@@ -1,0 +1,41 @@
+<svg width="1400" height="520" viewBox="0 0 1400 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1400" height="520" rx="24" fill="#FFFFFF"/>
+<text x="60" y="70" font-family="Inter, Arial, Helvetica, sans-serif" font-size="42" font-weight="800" fill="#081B33">Lo Agent Execution Flow</text>
+<rect x="60" y="190" width="190" height="110" rx="18" fill="#F8FBFF" stroke="#E6F0FF" stroke-width="3"/>
+<circle cx="88" cy="218" r="10" fill="#21A8F3"/>
+<text x="110" y="225" font-family="Inter, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#081B33">User intent</text>
+<text x="84" y="260" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">Natural-language task</text>
+<line x1="258" y1="245.0" x2="280" y2="245.0" stroke="#081B33" stroke-width="4" stroke-linecap="round"/>
+<path d="M 270 236.0 L 280 245.0 L 270 254.0" stroke="#081B33" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="288" y="190" width="190" height="110" rx="18" fill="#F8FBFF" stroke="#E6F0FF" stroke-width="3"/>
+<circle cx="316" cy="218" r="10" fill="#21A8F3"/>
+<text x="338" y="225" font-family="Inter, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#081B33">AI agent</text>
+<text x="312" y="260" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">Generates Lo</text>
+<line x1="486" y1="245.0" x2="508" y2="245.0" stroke="#081B33" stroke-width="4" stroke-linecap="round"/>
+<path d="M 498 236.0 L 508 245.0 L 498 254.0" stroke="#081B33" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="516" y="190" width="190" height="110" rx="18" fill="#F8FBFF" stroke="#E6F0FF" stroke-width="3"/>
+<circle cx="544" cy="218" r="10" fill="#21A8F3"/>
+<text x="566" y="225" font-family="Inter, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#081B33">Verifier</text>
+<text x="540" y="260" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">Checks syntax, types,</text>
+<text x="540" y="283" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">fallibility, effects</text>
+<line x1="714" y1="245.0" x2="736" y2="245.0" stroke="#081B33" stroke-width="4" stroke-linecap="round"/>
+<path d="M 726 236.0 L 736 245.0 L 726 254.0" stroke="#081B33" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="744" y="190" width="190" height="110" rx="18" fill="#F8FBFF" stroke="#E6F0FF" stroke-width="3"/>
+<circle cx="772" cy="218" r="10" fill="#21A8F3"/>
+<text x="794" y="225" font-family="Inter, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#081B33">Inspector</text>
+<text x="768" y="260" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">Lists commits and</text>
+<text x="768" y="283" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">permissions</text>
+<line x1="942" y1="245.0" x2="964" y2="245.0" stroke="#081B33" stroke-width="4" stroke-linecap="round"/>
+<path d="M 954 236.0 L 964 245.0 L 954 254.0" stroke="#081B33" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="972" y="190" width="190" height="110" rx="18" fill="#F8FBFF" stroke="#E6F0FF" stroke-width="3"/>
+<circle cx="1000" cy="218" r="10" fill="#21A8F3"/>
+<text x="1022" y="225" font-family="Inter, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#081B33">Approval</text>
+<text x="996" y="260" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">Human or policy gate</text>
+<line x1="1170" y1="245.0" x2="1192" y2="245.0" stroke="#081B33" stroke-width="4" stroke-linecap="round"/>
+<path d="M 1182 236.0 L 1192 245.0 L 1182 254.0" stroke="#081B33" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1200" y="190" width="190" height="110" rx="18" fill="#F8FBFF" stroke="#E6F0FF" stroke-width="3"/>
+<circle cx="1228" cy="218" r="10" fill="#21A8F3"/>
+<text x="1250" y="225" font-family="Inter, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#081B33">Runtime</text>
+<text x="1224" y="260" font-family="Inter, Arial, Helvetica, sans-serif" font-size="17" fill="#64748B">Executes approved graph</text>
+<text x="60" y="430" font-family="Inter, Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#081B33">Only approved commit targets cross the boundary into real-world execution.</text>
+</svg>

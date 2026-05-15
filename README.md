@@ -1,5 +1,7 @@
 # Lo
 
+![Lo logo](assets/lo-logo-horizontal.svg)
+
 **Lo is a typed executable plan language for AI agents.**
 
 Language models are good at proposing workflows, but unsafe as direct executors of arbitrary Python, shell scripts, browser automation, or raw API calls. Lo gives agents a small declarative language for producing action graphs that can be parsed, type-checked, inspected, approved, and executed by a trusted runtime.
@@ -18,19 +20,7 @@ This repository is public early so the design can be evaluated as an AI-agent ex
 
 AI agents should not directly perform irreversible actions. Instead, an agent should emit a typed action graph:
 
-```text
-User intent
-  ↓
-AI agent generates Lo
-  ↓
-Lo verifier checks syntax, types, fallibility, and side effects
-  ↓
-Runtime inspects required permissions and commit targets
-  ↓
-Human or policy engine approves execution
-  ↓
-Trusted runtime executes the graph
-```
+![Lo agent execution flow](assets/agent-execution-flow.svg)
 
 The goal is simple:
 
@@ -299,6 +289,10 @@ lo/
   README.md
   specification.md
   ISSUES.md
+  assets/
+    lo-logo-horizontal.svg
+    agent-execution-flow.svg
+    social-preview.png
   examples/
     list_sum.lo
     count_letter.lo

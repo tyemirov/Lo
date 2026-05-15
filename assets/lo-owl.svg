@@ -1,0 +1,60 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<line x1="176.00" y1="130.00" x2="176.00" y2="405.00" stroke="#7DD3FC" stroke-width="1.40" stroke-dasharray="4.00 10.00" opacity="0.35"/>
+<line x1="256.00" y1="130.00" x2="256.00" y2="405.00" stroke="#7DD3FC" stroke-width="1.40" stroke-dasharray="4.00 10.00" opacity="0.35"/>
+<line x1="336.00" y1="130.00" x2="336.00" y2="405.00" stroke="#7DD3FC" stroke-width="1.40" stroke-dasharray="4.00 10.00" opacity="0.35"/>
+<line x1="132.00" y1="92.00" x2="190.00" y2="135.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="190.00" y1="135.00" x2="256.00" y2="155.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="256.00" y1="155.00" x2="322.00" y2="135.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="322.00" y1="135.00" x2="380.00" y2="92.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="132.00" y1="92.00" x2="150.00" y2="258.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="380.00" y1="92.00" x2="362.00" y2="258.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="190.00" y1="135.00" x2="176.00" y2="190.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="176.00" y1="190.00" x2="232.00" y2="190.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="232.00" y1="190.00" x2="256.00" y2="155.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="322.00" y1="135.00" x2="336.00" y2="190.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="336.00" y1="190.00" x2="280.00" y2="190.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="280.00" y1="190.00" x2="256.00" y2="155.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="232.00" y1="190.00" x2="256.00" y2="210.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="280.00" y1="190.00" x2="256.00" y2="210.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="256.00" y1="210.00" x2="256.00" y2="330.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="150.00" y1="258.00" x2="188.00" y2="315.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="362.00" y1="258.00" x2="324.00" y2="315.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="176.00" y1="190.00" x2="150.00" y2="258.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="336.00" y1="190.00" x2="362.00" y2="258.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="188.00" y1="315.00" x2="256.00" y2="330.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="256.00" y1="330.00" x2="324.00" y2="315.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="188.00" y1="315.00" x2="208.00" y2="390.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="324.00" y1="315.00" x2="304.00" y2="390.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="256.00" y1="330.00" x2="208.00" y2="390.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="256.00" y1="330.00" x2="304.00" y2="390.00" stroke="#21A8F3" stroke-width="4.80" stroke-linecap="round" opacity="0.72"/>
+<line x1="208.00" y1="390.00" x2="256.00" y2="452.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="304.00" y1="390.00" x2="256.00" y2="452.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<line x1="208.00" y1="390.00" x2="304.00" y2="390.00" stroke="#081B33" stroke-width="4.80" stroke-linecap="round" opacity="0.92"/>
+<circle cx="204.00" cy="190.00" r="35.00" fill="#FFFFFF" stroke="#081B33" stroke-width="4.80"/>
+<circle cx="204.00" cy="190.00" r="16.00" fill="#21A8F3" opacity="0.22"/>
+<circle cx="204.00" cy="190.00" r="10.00" fill="#081B33"/>
+<circle cx="197.00" cy="182.00" r="4.00" fill="#FFFFFF" opacity="0.95"/>
+<circle cx="308.00" cy="190.00" r="35.00" fill="#FFFFFF" stroke="#081B33" stroke-width="4.80"/>
+<circle cx="308.00" cy="190.00" r="16.00" fill="#21A8F3" opacity="0.22"/>
+<circle cx="308.00" cy="190.00" r="10.00" fill="#081B33"/>
+<circle cx="301.00" cy="182.00" r="4.00" fill="#FFFFFF" opacity="0.95"/>
+<polygon points="244.00,218.00 256.00,244.00 268.00,218.00" fill="#081B33" opacity="0.95"/>
+<circle cx="132.00" cy="92.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="380.00" cy="92.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="190.00" cy="135.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="322.00" cy="135.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="256.00" cy="155.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="176.00" cy="190.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="232.00" cy="190.00" r="7.00" fill="#FFFFFF" stroke="#21A8F3" stroke-width="3.12"/>
+<circle cx="280.00" cy="190.00" r="7.00" fill="#FFFFFF" stroke="#21A8F3" stroke-width="3.12"/>
+<circle cx="336.00" cy="190.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="256.00" cy="210.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="150.00" cy="258.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="362.00" cy="258.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="188.00" cy="315.00" r="7.00" fill="#FFFFFF" stroke="#21A8F3" stroke-width="3.12"/>
+<circle cx="256.00" cy="330.00" r="7.00" fill="#FFFFFF" stroke="#21A8F3" stroke-width="3.12"/>
+<circle cx="324.00" cy="315.00" r="7.00" fill="#FFFFFF" stroke="#21A8F3" stroke-width="3.12"/>
+<circle cx="208.00" cy="390.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="304.00" cy="390.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+<circle cx="256.00" cy="452.00" r="5.00" fill="#081B33" stroke="#081B33" stroke-width="3.12"/>
+</svg>
