@@ -1,8 +1,8 @@
-DAGDSL v0.3 Draft Specification
+Lo v0.3 Draft Specification
 
 1. Purpose
 
-DAGDSL is a typed declarative dataflow language for building transformation pipelines, file-processing jobs, and HTTP services.
+Lo is a typed declarative dataflow language for building transformation pipelines, file-processing jobs, and HTTP services.
 
 The language is built around a simple discipline:
 
@@ -11,21 +11,21 @@ The language is built around a simple discipline:
 3. represent fallibility explicitly in the type system, and
 4. activate side effects and activatable adapters explicitly with commit.
 
-DAGDSL is graph-first. A program describes data dependencies, branching, fallibility, and boundary activation. It does not describe imperative step-by-step control flow.
+Lo is graph-first. A program describes data dependencies, branching, fallibility, and boundary activation. It does not describe imperative step-by-step control flow.
 
 ⸻
 
 2. Design Principles
 
-DAGDSL follows these principles.
+Lo follows these principles.
 
 1. Explicit data over hidden behavior. Values, processors, flows, adapters, errors, and commits are separate concepts.
 2. Construction is separate from activation. .new(...) constructs. commit activates only side effects and activatable adapters.
-3. Named flows only. DAGDSL does not support lambdas or anonymous functions in v0.3.
+3. Named flows only. Lo does not support lambdas or anonymous functions in v0.3.
 4. One ordered collection type. The surface language exposes List<T> only. Laziness is a runtime concern.
 5. Pragmatic standard library. Common arithmetic and aggregate operations belong in Math. Users should not be forced to express routine math through folds.
 6. Typed boundaries. The language exposes domain-oriented adapters such as File and HTTP, not generic IO.
-7. Readable pipeline syntax. DAGDSL uses |> as first-argument threading syntax.
+7. Readable pipeline syntax. Lo uses |> as first-argument threading syntax.
 8. Errors are values. Fallibility is explicit in the type system and can bubble or be resolved at declared handler boundaries.
 9. Boundary handlers are mandatory. Adapters that invoke flows must require an onError handler so uncaught errors are always translated at the boundary.
 10. Constructors are uniform. Any operation that constructs a value uses .new(...).
@@ -54,7 +54,7 @@ The following are out of scope in v0.3:
 
 4. Core Semantic Categories
 
-DAGDSL has five core semantic categories.
+Lo has five core semantic categories.
 
 4.1 Values
 
@@ -121,12 +121,12 @@ Examples:
 * String!
 * HTTP.Response!
 
-DAGDSL does not expose a user-visible generic Result<T> type in v0.3.
+Lo does not expose a user-visible generic Result<T> type in v0.3.
 
 An implementation may lower T! to an internal tagged result representation, but
 that representation is not part of the surface language or public type system.
 Recoverable operational failures must be represented as Error values. They must
-not be exposed to DAGDSL programs as hidden host-language exceptions.
+not be exposed to Lo programs as hidden host-language exceptions.
 
 Fatal host panics are outside the recoverable Error model and are reserved for:
 
@@ -152,7 +152,7 @@ Examples:
 
 5.2 Commit
 
-commit is the only activation keyword in DAGDSL.
+commit is the only activation keyword in Lo.
 
 A commit statement activates a previously bound committable target.
 
@@ -209,13 +209,13 @@ This means any flow that uses commit must declare either -> T! or -> T onError E
 
 5.6 Deterministic Evaluation and Host Runtime Constraints
 
-DAGDSL values are immutable after construction. A binding names a value or a
+Lo values are immutable after construction. A binding names a value or a
 committable target; it does not introduce mutable storage.
 
 The runtime may evaluate pure graph nodes eagerly, lazily, incrementally, or in
 parallel, provided the observable result is identical to an evaluation that
 respects data dependencies and the rules in this specification. Evaluation
-strategy is not observable to a DAGDSL program except through explicit commit
+strategy is not observable to a Lo program except through explicit commit
 activation and Error bubbling.
 
 Side effects occur only through evaluated commit statements. Each evaluated
@@ -232,7 +232,7 @@ evaluated.
 Ownership, borrowing, reference counting, tracing garbage collection, OS
 threads, green threads, channels, locks, and scheduler policy are host
 implementation concerns in v0.3. They are not user-visible language constructs.
-An implementation may use such mechanisms internally only if observable DAGDSL
+An implementation may use such mechanisms internally only if observable Lo
 semantics remain unchanged.
 
 v0.3 exposes no shared mutable memory, thread creation, channel creation,
@@ -253,9 +253,9 @@ observe the caller's binding.
 Implementations may represent values using copying, structural sharing,
 reference counting, tracing garbage collection, borrowing, host pointers, or
 other implementation techniques. These choices must not be observable by a
-DAGDSL program.
+Lo program.
 
-DAGDSL has no address-of operation, dereference operation, pointer identity
+Lo has no address-of operation, dereference operation, pointer identity
 operation, move operation, borrow operation, destructor, finalizer, or aliasing
 primitive in v0.3.
 
@@ -403,7 +403,7 @@ Notes:
 
 7. Constructors
 
-DAGDSL favors .new(...) for construction.
+Lo favors .new(...) for construction.
 
 7.1 Built-in Constructors
 
@@ -464,7 +464,7 @@ Processors are pure.
 
 8.4 Math Processors
 
-DAGDSL includes a pragmatic Math namespace.
+Lo includes a pragmatic Math namespace.
 
 All Math processors in v0.3 operate on Int operands or List<Int> inputs.
 
@@ -631,7 +631,7 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onEr
 5. A flow with no commit statements is a pure flow.
 6. Only pure named flows may be passed to pure data processors.
 7. Adapter boundary parameters may accept effectful flows as defined by the adapter signature.
-8. DAGDSL does not support anonymous functions or lambdas in v0.3.
+8. Lo does not support anonymous functions or lambdas in v0.3.
 9. A nested flow does not implicitly capture outer values. Any required value must be passed explicitly as a parameter.
 10. A plain total flow (-> T) may not use unresolved fallible expressions.
 11. A fallible flow (-> T!) automatically propagates unresolved fallible expressions via error bubbling.
@@ -656,7 +656,7 @@ In a self-handling flow, the nearest handler boundary is the flow signature’s 
 
 Branching is expression-based, not statement-based.
 
-DAGDSL uses a single pure match constructor:
+Lo uses a single pure match constructor:
 
 Match.new(selector_value,
     case_head_one: expression_one,
@@ -780,7 +780,7 @@ There is no run keyword and no export keyword in v0.3.
 
 14. Pipe Operator
 
-DAGDSL uses |> as first-argument threading syntax.
+Lo uses |> as first-argument threading syntax.
 
 14.1 Form
 
@@ -1216,7 +1216,7 @@ rejection for syntactically valid programs that violate semantic rules.
 | Fallible propagation | `flow Read(path: File.Path) -> Bytes! { bytes = File.read(path); return bytes }` | Treating a `T!` expression as `T` outside a fallible or self-handling boundary. |
 | Self-handling flow | `flow SafeRead(path: File.Path) -> Bytes onError EmptyBytes { return File.read(path) }` | A self-handling flow whose handler is effectful or has the wrong output type. |
 | Adapter onError | `HTTP.Server.new(port: Int.new(8080), handler: Handle, onError: HttpError)` | `HTTP.Server.new(port: Int.new(8080), handler: Handle)` |
-| Recoverable standard failures | `Math.div(Int.new(1), Int.new(0))` produces Error.kind `Math.DivideByZero` inside a fallible boundary. | A recoverable divide-by-zero escaping as a host exception visible to DAGDSL code. |
+| Recoverable standard failures | `Math.div(Int.new(1), Int.new(0))` produces Error.kind `Math.DivideByZero` inside a fallible boundary. | A recoverable divide-by-zero escaping as a host exception visible to Lo code. |
 | Null rejection | `nothing = null` binds a value whose type is Null. | Passing `null` or `Null` to `String.concat`, `Math.add`, `File.Path.new`, or `HTTP.Response.Text.new` where another type is required. |
 | Record exactness | `Record.new(limit: Int.new(10))` satisfies `Record{ limit: Int }`. | A value checked against `Record{ limit: Int }` that omits limit, adds another field, or sets `limit: null`. |
 | Map construction | `Map.new(Record.new(key: String.new("a"), value: Int.new(1)))` satisfies `Map<String, Int>`. | `Map.new(Record.new(name: String.new("a"), value: Int.new(1)))` because the entry field must be named key. |
@@ -1229,7 +1229,7 @@ rejection for syntactically valid programs that violate semantic rules.
 
 21. Summary
 
-DAGDSL v0.3 is a typed declarative dataflow language with:
+Lo v0.3 is a typed declarative dataflow language with:
 
 1. explicit .new(...) construction,
 2. pure processors,

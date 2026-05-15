@@ -1,4 +1,4 @@
-# DAGDSL v0.3 Issues
+# Lo v0.3 Issues
 
 This file tracks actionable work against `specification.md`. The original report
 described broad safety goals; the issues below restate them as implementable
@@ -140,7 +140,7 @@ concurrency boundaries, and a rigorous specification with atomic, testable,
 non-contradictory constraints.
 
 Spec context:
-Sections 1, 2, 3, 5, 10, 15, and 16 define DAGDSL as graph-first, immutable,
+Sections 1, 2, 3, 5, 10, 15, and 16 define Lo as graph-first, immutable,
 acyclic, and explicitly activated through `commit`. Section 3 excludes
 concurrency syntax from v0.3. Section 6.6 allows lazy, incremental, or eager
 list evaluation only when observable semantics do not change. Section 17 is

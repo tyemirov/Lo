@@ -1,14 +1,14 @@
-# DAGDSL
+# Lo
 
-**DAGDSL is a typed executable plan language for AI agents.**
+**Lo is a typed executable plan language for AI agents.**
 
-Language models are good at proposing workflows, but unsafe as direct executors of arbitrary Python, shell scripts, browser automation, or raw API calls. DAGDSL gives agents a small declarative language for producing action graphs that can be parsed, type-checked, inspected, approved, and executed by a trusted runtime.
+Language models are good at proposing workflows, but unsafe as direct executors of arbitrary Python, shell scripts, browser automation, or raw API calls. Lo gives agents a small declarative language for producing action graphs that can be parsed, type-checked, inspected, approved, and executed by a trusted runtime.
 
-DAGDSL is not a replacement for Go, Python, or shell. It is an execution contract between an AI planner, a verifier, and a runtime.
+Lo is not a replacement for Go, Python, or shell. It is an execution contract between an AI planner, a verifier, and a runtime.
 
 ## Status
 
-DAGDSL is currently a **v0.3 language proposal**.
+Lo is currently a **v0.3 language proposal**.
 
 The specification exists before the reference implementation. The next milestone is a verifier capable of parsing and type-checking the conformance examples, followed by a minimal interpreter for file and HTTP workflows.
 
@@ -21,9 +21,9 @@ AI agents should not directly perform irreversible actions. Instead, an agent sh
 ```text
 User intent
   ↓
-AI agent generates DAGDSL
+AI agent generates Lo
   ↓
-DAGDSL verifier checks syntax, types, fallibility, and side effects
+Lo verifier checks syntax, types, fallibility, and side effects
   ↓
 Runtime inspects required permissions and commit targets
   ↓
@@ -40,13 +40,13 @@ Strict enough for runtimes to reject bad plans.
 Explicit enough for humans to audit.
 ```
 
-## Why DAGDSL Exists
+## Why Lo Exists
 
 Python and shell are powerful, but too permissive for direct model-generated execution. An AI-generated Python script can hide arbitrary file access, network calls, subprocess execution, mutation, exception paths, dependency imports, and runtime-only failure modes.
 
-DAGDSL makes these things visible.
+Lo makes these things visible.
 
-A verifier should be able to inspect a DAGDSL program before execution and answer:
+A verifier should be able to inspect a Lo program before execution and answer:
 
 - What files may be read?
 - What files may be written?
@@ -60,7 +60,7 @@ A verifier should be able to inspect a DAGDSL program before execution and answe
 
 ## Language Discipline
 
-DAGDSL has a small core:
+Lo has a small core:
 
 ```text
 .new(...)       constructs values and adapters
@@ -72,7 +72,7 @@ commit          activates side effects
 onError         handles boundary failure
 ```
 
-DAGDSL v0.3 intentionally excludes:
+Lo v0.3 intentionally excludes:
 
 - classes and inheritance
 - mutable variables
@@ -91,7 +91,7 @@ These omissions are part of the design. The language is meant to be easy for AI 
 
 ## Example: HTTP Handler With Typed Failure
 
-```dagdsl
+```lo
 flow Calculate(request: HTTP.Request) -> HTTP.Response! {
     denominator = Int.new(0)
     result_value = Int.new(10) |> Math.div(denominator)
@@ -135,7 +135,7 @@ This program makes several things explicit:
 
 ## Example: File Processing With Self-Handling Flow
 
-```dagdsl
+```lo
 flow IsMatchingScalar(target_scalar: Scalar) -> Bool {
     return Scalar.eq(target_scalar, Scalar.new("a"))
 }
@@ -168,7 +168,7 @@ This example demonstrates:
 
 ## Example: Explicit Side Effects
 
-```dagdsl
+```lo
 flow StatusError(error: Error) -> HTTP.Response {
     return HTTP.Response.Text.new(
         status: Int.new(500),
@@ -205,7 +205,7 @@ The branch does not perform the write. The branch constructs an effect. The writ
    `.new(...)` constructs values and adapters. `commit` activates side effects and activatable adapters.
 
 3. **Named flows only**  
-   DAGDSL v0.3 does not support lambdas or anonymous functions.
+   Lo v0.3 does not support lambdas or anonymous functions.
 
 4. **Errors are values**  
    Recoverable failures are represented as `Error`, not hidden host-language exceptions.
@@ -226,11 +226,11 @@ The branch does not perform the write. The branch constructs an effect. The writ
    The language favors a compact, canonical surface that models can generate reliably.
 
 10. **The graph is inspectable**  
-    A DAGDSL program should be inspectable before execution.
+    A Lo program should be inspectable before execution.
 
 ## Intended Use Cases
 
-DAGDSL is designed for AI-agent-generated workflows such as:
+Lo is designed for AI-agent-generated workflows such as:
 
 - file-processing jobs
 - typed tool workflows
@@ -247,24 +247,24 @@ Example agent task:
 Read this uploaded CSV, validate rows, transform accepted records, write accepted rows to one file, write rejected rows to another file, and return a summary.
 ```
 
-The agent should not execute arbitrary Python. It should generate a DAGDSL program that can be checked, inspected, approved, and executed.
+The agent should not execute arbitrary Python. It should generate a Lo program that can be checked, inspected, approved, and executed.
 
 ## Planned CLI
 
 The reference implementation is expected to expose commands like:
 
 ```bash
-dagdsl parse examples/list_sum.dag
-dagdsl check examples/list_sum.dag
-dagdsl inspect examples/agent_file_workflow.dag
-dagdsl run examples/list_sum.dag
-dagdsl serve examples/http_division.dag
+lo parse examples/list_sum.lo
+lo check examples/list_sum.lo
+lo inspect examples/agent_file_workflow.lo
+lo run examples/list_sum.lo
+lo serve examples/http_division.lo
 ```
 
 The most important command is:
 
 ```bash
-dagdsl inspect program.dag
+lo inspect program.lo
 ```
 
 Expected inspection output should include:
@@ -295,15 +295,15 @@ Required permissions:
 ## Repository Layout
 
 ```text
-dagdsl/
+lo/
   README.md
   specification.md
   ISSUES.md
   examples/
-    list_sum.dag
-    count_letter.dag
-    http_division.dag
-    agent_file_workflow.dag
+    list_sum.lo
+    count_letter.lo
+    http_division.lo
+    agent_file_workflow.lo
   docs/
     agent-language-positioning.md
     verifier-model.md
@@ -316,7 +316,7 @@ dagdsl/
 
 Build a verifier that can:
 
-- parse `.dag` files
+- parse `.lo` files
 - validate the grammar
 - resolve built-in constructors and processors
 - type-check bindings and flows
@@ -329,7 +329,7 @@ Build a verifier that can:
 Target command:
 
 ```bash
-dagdsl check examples/list_sum.dag
+lo check examples/list_sum.lo
 ```
 
 ### Milestone 2: Inspection Report
@@ -339,7 +339,7 @@ Build static inspection for agent-generated programs.
 Target command:
 
 ```bash
-dagdsl inspect examples/agent_file_workflow.dag
+lo inspect examples/agent_file_workflow.lo
 ```
 
 The inspection report should expose:
@@ -376,7 +376,7 @@ Initial support:
 Target command:
 
 ```bash
-dagdsl run examples/count_letter.dag
+lo run examples/count_letter.lo
 ```
 
 ### Milestone 4: Commit and HTTP
@@ -397,12 +397,12 @@ Initial support:
 Target command:
 
 ```bash
-dagdsl serve examples/http_division.dag
+lo serve examples/http_division.lo
 ```
 
 ## Agent Profile
 
-DAGDSL should support a canonical agent-generation profile.
+Lo should support a canonical agent-generation profile.
 
 The agent profile should require:
 
@@ -420,16 +420,16 @@ The agent profile should require:
 The agent profile is the practical product surface:
 
 ```text
-LLMs generate DAGDSL Agent Profile.
-Verifiers check DAGDSL Core.
+LLMs generate Lo Agent Profile.
+Verifiers check Lo Core.
 Runtimes execute approved action graphs.
 ```
 
 ## Security Model
 
-DAGDSL does not make AI agents safe by itself. Instead, it gives a runtime a smaller and more inspectable execution surface.
+Lo does not make AI agents safe by itself. Instead, it gives a runtime a smaller and more inspectable execution surface.
 
-A secure DAGDSL runtime should:
+A secure Lo runtime should:
 
 - deny execution unless parsing succeeds
 - deny execution unless type checking succeeds
@@ -446,7 +446,7 @@ A secure DAGDSL runtime should:
 The current language version is:
 
 ```text
-DAGDSL v0.3
+Lo v0.3
 ```
 
 The v0.3 specification defines:
@@ -480,7 +480,7 @@ See:
 
 ## Non-Goals
 
-DAGDSL v0.3 is not trying to be:
+Lo v0.3 is not trying to be:
 
 - a general-purpose programming language
 - a Python replacement
@@ -507,7 +507,7 @@ Useful contributions include:
 - parser implementation
 - type checker implementation
 - conformance tests
-- example DAGDSL programs
+- example Lo programs
 - verifier report design
 - adapter permission model design
 - critique of the core semantics
