@@ -93,6 +93,61 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `tensor`: An immutable numeric array with a dtype, shape, and device location.
+- `dtype`: The numeric format of each tensor element.
+- `shape`: The ordered dimension sizes of a tensor.
+- `rank`: The number of dimensions in a tensor.
+- `rank-zero tensor`: A tensor with no dimensions and exactly one numeric element.
+- `numeric scalar`: One numeric value, independent of a tensor dimension or the Lo Unicode `Scalar` type.
+- `FP32`: The IEEE 754 binary32 numeric format.
+- `FP16`: The IEEE 754 binary16 numeric format.
+- `BF16`: A numeric format with one sign bit, eight exponent bits, and seven fraction bits.
+- `TF32`: An NVIDIA matrix arithmetic format with reduced input precision and FP32 accumulation.
+- `subnormal`: A floating-point value below the smallest positive normal magnitude of its numeric format.
+- `rounding`: Selection of a representable numeric value from a more precise result.
+- `autodiff`: Automatic construction and evaluation of derivatives from a computation graph.
+- `reverse-mode autodiff`: Autodiff that propagates derivative contributions in reverse dependency order.
+- `gradient`: A derivative of a numeric loss with respect to a selected input.
+- `VJP`: A vector-Jacobian product that transfers output derivative contributions to operation inputs.
+- `tape`: Intermediate data kept for one reverse-mode autodiff evaluation.
+- `stop-gradient`: An operation that preserves a value and stops its derivative contribution.
+- `Parameter`: A selected trainable tensor identified by an explicit record field name.
+- `optimizer`: An operation family that calculates new Parameters and state from gradients.
+- `SGD`: Stochastic gradient descent with the update rule selected by the training contract.
+- `AdamW`: An adaptive optimizer with first and second moments and decoupled weight decay.
+- `moment`: An optimizer state value that accumulates weighted gradient data.
+- `minibatch`: A group of training examples used for one loss evaluation.
+- `microbatch`: One part of a minibatch used for gradient accumulation.
+- `ReLU`: The rectified linear operation that returns the greater of its input and zero.
+- `subgradient`: A selected derivative value at a point without a unique derivative.
+- `finite difference`: A derivative estimate from changes in independently evaluated function values.
+- `broadcasting`: Alignment of tensor dimensions with implicit repetition of dimensions of size one.
+- `reduction`: Combination of tensor elements along specified axes into fewer output elements.
+- `numeric profile`: Fixed arithmetic rules and implementation identities for reproducible numeric execution.
+- `kernel`: A compiled program that executes tensor operations on a device.
+- `CUDA`: NVIDIA's platform for device computation.
+- `cuBLAS`: NVIDIA's library for basic linear algebra on CUDA devices.
+- `cgo`: The Go toolchain interface for calls between Go and C code.
+- `ABI`: The binary interface between compiled components.
+- `stream`: An internal ordered sequence of device operations.
+- `workspace`: Temporary memory used by a device library operation.
+- `simulation`: Software execution of a specified device operation or scheduling model.
+- `emulation`: Software reproduction of a device instruction or platform interface.
+- `training MVP`: The smallest complete training example specified by I001.
+- `AOT compilation`: Ahead-of-time translation of a program into machine code before program execution.
+- `native executable`: A program artifact with machine code for one operating system and processor architecture.
+- `compiler backend`: The compiler component that converts a checked graph into executable code.
+- `benchmark`: A repeatable workload that measures execution time or resource use under specified conditions.
+- `baseline`: A recorded benchmark result used to assess a later implementation.
+- `differential test`: A test that compares observable results from two implementations of the same contract.
+- `runtime bundle`: The exact runtime sources and dependencies included with a compiler for executable construction.
+- `logical cost`: The execution steps and value weight charged under the Lo host execution contract.
+- `lowering plan`: A compiler representation with explicit statements, branches, calls, source locations, and logical costs.
+- `source map`: Data that connects generated code or runtime failures to positions in the original source.
+- `allocation`: A runtime operation that reserves memory for a value or internal object.
+- `garbage collector`: A runtime component that reclaims memory which a program can no longer access.
+- `latency`: The time between an operation's start and its observable completion.
+- `throughput`: The number of completed operations per unit of time.
 - `listener`: A network resource that accepts connections at one local address and port.
 - `loopback address`: A network address for connections within the same host.
 - `readiness event`: A CLI result that identifies the servers active after program startup.
@@ -121,7 +176,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `capability`: Host authorization for a specified operation on an external resource.
 - `checked graph`: An execution graph that satisfies compiler type, reference, and control invariants.
 - `committable target`: An immutable activation description accepted by a Lo `commit` statement.
-- `compiler`: The program that converts Lo source code into a checked execution graph.
+- `compiler`: The program that converts Lo source code into a checked graph and an optional native executable.
 - `conformance fixture`: A source program and expected result for a specified language rule.
 - `constructor`: An operation that creates a typed value.
 - `control dependency`: A graph relation that restricts when a node can execute.
@@ -202,7 +257,11 @@ Use the simple present, simple past, simple future, imperative, or infinitive fo
 
 ## Repository Technical Verbs
 
-- `compile`: Convert Lo source code into a checked execution graph. Forms: compile, compiles, compiled.
+- `differentiate`: Construct or evaluate derivatives of a selected computation. Forms: differentiate, differentiates, differentiated.
+- `broadcast`: Align tensor dimensions through the defined repetition rule. Forms: broadcast, broadcasts, broadcast.
+- `reduce`: Combine tensor elements through a defined reduction. Forms: reduce, reduces, reduced.
+- `compile`: Convert program source into a verified executable representation. Forms: compile, compiles, compiled.
+- `charge`: Apply logical cost to an execution session. Forms: charge, charges, charged.
 - `construct`: Make a typed Lo value or compiler representation. Forms: construct, constructs, constructed.
 - `dispatch`: Invoke the configured Lo handler for an adapter request. Forms: dispatch, dispatches, dispatched.
 - `evaluate`: Execute a Lo expression or graph region to obtain its result. Forms: evaluate, evaluates, evaluated.
