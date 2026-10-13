@@ -32,6 +32,14 @@ func typeExpression(expression syntax.TypeExpression) (types.Type, diagnostic.Di
 		}
 		return must(types.NewRecord(fields)), nil
 	case syntax.NamedType:
+		if e.Name() == "Tensor" {
+			if len(e.Arguments()) == 1 {
+				if a, ok := e.Arguments()[0].(syntax.NamedType); ok && a.Name() == "FP32" && len(a.Arguments()) == 0 {
+					return types.Tensor(), nil
+				}
+			}
+			return nil, problem(diagnostic.TypeConstraint, "Tensor requires exactly the FP32 dtype argument", e.Span())
+		}
 		args := make([]types.Type, len(e.Arguments()))
 		for i, arg := range e.Arguments() {
 			t, d := typeExpression(arg)

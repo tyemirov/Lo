@@ -8,6 +8,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
+	"github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
@@ -56,7 +57,11 @@ func Program(program ir.Program) (Report, diagnostic.Diagnostic) {
 	if t := program.ResultType(); t != nil {
 		a.data.ResultType = t.String()
 	}
-	a.graph = index(program, &a.data)
+	metadata, d := tensorfacts.Analyze(program)
+	if d != nil {
+		return nil, d
+	}
+	a.graph = index(program, &a.data, metadata)
 	root := a.newContext(nil, "program", programEntry, "", "", nil)
 	a.data.EntryPoints = append(a.data.EntryPoints, entryData{ID: programEntry, Kind: "program", Context: root.id})
 	a.body(root, program.Body())

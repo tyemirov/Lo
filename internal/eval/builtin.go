@@ -16,8 +16,17 @@ import (
 func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int]ir.FlowID, f frame) (value.Value, error) {
 	op := call.Operation().Name()
 	switch op {
+	case catalog.DeviceNew, catalog.TensorNew, catalog.TensorShape, catalog.TensorRank, catalog.TensorDtype,
+		catalog.TensorDevice, catalog.TensorToFloat, catalog.TensorValues, catalog.TensorAdd, catalog.TensorSub,
+		catalog.TensorMul, catalog.TensorDiv, catalog.TensorSqrt, catalog.TensorRelu, catalog.TensorMatmul,
+		catalog.TensorBroadcast, catalog.TensorReshape, catalog.TensorTranspose, catalog.TensorSum, catalog.TensorMean:
+		return m.tensorOperation(call, args)
 	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew:
 		return args[0], nil
+	case catalog.FloatAdd, catalog.FloatSub, catalog.FloatMul, catalog.FloatDiv, catalog.FloatSqrt,
+		catalog.FloatEqual, catalog.FloatLT, catalog.FloatLTE, catalog.FloatGT, catalog.FloatGTE,
+		catalog.IntToFloat, catalog.FloatToInt, catalog.FloatToString:
+		return m.floatOperation(call, args)
 	case catalog.ScalarNew:
 		return must(value.NewText(types.Scalar(), args[0].(value.Text).Text())), nil
 	case catalog.PathNew:

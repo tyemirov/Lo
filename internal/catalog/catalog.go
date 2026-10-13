@@ -39,6 +39,19 @@ const (
 	StringNew         = "String.new"
 	BoolNew           = "Bool.new"
 	FloatNew          = "Float.new"
+	FloatAdd          = "Float.add"
+	FloatSub          = "Float.sub"
+	FloatMul          = "Float.mul"
+	FloatDiv          = "Float.div"
+	FloatSqrt         = "Float.sqrt"
+	FloatEqual        = "Float.eq"
+	FloatLT           = "Float.lt"
+	FloatLTE          = "Float.lte"
+	FloatGT           = "Float.gt"
+	FloatGTE          = "Float.gte"
+	IntToFloat        = "Int.to_float"
+	FloatToInt        = "Float.to_int"
+	FloatToString     = "Float.to_string"
 	BytesNew          = "Bytes.new"
 	ListNew           = "List.new"
 	MapNew            = "Map.new"
@@ -95,14 +108,19 @@ const (
 	AppendFailed      = "File.AppendFailed"
 	WriteFailed       = "File.WriteFailed"
 	ServerStartFailed = "HTTP.ServerStartFailed"
+	NumericNonFinite  = "Numeric.NonFinite"
+	NumericZero       = "Numeric.DivideByZero"
+	NumericDomain     = "Numeric.Domain"
 )
 const (
-	ParamValue   = "value"
-	ParamLeft    = "left_value"
-	ParamRight   = "right_value"
-	ParamNumbers = "number_list"
-	ParamPath    = "file_path"
-	ParamContent = "file_content"
+	ParamValue        = "value"
+	ParamLeft         = "left_value"
+	ParamRight        = "right_value"
+	ParamNumbers      = "number_list"
+	ParamPath         = "file_path"
+	ParamContent      = "file_content"
+	ParamLeftOperand  = "left"
+	ParamRightOperand = "right"
 )
 
 const (
@@ -185,6 +203,17 @@ func build() map[string]Operation {
 	}
 	one(StringLength, types.String(), types.Int())
 	one(IntToString, types.Int(), types.String())
+	one(IntToFloat, types.Int(), must(types.NewFallible(types.Float())))
+	one(FloatToInt, types.Float(), types.Int())
+	one(FloatToString, types.Float(), types.String())
+	one(FloatSqrt, types.Float(), must(types.NewFallible(types.Float())))
+	for _, name := range []string{FloatAdd, FloatSub, FloatMul, FloatDiv, FloatEqual, FloatLT, FloatLTE, FloatGT, FloatGTE} {
+		out := types.Bool()
+		if name == FloatAdd || name == FloatSub || name == FloatMul || name == FloatDiv {
+			out = must(types.NewFallible(types.Float()))
+		}
+		fixed(name, []types.Parameter{{Name: ParamLeftOperand, Type: types.Float()}, {Name: ParamRightOperand, Type: types.Float()}}, out)
+	}
 	binary(StringEqual, types.String(), types.Bool())
 	binary(ScalarEqual, types.Scalar(), types.Bool())
 	for _, name := range []string{MathAdd, MathSub, MathMul} {
@@ -235,6 +264,17 @@ func build() map[string]Operation {
 		o.errors = []string{kind}
 		m[name] = o
 	}
+	for _, name := range []string{FloatAdd, FloatSub, FloatMul, FloatDiv, FloatSqrt, IntToFloat} {
+		o := m[name].(operation)
+		o.errors = []string{NumericNonFinite}
+		switch name {
+		case FloatDiv:
+			o.errors = append(o.errors, NumericZero)
+		case FloatSqrt:
+			o.errors = append(o.errors, NumericDomain)
+		}
+		m[name] = o
+	}
 	o := m[FileRead].(operation)
 	o.boundary = Read
 	m[FileRead] = o
@@ -251,6 +291,7 @@ func build() map[string]Operation {
 		o.activation = []string{kind}
 		m[name] = o
 	}
+	addTensors(m)
 	return m
 }
 func Lookup(name string) (Operation, bool) { o, ok := operations[name]; return o, ok }
@@ -267,7 +308,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "UTF8", "Math", "Match":
+	case "List", "Map", "Range", "File", "HTTP", "UTF8", "Math", "Match", "Tensor", "FP32":
 		return true
 	}
 	return false

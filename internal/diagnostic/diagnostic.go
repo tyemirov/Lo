@@ -66,6 +66,8 @@ const (
 	ArgumentOrder       Code = "check.argument-order"
 	FlowReference       Code = "check.flow-reference"
 	MissingType         Code = "check.missing-type"
+	TensorShape         Code = "check.tensor-shape"
+	TensorAnalysisLimit Code = "check.tensor-analysis-limit"
 )
 
 type Diagnostic interface {
@@ -105,6 +107,11 @@ func Mismatch(expected, actual string, span source.Span) Diagnostic {
 		Code: TypeMismatch, Stage: Check, Span: span, Expected: expected, Actual: actual,
 		Message: fmt.Sprintf("expected %s, got %s", expected, actual),
 	}}
+}
+
+func ShapeMismatch(operation, expected, actual string, span source.Span) Diagnostic {
+	return diagnostic{Data{Code: TensorShape, Stage: Check, Span: span, Expected: expected, Actual: actual,
+		Message: fmt.Sprintf("%s: expected %s, got %s", operation, expected, actual)}}
 }
 
 func WithRelated(d Diagnostic, span source.Span) Diagnostic {

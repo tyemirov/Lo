@@ -7,6 +7,7 @@ import (
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
+	"github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts"
 )
 
 type nodeID string
@@ -39,19 +40,20 @@ type reportData struct {
 	UnusedFlows  []ir.FlowID      `json:"unused_flows"`
 }
 type nodeData struct {
-	ID        nodeID         `json:"id"`
-	Kind      string         `json:"kind"`
-	Type      string         `json:"type,omitempty"`
-	Span      source.Span    `json:"span"`
-	Region    string         `json:"region"`
-	Inputs    []nodeID       `json:"inputs"`
-	Operation string         `json:"operation,omitempty"`
-	Flow      ir.FlowID      `json:"flow,omitempty"`
-	Binding   ir.BindingID   `json:"binding,omitempty"`
-	Value     *string        `json:"value,omitempty"`
-	Field     string         `json:"field,omitempty"`
-	Arguments []argumentData `json:"arguments,omitempty"`
-	Cases     []caseData     `json:"cases,omitempty"`
+	Tensor    *tensorfacts.Metadata `json:"tensor,omitempty"`
+	ID        nodeID                `json:"id"`
+	Kind      string                `json:"kind"`
+	Type      string                `json:"type,omitempty"`
+	Span      source.Span           `json:"span"`
+	Region    string                `json:"region"`
+	Inputs    []nodeID              `json:"inputs"`
+	Operation string                `json:"operation,omitempty"`
+	Flow      ir.FlowID             `json:"flow,omitempty"`
+	Binding   ir.BindingID          `json:"binding,omitempty"`
+	Value     *string               `json:"value,omitempty"`
+	Field     string                `json:"field,omitempty"`
+	Arguments []argumentData        `json:"arguments,omitempty"`
+	Cases     []caseData            `json:"cases,omitempty"`
 }
 type argumentData struct {
 	Position int       `json:"position"`
@@ -224,6 +226,16 @@ func (r *report) Text() string {
 	b.WriteString("nodes:\n")
 	for _, n := range r.data.Nodes {
 		fmt.Fprintf(&b, "  %s %s %s operation=%s flow=%s binding=%s inputs=%v region=%s at %s\n", n.ID, n.Kind, n.Type, n.Operation, n.Flow, n.Binding, n.Inputs, n.Region, location(n.Span))
+		if n.Tensor != nil {
+			shape, size := "unknown", "unknown"
+			if n.Tensor.Shape != nil {
+				shape = "[" + strings.Join(n.Tensor.Shape, ",") + "]"
+			}
+			if n.Tensor.StorageBytes != nil {
+				size = fmt.Sprint(*n.Tensor.StorageBytes)
+			}
+			fmt.Fprintf(&b, "    tensor dtype=%s profile=%s device=%s layout=%s shape=%s storage_bytes=%s\n", n.Tensor.Dtype, n.Tensor.Profile, n.Tensor.Device, n.Tensor.Layout, shape, size)
+		}
 	}
 	fmt.Fprintf(&b, "unused flows: %v\n", r.data.UnusedFlows)
 	return b.String()
