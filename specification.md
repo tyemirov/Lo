@@ -1,4 +1,7 @@
-Lo v0.3 Draft Specification
+Lo Draft Specification
+
+This specification includes the v0.3 core and the implemented F002, F003, and F004 extensions.
+Section 24 defines binary64 arithmetic and CPU tensors.
 
 1. Purpose
 
@@ -22,7 +25,7 @@ Lo follows these principles.
 1. Explicit data over hidden behavior. Values, processors, flows, adapters, errors, and commits are separate concepts.
 2. Construction is separate from activation. .new(...) constructs. commit activates only side effects and activatable adapters.
 3. Named flows only. Lo does not support lambdas or anonymous functions in v0.3.
-4. One ordered collection type. The surface language exposes List<T> only. Laziness is a runtime concern.
+4. List<T> represents general-purpose sequences. Tensor<FP32> represents dense numeric arrays. Laziness is a runtime concern.
 5. Pragmatic standard library. Common arithmetic and aggregate operations belong in Math. Users should not be forced to express routine math through folds.
 6. Typed boundaries. The language exposes domain-oriented adapters such as File and HTTP, not generic IO.
 7. Readable pipeline syntax. Lo uses |> as first-argument threading syntax.
@@ -209,6 +212,10 @@ This means any flow that uses commit must declare either -> T! or -> T onError E
 
 5.6 Deterministic Evaluation and Host Runtime Constraints
 
+CPU tensor execution uses the `cpu-fp32-strict` numeric profile.
+Identical inputs produce identical numeric bits under the operation order in section 24.3.
+Execution strategy cannot change arithmetic order, failures, or effects.
+
 Lo values are immutable after construction. A binding names a value or a
 committable target; it does not introduce mutable storage.
 
@@ -239,6 +246,9 @@ v0.3 exposes no shared mutable memory, thread creation, channel creation,
 async/await syntax, lock syntax, concurrency annotations, or scheduler controls.
 
 5.7 Binding and Value Passing
+
+Tensor storage sharing preserves all prior values.
+Storage identity and host pointers are not observable.
 
 A binding introduces an immutable name for the value produced by its expression.
 
@@ -294,8 +304,10 @@ bounded host representation internally, but arithmetic semantics are defined in
 terms of mathematical integers. Recoverable numeric domain failures are listed
 in section 18.3.
 
-Float denotes an implementation-defined finite floating-point value. v0.3 does
-not define Float arithmetic processors.
+Float denotes a finite IEEE 754 binary64 value.
+Section 24.1 specifies arithmetic, comparison, and explicit conversion.
+FP32 is a dtype marker accepted only in Tensor<FP32>.
+FP32 has no standalone values or constructor.
 
 Bool has exactly two values, true and false.
 
@@ -328,6 +340,8 @@ The composite types are:
 * Map<K, V>
 * Record{ field_name: FieldType, ... }
 * Range<T>
+* Tensor<FP32>
+* Device
 * Error
 
 Error is a built-in nominal composite type with required fields. It is not structurally interchangeable with Record.
@@ -343,7 +357,9 @@ Record{ ... } type or from a built-in boundary type.
 The equality-comparable types in v0.3 are Scalar, String, Int, Bool, and Null.
 The ordered-comparable types in v0.3 are Scalar, String, and Int. Bytes, Float,
 records, maps, lists, ranges, Error, and boundary types are not comparable
-unless a later specification adds explicit processors for that comparison.
+except through explicit comparison processors.
+Float comparison processors do not make Float a valid map key or range endpoint.
+Tensor<FP32> and Device have no equality or ordering operations.
 
 6.4 Boundary Types
 
@@ -375,7 +391,8 @@ String.length(value) -> Int returns the number of Unicode scalar values.
 
 6.6 List Model
 
-List<T> is the only ordered collection type exposed by the language surface.
+List<T> is the general-purpose sequence type.
+Tensor<FP32> is a separate immutable numeric array with dtype, shape, and device metadata.
 
 The language does not expose a separate sequence type. Laziness, streaming, and incremental realization are runtime concerns.
 
@@ -461,6 +478,9 @@ Processors are pure.
 8.3 Conversion Processors
 
 * Int.to_string(value) -> String
+* Int.to_float(value: Int) -> Float!
+* Float.to_int(value: Float) -> Int
+* Float.to_string(value: Float) -> String
 
 8.4 Math Processors
 
@@ -482,6 +502,9 @@ All Math processors in v0.3 operate on Int operands or List<Int> inputs.
 * Math.product(number_list) -> Int
 * Math.min(number_list) -> Int!
 * Math.max(number_list) -> Int!
+
+Section 24.1 defines Float arithmetic with explicit Float operands.
+Section 24.3 defines CPU tensor arithmetic.
 
 8.5 Range Processors
 
@@ -1065,8 +1088,12 @@ Whitespace can occur between the components of a qualified name and before its c
 * HTTP.Response.Text.new
 * HTTP.Response.Bytes.new
 * String.FromScalars.new
+* Device.new
+* Tensor.new
 
 18.2 Pure Processors
+
+The Float and Tensor processors in section 24 are also pure.
 
 * Scalar.eq
 * String.concat
@@ -1097,6 +1124,8 @@ Whitespace can occur between the components of a qualified name and before its c
 * List.unfold
 
 18.3 Fallible Constructors and Processors
+
+Section 24 defines the additional numeric and tensor failures.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
@@ -1297,7 +1326,7 @@ Lo v0.3 is a typed declarative dataflow language with:
 5. a single pure Match.new(...) construct for branching,
 6. a first-argument threading operator |>,
 7. a pragmatic Math namespace,
-8. a single ordered collection type List<T>,
+8. general-purpose List<T> sequences and dense Tensor<FP32> arrays,
 9. explicit activation through commit for side effects and activatable adapters,
 10. atomic Null and built-in nominal composite Error,
 11. built-in fallible types via T!,
@@ -1390,6 +1419,9 @@ A return from a self-handling flow permits propagation to its declared handler.
 The verifier rejects a String input whose length it cannot establish.
 `Float` uses finite IEEE 754 binary64 values in the reference implementation.
 The verifier rejects float literals outside that finite representation.
+`Float.new` preserves its Float input without implicit integer conversion.
+`Tensor.new` converts each Float input to FP32 explicitly.
+Section 24.2 defines its shape and element-count boundaries.
 
 Fixed signatures accept positional arguments, named arguments, or a positional prefix followed by named arguments.
 A positional argument cannot follow a named argument.
@@ -1620,3 +1652,151 @@ The host HTTP parser can reject malformed protocol input before a Lo request exi
 Such protocol rejections do not enter Lo handlers.
 An unusable connection prevents delivery of an error response.
 The compiler design specifies request limits, cancellation, startup, and shutdown for the reference CLI.
+
+
+24. Numeric and CPU Tensor Extension
+
+F002, F003, and F004 implement this extension through the reference interpreter.
+All operations in this section are pure.
+Native executable generation, autodiff, optimizers, and device transfers have separate implementation issues.
+
+24.1 Binary64 Arithmetic
+
+| Signature | Result |
+| --- | --- |
+| `Float.add/sub/mul/div(left: Float, right: Float) -> Float!` | Binary64 arithmetic. |
+| `Float.sqrt(value: Float) -> Float!` | Binary64 square root. |
+| `Float.eq/lt/lte/gt/gte(left: Float, right: Float) -> Bool` | Numeric comparison, with equal positive and negative zero. |
+| `Int.to_float(value: Int) -> Float!` | Nearest finite binary64 value. |
+| `Float.to_int(value: Float) -> Int` | Exact integer after truncation toward zero. |
+| `Float.to_string(value: Float) -> String` | Shortest round-trip decimal, with signed zero kept. |
+
+Each arithmetic operation rounds separately with round-to-nearest, ties-to-even.
+An implementation must not combine multiplication and addition into one rounding operation.
+Underflow produces subnormal values or signed zero.
+Nonfinite results produce `Numeric.NonFinite`.
+Division by positive or negative zero produces `Numeric.DivideByZero`.
+A negative square-root input produces `Numeric.Domain`.
+The square root of negative zero is negative zero.
+
+Int and Float operations require explicit conversion between their domains.
+Integer arithmetic remains exact.
+Float construction remains an identity operation on a finite Float input.
+Float comparisons do not extend the comparable domains for maps, ranges, or Match case heads.
+
+24.2 Tensor Values and Shape Boundaries
+
+`Tensor<FP32>` represents an immutable, contiguous, row-major array of finite FP32 values.
+Its shape and CPU location are metadata, not type arguments.
+`Tensor`, `Tensor<Int>`, and standalone `FP32` are invalid types.
+`Device` is an immutable nominal descriptor.
+The following tables use `T` to mean `Tensor<FP32>`.
+This abbreviation is not a source type alias.
+
+| Signature | Contract |
+| --- | --- |
+| `Device.new(selector: String) -> Device!` | Accept exactly `cpu`, `cuda:0`, or `cuda-sim:0`. |
+| `Tensor.new(values: List<Float>, shape: List<Int>) -> T!` | Convert finite binary64 inputs to FP32 and construct a CPU tensor. |
+| `Tensor.shape(value: T) -> List<Int>` | Return ordered dimensions. |
+| `Tensor.rank(value: T) -> Int` | Return the number of dimensions. |
+| `Tensor.dtype(value: T) -> String` | Return `fp32`. |
+| `Tensor.device(value: T) -> Device` | Return the `cpu` descriptor. |
+| `Tensor.to_float(value: T) -> Float!` | Convert one rank-zero element exactly to binary64. |
+| `Tensor.values(value: T) -> List<Float>!` | Convert all elements exactly to binary64 in row-major order. |
+
+Device construction validates the selector without device initialization.
+An invalid selector produces `Device.InvalidSelector`.
+Device transfers and CUDA execution remain outside this implementation.
+
+An empty shape has one element and rank zero.
+A zero dimension makes the element count zero.
+Every dimension must be nonnegative and fit a signed 64-bit integer.
+For nonempty tensors, the dimension product must also fit a signed 64-bit integer.
+Invalid dimensions, element-count overflow, and constructor count mismatch produce `Tensor.InvalidShape`.
+FP32 conversion uses ties-to-even rounding and rejects nonfinite results with `Numeric.NonFinite`.
+
+Known shape conflicts produce `check.tensor-shape` with a source span and expected and actual metadata.
+Shape facts propagate through literals, bindings, records, projections, and named flow arguments and results.
+The checker joins facts across Match branches.
+General arithmetic and list callbacks can leave dimensions unknown.
+Dynamic constructor and operation boundaries validate unknown shapes before output allocation.
+CPU kernels consume the validated shapes and axes.
+
+Reshape preserves the element count and row-major element order.
+It can share immutable storage.
+Transpose constructs a new row-major result.
+All previous bindings retain their values after these operations.
+No Lo operation exposes tensor storage identity or host pointers.
+
+24.3 CPU Operation Set
+
+| Signature | Contract |
+| --- | --- |
+| `Tensor.add/sub/mul/div(left: T, right: T) -> T!` | Elementwise arithmetic with trailing-dimension broadcasting. |
+| `Tensor.sqrt(value: T) -> T!` | Elementwise square root. |
+| `Tensor.relu(value: T) -> T!` | Keep positive inputs. Replace all other inputs with positive zero. |
+| `Tensor.matmul(left: T, right: T) -> T!` | Multiply `[m,k]` by `[k,n]` to produce `[m,n]`. |
+| `Tensor.broadcast(value: T, shape: List<Int>) -> T!` | Broadcast to exactly the requested shape. |
+| `Tensor.reshape(value: T, shape: List<Int>) -> T!` | Change shape with the same element count. |
+| `Tensor.transpose(value: T, axes: List<Int>) -> T!` | Permute every axis exactly once. |
+| `Tensor.sum(value: T, axes: List<Int>) -> T!` | Sum selected axes and remove those dimensions. |
+| `Tensor.mean(value: T, axes: List<Int>) -> T!` | Sum selected axes, then divide by the selected element count. |
+
+Broadcast dimensions align from the right.
+Missing leading dimensions have size one.
+Aligned dimensions must be equal or have size one.
+Size one can broadcast to zero.
+Zero agrees only with zero or one.
+Rank-zero tensors can broadcast to any supported shape.
+
+Reduction axes must be unique, nonnegative, and strictly increasing.
+An empty axis list preserves the shape and values, including signed zero.
+Sum over an empty region returns positive zero.
+Mean over an empty region produces `Tensor.EmptyReduction`, including when the output is empty.
+Invalid axes produce `Tensor.InvalidShape`.
+Incompatible shapes and invalid runtime rank for `Tensor.to_float` produce `Tensor.ShapeMismatch`.
+
+Matrix multiplication requires rank-two operands.
+A zero contracted dimension produces positive zeros.
+Zero output dimensions produce an empty tensor.
+Each dot product multiplies and then adds in increasing contracted-index order.
+Reductions add elements in input row-major order, starting from positive zero.
+Every multiplication, addition, division, and square root rounds separately to FP32.
+
+Every numeric intermediate must remain finite.
+Numeric failures use the error kinds in section 24.1.
+The earliest failing row-major element determines the elementwise error index.
+Failures stop dependent execution and preserve operation and source context.
+No partial tensor result is published.
+
+Mean squared error composes subtraction, elementwise multiplication, and mean.
+The executable `examples/tensor_forward.lo` composes a two-layer ReLU network and returns rank-zero loss `3`.
+F005 and F009 must support the selected differentiable operations from this table under their derivative and backend contracts.
+
+24.4 Resource and Diagnostic Contracts
+
+Tensor rank is at most eight.
+Each dimension and each tensor element count is at most 1,000,000.
+The existing expanded-value limits remain 16 MiB per value and 64 MiB per invocation.
+Tensor weight is `16 + 4*N + 8*rank + len(dtype) + len(selector)` bytes.
+Device weight is `16 + len(selector)` bytes.
+Containers count repeated tensor values repeatedly.
+
+The runtime charges tensor work and checks result weight before output allocation.
+Construction, conversion, elementwise operations, broadcast, and transpose add one step per output element.
+Reduction adds one step per input element.
+Mean also adds one step per output division.
+An empty axis list keeps these logical charges even when storage is shared.
+Matrix multiplication adds `2*m*n*k` steps.
+Reshape and metadata add no element steps.
+
+Host budget failures produce `runtime.limit` and bypass Lo handlers.
+Host cancellation produces `runtime.cancelled` and bypasses Lo handlers.
+Neither condition causes tensor truncation.
+The compiler design owns allocation accounting and the inspection schema.
+
+Tensor diagnostics replace tensor contents with metadata records.
+The fields are `tensor_type: String`, `dtype: String`, `shape: List<Int>`, and `device: String`.
+The same transformation applies inside lists, maps, records, and fallible values.
+These records retain no tensor storage.
+Public tensor results contain complete row-major data under the compiler design serialization contract.
