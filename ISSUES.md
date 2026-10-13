@@ -1,14 +1,13 @@
-# Lo v0.3 Issues
+# Lo Issues
 
-This file tracks actionable work against `specification.md`. The original report
-described broad safety goals; the issues below restate them as implementable
-specification and conformance tasks.
+This file tracks work against `specification.md` and selected or proposed language extensions.
+D001, D002, and D003 record completed v0.3 specification work.
+The training issues implement the P001 design after v0.3.
 
-Scope note: v0.3 already defines `T!` plus `Error` as the surface fallibility
-model, keeps `Null` as its own atomic type, and lists user-visible `Result<T>`,
-anonymous recovery syntax, generic `Option<T>`, and concurrency syntax as
-non-goals. These issues therefore harden the v0.3 contract instead of adding
-conflicting surface features.
+Scope note: v0.3 uses `T!` and `Error` for fallibility and keeps `Null` as an atomic type.
+P001 completed the [training extension design](docs/training-extension-design.md).
+That design selects the implementation contract for F002 through F011 and I001.
+P001 closes design work only. The training operations remain unimplemented.
 
 ## D001 - Make Recoverable Failure Semantics Mechanically Enforceable
 
@@ -185,6 +184,481 @@ Out of scope:
 - Adding ownership or borrowing syntax to v0.3.
 - Adding green threads, channels, locks, async/await, or parallel execution
   syntax to v0.3.
+
+## Planning
+
+### Neural-network training context
+
+The [recovered discussion](chatgpt-conversation://6acdcb11-e488-83e8-991b-6d19845bcc8f) supplies the earlier backpropagation context.
+That account identifies graph-first purity, named flows, typed computation graphs, immutable bindings, and explicit `commit` effects as foundations.
+It identifies gaps in numeric arithmetic, tensors, shapes, autodiff, Parameters, gradient control, and optimizers such as AdamW.
+The recovered account does not establish detailed GPU requirements.
+P001 resolved the GPU proposals through the selected extension design.
+The design defines `Tensor<FP32>`, `Autodiff.grad`, `Parameters<R>`, `Gradients<R>`, and immutable optimizer state.
+Record field names identify Parameters. There is no independent `Parameter.new` API.
+
+Current evidence:
+- Sections 6.1, 8.4, and 22.4 of `specification.md` already define `Float` construction but exclude floating-point arithmetic.
+- The reference implementation uses finite IEEE 754 binary64 values for `Float`.
+- Sections 8.7 and 23.1 already define `List.fold` and immutable accumulator state.
+- Sections 5.6, 5.7, 22, and 23 define purity, value semantics, evaluation order, and failure boundaries.
+- `README.md` describes the Go frontend, checked graph, inspector, interpreter, and current supported platforms.
+- `docs/compiler-design.md` defines CLI diagnostics, authorization, inspection, serialization, and execution budgets.
+- D001, D002, and D003 cover existing failure, absence, and execution contracts.
+  The training issues extend these contracts rather than repeat their completed work.
+
+Terms for these issues:
+- A tensor is an immutable numeric array with an element type, shape, and device location.
+- A shape is an ordered list of dimension sizes. Rank is the number of dimensions.
+- Autodiff means automatic differentiation. Reverse-mode autodiff computes gradients through a graph in reverse dependency order.
+- A VJP is a vector-Jacobian product. A gradient is a loss derivative with respect to a selected input.
+- A Parameter is a selected trainable value. An optimizer computes new Parameters and new optimizer state from gradients.
+- A kernel is a device program. Lowering converts checked graph operations into backend operations.
+- FP32, FP16, and BF16 name numeric formats. A dtype is a tensor element type.
+- A tape contains intermediate values needed for reverse-mode autodiff. Stop-gradient prevents derivative propagation through a selected value.
+- An MVP is the smallest complete training example defined by I001.
+
+Design references:
+The [CUDA guide](https://docs.nvidia.com/cuda/cuda-programming-guide/index.html) describes device execution and memory.
+The [asynchronous execution guide](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html) describes streams and synchronization.
+The [cuBLAS reference](https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility) describes library operations and reproducibility limits.
+These references give vendor background.
+The P001 design selects the specific build inputs and numerical contract.
+
+Priority and order:
+P0 resolves language decisions before implementation. P1 establishes the complete FP32 training path. P2 extends numerical precision after that path works.
+
+| Order | Issues | Result |
+| --- | --- | --- |
+| 1 | P001 | Completed extension contract and validation plan |
+| 2 | F002, F003 | Numeric and tensor foundations |
+| 3 | F004, F005, F006, F007 | CPU operations, derivatives, Parameters, and optimizers |
+| 4 | F008, F009, F010 | Device resources, NVIDIA lowering, and execution boundaries |
+| 5 | I001 | Deterministic tests and the complete training MVP |
+| 6 | F011 | Mixed precision |
+
+Dependency markers define prerequisites. Independent work can proceed after its prerequisites are completed.
+Validation sections contain acceptance criteria for future implementation.
+Software simulation or emulation is sufficient for device acceptance.
+Where software cannot reproduce device behavior, available software evidence is sufficient with its limits recorded.
+Physical-device access is not an acceptance prerequisite.
+
+### Implementation review on October 13 2026
+
+The review covered all 21 open entries: 13 non-recurring issues and eight recurring maintenance issues.
+This audit preceded P001 design completion later on the same date.
+The current implementation supplies typed graphs, named flows, immutable values, error propagation, and list callbacks with explicit state.
+These features provide foundations for the proposed training extension.
+Reverse-mode autodiff and the complete training path remain unimplemented.
+No open issue met all its acceptance criteria for closure.
+
+| Issue | Implemented foundation | Remaining work |
+| --- | --- | --- |
+| P001 | Existing language and runtime contracts. | Accept the training types, operation signatures, numerical rules, effects, and backend contract. |
+| F001 | Checked graphs, interpreter, and the native compilation plan. | Add native code generation, `lo build`, standalone artifacts, and performance qualification. |
+| F002 | Finite binary64 `Float` construction and serialization. | Add floating-point arithmetic, explicit conversions, and the FP32 numeric contract. |
+| F003, F004 | Immutable lists, records, and integer operations. | Add tensor types, shapes, and the CPU tensor operation set. |
+| F005 | Resolved acyclic graphs and named flow references. | Add derivative graph construction, VJP rules, tape accounting, and gradient acceptance tests. |
+| F006, F007 | Explicit immutable state and `List.fold`. | Add trainable Parameters, gradient operations, SGD, and AdamW. |
+| F008, F009, F010 | Existing File and HTTP authorization and failure boundaries. | Add device resources, transfers, NVIDIA operations, and asynchronous device semantics. |
+| I001 | Public CLI tests for the existing language. | Add the complete training example and its CPU and software GPU-backend acceptance evidence. |
+| F011 | Existing binary64 values. | Add explicit mixed precision after I001 passes. |
+
+Source evidence includes the [type definitions](internal/types/types.go), [operation catalog](internal/catalog/catalog.go), and [list evaluator](internal/eval/list.go).
+The catalog contains no tensor, gradient, or optimizer operations.
+The source tree contains no derivative or device backend.
+The current `Parameter` type in `internal/types/types.go` describes a flow argument, not a trainable value.
+
+The following focused public integration tests passed during this review:
+
+```bash
+make test-integration TEST_ARGS='-run "TestVerifierBuiltinContracts|TestRunBuiltinCatalog|TestRunValues|TestRunListProcessors|TestCheckedGraphContracts|TestEvaluatorImmutableResults" -count=1'
+```
+
+`make build` also passed.
+Temporary source programs produced these public CLI results:
+
+| Probe | Result |
+| --- | --- |
+| `Float.new(1.25)` | Returned `Float` value `1.25`. |
+| `Math.add(Float.new(1.25), Float.new(2.5))` | Rejected with `check.type-mismatch`: expected `Int`, got `Float`. |
+| Candidate `Tensor.new` call | Rejected with `resolve.unknown-name`. |
+| Candidate `Autodiff.grad` call | Rejected with `resolve.unknown-name`. |
+| Named `List.fold` callback over `1, 2, 3` | Returned `123` through explicit accumulator state. |
+| `lo build examples/list_sum.lo` | Rejected with `cli.invalid-invocation`: unknown command `build`. |
+
+The candidate-name probes do not select the APIs that P001 must define.
+They confirm the absence of those proposed entry points in the current CLI.
+The source and catalog review establish the wider implementation gaps.
+The passing foundation tests do not establish gradient or training acceptance.
+
+At the time of this audit, P001 remained the next prerequisite for F002 through F011 and I001.
+F001 remains independent of the training path through `lo run`.
+M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurring tasks.
+
+- [x] [P001] (P0) Validate the neural-network training extension
+  Goal:
+  Establish one reviewed contract for training while retaining Lo's inspectable graph model.
+
+  Requirements:
+  - Separate the recovered backpropagation needs from the new GPU proposals in each design decision.
+  - Select one extension contract before implementation of dependent issues.
+  - Preserve named flows, explicit context arguments, immutable bindings, `.new(...)` construction, and `T!` error propagation.
+  - Define tensor types against section 6.6, which currently makes `List<T>` the only ordered collection type.
+  - Select a canonical representation for dtype, shape, device location, Parameters, gradients, and optimizer state.
+  - Validate `List.fold` with a pure named training flow and explicit state for bounded training iterations.
+  - Classify device selection, allocation, transfers, execution, and result observation as value operations, boundary operations, or commit activation.
+  - Keep `commit` for observable effects and adapter activation under the selected classification.
+  - Reconcile this classification with pure list callbacks and the existing boundary-read summary.
+  - Keep streams and synchronization inside the runtime, without user-visible async syntax.
+  - Define determinism for each backend and numerical comparison between backends.
+  - Record any proposed change to section 5.6 before tolerance-based CPU/GPU comparisons become language acceptance criteria.
+  - Define tensor, tape, and optimizer resource accounting against the current execution budgets.
+  - Limit the first implementation to dense tensors, one selected device, first-order derivatives, and the I001 network.
+
+  Deliverables:
+  - Produce a reviewed decision document with operation signatures, effect classifications, diagnostics, and source-section changes.
+  - Add a decision table for unresolved items under `Open Decisions`.
+  - Select the NVIDIA compilation route, operating system, host architecture, CUDA toolchain, and library versions.
+  - Record how the selected backend coexists with the currently documented CPU platforms.
+  - Keep F001 native executable generation independent of the training MVP through `lo run`.
+  - Reuse shared runtime contracts where applicable without adding native artifact requirements to I001.
+  - Record explicit deferrals for multiple devices, distributed training, sparse tensors, convolution, attention, and higher-order derivatives.
+  - Map each accepted decision to F002 through F011 and I001.
+
+  Validation:
+  - Review a complete I001 graph, including state transitions, derivative operations, transfers, failures, and result publication.
+  - Resolve every decision needed by the P1 issues before their implementation begins.
+  - Demonstrate that the proposed training flow needs no captures, recursion, mutable bindings, or statement loops.
+  - Confirm that CPU execution is an explicit backend choice, not recovery from a failed GPU request.
+  - Define simulator, emulator, and controlled backend tests with their evidence limits.
+
+  P001 completed its design on October 13, 2026.
+  The [decision document](docs/training-extension-design.md) resolves all P1 decisions and maps each contract change to its implementation issue.
+  It selects explicit CPU, CUDA, and software simulation backends without automatic substitution.
+  It specifies API signatures, VJPs, optimizer equations, resource budgets, diagnostics, source changes, and fixed numerical acceptance limits.
+
+  The [complete source fixture](docs/examples/training-mvp.lo) passed the current `lo parse` command.
+  `lo check` rejected the unimplemented `FP32` type with `resolve.unknown-name`, as expected.
+  `make build` passed.
+  The [independent reference](docs/evidence/training-reference.py) passed its network, finite-difference, and AdamW assertions.
+  Its FP32 loss after 200 updates was `0.00013215476064942777`, below the I001 threshold of `0.001`.
+  These checks validate the design and reference arithmetic, not Lo training execution.
+  Changed prose passed the mechanical language checks after review against the official reference.
+  Existing tracker and README language findings remain outside this change.
+
+## Features
+
+- [ ] [F001] (P1) Build native Lo executables
+  Goal:
+  Compile checked Lo programs into standalone native executables with the current language and runtime contracts.
+
+  Requirements:
+  - Use the proposed [native compilation plan](docs/native-compilation-plan.md) for scope and stage dependencies.
+  - Establish performance baselines and numeric build budgets before native implementation.
+  - Separate shared execution contracts from interpreter graph traversal.
+  - Generate direct Go functions, branches, local variables, and list loops.
+  - Preserve errors, source context, logical costs, authorization, and effect order.
+  - Support all current built-ins, File workflows, and HTTP services.
+  - Qualify macOS arm64 and Linux arm64 through native execution.
+  - Reject unsupported builds without interpreter execution.
+
+  Deliverables:
+  - A `lo build` command and standalone artifacts with `run` and `serve` commands.
+  - A pinned runtime bundle and isolated artifact construction.
+  - Native conformance tests and differential tests with independent expected results.
+  - Recorded performance results, target qualification, and updated user documentation.
+
+  Validation:
+  - Execute artifacts without Lo, Go, the original source, or the repository checkout.
+  - Verify all semantic, lifecycle, capability, and limit acceptance criteria in the plan.
+  - Pass the agreed performance gates and repository-native validation.
+  - Keep this issue open until implementation and its required evidence pass.
+
+### Numeric and training foundations
+
+F002 through F010 implement the selected [training extension contract](docs/training-extension-design.md).
+F011 owns the deferred mixed-precision decisions after I001.
+
+- [ ] [F002] (P1) {P001} Add floating-point arithmetic and explicit conversions
+  Goal:
+  Extend existing `Float` support with the arithmetic needed for training.
+
+  Requirements:
+  - Define binary64 reference arithmetic and FP32 tensor arithmetic under the P001 numeric contract.
+  - Specify addition, subtraction, multiplication, division, comparison, square root, and integer-to-float conversion.
+  - Specify explicit dtype conversions, representable ranges, rounding, signed zero, and subnormal behavior.
+  - Define overflow, nonfinite results, division by zero, and invalid square-root behavior through declared fallibility.
+  - Keep current integer arithmetic exact and current `Float.new` construction consistent with its accepted contract.
+  - Require explicit conversions between integer and floating-point domains.
+
+  Deliverables:
+  - Add canonical signatures, runtime operations, value serialization, and numeric conformance fixtures.
+  - Record any accepted numeric change in the specification and compiler design.
+
+  Validation:
+  - Verify exact results for representable arithmetic inputs through `lo check` and `lo run`.
+  - Verify rounding boundaries, conversion limits, underflow, overflow, zero division, and invalid square roots.
+  - Verify that unresolved numeric failures are rejected in total flows and propagate through fallible flows.
+
+- [ ] [F003] (P1) {F002} Add tensor values and shape semantics
+  Goal:
+  Make tensor dimensions, numeric types, and storage requirements explicit and verifiable.
+
+  Requirements:
+  - Define immutable dense tensors with dtype, rank, dimension sizes, layout, and device location.
+  - Separate statically known shapes from dimensions validated at input boundaries.
+  - Define rank-zero tensors, zero-length dimensions, invalid dimensions, and element-count overflow.
+  - Specify trailing-dimension broadcasting, reshape element counts, transpose axes, and matrix multiplication dimensions.
+  - Select one canonical initial layout and define the semantics of views and storage sharing.
+  - Validate dynamic shape inputs once at their boundary before core operations consume them.
+  - Keep tensor storage identity and host pointers outside observable Lo values.
+
+  Deliverables:
+  - Add tensor constructors, metadata operations, type checking, diagnostics, and bounded serialization.
+  - Define tensor allocation accounting for the existing execution budget.
+
+  Validation:
+  - Reject known shape conflicts through `lo check` with expected and actual dimensions.
+  - Return the specified typed failure for invalid dynamic shapes before allocation or execution.
+  - Verify broadcasting, reshape, transpose, rank-zero, and empty-dimension cases against fixed expected results.
+  - Verify that two bindings retain their original values after an operation shares or reuses internal storage.
+
+- [ ] [F004] (P1) {F003} Add the CPU tensor operation set
+  Goal:
+  Provide an independent reference for the forward pass, gradients, and optimizer calculations.
+
+  Requirements:
+  - Implement elementwise addition, subtraction, multiplication, division, and square root.
+  - Implement matrix multiplication, broadcasting, reshape, transpose, and reductions by sum and mean.
+  - Implement ReLU with an explicit zero-input rule.
+  - Compose mean squared error from these operations for I001.
+  - Specify reduction axes, retained dimensions, accumulation dtype, and empty-input behavior.
+  - Keep all operations pure and use the F002 and F003 failure contracts.
+
+  Deliverables:
+  - Add operation signatures, reference execution, and CLI integration fixtures for every accepted operation.
+  - Record the operation set that F005 and F009 must support.
+
+  Validation:
+  - Compare non-square matrix products and broadcast reductions with independently calculated results.
+  - Verify cancellation-sensitive reductions against the accepted reduction order and accumulation dtype.
+  - Verify that an invalid operation stops dependent evaluation and retains its source context.
+
+- [ ] [F005] (P1) {F004} Add reverse-mode autodiff for named flows
+  Goal:
+  Compute first-order gradients of a numeric rank-zero loss through a checked graph.
+
+  Requirements:
+  - Accept a pure named loss flow, explicit context inputs, and explicit differentiation targets.
+  - Define a closed differentiable subset of the F004 operations needed by I001.
+  - Add VJP rules for matrix multiplication, elementwise arithmetic, broadcasting, reshape, transpose, sum, mean, and ReLU.
+  - Define the ReLU derivative at zero as a reviewed subgradient choice.
+  - Accumulate derivative contributions from shared graph nodes exactly once per dependency edge.
+  - Define zero gradients for disconnected selected inputs and rejection for nondifferentiable selected dtypes.
+  - Reject unsupported operations with their source spans before backend execution.
+  - Reject boundary reads and commit activation inside differentiated flows, including indirect calls.
+  - Keep training iteration outside the differentiated loss graph for the MVP.
+  - Explicitly defer differentiation through `Match.new` and list callbacks unless P001 defines their derivative rules.
+  - Propagate forward failures without publishing partial gradients.
+  - Bound tape lifetime to one derivative evaluation, subject to the accepted resource budget.
+
+  Deliverables:
+  - Add the gradient API, derivative graph construction, operation coverage table, and source-span mapping.
+
+  Validation:
+  - Compare each VJP with independent analytical results and central finite differences away from nondifferentiable points.
+  - Fix finite-difference step sizes and error tolerances in fixtures before acceptance.
+  - Verify shared nodes, broadcast bias, disconnected inputs, repeated calls, and nested named pure flows.
+  - Verify that unsupported branches, callbacks, effects, and reads receive deterministic diagnostics.
+
+- [ ] [F006] (P1) {F005} Add Parameters and gradient lifecycle operations
+  Goal:
+  Represent trainable values and gradient accumulation through immutable state.
+
+  Requirements:
+  - Give each Parameter an explicit stable key, dtype, shape, and value.
+  - Define tied Parameter use as one selected value with accumulated derivative contributions.
+  - Distinguish tied Parameters from separate Parameters with equal numeric values.
+  - Return gradients in an exact structure keyed to the selected Parameters.
+  - Define immutable zero-gradient construction, accumulation, reset, and stop-gradient operations.
+  - Define minibatch weighting so accumulated gradients match the same complete batch loss.
+  - Preserve the numeric value through stop-gradient while removing its derivative contribution.
+  - Carry Parameters and gradient state explicitly through named flows and `List.fold`.
+
+  Deliverables:
+  - Add Parameter construction, gradient operations, and exact structural checks.
+
+  Validation:
+  - Verify that two microbatches produce the same weighted gradient as their combined batch within the accepted tolerance.
+  - Verify a tied Parameter, separate equal-valued Parameters, disconnected Parameters, reset, and repeated gradient evaluation.
+  - Verify that stop-gradient preserves forward results and yields zero contribution along the stopped path.
+  - Reject missing keys, duplicate keys, incompatible shapes, and incompatible dtypes at their applicable validation boundary.
+
+- [ ] [F007] (P1) {F006} Add pure SGD and AdamW state transitions
+  Goal:
+  Compute new Parameters and optimizer state without mutable user storage.
+
+  Requirements:
+  - Implement plain SGD for the I001 baseline and AdamW for the requested optimizer path.
+  - Define explicit learning rate, step count, moment values, beta values, epsilon, and weight decay.
+  - Specify AdamW bias correction, epsilon placement, and decoupled weight decay mathematically.
+  - Validate optimizer configuration once through its constructor.
+  - Return updated Parameters and state as a new exact value with the same Parameter keys.
+  - Retain previous Parameters and state without observable mutation.
+  - Publish no partial update when a gradient or numeric operation fails.
+  - Keep optimizer calculations pure and reserve persistent output for an explicit effect and `commit`.
+
+  Deliverables:
+  - Add canonical optimizer signatures, configuration constructors, and state-transition fixtures.
+
+  Validation:
+  - Compare one-step and multi-step results with independent numerical references for SGD and AdamW.
+  - Verify nonzero weight decay, zero gradients, invalid configuration, step increments, and original-state preservation.
+  - Verify that sequential `List.fold` steps receive the previous step's returned state.
+
+### NVIDIA backend
+
+F008, F009, and F010 implement the P001 device and NVIDIA contracts.
+F011 extends the accepted FP32 path with a later precision contract.
+
+- [ ] [F008] (P1) {F003} Add device resources and explicit tensor transfers
+  Goal:
+  Define device location and resource lifetime while preserving immutable value semantics.
+
+  Requirements:
+  - Implement the P001 device selection and activation contract for one NVIDIA device per training run.
+  - Require host authorization for the resolved device before resource access.
+  - Keep CPU execution as an explicit selection with the same accepted operation semantics.
+  - Define device allocation, ownership, shared storage, lifetime, release, and memory budgets.
+  - Account for Parameters, gradients, tape values, optimizer state, temporary buffers, and library workspace.
+  - Define explicit CPU-to-GPU and GPU-to-CPU transfers with typed results and preserved dtype and shape.
+  - Specify transfer completion, source lifetime, and cancellation cleanup.
+  - Define errors for unavailable devices, incompatible locations, failed allocations, and failed transfers.
+  - Use P001 classifications for recoverable errors and host policy failures.
+  - Expose device requirements, transfers, and known allocation sizes through static inspection.
+
+  Deliverables:
+  - Add the device boundary, transfer operations, resource accounting, and software backend test interface.
+
+  Validation:
+  - Verify a transfer round trip with exact FP32 values, unchanged source values, and stable shape metadata.
+  - Verify denial before resource access and deterministic failure for an unavailable selected device.
+  - Inject allocation and transfer failures through the public execution path.
+  - Verify release after success, failure, and cancellation with allocation receipts.
+  - Verify that `lo check` and `lo inspect` operate without device initialization.
+
+- [ ] [F009] (P1) {F007,F008} Lower checked tensor graphs to NVIDIA operations
+  Goal:
+  Execute the accepted tensor operation set through a defined NVIDIA backend.
+
+  Requirements:
+  - Select one canonical route from Lo's checked IR to CUDA library calls and compiled kernels.
+  - Use a reviewed cuBLAS or cuBLASLt mapping for matrix multiplication.
+  - Add kernels for the remaining accepted operations, including derivative and optimizer arithmetic.
+  - Record support by operation, dtype, layout, shape constraints, and target architecture.
+  - Validate backend support before execution and report unsupported nodes with source spans.
+  - Preserve data dependencies, branch regions, fallibility, source evaluation order, and commit boundaries during lowering.
+  - Keep repeated training steps on device after explicit input transfers.
+  - Allow fusion or buffer reuse only when results, failures, and value semantics remain unchanged.
+  - Specify build inputs and artifact identity with the accepted toolchain and backend configuration.
+
+  Deliverables:
+  - Add the selected backend, build instructions, support matrix, and graph-to-operation inspection evidence.
+
+  Validation:
+  - Compile representative forward, derivative, and optimizer graphs with the selected NVIDIA toolchain.
+  - Verify shapes, strides, transpose flags, dtypes, and dependency order at the library boundary.
+  - Compare lowered execution in software with the CPU reference under the accepted numerical contract.
+  - Verify that unsupported nodes produce a diagnostic rather than an implicit CPU execution path.
+  - Record simulator coverage and unmeasured device behavior separately from compilation evidence.
+
+- [ ] [F010] (P1) {F009} Preserve Lo semantics during asynchronous execution
+  Goal:
+  Keep device scheduling, synchronization, and failures consistent with Lo's observable execution rules.
+
+  Requirements:
+  - Define internal stream and event dependencies without new Lo concurrency syntax.
+  - Complete required synchronization before host observation, returned values, resource release, and dependent commit activation.
+  - Resolve earlier fallible work before any later observable boundary operation.
+  - Preserve source-order error selection when independent operations fail in a different completion order.
+  - Translate recoverable launch, transfer, and library failures into stable `Error.kind` values.
+  - Retain originating graph nodes, operations, device context, and available source spans for deferred failures.
+  - Define the handling of device loss and unusable contexts, including cleanup and later-call rejection.
+  - Keep authorization denial, cancellation, and execution limits as host diagnostics under the accepted P001 contract.
+  - Prevent result publication and later commits after an unresolved failure.
+  - Expose backend selection, transfer boundaries, possible errors, and synchronization boundaries through inspection.
+  - Specify deterministic reductions, library configuration, and accumulation precision for each supported execution profile.
+
+  Deliverables:
+  - Add scheduling rules, failure mappings, cleanup behavior, and inspection-schema extensions.
+
+  Validation:
+  - Inject out-of-order completions and verify identical published values and ordered effects.
+  - Inject immediate and deferred failures and verify the originating trace and selected handler.
+  - Verify that an earlier device failure prevents a later file commit.
+  - Verify cancellation and policy denial bypass Lo handlers and release resources.
+  - Repeat the same graph under fixed backend inputs and verify the P001 reproducibility contract.
+
+- [ ] [F011] (P2) {I001} Add explicit mixed-precision training
+  Goal:
+  Extend the validated FP32 path with reviewed precision choices.
+
+  Requirements:
+  - Validate proposed FP16 and BF16 storage separately from compute and accumulation precision.
+  - Specify explicit conversions, FP32 master Parameters, optimizer-state precision, and reduction precision.
+  - Define overflow detection, loss scaling, gradient unscaling, and skipped-step state transitions.
+  - Specify whether reduced-precision matrix modes, including TF32, are permitted in each execution profile.
+  - Report unsupported precision requests explicitly under the selected backend contract.
+
+  Deliverables:
+  - Add the precision policy, numeric signatures, backend mappings, and mixed-precision fixtures.
+
+  Validation:
+  - Compare loss, gradients, and Parameter updates with the FP32 reference with fixed absolute and relative tolerances.
+  - Verify overflow and underflow fixtures with the specified loss-scaling state transitions.
+  - Verify that a skipped update preserves Parameters and changes only the state specified by the policy.
+  - Record precision limitations of the selected software validation environment.
+
+## Improvements
+
+- [ ] [I001] (P1) {F007,F010} Qualify deterministic training with a small complete MVP
+  Goal:
+  Prove the complete training path through Lo's public CLI with reproducible software evidence.
+
+  Requirements:
+  - Implement the P001 design fixture with its selected `Forward`, `Loss`, and `TrainStep` signatures.
+  - Use a dense network with two inputs, two ReLU units, and one linear output.
+  - Use input rows `[-1,-1]`, `[-1,1]`, `[1,-1]`, and `[1,1]` with targets `0`, `2`, `1`, and `3`.
+  - Set the first weight matrix to the identity, both hidden biases to zero, and output weights to `[0.25,0.25]`.
+  - Set the output bias to zero.
+  - Use mean squared error over all four rows and SGD with learning rate `0.05`.
+  - Update all weights and biases for 200 steps through `List.fold` with explicit immutable state.
+  - Use fixed input order and fixed initial values without a random initialization dependency.
+  - Transfer inputs and initial Parameters once for the GPU path.
+  - Keep forward operations, gradients, optimizer updates, and intermediate state on the selected backend.
+  - Transfer final metrics and Parameters explicitly for host observation.
+  - Add a separate short AdamW fixture with independently calculated expected updates from F007.
+  - Record absolute and relative tolerances before test execution.
+  - Use CPU execution, software simulation or emulation, and controlled backend failures as the acceptance environments.
+
+  Deliverables:
+  - Add the example, independent numerical references, CLI integration tests, and a reproducible validation recipe.
+  - Record source revision, backend, compiler, library versions, numeric profile, inputs, and observed results.
+  - Record device execution and performance as unmeasured when the software environment cannot establish them.
+
+  Validation:
+  - Verify the example through `lo parse`, `lo check`, `lo inspect`, and `lo run`.
+  - Verify initial predictions `[0,0.25,0.25,0.5]` and initial mean squared error `2.46875`.
+  - Verify the first SGD output weights `[0.33125,0.35625]` and output bias `0.125` within the accepted FP32 tolerance.
+  - Verify finite gradients and loss at every step.
+  - Verify final mean squared error below `0.001` after 200 updates.
+  - Compare CPU and software GPU-backend losses, gradients, and final Parameters under the P001 numerical contract.
+  - Repeat each fixed configuration three times and verify its specified reproducibility result.
+  - Verify transfer receipts show no implicit host transfers between training steps.
+  - Verify bounded live allocation across repeated steps and release after completion or failure.
+  - Verify invalid shapes, unsupported operations, unavailable devices, transfer failures, and deferred failures through CLI diagnostics.
+  - Run `make test-integration`, `make test-conformance`, and `make ci` at the implementation completion checkpoint.
 
 ## Maintenance
 
