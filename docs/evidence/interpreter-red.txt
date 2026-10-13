@@ -1,0 +1,90 @@
+go test ./tests/integration -run TestRun -count=1
+--- FAIL: TestRunValues (0.22s)
+    --- FAIL: TestRunValues/sum (0.14s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/large (0.01s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/immutable (0.01s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/unicode (0.01s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/scalars (0.01s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/concat (0.01s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/bytes (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/bool (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/null (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/float (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/path (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/sum-empty (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/product-empty (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/merge (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/map-duplicate (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/range-empty (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/range-includes (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/match-lazy (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunValues/match-predicate (0.00s)
+        run_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    run_test.go:68: text result: {stdout: stderr:cli.invalid-invocation: unknown command "run"
+         status:2}
+--- FAIL: TestRunListProcessors (0.02s)
+    --- FAIL: TestRunListProcessors/map-context (0.00s)
+        run_test.go:81: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunListProcessors/filter-string (0.00s)
+        run_test.go:81: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunListProcessors/fold-context (0.00s)
+        run_test.go:81: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunListProcessors/flat-map (0.00s)
+        run_test.go:81: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunListProcessors/unfold (0.00s)
+        run_test.go:81: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+    --- FAIL: TestRunListProcessors/unfold-negative (0.00s)
+        run_test.go:81: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+             status:2}
+--- FAIL: TestRunRecoverableErrors (0.00s)
+    run_test.go:93: recoverable failure: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"run\""}]}
+         status:2}
+--- FAIL: TestRunFileReads (0.00s)
+    run_test.go:125: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--read-root\""}]}
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.628s
+FAIL
+make: *** [test-integration] Error 1

@@ -1,0 +1,6 @@
+go build -o bin/lo ./cmd/lo
+go: downloading golang.org/x/sys v0.49.0
+{"command":"serve","status":"ready","servers":[{"address":"127.0.0.1:8080"}]}
+{"command":"serve","status":"stopped"}
+HTTP GET /: division by zero 400
+SIGINT: exit 0, no diagnostics

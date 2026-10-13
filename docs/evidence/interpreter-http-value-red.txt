@@ -1,0 +1,60 @@
+go test ./tests/integration -run TestRunBuiltinCatalog/HTTP.Response -count=1
+--- FAIL: TestRunBuiltinCatalog (0.09s)
+    --- FAIL: TestRunBuiltinCatalog/HTTP.Response.Text.new (0.08s)
+        runtime_catalog_test.go:98: value: {"body":{"type":"Bytes","value":"b2s="},"headers":{"type":"Map\u003cString, String\u003e","value":[{"key":{"type":"String","value":"Content-Type"},"value":{"type":"String","value":"text/plain; charset=utf-8"}}]},"status":{"type":"Int","value":"200"}}, want {"status":{"type":"Int","value":"200"},"headers":{"type":"Map<String, String>","value":[]},"body":{"type":"Bytes","value":"b2s="}}
+    --- FAIL: TestRunBuiltinCatalog/HTTP.Response.Bytes.new (0.01s)
+        runtime_catalog_test.go:98: value: {"body":{"type":"Bytes","value":"b2s="},"headers":{"type":"Map\u003cString, String\u003e","value":[{"key":{"type":"String","value":"Content-Type"},"value":{"type":"String","value":"application/octet-stream"}}]},"status":{"type":"Int","value":"200"}}, want {"status":{"type":"Int","value":"200"},"headers":{"type":"Map<String, String>","value":[]},"body":{"type":"Bytes","value":"b2s="}}
+    runtime_catalog_test.go:104: missing runtime case for Bool.new
+    runtime_catalog_test.go:104: missing runtime case for Bytes.new
+    runtime_catalog_test.go:104: missing runtime case for Error.new
+    runtime_catalog_test.go:104: missing runtime case for File.Path.new
+    runtime_catalog_test.go:104: missing runtime case for File.append
+    runtime_catalog_test.go:104: missing runtime case for File.read
+    runtime_catalog_test.go:104: missing runtime case for File.write
+    runtime_catalog_test.go:104: missing runtime case for Float.new
+    runtime_catalog_test.go:104: missing runtime case for HTTP.Server.new
+    runtime_catalog_test.go:104: missing runtime case for Int.new
+    runtime_catalog_test.go:104: missing runtime case for Int.to_string
+    runtime_catalog_test.go:104: missing runtime case for List.filter
+    runtime_catalog_test.go:104: missing runtime case for List.flat_map
+    runtime_catalog_test.go:104: missing runtime case for List.fold
+    runtime_catalog_test.go:104: missing runtime case for List.length
+    runtime_catalog_test.go:104: missing runtime case for List.map
+    runtime_catalog_test.go:104: missing runtime case for List.new
+    runtime_catalog_test.go:104: missing runtime case for List.unfold
+    runtime_catalog_test.go:104: missing runtime case for Map.get
+    runtime_catalog_test.go:104: missing runtime case for Map.has_key
+    runtime_catalog_test.go:104: missing runtime case for Map.new
+    runtime_catalog_test.go:104: missing runtime case for Math.add
+    runtime_catalog_test.go:104: missing runtime case for Math.div
+    runtime_catalog_test.go:104: missing runtime case for Math.eq
+    runtime_catalog_test.go:104: missing runtime case for Math.gt
+    runtime_catalog_test.go:104: missing runtime case for Math.gte
+    runtime_catalog_test.go:104: missing runtime case for Math.lt
+    runtime_catalog_test.go:104: missing runtime case for Math.lte
+    runtime_catalog_test.go:104: missing runtime case for Math.max
+    runtime_catalog_test.go:104: missing runtime case for Math.min
+    runtime_catalog_test.go:104: missing runtime case for Math.mod
+    runtime_catalog_test.go:104: missing runtime case for Math.mul
+    runtime_catalog_test.go:104: missing runtime case for Math.product
+    runtime_catalog_test.go:104: missing runtime case for Math.sub
+    runtime_catalog_test.go:104: missing runtime case for Math.sum
+    runtime_catalog_test.go:104: missing runtime case for Range.contains
+    runtime_catalog_test.go:104: missing runtime case for Range.is_empty
+    runtime_catalog_test.go:104: missing runtime case for Range.new
+    runtime_catalog_test.go:104: missing runtime case for Record.merge
+    runtime_catalog_test.go:104: missing runtime case for Record.new
+    runtime_catalog_test.go:104: missing runtime case for Scalar.eq
+    runtime_catalog_test.go:104: missing runtime case for Scalar.new
+    runtime_catalog_test.go:104: missing runtime case for String.FromScalars.new
+    runtime_catalog_test.go:104: missing runtime case for String.concat
+    runtime_catalog_test.go:104: missing runtime case for String.eq
+    runtime_catalog_test.go:104: missing runtime case for String.length
+    runtime_catalog_test.go:104: missing runtime case for String.lower
+    runtime_catalog_test.go:104: missing runtime case for String.new
+    runtime_catalog_test.go:104: missing runtime case for String.upper
+    runtime_catalog_test.go:104: missing runtime case for UTF8.String.new
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.457s
+FAIL
+make: *** [test-integration] Error 1

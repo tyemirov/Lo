@@ -1,0 +1,2 @@
+go test ./tests/integration -run "TestServe|TestServer|TestFile|TestInspectionHTTP" -count=1 -timeout=90s
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	30.886s

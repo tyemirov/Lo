@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestInspectionCaseHeadReads -count=1
+--- FAIL: TestInspectionCaseHeadReads (0.08s)
+    inspect_test.go:144: a case-head read depends on selection of its body
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.449s
+FAIL
+make: *** [test-integration] Error 1

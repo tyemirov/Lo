@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestFileReadCancellation -count=1
+--- FAIL: TestFileReadCancellation (1.01s)
+    adapter_test.go:31: cancelled file read remained blocked
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.579s
+FAIL
+make: *** [test-integration] Error 1

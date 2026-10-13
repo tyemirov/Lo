@@ -1,0 +1,14 @@
+go test ./tests/integration -run TestVerifierRejections -count=1
+--- FAIL: TestVerifierRejections (0.16s)
+    --- FAIL: TestVerifierRejections/incomparable-head (0.00s)
+        verifier_test.go:138: want check.type-constraint: {Code:check.type-mismatch Stage:check Message:expected List<Int>, got Int Expected:List<Int> Actual:Int Span:0x56af0e31cff0}
+    --- FAIL: TestVerifierRejections/list-as-range (0.00s)
+        verifier_test.go:137: want rejection: {stdout:{"command":"check","status":"ok","file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierRejectionslist-as-range1485583718/001/622750458.lo","result_type":"Bool"}
+             stderr: status:0}
+    --- FAIL: TestVerifierRejections/range-as-list (0.00s)
+        verifier_test.go:137: want rejection: {stdout:{"command":"check","status":"ok","file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierRejectionsrange-as-list3565035562/001/3606546265.lo","result_type":"Int"}
+             stderr: status:0}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.492s
+FAIL
+make: *** [test-integration] Error 1

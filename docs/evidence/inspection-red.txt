@@ -1,0 +1,23 @@
+go test ./tests/integration -run TestInspection -count=1
+--- FAIL: TestInspectionResources (0.14s)
+    inspect_test.go:62: inspect: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"inspect\""}]}
+         status:2}
+--- FAIL: TestInspectionBranchesAndCallbacks (0.01s)
+    inspect_test.go:74: inspect: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"inspect\""}]}
+         status:2}
+--- FAIL: TestInspectionReturnedTargetsAndErrors (0.00s)
+    inspect_test.go:96: inspect: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"inspect\""}]}
+         status:2}
+--- FAIL: TestInspectionUncommittedServer (0.00s)
+    inspect_test.go:112: inspect: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"inspect\""}]}
+         status:2}
+--- FAIL: TestInspectionListContext (0.00s)
+    inspect_test.go:117: inspect: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"inspect\""}]}
+         status:2}
+--- FAIL: TestInspectionRejectsInvalidSource (0.00s)
+    inspect_test.go:123: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"inspect\""}]}
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.530s
+FAIL
+make: *** [test-integration] Error 1

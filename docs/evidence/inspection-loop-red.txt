@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestInspectionLoopCarriedTargets -count=1
+--- FAIL: TestInspectionLoopCarriedTargets (0.08s)
+    inspect_test.go:132: inspection omitted a target from later iterations: [{ID:p1 Operation:File.append Context:c1 Entry:program Node:n25 Target:{Kind:known Type:File.Path Node:n15 Value:first Expression: Dependencies:[n14 n15] Span:{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestInspectionLoopCarriedTargets4256662780/001/2443725044.lo","start":{"offset":258,"line":1,"column":259},"end":{"offset":280,"line":1,"column":281}}} Conditions:[] Handler: OnError:} {ID:p2 Operation:File.append Context:c1 Entry:program Node:n25 Target:{Kind:known Type:File.Path Node:n15 Value:first Expression: Dependencies:[n14 n15] Span:{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestInspectionLoopCarriedTargets4256662780/001/2443725044.lo","start":{"offset":258,"line":1,"column":259},"end":{"offset":280,"line":1,"column":281}}} Conditions:[{Kind:list-iteration Node:n20 Case:0} {Kind:list-iteration Node:n23 Case:0}] Handler: OnError:}]
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.439s
+FAIL
+make: *** [test-integration] Error 1

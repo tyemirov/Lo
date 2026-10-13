@@ -1,0 +1,6 @@
+go test ./tests/integration -run TestServerPartialStartupCleanup -count=1
+# github.com/MarcoPoloResearchLab/Lo/tests/integration_test [github.com/MarcoPoloResearchLab/Lo/tests/integration.test]
+tests/integration/adapter_test.go:64:16: servers.Start undefined (type adapter.Servers has no field or method Start)
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration [build failed]
+FAIL
+make: *** [test-integration] Error 1

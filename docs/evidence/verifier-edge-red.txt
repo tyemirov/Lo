@@ -1,0 +1,37 @@
+go test ./tests/integration -run TestVerifierEdge -count=1
+--- FAIL: TestVerifierEdgeContracts (0.18s)
+    --- FAIL: TestVerifierEdgeContracts/match-stored-failure (0.05s)
+        verifier_test.go:99: {stdout: stderr:{"diagnostics":[{"code":"check.unhandled-failure","stage":"check","message":"fallible value needs a fallible flow or a self-handler","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierEdgeContractsmatch-stored-failure2704191774/001/598281784.lo","start":{"offset":57,"line":1,"column":58},"end":{"offset":71,"line":1,"column":72}}}]}
+             status:1}
+    --- FAIL: TestVerifierEdgeContracts/match-error-return (0.01s)
+        verifier_test.go:99: {stdout: stderr:{"diagnostics":[{"code":"check.type-mismatch","stage":"check","message":"expected Int, got Error","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierEdgeContractsmatch-error-return3612498574/001/2458940112.lo","start":{"offset":48,"line":1,"column":49},"end":{"offset":111,"line":1,"column":112}},"expected":"Int","actual":"Error"}]}
+             status:1}
+    --- FAIL: TestVerifierEdgeContracts/map-fallible-value (0.01s)
+        verifier_test.go:99: {stdout: stderr:panic: invalid fallible base
+            
+            goroutine 1 [running]:
+            github.com/MarcoPoloResearchLab/Lo/internal/check.must[...](...)
+            	/Users/tyemirov/Development/Research/Lo/internal/check/check.go:192
+            github.com/MarcoPoloResearchLab/Lo/internal/check.(*checker).builtin(0x67f897b83b40, {0x1029852f0, 0x67f897c9bc80}, {0x67f897c80600, 0x2, 0x2}, {0x0, 0x0}, {0x102984f20, 0x67f897c82d40})
+            	/Users/tyemirov/Development/Research/Lo/internal/check/call.go:124 +0x1a84
+            github.com/MarcoPoloResearchLab/Lo/internal/check.(*checker).call(0x67f897b83b40, {0x67f897b60220, 0x7}, {0x67f897c80600, 0x2, 0x2}, {0x0, 0x0}, {0x102984f20, 0x67f897c82d40})
+            	/Users/tyemirov/Development/Research/Lo/internal/check/call.go:59 +0x1fc
+            github.com/MarcoPoloResearchLab/Lo/internal/check.(*checker).rawExpression(0x67f897b83b40, {0x102984a88?, 0x67f897c82d80}, {0x0, 0x0})
+            	/Users/tyemirov/Development/Research/Lo/internal/check/expression.go:44 +0x5d0
+            github.com/MarcoPoloResearchLab/Lo/internal/check.(*checker).expression(0x67f897b83b40, {0x102984a88, 0x67f897c82d80}, {0x0, 0x0})
+            	/Users/tyemirov/Development/Research/Lo/internal/check/expression.go:16 +0x7c
+            github.com/MarcoPoloResearchLab/Lo/internal/check.(*checker).body(0x67f897b83b40, {0x67f897bec5e0?, 0x67f897b5e048?, 0x67f897bec560?})
+            	/Users/tyemirov/Development/Research/Lo/internal/check/check.go:126 +0x430
+            github.com/MarcoPoloResearchLab/Lo/internal/check.Program({0x102984f60, 0x67f897c82e40})
+            	/Users/tyemirov/Development/Research/Lo/internal/check/check.go:43 +0x15c
+            github.com/MarcoPoloResearchLab/Lo/internal/compiler.Check({0x102984938?, 0x67f897c82600?})
+            	/Users/tyemirov/Development/Research/Lo/internal/compiler/compiler.go:17 +0x44
+            main.execute({0x67f897b62060?, 0x0?, 0x0?}, {0x1029840d8, 0x67f897b50030}, {0x1029840d8, 0x67f897b50038})
+            	/Users/tyemirov/Development/Research/Lo/cmd/lo/main.go:94 +0x1d8
+            main.main()
+            	/Users/tyemirov/Development/Research/Lo/cmd/lo/main.go:28 +0x6c
+             status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.497s
+FAIL
+make: *** [test-integration] Error 1

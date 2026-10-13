@@ -1,0 +1,8 @@
+go test ./tests/integration -run TestServeShutdownPendingConnection -count=1 -timeout=15s
+--- FAIL: TestServeShutdownPendingConnection (5.21s)
+    serve_test.go:238: shutdown: {stdout: stderr:{"diagnostics":[{"code":"runtime.host-failure","stage":"runtime","message":"close runtime resources \"program\": shutdown HTTP server 127.0.0.1:57797: context deadline exceeded"}]}
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	5.676s
+FAIL
+make: *** [test-integration] Error 1

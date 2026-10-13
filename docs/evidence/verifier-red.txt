@@ -1,0 +1,120 @@
+$ make test-integration TEST_ARGS="-run TestVerifier -count=1"
+go test ./tests/integration -run TestVerifier -count=1
+--- FAIL: TestVerifierExamples (0.07s)
+    --- FAIL: TestVerifierExamples/dynamic_filter (0.05s)
+        verifier_test.go:12: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"examples/dynamic_filter.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":141,"line":3,"column":2}}}]}
+             status:1}
+    --- FAIL: TestVerifierExamples/extract_vowels (0.00s)
+        verifier_test.go:12: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"examples/extract_vowels.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":321,"line":10,"column":2}}}]}
+             status:1}
+    --- FAIL: TestVerifierExamples/status_effect (0.00s)
+        verifier_test.go:12: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"examples/status_effect.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":523,"line":13,"column":2}}}]}
+             status:1}
+    --- FAIL: TestVerifierExamples/count_letter_flow (0.00s)
+        verifier_test.go:12: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"examples/count_letter_flow.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":109,"line":3,"column":2}}}]}
+             status:1}
+    --- FAIL: TestVerifierExamples/http_division (0.00s)
+        verifier_test.go:12: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"examples/http_division.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":261,"line":8,"column":2}}}]}
+             status:1}
+--- FAIL: TestVerifierContracts (0.15s)
+    --- FAIL: TestVerifierContracts/nested-flows (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsnested-flows636065840/001/184364341.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":94,"line":1,"column":95}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/forward-handler (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsforward-handler2941647818/001/1913184738.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":51,"line":1,"column":52}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/keyword-record (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"syntax.unexpected-token","stage":"parser","message":"expected record field, got \"flow\"","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractskeyword-record3560869886/001/3711983712.lo","start":{"offset":17,"line":1,"column":18},"end":{"offset":21,"line":1,"column":22}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/nested-fallibility (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsnested-fallibility2592816037/001/1448550858.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":74,"line":1,"column":75}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/fallible-elements (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsfallible-elements1941420015/001/3126098449.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":61,"line":1,"column":62}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/fallible-return (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsfallible-return1940913539/001/2399769170.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":92,"line":1,"column":93}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/error-data (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractserror-data2744312383/001/2774435405.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":90,"line":1,"column":91}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/fallible-argument (0.01s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsfallible-argument680949551/001/4005029686.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":52,"line":1,"column":53}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/top-propagation (0.00s)
+        verifier_test.go:65: want check.unhandled-failure, got {Code:check.unsupported Stage:check Message:Math.div is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6b6b8f0}
+    --- FAIL: TestVerifierContracts/record-shape (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"Record.new is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsrecord-shape3230310585/001/2649457387.lo","start":{"offset":4,"line":1,"column":5},"end":{"offset":30,"line":1,"column":31}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/unknown-record-field (0.00s)
+        verifier_test.go:65: want check.unknown-field, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6b6bd40}
+    --- FAIL: TestVerifierContracts/empty-context (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsempty-context3095822986/001/1764119549.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":55,"line":1,"column":56}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/map-get (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsmap-get2578463930/001/1788349106.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":88,"line":1,"column":89}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/range (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"Range.new is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsrange342599746/001/1582579017.lo","start":{"offset":4,"line":1,"column":5},"end":{"offset":72,"line":1,"column":73}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/range-match (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"expression is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsrange-match2171809246/001/3569853972.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":104,"line":1,"column":105}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/match-default-position (0.00s)
+        verifier_test.go:65: want check.match-default, got {Code:check.unsupported Stage:check Message:expression is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6ea4510}
+    --- FAIL: TestVerifierContracts/match-fallibility (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsmatch-fallibility2391857870/001/1450762228.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":71,"line":1,"column":72}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/match-head-failure (0.00s)
+        verifier_test.go:65: want check.fallible-case, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6ea4960}
+    --- FAIL: TestVerifierContracts/fold-context (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsfold-context3250358793/001/516115900.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":80,"line":1,"column":81}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/unfold (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsunfold3084040739/001/995280621.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":113,"line":1,"column":114}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/flat-map (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsflat-map669746096/001/2139285446.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":50,"line":1,"column":51}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/fallible-list (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"statement is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsfallible-list3622360519/001/3172846880.lo","start":{"offset":0,"line":1,"column":1},"end":{"offset":48,"line":1,"column":49}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/wrong-predicate (0.00s)
+        verifier_test.go:65: want check.type-mismatch, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6c1cf60}
+    --- FAIL: TestVerifierContracts/bad-scalar (0.00s)
+        verifier_test.go:65: want check.invalid-literal, got {Code:check.unsupported Stage:check Message:Scalar.new is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6c1d1a0}
+    --- FAIL: TestVerifierContracts/dynamic-scalar (0.00s)
+        verifier_test.go:65: want check.invalid-literal, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6bacae0}
+    --- FAIL: TestVerifierContracts/float-infinite (0.00s)
+        verifier_test.go:65: want check.invalid-literal, got {Code:check.unsupported Stage:check Message:Float.new is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6bacd20}
+    --- FAIL: TestVerifierContracts/bytes (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"Bytes.new is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsbytes2119303920/001/2467117082.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":23,"line":1,"column":24}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/scalar-alias (0.00s)
+        verifier_test.go:68: {stdout: stderr:{"diagnostics":[{"code":"check.unsupported","stage":"check","message":"Scalar.new is outside the implemented verifier subset","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierContractsscalar-alias1876785578/001/3964473632.lo","start":{"offset":17,"line":1,"column":17},"end":{"offset":30,"line":1,"column":30}}}]}
+             status:1}
+    --- FAIL: TestVerifierContracts/mixed-arguments (0.00s)
+        verifier_test.go:65: want check.argument-order, got {Code:check.unsupported Stage:check Message:Math.add is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6bad380}
+    --- FAIL: TestVerifierContracts/duplicate-record (0.00s)
+        verifier_test.go:65: want check.duplicate-argument, got {Code:check.unsupported Stage:check Message:Record.new is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6bad5c0}
+    --- FAIL: TestVerifierContracts/nested-invalid-type (0.00s)
+        verifier_test.go:65: want check.type-constraint, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6bad800}
+    --- FAIL: TestVerifierContracts/top-capture (0.00s)
+        verifier_test.go:65: want resolve.capture, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6bada40}
+    --- FAIL: TestVerifierContracts/flow-alias (0.00s)
+        verifier_test.go:65: want check.flow-reference, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6badc80}
+    --- FAIL: TestVerifierContracts/indirect-cycle (0.00s)
+        verifier_test.go:65: want check.cycle, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6badec0}
+    --- FAIL: TestVerifierContracts/handler-cycle (0.00s)
+        verifier_test.go:65: want check.cycle, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6e5a210}
+    --- FAIL: TestVerifierContracts/plain-commit (0.00s)
+        verifier_test.go:65: want check.unhandled-failure, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6e5a450}
+    --- FAIL: TestVerifierContracts/indirect-total-effect (0.00s)
+        verifier_test.go:65: want check.effectful-total, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6e5a690}
+    --- FAIL: TestVerifierContracts/invalid-unused (0.00s)
+        verifier_test.go:65: want check.type-mismatch, got {Code:check.unsupported Stage:check Message:statement is outside the implemented verifier subset Expected: Actual: Span:0x6cb0a6e5a8d0}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.508s
+FAIL
+make: *** [test-integration] Error 1
+Exit status: 2
