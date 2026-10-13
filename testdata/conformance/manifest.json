@@ -1,0 +1,552 @@
+[
+  {
+    "id": "example-1",
+    "rule": "19.1",
+    "file": "../../examples/dynamic_filter.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "example-2",
+    "rule": "19.2",
+    "file": "../../examples/extract_vowels.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "example-3",
+    "rule": "19.3",
+    "file": "../../examples/status_effect.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "example-4",
+    "rule": "19.4",
+    "file": "../../examples/count_letter_flow.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "example-5",
+    "rule": "19.5",
+    "file": "../../examples/http_division.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "example-6",
+    "rule": "19.6",
+    "file": "../../examples/list_sum.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "empty-program",
+    "rule": "17",
+    "file": "empty-program.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "comments",
+    "rule": "17.1",
+    "file": "comments.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "multiline-pipe",
+    "rule": "17.1",
+    "file": "multiline-pipe.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "literals",
+    "rule": "17.1",
+    "file": "literals.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "nested-types",
+    "rule": "17",
+    "file": "nested-types.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "predicate-match",
+    "rule": "17",
+    "file": "predicate-match.lo",
+    "command": "parse",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "bad-string",
+    "rule": "17.1",
+    "file": "bad-string.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-string"
+  },
+  {
+    "id": "bad-escape",
+    "rule": "17.1",
+    "file": "bad-escape.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-escape"
+  },
+  {
+    "id": "surrogate",
+    "rule": "17.1",
+    "file": "surrogate.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-escape"
+  },
+  {
+    "id": "leading-zero",
+    "rule": "17.1",
+    "file": "leading-zero.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-number"
+  },
+  {
+    "id": "bad-exponent",
+    "rule": "17.1",
+    "file": "bad-exponent.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-number"
+  },
+  {
+    "id": "numeric-suffix",
+    "rule": "17.1",
+    "file": "numeric-suffix.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-number"
+  },
+  {
+    "id": "bad-character",
+    "rule": "17.1",
+    "file": "bad-character.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-character"
+  },
+  {
+    "id": "lone-cr",
+    "rule": "17.1",
+    "file": "lone-cr.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-character"
+  },
+  {
+    "id": "bom",
+    "rule": "17.1",
+    "file": "bom.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.invalid-character"
+  },
+  {
+    "id": "missing-return",
+    "rule": "10.2",
+    "file": "missing-return.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.missing-return"
+  },
+  {
+    "id": "early-flow-return",
+    "rule": "10.2",
+    "file": "early-flow-return.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.return-position"
+  },
+  {
+    "id": "early-top-return",
+    "rule": "5.4",
+    "file": "early-top-return.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.return-position"
+  },
+  {
+    "id": "missing-separator",
+    "rule": "17",
+    "file": "missing-separator.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.expected-separator"
+  },
+  {
+    "id": "pipe-without-call",
+    "rule": "17",
+    "file": "pipe-without-call.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.unexpected-token"
+  },
+  {
+    "id": "fallible-self-handler",
+    "rule": "17",
+    "file": "fallible-self-handler.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.fallible-handler"
+  },
+  {
+    "id": "double-fallible",
+    "rule": "17",
+    "file": "double-fallible.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.unexpected-token"
+  },
+  {
+    "id": "empty-generic",
+    "rule": "17",
+    "file": "empty-generic.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.unexpected-token"
+  },
+  {
+    "id": "record-missing-colon",
+    "rule": "17",
+    "file": "record-missing-colon.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.unexpected-token"
+  },
+  {
+    "id": "semicolon-in-call",
+    "rule": "17.1",
+    "file": "semicolon-in-call.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.unexpected-token"
+  },
+  {
+    "id": "literal-underscore",
+    "rule": "17.1",
+    "file": "literal-underscore.lo",
+    "command": "parse",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "syntax.unexpected-token"
+  },
+  {
+    "id": "check-list-sum",
+    "rule": "8.4",
+    "file": "check-list-sum.lo",
+    "command": "check",
+    "exit": 0,
+    "stage": 2
+  },
+  {
+    "id": "check-wrong-list",
+    "rule": "8.4",
+    "file": "check-wrong-list.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "unknown-call",
+    "rule": "15.1",
+    "file": "unknown-call.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "resolve.unknown-name"
+  },
+  {
+    "id": "unknown-reference",
+    "rule": "15.1",
+    "file": "unknown-reference.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "resolve.unknown-name"
+  },
+  {
+    "id": "duplicate-binding",
+    "rule": "15.1",
+    "file": "duplicate-binding.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "resolve.duplicate-name"
+  },
+  {
+    "id": "shadow-builtin",
+    "rule": "15.1",
+    "file": "shadow-builtin.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "resolve.predeclared-name"
+  },
+  {
+    "id": "null-is-not-name",
+    "rule": "6.1",
+    "file": "null-is-not-name.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "resolve.unknown-name"
+  },
+  {
+    "id": "argument-count",
+    "rule": "7.2",
+    "file": "argument-count.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "check.argument-count"
+  },
+  {
+    "id": "duplicate-argument",
+    "rule": "17",
+    "file": "duplicate-argument.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "check.duplicate-argument"
+  },
+  {
+    "id": "unknown-argument",
+    "rule": "17",
+    "file": "unknown-argument.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "check.unknown-argument"
+  },
+  {
+    "id": "mixed-list",
+    "rule": "7.2",
+    "file": "mixed-list.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 2,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "flow-definition",
+    "rule": "10.2",
+    "file": "flow-definition.lo",
+    "command": "check",
+    "exit": 0,
+    "stage": 3
+  },
+  {
+    "id": "duplicate-parameter",
+    "rule": "10.2",
+    "file": "duplicate-parameter.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "resolve.duplicate-name"
+  },
+  {
+    "id": "fallible-total",
+    "rule": "10.2",
+    "file": "fallible-total.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.unhandled-failure"
+  },
+  {
+    "id": "propagation",
+    "rule": "10.3",
+    "file": "propagation.lo",
+    "command": "check",
+    "exit": 0,
+    "stage": 3
+  },
+  {
+    "id": "capture",
+    "rule": "10.2",
+    "file": "capture.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "resolve.capture"
+  },
+  {
+    "id": "recursion",
+    "rule": "3",
+    "file": "recursion.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.cycle"
+  },
+  {
+    "id": "missing-default",
+    "rule": "11",
+    "file": "missing-default.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.match-default"
+  },
+  {
+    "id": "wrong-branch",
+    "rule": "11",
+    "file": "wrong-branch.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "projection",
+    "rule": "9.3",
+    "file": "projection.lo",
+    "command": "check",
+    "exit": 0,
+    "stage": 3
+  },
+  {
+    "id": "missing-field",
+    "rule": "15.1",
+    "file": "missing-field.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.unknown-field"
+  },
+  {
+    "id": "missing-handler",
+    "rule": "9.2",
+    "file": "missing-handler.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.argument-count"
+  },
+  {
+    "id": "null-argument",
+    "rule": "6.1",
+    "file": "null-argument.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "wrong-record",
+    "rule": "6.3",
+    "file": "wrong-record.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "map-entry",
+    "rule": "7.2",
+    "file": "map-entry.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "invalid-map-key",
+    "rule": "6.3",
+    "file": "invalid-map-key.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.type-constraint"
+  },
+  {
+    "id": "map-get-total",
+    "rule": "8.6",
+    "file": "map-get-total.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.unhandled-failure"
+  },
+  {
+    "id": "wrong-callback",
+    "rule": "8.7",
+    "file": "wrong-callback.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "commit-value",
+    "rule": "15.5",
+    "file": "commit-value.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.not-committable"
+  },
+  {
+    "id": "self-handler",
+    "rule": "12.3",
+    "file": "self-handler.lo",
+    "command": "check",
+    "exit": 0,
+    "stage": 3
+  },
+  {
+    "id": "transitive-effect",
+    "rule": "10.2",
+    "file": "transitive-effect.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.effectful-callback"
+  }
+]

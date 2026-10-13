@@ -1,0 +1,3 @@
+numbers = List.new(Int.new(1), Int.new(2), Int.new(3), Int.new(4))
+total = numbers |> Math.sum()
+return total

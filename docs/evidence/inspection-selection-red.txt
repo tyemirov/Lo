@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestInspectionRecordTargetSelection -count=1
+--- FAIL: TestInspectionRecordTargetSelection (0.14s)
+    inspect_test.go:465: uncommitted record field became an activation: [{ID:p1 Operation:File.append Context:c1 Entry:program Node:n14 Target:{Kind:known Type:File.Path Node:n2 Value:active Expression: Dependencies:[n1 n2] Span:{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestInspectionRecordTargetSelection1602903832/001/4068883444.lo","start":{"offset":40,"line":1,"column":41},"end":{"offset":63,"line":1,"column":64}}} Conditions:[] Handler: OnError:} {ID:p2 Operation:File.write Context:c1 Entry:program Node:n14 Target:{Kind:known Type:File.Path Node:n6 Value:inactive Expression: Dependencies:[n5 n6] Span:{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestInspectionRecordTargetSelection1602903832/001/4068883444.lo","start":{"offset":92,"line":1,"column":93},"end":{"offset":117,"line":1,"column":118}}} Conditions:[] Handler: OnError:}]
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.517s
+FAIL
+make: *** [test-integration] Error 1

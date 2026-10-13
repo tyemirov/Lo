@@ -1,0 +1,2 @@
+numbers = List.new(String.new("one"))
+return numbers |> Math.sum()

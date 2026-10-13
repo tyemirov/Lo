@@ -1,0 +1,1 @@
+return Map.new(Record.new(name: "a", value: 1))

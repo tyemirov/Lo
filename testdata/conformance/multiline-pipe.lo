@@ -1,0 +1,6 @@
+value = Int.new(1)
+// continuation
+
+ |>
+ Int.to_string()
+return value

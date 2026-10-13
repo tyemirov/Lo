@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestEvaluatorBoundaryHostFailures -count=1
+--- FAIL: TestEvaluatorBoundaryHostFailures (0.00s)
+    eval_test.go:112: host failure entered a Lo handler: <nil>
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.338s
+FAIL
+make: *** [test-integration] Error 1

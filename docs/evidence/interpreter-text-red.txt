@@ -1,0 +1,8 @@
+go test ./tests/integration -run TestRunRecoverableErrors -count=1
+--- FAIL: TestRunRecoverableErrors (0.12s)
+    run_test.go:119: text trace: {stdout: stderr:/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestRunRecoverableErrors2838075497/010/3385871912.lo:1:63: runtime.unhandled-error: Math.DivideByZero: division by zero
+         status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.468s
+FAIL
+make: *** [test-integration] Error 1

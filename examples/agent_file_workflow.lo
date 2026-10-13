@@ -1,0 +1,15 @@
+flow ProcessFile(input_path: File.Path, log_path: File.Path, empty_path: File.Path) -> Int! {
+    file_bytes = File.read(input_path)
+    file_text = UTF8.String.new(file_bytes)
+    target = Match.new(String.length(file_text),
+        0: File.write(empty_path, Bytes.new("empty input")),
+        _: File.append(log_path, file_text)
+    )
+    commit target
+    return String.length(file_text)
+}
+return ProcessFile(
+    File.Path.new("input.txt"),
+    File.Path.new("summary.log"),
+    File.Path.new("empty.txt")
+)

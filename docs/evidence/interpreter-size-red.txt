@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestRunExpandedValueLimit -count=1
+--- FAIL: TestRunExpandedValueLimit (0.35s)
+    run_test.go:190: expanded value limit: status 0, stdout bytes 34283293
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.722s
+FAIL
+make: *** [test-integration] Error 1

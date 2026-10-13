@@ -1,0 +1,14 @@
+flow IsVowel(target_scalar: Scalar) -> Bool {
+    return Match.new(target_scalar,
+        Scalar.new("a"): Bool.new(true),
+        Scalar.new("e"): Bool.new(true),
+        Scalar.new("i"): Bool.new(true),
+        Scalar.new("o"): Bool.new(true),
+        Scalar.new("u"): Bool.new(true),
+        _: Bool.new(false)
+    )
+}
+flow ExtractVowels(input_text: String) -> String {
+    vowel_scalars = input_text |> List.filter(IsVowel)
+    return vowel_scalars |> String.FromScalars.new()
+}

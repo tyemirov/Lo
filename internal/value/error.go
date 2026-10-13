@@ -1,0 +1,143 @@
+package value
+
+import (
+	"encoding/json"
+	"fmt"
+	"slices"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/source"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
+)
+
+type Error interface {
+	Value
+	Kind() string
+	Message() string
+	Input() Record
+	Trace() []Record
+	Operation() string
+	Span() source.Span
+}
+type loError struct {
+	base
+	kind, message string
+	input         Record
+	trace         []Record
+	operation     string
+	span          source.Span
+}
+
+func (v loError) Kind() string      { return v.kind }
+func (v loError) Message() string   { return v.message }
+func (v loError) Input() Record     { return v.input }
+func (v loError) Trace() []Record   { return slices.Clone(v.trace) }
+func (v loError) Operation() string { return v.operation }
+func (v loError) Span() source.Span { return v.span }
+func (v loError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Type    string   `json:"type"`
+		Kind    string   `json:"kind"`
+		Message string   `json:"message"`
+		Input   Record   `json:"input"`
+		Trace   []Record `json:"trace"`
+	}{v.Type().String(), v.kind, v.message, v.input, v.trace})
+}
+func NewError(kind, message string, input Record) (Error, error) {
+	if input == nil {
+		return nil, fmt.Errorf("error requires input record")
+	}
+	if _, err := NewText(types.String(), kind); err != nil {
+		return nil, err
+	}
+	if _, err := NewText(types.String(), message); err != nil {
+		return nil, err
+	}
+	return loError{base: newBase(types.Error(), addWeight(uint64(len(kind)+len(message)), input.Weight())), kind: kind, message: message, input: RecordView(input), trace: []Record{}}, nil
+}
+func At(e Error, operation string, span source.Span) Error {
+	out := e.(loError)
+	out.operation, out.span = operation, span
+	return out
+}
+func WithFrame(e Error, flow, operation string, input Record) Error {
+	f := must(NewRecord([]Field{{"flow", must(NewText(types.String(), flow))}, {"operation", must(NewText(types.String(), operation))}, {"input", RecordView(input)}}))
+	out := e.(loError)
+	out.trace = append(e.Trace(), f)
+	out.weight = addWeight(out.weight, f.Weight())
+	return out
+}
+
+type Fallible interface {
+	Value
+	Outcome() (Value, Error)
+}
+type success struct {
+	base
+	result Value
+}
+type failure struct {
+	base
+	cause Error
+}
+
+func (v success) Outcome() (Value, Error) { return v.result, nil }
+func (v failure) Outcome() (Value, Error) { return nil, v.cause }
+func (v success) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Type   string `json:"type"`
+		Status string `json:"status"`
+		Value  Value  `json:"value"`
+	}{v.Type().String(), "ok", v.result})
+}
+func (v failure) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Type   string `json:"type"`
+		Status string `json:"status"`
+		Error  Error  `json:"error"`
+	}{v.Type().String(), "error", v.cause})
+}
+func Success(t types.Fallible, v Value) (Fallible, error) {
+	if t == nil || v == nil || !types.Equal(t.Base(), v.Type()) {
+		return nil, fmt.Errorf("invalid fallible success")
+	}
+	return success{newBase(t, v.Weight()), v}, nil
+}
+func Failure(t types.Fallible, e Error) (Fallible, error) {
+	if t == nil || e == nil {
+		return nil, fmt.Errorf("invalid fallible failure")
+	}
+	return failure{newBase(t, e.Weight()), e}, nil
+}
+
+func Project(v Value, field string) Value {
+	switch x := v.(type) {
+	case Record:
+		return x.Field(field)
+	case Error:
+		switch field {
+		case "kind":
+			return must(NewText(types.String(), x.Kind()))
+		case "message":
+			return must(NewText(types.String(), x.Message()))
+		case "input":
+			return x.Input()
+		case "trace":
+			t, _ := types.FieldType(types.Error(), "trace")
+			items := []Value{}
+			for _, f := range x.Trace() {
+				items = append(items, f)
+			}
+			return must(NewList(t.(types.List), items))
+		}
+	case HTTPValue:
+		return x.Fields().Field(field)
+	}
+	panic("invalid checked projection")
+}
+
+func must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}

@@ -1,0 +1,10 @@
+go test ./tests/integration -run TestInspectionHTTPBoundaryErrors -count=1
+--- FAIL: TestInspectionHTTPBoundaryErrors (0.13s)
+    --- FAIL: TestInspectionHTTPBoundaryErrors/1 (0.01s)
+        inspect_test.go:257: want 4 boundary kinds, got map[]
+    --- FAIL: TestInspectionHTTPBoundaryErrors/2 (0.01s)
+        inspect_test.go:257: want 8 boundary kinds, got map[]
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.617s
+FAIL
+make: *** [test-integration] Error 1

@@ -1,0 +1,9 @@
+go test ./tests/integration -run TestVerifierEdgeContracts/fallible-record-view -count=1
+--- FAIL: TestVerifierEdgeContracts (0.15s)
+    --- FAIL: TestVerifierEdgeContracts/fallible-record-view (0.14s)
+        verifier_test.go:126: {stdout: stderr:{"diagnostics":[{"code":"check.type-mismatch","stage":"check","message":"expected Record!, got Record{a: Int}!","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestVerifierEdgeContractsfallible-record-view4286976924/001/2735367782.lo","start":{"offset":126,"line":1,"column":127},"end":{"offset":129,"line":1,"column":130}},"expected":"Record!","actual":"Record{a: Int}!"}]}
+             status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.501s
+FAIL
+make: *** [test-integration] Error 1

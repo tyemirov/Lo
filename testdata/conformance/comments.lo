@@ -1,0 +1,3 @@
+// line
+value = Int.new(1) // tail
+return value

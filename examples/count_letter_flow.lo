@@ -1,0 +1,15 @@
+flow IsMatchingScalar(target_scalar: Scalar) -> Bool {
+    return Scalar.eq(target_scalar, Scalar.new("a"))
+}
+flow CountFallback(error: Error) -> Int {
+    return Int.new(0)
+}
+flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
+    file_text = file_path
+        |> File.read()
+        |> UTF8.String.new()
+    match_count = file_text
+        |> List.filter(IsMatchingScalar)
+        |> List.length()
+    return match_count
+}

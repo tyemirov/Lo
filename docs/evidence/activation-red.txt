@@ -1,0 +1,18 @@
+go test ./tests/integration -run TestFileCommit -count=1
+--- FAIL: TestFileCommitOrder (0.09s)
+    activation_test.go:23: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--write-root\""}]}
+         status:2}
+--- FAIL: TestFileCommitFailure (0.01s)
+    --- FAIL: TestFileCommitFailure/File.write (0.00s)
+        activation_test.go:39: commit failure: {stdout: stderr:cli.invalid-invocation: unknown option "--write-root"
+             status:2}
+    --- FAIL: TestFileCommitFailure/File.append (0.00s)
+        activation_test.go:39: commit failure: {stdout: stderr:cli.invalid-invocation: unknown option "--write-root"
+             status:2}
+--- FAIL: TestFileCommitAuthorization (0.01s)
+    activation_test.go:55: run: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--write-root\""}]}
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.492s
+FAIL
+make: *** [test-integration] Error 1

@@ -1,0 +1,18 @@
+$ make ci
+go fmt ./...
+tests/integration/inspect_test.go
+go vet ./...
+go test ./... 
+?   	github.com/MarcoPoloResearchLab/Lo/cmd/lo	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/catalog	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/check	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/compiler	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/diagnostic	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/inspect	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/ir	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/resolve	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/source	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/syntax	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/types	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.443s
+go build -o bin/lo ./cmd/lo

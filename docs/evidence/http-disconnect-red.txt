@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestServerDisconnectedErrorResponse -count=1 -timeout=15s
+--- FAIL: TestServerDisconnectedErrorResponse (0.10s)
+    adapter_test.go:388: client disconnection became a service failure: HTTP.respond "/": write tcp 127.0.0.1:58686->127.0.0.1:58687: write: connection reset by peer
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.583s
+FAIL
+make: *** [test-integration] Error 1

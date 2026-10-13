@@ -1,0 +1,20 @@
+go test ./tests/integration -run TestServe -count=1
+--- FAIL: TestServeHTTP (0.25s)
+    serve_test.go:90: server exited before readiness: {stdout: stderr:cli.invalid-invocation: unknown option "--listen"
+         status:2}
+--- FAIL: TestServeLoErrors (0.01s)
+    serve_test.go:106: server exited before readiness: {stdout: stderr:cli.invalid-invocation: unknown option "--listen"
+         status:2}
+--- FAIL: TestServeRequestBoundary (0.01s)
+    serve_test.go:116: server exited before readiness: {stdout: stderr:cli.invalid-invocation: unknown option "--listen"
+         status:2}
+--- FAIL: TestServeResponseBoundary (0.01s)
+    serve_test.go:127: server exited before readiness: {stdout: stderr:cli.invalid-invocation: unknown option "--listen"
+         status:2}
+--- FAIL: TestServeStartupFailures (0.01s)
+    serve_test.go:137: invalid port: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown command \"serve\""}]}
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.706s
+FAIL
+make: *** [test-integration] Error 1

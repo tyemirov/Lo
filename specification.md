@@ -83,8 +83,8 @@ A flow may be:
 
 A flow may also be:
 
-* pure, if it contains no commit statements, or
-* effectful, if it commits one or more committable targets.
+* pure, if it has no direct or indirect commit activation, or
+* effectful, if it activates a target directly or through a flow call.
 
 Only pure named flows may be passed to pure data processors.
 
@@ -628,7 +628,7 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onEr
 3. A flow has exactly one return statement, and that return statement must be
    the final statement in the flow body.
 4. A flow body may contain bindings, nested flow definitions, commit statements, and a return statement.
-5. A flow with no commit statements is a pure flow.
+5. A pure flow has no direct or indirect commit activation. Section 22 specifies the transitive rule.
 6. Only pure named flows may be passed to pure data processors.
 7. Adapter boundary parameters may accept effectful flows as defined by the adapter signature.
 8. Lo does not support anonymous functions or lambdas in v0.3.
@@ -637,7 +637,7 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onEr
 11. A fallible flow (-> T!) automatically propagates unresolved fallible expressions via error bubbling.
 12. A self-handling flow (-> T onError ErrorHandler) executes like a fallible flow internally, but resolves any bubbled error through ErrorHandler before publishing its result.
 13. ErrorHandler in a self-handling flow must be a pure total named flow with signature (Error) -> T.
-14. A flow that contains commit must declare either -> T! or -> T onError ErrorHandler.
+14. An effectful flow must declare either -> T! or -> T onError ErrorHandler.
 
 10.3 Automatic Propagation in Fallible Flows
 
@@ -842,7 +842,7 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 * A plain total flow (-> T) may not contain unresolved expressions of type U!.
 * A fallible flow (-> T!) may contain unresolved expressions of type U!, which auto-propagate on failure.
 * A self-handling flow (-> T onError ErrorHandler) may contain unresolved expressions of type U!, which bubble to the flow-level handler.
-* Any flow containing commit must declare either -> T! or -> T onError ErrorHandler.
+* Any effectful flow must declare either -> T! or -> T onError ErrorHandler.
 
 15.4 Match Rules
 
@@ -915,6 +915,7 @@ Reserved lower-case keywords are:
 Built-in type, namespace, constructor, processor, and adapter names are
 predeclared. User bindings and flow names must not shadow predeclared names.
 
+```ebnf
 Program                  = Separator*, TopLevelBody?, Separator* ;
 TopLevelBody             = TopLevelStatement, (Separator+, TopLevelStatement)* ;
 TopLevelStatement        = BindingStatement | FlowDefinition | CommitStatement | ReturnStatement ;
@@ -941,13 +942,13 @@ MatchCaseList            = MatchCase, (",", MatchCase)*, ","? ;
 MatchCase                = MatchCaseHead, ":", Expression ;
 MatchCaseHead            = "_" | "when", Identifier | Expression ;
 CallExpression           = QualifiedName, "(", ArgumentList?, ")" ;
-ProjectionExpression     = Identifier, ".", Identifier, (".", Identifier)* ;
+ProjectionExpression     = Identifier, ".", MemberLabel, (".", MemberLabel)* ;
 ReferenceExpression      = Identifier ;
 ParenthesizedExpression  = "(", Expression, ")" ;
 
 ArgumentList             = Argument, (",", Argument)*, ","? ;
 Argument                 = NamedArgument | Expression ;
-NamedArgument            = Identifier, ":", Expression ;
+NamedArgument            = MemberLabel, ":", Expression ;
 
 LiteralExpression        = StringLiteral | IntegerLiteral | FloatLiteral | BooleanLiteral | NullLiteral ;
 BooleanLiteral           = "true" | "false" ;
@@ -960,10 +961,12 @@ GenericTypeExpression    = QualifiedName, "<", TypeList, ">" ;
 TypeList                 = TypeExpression, (",", TypeExpression)*, ","? ;
 RecordTypeExpression     = "Record", "{", FieldTypeList?, "}" ;
 FieldTypeList            = FieldType, (",", FieldType)*, ","? ;
-FieldType                = Identifier, ":", TypeExpression ;
+FieldType                = MemberLabel, ":", TypeExpression ;
 
-QualifiedName            = Identifier, (".", Identifier)* ;
+QualifiedName            = Identifier, (".", MemberLabel)* ;
+MemberLabel              = Identifier | "flow" | "return" | "commit" | "onError" | "when" | "true" | "false" | "null" ;
 Separator                = Newline | ";" ;
+```
 
 Disambiguation rules:
 
@@ -974,14 +977,70 @@ Disambiguation rules:
    ProjectionExpression.
 4. A single identifier not followed by "(" or "." is parsed as
    ReferenceExpression.
-5. In an argument list, Identifier ":" Expression is parsed as NamedArgument;
-   all other arguments are positional Expression values.
+5. In an argument list, parse `MemberLabel ":" Expression` as `NamedArgument`.
+   Parse all other arguments as positional expressions.
 6. In a Match.new case head, "_" is the default case and "when" Identifier is a
    predicate-flow case head. All other case heads are expressions and are
    classified by the type checker as exact-value or range case heads.
 7. A self-handling flow return signature uses NonFallibleTypeExpression on the
    left side of onError. A fallible self-handling return such as T! onError H is
    invalid in v0.3.
+
+17.1 Lexical Rules
+
+Source files contain UTF-8 text without a byte order mark.
+Identifiers use ASCII letters, ASCII digits, and underscores.
+The first character must be a letter or underscore.
+The single underscore is reserved for a match default.
+Keywords cannot serve as identifiers.
+
+Names are case-sensitive.
+Keywords can serve as member labels, as specified in section 22.1.
+
+Spaces and horizontal tabs separate tokens.
+A newline is LF or CRLF.
+A lone carriage return is invalid.
+The sequence `//` starts a comment outside a string literal.
+A comment ends before the next newline or at the end of the file.
+Block comments are not part of the grammar.
+
+Strings use double quotes.
+A string contains Unicode scalar values and the escape sequences listed below.
+Raw control characters are invalid inside a string.
+A string cannot contain a raw newline.
+
+| Escape | Value |
+| --- | --- |
+| `\"` | Double quote |
+| `\\` | Backslash |
+| `\n` | Line feed |
+| `\r` | Carriage return |
+| `\t` | Horizontal tab |
+| `\b` | Backspace |
+| `\f` | Form feed |
+| `\uXXXX` | One Unicode scalar specified by four hexadecimal digits |
+| `\UXXXXXXXX` | One Unicode scalar specified by eight hexadecimal digits |
+
+An escape must identify a Unicode scalar.
+Surrogate code points and values above `U+10FFFF` are invalid.
+No other escape sequence is valid.
+
+Integer literals use decimal digits with an optional leading minus sign.
+Zero is `0` or `-0`.
+Other integer literals start with a nonzero digit after the optional sign.
+
+A float literal adds a decimal fraction, an exponent, or both to this integer form.
+A decimal point must have digits on each side.
+An exponent starts with `e` or `E`, followed by an optional sign and at least one digit.
+Numeric separators and nondecimal numeric literals are invalid.
+The lexer retains the exact numeric text.
+
+Newlines inside argument lists, parameter lists, type argument lists, record types, and parenthesized expressions are whitespace.
+Outside these constructs, newlines separate statements.
+A newline directly before or after `|>` continues the same expression.
+Blank lines and comments can occur in such a continuation.
+A semicolon always separates statements and cannot continue an expression.
+Whitespace can occur between the components of a qualified name and before its call parenthesis.
 
 ⸻
 
@@ -1254,3 +1313,310 @@ This specification is sufficient to begin implementation of:
 * a graph IR lowerer,
 * a runtime with error bubbling and commit, and
 * initial File and HTTP adapters.
+
+22. Verifier Contract Details
+
+22.1 Names and Flow References
+
+Each block declares all its flow names before verification of its statements.
+A flow name is visible in its declaration block and nested blocks.
+A nested flow name is not visible outside its declaration block.
+Parameters and local bindings share the namespace of their flow body.
+Local bindings can reference only earlier value bindings in the same invocation.
+Flow bodies cannot capture values from another invocation or from top-level bindings.
+
+Flow references are valid only in declared callback and handler positions.
+They are not ordinary values and cannot form aliases through bindings.
+The verifier rejects cycles through calls, callbacks, and handler references.
+This rule includes references stored in adapter construction.
+Adapter construction does not execute a stored callback.
+
+Record field names and member names can use reserved keywords.
+Named argument labels can also use reserved keywords.
+These labels do not declare variables.
+
+22.2 Transitive Effects
+
+A flow is effectful when its evaluated body can activate a commit directly or through an invoked flow.
+List callbacks and match predicates participate in the same analysis.
+An unused nested definition does not make its enclosing flow effectful.
+Construction of an adapter does not activate its handlers.
+The verifier checks all flow bodies, including unused flows.
+
+Every effectful flow must have a fallible output or a self-handler.
+A pure callback must not invoke an effectful flow indirectly.
+Match selectors, case heads, and branches must not invoke effectful flows.
+A branch can construct a committable target for an outer commit.
+Boundary reads have a separate summary and do not constitute commit activation.
+The runtime must not speculate boundary reads.
+
+22.3 Fallible Values
+
+A fallible value has a success tag or a failure tag.
+The failure payload is an `Error` value.
+`Error` by itself is ordinary nominal data.
+In a context that expects `T!`, a value of type `T` becomes a tagged success.
+In that context, an `Error` becomes a tagged failure when `T` is not `Error`.
+An `Error` supplied where `Error!` is expected becomes a tagged success.
+
+Explicit expected types can retain tagged values in parameters, record fields, and collection elements.
+Thus, `List<Int!>` contains tagged elements, while `List<Int>!` has one tag for the complete list.
+An expected fallible type retains the tag instead of automatic propagation.
+Other consumers of `T!` can obtain `T` only inside a fallible or self-handling flow.
+The graph contains an explicit propagation operation for such a consumer.
+
+For `Map<K, T!>`, `Map.get` returns `T!` with one failure tag.
+A present key returns its stored fallible value.
+A missing key returns `Map.MissingKey` as a failure of the same type.
+Conversion from an exact record to bare `Record` preserves an enclosing failure tag.
+
+A fallible or self-handling flow propagates fallible binding results before it publishes the binding.
+A plain total flow rejects a fallible binding result.
+At top level, a binding retains its fallible type.
+Top-level composition cannot implicitly remove that type modifier.
+A final top-level return can publish a fallible result.
+
+Branches with types `T` and `T!` unify to `T!`.
+Other branch types must be equal after contextual construction.
+The verifier does not add optional fields or widen exact record shapes.
+A return from a fallible flow uses its declared output as the expected type.
+A return from a self-handling flow permits propagation to its declared handler.
+
+22.4 Constructor and Argument Contracts
+
+`Int.new`, `String.new`, `Float.new`, and `Bool.new` accept one value of their output type.
+`Bytes.new(value: String)` encodes its input as UTF-8 bytes.
+`Scalar.new` accepts a Scalar or a statically known String with exactly one Unicode scalar.
+The verifier rejects a String input whose length it cannot establish.
+`Float` uses finite IEEE 754 binary64 values in the reference implementation.
+The verifier rejects float literals outside that finite representation.
+
+Fixed signatures accept positional arguments, named arguments, or a positional prefix followed by named arguments.
+A positional argument cannot follow a named argument.
+Each parameter receives exactly one argument.
+Arguments evaluate in source order, including arguments supplied by a pipe.
+The pipe supplies the first positional argument.
+
+`List.new`, `Map.new`, and `String.concat` accept positional arguments only.
+`Record.new` accepts named fields only.
+Record fields must be unique.
+`List.new()` and `Map.new()` need an expected collection type.
+List callbacks use positional arguments with the flow reference last.
+
+`Record.merge` accepts two exact records.
+Its result keeps the right field when a field occurs in each input.
+The output field types come from these selected fields.
+Bare `Record` accepts an exact record of any shape, but does not expose unknown fields for projection.
+
+22.5 Match Contracts
+
+A match has exactly one default, which must be its final case.
+Exact case heads must be total and equality-comparable.
+Range heads must be total with endpoints of the selector type.
+A predicate must be a pure total flow with one parameter of the selector type.
+The verifier checks every case, including cases that cannot execute for a constant selector.
+The runtime evaluates heads in source order until the first match.
+It evaluates only the selected branch.
+
+⸻
+
+23. Runtime Contracts
+
+23.1 Numeric and Collection Results
+
+Integer operations use exact mathematical integers within the host execution budget.
+Division removes the fractional part toward zero.
+The following relation defines the remainder for a nonzero divisor:
+
+```text
+left = Math.div(left, right) * right + Math.mod(left, right)
+```
+
+A nonzero remainder has the sign of the left operand.
+Division by zero produces `Math.DivideByZero`.
+Remainder calculation with a zero divisor produces `Math.ModuloByZero`.
+
+The sum of an empty integer list is zero.
+The product of an empty integer list is one.
+The minimum and maximum of an empty integer list produce `Math.EmptyList`.
+
+Map construction evaluates all entries in source order.
+For a repeated key, the last entry supplies the value.
+The key retains its first position in serialized map output.
+A lookup returns the stored fallible tag when the map value type is fallible.
+It does not add another fallible tag.
+
+List processors invoke callbacks in element order.
+A failed callback stops the processor before its next invocation.
+An empty fold returns its initial state.
+Unfold uses the previous callback result as its next state.
+A zero or negative unfold count produces an empty list without callback invocation.
+A count above the host limit produces a host failure before callback invocation.
+
+23.2 Comparison and Ranges
+
+Integer comparison uses mathematical order.
+Scalar comparison uses Unicode scalar order.
+String comparison uses scalar order at the first unequal position.
+A string precedes a longer string that has the complete shorter string as its prefix.
+
+A range contains values between its endpoints under their type's order.
+Each endpoint participates only when its corresponding inclusion flag is true.
+A start after the end produces an empty range.
+Equal endpoints produce an empty range unless both inclusion flags are true.
+An open range between consecutive values is also empty.
+
+Consecutive integers differ by one.
+Consecutive scalars exclude the Unicode surrogate interval.
+The immediate successor of a string is that string with one final U+0000 scalar.
+String case conversion uses the Unicode tables of the pinned Go toolchain.
+It applies the simple upper or lower mapping to each scalar.
+
+23.3 Evaluation Order
+
+The interpreter evaluates statements in source order.
+It evaluates every binding in an entered body, including bindings without later references.
+A binding reference uses the stored value without another evaluation of its initializer.
+Each flow invocation has its own parameter and binding values.
+
+Call arguments evaluate in source order, independent of their named parameter positions.
+A pipe evaluates its left expression before its explicit arguments.
+Match evaluation follows section 22.5.
+The interpreter does not evaluate unselected branches or later case heads after a match.
+
+Every evaluated `File.read` performs a new boundary read.
+Separate reads of one path can return different contents.
+The interpreter does not combine reads or move them across branch, invocation, or handler boundaries.
+
+An unresolved failure stops the current evaluation at its propagation operation.
+Later arguments and statements in that evaluation do not execute.
+The first failure reached in evaluation order takes precedence.
+A handler begins only after propagation reaches its boundary.
+
+Section 22.3 controls stored fallible values.
+A top-level binding can retain a failure as data while later statements execute.
+A fallible or self-handling flow propagates an unresolved binding failure even when later statements do not reference that binding.
+A top-level return with an outer failure tag produces an unhandled Lo error.
+Failure tags inside returned containers remain data.
+
+23.4 Runtime Error Context
+
+An operation error retains its required kind and immediate input record.
+Fixed operation inputs use the canonical parameter names from the built-in catalog.
+An explicit `Error.new` keeps its supplied input record and starts with an empty trace.
+Stored errors retain their trace until propagation adds a frame.
+
+A flow boundary adds one frame before invocation of its self-handler.
+A fallible flow also adds one frame before publication of a failed result.
+The frame contains the flow name, the recorded failure operation, and the flow's named input values.
+A caller records the failed callee as its operation.
+The input record can be empty for a flow without parameters.
+
+A failed list callback adds its flow frame before the list processor frame.
+The processor frame contains the enclosing flow name, processor name, and zero-based index.
+Its input also contains `element` when the processor has an input list.
+A fold or unfold frame also contains `state`.
+The processor frame precedes the enclosing flow boundary frame.
+At top level, the processor frame uses an empty flow name.
+
+An unavailable operation name uses an empty string.
+Unavailable input context uses an empty record.
+Trace updates construct a new error value and do not change stored errors.
+Authorization denial, cancellation, and execution limits are host failures.
+Lo handlers cannot catch these host failures.
+
+23.5 Host Execution Contract
+
+The host supplies adapter authorization and execution limits.
+A successful check or inspection does not grant authorization.
+Each boundary operation uses its actual runtime target for authorization.
+A calculated path receives no authorization from its source expression alone.
+
+The reference CLI denies file reads unless a supplied directory root contains the resolved path.
+Relative program paths resolve from the invocation directory.
+Path normalization removes `.` and resolves `..` before root selection.
+The most specific matching root supplies the file operation.
+Root access rejects symlinks that escape that root.
+It also rejects absolute symlinks.
+An authorized path that cannot supply bytes produces `File.ReadFailed`.
+UTF-8 decoding rejects invalid bytes with `UTF8.InvalidBytes`.
+
+The compiler design specifies CLI authorization inputs, resource limits, and result serialization.
+Host limits do not change the declared fallibility of Lo operations.
+An exceeded limit aborts execution with a host diagnostic.
+
+23.6 File and Server Activation
+
+File effect construction does not access a file.
+An evaluated commit activates its target once.
+Two evaluated commits of the same target cause two activations.
+Commits execute in source order within their invocation.
+A failed commit stops the current body before later statements execute.
+An applicable self-handler can return a result to the caller, as specified in section 23.4.
+
+`File.append` appends the UTF-8 bytes of its text input.
+`File.write` replaces the file contents with its byte input.
+Both operations create the target file if it does not exist.
+They do not create missing parent directories.
+A failed activation uses the error kind specified in section 18.3.
+Its input record contains `file_path` and `file_content`.
+
+A later failure does not reverse a completed file effect.
+A failed write can leave partial contents.
+Commit sequences have no transaction and no automatic retry.
+Each HTTP request has its own invocation order.
+The runtime does not specify an order across different requests.
+
+Server construction stores its port and handler references without a listener.
+An evaluated server commit creates a new listener.
+Valid ports are integers from `0` through `65535`.
+Port `0` lets the operating system select an available port.
+An invalid port or a failed authorized listener operation produces `HTTP.ServerStartFailed`.
+Its input record contains `port`.
+The host capability contract controls the listen address and authorized ports.
+
+23.7 HTTP Request and Response Processing
+
+Each HTTP request starts a new invocation of the configured handler.
+The request fields have the types in section 9.3.
+The adapter validates request text as UTF-8 before handler entry.
+The path contains the decoded URL path without the query.
+The body contains bytes without implicit text decoding.
+
+The header map starts with the `Host` entry.
+Other entries use canonical HTTP header names in sorted order.
+Repeated header values use `, ` as their separator.
+Repeated `Cookie` values use `; ` as their separator.
+
+| Boundary condition | Error kind |
+| --- | --- |
+| Invalid UTF-8 in request text | `HTTP.InvalidRequest` |
+| Request body exceeds the host limit | `HTTP.RequestTooLarge` |
+| Request body cannot be read completely | `HTTP.RequestReadFailed` |
+| Invalid response status or body | `HTTP.InvalidResponse` |
+
+Request errors contain available method and path bytes in `Error.input`.
+Response errors contain the response fields in `Error.input`.
+An uncaught Lo error from the request handler keeps its original kind and trace.
+Each of these errors enters the mandatory adapter `onError` handler.
+
+Before `onError` entry, the adapter adds one trace frame with an empty flow name and an input record that contains `port`.
+Request errors and propagated handler errors use operation `HTTP.request`.
+Response validation errors use operation `HTTP.respond`.
+An error from a self-handling flow reaches the adapter only if that flow does not return a successful response.
+
+Response status codes are integers from `200` through `599`.
+Responses with status codes `204`, `205`, and `304` must have an empty body.
+The response to `HEAD` omits body bytes on the connection.
+Section 9.2 specifies the empty headers in constructed responses.
+The HTTP transport can add protocol headers.
+
+An invalid response from `onError` is a fatal host failure.
+The adapter does not invoke `onError` again or construct a substitute response.
+Host authorization failures and interpreter limits bypass Lo handlers.
+The request handler and `onError` share one execution budget.
+
+The host HTTP parser can reject malformed protocol input before a Lo request exists.
+Such protocol rejections do not enter Lo handlers.
+An unusable connection prevents delivery of an error response.
+The compiler design specifies request limits, cancellation, startup, and shutdown for the reference CLI.

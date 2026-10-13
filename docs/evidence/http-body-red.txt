@@ -1,0 +1,7 @@
+go test ./tests/integration -run "TestServeTruncatedRequest|TestServeGracefulActiveRequest" -count=1 -timeout=20s
+--- FAIL: TestServeTruncatedRequest (0.13s)
+    serve_test.go:209: unexpected EOF
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.614s
+FAIL
+make: *** [test-integration] Error 1

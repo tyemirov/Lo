@@ -1,0 +1,19 @@
+flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
+    success_log = File.Path.new(String.new("/logs/success.log"))
+    error_log = File.Path.new(String.new("/logs/error.log"))
+    target_effect = Match.new(status_code,
+        Int.new(200): File.append(success_log, request_data),
+        _: File.append(error_log, request_data)
+    )
+    commit target_effect
+    return HTTP.Response.Text.new(
+        status: status_code,
+        body: String.new("Status processed")
+    )
+}
+flow StatusError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(
+        status: Int.new(500),
+        body: String.new("status handling failed")
+    )
+}

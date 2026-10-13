@@ -1,0 +1,8 @@
+$ make test-integration TEST_ARGS=-count=1
+go test ./tests/integration -count=1
+build public CLI: exit status 1
+stat /Users/tyemirov/Development/Research/Lo/cmd/lo: directory not found
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.082s
+FAIL
+make: *** [test-integration] Error 1
+Exit status: 2

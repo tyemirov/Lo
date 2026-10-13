@@ -1,0 +1,3 @@
+flow W() -> Int! { effect = File.append(File.Path.new("/tmp/log"), "x"); commit effect; return 1 }
+flow Wrap(x: Int) -> Int! { return W() }
+return List.map(List.new(1), Wrap)
