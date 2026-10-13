@@ -12,9 +12,42 @@ Lo is not a replacement for Go, Python, or shell. It is an execution contract be
 
 Lo is currently a **v0.3 language proposal**.
 
-The specification exists before the reference implementation. The next milestone is a verifier capable of parsing and type-checking the conformance examples, followed by a minimal interpreter for file and HTTP workflows.
+The reference implementation has a Go frontend, verifier, checked execution graph, and static inspector.
+The parser and verifier accept all six specification examples.
+`lo check` validates built-in signatures, flows, fallibility, and transitive effects.
+`lo inspect` reports effects, targets, error kinds, and capability requirements without program execution.
+`lo run` evaluates checked programs with immutable values, error traces, authorized file reads, and ordered file commits.
+`lo serve` activates authorized HTTP servers with request handlers, error handlers, and orderly shutdown.
+The six implementation stages passed their integration tests.
+The [implementation audit](docs/implementation-audit.md) records the completed requirements and validation evidence.
+
+The accepted [compiler design and implementation plan](docs/compiler-design.md) selects Go and a typed execution graph.
+It specifies compiler stages, package boundaries, diagnostics, inspection, acceptance criteria, and open language decisions.
 
 This repository is public early so the design can be evaluated as an AI-agent execution language. It is not production-ready.
+
+## Build and Validate
+
+The Makefile selects Go 1.27.1.
+The qualified platforms are macOS on arm64 and Linux on arm64.
+
+```bash
+make build
+./bin/lo parse examples/http_division.lo --format json
+./bin/lo check examples/list_sum.lo
+./bin/lo inspect examples/agent_file_workflow.lo --format json
+./bin/lo run examples/list_sum.lo
+./bin/lo run examples/count_letter.lo --read-root examples
+./bin/lo serve examples/http_echo.lo --listen 0 --format json
+make test-conformance
+make ci
+```
+
+The conformance suite runs all 63 static fixtures.
+The integration suite also tests built-in signatures, runtime values, evaluation order, error traces, and adapter authorization.
+The server command runs until a stop signal.
+`Ctrl+C` starts orderly shutdown.
+The [adapter examples](docs/compiler-design.md#executable-adapter-examples) specify file grants, listen grants, and expected results.
 
 ## Core Idea
 
@@ -239,16 +272,16 @@ Read this uploaded CSV, validate rows, transform accepted records, write accepte
 
 The agent should not execute arbitrary Python. It should generate a Lo program that can be checked, inspected, approved, and executed.
 
-## Planned CLI
+## CLI
 
-The reference implementation is expected to expose commands like:
+The reference implementation has these commands:
 
 ```bash
 lo parse examples/list_sum.lo
 lo check examples/list_sum.lo
 lo inspect examples/agent_file_workflow.lo
 lo run examples/list_sum.lo
-lo serve examples/http_division.lo
+lo serve examples/http_division.lo --listen 8080
 ```
 
 The most important command is:
@@ -257,30 +290,9 @@ The most important command is:
 lo inspect program.lo
 ```
 
-Expected inspection output should include:
-
-```text
-Pure flows:
-- ValidateRow
-- RenderCsv
-
-Fallible operations:
-- File.read -> File.ReadFailed
-- UTF8.String.new -> UTF8.InvalidBytes
-- Map.get -> Map.MissingKey
-
-Commit targets:
-- File.write /output/accepted.csv
-- File.write /output/rejected.csv
-
-Adapter boundaries:
-- HTTP.Server onError: HttpError
-
-Required permissions:
-- read: /input/users.csv
-- write: /output/accepted.csv
-- write: /output/rejected.csv
-```
+The report includes flows, boundary reads, constructed targets, commit sites, error kinds, and capability requirements.
+Each resource description identifies its source and invocation context.
+The [inspection contract](docs/compiler-design.md#inspection-contract) defines the text and JSON formats.
 
 ## Repository Layout
 
@@ -299,6 +311,7 @@ lo/
     http_division.lo
     agent_file_workflow.lo
   docs/
+    compiler-design.md
     agent-language-positioning.md
     verifier-model.md
   LICENSE
@@ -494,12 +507,12 @@ Make AI-generated action plans typed, inspectable, and executable by a trusted r
 
 ## Contributing
 
-This project is currently in proposal and verifier-design stage.
+This project has a reference compiler and runtime for the v0.3 proposal.
 
 Useful contributions include:
 
-- parser implementation
-- type checker implementation
+- compiler and runtime improvements
+- type checker validation
 - conformance tests
 - example Lo programs
 - verifier report design
