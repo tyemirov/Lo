@@ -1,0 +1,2 @@
+flow F(x: Record{a: Int}) -> Int { return x.a }
+return F(Record.new(a: 1, b: 2))

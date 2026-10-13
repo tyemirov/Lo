@@ -1,0 +1,3 @@
+flow H(error: Error) -> Int { return 0 }
+flow F() -> Int onError H { return Math.div(1, 0) }
+return F()

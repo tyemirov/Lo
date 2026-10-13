@@ -1,0 +1,1 @@
+flow F() -> Int { return 1; a = 2 }

@@ -1,0 +1,2 @@
+numbers = List.new(Int.new(1), Int.new(2))
+return numbers |> Math.sum()

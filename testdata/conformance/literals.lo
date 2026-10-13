@@ -1,0 +1,5 @@
+a = "héllo\n\u0041\U0001F600"
+b = -42
+c = 1.25e-2
+d = true
+e = null

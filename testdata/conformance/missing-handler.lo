@@ -1,0 +1,2 @@
+flow F(x: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(status: 200, body: "ok") }
+server = HTTP.Server.new(port: 8080, handler: F)

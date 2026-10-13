@@ -1,0 +1,1 @@
+flow F(x: Map<String, Int>) -> Int { return Map.get(x, "a") }

@@ -1,0 +1,1 @@
+return Int.new(other: 1)

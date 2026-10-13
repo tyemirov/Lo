@@ -1,0 +1,2 @@
+flow F(x: String) -> Bool { return true }
+return List.filter(List.new(1), F)

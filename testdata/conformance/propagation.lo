@@ -1,0 +1,1 @@
+flow F(path: File.Path) -> Bytes! { value = File.read(path); return value }
