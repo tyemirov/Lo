@@ -1,0 +1,120 @@
+$ make test-integration TEST_ARGS='-run TestFloat -count=1'
+go test ./tests/integration -run TestFloat -count=1
+--- FAIL: TestFloatArithmetic (0.36s)
+    --- FAIL: TestFloatArithmetic/add (0.18s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.add","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticadd3719415616/001/3771347624.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":40,"line":1,"column":41}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/sub (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.sub","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticsub3814053824/001/1596590998.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":27,"line":1,"column":28}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/mul (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.mul","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticmul1004115900/001/3523357632.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":27,"line":1,"column":28}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/div (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.div","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticdiv1438753845/001/4024137317.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":26,"line":1,"column":27}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/sqrt (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.sqrt","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticsqrt2109778411/001/1007755924.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":23,"line":1,"column":24}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/sqrt-rounded (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.sqrt","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticsqrt-rounded1336411277/001/65063840.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":22,"line":1,"column":23}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/eq (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.eq","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticeq437409235/001/3001360079.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":26,"line":1,"column":27}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/lt (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.lt","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticlt495811560/001/1222114505.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":25,"line":1,"column":26}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/lte (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.lte","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticlte2630464973/001/108112850.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":26,"line":1,"column":27}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/gt (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.gt","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticgt2312830643/001/3436203866.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":25,"line":1,"column":26}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/gte (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.gte","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticgte1134840166/001/1955983771.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":26,"line":1,"column":27}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/integer-conversion (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Int.to_float","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticinteger-conversion3983162827/001/555782547.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":23,"line":1,"column":24}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/integer-tie-even-down (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Int.to_float","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticinteger-tie-even-down940652519/001/2445382573.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":37,"line":1,"column":38}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/integer-tie-even-up (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Int.to_float","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticinteger-tie-even-up3251839515/001/694416855.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":37,"line":1,"column":38}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/truncate (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.to_int","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmetictruncate1463521229/001/3104164087.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":25,"line":1,"column":26}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/large-integer (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.to_int","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticlarge-integer1914336117/001/4099749720.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":25,"line":1,"column":26}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/string (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.to_string","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticstring3940453130/001/3557005061.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":28,"line":1,"column":29}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/string-signed-zero (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.to_string","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticstring-signed-zero45992200/001/3224530873.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":28,"line":1,"column":29}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/tie-even-down (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.add","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmetictie-even-down1785105363/001/88106784.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":45,"line":1,"column":46}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/tie-even-up (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.add","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmetictie-even-up1034384927/001/2453020327.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":60,"line":1,"column":61}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/subnormal (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.mul","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticsubnormal3316682505/001/2206040193.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":46,"line":1,"column":47}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/smallest-subnormal (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.add","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticsmallest-subnormal471824211/001/2884755555.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":29,"line":1,"column":30}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/underflow-zero (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.div","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticunderflow-zero2907896047/001/3332101884.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":29,"line":1,"column":30}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/underflow-negative-zero (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.mul","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticunderflow-negative-zero667658089/001/820318451.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":30,"line":1,"column":31}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/negative-zero-sqrt (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.sqrt","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticnegative-zero-sqrt3407546808/001/1142264461.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":23,"line":1,"column":24}}}]}
+             status:1}
+    --- FAIL: TestFloatArithmetic/maximum-finite (0.01s)
+        float_test.go:56: check: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.add","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmeticmaximum-finite3813380844/001/3294730753.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":45,"line":1,"column":46}}}]}
+             status:1}
+    float_test.go:65: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.mul","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatArithmetic3248871817/001/539080763.lo","start":{"offset":40,"line":2,"column":13},"end":{"offset":89,"line":2,"column":62}}}]}
+         status:1}
+--- FAIL: TestFloatFailures (0.07s)
+    --- FAIL: TestFloatFailures/Float.add(1e308,_1e308) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.add","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.add(1e308,_1e308)449297918/001/3010778457.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":30,"line":1,"column":31}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Float.sub(-1e308,_1e308) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.sub","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.sub(-1e308,_1e308)1742059510/001/1522396728.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":31,"line":1,"column":32}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Float.mul(1e308,_2.0) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.mul","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.mul(1e308,_2.0)1206050524/001/3292479138.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":28,"line":1,"column":29}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Float.div(1e308,_0.5) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.div","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.div(1e308,_0.5)2232704910/001/422052346.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":28,"line":1,"column":29}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Float.div(1.0,_0.0) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.div","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.div(1.0,_0.0)2063182939/001/1159899976.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":26,"line":1,"column":27}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Float.div(1.0,_-0.0) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.div","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.div(1.0,_-0.0)2018061585/001/1435244664.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":27,"line":1,"column":28}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Float.div(0.0,_0.0) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.div","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.div(0.0,_0.0)2465363579/001/3361908289.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":26,"line":1,"column":27}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Float.sqrt(-1.0) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.sqrt","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresFloat.sqrt(-1.0)3399628439/001/2533204757.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":23,"line":1,"column":24}}}]}
+             status:1}
+    --- FAIL: TestFloatFailures/Int.to_float(179769313486231590772930519078902473361797697894230657273430081157732675805500963132708477322407536021120113879871393357658789768814416622492847430639474124377767893424865485276302219601246094119453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137216) (0.01s)
+        float_test.go:98: numeric failure: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Int.to_float","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailuresInt.to_float(179769313486231590772930519078902387105974/001/2886120394.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":330,"line":1,"column":331}}}]}
+             status:1}
+    float_test.go:102: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.sqrt","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatFailures1175491795/001/1016518797.lo","start":{"offset":93,"line":2,"column":41},"end":{"offset":106,"line":2,"column":54}}}]}
+         status:1}
+--- FAIL: TestFloatTypeAndInspectionContracts (0.01s)
+    float_test.go:123: type rejection: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Float.add","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestFloatTypeAndInspectionContracts3228148153/001/4176817323.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":24,"line":1,"column":25}}}]}
+         status:1}, want check.type-mismatch
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.967s
+FAIL
+make: *** [test-integration] Error 1

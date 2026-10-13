@@ -1,0 +1,54 @@
+F002-F004 stack completion: October 13, 2026
+Platform: darwin/arm64
+Toolchain: go1.27.1
+Command: make ci
+Exit status: 0
+
+go fmt ./...
+internal/catalog/catalog.go
+internal/catalog/tensor.go
+internal/check/check.go
+internal/eval/tensor.go
+internal/inspect/analyze.go
+internal/inspect/index.go
+internal/inspect/report.go
+internal/tensor/cpu.go
+internal/tensor/shape.go
+internal/tensorfacts/analyze.go
+internal/tensorfacts/scope.go
+internal/value/tensor.go
+tests/integration/catalog_test.go
+tests/integration/float_test.go
+tests/integration/runtime_catalog_test.go
+tests/integration/tensor_budget_test.go
+tests/integration/tensor_contract_test.go
+tests/integration/tensor_test.go
+go vet ./...
+go test ./... 
+?   	github.com/MarcoPoloResearchLab/Lo/cmd/lo	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/adapter	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/catalog	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/check	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/compiler	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/diagnostic	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/eval	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/inspect	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/ir	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/resolve	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/source	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/syntax	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensor	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/types	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/value	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	11.542s
+go build -o bin/lo ./cmd/lo
+
+Manual command: ./bin/lo run examples/tensor_forward.lo --format json
+Exit status: 0
+Result: Tensor<FP32>!, successful CPU rank-zero tensor with values ["3"].
+
+Catalog assertions: 85 built-ins.
+Conformance manifest: 75 fixtures.
+Changed prose: zero new mechanical findings; 46 findings in unchanged text.
+Governor: eight existing managed-file differences.
