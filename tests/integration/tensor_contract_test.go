@@ -1,12 +1,15 @@
 package integration_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestTensorInspectionMetadata(t *testing.T) {
@@ -174,6 +177,55 @@ func TestTensorAnalysisScope(t *testing.T) {
 	got = run(t, "check", sourceFile(t, source.String()), "--format", "json")
 	if got.status != 0 {
 		t.Fatalf("shared metadata graph: %s", got.stderr)
+	}
+}
+
+func TestTensorAnalysisSharedJoins(t *testing.T) {
+	var source strings.Builder
+	source.WriteString("flow Unused(a: Tensor<FP32>) -> Int { return 0 }\na0=List.new(1)\nb0=List.new(2)\n")
+	for i := 1; i <= 30; i++ {
+		for _, name := range []string{"a", "b"} {
+			fmt.Fprintf(&source, "%s%d=List.new(%s%d,%s%d)\n", name, i, name, i-1, name, i-1)
+		}
+	}
+	source.WriteString("joined=Match.new(1,1:Record.new(data:a30),_:Record.new(data:b30))\nreturn 0")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, binary, "check", sourceFile(t, source.String()), "--format", "json")
+	cmd.Dir = repository
+	cmd.Env = append(os.Environ(), "GOMEMLIMIT=32MiB")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("shared metadata joins: %v (context: %v)\n%s", err, ctx.Err(), output)
+	}
+	if !json.Valid(output) {
+		t.Fatalf("check output: %s", output)
+	}
+}
+
+func TestTensorEmptyReductionOutputs(t *testing.T) {
+	for _, op := range []string{"sum", "mean"} {
+		for _, dimension := range []string{"1000000", "Math.mul(1000,1000)"} {
+			t.Run(op+"/"+dimension, func(t *testing.T) {
+				source := fmt.Sprintf(`flow Reduce(n: Int) -> Tensor<FP32>! {
+  a=Tensor.new(List.new(),List.new(n,n,n,n,0))
+  return Tensor.%s(a,List.new(0,1,2,3))
+}; return Reduce(%s)`, op, dimension)
+				tensorResult(t, source, []string{"0"}, []string{})
+			})
+		}
+	}
+	for _, dimension := range []string{"1000000", "Math.mul(1000,1000)"} {
+		t.Run("empty-region/"+dimension, func(t *testing.T) {
+			source := fmt.Sprintf(`flow Reduce(n: Int) -> Tensor<FP32>! {
+  a=Tensor.new(List.new(),List.new(n,n,n,n,0,0))
+  return Tensor.mean(a,List.new(0,1,2,3,4))
+}; return Reduce(%s)`, dimension)
+			got := run(t, "run", sourceFile(t, source), "--format", "json")
+			if got.status != 1 || !strings.Contains(got.stderr, `"kind":"Tensor.EmptyReduction"`) {
+				t.Fatalf("empty mean region: %+v", got)
+			}
+		})
 	}
 }
 
