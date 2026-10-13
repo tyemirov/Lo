@@ -24,6 +24,15 @@ The [implementation audit](docs/implementation-audit.md) records the completed r
 The accepted [compiler design and implementation plan](docs/compiler-design.md) selects Go and a typed execution graph.
 It specifies compiler stages, package boundaries, diagnostics, inspection, acceptance criteria, and open language decisions.
 
+The proposed [native compilation milestone](docs/native-compilation-plan.md) adds standalone executables through generated Go code.
+F001 tracks this work.
+Native compilation is not implemented.
+
+The selected [training extension design](docs/training-extension-design.md) defines FP32 tensors, reverse-mode autodiff, immutable optimizer state, and explicit device execution.
+P001 completed the design task.
+F002 through F011 and I001 track implementation and acceptance.
+Training operations are not implemented.
+
 This repository is public early so the design can be evaluated as an AI-agent execution language. It is not production-ready.
 
 ## Build and Validate
@@ -406,6 +415,12 @@ Target command:
 ```bash
 lo serve examples/http_division.lo
 ```
+
+### Milestone 5: Native Compilation
+
+The proposed [native compilation plan](docs/native-compilation-plan.md) defines F001.
+It covers performance baselines, shared runtime contracts, generated Go code, standalone artifacts, File workflows, and HTTP services.
+Its acceptance criteria require semantic equivalence, qualified target execution, and measured performance.
 
 ## Agent Profile
 
