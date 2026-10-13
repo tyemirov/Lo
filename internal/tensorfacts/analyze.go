@@ -76,6 +76,7 @@ func seal(f fact) fact {
 type analyzer struct {
 	flows  map[ir.FlowID]ir.Flow
 	memo   map[string]fact
+	joins  map[[2][32]byte]fact
 	facts  map[ir.Expression]fact
 	visits int
 	err    diagnostic.Diagnostic
@@ -85,7 +86,7 @@ func Analyze(p ir.Program) (map[ir.Expression]*Metadata, diagnostic.Diagnostic) 
 	if !usesTensors(p) {
 		return map[ir.Expression]*Metadata{}, nil
 	}
-	a := &analyzer{flows: map[ir.FlowID]ir.Flow{}, memo: map[string]fact{}, facts: map[ir.Expression]fact{}}
+	a := &analyzer{flows: map[ir.FlowID]ir.Flow{}, memo: map[string]fact{}, joins: map[[2][32]byte]fact{}, facts: map[ir.Expression]fact{}}
 	for _, f := range p.Flows() {
 		a.flows[f.ID()] = f
 	}
@@ -140,7 +141,7 @@ func (a *analyzer) invoke(id ir.FlowID, args []fact) fact {
 	}
 	result := a.body(f.Body(), env)
 	if f.Handler() != "" {
-		result = join(result, a.invoke(f.Handler(), []fact{{}}))
+		result = a.join(result, a.invoke(f.Handler(), []fact{{}}))
 	}
 	a.memo[key] = result
 	return result
@@ -173,7 +174,7 @@ func (a *analyzer) expression(e ir.Expression, env map[ir.BindingID]fact) (resul
 	defer func() {
 		result = seal(result)
 		if old, ok := a.facts[e]; ok {
-			a.facts[e] = join(old, result)
+			a.facts[e] = a.join(old, result)
 		} else {
 			a.facts[e] = result
 		}
@@ -211,7 +212,7 @@ func (a *analyzer) expression(e ir.Expression, env map[ir.BindingID]fact) (resul
 			if i == 0 {
 				result = f
 			} else {
-				result = join(result, f)
+				result = a.join(result, f)
 			}
 		}
 	case ir.BuiltinCall:
@@ -344,9 +345,13 @@ func integers(f fact) ([]*big.Int, bool) {
 	}
 	return result, true
 }
-func join(a, b fact) fact {
+func (an *analyzer) join(a, b fact) fact {
 	if a.key == b.key {
 		return a
+	}
+	key := [2][32]byte{a.key, b.key}
+	if f, ok := an.joins[key]; ok {
+		return f
 	}
 	f := fact{}
 	if a.Number == b.Number {
@@ -359,16 +364,18 @@ func join(a, b fact) fact {
 		f.List = true
 		f.Items = make([]fact, len(a.Items))
 		for i := range f.Items {
-			f.Items[i] = join(a.Items[i], b.Items[i])
+			f.Items[i] = an.join(a.Items[i], b.Items[i])
 		}
 	}
 	if a.Fields != nil && b.Fields != nil {
 		f.Fields = map[string]fact{}
 		for name, v := range a.Fields {
 			if w, ok := b.Fields[name]; ok {
-				f.Fields[name] = join(v, w)
+				f.Fields[name] = an.join(v, w)
 			}
 		}
 	}
-	return seal(f)
+	f = seal(f)
+	an.joins[key] = f
+	return f
 }

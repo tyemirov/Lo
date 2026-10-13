@@ -183,19 +183,15 @@ func Prepare(op string, a, b Shape, indices []*big.Int) (Plan, error) {
 				dims = append(dims, ad[axis])
 			}
 		} else {
-			regionDims := []int64{}
 			for i, d := range ad {
 				if seen[i] {
-					regionDims = append(regionDims, d)
+					if d == 0 {
+						p.region = 0
+					}
 				} else {
 					dims = append(dims, d)
 				}
 			}
-			r, e := fromDims(regionDims)
-			if e != nil {
-				return nil, e
-			}
-			p.region = r.Count()
 		}
 		p.shape, err = fromDims(dims)
 	default:
@@ -217,6 +213,9 @@ func Prepare(op string, a, b Shape, indices []*big.Int) (Plan, error) {
 		}
 		p.steps = 2 * p.shape.Count() * k
 	case catalog.TensorSum, catalog.TensorMean:
+		if p.shape.Count() != 0 {
+			p.region = a.Count() / p.shape.Count()
+		}
 		p.steps = a.Count()
 		if op == catalog.TensorMean {
 			p.steps += p.shape.Count()
