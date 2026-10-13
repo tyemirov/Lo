@@ -75,6 +75,14 @@ Lo operations must not change values shared with another binding.
 The implementation accepts the current canonical Lo contract only.
 Native code generation, optimization passes, and persistent executable artifacts are outside the initial milestones.
 
+The proposed [native compilation milestone](native-compilation-plan.md) defines the next implementation scope under F001.
+It leaves the completed six-stage acceptance scope unchanged.
+
+The selected [training extension design](training-extension-design.md) defines the additional contracts for F002 through F011 and I001.
+P001 completed that design task.
+Training implementation extends the interpreter independently of F001.
+The extension document maps each required specification change to its owning issue.
+
 ### Resolved Verifier Decisions
 
 The specification owns these language rules.
