@@ -46,6 +46,7 @@ func NewError(kind, message string, input Record) (Error, error) {
 	if input == nil {
 		return nil, fmt.Errorf("error requires input record")
 	}
+	input = Snapshot(input).(Record)
 	if _, err := NewText(types.String(), kind); err != nil {
 		return nil, err
 	}
@@ -60,6 +61,7 @@ func At(e Error, operation string, span source.Span) Error {
 	return out
 }
 func WithFrame(e Error, flow, operation string, input Record) Error {
+	input = Snapshot(input).(Record)
 	f := must(NewRecord([]Field{{"flow", must(NewText(types.String(), flow))}, {"operation", must(NewText(types.String(), operation))}, {"input", RecordView(input)}}))
 	out := e.(loError)
 	out.trace = append(e.Trace(), f)

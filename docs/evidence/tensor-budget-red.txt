@@ -1,0 +1,10 @@
+go test ./tests/integration -run "TestTensorWorkCharges|TestTensorKernelCancellation|TestTensorFailureStopsCommit" -count=1
+--- FAIL: TestTensorWorkCharges (0.00s)
+    --- FAIL: TestTensorWorkCharges/Tensor.sum(a,List.new()) (0.00s)
+        tensor_budget_test.go:49: work delta=9, want 18
+    --- FAIL: TestTensorWorkCharges/Tensor.mean(a,List.new()) (0.00s)
+        tensor_budget_test.go:49: work delta=9, want 27
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.464s
+FAIL
+make: *** [test-integration] Error 1

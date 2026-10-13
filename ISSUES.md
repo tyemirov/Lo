@@ -7,7 +7,8 @@ The training issues implement the P001 design after v0.3.
 Scope note: v0.3 uses `T!` and `Error` for fallibility and keeps `Null` as an atomic type.
 P001 completed the [training extension design](docs/training-extension-design.md).
 That design selects the implementation contract for F002 through F011 and I001.
-P001 closes design work only. The training operations remain unimplemented.
+F002 through F004 add Float arithmetic, tensor values, and CPU tensor operations.
+Autodiff, Parameters, optimizers, transfers, and complete training remain open.
 
 ## D001 - Make Recoverable Failure Semantics Mechanically Enforceable
 
@@ -198,7 +199,7 @@ The design defines `Tensor<FP32>`, `Autodiff.grad`, `Parameters<R>`, `Gradients<
 Record field names identify Parameters. There is no independent `Parameter.new` API.
 
 Current evidence:
-- Sections 6.1, 8.4, and 22.4 of `specification.md` already define `Float` construction but exclude floating-point arithmetic.
+- Specification section 24 defines the implemented Float arithmetic and CPU tensor operations.
 - The reference implementation uses finite IEEE 754 binary64 values for `Float`.
 - Sections 8.7 and 23.1 already define `List.fold` and immutable accumulator state.
 - Sections 5.6, 5.7, 22, and 23 define purity, value semantics, evaluation order, and failure boundaries.
@@ -231,7 +232,7 @@ P0 resolves language decisions before implementation. P1 establishes the complet
 | Order | Issues | Result |
 | --- | --- | --- |
 | 1 | P001 | Completed extension contract and validation plan |
-| 2 | F002, F003 | Numeric and tensor foundations |
+| 2 | F002, F003 | Implemented numeric and tensor foundations |
 | 3 | F004, F005, F006, F007 | CPU operations, derivatives, Parameters, and optimizers |
 | 4 | F008, F009, F010 | Device resources, NVIDIA lowering, and execution boundaries |
 | 5 | I001 | Deterministic tests and the complete training MVP |
@@ -246,7 +247,8 @@ Physical-device access is not an acceptance prerequisite.
 ### Implementation review on October 13 2026
 
 The review covered all 21 open entries: 13 non-recurring issues and eight recurring maintenance issues.
-This audit preceded P001 design completion later on the same date.
+This audit preceded P001 design completion and F002 through F004 implementation later on the same date.
+The table and probes below record that earlier state.
 The current implementation supplies typed graphs, named flows, immutable values, error propagation, and list callbacks with explicit state.
 These features provide foundations for the proposed training extension.
 Reverse-mode autodiff and the complete training path remain unimplemented.
@@ -304,7 +306,7 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   - Separate the recovered backpropagation needs from the new GPU proposals in each design decision.
   - Select one extension contract before implementation of dependent issues.
   - Preserve named flows, explicit context arguments, immutable bindings, `.new(...)` construction, and `T!` error propagation.
-  - Define tensor types against section 6.6, which currently makes `List<T>` the only ordered collection type.
+  - Define tensor types against section 6.6, which made `List<T>` the only ordered collection type when P001 began.
   - Select a canonical representation for dtype, shape, device location, Parameters, gradients, and optimizer state.
   - Validate `List.fold` with a pure named training flow and explicit state for bounded training iterations.
   - Classify device selection, allocation, transfers, execution, and result observation as value operations, boundary operations, or commit activation.
@@ -338,7 +340,7 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   It selects explicit CPU, CUDA, and software simulation backends without automatic substitution.
   It specifies API signatures, VJPs, optimizer equations, resource budgets, diagnostics, source changes, and fixed numerical acceptance limits.
 
-  The [complete source fixture](docs/examples/training-mvp.lo) passed the current `lo parse` command.
+  At P001 completion, the [complete source fixture](docs/examples/training-mvp.lo) passed `lo parse`.
   `lo check` rejected the unimplemented `FP32` type with `resolve.unknown-name`, as expected.
   `make build` passed.
   The [independent reference](docs/evidence/training-reference.py) passed its network, finite-difference, and AdamW assertions.
@@ -380,7 +382,7 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
 F002 through F010 implement the selected [training extension contract](docs/training-extension-design.md).
 F011 owns the deferred mixed-precision decisions after I001.
 
-- [ ] [F002] (P1) {P001} Add floating-point arithmetic and explicit conversions
+- [x] [F002] (P1) {P001} Add floating-point arithmetic and explicit conversions
   Goal:
   Extend existing `Float` support with the arithmetic needed for training.
 
@@ -401,7 +403,13 @@ F011 owns the deferred mixed-precision decisions after I001.
   - Verify rounding boundaries, conversion limits, underflow, overflow, zero division, and invalid square roots.
   - Verify that unresolved numeric failures are rejected in total flows and propagate through fallible flows.
 
-- [ ] [F003] (P1) {F002} Add tensor values and shape semantics
+  F002 implemented binary64 arithmetic and comparisons with explicit integer conversions.
+  CLI tests passed rounding, signed-zero, subnormal, overflow, division, square-root, and fallibility cases.
+  FP32 conversion and arithmetic use the same rules through F003 and F004.
+  Specification section 24.1 and the compiler design record the numeric contract.
+  The [initial failure](docs/evidence/float-red.txt) and [stack validation](docs/evidence/numeric-tensor-green.txt) record acceptance evidence.
+
+- [x] [F003] (P1) {F002} Add tensor values and shape semantics
   Goal:
   Make tensor dimensions, numeric types, and storage requirements explicit and verifiable.
 
@@ -424,7 +432,14 @@ F011 owns the deferred mixed-precision decisions after I001.
   - Verify broadcasting, reshape, transpose, rank-zero, and empty-dimension cases against fixed expected results.
   - Verify that two bindings retain their original values after an operation shares or reuses internal storage.
 
-- [ ] [F004] (P1) {F003} Add the CPU tensor operation set
+  F003 implemented Tensor and Device values, static shape facts, dynamic boundaries, metadata, and bounded serialization.
+  CLI tests passed rank-zero, empty, overflow, reshape, transpose, broadcast, snapshot, and immutable-value cases.
+  Inspection reports the CPU profile, known shapes and storage sizes, and explicit unknown metadata.
+  Output weight and logical work receive checks before tensor allocation.
+  F008 retains device sessions, transfers, and live resource receipts.
+  The [tensor failures](docs/evidence/tensor-red.txt) and [stack validation](docs/evidence/numeric-tensor-green.txt) record acceptance evidence.
+
+- [x] [F004] (P1) {F003} Add the CPU tensor operation set
   Goal:
   Provide an independent reference for the forward pass, gradients, and optimizer calculations.
 
@@ -444,6 +459,14 @@ F011 owns the deferred mixed-precision decisions after I001.
   - Compare non-square matrix products and broadcast reductions with independently calculated results.
   - Verify cancellation-sensitive reductions against the accepted reduction order and accumulation dtype.
   - Verify that an invalid operation stops dependent evaluation and retains its source context.
+
+  F004 implemented the complete selected CPU operation set under `cpu-fp32-strict`.
+  Independent CLI fixtures passed non-square products, broadcast operations, reductions, and intermediate numeric failures.
+  The [forward example](examples/tensor_forward.lo) returned the independently calculated loss from mean squared error `3`.
+  Budget and cancellation tests passed through the evaluator entry point.
+  A numeric failure stopped a later commit and retained source and argument metadata.
+  The [stack validation](docs/evidence/numeric-tensor-green.txt) records the final repository checks.
+  F005 and F009 must preserve this operation set under their derivative and backend contracts.
 
 - [ ] [F005] (P1) {F004} Add reverse-mode autodiff for named flows
   Goal:

@@ -548,5 +548,108 @@
     "exit": 1,
     "stage": 3,
     "diagnostic": "check.effectful-callback"
+  },
+  {
+    "id": "float-arithmetic",
+    "rule": "24.1",
+    "file": "float-arithmetic.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "float-zero-division",
+    "rule": "24.1",
+    "file": "float-zero-division.lo",
+    "command": "run",
+    "exit": 1,
+    "stage": 5,
+    "diagnostic": "runtime.unhandled-error"
+  },
+  {
+    "id": "float-unhandled",
+    "rule": "24.1",
+    "file": "float-unhandled.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.unhandled-failure"
+  },
+  {
+    "id": "float-explicit-conversion",
+    "rule": "24.1",
+    "file": "float-explicit-conversion.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.type-mismatch"
+  },
+  {
+    "id": "tensor-fp32-rounding",
+    "rule": "24.2",
+    "file": "tensor-fp32-rounding.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "tensor-static-shape",
+    "rule": "24.2",
+    "file": "tensor-static-shape.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.tensor-shape"
+  },
+  {
+    "id": "tensor-dynamic-shape",
+    "rule": "24.2",
+    "file": "tensor-dynamic-shape.lo",
+    "command": "run",
+    "exit": 1,
+    "stage": 5,
+    "diagnostic": "runtime.unhandled-error"
+  },
+  {
+    "id": "tensor-empty",
+    "rule": "24.2",
+    "file": "tensor-empty.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "tensor-reduction-order",
+    "rule": "24.3",
+    "file": "tensor-reduction-order.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "tensor-matmul",
+    "rule": "24.3",
+    "file": "tensor-matmul.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "tensor-invalid-axes",
+    "rule": "24.3",
+    "file": "tensor-invalid-axes.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.tensor-shape"
+  },
+  {
+    "id": "tensor-empty-mean",
+    "rule": "24.3",
+    "file": "tensor-empty-mean.lo",
+    "command": "run",
+    "exit": 1,
+    "stage": 5,
+    "diagnostic": "runtime.unhandled-error"
   }
 ]

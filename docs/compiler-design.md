@@ -80,6 +80,8 @@ It leaves the completed six-stage acceptance scope unchanged.
 
 The selected [training extension design](training-extension-design.md) defines the additional contracts for F002 through F011 and I001.
 P001 completed that design task.
+F002, F003, and F004 add Float arithmetic and CPU tensors to the interpreter.
+F005 through F011 and I001 retain their separate implementation and acceptance work.
 Training implementation extends the interpreter independently of F001.
 The extension document maps each required specification change to its owning issue.
 
@@ -478,7 +480,9 @@ Most values also have a `value` field.
 | Type | Representation |
 | --- | --- |
 | `Int` | Decimal string with exact integer precision. |
-| `Float` | Decimal string that preserves the finite binary64 value. |
+| `Float` | Shortest round-trip decimal string for a finite binary64 value, including signed zero. |
+| `Device` | Selector string: `cpu`, `cuda:0`, or `cuda-sim:0`. |
+| `Tensor<FP32>` | Object with `dtype`, `shape`, `device`, and complete row-major `values`. |
 | `String`, `Scalar`, `File.Path` | JSON string. |
 | `Bool`, `Null` | JSON boolean or null. |
 | `Bytes` | Base64 string. |
@@ -499,6 +503,21 @@ Empty records serialize as objects.
 Record field names have deterministic sorted output.
 Map entries follow the construction order specified in section 23.1.
 
+Tensor shape entries are decimal strings for Lo integers.
+Tensor element entries are shortest round-trip FP32 decimal strings, including signed zero.
+An empty shape or empty element array serializes as `[]`.
+For example, a rank-zero tensor serializes as follows:
+
+```json
+{"type":"Tensor<FP32>","value":{"dtype":"fp32","shape":[],"device":"cpu","values":["1"]}}
+```
+
+Error inputs and trace frames replace tensors with exact metadata records.
+The fields are `tensor_type`, `dtype`, `shape`, and `device`.
+The same transformation applies inside records, lists, maps, and fallible values.
+A snapshot retains no tensor data buffer.
+Empty nested containers receive the transformed element type.
+
 ### Execution Limits
 
 The interpreter counts each entered statement, evaluated expression, list iteration, and integer aggregate element as one step.
@@ -514,6 +533,9 @@ This option can occur only once.
 | One file read or string payload | 16 MiB |
 | One expanded value | 16 MiB of value weight |
 | All evaluated expression results | 64 MiB of accumulated value weight |
+| Tensor rank | 8 |
+| One tensor dimension | 1,000,000 |
+| One tensor element count | 1,000,000 |
 
 Each value has 16 bytes of fixed weight plus its payload weight.
 String, path, scalar, and byte payloads use their byte length.
@@ -526,6 +548,31 @@ Error weight includes kind, message, input, and trace frames.
 Effect weight includes its operation name, path, and content.
 Server weight includes its port and flow identities.
 HTTP value weight includes its field record.
+Tensor weight is `16 + 4*N + 8*rank + len(dtype) + len(selector)` bytes.
+Device weight is `16 + len(selector)` bytes.
+Repeated tensor references count repeatedly in expanded values.
+
+Tensor operation boundaries validate shapes and axes before CPU kernels receive them.
+They check output weight and charge logical work before numeric output allocation.
+Successful tensor results then consume the existing cumulative value budget.
+Each new output must fit the remaining budget before allocation.
+This rule bounds live CPU element payloads through the stricter cumulative value budget.
+Shared reshape storage does not reduce value charges.
+Failed work retains no output buffer in an error snapshot.
+The Go allocator and garbage collector remain outside exact process-memory guarantees.
+F008 owns device allocation receipts, transfers, and the combined live resource ledger.
+
+| Tensor work | Additional steps |
+| --- | --- |
+| Construction, conversion, elementwise operation, broadcast, or transpose | One per output element. |
+| Sum | One per input element. |
+| Mean | One per input element plus one per output element. |
+| Matrix multiplication | `2*m*n*k`. |
+| Reshape or metadata | Zero element steps. |
+
+Empty reduction axes preserve these logical charges even when the result shares storage.
+Tensor kernels test cancellation during execution.
+A host failure bypasses Lo handlers and prevents result publication.
 
 The interpreter checks weight before it publishes an expression result.
 These budgets bound specified evaluation work and data expansion.
@@ -535,11 +582,45 @@ They do not specify the Go process's exact memory use.
 Neither failure enters a Lo handler.
 The runtime does not narrow integers or silently truncate collections to meet a limit.
 
+### Numeric and Tensor Analysis
+
+The catalog defines 85 built-in operations after F002 through F004.
+`internal/tensor` owns validated shapes, operation plans, immutable data, and CPU kernels.
+`internal/tensorfacts` propagates static metadata through bindings, records, Match branches, and named flow calls.
+It examines every declared flow, including unused flows.
+It checks calls again with available argument facts and caches results by flow and facts.
+General arithmetic and list callbacks can leave shape dimensions unknown.
+
+Known conflicts produce `check.tensor-shape` with expected and actual metadata.
+Dynamic boundaries produce the typed errors in specification section 24.
+The analyzer runs only for programs with tensor types.
+It permits at most 100,000 expression visits.
+Fixed-size structural keys keep shared containers from expanding in the flow cache.
+An exceeded bound produces `check.tensor-analysis-limit` with a source span.
+The analyzer does not replace exhausted analysis with unknown metadata.
+
+CPU arithmetic uses the `cpu-fp32-strict` profile from P001.
+Each multiplication completes its FP32 rounding before the addition.
+Reduction order and intermediate failures follow specification section 24.3.
+The [forward example](../examples/tensor_forward.lo) returns loss from mean squared error `3` through `lo run`.
+This operation set supplies the reference implementation for F005 and F009.
+
 ## Inspection Contract
 
 The inspection report comes from the checked graph and the built-in catalog.
 It includes direct invocation behavior and behavior through referenced flows.
 It distinguishes possible behavior from operations that each evaluated path must execute.
+
+Each tensor node has a `tensor` metadata object.
+It contains `dtype`, `profile`, `device`, `layout`, `shape`, and `storage_bytes`.
+Known shapes use decimal dimension strings.
+Rank-zero shapes use `[]`.
+Unknown shapes and unknown storage sizes use JSON `null`.
+`storage_bytes` counts the element payload of the result, including shared storage.
+It does not identify a backing allocation or sum invocation storage.
+Text inspection writes `unknown` for unknown metadata.
+A flow body used with different shapes keeps only facts shared by its analysis contexts.
+Parse, check, and inspect never initialize a device.
 
 The report contains:
 
@@ -689,6 +770,8 @@ Each milestone adds the packages necessary for its behavior.
 | `internal/resolve/` | Symbols, lexical scopes, and reference resolution. |
 | `internal/types/` | Type identities, constraints, and type unification. |
 | `internal/catalog/` | Canonical built-in definitions and operation identifiers. |
+| `internal/tensor/` | Shape boundaries, immutable CPU data, operation plans, and FP32 kernels. |
+| `internal/tensorfacts/` | Static shape facts, shape diagnostics, and inspection metadata. |
 | `internal/check/` | Type checks, fallibility rules, and flow analysis. |
 | `internal/ir/` | Checked graph types and graph construction. |
 | `internal/inspect/` | Static inspection and capability summaries. |
@@ -1166,3 +1249,25 @@ This design owns command behavior, limits, and qualified platforms.
 All six stages have implementations and passed integration tests.
 The [implementation audit](implementation-audit.md) records the requirement review and final validation.
 No contract decision remains open within these six stages.
+
+
+## F002 Through F004 Acceptance
+
+The numeric and CPU tensor stack completed its public-entrypoint tests on October 13, 2026.
+The tests cover binary64 boundaries, FP32 conversion, shape diagnostics, immutable layout operations, CPU arithmetic, budgets, and cancellation.
+Independent fixtures cover non-square matrix products, reductions, and a complete forward-pass loss.
+All 85 catalog operations have check and runtime assertions.
+The conformance manifest contains 75 fixtures.
+
+Initial failures are recorded for [Float operations](evidence/float-red.txt) and [tensor operations](evidence/tensor-red.txt).
+Additional failures cover [shape and snapshot contracts](evidence/tensor-contract-red.txt), [logical work](evidence/tensor-budget-red.txt), [profile metadata](evidence/tensor-profile-red.txt), and [analysis scope](evidence/tensor-analysis-red.txt).
+The [final stack check](evidence/numeric-tensor-green.txt) records repository validation.
+This validation runs on macOS arm64 with Go 1.27.1.
+It does not add Linux execution or CUDA evidence.
+Autodiff, Parameters, optimizers, transfers, and complete training acceptance remain with F005 through F011 and I001.
+
+Changed prose received review against Part 1 and Part 2 of the verified ASD-STE100 Issue 9 reference.
+The mechanical language check reported no new findings.
+It reported 46 unchanged findings across the tracker, README, and specification.
+The Governor check reported eight existing managed-file differences.
+Those differences concern repository templates and remain outside F002 through F004.

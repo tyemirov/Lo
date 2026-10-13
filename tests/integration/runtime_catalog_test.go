@@ -12,6 +12,11 @@ import (
 
 func TestRunBuiltinCatalog(t *testing.T) {
 	want := map[string]string{
+		catalog.FloatAdd: `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
+		catalog.FloatMul: `{"type":"Float","value":"2.5"}`, catalog.FloatDiv: `{"type":"Float","value":"1.5"}`,
+		catalog.FloatSqrt: `{"type":"Float","value":"1.5"}`, catalog.IntToFloat: `{"type":"Float","value":"7"}`,
+		catalog.FloatEqual: `true`, catalog.FloatLT: `true`, catalog.FloatLTE: `true`, catalog.FloatGT: `false`, catalog.FloatGTE: `true`,
+		catalog.FloatToInt: `"-1"`, catalog.FloatToString: `"-0"`,
 		catalog.IntNew: `"123456789012345678901234567890"`, catalog.StringNew: `"héllo"`, catalog.BoolNew: `false`, catalog.FloatNew: `"-1250"`, catalog.BytesNew: `"Ynl0ZXM="`, catalog.ScalarNew: `"界"`,
 		catalog.ListNew:   `[{"type":"Null","value":null},{"type":"Null","value":null}]`,
 		catalog.MapNew:    `[{"key":{"type":"Bool","value":true},"value":{"type":"Int","value":"1"}}]`,
@@ -31,6 +36,28 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.FileAppend: `{"operation":"File.append","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"String","value":"data"}}`,
 		catalog.FileWrite:  `{"operation":"File.write","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
 	}
+	for name, expected := range map[string]string{
+		catalog.DeviceNew:     `{"type":"Device","value":"cpu"}`,
+		catalog.TensorShape:   `{"type":"List<Int>","value":[]}`,
+		catalog.TensorRank:    `{"type":"Int","value":"0"}`,
+		catalog.TensorDtype:   `{"type":"String","value":"fp32"}`,
+		catalog.TensorDevice:  `{"type":"Device","value":"cpu"}`,
+		catalog.TensorToFloat: `{"type":"Float","value":"4"}`,
+		catalog.TensorValues:  `{"type":"List<Float>","value":[{"type":"Float","value":"4"}]}`,
+	} {
+		want[name] = expected
+	}
+	for name, element := range map[string]string{catalog.TensorNew: "4", catalog.TensorAdd: "6", catalog.TensorSub: "2", catalog.TensorMul: "8", catalog.TensorDiv: "2", catalog.TensorSqrt: "2", catalog.TensorRelu: "4", catalog.TensorTranspose: "4", catalog.TensorSum: "4", catalog.TensorMean: "4", catalog.TensorMatmul: "8", catalog.TensorBroadcast: "4", catalog.TensorReshape: "4"} {
+		shape := "[]"
+		if name == catalog.TensorMatmul {
+			shape = `["1","1"]`
+		}
+		if name == catalog.TensorBroadcast || name == catalog.TensorReshape {
+			shape = `["1"]`
+		}
+		want[name] = fmt.Sprintf(`{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":%s,"values":[%q]}}`, shape, element)
+	}
+
 	covered := map[string]bool{}
 	for _, tc := range builtinExamples() {
 		if _, ok := want[tc.name]; ok {

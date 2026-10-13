@@ -1,0 +1,7 @@
+go test ./tests/integration -run TestTensorAnalysisScope -count=1
+--- FAIL: TestTensorAnalysisScope (0.15s)
+    tensor_contract_test.go:111: unrelated integer list acquired a tensor analysis limit: {"diagnostics":[{"code":"check.tensor-analysis-limit","stage":"check","message":"tensor metadata analysis exceeds 100000 expression visits","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestTensorAnalysisScope3028909898/001/3285664526.lo","start":{"offset":121,"line":1,"column":122},"end":{"offset":122,"line":1,"column":123}},"related":[{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestTensorAnalysisScope3028909898/001/3285664526.lo","start":{"offset":12529,"line":2,"column":12270},"end":{"offset":12541,"line":2,"column":12282}}]}]}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.686s
+FAIL
+make: *** [test-integration] Error 1

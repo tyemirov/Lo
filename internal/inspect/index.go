@@ -5,9 +5,12 @@ import (
 	"slices"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
+	"github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
 type graphIndex struct {
+	metadata   map[ir.Expression]*tensorfacts.Metadata
 	report     *reportData
 	nodes      map[ir.Expression]nodeID
 	nodeData   map[nodeID]nodeData
@@ -17,9 +20,10 @@ type graphIndex struct {
 	order      []ir.Flow
 }
 
-func index(program ir.Program, data *reportData) *graphIndex {
+func index(program ir.Program, data *reportData, metadata map[ir.Expression]*tensorfacts.Metadata) *graphIndex {
 	g := &graphIndex{report: data, nodes: map[ir.Expression]nodeID{}, nodeData: map[nodeID]nodeData{}, parameters: map[ir.BindingID]nodeID{}, statements: map[int]nodeID{}, flows: map[ir.FlowID]ir.Flow{}}
 	g.order = program.Flows()
+	g.metadata = metadata
 	slices.SortFunc(g.order, func(a, b ir.Flow) int { return a.Span().Start().Offset - b.Span().Start().Offset })
 	for _, f := range g.order {
 		g.flows[f.ID()] = f
@@ -36,6 +40,9 @@ func index(program ir.Program, data *reportData) *graphIndex {
 	return g
 }
 func (g *graphIndex) add(n nodeData) nodeID {
+	if n.Tensor == nil && (n.Type == types.Tensor().String() || n.Type == types.Tensor().String()+"!") {
+		n.Tensor = tensorfacts.Unknown()
+	}
 	n.ID = nodeID(fmt.Sprintf("n%d", len(g.report.Nodes)+1))
 	g.report.Nodes = append(g.report.Nodes, n)
 	g.nodeData[n.ID] = n
@@ -65,6 +72,7 @@ func (g *graphIndex) expression(expr ir.Expression, region string) nodeID {
 		return id
 	}
 	n := nodeData{Type: expr.Type().String(), Span: expr.Span(), Region: region, Inputs: []nodeID{}}
+	n.Tensor = g.metadata[expr]
 	input := func(value ir.Expression) nodeID {
 		id := g.expression(value, region)
 		n.Inputs = append(n.Inputs, id)

@@ -93,6 +93,12 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `metadata`: Information about a value's type, shape, storage size, or device, separate from its elements.
+- `axis`: One indexed dimension of a tensor.
+- `row-major layout`: Contiguous tensor storage where the last axis changes fastest.
+- `binary64`: The IEEE 754 format with 53 significant binary digits, used by Lo Float values.
+- `mean squared error`: A loss equal to the mean of squared differences between predictions and target values.
+
 - `tensor`: An immutable numeric array with a dtype, shape, and device location.
 - `dtype`: The numeric format of each tensor element.
 - `shape`: The ordered dimension sizes of a tensor.

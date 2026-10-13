@@ -16,6 +16,8 @@ const (
 	ScalarKind    Kind = "Scalar"
 	BytesKind     Kind = "Bytes"
 	FloatKind     Kind = "Float"
+	TensorKind    Kind = "Tensor<FP32>"
+	DeviceKind    Kind = "Device"
 	ErrorKind     Kind = "Error"
 	PathKind      Kind = "File.Path"
 	RequestKind   Kind = "HTTP.Request"
@@ -105,6 +107,8 @@ func Null() Type              { return atom(NullKind) }
 func Scalar() Type            { return atom(ScalarKind) }
 func Bytes() Type             { return atom(BytesKind) }
 func Float() Type             { return atom(FloatKind) }
+func Tensor() Type            { return atom(TensorKind) }
+func Device() Type            { return atom(DeviceKind) }
 func Error() Type             { return atom(ErrorKind) }
 func Path() Type              { return atom(PathKind) }
 func Request() Type           { return atom(RequestKind) }
@@ -114,7 +118,7 @@ func Effect() Type            { return atom(EffectKind) }
 func AnyRecord() Type         { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, ErrorKind, PathKind, RequestKind, ResponseKind, ServerKind, EffectKind, AnyRecordKind:
+	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, RequestKind, ResponseKind, ServerKind, EffectKind, AnyRecordKind:
 		return atom(name), true
 	}
 	return nil, false

@@ -1,0 +1,1 @@
+flow Work(n: Int) -> Tensor<FP32>! { return Tensor.new(List.new(1.0),List.new(n)) }; return Work(Math.add(1,1))

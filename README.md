@@ -10,7 +10,7 @@ Lo is not a replacement for Go, Python, or shell. It is an execution contract be
 
 ## Status
 
-Lo is currently a **v0.3 language proposal**.
+Lo has a **v0.3 core with implemented Float and CPU tensor extensions**.
 
 The reference implementation has a Go frontend, verifier, checked execution graph, and static inspector.
 The parser and verifier accept all six specification examples.
@@ -30,8 +30,10 @@ Native compilation is not implemented.
 
 The selected [training extension design](docs/training-extension-design.md) defines FP32 tensors, reverse-mode autodiff, immutable optimizer state, and explicit device execution.
 P001 completed the design task.
-F002 through F011 and I001 track implementation and acceptance.
-Training operations are not implemented.
+F002, F003, and F004 implement binary64 arithmetic, immutable FP32 tensors, shape checks, and the CPU operation set.
+The [forward example](examples/tensor_forward.lo) executes a two-layer ReLU network and returns loss from mean squared error `3`.
+F005 through F011 and I001 cover autodiff, Parameters, optimizers, device execution, and complete training acceptance.
+These remaining training features are not implemented.
 
 This repository is public early so the design can be evaluated as an AI-agent execution language. It is not production-ready.
 
@@ -46,13 +48,15 @@ make build
 ./bin/lo check examples/list_sum.lo
 ./bin/lo inspect examples/agent_file_workflow.lo --format json
 ./bin/lo run examples/list_sum.lo
+./bin/lo run examples/tensor_forward.lo
 ./bin/lo run examples/count_letter.lo --read-root examples
 ./bin/lo serve examples/http_echo.lo --listen 0 --format json
 make test-conformance
 make ci
 ```
 
-The conformance suite runs all 63 static fixtures.
+The conformance suite runs 75 static and runtime fixtures.
+The catalog tests verify all 85 built-in operations.
 The integration suite also tests built-in signatures, runtime values, evaluation order, error traces, and adapter authorization.
 The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.

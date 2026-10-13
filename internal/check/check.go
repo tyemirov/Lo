@@ -8,6 +8,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/resolve"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/syntax"
+	"github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
@@ -73,7 +74,11 @@ func Program(program syntax.Program) (ir.Program, diagnostic.Diagnostic) {
 		}
 		flows[i] = f.graph
 	}
-	return must(ir.NewProgram(program.Source(), body, flows)), nil
+	p := must(ir.NewProgram(program.Source(), body, flows))
+	if _, d := tensorfacts.Analyze(p); d != nil {
+		return nil, d
+	}
+	return p, nil
 }
 func (m *module) declare(scope resolve.Scope, body []syntax.Statement) diagnostic.Diagnostic {
 	for _, statement := range body {

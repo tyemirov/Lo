@@ -1,0 +1,17 @@
+flow Forward(x: Tensor<FP32>, w1: Tensor<FP32>, b1: Tensor<FP32>, w2: Tensor<FP32>, b2: Tensor<FP32>) -> Tensor<FP32>! {
+  h=Tensor.relu(Tensor.add(Tensor.matmul(x,w1),b1))
+  return Tensor.add(Tensor.matmul(h,w2),b2)
+}
+flow Loss(prediction: Tensor<FP32>, target: Tensor<FP32>) -> Tensor<FP32>! {
+  difference=Tensor.sub(prediction,target)
+  return Tensor.mean(Tensor.mul(difference,difference),List.new(0,1))
+}
+flow Work() -> Tensor<FP32>! {
+  x=Tensor.new(List.new(1.0,2.0,2.0,1.0,-1.0,1.0),List.new(3,2))
+  w1=Tensor.new(List.new(1.0,0.0,0.0,1.0),List.new(2,2))
+  b1=Tensor.new(List.new(0.0,0.0),List.new(2))
+  w2=Tensor.new(List.new(2.0,3.0),List.new(2,1))
+  b2=Tensor.new(List.new(1.0),List.new(1))
+  target=Tensor.new(List.new(8.0,6.0,2.0),List.new(3,1))
+  return Loss(Forward(x,w1,b1,w2,b2),target)
+}; return Work()

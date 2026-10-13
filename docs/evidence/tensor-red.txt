@@ -1,0 +1,23 @@
+$ make test-integration TEST_ARGS='-run TestTensor -count=1'
+go test ./tests/integration -run TestTensor -count=1
+--- FAIL: TestTensorConstructionAndMetadata (0.12s)
+    tensor_test.go:32: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Tensor.new","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestTensorConstructionAndMetadata3387323896/001/2443017375.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":65,"line":1,"column":66}}}]}
+         status:1}
+--- FAIL: TestTensorLayout (0.01s)
+    tensor_test.go:63: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type FP32","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestTensorLayout2686450859/001/4184476713.lo","start":{"offset":24,"line":1,"column":25},"end":{"offset":28,"line":1,"column":29}}}]}
+         status:1}
+--- FAIL: TestTensorStaticShapes (0.01s)
+    tensor_test.go:90: shape diagnostic needs expected, actual, and source: {Code:resolve.unknown-name Stage:resolve Message:unknown flow Tensor.new Expected: Actual: Span:0x61e5cd73c8d0}
+--- FAIL: TestTensorDynamicFailures (0.01s)
+    tensor_test.go:117: dynamic tensor failure Tensor.InvalidShape: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type FP32","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestTensorDynamicFailures1030632525/001/289181746.lo","start":{"offset":29,"line":1,"column":30},"end":{"offset":33,"line":1,"column":34}}}]}
+         status:1}
+--- FAIL: TestTensorCPUOperations (0.01s)
+    tensor_test.go:129: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type FP32","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestTensorCPUOperations1092146065/001/991015440.lo","start":{"offset":22,"line":1,"column":23},"end":{"offset":26,"line":1,"column":27}}}]}
+         status:1}
+--- FAIL: TestTensorCPUFailures (0.01s)
+    tensor_test.go:159: CPU error Numeric.DivideByZero: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type FP32","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestTensorCPUFailures3094714560/001/1346149544.lo","start":{"offset":21,"line":1,"column":22},"end":{"offset":25,"line":1,"column":26}}}]}
+         status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.651s
+FAIL
+make: *** [test-integration] Error 1

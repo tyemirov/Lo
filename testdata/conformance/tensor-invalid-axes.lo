@@ -1,0 +1,1 @@
+flow Work(a: Tensor<FP32>) -> Tensor<FP32>! { return Tensor.sum(a,List.new(1,0)) }

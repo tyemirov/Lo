@@ -1,0 +1,1 @@
+flow Work() -> Tensor<FP32>! { a=Tensor.new(List.new(),List.new(0,0)); return Tensor.mean(a,List.new(0)) }; return Work()

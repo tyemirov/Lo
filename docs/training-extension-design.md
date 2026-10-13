@@ -7,8 +7,10 @@ Reverse-mode autodiff produces gradients from the checked graph.
 
 Status: design completed on October 13, 2026.
 F002 through F011 and I001 own implementation and acceptance.
-The current compiler implements v0.3 and does not implement these operations.
-The signatures below are selected extension APIs, not current CLI capabilities.
+F002, F003, and F004 implement Float arithmetic and CPU tensors through `lo run`.
+The compiler also implements Device descriptors without device initialization.
+Autodiff, Parameters, optimizers, transfers, and GPU execution remain selected APIs for later issues.
+The [specification](../specification.md) section 24 defines the implemented numeric and tensor contract.
 
 The [language specification](../specification.md) remains the authority for implemented language behavior.
 The [source changes](#source-contract-changes) identify the changes required before each extension receives implementation acceptance.
@@ -800,7 +802,8 @@ The script also reports moments for comparison with the future implementation.
 
 These changes are selected by P001.
 Each owning feature must update the relevant specification text and conformance fixtures before its implementation acceptance.
-This design does not silently revise the implemented v0.3 specification.
+F002 through F004 apply their source changes in specification section 24 and the affected core sections.
+Later issues must apply their remaining source changes before acceptance.
 
 | Source section | Required change | Owner |
 | --- | --- | --- |
