@@ -1,0 +1,10 @@
+flow Echo(request: HTTP.Request) -> HTTP.Response {
+    return HTTP.Response.Bytes.new(200, request.body)
+}
+
+flow HttpError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(400, error.kind)
+}
+
+server = HTTP.Server.new(0, Echo, HttpError)
+commit server

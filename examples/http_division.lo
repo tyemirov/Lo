@@ -1,0 +1,26 @@
+flow Calculate(request: HTTP.Request) -> HTTP.Response! {
+    denominator = Int.new(0)
+    result_value = Int.new(10) |> Math.div(denominator)
+    return HTTP.Response.Text.new(
+        status: Int.new(200),
+        body: result_value |> Int.to_string()
+    )
+}
+flow CalculatorHttpError(error: Error) -> HTTP.Response {
+    return Match.new(error.kind,
+        String.new("Math.DivideByZero"): HTTP.Response.Text.new(
+            status: Int.new(400),
+            body: String.new("division by zero")
+        ),
+        _: HTTP.Response.Text.new(
+            status: Int.new(500),
+            body: String.new("internal error")
+        )
+    )
+}
+server = HTTP.Server.new(
+    port: Int.new(8080),
+    handler: Calculate,
+    onError: CalculatorHttpError
+)
+commit server

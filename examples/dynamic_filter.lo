@@ -1,0 +1,7 @@
+flow IsAboveThreshold(context_data: Record{ limit: Int }, target_value: Int) -> Bool {
+    return Math.gt(target_value, context_data.limit)
+}
+raw_numbers = List.new(Int.new(4), Int.new(12), Int.new(20))
+threshold_config = Record.new(limit: Int.new(10))
+filtered_numbers = raw_numbers |> List.filter(threshold_config, IsAboveThreshold)
+return filtered_numbers
