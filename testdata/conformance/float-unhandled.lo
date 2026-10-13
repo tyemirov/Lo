@@ -1,0 +1,1 @@
+flow Bad() -> Float { return Float.sqrt(2.0) }

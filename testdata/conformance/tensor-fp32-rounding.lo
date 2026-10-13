@@ -1,0 +1,1 @@
+return Tensor.new(List.new(1.0000000596046448,1.0000001788139343),List.new(2))

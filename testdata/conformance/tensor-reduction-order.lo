@@ -1,0 +1,1 @@
+flow Work() -> Tensor<FP32>! { a=Tensor.new(List.new(16777216.0,1.0,-16777216.0),List.new(3)); return Tensor.sum(a,List.new(0)) }; return Work()

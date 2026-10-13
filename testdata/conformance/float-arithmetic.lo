@@ -1,0 +1,1 @@
+flow Work() -> Float! { a=Float.add(1.25,2.5); b=Float.mul(a,2.0); return Float.div(b,5.0) }; return Work()
