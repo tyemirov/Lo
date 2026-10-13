@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
@@ -10,11 +11,24 @@ import (
 type builtinExample struct{ name, source, kind string }
 
 func builtinExamples() []builtinExample {
-	return []builtinExample{
+	examples := []builtinExample{
 		{"Int.new", `return Int.new(123456789012345678901234567890)`, "Int"},
 		{"String.new", `return String.new("héllo")`, "String"},
 		{"Bool.new", `return Bool.new(false)`, "Bool"},
 		{"Float.new", `return Float.new(-1.25e3)`, "Float"},
+		{"Float.add", `return Float.add(1.25, 2.5)`, "Float!"},
+		{"Float.sub", `return Float.sub(1.25, 2.5)`, "Float!"},
+		{"Float.mul", `return Float.mul(1.25, 2.0)`, "Float!"},
+		{"Float.div", `return Float.div(3.0, 2.0)`, "Float!"},
+		{"Float.sqrt", `return Float.sqrt(2.25)`, "Float!"},
+		{"Float.eq", `return Float.eq(-0.0, 0.0)`, "Bool"},
+		{"Float.lt", `return Float.lt(1.0, 2.0)`, "Bool"},
+		{"Float.lte", `return Float.lte(1.0, 1.0)`, "Bool"},
+		{"Float.gt", `return Float.gt(1.0, 2.0)`, "Bool"},
+		{"Float.gte", `return Float.gte(1.0, 1.0)`, "Bool"},
+		{"Int.to_float", `return Int.to_float(7)`, "Float!"},
+		{"Float.to_int", `return Float.to_int(-1.9)`, "Int"},
+		{"Float.to_string", `return Float.to_string(-0.0)`, "String"},
 		{"Bytes.new", `return Bytes.new("bytes")`, "Bytes"},
 		{"Scalar.new", `return Scalar.new("界")`, "Scalar"},
 		{"List.new", `return List.new(null, null)`, "List<Null>"},
@@ -64,6 +78,7 @@ func builtinExamples() []builtinExample {
 		{"File.append", `return File.append(File.Path.new("unwritten"), "data")`, "Effect"},
 		{"File.write", `return File.write(File.Path.new("unwritten"), Bytes.new("data"))`, "Effect"},
 	}
+	return append(examples, tensorBuiltinExamples()...)
 }
 
 func TestVerifierBuiltinContracts(t *testing.T) {
@@ -91,4 +106,31 @@ func TestVerifierBuiltinContracts(t *testing.T) {
 			t.Errorf("no public signature example for %s", op.Name())
 		}
 	}
+}
+
+func tensorBuiltinExamples() []builtinExample {
+	examples := []builtinExample{{"Device.new", `return Device.new("cpu")`, "Device!"}, {"Tensor.new", `return Tensor.new(List.new(4.0),List.new())`, "Tensor<FP32>!"}}
+	for _, tc := range []struct{ name, expression, typ string }{
+		{"Tensor.shape", "Tensor.shape(a)", "List<Int>"},
+		{"Tensor.rank", "Tensor.rank(a)", "Int"},
+		{"Tensor.dtype", "Tensor.dtype(a)", "String"},
+		{"Tensor.device", "Tensor.device(a)", "Device"},
+		{"Tensor.to_float", "Tensor.to_float(a)", "Float"},
+		{"Tensor.values", "Tensor.values(a)", "List<Float>"},
+		{"Tensor.add", "Tensor.add(a,b)", "Tensor<FP32>"},
+		{"Tensor.sub", "Tensor.sub(a,b)", "Tensor<FP32>"},
+		{"Tensor.mul", "Tensor.mul(a,b)", "Tensor<FP32>"},
+		{"Tensor.div", "Tensor.div(a,b)", "Tensor<FP32>"},
+		{"Tensor.sqrt", "Tensor.sqrt(a)", "Tensor<FP32>"},
+		{"Tensor.relu", "Tensor.relu(a)", "Tensor<FP32>"},
+		{"Tensor.matmul", "Tensor.matmul(Tensor.reshape(a,List.new(1,1)),Tensor.reshape(b,List.new(1,1)))", "Tensor<FP32>"},
+		{"Tensor.broadcast", "Tensor.broadcast(a,List.new(1))", "Tensor<FP32>"},
+		{"Tensor.reshape", "Tensor.reshape(a,List.new(1))", "Tensor<FP32>"},
+		{"Tensor.transpose", "Tensor.transpose(a,List.new())", "Tensor<FP32>"},
+		{"Tensor.sum", "Tensor.sum(a,List.new())", "Tensor<FP32>"},
+		{"Tensor.mean", "Tensor.mean(a,List.new())", "Tensor<FP32>"},
+	} {
+		examples = append(examples, builtinExample{tc.name, fmt.Sprintf(`flow Example() -> %s! { a=Tensor.new(List.new(4.0),List.new()); b=Tensor.new(List.new(2.0),List.new()); return %s }; return Example()`, tc.typ, tc.expression), tc.typ + "!"})
+	}
+	return examples
 }
