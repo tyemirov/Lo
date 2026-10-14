@@ -12,6 +12,7 @@ import (
 )
 
 var binary string
+var nativeCompiler string
 var repository string
 
 func TestMain(m *testing.M) {
@@ -27,12 +28,28 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	binary = filepath.Join(dir, "lo")
+	prepare := exec.Command("go", "run", "./tools/runtimebundle")
+	prepare.Dir = repository
+	if output, err := prepare.CombinedOutput(); err != nil {
+		fmt.Fprintf(os.Stderr, "prepare runtime bundle: %v\n%s", err, output)
+		os.Exit(1)
+	}
 	command := exec.Command("go", "build", "-o", binary, "./cmd/lo")
 	command.Dir = repository
 	if output, err := command.CombinedOutput(); err != nil {
 		fmt.Fprintf(os.Stderr, "build public CLI: %v\n%s", err, output)
 		_ = os.RemoveAll(dir)
 		os.Exit(1)
+	}
+	nativeCompiler = binary
+	if os.Getenv("LO_TEST_NATIVE_RACE") == "1" {
+		nativeCompiler = filepath.Join(dir, "nativefixture")
+		command := exec.Command("go", "build", "-tags=nativequalification", "-o", nativeCompiler, "./tools/nativefixture")
+		command.Dir = repository
+		if output, err := command.CombinedOutput(); err != nil {
+			fmt.Fprintf(os.Stderr, "build native race harness: %v\n%s", err, output)
+			os.Exit(1)
+		}
 	}
 	status := m.Run()
 	if err := os.RemoveAll(dir); err != nil {
@@ -50,7 +67,18 @@ type result struct {
 
 func run(t *testing.T, args ...string) result {
 	t.Helper()
-	command := exec.Command(binary, args...)
+	if path, runtimeArgs, ok := nativeInvocation(args); ok {
+		artifact, r := buildForTest(t, path)
+		if r.status != 0 {
+			return r
+		}
+		return runExecutable(t, artifact, runtimeArgs...)
+	}
+	return runExecutable(t, binary, args...)
+}
+func runExecutable(t *testing.T, executable string, args ...string) result {
+	t.Helper()
+	command := exec.Command(executable, args...)
 	command.Dir = repository
 	var stdout, stderr bytes.Buffer
 	command.Stdout = &stdout

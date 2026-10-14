@@ -5,6 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"io"
 	"net"
 	"net/http"
@@ -18,7 +21,6 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
@@ -236,12 +238,12 @@ func TestServerPartialStartupCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	servers, err := adapter.NewServers(p, files, policy, eval.DefaultBudget())
+	servers, err := adapter.NewServers(executable(t, p), files, policy, execution.DefaultBudget())
 	if err != nil {
 		t.Fatal(err)
 	}
 	_, err = servers.Start(context.Background())
-	var failure eval.Failure
+	var failure execution.Failure
 	if !errors.As(err, &failure) || failure.Value().Kind() != "HTTP.ServerStartFailed" {
 		t.Fatalf("startup failure: %v", err)
 	}
@@ -279,7 +281,7 @@ func startAdapter(t *testing.T, text string) adapter.Servers {
 	if err != nil {
 		t.Fatal(err)
 	}
-	servers, err := adapter.NewServers(p, files, policy, eval.DefaultBudget())
+	servers, err := adapter.NewServers(executable(t, p), files, policy, execution.DefaultBudget())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -416,4 +418,13 @@ func TestServerDisconnectedErrorResponse(t *testing.T) {
 		t.Fatalf("client disconnection became a service failure: %v", err)
 	default:
 	}
+}
+
+func executable(t *testing.T, p ir.Program) execution.Program {
+	t.Helper()
+	result, err := eval.Program(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return result
 }

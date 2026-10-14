@@ -41,7 +41,7 @@ func startServer(t *testing.T, source string, extra ...string) *serverProcess {
 func startServerFile(t *testing.T, path string, extra ...string) *serverProcess {
 	t.Helper()
 	args := append([]string{"serve", path, "--listen", "0", "--format", "json"}, extra...)
-	p := &serverProcess{cmd: exec.Command(binary, args...), events: make(chan serveEvent, 4), done: make(chan struct{})}
+	p := &serverProcess{cmd: runtimeCommand(t, args...), events: make(chan serveEvent, 4), done: make(chan struct{})}
 	p.cmd.Dir = repository
 	stdout, err := p.cmd.StdoutPipe()
 	if err != nil {

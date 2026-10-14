@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"sync/atomic"
 	"testing"
 
@@ -31,7 +32,7 @@ func minimumTensorSteps(t *testing.T, text string) uint64 {
 	lo, hi := uint64(1), uint64(10000)
 	for lo < hi {
 		mid := (lo + hi) / 2
-		budget, err := eval.NewBudget(mid)
+		budget, err := execution.NewBudget(mid)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -40,7 +41,7 @@ func minimumTensorSteps(t *testing.T, text string) uint64 {
 			hi = mid
 			continue
 		}
-		var host eval.HostError
+		var host execution.HostError
 		if !errors.As(err, &host) || host.Code() != "runtime.limit" {
 			t.Fatal(err)
 		}
@@ -102,12 +103,12 @@ flow Work() -> Int onError Handle { seed=Tensor.new(List.new(1.0),List.new()); a
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	controlled := &tensorCancellation{Context: ctx, cancel: cancel}
-	budget, err := eval.NewBudget(10000000)
+	budget, err := execution.NewBudget(10000000)
 	if err != nil {
 		t.Fatal(err)
 	}
 	v, err := eval.Run(controlled, p, &observedBoundary{}, budget)
-	var host eval.HostError
+	var host execution.HostError
 	if v != nil || !errors.As(err, &host) || host.Code() != "runtime.cancelled" || !errors.Is(err, context.Canceled) {
 		t.Fatalf("kernel cancellation entered handler: value=%v, error=%v", v, err)
 	}
@@ -116,7 +117,7 @@ flow Work() -> Int onError Handle { seed=Tensor.new(List.new(1.0),List.new()); a
 func TestTensorFailureStopsCommit(t *testing.T) {
 	b := &observedBoundary{}
 	_, err := evaluate(t, `flow Fail() -> Tensor<FP32>! { a=Tensor.new(List.new(-1.0),List.new()); b=Tensor.sqrt(a); target=File.write(File.Path.new("after"),Bytes.new("wrong")); commit target; return b }; return Fail()`, b)
-	var failure eval.Failure
+	var failure execution.Failure
 	if !errors.As(err, &failure) || failure.Value().Kind() != "Numeric.Domain" || b.commits != 0 {
 		t.Fatalf("failure/commit order: error=%v commits=%d", err, b.commits)
 	}
