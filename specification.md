@@ -1463,6 +1463,9 @@ It evaluates only the selected branch.
 
 23. Runtime Contracts
 
+The interpreter and native backend use these runtime contracts.
+The two backends use the same evaluation order, errors, authorization rules, and logical execution limits.
+
 23.1 Numeric and Collection Results
 
 Integer operations use exact mathematical integers within the host execution budget.
@@ -1515,7 +1518,7 @@ It applies the simple upper or lower mapping to each scalar.
 
 23.3 Evaluation Order
 
-The interpreter evaluates statements in source order.
+The runtime evaluates statements in source order.
 It evaluates every binding in an entered body, including bindings without later references.
 A binding reference uses the stored value without another evaluation of its initializer.
 Each flow invocation has its own parameter and binding values.
@@ -1523,11 +1526,11 @@ Each flow invocation has its own parameter and binding values.
 Call arguments evaluate in source order, independent of their named parameter positions.
 A pipe evaluates its left expression before its explicit arguments.
 Match evaluation follows section 22.5.
-The interpreter does not evaluate unselected branches or later case heads after a match.
+The runtime does not evaluate unselected branches or subsequent case heads after a match.
 
 Every evaluated `File.read` performs a new boundary read.
 Separate reads of one path can return different contents.
-The interpreter does not combine reads or move them across branch, invocation, or handler boundaries.
+The runtime does not combine reads or move them across branch, invocation, or handler boundaries.
 
 An unresolved failure stops the current evaluation at its propagation operation.
 Later arguments and statements in that evaluation do not execute.
@@ -1654,7 +1657,7 @@ The HTTP transport can add protocol headers.
 
 An invalid response from `onError` is a fatal host failure.
 The adapter does not invoke `onError` again or construct a substitute response.
-Host authorization failures and interpreter limits bypass Lo handlers.
+Host authorization failures and execution limits bypass Lo handlers.
 The request handler and `onError` share one execution budget.
 
 The host HTTP parser can reject malformed protocol input before a Lo request exists.
@@ -1665,9 +1668,11 @@ The compiler design specifies request limits, cancellation, startup, and shutdow
 
 24. Numeric and CPU Tensor Extension
 
-F002 through F007 implement this extension through the reference interpreter.
+F002 through F007 implement Float arithmetic, CPU tensors, reverse-mode autodiff, Parameters, gradients, and optimizers.
+F001 implements these operations in native executables.
+The reference interpreter and native artifacts use the same numeric and runtime contracts.
 All operations in this section are pure.
-Native executable generation and device transfers have separate implementation issues.
+F008 through F011 and I001 own the remaining device, precision, and training acceptance work.
 
 24.1 Binary64 Arithmetic
 
