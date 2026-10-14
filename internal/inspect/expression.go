@@ -136,6 +136,11 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		out.targets = []targetReference{{ID: targetID(r.ID), Conditions: mergeConditions(nil, c.conditions)}}
 	}
 	switch op.Rule() {
+	case catalog.Gradient:
+		arguments := append([]abstract{}, values[1:len(values)-1]...)
+		arguments = append(arguments, values[0])
+		loss := a.invoke(c, flows[len(values)-1], "gradient", c.entry, node, arguments, c.conditions)
+		out.fields = map[string]abstract{catalog.ParamValue: loss, catalog.FieldGradients: values[0]}
 	case catalog.RecordConstructor:
 		out.fields = map[string]abstract{}
 		for i, label := range e.Labels() {

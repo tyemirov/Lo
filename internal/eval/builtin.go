@@ -16,6 +16,14 @@ import (
 func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int]ir.FlowID, f frame) (value.Value, error) {
 	op := call.Operation().Name()
 	switch op {
+	case catalog.SGDConfigNew, catalog.AdamWConfigNew, catalog.SGDStateNew, catalog.AdamWStateNew, catalog.SGDStep, catalog.AdamWStep:
+		return m.optimizerOperation(call, args)
+	case catalog.AutodiffGrad:
+		return m.gradient(call, args)
+	case catalog.AutodiffStop:
+		return args[0], nil
+	case catalog.ParametersNew, catalog.ParametersValues, catalog.GradientsNew, catalog.GradientsValues, catalog.GradientsZero, catalog.GradientsAdd, catalog.GradientsScale:
+		return m.parameterOperation(call, args)
 	case catalog.DeviceNew, catalog.TensorNew, catalog.TensorShape, catalog.TensorRank, catalog.TensorDtype,
 		catalog.TensorDevice, catalog.TensorToFloat, catalog.TensorValues, catalog.TensorAdd, catalog.TensorSub,
 		catalog.TensorMul, catalog.TensorDiv, catalog.TensorSqrt, catalog.TensorRelu, catalog.TensorMatmul,

@@ -220,14 +220,20 @@ func (m *machine) expression(expr ir.Expression, f frame) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := m.chargeValue(v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+func (m *machine) chargeValue(v value.Value) error {
 	if v.Weight() > MaxValueWeight {
-		return nil, Limit("expanded value bytes")
+		return Limit("expanded value bytes")
 	}
 	if v.Weight() > MaxEvaluationWeight-m.weight {
-		return nil, Limit("evaluation value bytes")
+		return Limit("evaluation value bytes")
 	}
 	m.weight += v.Weight()
-	return v, nil
+	return nil
 }
 func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 	switch x := expr.(type) {

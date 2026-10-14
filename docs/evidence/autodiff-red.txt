@@ -1,0 +1,24 @@
+go test ./tests/integration -run TestAutodiff -count=1
+--- FAIL: TestAutodiffSharedEdgesAndContext (0.18s)
+    --- FAIL: TestAutodiffSharedEdgesAndContext/first.value (0.16s)
+        autodiff_test.go:32: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Autodiff.grad","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestAutodiffSharedEdgesAndContextfirst.value3812929116/001/2074109438.lo","start":{"offset":422,"line":11,"column":11},"end":{"offset":445,"line":11,"column":34}}}]}
+             status:1}
+    --- FAIL: TestAutodiffSharedEdgesAndContext/first.gradients.x (0.01s)
+        autodiff_test.go:32: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Autodiff.grad","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestAutodiffSharedEdgesAndContextfirst.gradients.x3632248390/001/1901915782.lo","start":{"offset":422,"line":11,"column":11},"end":{"offset":445,"line":11,"column":34}}}]}
+             status:1}
+    --- FAIL: TestAutodiffSharedEdgesAndContext/first.gradients.unused (0.01s)
+        autodiff_test.go:32: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Autodiff.grad","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestAutodiffSharedEdgesAndContextfirst.gradients.unused158774005/001/2782837897.lo","start":{"offset":422,"line":11,"column":11},"end":{"offset":445,"line":11,"column":34}}}]}
+             status:1}
+    --- FAIL: TestAutodiffSharedEdgesAndContext/second.gradients.x (0.01s)
+        autodiff_test.go:32: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Autodiff.grad","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestAutodiffSharedEdgesAndContextsecond.gradients.x1803668309/001/604511158.lo","start":{"offset":422,"line":11,"column":11},"end":{"offset":445,"line":11,"column":34}}}]}
+             status:1}
+    --- FAIL: TestAutodiffSharedEdgesAndContext/p.x (0.01s)
+        autodiff_test.go:32: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Autodiff.grad","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestAutodiffSharedEdgesAndContextp.x3370465956/001/3057599178.lo","start":{"offset":422,"line":11,"column":11},"end":{"offset":445,"line":11,"column":34}}}]}
+             status:1}
+--- FAIL: TestAutodiffRejectsUnsupportedGraphs (0.01s)
+    autodiff_test.go:48: unsupported loss graph: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Autodiff.grad","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestAutodiffRejectsUnsupportedGraphs959582972/001/488110378.lo","start":{"offset":196,"line":2,"column":74},"end":{"offset":231,"line":2,"column":109}}}]}
+         status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.711s
+FAIL
+make: *** [test-integration] Error 1

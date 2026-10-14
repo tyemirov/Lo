@@ -113,6 +113,13 @@ func Failure(t types.Fallible, e Error) (Fallible, error) {
 
 func Project(v Value, field string) Value {
 	switch x := v.(type) {
+	case OptimizerState:
+		switch field {
+		case types.FieldParameters:
+			return x.Parameters()
+		case types.FieldStep:
+			return x.Step()
+		}
 	case Record:
 		return x.Field(field)
 	case Error:

@@ -12,7 +12,7 @@ Native compilation is not implemented.
 The completed [compiler design](compiler-design.md) remains the reference for the existing six stages.
 The [implementation audit](implementation-audit.md) records their acceptance evidence.
 
-The milestone covers all currently supported Lo programs and all 52 built-in operations.
+The milestone covers all currently supported Lo programs and all 100 built-in operations after F007.
 It includes File workflows and HTTP services.
 The initial targets are `darwin/arm64` and `linux/arm64`, which match the currently qualified platforms.
 Each target requires execution tests on that target.
@@ -72,6 +72,11 @@ Both text cases returned `10000`.
 These measurements include process startup, source access, parsing, type checks, execution, and output.
 They do not isolate interpreter costs or predict native performance.
 Stage 0 replaces this exploratory probe with repeatable benchmarks and recorded environment data.
+
+The [CPU training benchmark](training-benchmark.md) adds measured execution and allocation costs after F005 through F007.
+It separates checking, execution, serialization, and complete CLI latency.
+F001 must also lower derivative plans and preserve Parameter, gradient, and optimizer contracts.
+This training baseline does not replace the remaining Stage 0 corpus or its build budgets.
 
 ## Backend Choice
 

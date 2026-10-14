@@ -1,0 +1,2 @@
+flow Run() -> Optimizer.SGD.State<Record{x: Tensor<FP32>}>! { x=Tensor.new(List.new(2.0),List.new()); p=Parameters.new(Record.new(x:x)); config=Optimizer.SGD.Config.new(0.25); state=Optimizer.SGD.State.new(p,config); gradients=Gradients.new(p,Record.new(x:x)); return Optimizer.SGD.step(state,gradients) }
+return Run()

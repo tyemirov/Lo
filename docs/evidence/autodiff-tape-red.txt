@@ -1,0 +1,8 @@
+go test ./tests/integration -run TestAutodiffDiagnosticContextBudget -count=1
+--- FAIL: TestAutodiffDiagnosticContextBudget (0.22s)
+    autodiff_contract_test.go:187: unbounded derivative context: {stdout: stderr:{"diagnostics":[{"code":"runtime.unhandled-error","stage":"runtime","message":"Numeric.NonFinite: expected finite FP32 result, got invalid value at row-major element 0","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestAutodiffDiagnosticContextBudget299770924/001/3061153285.lo","start":{"offset":5472,"line":3,"column":5262},"end":{"offset":5477,"line":3,"column":5267}},"error":{"type":"Error","kind":"Numeric.NonFinite","message":"expected finite FP32 result, got invalid value at row-major element 0","input":{"type":"Record","value":{"argument0":{"type":"Record{device: String, dtype: String, shape: List\u003cInt\u003e, tensor_type: String}","value":{"device":{"type":"String","value":"cpu"},"dtype":{"type":"String","value":"fp32"},"shape":{"type":"List\u003cInt\u003e","value":[]},"tensor_type":{"type":"String","value":"Tensor\u003cFP32\u003e"}}},"argument1":{"type":"Record{device: String,  [remaining diagnostic omitted]
+         status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.695s
+FAIL
+make: *** [test-integration] Error 1

@@ -64,6 +64,12 @@ func NewDevice(selector string) (Device, error) {
 // Snapshot removes tensor storage from diagnostic inputs, including nested data.
 func Snapshot(v Value) Value {
 	switch x := v.(type) {
+	case OptimizerState:
+		return Snapshot(x.Contents())
+	case OptimizerConfig:
+		return Snapshot(x.Contents())
+	case TensorBundle:
+		return Snapshot(x.Contents())
 	case Tensor:
 		shape := make([]Value, x.Data().Shape().Rank())
 		for i, d := range x.Data().Shape().Dims() {
@@ -111,6 +117,10 @@ func Snapshot(v Value) Value {
 
 func snapshotType(t types.Type) types.Type {
 	switch x := t.(type) {
+	case types.OptimizerState:
+		return snapshotType(types.StateContents(x))
+	case types.TensorBundle:
+		return snapshotType(x.Schema())
 	case types.List:
 		return must(types.NewList(snapshotType(x.Element())))
 	case types.Map:
@@ -126,6 +136,9 @@ func snapshotType(t types.Type) types.Type {
 	}
 	if t.Kind() == types.TensorKind {
 		return must(types.NewRecord([]types.Field{{Name: "tensor_type", Type: types.String()}, {Name: "dtype", Type: types.String()}, {Name: "shape", Type: must(types.NewList(types.Int()))}, {Name: "device", Type: types.String()}}))
+	}
+	if t.Kind() == types.SGDConfigKind || t.Kind() == types.AdamWConfigKind {
+		return types.ConfigContents(t.Kind())
 	}
 	return t
 }

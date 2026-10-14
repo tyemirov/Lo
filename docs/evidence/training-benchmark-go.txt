@@ -1,0 +1,67 @@
+GOMAXPROCS=1 go test ./tests/benchmark -run '^$' -bench BenchmarkTraining -benchmem -count=10 -benchtime=300ms
+goos: darwin
+goarch: arm64
+pkg: github.com/MarcoPoloResearchLab/Lo/tests/benchmark
+cpu: Apple M5 Pro
+BenchmarkTraining/MVP200/Check         	    1567	    224492 ns/op	  399129 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1717	    206485 ns/op	  399119 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1776	    211651 ns/op	  399120 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1754	    210671 ns/op	  399119 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1588	    210363 ns/op	  399122 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1676	    211466 ns/op	  399122 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1728	    205008 ns/op	  399120 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1778	    208467 ns/op	  399117 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1758	    207543 ns/op	  399124 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Check         	    1663	    209181 ns/op	  399116 B/op	    4103 allocs/op
+BenchmarkTraining/MVP200/Execute       	      72	   5139733 ns/op	 8401731 B/op	  213900 allocs/op
+BenchmarkTraining/MVP200/Execute       	      74	   5013639 ns/op	 8401705 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Execute       	      76	   5174953 ns/op	 8401625 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Execute       	      73	   5101604 ns/op	 8401650 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Execute       	      69	   5010542 ns/op	 8401695 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Execute       	      74	   5180002 ns/op	 8401438 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Execute       	      76	   5096414 ns/op	 8401637 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Execute       	      78	   5231085 ns/op	 8401345 B/op	  213898 allocs/op
+BenchmarkTraining/MVP200/Execute       	      73	   5197421 ns/op	 8401628 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Execute       	      74	   5264936 ns/op	 8401421 B/op	  213899 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   33142	     10729 ns/op	   10571 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   34657	     10364 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   34993	     10270 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   34516	     10383 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   35660	     10247 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   34839	     10285 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   34976	     10457 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   34035	     10373 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   35781	     10265 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/MVP200/Serialize     	   35437	     10413 ns/op	   10570 B/op	     137 allocs/op
+BenchmarkTraining/Dense20/Check        	     148	   2435468 ns/op	 2067923 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     152	   2365708 ns/op	 2067930 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     146	   2435753 ns/op	 2067962 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     152	   2373951 ns/op	 2067886 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     153	   2335910 ns/op	 2067893 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     145	   2450832 ns/op	 2067905 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     153	   2332422 ns/op	 2067894 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     150	   2372292 ns/op	 2067883 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     153	   2368463 ns/op	 2067883 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Check        	     152	   2369818 ns/op	 2067885 B/op	   11085 allocs/op
+BenchmarkTraining/Dense20/Execute      	     100	   3045080 ns/op	 1647470 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     100	   3015912 ns/op	 1647404 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     100	   3040440 ns/op	 1647405 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     120	   2991572 ns/op	 1647459 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     100	   3043800 ns/op	 1647405 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     120	   2996823 ns/op	 1647513 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     100	   3014934 ns/op	 1647410 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     120	   3002260 ns/op	 1647474 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     100	   3043267 ns/op	 1647417 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Execute      	     100	   3010075 ns/op	 1647400 B/op	   23169 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    6777	     50694 ns/op	   56118 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7669	     50615 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7711	     49894 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7393	     50365 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7410	     50358 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7232	     50494 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7321	     50364 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7430	     49802 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7579	     50452 ns/op	   56093 B/op	     536 allocs/op
+BenchmarkTraining/Dense20/Serialize    	    7426	     50682 ns/op	   56093 B/op	     536 allocs/op
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/benchmark	21.717s

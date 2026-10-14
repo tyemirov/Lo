@@ -1,0 +1,126 @@
+go build -o bin/lo ./cmd/lo
+GOMAXPROCS=1 go test ./tests/benchmark -run '^$' -bench 'BenchmarkTraining/(MVP200|Dense20)/Execute$' -benchtime=3s -cpuprofile bin/training-cpu.pprof -memprofile bin/training-alloc.pprof -o bin/training-benchmark.test
+goos: darwin
+goarch: arm64
+pkg: github.com/MarcoPoloResearchLab/Lo/tests/benchmark
+cpu: Apple M5 Pro
+BenchmarkTraining/MVP200/Execute         	     661	   5344886 ns/op	 8401708 B/op	  213901 allocs/op
+BenchmarkTraining/Dense20/Execute        	    1194	   2991884 ns/op	 1647487 B/op	   23169 allocs/op
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/benchmark	7.432s
+go tool pprof -top -nodecount=30 bin/training-benchmark.test bin/training-cpu.pprof
+File: training-benchmark.test
+Type: cpu
+Time: 2026-10-13 17:23:01 PDT
+Duration: 7.27s, Total samples = 6.62s (91.11%)
+Showing nodes accounting for 6.31s, 95.32% of 6.62s total
+Dropped 92 nodes (cum <= 0.03s)
+Showing top 30 nodes out of 43
+      flat  flat%   sum%        cum   cum%
+     5.88s 88.82% 88.82%      5.88s 88.82%  runtime.kevent
+     0.22s  3.32% 92.15%      0.22s  3.32%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.(*data).At
+     0.11s  1.66% 93.81%      0.11s  1.66%  runtime.madvise
+     0.04s   0.6% 94.41%      0.33s  4.98%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.Execute
+     0.02s   0.3% 94.71%      0.04s   0.6%  runtime.(*timer).unlockAndRun
+     0.01s  0.15% 94.86%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).expression
+     0.01s  0.15% 95.02%      0.05s  0.76%  runtime.(*timers).run
+     0.01s  0.15% 95.17%      0.11s  1.66%  runtime.mallocgc
+     0.01s  0.15% 95.32%      0.08s  1.21%  runtime.schedule
+         0     0% 95.32%      0.14s  2.11%  github.com/MarcoPoloResearchLab/Lo/internal/autodiff.(*calculation).apply
+         0     0% 95.32%      0.15s  2.27%  github.com/MarcoPoloResearchLab/Lo/internal/autodiff.VJP
+         0     0% 95.32%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).body
+         0     0% 95.32%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).builtin
+         0     0% 95.32%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).evaluate
+         0     0% 95.32%      0.43s  6.50%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).gradient
+         0     0% 95.32%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).invoke
+         0     0% 95.32%      0.44s  6.65%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).listProcessor
+         0     0% 95.32%      0.16s  2.42%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).tensorOperation
+         0     0% 95.32%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.Run
+         0     0% 95.32%      0.20s  3.02%  github.com/MarcoPoloResearchLab/Lo/internal/eval.tensorArithmetic.Apply
+         0     0% 95.32%      0.05s  0.76%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.shape.Dims
+         0     0% 95.32%      0.44s  6.65%  github.com/MarcoPoloResearchLab/Lo/tests/benchmark_test.BenchmarkTraining.func2
+         0     0% 95.32%      0.11s  1.66%  runtime.(*mheap).alloc.func1
+         0     0% 95.32%      0.11s  1.66%  runtime.(*mheap).allocSpan
+         0     0% 95.32%      0.05s  0.76%  runtime.(*timers).check
+         0     0% 95.32%      0.05s  0.76%  runtime.bgsweep
+         0     0% 95.32%      0.06s  0.91%  runtime.findRunnable
+         0     0% 95.32%      2.72s 41.09%  runtime.gcMarkTermination.func3
+         0     0% 95.32%      3.16s 47.73%  runtime.gcStart.func4
+         0     0% 95.32%      0.07s  1.06%  runtime.gopreempt_m
+go tool pprof -top -cum -nodecount=30 bin/training-benchmark.test bin/training-cpu.pprof
+File: training-benchmark.test
+Type: cpu
+Time: 2026-10-13 17:23:01 PDT
+Duration: 7.27s, Total samples = 6.62s (91.11%)
+Showing nodes accounting for 6.28s, 94.86% of 6.62s total
+Dropped 92 nodes (cum <= 0.03s)
+Showing top 30 nodes out of 43
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%      6.07s 91.69%  runtime.systemstack
+     5.88s 88.82% 88.82%      5.88s 88.82%  runtime.kevent
+         0     0% 88.82%      5.88s 88.82%  runtime.netpoll
+         0     0% 88.82%      5.88s 88.82%  runtime.startTheWorldWithSema
+         0     0% 88.82%      3.16s 47.73%  runtime.gcStart.func4
+         0     0% 88.82%      2.72s 41.09%  runtime.gcMarkTermination.func3
+         0     0% 88.82%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).body
+         0     0% 88.82%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).builtin
+         0     0% 88.82%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).evaluate
+     0.01s  0.15% 88.97%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).expression
+         0     0% 88.97%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).invoke
+         0     0% 88.97%      0.45s  6.80%  github.com/MarcoPoloResearchLab/Lo/internal/eval.Run
+         0     0% 88.97%      0.45s  6.80%  testing.(*B).run1.func1
+         0     0% 88.97%      0.45s  6.80%  testing.(*B).runN
+         0     0% 88.97%      0.44s  6.65%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).listProcessor
+         0     0% 88.97%      0.44s  6.65%  github.com/MarcoPoloResearchLab/Lo/tests/benchmark_test.BenchmarkTraining.func2
+         0     0% 88.97%      0.43s  6.50%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).gradient
+     0.04s   0.6% 89.58%      0.33s  4.98%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.Execute
+     0.22s  3.32% 92.90%      0.22s  3.32%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.(*data).At
+         0     0% 92.90%      0.20s  3.02%  github.com/MarcoPoloResearchLab/Lo/internal/eval.tensorArithmetic.Apply
+         0     0% 92.90%      0.16s  2.42%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).tensorOperation
+         0     0% 92.90%      0.15s  2.27%  github.com/MarcoPoloResearchLab/Lo/internal/autodiff.VJP
+         0     0% 92.90%      0.14s  2.11%  github.com/MarcoPoloResearchLab/Lo/internal/autodiff.(*calculation).apply
+         0     0% 92.90%      0.11s  1.66%  runtime.(*mheap).alloc.func1
+         0     0% 92.90%      0.11s  1.66%  runtime.(*mheap).allocSpan
+     0.11s  1.66% 94.56%      0.11s  1.66%  runtime.madvise
+     0.01s  0.15% 94.71%      0.11s  1.66%  runtime.mallocgc
+         0     0% 94.71%      0.11s  1.66%  runtime.sysUsed (inline)
+         0     0% 94.71%      0.11s  1.66%  runtime.sysUsedOS (inline)
+     0.01s  0.15% 94.86%      0.08s  1.21%  runtime.schedule
+go tool pprof -sample_index=alloc_space -top -nodecount=30 bin/training-benchmark.test bin/training-alloc.pprof
+File: training-benchmark.test
+Type: alloc_space
+Time: 2026-10-13 17:23:09 PDT
+Showing nodes accounting for 6.76GB, 95.28% of 7.10GB total
+Dropped 69 nodes (cum <= 0.04GB)
+Showing top 30 nodes out of 76
+      flat  flat%   sum%        cum   cum%
+    0.95GB 13.33% 13.33%     1.11GB 15.66%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.Execute
+    0.84GB 11.83% 25.16%     1.25GB 17.62%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewRecord
+    0.67GB  9.40% 34.56%     0.67GB  9.40%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/types.Field,go.shape.struct { Name string; Type github.com/MarcoPoloResearchLab/Lo/internal/types.Type }] (inline)
+    0.45GB  6.33% 40.89%     1.18GB 16.58%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.Prepare
+    0.44GB  6.16% 47.04%     5.45GB 76.86%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).gradient
+    0.38GB  5.39% 52.43%     0.38GB  5.39%  math/big.NewInt (inline)
+    0.37GB  5.28% 57.71%     0.37GB  5.28%  slices.Clone[go.shape.[]int64,go.shape.int64] (inline)
+    0.25GB  3.52% 61.22%     0.25GB  3.52%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.NewShape
+    0.23GB  3.27% 64.49%     0.23GB  3.27%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewText
+    0.21GB  2.99% 67.48%     1.71GB 24.11%  github.com/MarcoPoloResearchLab/Lo/internal/value.Snapshot
+    0.21GB  2.98% 70.46%     0.23GB  3.27%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewInt
+    0.20GB  2.88% 73.34%     0.20GB  2.88%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/autodiff.Argument,go.shape.struct { Name string; Binding github.com/MarcoPoloResearchLab/Lo/internal/ir.BindingID }] (inline)
+    0.20GB  2.79% 76.13%     0.20GB  2.79%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/ir.Argument,go.shape.interface { Position int; Span github.com/MarcoPoloResearchLab/Lo/internal/source.Span; github.com/MarcoPoloResearchLab/Lo/internal/ir.argument }] (inline)
+    0.17GB  2.33% 78.46%     0.17GB  2.33%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewList
+    0.15GB  2.08% 80.54%     0.15GB  2.08%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/autodiff.Frame,go.shape.struct { Invocation int; Name string; Span github.com/MarcoPoloResearchLab/Lo/internal/source.Span; Arguments []github.com/MarcoPoloResearchLab/Lo/internal/autodiff.Argument }] (inline)
+    0.12GB  1.75% 82.29%     0.12GB  1.75%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewTensor
+    0.11GB  1.59% 83.88%     7.09GB 99.93%  github.com/MarcoPoloResearchLab/Lo/internal/eval.(*machine).invoke
+    0.11GB  1.48% 85.36%     0.11GB  1.48%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.Construct
+    0.09GB  1.29% 86.64%     0.09GB  1.29%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/value.Field,go.shape.struct { Name string; Value github.com/MarcoPoloResearchLab/Lo/internal/value.Value }] (inline)
+    0.08GB  1.14% 87.79%     0.08GB  1.14%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/ir.Parameter,go.shape.struct { ID github.com/MarcoPoloResearchLab/Lo/internal/ir.BindingID; Name string; Type github.com/MarcoPoloResearchLab/Lo/internal/types.Type; Span github.com/MarcoPoloResearchLab/Lo/internal/source.Span }] (inline)
+    0.07GB  1.04% 88.82%     0.20GB  2.86%  github.com/MarcoPoloResearchLab/Lo/internal/value.Success
+    0.07GB  0.95% 89.77%     0.41GB  5.79%  github.com/MarcoPoloResearchLab/Lo/internal/types.NewRecord
+    0.06GB   0.8% 90.57%     0.06GB   0.8%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/autodiff.Edge,go.shape.struct { Operand int; Node int }] (inline)
+    0.06GB  0.79% 91.36%     0.06GB   0.8%  fmt.Sprintf
+    0.05GB  0.76% 92.13%     0.57GB  7.99%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.fromDims
+    0.05GB  0.66% 92.79%     0.05GB  0.66%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewFloat
+    0.05GB  0.64% 93.43%     0.05GB  0.64%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/ir.BindingID,go.shape.string] (inline)
+    0.04GB  0.63% 94.06%     0.04GB  0.63%  github.com/MarcoPoloResearchLab/Lo/internal/tensor.ReluDerivative
+    0.04GB  0.62% 94.68%     0.04GB  0.62%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/autodiff.Node,go.shape.8c13734742bc97da28d00ceea18a5d5a063dc7eb048a3e1224641b694788f070] (inline)
+    0.04GB   0.6% 95.28%     0.04GB   0.6%  math/big.nat.make (inline)

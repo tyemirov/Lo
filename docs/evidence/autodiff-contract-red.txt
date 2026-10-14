@@ -1,0 +1,7 @@
+go test ./tests/integration -run "TestAutodiff(Inspection|TransitiveRejections)" -count=1
+--- FAIL: TestAutodiffInspection (0.09s)
+    autodiff_contract_test.go:41: missing derivative plan
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.648s
+FAIL
+make: *** [test-integration] Error 1

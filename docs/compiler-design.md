@@ -81,7 +81,8 @@ It leaves the completed six-stage acceptance scope unchanged.
 The selected [training extension design](training-extension-design.md) defines the additional contracts for F002 through F011 and I001.
 P001 completed that design task.
 F002, F003, and F004 add Float arithmetic and CPU tensors to the interpreter.
-F005 through F011 and I001 retain their separate implementation and acceptance work.
+F005, F006, and F007 add CPU autodiff, Parameters, gradients, and pure optimizer transitions.
+F008 through F011 and I001 retain device implementation and complete training acceptance.
 Training implementation extends the interpreter independently of F001.
 The extension document maps each required specification change to its owning issue.
 
@@ -584,7 +585,7 @@ The runtime does not narrow integers or silently truncate collections to meet a 
 
 ### Numeric and Tensor Analysis
 
-The catalog defines 85 built-in operations after F002 through F004.
+The catalog defines 100 built-in operations after F002 through F007.
 `internal/tensor` owns validated shapes, operation plans, immutable data, and CPU kernels.
 `internal/tensorfacts` propagates static metadata through bindings, records, Match branches, and named flow calls.
 It examines every declared flow, including unused flows.
@@ -604,6 +605,50 @@ Each multiplication completes its FP32 rounding before the addition.
 Reduction order and intermediate failures follow specification section 24.3.
 The [forward example](../examples/tensor_forward.lo) returns loss from mean squared error `3` through `lo run`.
 This operation set supplies the reference implementation for F005 and F009.
+
+### Derivative Plans
+
+`internal/autodiff` constructs the F005 derivative plan during checking.
+Each checked `Autodiff.grad` call owns an immutable plan.
+The plan expands named helpers with distinct invocation identities.
+Its nodes contain source spans, operand bindings, active derivative edges, and value-lifetime information.
+Unsupported operations fail before execution, including operations in unused eager bindings.
+
+The evaluator executes the forward plan and propagates contributions in reverse stable order.
+The VJP module uses an arithmetic interface for checked tensor operations and resource admission.
+This interface keeps derivative rules independent of interpreter traversal.
+F001 can reuse the same plan and rules.
+
+Forward values leave the local environment after their last use unless a derivative rule requires them.
+Diagnostic frames retain metadata snapshots instead of tensor contents.
+These snapshots receive cumulative value charges before the evaluator retains them.
+The tape counts distinct storage allocations and enforces the limit in specification section 24.5.
+Every generated numeric result contributes to cumulative value weight.
+Failures retain the forward operation span and the expanded helper trace.
+
+Inspection adds a `derivative` object to each `Autodiff.grad` node.
+The object contains `result`, `targets`, and `nodes`.
+Each derivative node reports its ID, binding, operation, span, invocation identities, operands, edges, reverse activity, and retention status.
+Each edge identifies the operand index and its source node.
+Both text and JSON reports expose this plan.
+
+### Parameters and Optimizer State
+
+`Parameters<R>` and `Gradients<R>` wrap immutable exact tensor records.
+Their type identity includes the complete record schema.
+The value boundary validates gradient shapes before accumulation or optimizer work.
+Stop-gradient preserves the forward value and removes active reverse edges.
+
+Optimizer configs store FP32-rounded fields after constructor validation.
+Optimizer states store Parameters, step count, config, and the private AdamW fields from specification section 24.7.
+Only Parameters and step count support source projection.
+Serialization includes all fields.
+Diagnostic snapshots replace tensors recursively, including tensors inside optimizer states and container values.
+
+The CPU arithmetic boundary supplies generated derivative, gradient, and optimizer operations.
+It checks work and output weight before each tensor allocation.
+It charges each generated result to the cumulative value budget.
+No partial optimizer state leaves this boundary after a failed primitive.
 
 ## Inspection Contract
 
@@ -1264,10 +1309,31 @@ Additional failures cover [shape and snapshot contracts](evidence/tensor-contrac
 The [final stack check](evidence/numeric-tensor-green.txt) records repository validation.
 This validation runs on macOS arm64 with Go 1.27.1.
 It does not add Linux execution or CUDA evidence.
-Autodiff, Parameters, optimizers, transfers, and complete training acceptance remain with F005 through F011 and I001.
+At that checkpoint, F005 through F011 and I001 retained their implementation work.
 
 Changed prose received review against Part 1 and Part 2 of the verified ASD-STE100 Issue 9 reference.
 The mechanical language check reported no new findings.
 It reported 46 unchanged findings across the tracker, README, and specification.
 The Governor check reported eight existing managed-file differences.
 Those differences concern repository templates and remain outside F002 through F004.
+
+## F005 Through F007 Acceptance
+
+The CPU training stack passed `make ci` on October 13, 2026, with Go 1.27.1 on macOS arm64.
+The catalog has public check and runtime assertions for all 100 operations.
+The conformance suite contains 83 fixtures.
+CLI tests cover each VJP against analytical values and central finite differences.
+Other tests cover source mapping, restrictions, budgets, cancellation, weighted microbatches, optimizer transitions, and immutable prior values.
+
+The [CPU training example](../examples/training_cpu.lo) passed parse, check, inspect, and repeated execution.
+Its final loss and all nine Parameter values matched the independent FP32 reference within fixed tolerances.
+The loss decreased from `2.46875` to `0.00013215476064942777` after 200 SGD updates.
+This result establishes CPU training through the interpreter.
+F008 through F011 and I001 retain their device and complete acceptance scope.
+
+The [stack evidence](evidence/training-stack-green.txt) records final checks and the requirement audit.
+The [benchmark report](training-benchmark.md) records raw samples, allocation evidence, and implications for F001.
+It also records the unresolved CPU profile attribution limit.
+Changed prose received Part 1 and Part 2 review against the verified ASD-STE100 Issue 9 reference.
+The language check found no new mechanical findings and 46 unchanged findings.
+The Governor check retained eight existing template differences.

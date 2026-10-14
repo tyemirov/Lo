@@ -12,7 +12,8 @@ import (
 
 func TestRunBuiltinCatalog(t *testing.T) {
 	want := map[string]string{
-		catalog.FloatAdd: `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
+		catalog.AutodiffGrad: `{"type":"Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}","value":{"gradients":{"type":"Record{x: Tensor<FP32>}","value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}},"value":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}}`,
+		catalog.FloatAdd:     `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
 		catalog.FloatMul: `{"type":"Float","value":"2.5"}`, catalog.FloatDiv: `{"type":"Float","value":"1.5"}`,
 		catalog.FloatSqrt: `{"type":"Float","value":"1.5"}`, catalog.IntToFloat: `{"type":"Float","value":"7"}`,
 		catalog.FloatEqual: `true`, catalog.FloatLT: `true`, catalog.FloatLTE: `true`, catalog.FloatGT: `false`, catalog.FloatGTE: `true`,
@@ -58,6 +59,21 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		want[name] = fmt.Sprintf(`{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":%s,"values":[%q]}}`, shape, element)
 	}
 
+	for _, tc := range []struct{ name, typ, element string }{
+		{catalog.ParametersNew, "Parameters<Record{x: Tensor<FP32>}>", "2"},
+		{catalog.ParametersValues, "Record{x: Tensor<FP32>}", "2"},
+		{catalog.GradientsNew, "Gradients<Record{x: Tensor<FP32>}>", "2"},
+		{catalog.GradientsValues, "Record{x: Tensor<FP32>}", "2"},
+		{catalog.GradientsZero, "Gradients<Record{x: Tensor<FP32>}>", "0"},
+		{catalog.GradientsAdd, "Gradients<Record{x: Tensor<FP32>}>", "4"},
+		{catalog.GradientsScale, "Gradients<Record{x: Tensor<FP32>}>", "1"},
+	} {
+		want[tc.name] = fmt.Sprintf(`{"type":%q,"value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":[%q]}}}}`, tc.typ, tc.element)
+	}
+	want[catalog.AutodiffStop] = `{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["2"]}}`
+	for name, expected := range optimizerCatalogResults() {
+		want[name] = expected
+	}
 	covered := map[string]bool{}
 	for _, tc := range builtinExamples() {
 		if _, ok := want[tc.name]; ok {
@@ -133,4 +149,43 @@ func TestRunBuiltinCatalog(t *testing.T) {
 			t.Errorf("missing runtime case for %s", op.Name())
 		}
 	}
+}
+
+func optimizerCatalogResults() map[string]string {
+	tensor := func(n string) string {
+		return fmt.Sprintf(`{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":[%q]}}`, n)
+	}
+	record := func(n string) string { return `{"type":"Record{x: Tensor<FP32>}","value":{"x":` + tensor(n) + `}}` }
+	parameters := func(n string) string {
+		return `{"type":"Parameters<Record{x: Tensor<FP32>}>","value":{"x":` + tensor(n) + `}}`
+	}
+	configs := map[string]string{
+		"SGD":   `{"type":"Optimizer.SGD.Config","value":{"learning_rate":{"type":"Float","value":"0.25"}}}`,
+		"AdamW": `{"type":"Optimizer.AdamW.Config","value":{"learning_rate":{"type":"Float","value":"0.25"},"beta1":{"type":"Float","value":"0.5"},"beta2":{"type":"Float","value":"0.5"},"epsilon":{"type":"Float","value":"0.5"},"weight_decay":{"type":"Float","value":"0.5"}}}`,
+	}
+	out := map[string]string{}
+	for _, optimizer := range []string{"SGD", "AdamW"} {
+		out["Optimizer."+optimizer+".Config.new"] = configs[optimizer]
+		for step := 0; step <= 1; step++ {
+			n := "2"
+			op := "State.new"
+			if step == 1 {
+				op = "step"
+				n = "1.5"
+				if optimizer == "AdamW" {
+					n = "1.55"
+				}
+			}
+			fields := fmt.Sprintf(`"parameters":%s,"step":{"type":"Int","value":%q},"config":%s`, parameters(n), fmt.Sprint(step), configs[optimizer])
+			if optimizer == "AdamW" {
+				m, v, power := "0", "0", "1"
+				if step == 1 {
+					m, v, power = "1", "2", "0.5"
+				}
+				fields += fmt.Sprintf(`,"first_moment":%s,"second_moment":%s,"beta1_power":%s,"beta2_power":%s`, record(m), record(v), tensor(power), tensor(power))
+			}
+			out["Optimizer."+optimizer+"."+op] = fmt.Sprintf(`{"type":%q,"value":{%s}}`, "Optimizer."+optimizer+".State<Record{x: Tensor<FP32>}>", fields)
+		}
+	}
+	return out
 }

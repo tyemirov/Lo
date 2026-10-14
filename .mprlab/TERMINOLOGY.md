@@ -93,6 +93,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `median`: The middle value of ordered measurements, or the mean of the two middle values.
+- `bootstrap interval`: An estimated statistical interval from repeated samples drawn with replacement from the measured values.
+- `allocation profile`: A sampled report of memory allocations attributed to functions.
+- `CPU profile`: A sampled report of processor time attributed to functions.
+
 - `metadata`: Information about a value's type, shape, storage size, or device, separate from its elements.
 - `axis`: One indexed dimension of a tensor.
 - `row-major layout`: Contiguous tensor storage where the last axis changes fastest.

@@ -26,6 +26,10 @@ func tensorType(t types.Type) bool {
 		return true
 	}
 	switch x := t.(type) {
+	case types.TensorBundle:
+		return true
+	case types.OptimizerState:
+		return true
 	case types.Fallible:
 		return tensorType(x.Base())
 	case types.List:

@@ -468,7 +468,7 @@ F011 owns the deferred mixed-precision decisions after I001.
   The [stack validation](docs/evidence/numeric-tensor-green.txt) records the final repository checks.
   F005 and F009 must preserve this operation set under their derivative and backend contracts.
 
-- [ ] [F005] (P1) {F004} Add reverse-mode autodiff for named flows
+- [x] [F005] (P1) {F004} Add reverse-mode autodiff for named flows
   Goal:
   Compute first-order gradients of a numeric rank-zero loss through a checked graph.
 
@@ -495,7 +495,13 @@ F011 owns the deferred mixed-precision decisions after I001.
   - Verify shared nodes, broadcast bias, disconnected inputs, repeated calls, and nested named pure flows.
   - Verify that unsupported branches, callbacks, effects, and reads receive deterministic diagnostics.
 
-- [ ] [F006] (P1) {F005} Add Parameters and gradient lifecycle operations
+  F005 implemented the exact-record gradient API and bounded derivative plans with source mappings.
+  CLI tests passed analytical VJPs, finite differences, shared edges, explicit context, empty shapes, and repeated helper calls.
+  Rejection, failure, cancellation, work-charge, and diagnostic-context budget tests passed.
+  Specification section 24.5 defines the accepted contract.
+  The [initial failure](docs/evidence/autodiff-red.txt) and [stack validation](docs/evidence/training-stack-green.txt) record evidence.
+
+- [x] [F006] (P1) {F005} Add Parameters and gradient lifecycle operations
   Goal:
   Represent trainable values and gradient accumulation through immutable state.
 
@@ -518,7 +524,13 @@ F011 owns the deferred mixed-precision decisions after I001.
   - Verify that stop-gradient preserves forward results and yields zero contribution along the stopped path.
   - Reject missing keys, duplicate keys, incompatible shapes, and incompatible dtypes at their applicable validation boundary.
 
-- [ ] [F007] (P1) {F006} Add pure SGD and AdamW state transitions
+  F006 implemented immutable Parameters, gradients, reset through zero construction, and stop-gradient.
+  CLI tests passed exact schemas, tied fields, separate equal values, and weighted microbatch accumulation through `List.fold`.
+  Earlier values remained unchanged after accumulation and scale operations.
+  Specification section 24.6 defines the accepted contract.
+  The [initial failure](docs/evidence/parameters-red.txt) and [stack validation](docs/evidence/training-stack-green.txt) record evidence.
+
+- [x] [F007] (P1) {F006} Add pure SGD and AdamW state transitions
   Goal:
   Compute new Parameters and optimizer state without mutable user storage.
 
@@ -539,6 +551,14 @@ F011 owns the deferred mixed-precision decisions after I001.
   - Compare one-step and multi-step results with independent numerical references for SGD and AdamW.
   - Verify nonzero weight decay, zero gradients, invalid configuration, step increments, and original-state preservation.
   - Verify that sequential `List.fold` steps receive the previous step's returned state.
+
+  F007 implemented validated FP32 configs and immutable SGD and AdamW states.
+  CLI tests passed independent transitions, moments, zero gradients, weight decay, invalid configs, and previous-state preservation.
+  Schema, numeric failure, commit-order, and primitive work-charge tests passed.
+  The CPU example completed 200 SGD updates and matched the independent final loss and all nine Parameter values.
+  Specification section 24.7 defines the accepted contract.
+  The [initial failure](docs/evidence/optimizer-red.txt) and [stack validation](docs/evidence/training-stack-green.txt) record evidence.
+  The [training benchmark](docs/training-benchmark.md) supplies execution and allocation evidence for F001.
 
 ### NVIDIA backend
 

@@ -1,0 +1,14 @@
+go test ./tests/integration -run TestParameters -count=1
+--- FAIL: TestParametersGradientLifecycle (0.10s)
+    parameters_test.go:28: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Parameters.new","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestParametersGradientLifecycle417005686/001/354807676.lo","start":{"offset":87,"line":3,"column":13},"end":{"offset":118,"line":3,"column":44}}}]}
+         status:1}
+--- FAIL: TestParametersStopAndIdentity (0.01s)
+    parameters_test.go:48: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Autodiff.stop","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestParametersStopAndIdentity2139161049/001/2669627056.lo","start":{"offset":109,"line":3,"column":10},"end":{"offset":127,"line":3,"column":28}}}]}
+         status:1}
+--- FAIL: TestParametersSchemaFailures (0.05s)
+    parameters_test.go:70: gradient metadata mismatch: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type Gradients","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestParametersSchemaFailures1704205587/007/3856156241.lo","start":{"offset":14,"line":1,"column":15},"end":{"offset":48,"line":1,"column":49}}}]}
+         status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.645s
+FAIL
+make: *** [test-integration] Error 1

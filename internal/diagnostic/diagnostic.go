@@ -68,6 +68,9 @@ const (
 	MissingType         Code = "check.missing-type"
 	TensorShape         Code = "check.tensor-shape"
 	TensorAnalysisLimit Code = "check.tensor-analysis-limit"
+	AutodiffUnsupported Code = "check.autodiff-unsupported"
+	AutodiffLoss        Code = "check.autodiff-loss"
+	AutodiffLimit       Code = "check.autodiff-limit"
 )
 
 type Diagnostic interface {

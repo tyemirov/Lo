@@ -9,7 +9,9 @@ Status: design completed on October 13, 2026.
 F002 through F011 and I001 own implementation and acceptance.
 F002, F003, and F004 implement Float arithmetic and CPU tensors through `lo run`.
 The compiler also implements Device descriptors without device initialization.
-Autodiff, Parameters, optimizers, transfers, and GPU execution remain selected APIs for later issues.
+F005 implements first-order CPU autodiff and derivative plans in inspection reports.
+F006 and F007 implement Parameters, gradients, stop-gradient, SGD, and AdamW.
+Transfers and GPU execution remain selected APIs for later issues.
 The [specification](../specification.md) section 24 defines the implemented numeric and tensor contract.
 
 The [language specification](../specification.md) remains the authority for implemented language behavior.
@@ -728,7 +730,8 @@ The runtime releases failed tensor work independently of those snapshots.
 
 The [complete Lo design fixture](examples/training-mvp.lo) supplies `Forward`, `Loss`, `TrainStep`, and explicit setup and observation.
 It uses the existing grammar, expanded exact record types, and the extension signatures above.
-Its source is a future acceptance fixture, not an executable v0.3 example.
+Its source retains the future device transfer APIs.
+The [CPU training example](../examples/training_cpu.lo) executes the same network without device transfers.
 
 | Stage | Values and shapes | Boundary or state transition |
 | --- | --- | --- |
@@ -891,4 +894,5 @@ The following decisions belong to later scope or implementation evidence.
 | Distributed, sparse, convolution, attention, and higher-order operations | Outside this extension | Use separate feature designs and acceptance fixtures. |
 
 P001 closes the design task only.
-F002 through F011 and I001 remain open until their implementations and required evidence pass.
+Each implementation issue closes only after its required evidence passes.
+F008 through F011 and I001 retain the device and complete training acceptance scope.

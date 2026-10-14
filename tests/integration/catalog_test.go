@@ -12,6 +12,7 @@ type builtinExample struct{ name, source, kind string }
 
 func builtinExamples() []builtinExample {
 	examples := []builtinExample{
+		{"Autodiff.grad", `flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.mul(p.x,p.x) }; flow Example() -> Record{value: Tensor<FP32>, gradients: Record{x: Tensor<FP32>}}! { x=Tensor.new(List.new(2.0),List.new()); return Autodiff.grad(Record.new(x:x),Loss) }; return Example()`, "Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}!"},
 		{"Int.new", `return Int.new(123456789012345678901234567890)`, "Int"},
 		{"String.new", `return String.new("héllo")`, "String"},
 		{"Bool.new", `return Bool.new(false)`, "Bool"},
@@ -78,6 +79,8 @@ func builtinExamples() []builtinExample {
 		{"File.append", `return File.append(File.Path.new("unwritten"), "data")`, "Effect"},
 		{"File.write", `return File.write(File.Path.new("unwritten"), Bytes.new("data"))`, "Effect"},
 	}
+	examples = append(examples, parameterBuiltinExamples()...)
+	examples = append(examples, optimizerBuiltinExamples()...)
 	return append(examples, tensorBuiltinExamples()...)
 }
 
@@ -131,6 +134,46 @@ func tensorBuiltinExamples() []builtinExample {
 		{"Tensor.mean", "Tensor.mean(a,List.new())", "Tensor<FP32>"},
 	} {
 		examples = append(examples, builtinExample{tc.name, fmt.Sprintf(`flow Example() -> %s! { a=Tensor.new(List.new(4.0),List.new()); b=Tensor.new(List.new(2.0),List.new()); return %s }; return Example()`, tc.typ, tc.expression), tc.typ + "!"})
+	}
+	return examples
+}
+
+func parameterBuiltinExamples() []builtinExample {
+	var examples []builtinExample
+	for _, tc := range []struct{ name, expression, typ string }{
+		{"Parameters.new", "Parameters.new(Record.new(x:x))", "Parameters<Record{x: Tensor<FP32>}>"},
+		{"Parameters.values", "Parameters.values(p)", "Record{x: Tensor<FP32>}"},
+		{"Gradients.new", "Gradients.new(p,Record.new(x:x))", "Gradients<Record{x: Tensor<FP32>}>"},
+		{"Gradients.values", "Gradients.values(g)", "Record{x: Tensor<FP32>}"},
+		{"Gradients.zero", "Gradients.zero(p)", "Gradients<Record{x: Tensor<FP32>}>"},
+		{"Gradients.add", "Gradients.add(g,g)", "Gradients<Record{x: Tensor<FP32>}>"},
+		{"Gradients.scale", "Gradients.scale(g,0.5)", "Gradients<Record{x: Tensor<FP32>}>"},
+		{"Autodiff.stop", "Autodiff.stop(x)", "Tensor<FP32>"},
+	} {
+		examples = append(examples, builtinExample{tc.name, fmt.Sprintf(`flow Example() -> %s! { x=Tensor.new(List.new(2.0),List.new()); p=Parameters.new(Record.new(x:x)); g=Gradients.new(p,Record.new(x:x)); return %s }; return Example()`, tc.typ, tc.expression), tc.typ + "!"})
+	}
+	return examples
+}
+
+func optimizerBuiltinExamples() []builtinExample {
+	var examples []builtinExample
+	for _, optimizer := range []string{"SGD", "AdamW"} {
+		config := "Optimizer.SGD.Config.new(0.25)"
+		if optimizer == "AdamW" {
+			config = "Optimizer.AdamW.Config.new(0.25,0.5,0.5,0.5,0.5)"
+		}
+		configType := "Optimizer." + optimizer + ".Config"
+		stateType := "Optimizer." + optimizer + ".State<Record{x: Tensor<FP32>}>"
+		examples = append(examples, builtinExample{configType + ".new", "return " + config, configType + "!"})
+		for _, op := range []string{"State.new", "step"} {
+			name := "Optimizer." + optimizer + "." + op
+			expression := "Optimizer." + optimizer + ".State.new(p,config)"
+			if op == "step" {
+				expression = "Optimizer." + optimizer + ".step(state,g)"
+			}
+			source := fmt.Sprintf(`flow Example() -> %s! { x=Tensor.new(List.new(2.0),List.new()); p=Parameters.new(Record.new(x:x)); config=%s; state=Optimizer.%s.State.new(p,config); g=Gradients.new(p,Record.new(x:x)); return %s }; return Example()`, stateType, config, optimizer, expression)
+			examples = append(examples, builtinExample{name, source, stateType + "!"})
+		}
 	}
 	return examples
 }

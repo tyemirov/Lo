@@ -8,6 +8,12 @@ Repeat for emphasis because this rule is binding: no fallbacks, no backward comp
 
 One-off data migrations are allowed only when they move existing persisted data into the current schema in a bounded operation. After migration, remove the bridge and keep only the current contract.
 
+## Issue Identifier Allocation
+
+- Select an identifier absent from both the active tracker and its archive.
+- After sequence number `999`, continue the identifier search at `001`.
+- If all identifiers in the section are occupied, stop and request an identifier decision.
+
 <!-- BEGIN MPRLAB-GOVERNANCE -->
 ## MPR Lab Governance
 
@@ -22,6 +28,9 @@ Read each selected guide in full before its first applicable action.
 - For issue work: the selected issue and its dependencies in `ISSUES.md`.
 - For tracker edits: `.mprlab/issues-md-format.md`.
 - For Git operations: `.mprlab/AGENTS.GIT.md`.
+- For HTTP or gRPC API changes: `.mprlab/AGENTS.API.md`.
+- For Go changes: `.mprlab/AGENTS.GO.md`.
+- For Python changes: `.mprlab/AGENTS.PY.md`.
 
 File permission modes are outside agent scope.
 Never examine, validate, compare, require, change, or record a file permission mode.

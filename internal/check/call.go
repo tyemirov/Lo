@@ -124,6 +124,12 @@ func (c *checker) call(name string, args []syntax.Argument, expected types.Type,
 }
 func (c *checker) builtin(op catalog.Operation, args []syntax.Argument, expected types.Type, span source.Span) (expression, diagnostic.Diagnostic) {
 	switch op.Rule() {
+	case catalog.Gradient:
+		return c.gradient(op, args, span)
+	case catalog.TensorBundleOperation:
+		return c.tensorBundle(op, args, span)
+	case catalog.OptimizerOperation:
+		return c.optimizer(op, args, span)
 	case catalog.ListConstructor:
 		return c.list(op, args, expected, span)
 	case catalog.MapConstructor:
