@@ -1,5 +1,6 @@
 .DS_Store
 /bin/
+__pycache__/
 
 # BEGIN MPRLAB-GOVERNANCE
 /.mprlab/*-PLAN.md
