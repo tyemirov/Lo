@@ -11,9 +11,9 @@ import (
 // Bound each generated function's control-flow graph without changing Lo costs.
 const argumentChunkSize = 64
 
-func (b *block) arguments(arguments []ir.Argument) string {
+func (b *block) arguments(arguments []ir.ValueArgument, argumentCount int) string {
 	result := b.g.fresh()
-	b.line("%s:=make([]value.Value,%d)", result, len(arguments))
+	b.line("%s:=make([]value.Value,%d)", result, argumentCount)
 	bindings := make([]ir.BindingID, 0, len(b.bindings))
 	for binding := range b.bindings {
 		bindings = append(bindings, binding)
@@ -35,13 +35,8 @@ func (b *block) arguments(arguments []ir.Argument) string {
 	for start := 0; start < len(arguments); start += argumentChunkSize {
 		helper := &block{g: b.g, bindings: helperBindings, name: b.name}
 		for _, argument := range arguments[start:min(start+argumentChunkSize, len(arguments))] {
-			arg, ok := argument.(ir.ValueArgument)
-			if !ok {
-				b.g.err = fmt.Errorf("flow argument in variadic native call")
-				continue
-			}
-			v := helper.expression(arg.Value())
-			helper.line("arguments[%d]=%s", arg.Position(), v)
+			v := helper.expression(argument.Value())
+			helper.line("arguments[%d]=%s", argument.Position(), v)
 		}
 		name := b.g.fresh()
 		fmt.Fprintf(&b.g.functions, "func(p *program)%s(s execution.Session,arguments []value.Value%s)(value.Value,error){var err error;_ = err\n%s\nreturn nil,nil}\n", name, parameterSuffix, helper.out.String())

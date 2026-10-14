@@ -109,19 +109,23 @@ func (b *block) expression(expr ir.Expression) string {
 			args[i] = "nil"
 		}
 		arguments := e.Arguments()
-		if len(arguments) > argumentChunkSize {
-			argumentList = b.arguments(arguments)
-			for i := range args {
-				args[i] = fmt.Sprintf("%s[%d]", argumentList, i)
-			}
-			arguments = nil
-		}
-		for _, a := range arguments {
-			switch a := a.(type) {
+		valueArguments := make([]ir.ValueArgument, 0, len(arguments))
+		for _, argument := range arguments {
+			switch argument := argument.(type) {
 			case ir.ValueArgument:
-				args[a.Position()] = b.expression(a.Value())
+				valueArguments = append(valueArguments, argument)
 			case ir.FlowArgument:
-				flows[a.Position()] = a.Flow()
+				flows[argument.Position()] = argument.Flow()
+			}
+		}
+		if len(arguments) > argumentChunkSize {
+			argumentList = b.arguments(valueArguments, len(args))
+			for _, argument := range valueArguments {
+				args[argument.Position()] = fmt.Sprintf("%s[%d]", argumentList, argument.Position())
+			}
+		} else {
+			for _, argument := range valueArguments {
+				args[argument.Position()] = b.expression(argument.Value())
 			}
 		}
 		call := b.g.call(e)
