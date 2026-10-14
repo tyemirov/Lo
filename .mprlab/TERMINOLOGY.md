@@ -93,6 +93,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `geometric mean`: The root of the product of positive measurements, with the root degree equal to their count.
+- `resident set size`: The amount of process memory present in physical memory at a measurement point.
+- `build cache`: Compiled data that the Go toolchain stores for use in subsequent builds.
+- `warmup`: A preliminary execution excluded from measured performance samples.
+- `race detector`: Runtime analysis that finds memory access without the required synchronization.
 - `median`: The middle value of ordered measurements, or the mean of the two middle values.
 - `bootstrap interval`: An estimated statistical interval from repeated samples drawn with replacement from the measured values.
 - `allocation profile`: A sampled report of memory allocations attributed to functions.
