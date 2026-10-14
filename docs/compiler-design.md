@@ -12,7 +12,7 @@ The frontend, full verifier, checked graph, static inspection, interpreter, File
 The [implementation audit](implementation-audit.md) maps the completed requirements to source and acceptance evidence.
 The stages below specify the full implementation scope.
 
-Validated commands are `lo parse`, `lo check`, `lo inspect`, `lo run`, and `lo serve`.
+Validated commands are `lo parse`, `lo check`, `lo inspect`, `lo run`, `lo serve`, and `lo build`.
 The parser and verifier accept all six specification examples.
 The verifier checks all built-in signatures and every declared flow, including unused flows.
 Accepted programs produce an immutable checked graph with explicit propagation and commit sites.
@@ -75,8 +75,16 @@ Lo operations must not change values shared with another binding.
 The implementation accepts the current canonical Lo contract only.
 Native code generation, optimization passes, and persistent executable artifacts are outside the initial milestones.
 
-The proposed [native compilation milestone](native-compilation-plan.md) defines the next implementation scope under F001.
+The [native compilation milestone](native-compilation-plan.md) defines the additional implementation scope under F001.
 It leaves the completed six-stage acceptance scope unchanged.
+`lo build` now generates direct Go functions and standalone artifacts.
+The [native contract](native-compilation-contract.md) defines the build limits and execution charges.
+
+Shared execution sessions, operation helpers, and adapters serve both execution backends.
+`internal/identity` owns flow identities.
+`internal/execution` owns budgets, failures, program entries, and request invocations.
+`internal/derivative` owns the runtime VJP arithmetic without compiler graph dependencies.
+`internal/runner` owns runtime options, results, signals, and service lifecycle.
 
 The selected [training extension design](training-extension-design.md) defines the additional contracts for F002 through F011 and I001.
 P001 completed that design task.
@@ -809,7 +817,11 @@ Each milestone adds the packages necessary for its behavior.
 
 | Path | Responsibility |
 | --- | --- |
-| `cmd/lo/` | Process entry point, arguments, output streams, and exit status. |
+| `cmd/lo/` | Source compiler entry point and native build commands. |
+| `internal/runner/` | Runtime arguments, output streams, signals, service lifecycle, and exit status. |
+| `internal/execution/` | Shared execution sessions, budgets, boundaries, failures, and program entries. |
+| `internal/runtimeops/` | Shared runtime operations and value construction. |
+| `internal/codegen/`, `internal/nativebuild/` | Direct Go generation and isolated artifact construction. |
 | `internal/source/` | Source bytes, file identity, and source spans. |
 | `internal/syntax/` | Tokens, lexer, AST, and parser. |
 | `internal/resolve/` | Symbols, lexical scopes, and reference resolution. |
@@ -1065,7 +1077,7 @@ The runtime does not promise a total order for commits from different requests.
 
 `HTTP.Server.new` stores a port and resolved handler references without a listener.
 Its commit creates the listener and starts request dispatch.
-Each request gets a new interpreter invocation with its own execution budget.
+Each request gets a new program invocation with its own execution session and budget.
 The handler and its adapter `onError` share that request's budget.
 The checked graph and immutable values can be shared across requests.
 
@@ -1176,7 +1188,9 @@ Filesystem calls can impose additional host constraints.
 The CLI owns process signals, output, exit status, and final resource cleanup.
 The File adapter owns directory roots and file operations.
 The HTTP adapter owns listeners, request conversion, dispatch, response validation, and request cleanup.
-The interpreter owns evaluation, propagation, budgets, and flow traces.
+Each execution backend owns statement and expression evaluation.
+Shared runtime contracts own budgets and failure propagation.
+Both backends keep the required flow traces.
 The catalog owns operation identifiers and known error kinds.
 
 Implementation sequence:

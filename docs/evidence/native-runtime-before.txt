@@ -1,0 +1,2 @@
+go test ./tests/integration -run "Test(Eval|Run|Serve|Adapter|Activation|Autodiff|Training|Parameters|Optimizer|Tensor|Float)" -count=1
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	5.825s

@@ -1,0 +1,3 @@
+{"command":"build","status":"ok","artifact":"/output/program","target":"linux/arm64"}
+{"command":"run","status":"ok","result":{"type":"Int","value":"10"}}
+{"source_sha256":"5640eab42d3927d0feaf3cdd7fe7e2f998ab4bb269fff1f1cccf36eee4b666d4","source":"/input/program.lo","compiler":"lo-native-go-v1","runtime_bundle_sha256":"8c2df7d02f833dc0bee105c36ce664b81e7c9cd3e8bd457f7670d222caf6b29e","toolchain":"go1.27.1","target":"linux/arm64"}

@@ -1,0 +1,2901 @@
+{
+  "system": "Linux-7.0.14-linuxkit-aarch64-with-glibc2.41",
+  "machine": "aarch64",
+  "processor": "CPU implementer=0x61, CPU architecture=8, CPU part=0x000, CPU revision=0",
+  "go": "go version go1.27.1 linux/arm64",
+  "binary_sha256": "221d3f904aab89810c48472895962ff5baf885a97034772ff7c21b006ad22271",
+  "samples": 10,
+  "warmup": 3,
+  "max_steps": 10000000,
+  "concurrency": 1,
+  "cache": "warm except explicit empty build cache",
+  "order": "alternating paired samples",
+  "execution": [
+    {
+      "name": "startup",
+      "source_sha256": "4336023f72dee9bfa682ee0e6cb6384369e92d47b1e99acf621fa88d5b874515",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 89.72,
+              "bytes": 136,
+              "allocations": 4
+            },
+            "interpreter": {
+              "ns": 192.6,
+              "bytes": 240,
+              "allocations": 8
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 126.7,
+              "bytes": 240,
+              "allocations": 8
+            },
+            "native": {
+              "ns": 53.51,
+              "bytes": 136,
+              "allocations": 4
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 78.47,
+              "bytes": 136,
+              "allocations": 4
+            },
+            "interpreter": {
+              "ns": 163.2,
+              "bytes": 240,
+              "allocations": 8
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 187.2,
+              "bytes": 240,
+              "allocations": 8
+            },
+            "native": {
+              "ns": 110.7,
+              "bytes": 136,
+              "allocations": 4
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 107.4,
+              "bytes": 136,
+              "allocations": 4
+            },
+            "interpreter": {
+              "ns": 184.3,
+              "bytes": 240,
+              "allocations": 8
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 200.5,
+              "bytes": 240,
+              "allocations": 8
+            },
+            "native": {
+              "ns": 97.84,
+              "bytes": 136,
+              "allocations": 4
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 59.81,
+              "bytes": 136,
+              "allocations": 4
+            },
+            "interpreter": {
+              "ns": 130.7,
+              "bytes": 240,
+              "allocations": 8
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 153.2,
+              "bytes": 240,
+              "allocations": 8
+            },
+            "native": {
+              "ns": 83.54,
+              "bytes": 136,
+              "allocations": 4
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 69.66,
+              "bytes": 136,
+              "allocations": 4
+            },
+            "interpreter": {
+              "ns": 171.5,
+              "bytes": 240,
+              "allocations": 8
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 236.6,
+              "bytes": 240,
+              "allocations": 8
+            },
+            "native": {
+              "ns": 129.7,
+              "bytes": 136,
+              "allocations": 4
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.48440056415334215,
+      "bootstrap_95_percent": [
+        0.4515786528699878,
+        0.5640228923497137
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "list_sum",
+      "source_sha256": "5640eab42d3927d0feaf3cdd7fe7e2f998ab4bb269fff1f1cccf36eee4b666d4",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 656.6,
+              "bytes": 816,
+              "allocations": 29
+            },
+            "interpreter": {
+              "ns": 1143.0,
+              "bytes": 1264,
+              "allocations": 44
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 1299.0,
+              "bytes": 1264,
+              "allocations": 44
+            },
+            "native": {
+              "ns": 867.1,
+              "bytes": 816,
+              "allocations": 29
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 559.1,
+              "bytes": 816,
+              "allocations": 29
+            },
+            "interpreter": {
+              "ns": 1035.0,
+              "bytes": 1264,
+              "allocations": 44
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 1040.0,
+              "bytes": 1264,
+              "allocations": 44
+            },
+            "native": {
+              "ns": 578.0,
+              "bytes": 816,
+              "allocations": 29
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 730.4,
+              "bytes": 816,
+              "allocations": 29
+            },
+            "interpreter": {
+              "ns": 1286.0,
+              "bytes": 1264,
+              "allocations": 44
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 1022.0,
+              "bytes": 1264,
+              "allocations": 44
+            },
+            "native": {
+              "ns": 558.0,
+              "bytes": 816,
+              "allocations": 29
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 416.6,
+              "bytes": 816,
+              "allocations": 29
+            },
+            "interpreter": {
+              "ns": 740.5,
+              "bytes": 1264,
+              "allocations": 44
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 846.0,
+              "bytes": 1264,
+              "allocations": 44
+            },
+            "native": {
+              "ns": 414.5,
+              "bytes": 816,
+              "allocations": 29
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 549.4,
+              "bytes": 816,
+              "allocations": 29
+            },
+            "interpreter": {
+              "ns": 956.9,
+              "bytes": 1264,
+              "allocations": 44
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 899.4,
+              "bytes": 1264,
+              "allocations": 44
+            },
+            "native": {
+              "ns": 473.4,
+              "bytes": 816,
+              "allocations": 29
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.55918103672155,
+      "bootstrap_95_percent": [
+        0.5361695794587129,
+        0.5741456787543108
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "map_1000",
+      "source_sha256": "c51799989292cc7270831221f3fe786b82a971e1447a8fa32078ee7d1ddeb2b5",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 387936.0,
+              "bytes": 484195,
+              "allocations": 15971
+            },
+            "interpreter": {
+              "ns": 922787.0,
+              "bytes": 1141829,
+              "allocations": 27971
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 941445.0,
+              "bytes": 1141845,
+              "allocations": 27971
+            },
+            "native": {
+              "ns": 419260.0,
+              "bytes": 484197,
+              "allocations": 15971
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 391320.0,
+              "bytes": 484196,
+              "allocations": 15971
+            },
+            "interpreter": {
+              "ns": 893522.0,
+              "bytes": 1141839,
+              "allocations": 27971
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 666422.0,
+              "bytes": 1141812,
+              "allocations": 27971
+            },
+            "native": {
+              "ns": 327645.0,
+              "bytes": 484194,
+              "allocations": 15971
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 381552.0,
+              "bytes": 484196,
+              "allocations": 15971
+            },
+            "interpreter": {
+              "ns": 895439.0,
+              "bytes": 1141866,
+              "allocations": 27971
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 944445.0,
+              "bytes": 1141838,
+              "allocations": 27971
+            },
+            "native": {
+              "ns": 431529.0,
+              "bytes": 484200,
+              "allocations": 15971
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 387004.0,
+              "bytes": 484194,
+              "allocations": 15971
+            },
+            "interpreter": {
+              "ns": 942527.0,
+              "bytes": 1141783,
+              "allocations": 27971
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 667446.0,
+              "bytes": 1141795,
+              "allocations": 27971
+            },
+            "native": {
+              "ns": 307050.0,
+              "bytes": 484192,
+              "allocations": 15971
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 393625.0,
+              "bytes": 484196,
+              "allocations": 15971
+            },
+            "interpreter": {
+              "ns": 902567.0,
+              "bytes": 1141801,
+              "allocations": 27971
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 653618.0,
+              "bytes": 1141853,
+              "allocations": 27971
+            },
+            "native": {
+              "ns": 305728.0,
+              "bytes": 484194,
+              "allocations": 15971
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.4416444865437495,
+      "bootstrap_95_percent": [
+        0.42610607757759045,
+        0.4600372164939186
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "filter_1000",
+      "source_sha256": "ebf75a710f99c844be452b01ee93871b9aa0312736456a64c9a4848e8dacfa60",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 207900.0,
+              "bytes": 311860,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 597948.0,
+              "bytes": 969527,
+              "allocations": 22992
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 771886.0,
+              "bytes": 969544,
+              "allocations": 22992
+            },
+            "native": {
+              "ns": 286344.0,
+              "bytes": 311863,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 204597.0,
+              "bytes": 311860,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 627292.0,
+              "bytes": 969583,
+              "allocations": 22992
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 793848.0,
+              "bytes": 969472,
+              "allocations": 22992
+            },
+            "native": {
+              "ns": 276768.0,
+              "bytes": 311863,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 306343.0,
+              "bytes": 311863,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 837307.0,
+              "bytes": 969536,
+              "allocations": 22992
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 803490.0,
+              "bytes": 969517,
+              "allocations": 22992
+            },
+            "native": {
+              "ns": 299663.0,
+              "bytes": 311866,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 278122.0,
+              "bytes": 311864,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 772457.0,
+              "bytes": 969504,
+              "allocations": 22992
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 804093.0,
+              "bytes": 969595,
+              "allocations": 22992
+            },
+            "native": {
+              "ns": 288838.0,
+              "bytes": 311865,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 218474.0,
+              "bytes": 311861,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 646767.0,
+              "bytes": 969529,
+              "allocations": 22992
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 597598.0,
+              "bytes": 969561,
+              "allocations": 22992
+            },
+            "native": {
+              "ns": 260192.0,
+              "bytes": 311863,
+              "allocations": 10990
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.3596291069531406,
+      "bootstrap_95_percent": [
+        0.34321751556062374,
+        0.3709666971547612
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "fold_1000",
+      "source_sha256": "10cbc76bb0ce9864a6a203e9582871190d7078c05bf91815ac95f8df9f69fb6a",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 277962.0,
+              "bytes": 304367,
+              "allocations": 10985
+            },
+            "interpreter": {
+              "ns": 799742.0,
+              "bytes": 1049977,
+              "allocations": 21983
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 604489.0,
+              "bytes": 1050008,
+              "allocations": 21983
+            },
+            "native": {
+              "ns": 227328.0,
+              "bytes": 304365,
+              "allocations": 10985
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 277717.0,
+              "bytes": 304367,
+              "allocations": 10985
+            },
+            "interpreter": {
+              "ns": 847522.0,
+              "bytes": 1050014,
+              "allocations": 21983
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 776601.0,
+              "bytes": 1050047,
+              "allocations": 21983
+            },
+            "native": {
+              "ns": 272211.0,
+              "bytes": 304368,
+              "allocations": 10985
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 263108.0,
+              "bytes": 304365,
+              "allocations": 10985
+            },
+            "interpreter": {
+              "ns": 728499.0,
+              "bytes": 1049981,
+              "allocations": 21983
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 763625.0,
+              "bytes": 1049995,
+              "allocations": 21983
+            },
+            "native": {
+              "ns": 268126.0,
+              "bytes": 304368,
+              "allocations": 10985
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 271901.0,
+              "bytes": 304365,
+              "allocations": 10985
+            },
+            "interpreter": {
+              "ns": 774804.0,
+              "bytes": 1050040,
+              "allocations": 21983
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 599099.0,
+              "bytes": 1050016,
+              "allocations": 21983
+            },
+            "native": {
+              "ns": 224968.0,
+              "bytes": 304365,
+              "allocations": 10985
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 210550.0,
+              "bytes": 304363,
+              "allocations": 10985
+            },
+            "interpreter": {
+              "ns": 607156.0,
+              "bytes": 1049977,
+              "allocations": 21983
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 804815.0,
+              "bytes": 1050010,
+              "allocations": 21983
+            },
+            "native": {
+              "ns": 295158.0,
+              "bytes": 304367,
+              "allocations": 10985
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.35102567850216004,
+      "bootstrap_95_percent": [
+        0.3475645895801396,
+        0.3683375449047657
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "records_1000",
+      "source_sha256": "d05ec57d7aaf9221c60a3060ceee2f12624a5b6c852f5864416cc7653207436e",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 409046.0,
+              "bytes": 588835,
+              "allocations": 12001
+            },
+            "interpreter": {
+              "ns": 964235.0,
+              "bytes": 1254601,
+              "allocations": 23001
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 919395.0,
+              "bytes": 1254633,
+              "allocations": 23001
+            },
+            "native": {
+              "ns": 404850.0,
+              "bytes": 588835,
+              "allocations": 12001
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 422495.0,
+              "bytes": 588834,
+              "allocations": 12001
+            },
+            "interpreter": {
+              "ns": 981560.0,
+              "bytes": 1254537,
+              "allocations": 23001
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 970898.0,
+              "bytes": 1254518,
+              "allocations": 23001
+            },
+            "native": {
+              "ns": 419727.0,
+              "bytes": 588836,
+              "allocations": 12001
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 335547.0,
+              "bytes": 588832,
+              "allocations": 12001
+            },
+            "interpreter": {
+              "ns": 717994.0,
+              "bytes": 1254583,
+              "allocations": 23001
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 940792.0,
+              "bytes": 1254529,
+              "allocations": 23001
+            },
+            "native": {
+              "ns": 436807.0,
+              "bytes": 588838,
+              "allocations": 12001
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 306629.0,
+              "bytes": 588833,
+              "allocations": 12001
+            },
+            "interpreter": {
+              "ns": 755188.0,
+              "bytes": 1254552,
+              "allocations": 23001
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 934998.0,
+              "bytes": 1254573,
+              "allocations": 23001
+            },
+            "native": {
+              "ns": 437005.0,
+              "bytes": 588836,
+              "allocations": 12001
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 441232.0,
+              "bytes": 588837,
+              "allocations": 12001
+            },
+            "interpreter": {
+              "ns": 985531.0,
+              "bytes": 1254563,
+              "allocations": 23001
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 724194.0,
+              "bytes": 1254591,
+              "allocations": 23001
+            },
+            "native": {
+              "ns": 314866.0,
+              "bytes": 588834,
+              "allocations": 12001
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.4375626048525498,
+      "bootstrap_95_percent": [
+        0.4282630954113114,
+        0.464297102866521
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "bigint_1000",
+      "source_sha256": "330642049f5b82d0f4490b2239980a51d2ed9d744b7d7db3d211047267efb66c",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 272590.0,
+              "bytes": 432967,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 803339.0,
+              "bytes": 1178594,
+              "allocations": 21987
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 587443.0,
+              "bytes": 1178573,
+              "allocations": 21987
+            },
+            "native": {
+              "ns": 213618.0,
+              "bytes": 432965,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 288880.0,
+              "bytes": 432968,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 811685.0,
+              "bytes": 1178587,
+              "allocations": 21987
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 795063.0,
+              "bytes": 1178575,
+              "allocations": 21987
+            },
+            "native": {
+              "ns": 298715.0,
+              "bytes": 432968,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 286436.0,
+              "bytes": 432968,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 819350.0,
+              "bytes": 1178601,
+              "allocations": 21987
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 791437.0,
+              "bytes": 1178600,
+              "allocations": 21987
+            },
+            "native": {
+              "ns": 292623.0,
+              "bytes": 432969,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 287082.0,
+              "bytes": 432967,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 748235.0,
+              "bytes": 1178567,
+              "allocations": 21987
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 799716.0,
+              "bytes": 1178550,
+              "allocations": 21987
+            },
+            "native": {
+              "ns": 304935.0,
+              "bytes": 432969,
+              "allocations": 10990
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 322702.0,
+              "bytes": 432969,
+              "allocations": 10990
+            },
+            "interpreter": {
+              "ns": 870135.0,
+              "bytes": 1178667,
+              "allocations": 21987
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 814451.0,
+              "bytes": 1178589,
+              "allocations": 21987
+            },
+            "native": {
+              "ns": 297963.0,
+              "bytes": 432968,
+              "allocations": 10990
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.3677907643033836,
+      "bootstrap_95_percent": [
+        0.3559016120785773,
+        0.3760842020666548
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "map_10000",
+      "source_sha256": "292ad36f025dbd444ab71c454cd9f1e0a0621cb12f0a167e103f9055921302bc",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 4288003.0,
+              "bytes": 5317943,
+              "allocations": 159543
+            },
+            "interpreter": {
+              "ns": 9128616.0,
+              "bytes": 11725953,
+              "allocations": 279444
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 10952114.0,
+              "bytes": 11726517,
+              "allocations": 279445
+            },
+            "native": {
+              "ns": 5703525.0,
+              "bytes": 5317909,
+              "allocations": 159542
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3883444.0,
+              "bytes": 5317946,
+              "allocations": 159543
+            },
+            "interpreter": {
+              "ns": 8852826.0,
+              "bytes": 11726173,
+              "allocations": 279445
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 11333098.0,
+              "bytes": 11726256,
+              "allocations": 279445
+            },
+            "native": {
+              "ns": 5794510.0,
+              "bytes": 5317904,
+              "allocations": 159542
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 6645775.0,
+              "bytes": 5317950,
+              "allocations": 159543
+            },
+            "interpreter": {
+              "ns": 12152465.0,
+              "bytes": 11725928,
+              "allocations": 279444
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9966078.0,
+              "bytes": 11726024,
+              "allocations": 279444
+            },
+            "native": {
+              "ns": 5154801.0,
+              "bytes": 5317973,
+              "allocations": 159544
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 6098249.0,
+              "bytes": 5317979,
+              "allocations": 159544
+            },
+            "interpreter": {
+              "ns": 12520730.0,
+              "bytes": 11726150,
+              "allocations": 279444
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9122276.0,
+              "bytes": 11726288,
+              "allocations": 279445
+            },
+            "native": {
+              "ns": 4801099.0,
+              "bytes": 5317973,
+              "allocations": 159544
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 4477509.0,
+              "bytes": 5317957,
+              "allocations": 159543
+            },
+            "interpreter": {
+              "ns": 8967300.0,
+              "bytes": 11726038,
+              "allocations": 279444
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9251304.0,
+              "bytes": 11725586,
+              "allocations": 279444
+            },
+            "native": {
+              "ns": 4626229.0,
+              "bytes": 5318004,
+              "allocations": 159544
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.5056766402544925,
+      "bootstrap_95_percent": [
+        0.4845235864523151,
+        0.5217698059416548
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "filter_10000",
+      "source_sha256": "dd1b7a6ba542e6a4819764798cbdf542e61b7987f940c62e2705c6c2950d35d2",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3489882.0,
+              "bytes": 3332416,
+              "allocations": 109736
+            },
+            "interpreter": {
+              "ns": 10168885.0,
+              "bytes": 9741208,
+              "allocations": 229641
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7279485.0,
+              "bytes": 9740393,
+              "allocations": 229640
+            },
+            "native": {
+              "ns": 2694918.0,
+              "bytes": 3332429,
+              "allocations": 109736
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3506359.0,
+              "bytes": 3332468,
+              "allocations": 109737
+            },
+            "interpreter": {
+              "ns": 9294951.0,
+              "bytes": 9740594,
+              "allocations": 229640
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7149335.0,
+              "bytes": 9740708,
+              "allocations": 229640
+            },
+            "native": {
+              "ns": 2706050.0,
+              "bytes": 3332457,
+              "allocations": 109737
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 4117333.0,
+              "bytes": 3332469,
+              "allocations": 109737
+            },
+            "interpreter": {
+              "ns": 9834992.0,
+              "bytes": 9740791,
+              "allocations": 229641
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7630048.0,
+              "bytes": 9740930,
+              "allocations": 229641
+            },
+            "native": {
+              "ns": 3131618.0,
+              "bytes": 3332449,
+              "allocations": 109737
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3659760.0,
+              "bytes": 3332451,
+              "allocations": 109737
+            },
+            "interpreter": {
+              "ns": 9945032.0,
+              "bytes": 9740430,
+              "allocations": 229640
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9310404.0,
+              "bytes": 9740224,
+              "allocations": 229640
+            },
+            "native": {
+              "ns": 4075129.0,
+              "bytes": 3332452,
+              "allocations": 109737
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3971786.0,
+              "bytes": 3332478,
+              "allocations": 109737
+            },
+            "interpreter": {
+              "ns": 9686123.0,
+              "bytes": 9740512,
+              "allocations": 229640
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7403413.0,
+              "bytes": 9740670,
+              "allocations": 229640
+            },
+            "native": {
+              "ns": 2900884.0,
+              "bytes": 3332442,
+              "allocations": 109737
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.3851671838361489,
+      "bootstrap_95_percent": [
+        0.3691030244789078,
+        0.4143451565177393
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "fold_10000",
+      "source_sha256": "208089a72c9da4bacee8d3645811a9b5e7123b6bb10996186856dc0740e7ae8b",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3998579.0,
+              "bytes": 3206582,
+              "allocations": 109817
+            },
+            "interpreter": {
+              "ns": 9943939.0,
+              "bytes": 10494250,
+              "allocations": 219716
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7430111.0,
+              "bytes": 10494848,
+              "allocations": 219716
+            },
+            "native": {
+              "ns": 2982732.0,
+              "bytes": 3206579,
+              "allocations": 109817
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 2447252.0,
+              "bytes": 3206554,
+              "allocations": 109817
+            },
+            "interpreter": {
+              "ns": 7462118.0,
+              "bytes": 10494509,
+              "allocations": 219716
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9484662.0,
+              "bytes": 10494561,
+              "allocations": 219716
+            },
+            "native": {
+              "ns": 3772311.0,
+              "bytes": 3206580,
+              "allocations": 109817
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3635640.0,
+              "bytes": 3206533,
+              "allocations": 109816
+            },
+            "interpreter": {
+              "ns": 11430175.0,
+              "bytes": 10495010,
+              "allocations": 219717
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 10046096.0,
+              "bytes": 10494807,
+              "allocations": 219716
+            },
+            "native": {
+              "ns": 4068338.0,
+              "bytes": 3206574,
+              "allocations": 109817
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 2995492.0,
+              "bytes": 3206561,
+              "allocations": 109817
+            },
+            "interpreter": {
+              "ns": 7761631.0,
+              "bytes": 10494813,
+              "allocations": 219716
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 8826851.0,
+              "bytes": 10494892,
+              "allocations": 219716
+            },
+            "native": {
+              "ns": 3911708.0,
+              "bytes": 3206562,
+              "allocations": 109817
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3939342.0,
+              "bytes": 3206587,
+              "allocations": 109817
+            },
+            "interpreter": {
+              "ns": 10131933.0,
+              "bytes": 10495055,
+              "allocations": 219717
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7657122.0,
+              "bytes": 10494253,
+              "allocations": 219716
+            },
+            "native": {
+              "ns": 2582892.0,
+              "bytes": 3206555,
+              "allocations": 109817
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.39326604721401087,
+      "bootstrap_95_percent": [
+        0.3373189038910442,
+        0.40211218109845603
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "records_10000",
+      "source_sha256": "15bc7371052260f50fa74ecc6a35d609ef3514a5e5ccb63003227e1108343461",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 5088052.0,
+              "bytes": 6364330,
+              "allocations": 119841
+            },
+            "interpreter": {
+              "ns": 10110782.0,
+              "bytes": 12853032,
+              "allocations": 229742
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 10881147.0,
+              "bytes": 12854052,
+              "allocations": 229742
+            },
+            "native": {
+              "ns": 5500697.0,
+              "bytes": 6364267,
+              "allocations": 119840
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 5978046.0,
+              "bytes": 6364295,
+              "allocations": 119840
+            },
+            "interpreter": {
+              "ns": 11797046.0,
+              "bytes": 12852924,
+              "allocations": 229742
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9900720.0,
+              "bytes": 12853245,
+              "allocations": 229742
+            },
+            "native": {
+              "ns": 4546801.0,
+              "bytes": 6364269,
+              "allocations": 119840
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 5727673.0,
+              "bytes": 6364286,
+              "allocations": 119840
+            },
+            "interpreter": {
+              "ns": 12070558.0,
+              "bytes": 12853806,
+              "allocations": 229742
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 12191002.0,
+              "bytes": 12853352,
+              "allocations": 229742
+            },
+            "native": {
+              "ns": 6086708.0,
+              "bytes": 6364292,
+              "allocations": 119840
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 6095096.0,
+              "bytes": 6364265,
+              "allocations": 119840
+            },
+            "interpreter": {
+              "ns": 12153792.0,
+              "bytes": 12853320,
+              "allocations": 229742
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 11218452.0,
+              "bytes": 12853155,
+              "allocations": 229742
+            },
+            "native": {
+              "ns": 5456077.0,
+              "bytes": 6364344,
+              "allocations": 119841
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 5045059.0,
+              "bytes": 6364278,
+              "allocations": 119840
+            },
+            "interpreter": {
+              "ns": 10792579.0,
+              "bytes": 12853353,
+              "allocations": 229742
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9223423.0,
+              "bytes": 12853237,
+              "allocations": 229742
+            },
+            "native": {
+              "ns": 5171057.0,
+              "bytes": 6364289,
+              "allocations": 119840
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.5003881026779318,
+      "bootstrap_95_percent": [
+        0.47451600829058604,
+        0.5055254744743362
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "bigint_10000",
+      "source_sha256": "52c277886dbd75cd69f326adcb9bdd8d5265be9999cb2d17e75cc4e59b6ac230",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3584269.0,
+              "bytes": 4490722,
+              "allocations": 109822
+            },
+            "interpreter": {
+              "ns": 9180368.0,
+              "bytes": 11779102,
+              "allocations": 219720
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9822322.0,
+              "bytes": 11778629,
+              "allocations": 219720
+            },
+            "native": {
+              "ns": 3790539.0,
+              "bytes": 4490718,
+              "allocations": 109822
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3512632.0,
+              "bytes": 4490735,
+              "allocations": 109822
+            },
+            "interpreter": {
+              "ns": 9113537.0,
+              "bytes": 11778487,
+              "allocations": 219720
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9150847.0,
+              "bytes": 11779065,
+              "allocations": 219721
+            },
+            "native": {
+              "ns": 3799914.0,
+              "bytes": 4490728,
+              "allocations": 109822
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3692661.0,
+              "bytes": 4490718,
+              "allocations": 109822
+            },
+            "interpreter": {
+              "ns": 8252968.0,
+              "bytes": 11778720,
+              "allocations": 219720
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 9513848.0,
+              "bytes": 11778729,
+              "allocations": 219720
+            },
+            "native": {
+              "ns": 3750518.0,
+              "bytes": 4490683,
+              "allocations": 109821
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 2876941.0,
+              "bytes": 4490707,
+              "allocations": 109822
+            },
+            "interpreter": {
+              "ns": 7582152.0,
+              "bytes": 11778585,
+              "allocations": 219720
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7617868.0,
+              "bytes": 11778465,
+              "allocations": 219720
+            },
+            "native": {
+              "ns": 2852659.0,
+              "bytes": 4490718,
+              "allocations": 109822
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 2944160.0,
+              "bytes": 4490737,
+              "allocations": 109822
+            },
+            "interpreter": {
+              "ns": 7989231.0,
+              "bytes": 11778808,
+              "allocations": 219720
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 7674495.0,
+              "bytes": 11778436,
+              "allocations": 219720
+            },
+            "native": {
+              "ns": 2960816.0,
+              "bytes": 4490720,
+              "allocations": 109822
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.38585507017997694,
+      "bootstrap_95_percent": [
+        0.37943594377954964,
+        0.40473471661340643
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "unicode",
+      "source_sha256": "49a2616fe73d35a9e93ae78f17e9feb97bd036959f28802ebdf0ab9d07ced3f1",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 92946.0,
+              "bytes": 18664,
+              "allocations": 7
+            },
+            "interpreter": {
+              "ns": 93661.0,
+              "bytes": 18792,
+              "allocations": 13
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 91418.0,
+              "bytes": 18792,
+              "allocations": 13
+            },
+            "native": {
+              "ns": 90720.0,
+              "bytes": 18664,
+              "allocations": 7
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 95570.0,
+              "bytes": 18664,
+              "allocations": 7
+            },
+            "interpreter": {
+              "ns": 97302.0,
+              "bytes": 18792,
+              "allocations": 13
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 90665.0,
+              "bytes": 18792,
+              "allocations": 13
+            },
+            "native": {
+              "ns": 89433.0,
+              "bytes": 18664,
+              "allocations": 7
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 95480.0,
+              "bytes": 18664,
+              "allocations": 7
+            },
+            "interpreter": {
+              "ns": 94380.0,
+              "bytes": 18792,
+              "allocations": 13
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 91191.0,
+              "bytes": 18792,
+              "allocations": 13
+            },
+            "native": {
+              "ns": 91091.0,
+              "bytes": 18664,
+              "allocations": 7
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 91045.0,
+              "bytes": 18664,
+              "allocations": 7
+            },
+            "interpreter": {
+              "ns": 90352.0,
+              "bytes": 18792,
+              "allocations": 13
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 89129.0,
+              "bytes": 18792,
+              "allocations": 13
+            },
+            "native": {
+              "ns": 90641.0,
+              "bytes": 18664,
+              "allocations": 7
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 90892.0,
+              "bytes": 18664,
+              "allocations": 7
+            },
+            "interpreter": {
+              "ns": 89189.0,
+              "bytes": 18792,
+              "allocations": 13
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 90588.0,
+              "bytes": 18792,
+              "allocations": 13
+            },
+            "native": {
+              "ns": 94119.0,
+              "bytes": 18664,
+              "allocations": 7
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 1.0032867011628657,
+      "bootstrap_95_percent": [
+        0.9893888005610285,
+        1.0169641755208743
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "training_mvp",
+      "source_sha256": "86a8899580f196ebf822efd80f08dca717017104bbd4e45ce65a7deabc344b85",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 6400047.0,
+              "bytes": 6766419,
+              "allocations": 188119
+            },
+            "interpreter": {
+              "ns": 9381472.0,
+              "bytes": 9162914,
+              "allocations": 232300
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 8556985.0,
+              "bytes": 9163016,
+              "allocations": 232301
+            },
+            "native": {
+              "ns": 5857425.0,
+              "bytes": 6766294,
+              "allocations": 188118
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 4451357.0,
+              "bytes": 6766361,
+              "allocations": 188118
+            },
+            "interpreter": {
+              "ns": 6989164.0,
+              "bytes": 9162868,
+              "allocations": 232299
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 8765083.0,
+              "bytes": 9163350,
+              "allocations": 232301
+            },
+            "native": {
+              "ns": 5793247.0,
+              "bytes": 6766324,
+              "allocations": 188118
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 4334382.0,
+              "bytes": 6766361,
+              "allocations": 188118
+            },
+            "interpreter": {
+              "ns": 6526485.0,
+              "bytes": 9162591,
+              "allocations": 232299
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 8831378.0,
+              "bytes": 9163248,
+              "allocations": 232301
+            },
+            "native": {
+              "ns": 5873772.0,
+              "bytes": 6766298,
+              "allocations": 188118
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 4477424.0,
+              "bytes": 6766343,
+              "allocations": 188118
+            },
+            "interpreter": {
+              "ns": 6883786.0,
+              "bytes": 9162910,
+              "allocations": 232299
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 8495413.0,
+              "bytes": 9162864,
+              "allocations": 232301
+            },
+            "native": {
+              "ns": 5724199.0,
+              "bytes": 6766337,
+              "allocations": 188118
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 4274145.0,
+              "bytes": 6766346,
+              "allocations": 188118
+            },
+            "interpreter": {
+              "ns": 6633338.0,
+              "bytes": 9163175,
+              "allocations": 232300
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 8583931.0,
+              "bytes": 9162937,
+              "allocations": 232301
+            },
+            "native": {
+              "ns": 5889921.0,
+              "bytes": 6766317,
+              "allocations": 188118
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.6646122526506975,
+      "bootstrap_95_percent": [
+        0.6504304462689572,
+        0.6822007250034963
+      ],
+      "gate": "pass"
+    },
+    {
+      "name": "training_dense",
+      "source_sha256": "0a19fa7d15fe3a6e8c1fe71dd47ed890a9130468e830244d81a8939c9f464fb0",
+      "samples": [
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3137074.0,
+              "bytes": 1409706,
+              "allocations": 20431
+            },
+            "interpreter": {
+              "ns": 3709169.0,
+              "bytes": 1723310,
+              "allocations": 25009
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 3732118.0,
+              "bytes": 1723330,
+              "allocations": 25009
+            },
+            "native": {
+              "ns": 3230073.0,
+              "bytes": 1409688,
+              "allocations": 20430
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3115598.0,
+              "bytes": 1409712,
+              "allocations": 20431
+            },
+            "interpreter": {
+              "ns": 3866122.0,
+              "bytes": 1723251,
+              "allocations": 25009
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 3620616.0,
+              "bytes": 1723379,
+              "allocations": 25009
+            },
+            "native": {
+              "ns": 3226766.0,
+              "bytes": 1409701,
+              "allocations": 20431
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3308277.0,
+              "bytes": 1409717,
+              "allocations": 20431
+            },
+            "interpreter": {
+              "ns": 3790144.0,
+              "bytes": 1723345,
+              "allocations": 25009
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 3587757.0,
+              "bytes": 1723396,
+              "allocations": 25009
+            },
+            "native": {
+              "ns": 3203809.0,
+              "bytes": 1409683,
+              "allocations": 20430
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3115723.0,
+              "bytes": 1409711,
+              "allocations": 20431
+            },
+            "interpreter": {
+              "ns": 3401091.0,
+              "bytes": 1723280,
+              "allocations": 25009
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 3329656.0,
+              "bytes": 1723516,
+              "allocations": 25010
+            },
+            "native": {
+              "ns": 2872020.0,
+              "bytes": 1409677,
+              "allocations": 20430
+            }
+          }
+        },
+        {
+          "order": [
+            "native",
+            "interpreter"
+          ],
+          "results": {
+            "native": {
+              "ns": 3250878.0,
+              "bytes": 1409695,
+              "allocations": 20431
+            },
+            "interpreter": {
+              "ns": 3653490.0,
+              "bytes": 1723319,
+              "allocations": 25009
+            }
+          }
+        },
+        {
+          "order": [
+            "interpreter",
+            "native"
+          ],
+          "results": {
+            "interpreter": {
+              "ns": 3358467.0,
+              "bytes": 1723361,
+              "allocations": 25009
+            },
+            "native": {
+              "ns": 2944756.0,
+              "bytes": 1409669,
+              "allocations": 20430
+            }
+          }
+        }
+      ],
+      "native_over_interpreter": 0.8748393325741589,
+      "bootstrap_95_percent": [
+        0.8593125450857919,
+        0.8912201680597998
+      ],
+      "gate": "pass"
+    }
+  ],
+  "callback_speedup": 2.4826803504368886,
+  "callback_bootstrap_95_percent": [
+    2.4324848665359404,
+    2.5416011905425724
+  ],
+  "callback_gate": "pass"
+}

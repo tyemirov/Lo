@@ -1,14 +1,18 @@
 # Lo Native Compilation Milestone
 
-The proposed milestone adds AOT compilation through generated Go source.
-Lo will convert its checked graph into direct functions, local variables, branches, and loops.
-The pinned Go toolchain will build a native executable with the Lo runtime and adapters.
-The executable will run without the Lo CLI, the source file, or an installed Go toolchain.
+This milestone adds AOT compilation through generated Go source.
+Lo converts its checked graph into direct functions, local variables, branches, and loops.
+The pinned Go toolchain builds a native executable with the Lo runtime and adapters.
+The executable runs without the Lo CLI, the source file, or an installed Go toolchain.
 
 ## Status and Scope
 
-This is a proposed implementation plan for F001.
-Native compilation is not implemented.
+This is the accepted implementation plan for F001.
+The native backend and build command are implemented.
+Both targets passed semantic, race, performance, and build-resource acceptance.
+The [acceptance report](native-compilation-results.md) records measurements and final validation.
+The [native contract](native-compilation-contract.md) records the selected toolchain, numeric limits, corpus, and charge order.
+
 The completed [compiler design](compiler-design.md) remains the reference for the existing six stages.
 The [implementation audit](implementation-audit.md) records their acceptance evidence.
 
@@ -98,10 +102,9 @@ The first backend will generate actual Lo control flow.
 It will not serialize an IR graph into a Go program that calls the interpreter.
 The artifact dependency test must reject compiler and interpreter packages.
 
-## Proposed User Contract
+## User Contract
 
-The following commands describe the proposed interface.
-They are not current CLI commands.
+The following commands use the implemented interface.
 
 ```bash
 lo build examples/list_sum.lo --output ./list-sum
@@ -119,7 +122,7 @@ lo build examples/http_echo.lo --output ./echo-server --target linux/arm64
 
 ### Build Command
 
-The proposed syntax is:
+The build syntax is:
 
 ```text
 lo build SOURCE --output PATH [--target OS/ARCH] [--format text|json]
@@ -147,7 +150,8 @@ Generated Go errors identify a compiler defect or a host build failure, with the
 ### Executable Commands
 
 Each artifact contains one compiled program.
-It accepts `run` or `serve`, followed by the existing runtime options.
+The `run` and `serve` commands accept the existing runtime options.
+The `metadata` command prints artifact identity without program execution.
 It accepts no source path.
 Explicit command selection preserves the current difference between one-shot execution and service execution.
 
@@ -159,6 +163,7 @@ Explicit command selection preserves the current difference between one-shot exe
 | `--read-root`, `--write-root` | Authorize the actual runtime file targets through the current File adapter. |
 | `--listen` | Authorize exact listen ports for `serve`, including the existing port-zero rule. |
 | `--max-steps` | Set the same logical execution budget as the interpreter. |
+| `metadata` | Print artifact identity as JSON without program execution. |
 
 Relative resource paths resolve from the artifact invocation directory.
 Capabilities remain absent until the operator supplies runtime grants.
@@ -193,16 +198,16 @@ It does not communicate with another runtime process.
 
 ### Shared Runtime Boundary
 
-The present adapters import `internal/eval` for budgets, failures, and execution entry points.
-The server value also stores `ir.FlowID`.
-These dependencies would pull interpreter or graph code into a naive generated executable.
-Stage 1 replaces them with shared execution contracts.
+The adapters use `internal/execution` for budgets, failures, and program entry points.
+Server values use `identity.FlowID`.
+These contracts keep interpreter and graph packages outside native artifacts.
 
-| Proposed package | Responsibility |
+| Package | Responsibility |
 | --- | --- |
 | `internal/identity` | Runtime flow identities shared by checked graphs, values, and adapters. |
 | `internal/execution` | Execution sessions, budgets, boundary contracts, host failures, propagation, and program entry points. |
 | `internal/runtimeops` | Direct built-in helpers with the canonical numeric, collection, and error behavior. |
+| `internal/derivative` | Runtime VJP arithmetic without compiler derivative plans. |
 | `internal/runner` | Runtime options, authorization setup, results, signals, and service lifecycle. |
 | `internal/codegen` | Checked graph lowering and deterministic Go source generation. |
 | `internal/nativebuild` | Target validation, toolchain invocation, runtime bundle assembly, and artifact publication. |
@@ -262,7 +267,8 @@ Use Go syntax trees and formatting tools to produce valid source.
 
 The first representation uses existing typed value interfaces for locals and function parameters.
 Containers can retain `value.Value` elements under their checked type contract.
-Direct operation helpers replace runtime operation-name switches.
+Generated calls select direct operation helpers during compilation.
+Shared numeric helpers retain branches for operations within one family.
 Dynamic value tags remain necessary for fallibility and heterogeneous runtime interfaces.
 
 Every flow has a generated body and the required error-boundary behavior.
@@ -318,7 +324,7 @@ The compiler release must record one exact toolchain and dependency selection fr
 Stage 0 verifies the required build flags with that toolchain.
 This milestone does not independently upgrade the toolchain.
 
-The proposed builder requires the selected Go installation on the build host.
+The builder requires the selected Go installation on the build host.
 It validates that installation before compilation.
 `GOTOOLCHAIN=local` prevents automatic toolchain selection. See [Go toolchain selection](https://go.dev/doc/toolchain#select).
 A missing or different toolchain produces an actionable build diagnostic.
@@ -349,7 +355,7 @@ It does not execute a shell or accept arbitrary compiler flags from Lo source.
 The controlled environment overrides ambient `GOFLAGS`, `GOWORK`, toolchain selection, target variables, and module download settings.
 It also excludes user overlays and compiler plugins.
 
-The proposed production build uses `CGO_ENABLED=0`, `GOWORK=off`, and `GOENV=off`.
+The production build uses `CGO_ENABLED=0`, `GOWORK=off`, and `GOENV=off`.
 It selects the exact target and uses `-mod=vendor`, `-trimpath`, `-buildvcs=false`, and `-pgo=off`.
 It disables module and toolchain downloads for `lo build`.
 The required toolchain and operating-system dependencies receive separate qualification on both targets.
@@ -399,9 +405,9 @@ Change the implementation order between sample pairs.
 Record uncertainty with the result instead of treating small timing differences as definite improvements.
 Use repository-owned Make targets for benchmark execution.
 
-### Proposed Performance Gates
+### Performance Gates
 
-The following numbers are proposed targets, not measured native results.
+The following numbers are the accepted performance targets.
 Stage 0 fixes the corpus and measurement procedure before optimization work.
 It also records any revised targets with their rationale before native performance results are available.
 
@@ -447,8 +453,8 @@ It must not erase error frames, statuses, operation order, or meaningful path di
 ## Implementation Stages
 
 Each stage depends on the preceding stage's acceptance evidence.
-The stages define work for a later implementation pass.
-They do not mark any native capability as delivered.
+The stages define implementation and acceptance dependencies.
+The status section identifies delivered capabilities and remaining qualification work.
 
 ### Stage 0 Establish Contracts and Baselines
 
@@ -552,7 +558,7 @@ Acceptance:
 - Build from a distributed Lo compiler outside the repository checkout.
 - Execute artifacts without the compiler, original source, or Go installation.
 - Verify artifact construction with disabled network access and an empty module cache.
-- Verify source escaping, hostile ambient build flags, spaces in paths, and unwritable output failures.
+- Verify source escaping, hostile ambient build flags, spaces in paths, and output I/O failures.
 - Verify repeated build hashes under identical pinned inputs.
 - Run native semantic acceptance on macOS arm64 and Linux arm64.
 
@@ -574,11 +580,9 @@ Acceptance:
 
 ## Validation Integration
 
-The proposed Make targets are `test-native`, `test-native-race`, `bench-native`, and `verify-runtime-bundle`.
-Their definitions belong in the implementation stages that first need them.
-Existing `build` and integration setup must generate the bundle before compilation.
-The current `TestMain` directly invokes `go build`, so it needs the same bundle preparation as the Make build.
-`make ci` must include native semantic tests and bundle verification after the native path is available.
+The Make targets are `test-native`, `test-native-race`, `benchmark-native`, and `verify-runtime-bundle`.
+`build` and integration setup generate the bundle before compilation.
+`make ci` includes native semantic tests and verifies the bundle before its regeneration.
 
 Benchmarks use a separate target because ordinary CI contention can invalidate performance comparisons.
 Both qualified platforms require recorded native runs before milestone closure.
@@ -596,7 +600,7 @@ Keep arbitrary toolchain flags outside the production artifact CLI.
 For each behavior change, record the failing integration test before production changes.
 For the shared runtime refactor, record the current passing behavior before changes.
 Use the smallest relevant Make target during implementation.
-Run `make ci` at each completed stage after its last code change.
+Run `make ci` after the last stack change, as specified by the repository policy.
 
 ## Risks and Open Decisions
 
@@ -610,7 +614,6 @@ Run `make ci` at each completed stage after its last code change.
 | Shared helpers can hide shared semantic defects. | Both execution paths can return the same wrong result. | Independent expected results and existing conformance fixtures. |
 | Go garbage collection and runtime code remain in artifacts. | Native artifacts can retain allocation costs and substantial size. | Stage 0 artifact budgets and Stage 6 profiles. |
 
-The proposed backend, CLI shape, and two target platforms are the defaults for this milestone.
-The exact numeric build-time, build-memory, generated-source, diagnostic-output, and artifact-size limits remain open until Stage 0 measurements.
-Stage 0 also confirms the proposed performance targets against the fixed corpus and available measurement hosts.
-No native performance result is claimed by this plan.
+The backend, CLI, and two target platforms are the accepted contract for this milestone.
+The [native contract](native-compilation-contract.md) fixes the numeric limits and performance gates from Stage 0.
+Performance qualification compares both execution backends with the same corpus and logical limits.

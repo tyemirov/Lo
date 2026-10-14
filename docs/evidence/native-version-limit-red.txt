@@ -1,0 +1,9 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestNativeToolchainCancellationAndOutputLimit/version-overflow -count=1
+--- FAIL: TestNativeToolchainCancellationAndOutputLimit (0.41s)
+    --- FAIL: TestNativeToolchainCancellationAndOutputLimit/version-overflow (0.26s)
+        native_test.go:340: diagnostic {Code:build.toolchain Stage:build Message:build /var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestNativeToolchainCancellationAndOutputLimitversion-overflow377596058/002/148367739.lo with go1.27.1: r [diagnostic truncated]
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.012s
+FAIL
+make: *** [test-integration] Error 1

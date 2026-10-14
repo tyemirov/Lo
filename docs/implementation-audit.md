@@ -5,6 +5,7 @@ Its scope is the six stages in [the compiler design](compiler-design.md).
 The audit includes the runtime contracts in specification sections 23.1 through 23.7.
 The six implementation stages passed acceptance.
 The [final gate](evidence/audit-green.txt) includes the additional resource-limit and client-disconnection tests.
+F001 extends this audit with the native compiler and shared runtime described below.
 
 ## Evidence Sources
 
@@ -16,7 +17,7 @@ The [final gate](evidence/audit-green.txt) includes the additional resource-limi
 | [Graph tests](../tests/integration/graph_test.go) | Compiler publication, references, spans, conversions, immutability, and static-only behavior. |
 | [Inspection tests](../tests/integration/inspect_test.go) | Report fields, references, conditions, capabilities, errors, and deterministic output. |
 | [Runtime tests](../tests/integration/run_test.go) | CLI values, serialization, recoverable errors, traces, file reads, and host limits. |
-| [Runtime catalog tests](../tests/integration/runtime_catalog_test.go) | Expected runtime behavior for all 52 built-in operations. |
+| [Runtime catalog tests](../tests/integration/runtime_catalog_test.go) | Expected runtime behavior for all 100 built-in operations. |
 | [Evaluator tests](../tests/integration/eval_test.go) | Evaluation order, branch selection, repeated reads, error precedence, cancellation, and immutable results. |
 | [File tests](../tests/integration/activation_test.go) | Commit order, failure handling, authorization, and the executable File workflow. |
 | [HTTP tests](../tests/integration/serve_test.go) | Real CLI processes, local HTTP requests, readiness, failures, and shutdown. |
@@ -111,16 +112,16 @@ Their source programs and expected values are in the named tests.
 | Client disconnection does not stop the service | `TestServerDisconnectedErrorResponse` checks cancellation during a large error response. |
 | Runtime JSON preserves numeric precision and every value category | `TestRunBuiltinCatalog`, `TestRunValues`, and `TestRunStoredFallibility`. |
 | Text results and traces use the documented contract | `TestRunValues`, `TestRunCountLetterExample`, and `TestRunRecoverableErrors`. |
-| A program without a return omits its result | `TestRunValues` and `writeExecution` in [CLI execution](../cmd/lo/execute.go). |
+| A program without a return omits its result | `TestRunValues` and `writeExecution` in [shared CLI execution](../internal/runner/execute.go). |
 | Source and invocation failures use stable exit classes | `TestCLIErrorBoundary`, `TestFirstVerifierSlice`, and `TestRunRecoverableErrors`. |
-| Runtime options reject invalid or duplicate inputs | `TestRunHostLimitsAndAuthorization` and `parseArgs` in [the CLI](../cmd/lo/main.go). |
+| Runtime options reject invalid or duplicate inputs | `TestRunHostLimitsAndAuthorization` and `parseArgs` in [the shared runner](../internal/runner/command.go). |
 | Reads need a matching directory root | `TestRunFileReads` and `TestRunHostLimitsAndAuthorization`. |
 | Path normalization and most-specific root selection occur at the adapter edge | `files.resolve` and `openRoots` in [the File adapter](../internal/adapter/files.go). |
 | Root traversal and symlink escape fail | `TestRunHostLimitsAndAuthorization` and `TestFileCommitAuthorization`. |
 | Invalid UTF-8 produces the specified Lo error | `TestRunFileReads` and `TestServeRequestValidation`. |
 | Steps, integer magnitude, collection count, and flow depth have host limits | `TestRunHostLimitsAndAuthorization` and `TestRunResourceLimits`. |
 | File bytes, expanded values, and cumulative value weight have host limits | `TestRunResourceLimits` and `TestRunExpandedValueLimit`. |
-| String construction checks byte limits before publication | `builtin` in [the evaluator](../internal/eval/builtin.go) and expression weight checks in [evaluation](../internal/eval/eval.go). |
+| String construction checks byte limits before publication | [Shared operations](../internal/runtimeops/builtin.go) and value weight checks in [execution sessions](../internal/execution/session.go). |
 
 ## Stage Acceptance
 
@@ -184,17 +185,19 @@ Private representations and copied collection views preserve published graph and
 
 | Artifact | Review result |
 | --- | --- |
-| `cmd/lo/` | Arguments, streams, diagnostics, process signals, and lifecycle. |
+| `cmd/lo/` | Source compiler and native build commands. |
+| `internal/runner/` | Runtime arguments, streams, diagnostics, signals, and lifecycle. |
 | `internal/source/`, `internal/syntax/` | Source identity, spans, tokens, AST, and parser. |
 | `internal/resolve/`, `internal/types/`, `internal/check/` | Symbols, domain types, type rules, flow analysis, and graph construction. |
 | `internal/catalog/`, `internal/ir/` | Canonical operations and immutable checked graph representations. |
 | `internal/inspect/` | Static traversal, abstract values, report schema, and text output. |
-| `internal/value/`, `internal/eval/` | Immutable runtime values, graph execution, budgets, and propagation. |
+| `internal/value/`, `internal/eval/` | Immutable runtime values and interpreter graph execution. |
+| `internal/execution/`, `internal/runtimeops/` | Shared budgets, propagation, program entries, and runtime operations. |
 | `internal/adapter/` | Authorized files, HTTP dispatch, listeners, and cleanup. |
 | `internal/diagnostic/`, `internal/compiler/` | Structured diagnostics and compiler entry points. |
 | `tests/integration/`, `testdata/conformance/` | Public acceptance tests and indexed static fixtures. |
 | `examples/` | Specification examples and executable File and HTTP workflows. |
-| `Makefile` | All seven specified build and validation targets. |
+| `Makefile` | Compiler, native, race, and benchmark targets. |
 
 ## Validation Gates
 
@@ -234,3 +237,25 @@ GOFLAGS=-race make test-integration \
 The [disconnect regression](evidence/http-disconnect-red.txt) records the failure before its correction.
 The corrected adapter uses connection cancellation when response delivery fails.
 The audit found no remaining implementation requirement within the six-stage scope.
+
+## Native Compilation
+
+F001 adds direct Go generation and standalone native artifacts.
+The [native results](native-compilation-results.md) record semantic tests, timing gates, resource measurements, and target environments.
+The [native contract](native-compilation-contract.md) owns the build limits and logical charge order.
+
+| Requirement | Implementation and evidence |
+| --- | --- |
+| Shared execution contracts | `internal/execution`, `internal/identity`, `internal/runtimeops`, and `internal/runner`. |
+| Direct generated execution | `internal/codegen` emits flow functions, local variables, branches, list loops, and derivative operations. |
+| Compiler-free runtime | `internal/derivative` supplies VJP arithmetic without compiler plans. Artifact symbol checks reject compiler and interpreter packages. |
+| Isolated artifact construction | `internal/nativebuild` uses a controlled toolchain environment, temporary module, process-group cancellation, and atomic output replacement. |
+| Runtime source identity | `tools/runtimebundle` emits the embedded bundle and content manifest. CI verifies the bundle before regeneration. |
+| Public native behavior | `make test-native` compiles CLI execution fixtures and uses their existing expected results. |
+| Limits and effects | Native differential tests compare diagnostics, results, and file effects at budget boundaries. |
+| Target execution | The complete native suite passed on macOS arm64 and Linux arm64. |
+| Concurrent runtime behavior | Generated artifacts passed the selected HTTP and execution race tests on both targets. |
+| Repository validation | [Final CI](evidence/native-ci.txt) passed formatting, static analysis, interpreter tests, native tests, and the compiler build. |
+
+F001 retains the current language, value, authorization, and error contracts.
+The native backend adds no language syntax or automatic backend selection.

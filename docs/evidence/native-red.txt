@@ -1,0 +1,8 @@
+go test ./tests/integration -run TestNativeStandalone -count=1
+--- FAIL: TestNativeStandalone (0.20s)
+    native_test.go:18: build native program: {stdout: stderr:cli.invalid-invocation: unknown option "--output"
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.720s
+FAIL
+make: *** [test-integration] Error 1
