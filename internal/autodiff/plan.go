@@ -140,6 +140,9 @@ func Compile(original ir.BuiltinCall, loss ir.Flow, flows map[ir.FlowID]ir.Flow)
 		selected = append(selected, Selection{f.Name, s.id})
 	}
 	result := b.invoke(loss, args, original.Span())
+	if ft, ok := loss.Signature().Output().(types.Fallible); ok && b.err == nil {
+		result = b.convert(ft.Base(), result, ir.Propagate)
+	}
 	if b.err != nil {
 		return nil, b.err
 	}
@@ -218,11 +221,17 @@ func (b *builder) emit(expr ir.Expression, args []symbol, edges []Edge, active b
 	if c, ok := expr.(ir.BuiltinCall); ok {
 		n.operation = c.Operation().Name()
 	}
-	if ft, ok := expr.Type().(types.Fallible); ok {
-		n.expression = must(ir.NewConversion(ft.Base(), expr, ir.Propagate))
-	}
 	b.nodes = append(b.nodes, n)
-	return symbol{id: n.id, ref: must(ir.NewReference(base(expr.Type()), n.Binding(), expr.Span())), active: active}
+	return symbol{id: n.id, ref: must(ir.NewReference(expr.Type(), n.Binding(), expr.Span())), active: active}
+}
+func (b *builder) convert(t types.Type, input symbol, kind ir.ConversionKind) symbol {
+	edges := []Edge{}
+	if input.active {
+		edges = append(edges, Edge{0, input.id})
+	}
+	result := b.emit(must(ir.NewConversion(t, input.ref, kind)), []symbol{input}, edges, input.active)
+	result.fields = input.fields
+	return result
 }
 func (b *builder) invoke(f ir.Flow, args []symbol, span source.Span) symbol {
 	if b.err != nil {
@@ -253,7 +262,14 @@ func (b *builder) invoke(f ir.Flow, args []symbol, span source.Span) symbol {
 		case ir.Binding:
 			env[s.ID()] = b.expression(s.Value(), env)
 		case ir.Return:
-			return b.expression(s.Value(), env)
+			result := b.expression(s.Value(), env)
+			if ft, ok := f.Signature().Output().(types.Fallible); ok && b.err == nil {
+				result = b.convert(ft.Base(), result, ir.Propagate)
+				if b.err == nil {
+					result = b.convert(ft, result, ir.Success)
+				}
+			}
+			return result
 		case ir.Commit:
 			b.fail("commit activation is not differentiable", s.Span())
 			return symbol{}
@@ -277,7 +293,11 @@ func (b *builder) expression(expr ir.Expression, env map[ir.BindingID]symbol) sy
 		return b.emit(e, nil, nil, false)
 	case ir.Conversion:
 		if e.Conversion() == ir.Propagate || e.Conversion() == ir.Success {
-			return b.expression(e.Input(), env)
+			input := b.expression(e.Input(), env)
+			if b.err != nil {
+				return symbol{}
+			}
+			return b.convert(e.Type(), input, e.Conversion())
 		}
 		b.fail("unsupported conversion in differentiated loss", e.Span())
 	case ir.Projection:

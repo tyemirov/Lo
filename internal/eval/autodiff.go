@@ -116,6 +116,9 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 		}
 		f.bindings[n.Binding()] = v
 		if n.Retained() {
+			if wrapped, ok := v.(value.Fallible); ok {
+				v, _ = wrapped.Outcome()
+			}
 			if t, ok := v.(value.Tensor); ok {
 				storage := t.Data().Storage()
 				if !tape[storage] {
@@ -158,6 +161,21 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 			continue
 		}
 		operands := n.Operands()
+		if _, ok := n.Expression().(ir.Conversion); ok {
+			for _, edge := range n.Edges() {
+				contribution := g
+				if previous := adjoints[edge.Node]; previous != nil {
+					var err error
+					contribution, err = math.Apply(catalog.TensorAdd, previous, contribution, nil)
+					if err != nil {
+						return fail(err, n)
+					}
+				}
+				adjoints[edge.Node] = contribution
+			}
+			delete(adjoints, n.ID())
+			continue
+		}
 		a := f.bindings[operands[0]].(value.Tensor).Data()
 		var b, result tensor.Data
 		var indices []int64
@@ -172,7 +190,8 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 			}
 		}
 		if n.Operation() == catalog.TensorSqrt {
-			result = f.bindings[n.Binding()].(value.Tensor).Data()
+			v, _ := f.bindings[n.Binding()].(value.Fallible).Outcome()
+			result = v.(value.Tensor).Data()
 		}
 		for _, edge := range n.Edges() {
 			contribution, err := autodiff.VJP(math, n.Operation(), edge.Operand, g, a, b, result, indices)
