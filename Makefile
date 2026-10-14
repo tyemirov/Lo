@@ -6,6 +6,8 @@ BENCH_TIME ?= 300ms
 NATIVE_BENCH_WORK ?= _scratch/f001-native/benchmark
 NATIVE_BENCH_LANE ?= all
 
+.DEFAULT_GOAL := build
+
 .PHONY: build fmt lint test test-integration test-conformance test-native test-native-race runtime-bundle verify-runtime-bundle benchmark-training benchmark-training-cli benchmark-training-profile benchmark-native-baseline benchmark-native ci
 
 runtime-bundle:
