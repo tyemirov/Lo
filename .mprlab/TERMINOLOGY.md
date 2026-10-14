@@ -172,7 +172,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `timeout`: A specified duration after which the host cancels an operation.
 - `Base64`: A text encoding for a sequence of bytes.
 - `directory root`: An opened directory that limits adapter path access to its directory tree.
-- `execution budget`: A host limit on interpreter steps or evaluated value data.
+- `execution budget`: A host limit on logical execution steps or evaluated value data.
 - `quotient`: The integer result of division after removal of the fractional part toward zero.
 - `remainder`: The integer difference between a dividend and the product of its divisor and quotient.
 - `symlink`: A filesystem entry that refers to another path.
