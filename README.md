@@ -24,9 +24,11 @@ The [implementation audit](docs/implementation-audit.md) records the completed r
 The accepted [compiler design and implementation plan](docs/compiler-design.md) selects Go and a typed execution graph.
 It specifies compiler stages, package boundaries, diagnostics, inspection, acceptance criteria, and open language decisions.
 
-The proposed [native compilation milestone](docs/native-compilation-plan.md) adds standalone executables through generated Go code.
-F001 tracks this work.
-Native compilation is not implemented.
+`lo build` creates standalone native executables through generated Go code.
+Artifacts support the current operations, CPU training, File workflows, and HTTP services.
+The [native compilation contract](docs/native-compilation-contract.md) defines toolchain requirements, limits, and artifact construction.
+F001 completed native qualification on macOS arm64 and Linux arm64.
+The [acceptance report](docs/native-compilation-results.md) records tests, performance measurements, and build resources.
 
 The selected [training extension design](docs/training-extension-design.md) defines FP32 tensors, reverse-mode autodiff, immutable optimizer state, and explicit device execution.
 P001 completed the design task.
@@ -50,6 +52,8 @@ make build
 ./bin/lo check examples/list_sum.lo
 ./bin/lo inspect examples/agent_file_workflow.lo --format json
 ./bin/lo run examples/list_sum.lo
+./bin/lo build examples/list_sum.lo --output ./bin/list-sum
+./bin/list-sum run
 ./bin/lo run examples/tensor_forward.lo
 ./bin/lo run examples/training_cpu.lo --format json
 ./bin/lo run examples/count_letter.lo --read-root examples
@@ -64,6 +68,14 @@ The integration suite also tests built-in signatures, runtime values, evaluation
 The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.
 The [adapter examples](docs/compiler-design.md#executable-adapter-examples) specify file grants, listen grants, and expected results.
+
+Native builds require Go 1.27.1 on the build host.
+Artifacts need no Go installation, Lo installation, source file, or repository checkout during execution.
+Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact target.
+The build uses the host target when this option is absent.
+Supply file and listen grants when you execute the artifact.
+Use the artifact's `metadata` command to inspect its source digest, runtime bundle digest, target, and toolchain.
+`lo run` and `lo serve` select interpreter execution.
 
 ## Core Idea
 
@@ -425,9 +437,10 @@ lo serve examples/http_division.lo
 
 ### Milestone 5: Native Compilation
 
-The proposed [native compilation plan](docs/native-compilation-plan.md) defines F001.
+The [native compilation plan](docs/native-compilation-plan.md) defines F001.
 It covers performance baselines, shared runtime contracts, generated Go code, standalone artifacts, File workflows, and HTTP services.
 Its acceptance criteria require semantic equivalence, qualified target execution, and measured performance.
+F001 passed these criteria on both supported targets.
 
 ## Agent Profile
 

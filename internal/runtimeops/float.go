@@ -1,4 +1,4 @@
-package eval
+package runtimeops
 
 import (
 	"math"
@@ -6,12 +6,12 @@ import (
 	"strconv"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
-	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
+
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-func (m *machine) floatOperation(call ir.BuiltinCall, args []value.Value) (value.Value, error) {
+func (m *machine) floatOperation(call Call, args []value.Value) (value.Value, error) {
 	op := call.Operation().Name()
 	if op == catalog.IntToFloat {
 		n, _ := args[0].(value.Integer).Big().Float64()
@@ -26,7 +26,7 @@ func (m *machine) floatOperation(call ir.BuiltinCall, args []value.Value) (value
 		return must(value.NewText(types.String(), strconv.FormatFloat(a, 'g', -1, 64))), nil
 	case catalog.FloatSqrt:
 		if a < 0 {
-			return operationFailure(call, args, catalog.NumericDomain, "square root requires a nonnegative input"), nil
+			return OperationFailure(call, args, catalog.NumericDomain, "square root requires a nonnegative input"), nil
 		}
 		return floatResult(call, args, math.Sqrt(a)), nil
 	}
@@ -41,7 +41,7 @@ func (m *machine) floatOperation(call ir.BuiltinCall, args []value.Value) (value
 		result = float64(a * b)
 	case catalog.FloatDiv:
 		if b == 0 {
-			return operationFailure(call, args, catalog.NumericZero, "division by zero"), nil
+			return OperationFailure(call, args, catalog.NumericZero, "division by zero"), nil
 		}
 		result = float64(a / b)
 	case catalog.FloatEqual:
@@ -60,10 +60,10 @@ func (m *machine) floatOperation(call ir.BuiltinCall, args []value.Value) (value
 	return floatResult(call, args, result), nil
 }
 
-func floatResult(call ir.BuiltinCall, args []value.Value, n float64) value.Value {
+func floatResult(call Call, args []value.Value, n float64) value.Value {
 	result, err := value.NewFloat(n)
 	if err != nil {
-		return operationFailure(call, args, catalog.NumericNonFinite, "numeric result is not finite")
+		return OperationFailure(call, args, catalog.NumericNonFinite, "numeric result is not finite")
 	}
-	return success(call.Type(), result)
+	return Success(call.Type(), result)
 }

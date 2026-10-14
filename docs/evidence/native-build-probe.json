@@ -1,0 +1,81 @@
+{
+  "command": [
+    "go",
+    "build",
+    "-trimpath",
+    "-buildvcs=false",
+    "-pgo=off",
+    "-o",
+    "/Users/tyemirov/Development/Research/Lo/_scratch/f001-native-20261013/probe-lo",
+    "./cmd/lo"
+  ],
+  "go": "go version go1.27.1 darwin/arm64",
+  "samples": [
+    {
+      "cache": "cold",
+      "elapsed_ns": 3092435083,
+      "peak_rss_bytes": 329695232,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 78290583,
+      "peak_rss_bytes": 40239104,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 78095167,
+      "peak_rss_bytes": 40599552,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 78839417,
+      "peak_rss_bytes": 40304640,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 73156000,
+      "peak_rss_bytes": 40304640,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 74174958,
+      "peak_rss_bytes": 41009152,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 75302833,
+      "peak_rss_bytes": 40091648,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 73845959,
+      "peak_rss_bytes": 40222720,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 73010208,
+      "peak_rss_bytes": 40386560,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 75329583,
+      "peak_rss_bytes": 39616512,
+      "artifact_bytes": 11003570
+    },
+    {
+      "cache": "warm",
+      "elapsed_ns": 74466083,
+      "peak_rss_bytes": 40861696,
+      "artifact_bytes": 11003570
+    }
+  ]
+}

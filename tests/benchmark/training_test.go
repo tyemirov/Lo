@@ -3,6 +3,7 @@ package benchmark_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,10 +18,10 @@ import (
 type noBoundaries struct{}
 
 func (noBoundaries) Read(context.Context, value.Text) (value.Bytes, error) {
-	return nil, eval.Denied("File.read", "training benchmark")
+	return nil, execution.Denied("File.read", "training benchmark")
 }
 func (noBoundaries) Commit(context.Context, value.Target) error {
-	return eval.Denied("commit", "training benchmark")
+	return execution.Denied("commit", "training benchmark")
 }
 
 var programSink ir.Program
@@ -44,7 +45,7 @@ func BenchmarkTraining(b *testing.B) {
 		if d != nil {
 			b.Fatal(d)
 		}
-		budget, err := eval.NewBudget(10_000_000)
+		budget, err := execution.NewBudget(10_000_000)
 		if err != nil {
 			b.Fatal(err)
 		}

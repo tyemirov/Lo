@@ -2,6 +2,7 @@ package inspect
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"slices"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
@@ -39,7 +40,7 @@ type abstract struct {
 type context struct {
 	id         contextID
 	entry      string
-	handler    ir.FlowID
+	handler    identity.FlowID
 	conditions []condition
 	values     map[ir.BindingID]abstract
 }
@@ -48,12 +49,12 @@ type analyzer struct {
 	data    reportData
 	graph   *graphIndex
 	targets map[targetID]resourceData
-	uses    map[ir.FlowID]map[string]bool
+	uses    map[identity.FlowID]map[string]bool
 	err     diagnostic.Diagnostic
 }
 
 func Program(program ir.Program) (Report, diagnostic.Diagnostic) {
-	a := &analyzer{program: program, data: newReport(program.Source().Path()), targets: map[targetID]resourceData{}, uses: map[ir.FlowID]map[string]bool{}}
+	a := &analyzer{program: program, data: newReport(program.Source().Path()), targets: map[targetID]resourceData{}, uses: map[identity.FlowID]map[string]bool{}}
 	if t := program.ResultType(); t != nil {
 		a.data.ResultType = t.String()
 	}
@@ -90,7 +91,7 @@ func Program(program ir.Program) (Report, diagnostic.Diagnostic) {
 	}
 	return &report{a.data}, nil
 }
-func (a *analyzer) newContext(parent *context, kind, entry string, flow ir.FlowID, node nodeID, conditions []condition) *context {
+func (a *analyzer) newContext(parent *context, kind, entry string, flow identity.FlowID, node nodeID, conditions []condition) *context {
 	if a.err != nil {
 		return nil
 	}
@@ -132,7 +133,7 @@ func branchContext(c *context, guard condition) *context {
 	copy.conditions = mergeConditions(c.conditions, []condition{guard})
 	return &copy
 }
-func (a *analyzer) invoke(parent *context, id ir.FlowID, kind, entry string, node nodeID, values []abstract, conditions []condition) abstract {
+func (a *analyzer) invoke(parent *context, id identity.FlowID, kind, entry string, node nodeID, values []abstract, conditions []condition) abstract {
 	f := a.graph.flows[id]
 	if node == "" {
 		body := f.Body()
@@ -381,7 +382,7 @@ func (a *analyzer) activate(c *context, node nodeID, value abstract) {
 		}
 	}
 }
-func (a *analyzer) adapter(parent *context, flow, handler ir.FlowID, activation string, node nodeID, conditionKind string) {
+func (a *analyzer) adapter(parent *context, flow, handler identity.FlowID, activation string, node nodeID, conditionKind string) {
 	if a.err != nil {
 		return
 	}

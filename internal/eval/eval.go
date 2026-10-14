@@ -2,188 +2,59 @@ package eval
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
+	"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops"
 	"math/big"
 	"strconv"
 
-	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-const (
-	DefaultSteps        uint64 = 1_000_000
-	MaxBytes                   = 16 << 20
-	MaxItems                   = 1_000_000
-	MaxIntegerBits             = 1_048_576
-	MaxDepth                   = 256
-	MaxValueWeight      uint64 = 16 << 20
-	MaxEvaluationWeight uint64 = 64 << 20
-)
-
-type Boundary interface {
-	Read(context.Context, value.Text) (value.Bytes, error)
-	Commit(context.Context, value.Target) error
-}
-type Budget interface {
-	Steps() uint64
-	budget()
-}
-type budget uint64
-
-func (budget) budget()         {}
-func (b budget) Steps() uint64 { return uint64(b) }
-func NewBudget(steps uint64) (Budget, error) {
-	if steps == 0 {
-		return nil, fmt.Errorf("execution steps must be positive")
-	}
-	return budget(steps), nil
-}
-func DefaultBudget() Budget { return budget(DefaultSteps) }
-
-type Failure interface {
-	error
-	Value() value.Error
-	failure()
-}
-type failure struct{ cause value.Error }
-
-func (failure) failure()             {}
-func (f failure) Value() value.Error { return f.cause }
-func (f failure) Error() string      { return f.cause.Kind() + ": " + f.cause.Message() }
-
-type HostError interface {
-	error
-	Code() diagnostic.Code
-	Unwrap() error
-	hostError()
-}
-type hostError struct {
-	code    diagnostic.Code
-	message string
-	cause   error
-}
-
-func (hostError) hostError()              {}
-func (e hostError) Code() diagnostic.Code { return e.code }
-func (e hostError) Unwrap() error         { return e.cause }
-func (e hostError) Error() string {
-	if e.cause != nil {
-		return e.message + ": " + e.cause.Error()
-	}
-	return e.message
-}
-func Denied(operation, subject string) HostError {
-	return hostError{diagnostic.CapabilityDenied, fmt.Sprintf("%s %q has no host capability", operation, subject), nil}
-}
-func Limit(subject string) HostError {
-	return hostError{diagnostic.RuntimeLimit, "execution limit: " + subject, nil}
-}
-func HostFailure(operation, subject string, cause error) HostError {
-	return hostError{diagnostic.RuntimeHost, fmt.Sprintf("%s %q", operation, subject), cause}
-}
-func ServerRequiresServe() HostError {
-	return hostError{diagnostic.ServerRequiresServe, "HTTP server activation requires lo serve", nil}
-}
-func NoServer() HostError {
-	return hostError{diagnostic.NoServer, "serve requires an activated HTTP server", nil}
-}
-func boundaryHostError(err error) HostError {
-	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-		return hostError{diagnostic.RuntimeCancelled, "execution cancelled", err}
-	}
-	var host HostError
-	if errors.As(err, &host) {
-		return hostError{host.Code(), "boundary operation failed", err}
-	}
-	return nil
-}
-
 type machine struct {
-	ctx       context.Context
-	boundary  Boundary
-	flows     map[ir.FlowID]ir.Flow
-	remaining uint64
-	depth     int
-	weight    uint64
+	execution.Session
+	flows map[identity.FlowID]ir.Flow
 }
 type frame struct {
 	name     string
 	bindings map[ir.BindingID]value.Value
 }
 
-func Run(ctx context.Context, p ir.Program, boundary Boundary, limit Budget) (value.Value, error) {
-	m, err := newMachine(ctx, p, boundary, limit)
-	if err != nil {
-		return nil, err
+func Program(p ir.Program) (execution.Program, error) {
+	if p == nil {
+		return nil, fmt.Errorf("execution requires a checked program")
 	}
-	v, err := m.body(p.Body(), frame{bindings: map[ir.BindingID]value.Value{}})
-	if err != nil {
-		return nil, err
-	}
-	return published(v)
-}
-
-type Invocation interface {
-	Invoke(ir.FlowID, []value.Value) (value.Value, error)
-	invocation()
-}
-
-func (*machine) invocation() {}
-func NewInvocation(ctx context.Context, p ir.Program, boundary Boundary, limit Budget) (Invocation, error) {
-	return newMachine(ctx, p, boundary, limit)
-}
-func newMachine(ctx context.Context, p ir.Program, boundary Boundary, limit Budget) (*machine, error) {
-	if ctx == nil || p == nil || boundary == nil || limit == nil {
-		return nil, fmt.Errorf("execution requires context, checked program, boundary, and budget")
-	}
-	m := &machine{ctx: ctx, boundary: boundary, flows: map[ir.FlowID]ir.Flow{}, remaining: limit.Steps()}
+	flows := map[identity.FlowID]ir.Flow{}
 	for _, f := range p.Flows() {
-		m.flows[f.ID()] = f
+		flows[f.ID()] = f
 	}
-	return m, nil
+	handlers := make([]execution.Handler, 0, len(flows))
+	for _, f := range p.Flows() {
+		id := f.ID()
+		handlers = append(handlers, execution.Handler{ID: id, Name: f.Name(), Parameters: f.Signature().Parameters(), Span: f.Span(), Call: func(s execution.Session, args []value.Value, span source.Span) (value.Value, error) {
+			m := &machine{Session: s, flows: flows}
+			return m.invoke(id, args, span)
+		}})
+	}
+	return execution.NewProgram(func(s execution.Session) (value.Value, error) {
+		m := &machine{Session: s, flows: flows}
+		return m.body(p.Body(), frame{bindings: map[ir.BindingID]value.Value{}})
+	}, handlers)
 }
-func (m *machine) Invoke(id ir.FlowID, args []value.Value) (value.Value, error) {
-	f := m.flows[id]
-	if f == nil || len(args) != len(f.Parameters()) {
-		return nil, fmt.Errorf("invalid adapter flow invocation %q", id)
-	}
-	for i, p := range f.Parameters() {
-		if args[i] == nil || !types.Equal(p.Type, args[i].Type()) {
-			return nil, fmt.Errorf("invalid adapter argument %s", p.Name)
-		}
-	}
-	v, err := m.invoke(id, args, f.Span())
+func Run(ctx context.Context, p ir.Program, boundary execution.Boundary, budget execution.Budget) (value.Value, error) {
+	program, err := Program(p)
 	if err != nil {
 		return nil, err
 	}
-	return published(v)
-}
-func published(v value.Value) (value.Value, error) {
-	if f, ok := v.(value.Fallible); ok {
-		_, cause := f.Outcome()
-		if cause != nil {
-			return nil, failure{cause}
-		}
-	}
-	return v, nil
-}
-func (m *machine) step() error {
-	if err := m.ctx.Err(); err != nil {
-		return hostError{diagnostic.RuntimeCancelled, "execution cancelled", err}
-	}
-	if m.remaining == 0 {
-		return Limit("evaluation steps")
-	}
-	m.remaining--
-	return nil
+	return program.Run(ctx, boundary, budget)
 }
 func (m *machine) body(body []ir.Statement, f frame) (value.Value, error) {
 	for _, s := range body {
-		if err := m.step(); err != nil {
+		if err := m.Step(); err != nil {
 			return nil, err
 		}
 		switch x := s.(type) {
@@ -200,11 +71,11 @@ func (m *machine) body(body []ir.Statement, f frame) (value.Value, error) {
 			if err != nil {
 				return nil, err
 			}
-			if err := m.boundary.Commit(m.ctx, v.(value.Target)); err != nil {
-				if host := boundaryHostError(err); host != nil {
+			if err := m.Boundary().Commit(m.Context(), v.(value.Target)); err != nil {
+				if host := execution.BoundaryHostError(err); host != nil {
 					return nil, host
 				}
-				return nil, failure{activationError(v.(value.Target), err, x.Span())}
+				return nil, execution.Failed(runtimeops.ActivationError(v.(value.Target), err, x.Span()))
 			}
 		default:
 			panic("unknown checked statement")
@@ -213,27 +84,17 @@ func (m *machine) body(body []ir.Statement, f frame) (value.Value, error) {
 	return nil, nil
 }
 func (m *machine) expression(expr ir.Expression, f frame) (value.Value, error) {
-	if err := m.step(); err != nil {
+	if err := m.Step(); err != nil {
 		return nil, err
 	}
 	v, err := m.evaluate(expr, f)
 	if err != nil {
 		return nil, err
 	}
-	if err := m.chargeValue(v); err != nil {
+	if err := m.ChargeValue(v); err != nil {
 		return nil, err
 	}
 	return v, nil
-}
-func (m *machine) chargeValue(v value.Value) error {
-	if v.Weight() > MaxValueWeight {
-		return Limit("expanded value bytes")
-	}
-	if v.Weight() > MaxEvaluationWeight-m.weight {
-		return Limit("evaluation value bytes")
-	}
-	m.weight += v.Weight()
-	return nil
 }
 func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 	switch x := expr.(type) {
@@ -244,7 +105,7 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 			if !ok {
 				panic("invalid checked integer")
 			}
-			return m.integer(n)
+			return runtimeops.Integer(n)
 		case types.StringKind:
 			return must(value.NewText(types.String(), x.Text())), nil
 		case types.BoolKind:
@@ -285,7 +146,7 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 		case ir.Propagate:
 			result, cause := v.(value.Fallible).Outcome()
 			if cause != nil {
-				return nil, failure{cause}
+				return nil, execution.Failed(cause)
 			}
 			return result, nil
 		case ir.RecordView:
@@ -299,8 +160,8 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 		case ir.ScalarListView:
 			items := []value.Value{}
 			for _, r := range v.(value.Text).Text() {
-				if len(items) == MaxItems {
-					return nil, Limit("list elements")
+				if len(items) == execution.MaxItems {
+					return nil, execution.Limit("list elements")
 				}
 				items = append(items, must(value.NewText(types.Scalar(), string(r))))
 			}
@@ -320,7 +181,7 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 		return m.invoke(x.Flow(), args, x.Span())
 	case ir.BuiltinCall:
 		args := make([]value.Value, len(x.Arguments()))
-		flows := map[int]ir.FlowID{}
+		flows := map[int]identity.FlowID{}
 		for _, a := range x.Arguments() {
 			switch a := a.(type) {
 			case ir.ValueArgument:
@@ -374,12 +235,11 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 		panic("unknown checked expression")
 	}
 }
-func (m *machine) invoke(id ir.FlowID, args []value.Value, span source.Span) (value.Value, error) {
-	if m.depth == MaxDepth {
-		return nil, Limit("flow depth")
+func (m *machine) invoke(id identity.FlowID, args []value.Value, span source.Span) (value.Value, error) {
+	if err := m.Enter(); err != nil {
+		return nil, err
 	}
-	m.depth++
-	defer func() { m.depth-- }()
+	defer m.Leave()
 	f := m.flows[id]
 	if f == nil {
 		panic("absent checked flow")
@@ -393,7 +253,7 @@ func (m *machine) invoke(id ir.FlowID, args []value.Value, span source.Span) (va
 	result, err := m.body(f.Body(), frame{f.Name(), bindings})
 	var cause value.Error
 	if err != nil {
-		if e, ok := err.(Failure); ok {
+		if e, ok := err.(execution.Failure); ok {
 			cause = e.Value()
 		} else {
 			return nil, err
@@ -415,18 +275,6 @@ func (m *machine) invoke(id ir.FlowID, args []value.Value, span source.Span) (va
 	}
 	cause = value.At(cause, f.Name(), span)
 	return must(value.Failure(out, cause)), nil
-}
-func (m *machine) integer(n *big.Int) (value.Value, error) {
-	if n.BitLen() > MaxIntegerBits {
-		return nil, Limit("integer bits")
-	}
-	return must(value.NewInt(n)), nil
-}
-func (m *machine) list(t types.List, items []value.Value) (value.Value, error) {
-	if len(items) > MaxItems {
-		return nil, Limit("list elements")
-	}
-	return must(value.NewList(t, items)), nil
 }
 func must[T any](v T, err error) T {
 	if err != nil {

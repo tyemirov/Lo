@@ -2,9 +2,9 @@ package value
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
-	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
@@ -49,27 +49,27 @@ func NewEffect(op catalog.Operation, path Text, content Value) (Effect, error) {
 type Server interface {
 	Target
 	Port() Integer
-	Handler() ir.FlowID
-	OnError() ir.FlowID
+	Handler() identity.FlowID
+	OnError() identity.FlowID
 }
 type server struct {
 	base
 	port             Integer
-	handler, onError ir.FlowID
+	handler, onError identity.FlowID
 }
 
-func (server) target()              {}
-func (v server) Port() Integer      { return v.port }
-func (v server) Handler() ir.FlowID { return v.handler }
-func (v server) OnError() ir.FlowID { return v.onError }
+func (server) target()                    {}
+func (v server) Port() Integer            { return v.port }
+func (v server) Handler() identity.FlowID { return v.handler }
+func (v server) OnError() identity.FlowID { return v.onError }
 func (v server) MarshalJSON() ([]byte, error) {
 	return encode(v, struct {
-		Port    Integer   `json:"port"`
-		Handler ir.FlowID `json:"handler"`
-		OnError ir.FlowID `json:"on_error"`
+		Port    Integer         `json:"port"`
+		Handler identity.FlowID `json:"handler"`
+		OnError identity.FlowID `json:"on_error"`
 	}{v.port, v.handler, v.onError})
 }
-func NewServer(port Integer, handler, onError ir.FlowID) (Server, error) {
+func NewServer(port Integer, handler, onError identity.FlowID) (Server, error) {
 	if port == nil || handler == "" || onError == "" {
 		return nil, fmt.Errorf("incomplete server target")
 	}

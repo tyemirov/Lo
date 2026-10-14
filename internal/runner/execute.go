@@ -1,18 +1,17 @@
-package main
+package runner
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"io"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
-	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
@@ -23,26 +22,26 @@ type executionResult struct {
 	Result  value.Value          `json:"result,omitempty"`
 }
 
-func executeProgram(inv invocation, p ir.Program, stdout, stderr io.Writer) int {
+func executeProgram(inv invocation, p execution.Program, stdout, stderr io.Writer) int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	files, err := adapter.OpenFiles(inv.readRoots, inv.writeRoots)
 	if err != nil {
-		return reportRuntime(stderr, inv.format, err)
+		return ReportRuntime(stderr, inv.format, err)
 	}
-	if inv.command == runCommand {
-		output, runErr := eval.Run(ctx, p, files, inv.budget)
+	if inv.command == RunCommand {
+		output, runErr := p.Run(ctx, files, inv.budget)
 		if err := runtimeCleanup(runErr, files.Close()); err != nil {
-			return reportRuntime(stderr, inv.format, err)
+			return ReportRuntime(stderr, inv.format, err)
 		}
-		if err := writeExecution(stdout, inv.format, executionResult{Command: runCommand, Status: "ok", Result: output}); err != nil {
-			return reportRuntime(stderr, inv.format, eval.HostFailure("write command result", inv.path, err))
+		if err := writeExecution(stdout, inv.format, executionResult{Command: RunCommand, Status: "ok", Result: output}); err != nil {
+			return ReportRuntime(stderr, inv.format, execution.HostFailure("write command result", inv.path, err))
 		}
-		return exitSuccess
+		return ExitSuccess
 	}
 	servers, err := adapter.NewServers(p, files, inv.listenPolicy, inv.budget)
 	if err != nil {
-		return reportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
+		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
 	}
 	cleanup := func(cause error) error {
 		shutdown, cancel := context.WithTimeout(context.Background(), adapter.ShutdownTimeout)
@@ -52,16 +51,16 @@ func executeProgram(inv invocation, p ir.Program, stdout, stderr io.Writer) int 
 	}
 	output, err := servers.Start(ctx)
 	if err != nil {
-		return reportRuntime(stderr, inv.format, cleanup(err))
+		return ReportRuntime(stderr, inv.format, cleanup(err))
 	}
 	active := servers.Snapshot()
 	select {
 	case err := <-servers.Failures():
-		return reportRuntime(stderr, inv.format, cleanup(err))
+		return ReportRuntime(stderr, inv.format, cleanup(err))
 	default:
 	}
-	if err := writeExecution(stdout, inv.format, executionResult{Command: serveCommand, Status: "ready", Servers: active, Result: output}); err != nil {
-		return reportRuntime(stderr, inv.format, cleanup(eval.HostFailure("write readiness", inv.path, err)))
+	if err := writeExecution(stdout, inv.format, executionResult{Command: ServeCommand, Status: "ready", Servers: active, Result: output}); err != nil {
+		return ReportRuntime(stderr, inv.format, cleanup(execution.HostFailure("write readiness", inv.path, err)))
 	}
 	var cause error
 	select {
@@ -69,31 +68,31 @@ func executeProgram(inv invocation, p ir.Program, stdout, stderr io.Writer) int 
 	case cause = <-servers.Failures():
 	}
 	if err := cleanup(cause); err != nil {
-		return reportRuntime(stderr, inv.format, err)
+		return ReportRuntime(stderr, inv.format, err)
 	}
 	select {
 	case err := <-servers.Failures():
-		return reportRuntime(stderr, inv.format, err)
+		return ReportRuntime(stderr, inv.format, err)
 	default:
 	}
-	if err := writeExecution(stdout, inv.format, executionResult{Command: serveCommand, Status: "stopped"}); err != nil {
-		return reportRuntime(stderr, inv.format, eval.HostFailure("write shutdown result", inv.path, err))
+	if err := writeExecution(stdout, inv.format, executionResult{Command: ServeCommand, Status: "stopped"}); err != nil {
+		return ReportRuntime(stderr, inv.format, execution.HostFailure("write shutdown result", inv.path, err))
 	}
-	return exitSuccess
+	return ExitSuccess
 }
 func runtimeCleanup(cause, cleanup error) error {
 	if cleanup != nil {
-		return eval.HostFailure("close runtime resources", "program", errors.Join(cause, cleanup))
+		return execution.HostFailure("close runtime resources", "program", errors.Join(cause, cleanup))
 	}
 	return cause
 }
 func writeExecution(w io.Writer, format string, result executionResult) error {
-	if format == jsonFormat {
+	if format == JsonFormat {
 		encoder := json.NewEncoder(w)
 		encoder.SetEscapeHTML(false)
 		return encoder.Encode(result)
 	}
-	if result.Command == runCommand {
+	if result.Command == RunCommand {
 		if result.Result == nil {
 			return nil
 		}

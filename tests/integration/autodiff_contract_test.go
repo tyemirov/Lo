@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"strings"
 	"testing"
 
@@ -193,12 +194,12 @@ func TestAutodiffWorkAndCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	controlled := &tensorCancellation{Context: ctx, cancel: cancel}
-	budget, err := eval.NewBudget(10000000)
+	budget, err := execution.NewBudget(10000000)
 	if err != nil {
 		t.Fatal(err)
 	}
 	v, err := eval.Run(controlled, p, &observedBoundary{}, budget)
-	var host eval.HostError
+	var host execution.HostError
 	if v != nil || !errors.As(err, &host) || host.Code() != "runtime.cancelled" {
 		t.Fatalf("derivative cancellation: %v %v", v, err)
 	}

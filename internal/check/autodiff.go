@@ -4,6 +4,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/autodiff"
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/syntax"
@@ -51,10 +52,10 @@ func (c *checker) gradient(op catalog.Operation, args []syntax.Argument, span so
 		values[i] = v
 		nodes[i] = must(ir.ValueArg(i, v.node))
 	}
-	nodes[len(args)-1] = must(ir.FlowArg(len(args)-1, ir.FlowID(f.entry.ID()), args[len(args)-1].Span))
+	nodes[len(args)-1] = must(ir.FlowArg(len(args)-1, identity.FlowID(f.entry.ID()), args[len(args)-1].Span))
 	out := must(types.NewRecord([]types.Field{{Name: catalog.ParamValue, Type: types.Tensor()}, {Name: catalog.FieldGradients, Type: r}}))
 	result := builtinResult(op, fallibleType(out), nodes, nil, span, values...)
-	flows := map[ir.FlowID]ir.Flow{}
+	flows := map[identity.FlowID]ir.Flow{}
 	for _, flow := range c.module.order {
 		if flow.graph != nil {
 			flows[flow.graph.ID()] = flow.graph

@@ -2,6 +2,9 @@ package eval
 
 import (
 	"errors"
+	"github.com/MarcoPoloResearchLab/Lo/internal/derivative"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops"
 	"math/big"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/autodiff"
@@ -13,45 +16,6 @@ import (
 )
 
 const MaxTapeBytes uint64 = 32 << 20
-
-type tensorArithmetic struct{ machine *machine }
-
-func (d tensorArithmetic) finish(data tensor.Data, err error) (tensor.Data, error) {
-	if err != nil {
-		return nil, err
-	}
-	d.machine.weight += data.Shape().Weight()
-	return data, nil
-}
-func (d tensorArithmetic) Apply(op string, a, b tensor.Data, indices []*big.Int) (tensor.Data, error) {
-	var bs tensor.Shape
-	if b != nil {
-		bs = b.Shape()
-	}
-	p, err := tensor.Prepare(op, a.Shape(), bs, indices)
-	if err != nil {
-		return nil, err
-	}
-	if err = d.machine.tensorBudget(p.Steps(), p.Shape().Weight()); err != nil {
-		return nil, err
-	}
-	return d.finish(tensor.Execute(d.machine.ctx, p, a, b))
-}
-func (d tensorArithmetic) Constant(shape tensor.Shape, v float32) (tensor.Data, error) {
-	if err := d.machine.tensorBudget(shape.Count(), shape.Weight()); err != nil {
-		return nil, err
-	}
-	return d.finish(tensor.Construct(d.machine.ctx, shape, func(int) float64 { return float64(v) }))
-}
-func (d tensorArithmetic) Relu(g, a tensor.Data) (tensor.Data, error) {
-	if err := d.machine.tensorBudget(a.Shape().Count(), a.Shape().Weight()); err != nil {
-		return nil, err
-	}
-	return d.finish(tensor.ReluDerivative(d.machine.ctx, g, a))
-}
-func (d tensorArithmetic) CheckSqrt(a tensor.Data) error {
-	return tensor.CheckSqrtDerivative(d.machine.ctx, a)
-}
 
 func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.Value, error) {
 	call := original.(autodiff.Call)
@@ -69,11 +33,11 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 	tape := map[tensor.Storage]bool{}
 	var tapeBytes uint64
 	fail := func(err error, n autodiff.Node) (value.Value, error) {
-		if host := boundaryHostError(err); host != nil {
+		if host := execution.BoundaryHostError(err); host != nil {
 			return nil, host
 		}
 		var cause value.Error
-		var runtime Failure
+		var runtime execution.Failure
 		var numeric tensor.Fault
 		switch {
 		case errors.As(err, &runtime):
@@ -87,7 +51,7 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 			}
 			cause = value.At(must(value.NewError(numeric.Kind(), numeric.Error(), must(value.NewRecord(input)))), n.Operation(), n.Expression().Span())
 		default:
-			return nil, Limit("derivative operation: " + err.Error())
+			return nil, execution.Limit("derivative operation: " + err.Error())
 		}
 		frames := n.Frames()
 		for i := len(frames) - 1; i >= 0; i-- {
@@ -104,7 +68,7 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 					fields[i] = value.Field{Name: a.Name, Value: value.Snapshot(f.bindings[a.Binding])}
 				}
 				snapshot := must(value.NewRecord(fields))
-				if err := m.chargeValue(snapshot); err != nil {
+				if err := m.ChargeValue(snapshot); err != nil {
 					return nil, err
 				}
 				snapshots[frame.Invocation] = snapshot
@@ -123,7 +87,7 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 				storage := t.Data().Storage()
 				if !tape[storage] {
 					if storage.Bytes() > MaxTapeBytes-tapeBytes {
-						return nil, Limit("derivative tape bytes")
+						return nil, execution.Limit("derivative tape bytes")
 					}
 					tape[storage] = true
 					tapeBytes += storage.Bytes()
@@ -136,9 +100,9 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 	}
 	loss := f.bindings[call.Result()].(value.Tensor)
 	if loss.Data().Shape().Rank() != 0 {
-		return operationFailure(original, args, catalog.InvalidLoss, "loss must return a rank-zero tensor"), nil
+		return runtimeops.OperationFailure(original, args, catalog.InvalidLoss, "loss must return a rank-zero tensor"), nil
 	}
-	math := tensorArithmetic{m}
+	math := runtimeops.Arithmetic(m.Session)
 	adjoints := map[int]tensor.Data{}
 	for _, s := range call.Selections() {
 		n := nodes[s.Node-1]
@@ -194,7 +158,7 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 			result = v.(value.Tensor).Data()
 		}
 		for _, edge := range n.Edges() {
-			contribution, err := autodiff.VJP(math, n.Operation(), edge.Operand, g, a, b, result, indices)
+			contribution, err := derivative.VJP(math, n.Operation(), edge.Operand, g, a, b, result, indices)
 			if err != nil {
 				return fail(err, n)
 			}
@@ -213,5 +177,5 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 		fields[i] = value.Field{Name: s.Key, Value: must(value.NewTensor(adjoints[s.Node]))}
 	}
 	gradients := must(value.NewRecord(fields))
-	return success(call.Type(), must(value.NewRecord([]value.Field{{Name: catalog.ParamValue, Value: loss}, {Name: catalog.FieldGradients, Value: gradients}}))), nil
+	return runtimeops.Success(call.Type(), must(value.NewRecord([]value.Field{{Name: catalog.ParamValue, Value: loss}, {Name: catalog.FieldGradients, Value: gradients}}))), nil
 }

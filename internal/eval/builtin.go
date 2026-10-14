@@ -2,283 +2,216 @@ package eval
 
 import (
 	"fmt"
-	"math/big"
-	"strings"
-	"unicode/utf8"
-
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
-	"github.com/MarcoPoloResearchLab/Lo/internal/source"
-	"github.com/MarcoPoloResearchLab/Lo/internal/types"
+	"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int]ir.FlowID, f frame) (value.Value, error) {
-	op := call.Operation().Name()
-	switch op {
-	case catalog.SGDConfigNew, catalog.AdamWConfigNew, catalog.SGDStateNew, catalog.AdamWStateNew, catalog.SGDStep, catalog.AdamWStep:
-		return m.optimizerOperation(call, args)
+func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int]identity.FlowID, f frame) (value.Value, error) {
+	switch call.Operation().Name() {
+	case catalog.SGDConfigNew:
+		return runtimeops.SGDConfigNew(m.Session, call, args, flows)
+	case catalog.AdamWConfigNew:
+		return runtimeops.AdamWConfigNew(m.Session, call, args, flows)
+	case catalog.SGDStateNew:
+		return runtimeops.SGDStateNew(m.Session, call, args, flows)
+	case catalog.AdamWStateNew:
+		return runtimeops.AdamWStateNew(m.Session, call, args, flows)
+	case catalog.SGDStep:
+		return runtimeops.SGDStep(m.Session, call, args, flows)
+	case catalog.AdamWStep:
+		return runtimeops.AdamWStep(m.Session, call, args, flows)
 	case catalog.AutodiffGrad:
 		return m.gradient(call, args)
 	case catalog.AutodiffStop:
-		return args[0], nil
-	case catalog.ParametersNew, catalog.ParametersValues, catalog.GradientsNew, catalog.GradientsValues, catalog.GradientsZero, catalog.GradientsAdd, catalog.GradientsScale:
-		return m.parameterOperation(call, args)
-	case catalog.DeviceNew, catalog.TensorNew, catalog.TensorShape, catalog.TensorRank, catalog.TensorDtype,
-		catalog.TensorDevice, catalog.TensorToFloat, catalog.TensorValues, catalog.TensorAdd, catalog.TensorSub,
-		catalog.TensorMul, catalog.TensorDiv, catalog.TensorSqrt, catalog.TensorRelu, catalog.TensorMatmul,
-		catalog.TensorBroadcast, catalog.TensorReshape, catalog.TensorTranspose, catalog.TensorSum, catalog.TensorMean:
-		return m.tensorOperation(call, args)
-	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew:
-		return args[0], nil
-	case catalog.FloatAdd, catalog.FloatSub, catalog.FloatMul, catalog.FloatDiv, catalog.FloatSqrt,
-		catalog.FloatEqual, catalog.FloatLT, catalog.FloatLTE, catalog.FloatGT, catalog.FloatGTE,
-		catalog.IntToFloat, catalog.FloatToInt, catalog.FloatToString:
-		return m.floatOperation(call, args)
+		return runtimeops.AutodiffStop(m.Session, call, args, flows)
+	case catalog.ParametersNew:
+		return runtimeops.ParametersNew(m.Session, call, args, flows)
+	case catalog.ParametersValues:
+		return runtimeops.ParametersValues(m.Session, call, args, flows)
+	case catalog.GradientsNew:
+		return runtimeops.GradientsNew(m.Session, call, args, flows)
+	case catalog.GradientsValues:
+		return runtimeops.GradientsValues(m.Session, call, args, flows)
+	case catalog.GradientsZero:
+		return runtimeops.GradientsZero(m.Session, call, args, flows)
+	case catalog.GradientsAdd:
+		return runtimeops.GradientsAdd(m.Session, call, args, flows)
+	case catalog.GradientsScale:
+		return runtimeops.GradientsScale(m.Session, call, args, flows)
+	case catalog.DeviceNew:
+		return runtimeops.DeviceNew(m.Session, call, args, flows)
+	case catalog.TensorNew:
+		return runtimeops.TensorNew(m.Session, call, args, flows)
+	case catalog.TensorShape:
+		return runtimeops.TensorShape(m.Session, call, args, flows)
+	case catalog.TensorRank:
+		return runtimeops.TensorRank(m.Session, call, args, flows)
+	case catalog.TensorDtype:
+		return runtimeops.TensorDtype(m.Session, call, args, flows)
+	case catalog.TensorDevice:
+		return runtimeops.TensorDevice(m.Session, call, args, flows)
+	case catalog.TensorToFloat:
+		return runtimeops.TensorToFloat(m.Session, call, args, flows)
+	case catalog.TensorValues:
+		return runtimeops.TensorValues(m.Session, call, args, flows)
+	case catalog.TensorAdd:
+		return runtimeops.TensorAdd(m.Session, call, args, flows)
+	case catalog.TensorSub:
+		return runtimeops.TensorSub(m.Session, call, args, flows)
+	case catalog.TensorMul:
+		return runtimeops.TensorMul(m.Session, call, args, flows)
+	case catalog.TensorDiv:
+		return runtimeops.TensorDiv(m.Session, call, args, flows)
+	case catalog.TensorSqrt:
+		return runtimeops.TensorSqrt(m.Session, call, args, flows)
+	case catalog.TensorRelu:
+		return runtimeops.TensorRelu(m.Session, call, args, flows)
+	case catalog.TensorMatmul:
+		return runtimeops.TensorMatmul(m.Session, call, args, flows)
+	case catalog.TensorBroadcast:
+		return runtimeops.TensorBroadcast(m.Session, call, args, flows)
+	case catalog.TensorReshape:
+		return runtimeops.TensorReshape(m.Session, call, args, flows)
+	case catalog.TensorTranspose:
+		return runtimeops.TensorTranspose(m.Session, call, args, flows)
+	case catalog.TensorSum:
+		return runtimeops.TensorSum(m.Session, call, args, flows)
+	case catalog.TensorMean:
+		return runtimeops.TensorMean(m.Session, call, args, flows)
+	case catalog.IntNew:
+		return runtimeops.IntNew(m.Session, call, args, flows)
+	case catalog.StringNew:
+		return runtimeops.StringNew(m.Session, call, args, flows)
+	case catalog.BoolNew:
+		return runtimeops.BoolNew(m.Session, call, args, flows)
+	case catalog.FloatNew:
+		return runtimeops.FloatNew(m.Session, call, args, flows)
+	case catalog.FloatAdd:
+		return runtimeops.FloatAdd(m.Session, call, args, flows)
+	case catalog.FloatSub:
+		return runtimeops.FloatSub(m.Session, call, args, flows)
+	case catalog.FloatMul:
+		return runtimeops.FloatMul(m.Session, call, args, flows)
+	case catalog.FloatDiv:
+		return runtimeops.FloatDiv(m.Session, call, args, flows)
+	case catalog.FloatSqrt:
+		return runtimeops.FloatSqrt(m.Session, call, args, flows)
+	case catalog.FloatEqual:
+		return runtimeops.FloatEqual(m.Session, call, args, flows)
+	case catalog.FloatLT:
+		return runtimeops.FloatLT(m.Session, call, args, flows)
+	case catalog.FloatLTE:
+		return runtimeops.FloatLTE(m.Session, call, args, flows)
+	case catalog.FloatGT:
+		return runtimeops.FloatGT(m.Session, call, args, flows)
+	case catalog.FloatGTE:
+		return runtimeops.FloatGTE(m.Session, call, args, flows)
+	case catalog.IntToFloat:
+		return runtimeops.IntToFloat(m.Session, call, args, flows)
+	case catalog.FloatToInt:
+		return runtimeops.FloatToInt(m.Session, call, args, flows)
+	case catalog.FloatToString:
+		return runtimeops.FloatToString(m.Session, call, args, flows)
 	case catalog.ScalarNew:
-		return must(value.NewText(types.Scalar(), args[0].(value.Text).Text())), nil
+		return runtimeops.ScalarNew(m.Session, call, args, flows)
 	case catalog.PathNew:
-		return must(value.NewText(types.Path(), args[0].(value.Text).Text())), nil
+		return runtimeops.PathNew(m.Session, call, args, flows)
 	case catalog.BytesNew:
-		return value.NewBytes([]byte(args[0].(value.Text).Text())), nil
+		return runtimeops.BytesNew(m.Session, call, args, flows)
 	case catalog.ListNew:
-		return m.list(call.Type().(types.List), args)
+		return runtimeops.ListNew(m.Session, call, args, flows)
 	case catalog.RecordNew:
-		fields := make([]value.Field, len(args))
-		for i, name := range call.Labels() {
-			fields[i] = value.Field{Name: name, Value: args[i]}
-		}
-		return must(value.NewRecord(fields)), nil
+		return runtimeops.RecordNew(m.Session, call, args, flows)
 	case catalog.MapNew:
-		entries := make([]value.Entry, len(args))
-		for i, v := range args {
-			r := v.(value.Record)
-			entries[i] = value.Entry{Key: r.Field("key"), Value: r.Field("value")}
-		}
-		return must(value.NewMap(call.Type().(types.Map), entries)), nil
+		return runtimeops.MapNew(m.Session, call, args, flows)
 	case catalog.RangeNew:
-		return must(value.NewRange(call.Type().(types.Range), args[0], args[1], args[2].(value.Boolean).Bool(), args[3].(value.Boolean).Bool())), nil
+		return runtimeops.RangeNew(m.Session, call, args, flows)
 	case catalog.Concat:
-		var b strings.Builder
-		for _, v := range args {
-			s := v.(value.Text).Text()
-			if len(s) > MaxBytes-b.Len() {
-				return nil, Limit("string bytes")
-			}
-			b.WriteString(s)
-		}
-		return must(value.NewText(types.String(), b.String())), nil
-	case catalog.Upper, catalog.Lower:
-		s := args[0].(value.Text).Text()
-		if op == catalog.Upper {
-			s = strings.ToUpper(s)
-		} else {
-			s = strings.ToLower(s)
-		}
-		if len(s) > MaxBytes {
-			return nil, Limit("string bytes")
-		}
-		return must(value.NewText(types.String(), s)), nil
+		return runtimeops.Concat(m.Session, call, args, flows)
+	case catalog.Upper:
+		return runtimeops.Upper(m.Session, call, args, flows)
+	case catalog.Lower:
+		return runtimeops.Lower(m.Session, call, args, flows)
 	case catalog.StringLength:
-		return value.Int64(int64(utf8.RuneCountInString(args[0].(value.Text).Text()))), nil
-	case catalog.StringEqual, catalog.ScalarEqual:
-		return value.Bool(value.Equal(args[0], args[1])), nil
+		return runtimeops.StringLength(m.Session, call, args, flows)
+	case catalog.StringEqual:
+		return runtimeops.StringEqual(m.Session, call, args, flows)
+	case catalog.ScalarEqual:
+		return runtimeops.ScalarEqual(m.Session, call, args, flows)
 	case catalog.IntToString:
-		return must(value.NewText(types.String(), args[0].(value.Integer).Big().String())), nil
+		return runtimeops.IntToString(m.Session, call, args, flows)
 	case catalog.FromScalarsNew:
-		var b strings.Builder
-		for _, v := range args[0].(value.List).Items() {
-			b.WriteString(v.(value.Text).Text())
-		}
-		return must(value.NewText(types.String(), b.String())), nil
-	case catalog.MathAdd, catalog.MathSub, catalog.MathMul, catalog.MathDiv, catalog.MathMod, catalog.MathLT, catalog.MathLTE, catalog.MathGT, catalog.MathGTE, catalog.MathEqual:
-		return m.binaryMath(call, args)
-	case catalog.MathSum, catalog.MathProduct, catalog.MathMin, catalog.MathMax:
-		return m.aggregate(call, args)
+		return runtimeops.FromScalarsNew(m.Session, call, args, flows)
+	case catalog.MathAdd:
+		return runtimeops.MathAdd(m.Session, call, args, flows)
+	case catalog.MathSub:
+		return runtimeops.MathSub(m.Session, call, args, flows)
+	case catalog.MathMul:
+		return runtimeops.MathMul(m.Session, call, args, flows)
+	case catalog.MathDiv:
+		return runtimeops.MathDiv(m.Session, call, args, flows)
+	case catalog.MathMod:
+		return runtimeops.MathMod(m.Session, call, args, flows)
+	case catalog.MathLT:
+		return runtimeops.MathLT(m.Session, call, args, flows)
+	case catalog.MathLTE:
+		return runtimeops.MathLTE(m.Session, call, args, flows)
+	case catalog.MathGT:
+		return runtimeops.MathGT(m.Session, call, args, flows)
+	case catalog.MathGTE:
+		return runtimeops.MathGTE(m.Session, call, args, flows)
+	case catalog.MathEqual:
+		return runtimeops.MathEqual(m.Session, call, args, flows)
+	case catalog.MathSum:
+		return runtimeops.MathSum(m.Session, call, args, flows)
+	case catalog.MathProduct:
+		return runtimeops.MathProduct(m.Session, call, args, flows)
+	case catalog.MathMin:
+		return runtimeops.MathMin(m.Session, call, args, flows)
+	case catalog.MathMax:
+		return runtimeops.MathMax(m.Session, call, args, flows)
 	case catalog.Length:
-		return value.Int64(int64(len(args[0].(value.List).Items()))), nil
+		return runtimeops.Length(m.Session, call, args, flows)
 	case catalog.Contains:
-		return value.Bool(args[0].(value.Range).Contains(args[1])), nil
+		return runtimeops.Contains(m.Session, call, args, flows)
 	case catalog.IsEmpty:
-		return value.Bool(args[0].(value.Range).Empty()), nil
+		return runtimeops.IsEmpty(m.Session, call, args, flows)
 	case catalog.Merge:
-		fields := map[string]value.Value{}
-		for _, arg := range args {
-			for _, field := range arg.(value.Record).Fields() {
-				fields[field.Name] = field.Value
-			}
-		}
-		merged := make([]value.Field, 0, len(fields))
-		for name, v := range fields {
-			merged = append(merged, value.Field{Name: name, Value: v})
-		}
-		return must(value.NewRecord(merged)), nil
-	case catalog.HasKey, catalog.Get:
-		v, found := args[0].(value.Map).Get(args[1])
-		if op == catalog.HasKey {
-			return value.Bool(found), nil
-		}
-		if !found {
-			return operationFailure(call, args, catalog.MissingKey, "map key is absent"), nil
-		}
-		if v.Type().Kind() == types.FallibleKind {
-			return v, nil
-		}
-		return success(call.Type(), v), nil
+		return runtimeops.Merge(m.Session, call, args, flows)
+	case catalog.HasKey:
+		return runtimeops.HasKey(m.Session, call, args, flows)
+	case catalog.Get:
+		return runtimeops.Get(m.Session, call, args, flows)
 	case catalog.ErrorNew:
-		return value.At(must(value.NewError(args[0].(value.Text).Text(), args[1].(value.Text).Text(), args[2].(value.Record))), op, call.Span()), nil
+		return runtimeops.ErrorNew(m.Session, call, args, flows)
 	case catalog.UTF8New:
-		data := args[0].(value.Bytes).Bytes()
-		if !utf8.Valid(data) {
-			return operationFailure(call, args, catalog.InvalidUTF8, "bytes are not valid UTF-8"), nil
-		}
-		return success(call.Type(), must(value.NewText(types.String(), string(data)))), nil
+		return runtimeops.UTF8New(m.Session, call, args, flows)
 	case catalog.FileRead:
-		data, err := m.boundary.Read(m.ctx, args[0].(value.Text))
-		if err != nil {
-			if host := boundaryHostError(err); host != nil {
-				return nil, host
-			}
-			return operationFailure(call, args, catalog.ReadFailed, err.Error()), nil
-		}
-		if len(data.Bytes()) > MaxBytes {
-			return nil, Limit("file read bytes")
-		}
-		return success(call.Type(), data), nil
-	case catalog.FileAppend, catalog.FileWrite:
-		return must(value.NewEffect(call.Operation(), args[0].(value.Text), args[1])), nil
+		return runtimeops.FileRead(m.Session, call, args, flows)
+	case catalog.FileAppend:
+		return runtimeops.FileAppend(m.Session, call, args, flows)
+	case catalog.FileWrite:
+		return runtimeops.FileWrite(m.Session, call, args, flows)
 	case catalog.ServerNew:
-		return must(value.NewServer(args[0].(value.Integer), flows[1], flows[2])), nil
-	case catalog.ResponseTextNew, catalog.ResponseBytesNew:
-		body := args[1]
-		if op == catalog.ResponseTextNew {
-			body = value.NewBytes([]byte(args[1].(value.Text).Text()))
-		}
-		headers := must(value.NewMap(must(types.NewMap(types.String(), types.String())), nil))
-		fields := must(value.NewRecord([]value.Field{{Name: "status", Value: args[0]}, {Name: "headers", Value: headers}, {Name: "body", Value: body}}))
-		return must(value.NewHTTP(types.Response(), fields)), nil
-	case catalog.ListMap, catalog.ListFilter, catalog.ListFold, catalog.ListFlatMap, catalog.ListUnfold:
+		return runtimeops.ServerNew(m.Session, call, args, flows)
+	case catalog.ResponseTextNew:
+		return runtimeops.ResponseTextNew(m.Session, call, args, flows)
+	case catalog.ResponseBytesNew:
+		return runtimeops.ResponseBytesNew(m.Session, call, args, flows)
+	case catalog.ListMap:
+		return m.listProcessor(call, args, flows[len(args)-1], f)
+	case catalog.ListFilter:
+		return m.listProcessor(call, args, flows[len(args)-1], f)
+	case catalog.ListFold:
+		return m.listProcessor(call, args, flows[len(args)-1], f)
+	case catalog.ListFlatMap:
+		return m.listProcessor(call, args, flows[len(args)-1], f)
+	case catalog.ListUnfold:
 		return m.listProcessor(call, args, flows[len(args)-1], f)
 	default:
-		panic("missing checked builtin implementation: " + op)
+		return nil, fmt.Errorf("missing checked operation %s", call.Operation().Name())
 	}
-}
-
-func (m *machine) binaryMath(call ir.BuiltinCall, args []value.Value) (value.Value, error) {
-	a, b := args[0].(value.Integer).Big(), args[1].(value.Integer).Big()
-	n := new(big.Int)
-	switch call.Operation().Name() {
-	case catalog.MathAdd:
-		n.Add(a, b)
-	case catalog.MathSub:
-		n.Sub(a, b)
-	case catalog.MathMul:
-		if a.Sign() != 0 && b.Sign() != 0 && a.BitLen()+b.BitLen()-1 > MaxIntegerBits {
-			return nil, Limit("integer bits")
-		}
-		n.Mul(a, b)
-	case catalog.MathDiv:
-		if b.Sign() == 0 {
-			return operationFailure(call, args, catalog.DivideByZero, "division by zero"), nil
-		}
-		n.Quo(a, b)
-	case catalog.MathMod:
-		if b.Sign() == 0 {
-			return operationFailure(call, args, catalog.ModuloByZero, "remainder by zero"), nil
-		}
-		n.Rem(a, b)
-	case catalog.MathLT:
-		return value.Bool(a.Cmp(b) < 0), nil
-	case catalog.MathLTE:
-		return value.Bool(a.Cmp(b) <= 0), nil
-	case catalog.MathGT:
-		return value.Bool(a.Cmp(b) > 0), nil
-	case catalog.MathGTE:
-		return value.Bool(a.Cmp(b) >= 0), nil
-	case catalog.MathEqual:
-		return value.Bool(a.Cmp(b) == 0), nil
-	default:
-		panic("unknown math operation")
-	}
-	v, err := m.integer(n)
-	if err != nil {
-		return nil, err
-	}
-	return success(call.Type(), v), nil
-}
-func (m *machine) aggregate(call ir.BuiltinCall, args []value.Value) (value.Value, error) {
-	items := args[0].(value.List).Items()
-	op := call.Operation().Name()
-	if len(items) == 0 && (op == catalog.MathMin || op == catalog.MathMax) {
-		return operationFailure(call, args, catalog.EmptyList, "empty number list"), nil
-	}
-	n := new(big.Int)
-	if op == catalog.MathProduct {
-		n.SetInt64(1)
-	}
-	for i, v := range items {
-		if err := m.step(); err != nil {
-			return nil, err
-		}
-		x := v.(value.Integer).Big()
-		switch op {
-		case catalog.MathSum:
-			n.Add(n, x)
-		case catalog.MathProduct:
-			if n.Sign() != 0 && x.Sign() != 0 && n.BitLen()+x.BitLen()-1 > MaxIntegerBits {
-				return nil, Limit("integer bits")
-			}
-			n.Mul(n, x)
-		case catalog.MathMin:
-			if i == 0 || x.Cmp(n) < 0 {
-				n.Set(x)
-			}
-		case catalog.MathMax:
-			if i == 0 || x.Cmp(n) > 0 {
-				n.Set(x)
-			}
-		}
-		if n.BitLen() > MaxIntegerBits {
-			return nil, Limit("integer bits")
-		}
-	}
-	return success(call.Type(), must(value.NewInt(n))), nil
-}
-func success(t types.Type, v value.Value) value.Value {
-	if out, ok := t.(types.Fallible); ok {
-		return must(value.Success(out, v))
-	}
-	return v
-}
-func operationFailure(call ir.BuiltinCall, args []value.Value, kind, message string) value.Fallible {
-	params := call.Operation().Parameters()
-	fields := make([]value.Field, 0, len(args))
-	for i, arg := range args {
-		if arg == nil {
-			continue
-		}
-		name := fmt.Sprintf("argument_%d", i)
-		if i < len(params) {
-			name = params[i].Name
-		}
-		fields = append(fields, value.Field{Name: name, Value: arg})
-	}
-	e := must(value.NewError(kind, message, must(value.NewRecord(fields))))
-	return must(value.Failure(call.Type().(types.Fallible), value.At(e, call.Operation().Name(), call.Span())))
-}
-func activationError(target value.Target, err error, span source.Span) value.Error {
-	var operation, kind string
-	var input value.Record
-	switch v := target.(type) {
-	case value.Effect:
-		operation = v.Operation().Name()
-		kind = v.Operation().ActivationKinds()[0]
-		input = must(value.NewRecord([]value.Field{{Name: catalog.ParamPath, Value: v.Path()}, {Name: catalog.ParamContent, Value: v.Content()}}))
-	case value.Server:
-		operation, kind = catalog.HTTPListen, catalog.ServerStartFailed
-		input = must(value.NewRecord([]value.Field{{Name: "port", Value: v.Port()}}))
-	default:
-		panic("unknown commit target")
-	}
-	return value.At(must(value.NewError(kind, err.Error(), input)), operation, span)
 }

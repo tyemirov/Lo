@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -131,7 +130,7 @@ func TestFileWorkflowExample(t *testing.T) {
 			if err := input.Close(); err != nil {
 				t.Fatal(err)
 			}
-			cmd := exec.Command(binary, "run", filepath.Join(repository, "examples/agent_file_workflow.lo"), "--read-root", ".", "--write-root", ".", "--format", "json")
+			cmd := runtimeCommand(t, "run", filepath.Join(repository, "examples/agent_file_workflow.lo"), "--read-root", ".", "--write-root", ".", "--format", "json")
 			cmd.Dir = dir
 			var stdout, stderr bytes.Buffer
 			cmd.Stdout = &stdout

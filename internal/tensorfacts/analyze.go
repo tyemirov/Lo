@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"math"
 	"math/big"
 	"slices"
@@ -74,7 +75,7 @@ func seal(f fact) fact {
 }
 
 type analyzer struct {
-	flows  map[ir.FlowID]ir.Flow
+	flows  map[identity.FlowID]ir.Flow
 	memo   map[string]fact
 	joins  map[[2][32]byte]fact
 	facts  map[ir.Expression]fact
@@ -86,7 +87,7 @@ func Analyze(p ir.Program) (map[ir.Expression]*Metadata, diagnostic.Diagnostic) 
 	if !usesTensors(p) {
 		return map[ir.Expression]*Metadata{}, nil
 	}
-	a := &analyzer{flows: map[ir.FlowID]ir.Flow{}, memo: map[string]fact{}, joins: map[[2][32]byte]fact{}, facts: map[ir.Expression]fact{}}
+	a := &analyzer{flows: map[identity.FlowID]ir.Flow{}, memo: map[string]fact{}, joins: map[[2][32]byte]fact{}, facts: map[ir.Expression]fact{}}
 	for _, f := range p.Flows() {
 		a.flows[f.ID()] = f
 	}
@@ -121,7 +122,7 @@ func Analyze(p ir.Program) (map[ir.Expression]*Metadata, diagnostic.Diagnostic) 
 	}
 	return out, nil
 }
-func (a *analyzer) invoke(id ir.FlowID, args []fact) fact {
+func (a *analyzer) invoke(id identity.FlowID, args []fact) fact {
 	if a.err != nil {
 		return fact{}
 	}
@@ -244,7 +245,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 	case catalog.GradientsNew:
 		return args[1]
 	case catalog.AutodiffGrad:
-		var loss ir.FlowID
+		var loss identity.FlowID
 		for _, arg := range call.Arguments() {
 			if f, ok := arg.(ir.FlowArgument); ok {
 				loss = f.Flow()

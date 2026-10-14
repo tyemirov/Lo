@@ -1,4 +1,4 @@
-package autodiff
+package derivative
 
 import (
 	"math/big"
@@ -142,4 +142,11 @@ func VJP(arithmetic Arithmetic, op string, operand int, g, a, b, result tensor.D
 		out = c.unbroadcast(out, shape)
 	}
 	return out, c.err
+}
+
+func must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

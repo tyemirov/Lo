@@ -2,12 +2,15 @@ package eval
 
 import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
+	"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callback ir.FlowID, f frame) (value.Value, error) {
+func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callback identity.FlowID, f frame) (value.Value, error) {
 	op := call.Operation().Name()
 	contextStart := 1
 	var state value.Value
@@ -17,8 +20,8 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 		contextStart, state = 2, args[0]
 		n := args[1].(value.Integer).Big()
 		if n.Sign() > 0 {
-			if !n.IsInt64() || n.Int64() > MaxItems {
-				return nil, Limit("unfold elements")
+			if !n.IsInt64() || n.Int64() > execution.MaxItems {
+				return nil, execution.Limit("unfold elements")
 			}
 			count = int(n.Int64())
 		}
@@ -32,7 +35,7 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 	context := args[contextStart : len(args)-1]
 	output := []value.Value{}
 	for index := 0; index < count; index++ {
-		if err := m.step(); err != nil {
+		if err := m.Step(); err != nil {
 			return nil, err
 		}
 		params := append([]value.Value{}, context...)
@@ -72,8 +75,8 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 			state = v
 		case catalog.ListFlatMap:
 			extra := v.(value.List).Items()
-			if len(extra) > MaxItems-len(output) {
-				return nil, Limit("list elements")
+			if len(extra) > execution.MaxItems-len(output) {
+				return nil, execution.Limit("list elements")
 			}
 			output = append(output, extra...)
 		case catalog.ListUnfold:
@@ -83,15 +86,15 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 		}
 	}
 	if op == catalog.ListFold {
-		return success(call.Type(), state), nil
+		return runtimeops.Success(call.Type(), state), nil
 	}
 	outType := call.Type()
 	if ft, ok := outType.(types.Fallible); ok {
 		outType = ft.Base()
 	}
-	result, err := m.list(outType.(types.List), output)
+	result, err := runtimeops.List(outType.(types.List), output)
 	if err != nil {
 		return nil, err
 	}
-	return success(call.Type(), result), nil
+	return runtimeops.Success(call.Type(), result), nil
 }

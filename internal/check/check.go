@@ -2,6 +2,7 @@ package check
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
@@ -145,7 +146,7 @@ func (m *module) compileFlow(f *flowWork, span source.Span) diagnostic.Diagnosti
 	m.stack = append(m.stack, f)
 	defer func() { m.stack = m.stack[:len(m.stack)-1] }()
 	c := checker{module: m, scope: f.scope, flow: f}
-	var handler ir.FlowID
+	var handler identity.FlowID
 	var handlerEffects ir.Effects
 	if name := f.declaration.Handler(); name != "" {
 		h, d := c.namedFlow(name, f.declaration.Span())
@@ -155,7 +156,7 @@ func (m *module) compileFlow(f *flowWork, span source.Span) diagnostic.Diagnosti
 		if d := c.callback(h, []types.Type{types.Error()}, f.signature.Output(), f.declaration.Span()); d != nil {
 			return d
 		}
-		handler = ir.FlowID(h.entry.ID())
+		handler = identity.FlowID(h.entry.ID())
 		handlerEffects = h.graph.Effects()
 	}
 	body, effects, d := c.body(f.declaration.Body())
@@ -166,7 +167,7 @@ func (m *module) compileFlow(f *flowWork, span source.Span) diagnostic.Diagnosti
 	if effects.Commits && !c.canPropagate() {
 		return problem(diagnostic.EffectfulTotal, "an effectful flow needs a fallible output or a self-handler", f.declaration.Span())
 	}
-	f.graph = must(ir.NewFlow(ir.FlowID(f.entry.ID()), f.declaration.Name(), f.signature, f.parameters, handler, body, effects, f.declaration.Span()))
+	f.graph = must(ir.NewFlow(identity.FlowID(f.entry.ID()), f.declaration.Name(), f.signature, f.parameters, handler, body, effects, f.declaration.Span()))
 	f.state = complete
 	return nil
 }

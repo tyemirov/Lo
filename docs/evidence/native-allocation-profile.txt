@@ -1,0 +1,22 @@
+File: benchmark.test
+Type: alloc_space
+Time: 2026-10-14 01:17:06 PDT
+Showing nodes accounting for 3900.80MB, 99.72% of 3911.88MB total
+Dropped 201 nodes (cum <= 19.56MB)
+Showing top 15 nodes out of 37
+      flat  flat%   sum%        cum   cum%
+ 1164.04MB 29.76% 29.76%  1312.54MB 33.55%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewInt
+  679.52MB 17.37% 47.13%   679.52MB 17.37%  math/big.nat.make (inline)
+  550.52MB 14.07% 61.20%   690.52MB 17.65%  github.com/MarcoPoloResearchLab/Lo/internal/value.integer.Big
+  426.52MB 10.90% 72.10%  2685.20MB 68.64%  github.com/MarcoPoloResearchLab/Lo/_scratch/f001-native-20261013/bench/map_10000.(*program).listv10163
+  398.01MB 10.17% 82.28%   398.01MB 10.17%  strings.NewReader (inline)
+  208.42MB  5.33% 87.61%   208.42MB  5.33%  github.com/MarcoPoloResearchLab/Lo/internal/value.NewList
+  196.78MB  5.03% 92.64%   196.78MB  5.03%  slices.Clone[go.shape.[]github.com/MarcoPoloResearchLab/Lo/internal/value.Value,go.shape.interface { MarshalJSON ; Type github.com/MarcoPoloResearchLab/Lo/internal/types.Type; Weight uint64; github.com/MarcoPoloResearchLab/Lo/internal/value.value }] (inline)
+  188.51MB  4.82% 97.45%  2063.06MB 52.74%  github.com/MarcoPoloResearchLab/Lo/_scratch/f001-native-20261013/bench/map_10000.(*program).flow0
+   88.49MB  2.26% 99.72%  3900.80MB 99.72%  github.com/MarcoPoloResearchLab/Lo/_scratch/f001-native-20261013/bench/map_10000.(*program).top
+         0     0% 99.72%  1874.56MB 47.92%  github.com/MarcoPoloResearchLab/Lo/_scratch/f001-native-20261013/bench/map_10000.(*program).flow0Body
+         0     0% 99.72%  3900.80MB 99.72%  github.com/MarcoPoloResearchLab/Lo/_scratch/f001-native-20261013/bench/map_10000.BenchmarkExecution.func1
+         0     0% 99.72%  3900.80MB 99.72%  github.com/MarcoPoloResearchLab/Lo/_scratch/f001-native-20261013/bench/map_10000.BenchmarkExecution.func1.1 (inline)
+         0     0% 99.72%  3900.80MB 99.72%  github.com/MarcoPoloResearchLab/Lo/internal/execution.(*program).Run
+         0     0% 99.72%   328.72MB  8.40%  github.com/MarcoPoloResearchLab/Lo/internal/runtimeops.(*machine).aggregate
+         0     0% 99.72%  1193.54MB 30.51%  github.com/MarcoPoloResearchLab/Lo/internal/runtimeops.(*machine).binaryMath

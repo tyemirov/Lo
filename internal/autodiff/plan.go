@@ -2,6 +2,7 @@ package autodiff
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"slices"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
@@ -102,7 +103,7 @@ type symbol struct {
 	fields map[string]symbol
 }
 type builder struct {
-	flows       map[ir.FlowID]ir.Flow
+	flows       map[identity.FlowID]ir.Flow
 	nodes       []*node
 	frames      []Frame
 	invocations int
@@ -124,7 +125,7 @@ func base(t types.Type) types.Type {
 	return t
 }
 
-func Compile(original ir.BuiltinCall, loss ir.Flow, flows map[ir.FlowID]ir.Flow) (Call, diagnostic.Diagnostic) {
+func Compile(original ir.BuiltinCall, loss ir.Flow, flows map[identity.FlowID]ir.Flow) (Call, diagnostic.Diagnostic) {
 	b := &builder{flows: flows}
 	params := loss.Parameters()
 	args := make([]symbol, len(params))

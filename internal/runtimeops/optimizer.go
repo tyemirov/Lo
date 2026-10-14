@@ -1,11 +1,12 @@
-package eval
+package runtimeops
 
 import (
 	"errors"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"math/big"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
-	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
+
 	"github.com/MarcoPoloResearchLab/Lo/internal/tensor"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
@@ -43,17 +44,17 @@ func (c *optimizerCalculation) sqrt(v tensor.Data) tensor.Data {
 	return x
 }
 
-func (m *machine) optimizerOperation(call ir.BuiltinCall, args []value.Value) (value.Value, error) {
+func (m *machine) optimizerOperation(call Call, args []value.Value) (value.Value, error) {
 	name := call.Operation().Name()
 	fail := func(err error) (value.Value, error) {
-		if host := boundaryHostError(err); host != nil {
+		if host := execution.BoundaryHostError(err); host != nil {
 			return nil, host
 		}
 		var f tensor.Fault
 		if errors.As(err, &f) {
-			return operationFailure(call, args, f.Kind(), f.Error()), nil
+			return OperationFailure(call, args, f.Kind(), f.Error()), nil
 		}
-		return nil, Limit(name + ": " + err.Error())
+		return nil, execution.Limit(name + ": " + err.Error())
 	}
 	if name == catalog.SGDConfigNew || name == catalog.AdamWConfigNew {
 		var config value.Value
@@ -64,12 +65,12 @@ func (m *machine) optimizerOperation(call ir.BuiltinCall, args []value.Value) (v
 			config, err = value.NewAdamWConfig(args[0].(value.Float).Number(), args[1].(value.Float).Number(), args[2].(value.Float).Number(), args[3].(value.Float).Number(), args[4].(value.Float).Number())
 		}
 		if err != nil {
-			return operationFailure(call, args, catalog.InvalidOptimizerConfig, err.Error()), nil
+			return OperationFailure(call, args, catalog.InvalidOptimizerConfig, err.Error()), nil
 		}
-		return success(call.Type(), config), nil
+		return Success(call.Type(), config), nil
 	}
 	if name == catalog.SGDStateNew {
-		return success(call.Type(), must(value.NewSGDState(args[0].(value.TensorBundle), value.Int64(0), args[1].(value.SGDConfig)))), nil
+		return Success(call.Type(), must(value.NewSGDState(args[0].(value.TensorBundle), value.Int64(0), args[1].(value.SGDConfig)))), nil
 	}
 	if name == catalog.AdamWStateNew {
 		p := args[0].(value.TensorBundle)
@@ -78,7 +79,7 @@ func (m *machine) optimizerOperation(call ir.BuiltinCall, args []value.Value) (v
 			bytes += 8 * f.Value.(value.Tensor).Data().Shape().Count()
 		}
 		if bytes > MaxOptimizerBytes {
-			return nil, Limit("AdamW moment and beta-power bytes")
+			return nil, execution.Limit("AdamW moment and beta-power bytes")
 		}
 		maths := tensorArithmetic{m}
 		first, second := p.Contents().Fields(), p.Contents().Fields()
@@ -101,12 +102,12 @@ func (m *machine) optimizerOperation(call ir.BuiltinCall, args []value.Value) (v
 		}
 		power := must(value.NewTensor(one))
 		state := must(value.NewAdamWState(p, value.Int64(0), args[1].(value.AdamWConfig), must(value.NewRecord(first)), must(value.NewRecord(second)), power, power))
-		return success(call.Type(), state), nil
+		return Success(call.Type(), state), nil
 	}
 	state := args[0].(value.OptimizerState)
 	gradients := args[1].(value.TensorBundle).Contents()
 	if err := value.MatchTensorSchema(state.Parameters().Contents(), gradients); err != nil {
-		return operationFailure(call, args, catalog.GradientSchemaMismatch, err.Error()), nil
+		return OperationFailure(call, args, catalog.GradientSchemaMismatch, err.Error()), nil
 	}
 	c := &optimizerCalculation{arithmetic: tensorArithmetic{m}}
 	rate := c.scalar(state.Config().Rate())
@@ -126,7 +127,7 @@ func (m *machine) optimizerOperation(call ir.BuiltinCall, args []value.Value) (v
 			return nil, err
 		}
 		p := must(value.NewTensorBundle(state.Parameters().Type().(types.TensorBundle), must(value.NewRecord(fields))))
-		return success(call.Type(), must(value.NewSGDState(p, step.(value.Integer), state.Config().(value.SGDConfig)))), nil
+		return Success(call.Type(), must(value.NewSGDState(p, step.(value.Integer), state.Config().(value.SGDConfig)))), nil
 	}
 	adam := state.(value.AdamWState)
 	config := adam.Config().(value.AdamWConfig)
@@ -174,5 +175,5 @@ func (m *machine) optimizerOperation(call ir.BuiltinCall, args []value.Value) (v
 	}
 	p := must(value.NewTensorBundle(state.Parameters().Type().(types.TensorBundle), must(value.NewRecord(fields))))
 	next := must(value.NewAdamWState(p, step.(value.Integer), config, must(value.NewRecord(first)), must(value.NewRecord(second)), must(value.NewTensor(power1)), must(value.NewTensor(power2))))
-	return success(call.Type(), next), nil
+	return Success(call.Type(), next), nil
 }

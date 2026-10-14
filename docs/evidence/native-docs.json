@@ -1,0 +1,17 @@
+{
+  "changed_prose_findings": [],
+  "unchanged_findings": 23,
+  "local_links_checked": 166,
+  "local_link_failures": [],
+  "review_scope": "Changed prose in the listed documents, including the complete new native contract and results report. Part 1 and Part 2 of the verified Issue 9 reference were reviewed.",
+  "documents": [
+    "README.md",
+    "ISSUES.md",
+    "docs/compiler-design.md",
+    "docs/implementation-audit.md",
+    "docs/native-compilation-plan.md",
+    "docs/native-compilation-contract.md",
+    "docs/native-compilation-results.md",
+    ".mprlab/TERMINOLOGY.md"
+  ]
+}

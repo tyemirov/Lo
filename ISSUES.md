@@ -351,12 +351,12 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
 
 ## Features
 
-- [ ] [F001] (P1) Build native Lo executables
+- [x] [F001] (P1) Build native Lo executables
   Goal:
   Compile checked Lo programs into standalone native executables with the current language and runtime contracts.
 
   Requirements:
-  - Use the proposed [native compilation plan](docs/native-compilation-plan.md) for scope and stage dependencies.
+  - Use the accepted [native compilation plan](docs/native-compilation-plan.md) for scope and stage dependencies.
   - Establish performance baselines and numeric build budgets before native implementation.
   - Separate shared execution contracts from interpreter graph traversal.
   - Generate direct Go functions, branches, local variables, and list loops.
@@ -376,6 +376,16 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   - Verify all semantic, lifecycle, capability, and limit acceptance criteria in the plan.
   - Pass the agreed performance gates and repository-native validation.
   - Keep this issue open until implementation and its required evidence pass.
+
+  F001 completed native compilation on October 14, 2026.
+  `lo build` creates standalone artifacts for macOS arm64 and Linux arm64.
+  Native execution covers all 100 built-in operations, CPU training, File workflows, and HTTP services.
+  Both targets passed native semantic tests, generated artifact race tests, and the required performance gates.
+
+  Callback execution improved by 2.68× on macOS and 2.48× on Linux across the fixed corpus.
+  All measured builds met the source, time, memory, diagnostic-output, and artifact-size contracts.
+  The [acceptance report](docs/native-compilation-results.md) records raw samples, uncertainty, source independence, and build isolation.
+  The [final CI run](docs/evidence/native-ci.txt) passed bundle verification, formatting, static analysis, all tests, and the compiler build.
 
 ### Numeric and training foundations
 

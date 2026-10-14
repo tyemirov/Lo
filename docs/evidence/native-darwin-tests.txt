@@ -1,0 +1,3 @@
+Native lane from make ci:
+LO_TEST_BACKEND=native go test ./tests/integration 
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	335.630s

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"math/big"
 	"reflect"
 	"testing"
@@ -30,7 +31,7 @@ func (b *observedBoundary) Commit(_ context.Context, _ value.Target) error {
 	b.commits++
 	return errors.New("injected activation failure")
 }
-func evaluate(t *testing.T, text string, b eval.Boundary) (value.Value, error) {
+func evaluate(t *testing.T, text string, b execution.Boundary) (value.Value, error) {
 	t.Helper()
 	s, err := source.New("eval.lo", text)
 	if err != nil {
@@ -40,7 +41,7 @@ func evaluate(t *testing.T, text string, b eval.Boundary) (value.Value, error) {
 	if d != nil {
 		t.Fatal(d)
 	}
-	return eval.Run(context.Background(), p, b, eval.DefaultBudget())
+	return eval.Run(context.Background(), p, b, execution.DefaultBudget())
 }
 
 func TestEvaluatorReadOrder(t *testing.T) {
@@ -154,17 +155,17 @@ func TestEvaluatorCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	b := &observedBoundary{read: func(string, int) (value.Bytes, error) { t.Fatal("unexpected read"); return nil, nil }}
-	_, err = eval.Run(ctx, p, b, eval.DefaultBudget())
-	if h, ok := err.(eval.HostError); !ok || h.Code() != "runtime.cancelled" || !errors.Is(err, context.Canceled) {
+	_, err = eval.Run(ctx, p, b, execution.DefaultBudget())
+	if h, ok := err.(execution.HostError); !ok || h.Code() != "runtime.cancelled" || !errors.Is(err, context.Canceled) {
 		t.Fatalf("cancellation: %v", err)
 	}
 }
 
 func TestEvaluatorBoundaryHostFailures(t *testing.T) {
-	for _, cause := range []error{context.Canceled, fmt.Errorf("adapter: %w", eval.Denied("File.read", "input"))} {
+	for _, cause := range []error{context.Canceled, fmt.Errorf("adapter: %w", execution.Denied("File.read", "input"))} {
 		b := &observedBoundary{read: func(string, int) (value.Bytes, error) { return nil, cause }}
 		_, err := evaluate(t, `flow H(e: Error) -> Bytes { return Bytes.new("caught") }; flow F() -> Bytes onError H { return File.read(File.Path.new("input")) }; return F()`, b)
-		var host eval.HostError
+		var host execution.HostError
 		if !errors.As(err, &host) {
 			t.Fatalf("host failure entered a Lo handler: %v", err)
 		}
@@ -196,7 +197,7 @@ func FuzzRuntimeSource(f *testing.F) {
 			return
 		}
 		b := &observedBoundary{read: func(string, int) (value.Bytes, error) { return value.NewBytes([]byte("input")), nil }}
-		budget, err := eval.NewBudget(1000)
+		budget, err := execution.NewBudget(1000)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -205,8 +206,8 @@ func FuzzRuntimeSource(f *testing.F) {
 			if v != nil {
 				t.Fatal("failed execution published a result")
 			}
-			var failure eval.Failure
-			var host eval.HostError
+			var failure execution.Failure
+			var host execution.HostError
 			if !errors.As(err, &failure) && !errors.As(err, &host) {
 				t.Fatalf("unclassified runtime failure: %v", err)
 			}
