@@ -23,6 +23,9 @@ const (
 	ListProcessor
 	ListLength
 	ServerConstructor
+	Gradient
+	TensorBundleOperation
+	OptimizerOperation
 )
 
 type Boundary uint8
@@ -292,6 +295,9 @@ func build() map[string]Operation {
 		m[name] = o
 	}
 	addTensors(m)
+	addAutodiff(m)
+	addParameters(m)
+	addOptimizers(m)
 	return m
 }
 func Lookup(name string) (Operation, bool) { o, ok := operations[name]; return o, ok }
@@ -308,7 +314,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "UTF8", "Math", "Match", "Tensor", "FP32":
+	case "List", "Map", "Range", "File", "HTTP", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer":
 		return true
 	}
 	return false

@@ -40,20 +40,21 @@ type reportData struct {
 	UnusedFlows  []ir.FlowID      `json:"unused_flows"`
 }
 type nodeData struct {
-	Tensor    *tensorfacts.Metadata `json:"tensor,omitempty"`
-	ID        nodeID                `json:"id"`
-	Kind      string                `json:"kind"`
-	Type      string                `json:"type,omitempty"`
-	Span      source.Span           `json:"span"`
-	Region    string                `json:"region"`
-	Inputs    []nodeID              `json:"inputs"`
-	Operation string                `json:"operation,omitempty"`
-	Flow      ir.FlowID             `json:"flow,omitempty"`
-	Binding   ir.BindingID          `json:"binding,omitempty"`
-	Value     *string               `json:"value,omitempty"`
-	Field     string                `json:"field,omitempty"`
-	Arguments []argumentData        `json:"arguments,omitempty"`
-	Cases     []caseData            `json:"cases,omitempty"`
+	Derivative *derivativePlanData   `json:"derivative,omitempty"`
+	Tensor     *tensorfacts.Metadata `json:"tensor,omitempty"`
+	ID         nodeID                `json:"id"`
+	Kind       string                `json:"kind"`
+	Type       string                `json:"type,omitempty"`
+	Span       source.Span           `json:"span"`
+	Region     string                `json:"region"`
+	Inputs     []nodeID              `json:"inputs"`
+	Operation  string                `json:"operation,omitempty"`
+	Flow       ir.FlowID             `json:"flow,omitempty"`
+	Binding    ir.BindingID          `json:"binding,omitempty"`
+	Value      *string               `json:"value,omitempty"`
+	Field      string                `json:"field,omitempty"`
+	Arguments  []argumentData        `json:"arguments,omitempty"`
+	Cases      []caseData            `json:"cases,omitempty"`
 }
 type argumentData struct {
 	Position int       `json:"position"`
@@ -235,6 +236,12 @@ func (r *report) Text() string {
 				size = fmt.Sprint(*n.Tensor.StorageBytes)
 			}
 			fmt.Fprintf(&b, "    tensor dtype=%s profile=%s device=%s layout=%s shape=%s storage_bytes=%s\n", n.Tensor.Dtype, n.Tensor.Profile, n.Tensor.Device, n.Tensor.Layout, shape, size)
+		}
+		if n.Derivative != nil {
+			fmt.Fprintf(&b, "    derivative result=%d targets=%v\n", n.Derivative.Result, n.Derivative.Targets)
+			for _, d := range n.Derivative.Nodes {
+				fmt.Fprintf(&b, "      %d %s invocations=%v reverse=%t retained=%t edges=%v at %s\n", d.ID, d.Operation, d.Invocations, d.Reverse, d.Retained, d.Edges, location(d.Span))
+			}
 		}
 	}
 	fmt.Fprintf(&b, "unused flows: %v\n", r.data.UnusedFlows)

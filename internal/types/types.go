@@ -118,7 +118,7 @@ func Effect() Type            { return atom(EffectKind) }
 func AnyRecord() Type         { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, RequestKind, ResponseKind, ServerKind, EffectKind, AnyRecordKind:
+	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, RequestKind, ResponseKind, ServerKind, EffectKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true
 	}
 	return nil, false
@@ -220,6 +220,10 @@ func Equal(a, b Type) bool {
 		return false
 	}
 	switch a.Kind() {
+	case SGDStateKind, AdamWStateKind:
+		return Equal(a.(OptimizerState).Schema(), b.(OptimizerState).Schema())
+	case ParametersKind, GradientsKind:
+		return Equal(a.(TensorBundle).Schema(), b.(TensorBundle).Schema())
 	case ListKind:
 		return Equal(a.(List).Element(), b.(List).Element())
 	case MapKind:
@@ -244,6 +248,19 @@ func Equal(a, b Type) bool {
 	return true
 }
 func FieldType(t Type, name string) (Type, bool) {
+	if s, ok := t.(OptimizerState); ok {
+		switch name {
+		case FieldStep:
+			return Int(), true
+		case FieldParameters:
+			p, err := NewTensorBundle(ParametersKind, s.Schema())
+			if err != nil {
+				panic(err)
+			}
+			return p, true
+		}
+		return nil, false
+	}
 	if r, ok := t.(Record); ok {
 		for _, f := range r.Fields() {
 			if f.Name == name {

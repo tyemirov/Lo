@@ -50,7 +50,7 @@ func typeExpression(expression syntax.TypeExpression) (types.Type, diagnostic.Di
 		}
 		arity := 0
 		switch e.Name() {
-		case "List", "Range":
+		case "List", "Range", "Parameters", "Gradients", "Optimizer.SGD.State", "Optimizer.AdamW.State":
 			arity = 1
 		case "Map":
 			arity = 2
@@ -65,6 +65,10 @@ func typeExpression(expression syntax.TypeExpression) (types.Type, diagnostic.Di
 		var t types.Type
 		var err error
 		switch e.Name() {
+		case "Parameters", "Gradients":
+			t, err = types.NewTensorBundle(types.Kind(e.Name()), args[0])
+		case "Optimizer.SGD.State", "Optimizer.AdamW.State":
+			t, err = types.NewOptimizerState(types.Kind(e.Name()), args[0])
 		case "List":
 			t, err = types.NewList(args[0])
 		case "Map":

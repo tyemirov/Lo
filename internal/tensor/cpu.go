@@ -11,16 +11,27 @@ import (
 type Data interface {
 	Shape() Shape
 	At(int) float32
+	Storage() Storage
 	data()
 }
+type Storage interface {
+	Bytes() uint64
+	storage()
+}
+type storage struct{ elements []float32 }
+
+func (*storage) storage()        {}
+func (s *storage) Bytes() uint64 { return uint64(len(s.elements)) * 4 }
+
 type data struct {
-	shape    Shape
-	elements []float32
+	shape Shape
+	*storage
 }
 
 func (*data) data()              {}
 func (d *data) Shape() Shape     { return d.shape }
 func (d *data) At(i int) float32 { return d.elements[i] }
+func (d *data) Storage() Storage { return d.storage }
 
 // Construct receives a validated shape and indexed input from the runtime edge.
 // The caller reserves the work and value budgets before this allocation.
@@ -39,7 +50,7 @@ func Construct(ctx context.Context, s Shape, input func(int) float64) (Data, err
 		}
 		out[i] = v
 	}
-	return &data{s, out}, nil
+	return &data{s, &storage{out}}, nil
 }
 
 func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
@@ -48,14 +59,14 @@ func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
 		return nil, err
 	}
 	if p.op == catalog.TensorReshape || (p.op == catalog.TensorSum || p.op == catalog.TensorMean) && len(p.axes) == 0 {
-		return &data{p.shape, a.(*data).elements}, nil
+		return &data{p.shape, a.(*data).storage}, nil
 	}
 	if p.op == catalog.TensorMean && p.region == 0 {
 		return nil, fault{catalog.EmptyReduction, "nonempty mean reduction region", fmt.Sprint(a.Shape().Dims())}
 	}
 	out := make([]float32, int(p.shape.Count()))
 	if len(out) == 0 {
-		return &data{p.shape, out}, nil
+		return &data{p.shape, &storage{out}}, nil
 	}
 	ad := a.Shape().Dims()
 	od := p.shape.Dims()
@@ -178,7 +189,31 @@ func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
 			out[i] = z
 		}
 	}
-	return &data{p.shape, out}, nil
+	return &data{p.shape, &storage{out}}, nil
+}
+
+func ReluDerivative(ctx context.Context, gradient, input Data) (Data, error) {
+	out := make([]float32, int(input.Shape().Count()))
+	for i := range out {
+		if err := poll(ctx, i); err != nil {
+			return nil, err
+		}
+		if input.At(i) > 0 {
+			out[i] = gradient.At(i)
+		}
+	}
+	return &data{input.Shape(), &storage{out}}, nil
+}
+func CheckSqrtDerivative(ctx context.Context, input Data) error {
+	for i := 0; i < int(input.Shape().Count()); i++ {
+		if err := poll(ctx, i); err != nil {
+			return err
+		}
+		if input.At(i) == 0 {
+			return numeric(catalog.UndefinedDerivative, i, "nonzero active square-root input")
+		}
+	}
+	return nil
 }
 func broadcastIndex(index int, out, in []int64) int {
 	offset, stride := 0, 1

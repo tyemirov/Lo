@@ -235,6 +235,30 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 		}
 	}
 	switch op {
+	case catalog.SGDStateNew, catalog.AdamWStateNew:
+		return fact{Fields: map[string]fact{types.FieldParameters: args[0]}}
+	case catalog.SGDStep, catalog.AdamWStep:
+		return args[0]
+	case catalog.ParametersNew, catalog.ParametersValues, catalog.GradientsValues, catalog.GradientsZero, catalog.GradientsAdd, catalog.GradientsScale:
+		return args[0]
+	case catalog.GradientsNew:
+		return args[1]
+	case catalog.AutodiffGrad:
+		var loss ir.FlowID
+		for _, arg := range call.Arguments() {
+			if f, ok := arg.(ir.FlowArgument); ok {
+				loss = f.Flow()
+			}
+		}
+		inputs := append([]fact{}, args[1:len(args)-1]...)
+		inputs = append(inputs, args[0])
+		result := a.invoke(loss, inputs)
+		if result.Shape != nil && result.Shape.Rank() != 0 {
+			a.err = diagnostic.New(diagnostic.AutodiffLoss, diagnostic.Check, "loss must return a rank-zero tensor", call.Span())
+		}
+		return fact{Fields: map[string]fact{catalog.ParamValue: result, catalog.FieldGradients: args[0]}}
+	case catalog.AutodiffStop:
+		return args[0]
 	case catalog.ListNew:
 		return fact{List: true, Items: args}
 	case catalog.IntNew:

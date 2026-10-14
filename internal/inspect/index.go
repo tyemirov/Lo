@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/MarcoPoloResearchLab/Lo/internal/autodiff"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
@@ -103,6 +104,9 @@ func (g *graphIndex) expression(expr ir.Expression, region string) nodeID {
 	case ir.BuiltinCall:
 		n.Kind = "builtin"
 		n.Operation = e.Operation().Name()
+		if call, ok := e.(autodiff.Call); ok {
+			n.Derivative = derivativePlan(call)
+		}
 		for _, arg := range e.Arguments() {
 			switch a := arg.(type) {
 			case ir.ValueArgument:
