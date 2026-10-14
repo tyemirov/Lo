@@ -11,7 +11,7 @@ F001 extends this audit with the native compiler and shared runtime described be
 
 | Source | Coverage |
 | --- | --- |
-| [CLI tests](../tests/integration/cli_test.go) | Command inputs, diagnostics, source boundaries, syntax, and all 63 static fixtures. |
+| [CLI tests](../tests/integration/cli_test.go) | Command inputs, diagnostics, source boundaries, syntax, and all 83 conformance fixtures. |
 | [Verifier tests](../tests/integration/verifier_test.go) | Types, scopes, fallibility, handlers, effects, and all six specification examples. |
 | [Catalog tests](../tests/integration/catalog_test.go) | A source fixture and expected checked type for every built-in operation. |
 | [Graph tests](../tests/integration/graph_test.go) | Compiler publication, references, spans, conversions, immutability, and static-only behavior. |
@@ -24,7 +24,7 @@ F001 extends this audit with the native compiler and shared runtime described be
 | [Adapter tests](../tests/integration/adapter_test.go) | File cancellation, concurrent append, partial startup, nested servers, and forced shutdown. |
 
 The test names below identify executable fixtures in these files.
-`TestConformance` executes every entry in the [static manifest](../testdata/conformance/manifest.json).
+`TestConformance` executes every entry in the [conformance manifest](../testdata/conformance/manifest.json).
 The two catalog tests reject missing built-in coverage.
 Runtime fixtures use stages 5 and 6, as identified in the stage tables below.
 Their source programs and expected values are in the named tests.

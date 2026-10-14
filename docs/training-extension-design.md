@@ -1,23 +1,27 @@
 # Lo Neural Network Training Extension
 
-P001 selects the implementation contract for dense FP32 training through `lo run`.
+P001 selects the implementation contract for dense FP32 training.
 Named flows describe the forward pass and loss.
 Reverse-mode autodiff produces gradients from the checked graph.
 `List.fold` carries immutable Parameters and optimizer state through a bounded number of updates.
 
 Status: design completed on October 13, 2026.
 F002 through F011 and I001 own implementation and acceptance.
+
 F002, F003, and F004 implement Float arithmetic and CPU tensors through `lo run`.
 The compiler also implements Device descriptors without device initialization.
 F005 implements first-order CPU autodiff and derivative plans in inspection reports.
 F006 and F007 implement Parameters, gradients, stop-gradient, SGD, and AdamW.
+F001 implements the CPU training operations in standalone native executables.
+
 Transfers and GPU execution remain selected APIs for later issues.
 The [specification](../specification.md) section 24 defines the implemented numeric and tensor contract.
 
 The [language specification](../specification.md) remains the authority for implemented language behavior.
 The [source changes](#source-contract-changes) identify the changes required before each extension receives implementation acceptance.
 The [compiler design](compiler-design.md) owns existing diagnostics, authorization, and execution rules.
-F001 and the [native compilation plan](native-compilation-plan.md) remain independent of this interpreter training path.
+The [native compilation plan](native-compilation-plan.md) defines the second execution backend for these CPU contracts.
+The [native acceptance report](native-compilation-results.md) compares training results and performance on macOS arm64 and Linux arm64.
 
 ## Decision scope
 
@@ -482,7 +486,7 @@ Software failure injection exercises cleanup when a device operation cannot comp
 The CPU profile is `cpu-fp32-strict`.
 It uses the explicit operation order in this contract without contraction or reassociation.
 Repeated execution with identical inputs produces identical numeric bits.
-The interpreter's evaluation strategy cannot change this result.
+The interpreter and native backend must give the same numeric results.
 
 The NVIDIA profile is `cuda-fp32-pedantic`.
 Its identity includes Lo build, kernels, CUDA libraries, driver, architecture, device SM count, and library configuration.
@@ -579,7 +583,8 @@ If a program explicitly keeps prior states, those states continue to consume the
 
 ### Build and platform selection
 
-The selected route keeps graph execution in the Go interpreter.
+F009 selects graph execution in the Go interpreter for the first NVIDIA implementation.
+The native CPU backend from F001 does not implement this device contract.
 A narrow C ABI submits validated tensor descriptors to CUDA Runtime and cuBLAS.
 Repository-owned CUDA kernels implement elementwise operations, reductions, layout transforms, derivatives, and optimizer arithmetic.
 `nvcc` compiles these kernels when the CUDA-enabled Lo binary is built.
@@ -769,7 +774,7 @@ Already completed earlier commits keep the existing no-rollback semantics.
 ### Independent arithmetic evidence
 
 The [reference calculation](evidence/training-reference.py) uses direct network derivatives and Python standard-library arithmetic.
-It does not call Lo, a tensor framework, or the proposed derivative generator.
+It does not call Lo, a tensor framework, or the compiler's derivative generator.
 It checks binary64 and FP32-rounded calculations, all nine Parameter derivatives, and two AdamW updates.
 It is a fixture reference, not a general IEEE 754 conformance oracle.
 
@@ -794,19 +799,20 @@ python3 docs/evidence/training-reference.py
 The independent network calculation passed the I001 threshold.
 Its direct derivative arithmetic can group contributions differently from generated VJPs.
 Implementation comparisons use the fixed fixture tolerances.
-This evidence validates the proposed example and equations, not Lo training execution.
+This calculation validates the example and equations.
+The [training acceptance evidence](evidence/training-stack-green.txt) and [native acceptance report](native-compilation-results.md) separately record Lo execution.
 
 The AdamW fixture starts with `[1,-2]`, then uses gradients `[0.1,-0.2]` and `[0,0.3]`.
 Its config is rate `0.01`, betas `0.9` and `0.999`, epsilon `1e-8`, and decay `0.1`.
 The FP32 Parameter results are `[0.9890000224113464,-1.9880000352859497]` and `[0.9813104271888733,-1.988489031791687]`.
-The script also reports moments for comparison with the future implementation.
+The script also reports moments to compare with optimizer results.
 
 ## Source contract changes
 
 These changes are selected by P001.
 Each owning feature must update the relevant specification text and conformance fixtures before its implementation acceptance.
-F002 through F004 apply their source changes in specification section 24 and the affected core sections.
-Later issues must apply their remaining source changes before acceptance.
+F002 through F007 implemented their source changes in specification section 24 and the affected core sections.
+The table includes those completed changes and the remaining device contracts.
 
 | Source section | Required change | Owner |
 | --- | --- | --- |
@@ -825,9 +831,9 @@ Later issues must apply their remaining source changes before acceptance.
 | Compiler design CLI and serialization | Add grants, tensor JSON, diagnostic summaries, and numeric profiles. | F003, F008, F010 |
 | Compiler design execution limits | Add tensor weight, logical work, and live resource receipts. | F003, F005, F007, F008 |
 
-F001 can reuse these runtime contracts when native compilation later supports the extension.
-It does not become a dependency of any training issue.
-Unsupported native constructs must fail explicitly until the native backend implements them.
+F001 implements these CPU contracts through generated code and shared runtime operations.
+The generated code implements derivative plans, Parameters, gradients, and optimizer transitions.
+F008 through F011 and I001 retain their device and complete training acceptance scope.
 
 ## Implementation and acceptance sequence
 
@@ -868,11 +874,12 @@ The P001 document review does not claim that those future acceptance commands pa
 
 ### P001 design validation
 
-`make build` passed against the current compiler.
+P001 recorded the following results before F003 implementation.
+`make build` passed against that compiler.
 `lo parse docs/examples/training-mvp.lo --format json` accepted the complete source fixture.
 `lo check` rejected that fixture with `resolve.unknown-name` for `FP32`, as expected before F003.
-This result establishes grammar reuse and the current implementation boundary.
-It does not establish extension type checking or training execution.
+This result established grammar reuse before extension type checking or training execution existed.
+F002 through F007 subsequently implemented the CPU extension, and F001 added native execution.
 
 The independent reference script passed all network, finite-difference, and optimizer assertions.
 The document review traced P001 requirements to the selected contracts and dependent issues.

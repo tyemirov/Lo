@@ -1,9 +1,13 @@
 # CPU Training Baseline for F001
 
-F005, F006, and F007 support complete CPU training through the interpreter.
-The small network completes 200 SGD updates with final loss `0.00013215476064942777`.
-This result equals the independent FP32 fixture result.
-Native executable generation remains open under F001.
+This report records the interpreter baseline from October 13, 2026, before F001.
+F005, F006, and F007 implemented CPU training through the interpreter.
+The small network completed 200 SGD updates with final loss `0.00013215476064942777`.
+This result was the same as the independent FP32 fixture result.
+
+F001 completed native compilation on October 14, 2026, including these training workloads.
+The [native acceptance report](native-compilation-results.md) compares interpreter and native execution on macOS arm64 and Linux arm64.
+The measurements below describe the implementation before F001.
 
 ## Workloads and Method
 
@@ -75,34 +79,35 @@ These percentages overlap because they include child calls.
 The CPU profile attributes 88.8% of its samples to `runtime.kevent` during runtime scheduling and garbage collection.
 This attribution does not establish useful Lo operation costs.
 Thus, the report does not use those CPU percentages to estimate a native speed improvement.
-F001 requires a reliable CPU attribution method before such estimates become acceptance evidence.
+The native acceptance report compares elapsed times and records allocation measurements.
 Elapsed times and allocation measurements remain separate observations.
 
-## Implications for F001
+## Baseline Findings and F001 Acceptance
 
-The small training workload spends substantially more time in execution than in checking.
-Removing frontend work alone will not remove its dominant measured phase.
-The larger fixture has a greater checking cost because its source contains more explicit numeric inputs.
-A standalone artifact can remove that repeated frontend work.
+The small training workload spent more time in execution than in checking.
+The larger fixture had a greater checking cost because its source contained more explicit numeric inputs.
+These results showed the execution cost and the frontend cost on each CLI run.
 
-The allocation profile identifies work for the shared runtime boundary in the native plan.
-Direct generated calls and locals can remove expression traversal and temporary argument maps.
-F001 must also measure record construction, metadata copies, and diagnostic snapshots in the shared runtime.
-Generated Go that retains these costs does not automatically remove them.
+The allocation profile identified derivative execution, record construction, metadata copies, and diagnostic snapshots as costs for F001 to measure.
+F001 generates direct calls and local variables for expressions and derivative plans.
+The native acceptance report records execution times and allocations after these changes.
 Tensor kernels already execute compiled Go loops.
 Native graph compilation alone does not replace their numeric algorithms.
 
-Use both fixtures in the F001 corpus with identical inputs, output contracts, numeric profile, and logical limits.
-Compare generated execution with the checked-program execution phase above.
-Measure complete artifact latency separately from execution and build time.
-Retain gradient, optimizer, source-span, cancellation, and budget differential tests.
-Keep the existing native performance gates until Stage 0 formally selects its complete corpus and budgets.
+The F001 corpus includes the two training fixtures with the same inputs, output contracts, numeric profiles, and logical limits.
+F001 compares the interpreter and native backend from the same implementation.
+It measures artifact latency separately from execution and build time.
+The [native contract](native-compilation-contract.md) defines the selected corpus, performance gates, and build limits.
+The native acceptance report includes callback, File, HTTP, training, and build measurements.
 
-This baseline supports F001 planning.
-It does not establish native performance, Linux execution, CUDA execution, or completion of I001.
-The remaining Stage 0 work still includes callback, File, HTTP, and native build measurements.
+This baseline alone does not establish native performance or Linux execution.
+F001 supplies that evidence in the native acceptance report.
+Neither report establishes CUDA execution or completion of I001.
 
 ## Reproduction
+
+These commands measure the repository's implementation.
+The linked raw samples preserve the October 13 baseline.
 
 Run these commands sequentially from the repository root:
 

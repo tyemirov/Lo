@@ -36,23 +36,24 @@ The following work is outside this milestone:
 The interpreter provides a second implementation of the same current language contract for differential tests.
 It is not a compatibility path for obsolete programs or artifacts.
 
-## Current Implementation and Expected Costs
+## Execution Backends and Runtime Costs
 
 The frontend already resolves types, flow references, effects, branches, and fallibility.
 Its immutable [checked graph](../internal/ir/ir.go) contains explicit conversion nodes and commit statements.
 This graph supplies the native backend input without another parser or type checker.
 
-The current runtime has several costs that generated code can reduce.
-The following table distinguishes removable dispatch work from runtime work that remains necessary.
+The interpreter traverses the checked graph during execution.
+The native backend generates direct code from that graph before execution.
+The following table compares the two backends.
 
-| Current code | Current work | Proposed native behavior |
+| Operation | Interpreter execution | Native execution |
 | --- | --- | --- |
 | [Expression evaluation](../internal/eval/eval.go) | Select an IR node type for each expression. | Execute the generated operation directly. |
 | Flow invocation in `internal/eval/eval.go` | Find a flow and construct its binding map. | Call a generated function with typed parameters and local variables. |
 | [Built-in execution](../internal/eval/builtin.go) | Select an operation by name and construct argument collections. | Call the operation helper selected during compilation. |
 | [List execution](../internal/eval/list.go) | Invoke the interpreter for each callback. | Execute a generated loop with a direct callback call. |
-| [Runtime values](../internal/value/value.go) | Copy integers and collection views to preserve immutable values. | Reuse the value contract initially. Measure remaining allocation costs. |
-| [HTTP adapter](../internal/adapter/http.go) | Construct an interpreter invocation for each request. | Construct a shared execution session and invoke a compiled handler. |
+| [Runtime values](../internal/value/value.go) | Copy integers and collection views to preserve immutable values. | Use the same immutable value contract. |
+| [HTTP adapter](../internal/adapter/http.go) | Create an execution session for each request and invoke the interpreter handler. | Create an execution session for each request and invoke the compiled handler. |
 
 Native compilation does not remove arbitrary-precision arithmetic, capability checks, execution limits, or operating-system I/O costs.
 The initial implementation retains the current immutable value representations.
@@ -75,12 +76,12 @@ The filter callback compared each scalar with `Scalar.new("a")`.
 Both text cases returned `10000`.
 These measurements include process startup, source access, parsing, type checks, execution, and output.
 They do not isolate interpreter costs or predict native performance.
-Stage 0 replaces this exploratory probe with repeatable benchmarks and recorded environment data.
+Stage 0 replaced this exploratory probe with repeatable benchmarks and recorded environment data.
 
 The [CPU training benchmark](training-benchmark.md) adds measured execution and allocation costs after F005 through F007.
 It separates checking, execution, serialization, and complete CLI latency.
-F001 must also lower derivative plans and preserve Parameter, gradient, and optimizer contracts.
-This training baseline does not replace the remaining Stage 0 corpus or its build budgets.
+F001 lowers derivative plans and keeps the Parameter, gradient, and optimizer contracts.
+The [native acceptance report](native-compilation-results.md) records the completed corpus and build measurements.
 
 ## Backend Choice
 
@@ -88,7 +89,7 @@ The table gives an engineering assessment based on the current Go implementation
 
 | Option | Benefit | Additional work | Milestone decision |
 | --- | --- | --- | --- |
-| Generate Go source | Reuse Go values, adapters, garbage collection, and build tools. | Generate direct code and separate the runtime from the interpreter. | Recommended. |
+| Generate Go source | Reuse Go values, adapters, garbage collection, and build tools. | Generate direct code and separate the runtime from the interpreter. | Implemented. |
 | Generate LLVM IR | Control machine-level representations and optimization. | Define a runtime interface, memory management, arithmetic, and adapter integration. | Defer. |
 | Generate C source | Use a conventional native compiler interface. | Implement the runtime in C or introduce a boundary between C and Go. | Defer. |
 
@@ -98,9 +99,8 @@ This supports a native artifact from generated source. See the [Go build documen
 LLVM supplies garbage-collection integration mechanisms, but the language runtime must supply the collector and its allocation interface.
 That requirement increases the scope of a direct LLVM backend. See [LLVM garbage collection](https://llvm.org/docs/GarbageCollection.html).
 
-The first backend will generate actual Lo control flow.
-It will not serialize an IR graph into a Go program that calls the interpreter.
-The artifact dependency test must reject compiler and interpreter packages.
+The backend generates Lo control flow directly.
+The artifact dependency test rejects compiler and interpreter packages.
 
 ## User Contract
 
@@ -453,8 +453,9 @@ It must not erase error frames, statuses, operation order, or meaningful path di
 ## Implementation Stages
 
 Each stage depends on the preceding stage's acceptance evidence.
-The stages define implementation and acceptance dependencies.
-The status section identifies delivered capabilities and remaining qualification work.
+F001 completed all stages below.
+The deliverables and acceptance criteria record the implementation sequence.
+The status section links the completed qualification evidence.
 
 ### Stage 0 Establish Contracts and Baselines
 
@@ -467,9 +468,9 @@ Deliverables:
 - Record exact performance gates and the two target environments.
 - Resolve the toolchain and runtime bundle build procedure.
 
-The initial toolchain probes use the existing CLI build and small Go programs.
-They establish host build costs before a native Lo backend exists.
-Build budgets remain proposed limits until native qualification measures them.
+The initial toolchain probes used the CLI build and small Go programs before the native backend existed.
+The [native contract](native-compilation-contract.md) records the selected build limits.
+The [acceptance report](native-compilation-results.md) records successful qualification against those limits on macOS arm64 and Linux arm64.
 
 Acceptance:
 

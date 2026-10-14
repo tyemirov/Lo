@@ -1,14 +1,14 @@
 # Lo Compiler Design and Implementation Plan
 
 Lo compiles source programs into a verified execution graph.
-Static inspection and a trusted interpreter use the same graph.
+Static inspection, the interpreter, and native code generation use the same checked graph.
 The reference implementation uses Go.
 This plan defines six implementation stages, their contracts, and their acceptance evidence.
 
 ## Status and Authority
 
 The compiler architecture and implementation sequence are accepted.
-The frontend, full verifier, checked graph, static inspection, interpreter, File activation, and HTTP execution are implemented.
+The frontend, verifier, checked graph, static inspection, interpreter, native compiler, File activation, and HTTP execution are implemented.
 The [implementation audit](implementation-audit.md) maps the completed requirements to source and acceptance evidence.
 The stages below specify the full implementation scope.
 
@@ -49,7 +49,7 @@ Design sections:
 - [Effects and checked graph](#effects-and-execution-graph).
 - [CLI, diagnostics, and execution limits](#cli-and-diagnostics).
 - [Inspection contract and report schema](#inspection-contract).
-- [Package boundaries](#planned-package-boundaries).
+- [Package boundaries](#package-boundaries).
 - [Implementation stages](#implementation-stages).
 - [Detailed File and HTTP plan](#stage-6-detailed-contracts).
 - [Validation plan](#validation-plan) and [open decisions](#open-decisions).
@@ -60,7 +60,7 @@ Design sections:
 | --- | --- | --- |
 | Implementation language | Go | One implementation can contain the compiler, CLI, interpreter, and adapters. |
 | First product | Verifier with source diagnostics | Type and boundary checks establish the executable contract. |
-| Compiler output | Typed execution graph | Inspection and execution use the same resolved program. |
+| Compiler output | Checked graph and optional native executable | Inspection, interpreter execution, and code generation use the same resolved program. |
 | Parser | Handwritten recursive descent | The small grammar permits direct control of source spans and diagnostics. |
 | Built-ins | One typed catalog | Type checks, inspection, and execution use the same operation definitions. |
 | Integers | Arbitrary-precision values | Lo specifies mathematical integer semantics. |
@@ -69,7 +69,7 @@ Design sections:
 
 Go has arbitrary-precision integers through [`math/big`](https://pkg.go.dev/math/big).
 Its arithmetic methods write results into a receiver.
-The Lo value layer will keep these mutable objects private.
+The Lo value layer keeps these mutable objects private.
 Lo operations must not change values shared with another binding.
 
 The implementation accepts the current canonical Lo contract only.
@@ -88,10 +88,10 @@ Shared execution sessions, operation helpers, and adapters serve both execution 
 
 The selected [training extension design](training-extension-design.md) defines the additional contracts for F002 through F011 and I001.
 P001 completed that design task.
-F002, F003, and F004 add Float arithmetic and CPU tensors to the interpreter.
+F002, F003, and F004 implement Float arithmetic and CPU tensors.
 F005, F006, and F007 add CPU autodiff, Parameters, gradients, and pure optimizer transitions.
 F008 through F011 and I001 retain device implementation and complete training acceptance.
-Training implementation extends the interpreter independently of F001.
+F001 implements the same CPU training contracts in native executables.
 The extension document maps each required specification change to its owning issue.
 
 ### Resolved Verifier Decisions
@@ -123,12 +123,16 @@ flowchart TD
     Lower --> Graph[Checked execution graph]
     Graph --> Inspect[Inspection report]
     Graph --> Runtime[Interpreter]
+    Graph --> Generate[Direct Go generation]
+    Generate --> Build[Pinned Go toolchain]
+    Build --> Native[Native executable]
+    Native --> Adapters
     Runtime --> Adapters[File and HTTP adapters]
 ```
 
 Each stage gives a representation with more guarantees.
 A failed stage returns diagnostics and prevents graph publication.
-The interpreter accepts only a checked graph.
+The interpreter and code generator accept only a checked graph.
 
 ### Stage Contracts
 
@@ -349,9 +353,10 @@ The pipe becomes a `Math.sum` call whose first argument references that binding.
 The call produces `Int`, and the top-level return references its result.
 The graph keeps source spans for both the original pipe and its supplied argument.
 
-## Interpreter and Adapter Boundary
+## Execution and Adapter Boundary
 
-The interpreter evaluates graph regions and passes typed requests to adapters.
+The interpreter evaluates graph regions, and the native backend executes generated code.
+The two backends use shared execution sessions and pass typed requests to the same adapters.
 The adapter interface owns external operations and converts recoverable failures into Lo errors.
 Each Lo error contains the required kind, input record, and trace data.
 
@@ -529,7 +534,7 @@ Empty nested containers receive the transformed element type.
 
 ### Execution Limits
 
-The interpreter counts each entered statement, evaluated expression, list iteration, and integer aggregate element as one step.
+The two backends count each entered statement, evaluated expression, list iteration, and integer aggregate element as one step.
 The default budget is 1,000,000 steps.
 `--max-steps POSITIVE_INTEGER` replaces that budget for one command.
 This option can occur only once.
@@ -583,7 +588,7 @@ Empty reduction axes preserve these logical charges even when the result shares 
 Tensor kernels test cancellation during execution.
 A host failure bypasses Lo handlers and prevents result publication.
 
-The interpreter checks weight before it publishes an expression result.
+The two backends check weight before they publish an expression result.
 These budgets bound specified evaluation work and data expansion.
 They do not specify the Go process's exact memory use.
 `runtime.limit` reports a budget failure with exit status `2`.
@@ -622,14 +627,15 @@ The plan expands named helpers with distinct invocation identities.
 Its nodes contain source spans, operand bindings, active derivative edges, and value-lifetime information.
 Unsupported operations fail before execution, including operations in unused eager bindings.
 
-The evaluator executes the forward plan and propagates contributions in reverse stable order.
+The interpreter executes the derivative plan, and the native backend generates code from that plan.
+The two backends execute the forward operations and propagate contributions in reverse stable order.
 The VJP module uses an arithmetic interface for checked tensor operations and resource admission.
 This interface keeps derivative rules independent of interpreter traversal.
-F001 can reuse the same plan and rules.
+The two backends use the VJP rules in `internal/derivative`.
 
 Forward values leave the local environment after their last use unless a derivative rule requires them.
 Diagnostic frames retain metadata snapshots instead of tensor contents.
-These snapshots receive cumulative value charges before the evaluator retains them.
+The two backends charge cumulative value weight before they retain these snapshots.
 The tape counts distinct storage allocations and enforces the limit in specification section 24.5.
 Every generated numeric result contributes to cumulative value weight.
 Failures retain the forward operation span and the expanded helper trace.
@@ -810,10 +816,9 @@ Their capabilities are:
 The error sources include `File.ReadFailed`, `UTF8.InvalidBytes`, `File.WriteFailed`, and `File.AppendFailed`.
 Inspection does not need these files to exist.
 
-## Planned Package Boundaries
+## Package Boundaries
 
-The following paths specify the intended Go package responsibilities.
-Each milestone adds the packages necessary for its behavior.
+The following paths identify the implemented Go package responsibilities.
 
 | Path | Responsibility |
 | --- | --- |
@@ -822,6 +827,10 @@ Each milestone adds the packages necessary for its behavior.
 | `internal/execution/` | Shared execution sessions, budgets, boundaries, failures, and program entries. |
 | `internal/runtimeops/` | Shared runtime operations and value construction. |
 | `internal/codegen/`, `internal/nativebuild/` | Direct Go generation and isolated artifact construction. |
+| `internal/runtimebundle/` | Embedded runtime sources and the content manifest for native builds. |
+| `internal/identity/` | Flow identities for the two execution backends. |
+| `internal/autodiff/` | Checked derivative plans. |
+| `internal/derivative/` | Runtime VJP arithmetic without compiler graph dependencies. |
 | `internal/source/` | Source bytes, file identity, and source spans. |
 | `internal/syntax/` | Tokens, lexer, AST, and parser. |
 | `internal/resolve/` | Symbols, lexical scopes, and reference resolution. |
@@ -843,7 +852,8 @@ Each milestone adds the packages necessary for its behavior.
 
 The compiler core imports typed catalog definitions.
 Concrete adapter implementations stay outside the compiler core.
-The CLI composes the interpreter with adapters.
+The source CLI selects interpreter execution or native artifact construction through explicit commands.
+The runtime runner connects each execution backend to the adapters.
 The inspector uses the graph without a runtime dependency.
 Private representations prevent unrestricted construction of checked graphs and valid domain values.
 Smart constructors return `(Type, error)` where construction has invariants.
@@ -1120,7 +1130,7 @@ The transport can add its own protocol headers.
 
 An invalid response from `onError` is a fatal host failure.
 The adapter does not invoke `onError` again or construct a substitute response.
-Capability denial, interpreter limits, and invariant failures also bypass Lo handlers.
+Capability denial, execution limits, and invariant failures also bypass Lo handlers.
 A fatal request failure closes that connection and stops the service with exit status `2`.
 
 #### Startup and Shutdown
@@ -1177,7 +1187,7 @@ Cleanup or shutdown failure produces a host diagnostic and exit status `2`.
 | Idle connection | 30 seconds |
 | Orderly shutdown | 5 seconds |
 
-These limits apply in addition to the [interpreter limits](#execution-limits).
+These limits apply in addition to the [execution limits](#execution-limits).
 Client disconnection cancels its request without a service failure by itself.
 File operations check cancellation while they wait for data transfer.
 Cancellation does not reverse bytes already written.
@@ -1342,11 +1352,12 @@ Other tests cover source mapping, restrictions, budgets, cancellation, weighted 
 The [CPU training example](../examples/training_cpu.lo) passed parse, check, inspect, and repeated execution.
 Its final loss and all nine Parameter values matched the independent FP32 reference within fixed tolerances.
 The loss decreased from `2.46875` to `0.00013215476064942777` after 200 SGD updates.
-This result establishes CPU training through the interpreter.
+This result established CPU training through the interpreter before F001.
+The [native acceptance report](native-compilation-results.md) records CPU training results for native artifacts on macOS arm64 and Linux arm64.
 F008 through F011 and I001 retain their device and complete acceptance scope.
 
 The [stack evidence](evidence/training-stack-green.txt) records final checks and the requirement audit.
-The [benchmark report](training-benchmark.md) records raw samples, allocation evidence, and implications for F001.
+The [benchmark report](training-benchmark.md) records raw samples and allocation evidence from the interpreter baseline before F001.
 It also records the unresolved CPU profile attribution limit.
 Changed prose received Part 1 and Part 2 review against the verified ASD-STE100 Issue 9 reference.
 The language check found no new mechanical findings and 46 unchanged findings.
