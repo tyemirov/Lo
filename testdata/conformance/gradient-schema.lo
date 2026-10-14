@@ -1,0 +1,2 @@
+flow Run() -> Gradients<Record{x: Tensor<FP32>}>! { x=Tensor.new(List.new(1.0),List.new()); y=Tensor.new(List.new(1.0),List.new(1)); p=Parameters.new(Record.new(x:x)); return Gradients.new(p,Record.new(x:y)) }
+return Run()

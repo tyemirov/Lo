@@ -1,0 +1,3 @@
+flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32> { return Autodiff.stop(p.x) }
+flow Run() -> Tensor<FP32>! { x=Tensor.new(List.new(3.0),List.new()); result=Autodiff.grad(Record.new(x:x),Loss); return result.gradients.x }
+return Run()

@@ -651,5 +651,73 @@
     "exit": 1,
     "stage": 5,
     "diagnostic": "runtime.unhandled-error"
+  },
+  {
+    "id": "autodiff-shared",
+    "rule": "24.5",
+    "file": "autodiff-shared.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "autodiff-read",
+    "rule": "24.5",
+    "file": "autodiff-read.lo",
+    "command": "check",
+    "exit": 1,
+    "stage": 3,
+    "diagnostic": "check.autodiff-unsupported"
+  },
+  {
+    "id": "autodiff-undefined",
+    "rule": "24.5",
+    "file": "autodiff-undefined.lo",
+    "command": "run",
+    "exit": 1,
+    "stage": 5,
+    "diagnostic": "runtime.unhandled-error"
+  },
+  {
+    "id": "gradient-stop",
+    "rule": "24.6",
+    "file": "gradient-stop.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "gradient-schema",
+    "rule": "24.6",
+    "file": "gradient-schema.lo",
+    "command": "run",
+    "exit": 1,
+    "stage": 5,
+    "diagnostic": "runtime.unhandled-error"
+  },
+  {
+    "id": "optimizer-sgd",
+    "rule": "24.7",
+    "file": "optimizer-sgd.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "optimizer-adamw",
+    "rule": "24.7",
+    "file": "optimizer-adamw.lo",
+    "command": "run",
+    "exit": 0,
+    "stage": 5
+  },
+  {
+    "id": "optimizer-invalid-config",
+    "rule": "24.7",
+    "file": "optimizer-invalid-config.lo",
+    "command": "run",
+    "exit": 1,
+    "stage": 5,
+    "diagnostic": "runtime.unhandled-error"
   }
 ]
