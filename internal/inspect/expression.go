@@ -2,6 +2,7 @@ package inspect
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"math/big"
 	"strings"
 
@@ -100,7 +101,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	node := a.graph.nodes[e]
 	op := e.Operation()
 	values := make([]abstract, len(e.Arguments()))
-	flows := map[int]ir.FlowID{}
+	flows := map[int]identity.FlowID{}
 	for _, arg := range e.Arguments() {
 		switch value := arg.(type) {
 		case ir.ValueArgument:
@@ -214,7 +215,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	}
 	return out
 }
-func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callback ir.FlowID) abstract {
+func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callback identity.FlowID) abstract {
 	node := a.graph.nodes[e]
 	name := e.Operation().Name()
 	flow := a.graph.flows[callback]

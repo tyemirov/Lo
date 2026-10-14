@@ -3,6 +3,7 @@ package inspect
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"strings"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
@@ -25,19 +26,19 @@ func (*report) report()                        {}
 func (r *report) MarshalJSON() ([]byte, error) { return json.Marshal(r.data) }
 
 type reportData struct {
-	File         string           `json:"file"`
-	ResultType   string           `json:"result_type,omitempty"`
-	Nodes        []nodeData       `json:"nodes"`
-	Bindings     []bindingData    `json:"bindings"`
-	Flows        []flowData       `json:"flows"`
-	Contexts     []contextData    `json:"contexts"`
-	EntryPoints  []entryData      `json:"entry_points"`
-	Reads        []resourceData   `json:"reads"`
-	Targets      []resourceData   `json:"targets"`
-	Activations  []activationData `json:"activations"`
-	ErrorSources []errorData      `json:"error_sources"`
-	Capabilities []resourceData   `json:"capabilities"`
-	UnusedFlows  []ir.FlowID      `json:"unused_flows"`
+	File         string            `json:"file"`
+	ResultType   string            `json:"result_type,omitempty"`
+	Nodes        []nodeData        `json:"nodes"`
+	Bindings     []bindingData     `json:"bindings"`
+	Flows        []flowData        `json:"flows"`
+	Contexts     []contextData     `json:"contexts"`
+	EntryPoints  []entryData       `json:"entry_points"`
+	Reads        []resourceData    `json:"reads"`
+	Targets      []resourceData    `json:"targets"`
+	Activations  []activationData  `json:"activations"`
+	ErrorSources []errorData       `json:"error_sources"`
+	Capabilities []resourceData    `json:"capabilities"`
+	UnusedFlows  []identity.FlowID `json:"unused_flows"`
 }
 type nodeData struct {
 	Derivative *derivativePlanData   `json:"derivative,omitempty"`
@@ -49,7 +50,7 @@ type nodeData struct {
 	Region     string                `json:"region"`
 	Inputs     []nodeID              `json:"inputs"`
 	Operation  string                `json:"operation,omitempty"`
-	Flow       ir.FlowID             `json:"flow,omitempty"`
+	Flow       identity.FlowID       `json:"flow,omitempty"`
 	Binding    ir.BindingID          `json:"binding,omitempty"`
 	Value      *string               `json:"value,omitempty"`
 	Field      string                `json:"field,omitempty"`
@@ -57,15 +58,15 @@ type nodeData struct {
 	Cases      []caseData            `json:"cases,omitempty"`
 }
 type argumentData struct {
-	Position int       `json:"position"`
-	Node     nodeID    `json:"node,omitempty"`
-	Flow     ir.FlowID `json:"flow,omitempty"`
+	Position int             `json:"position"`
+	Node     nodeID          `json:"node,omitempty"`
+	Flow     identity.FlowID `json:"flow,omitempty"`
 }
 type caseData struct {
-	Kind string    `json:"kind"`
-	Head nodeID    `json:"head,omitempty"`
-	Flow ir.FlowID `json:"flow,omitempty"`
-	Body nodeID    `json:"body"`
+	Kind string          `json:"kind"`
+	Head nodeID          `json:"head,omitempty"`
+	Flow identity.FlowID `json:"flow,omitempty"`
+	Body nodeID          `json:"body"`
 }
 type bindingData struct {
 	ID     ir.BindingID `json:"id"`
@@ -84,29 +85,29 @@ type effectsData struct {
 	Commits bool `json:"commits"`
 }
 type flowData struct {
-	ID         ir.FlowID       `json:"id"`
+	ID         identity.FlowID `json:"id"`
 	Name       string          `json:"name"`
 	Span       source.Span     `json:"span"`
 	Parameters []parameterData `json:"parameters"`
 	Output     string          `json:"output"`
-	Handler    ir.FlowID       `json:"handler,omitempty"`
+	Handler    identity.FlowID `json:"handler,omitempty"`
 	Effects    effectsData     `json:"effects"`
 	Uses       []string        `json:"uses"`
 }
 type contextData struct {
-	ID     contextID `json:"id"`
-	Entry  string    `json:"entry,omitempty"`
-	Parent contextID `json:"parent,omitempty"`
-	Flow   ir.FlowID `json:"flow,omitempty"`
-	Node   nodeID    `json:"node,omitempty"`
-	Kind   string    `json:"kind"`
+	ID     contextID       `json:"id"`
+	Entry  string          `json:"entry,omitempty"`
+	Parent contextID       `json:"parent,omitempty"`
+	Flow   identity.FlowID `json:"flow,omitempty"`
+	Node   nodeID          `json:"node,omitempty"`
+	Kind   string          `json:"kind"`
 }
 type entryData struct {
-	ID         string    `json:"id"`
-	Kind       string    `json:"kind"`
-	Context    contextID `json:"context"`
-	Flow       ir.FlowID `json:"flow,omitempty"`
-	Activation string    `json:"activation,omitempty"`
+	ID         string          `json:"id"`
+	Kind       string          `json:"kind"`
+	Context    contextID       `json:"context"`
+	Flow       identity.FlowID `json:"flow,omitempty"`
+	Activation string          `json:"activation,omitempty"`
 }
 type condition struct {
 	Context contextID `json:"context"`
@@ -124,16 +125,16 @@ type description struct {
 	Expression   string      `json:"expression,omitempty"`
 }
 type resourceData struct {
-	ID         string      `json:"id"`
-	Origin     string      `json:"origin,omitempty"`
-	Operation  string      `json:"operation"`
-	Context    contextID   `json:"context"`
-	Entry      string      `json:"entry,omitempty"`
-	Node       nodeID      `json:"node"`
-	Target     description `json:"target"`
-	Conditions []condition `json:"conditions"`
-	Handler    ir.FlowID   `json:"handler,omitempty"`
-	OnError    ir.FlowID   `json:"on_error,omitempty"`
+	ID         string          `json:"id"`
+	Origin     string          `json:"origin,omitempty"`
+	Operation  string          `json:"operation"`
+	Context    contextID       `json:"context"`
+	Entry      string          `json:"entry,omitempty"`
+	Node       nodeID          `json:"node"`
+	Target     description     `json:"target"`
+	Conditions []condition     `json:"conditions"`
+	Handler    identity.FlowID `json:"handler,omitempty"`
+	OnError    identity.FlowID `json:"on_error,omitempty"`
 }
 type targetReference struct {
 	ID         targetID    `json:"id"`
@@ -148,20 +149,20 @@ type activationData struct {
 	Targets    []targetReference `json:"targets"`
 }
 type errorData struct {
-	ID         string       `json:"id"`
-	Category   string       `json:"category"`
-	Operation  string       `json:"operation"`
-	Context    contextID    `json:"context"`
-	Entry      string       `json:"entry,omitempty"`
-	Node       nodeID       `json:"node"`
-	Kinds      []string     `json:"kinds"`
-	Dynamic    *description `json:"dynamic,omitempty"`
-	Handler    ir.FlowID    `json:"handler,omitempty"`
-	Conditions []condition  `json:"conditions"`
+	ID         string          `json:"id"`
+	Category   string          `json:"category"`
+	Operation  string          `json:"operation"`
+	Context    contextID       `json:"context"`
+	Entry      string          `json:"entry,omitempty"`
+	Node       nodeID          `json:"node"`
+	Kinds      []string        `json:"kinds"`
+	Dynamic    *description    `json:"dynamic,omitempty"`
+	Handler    identity.FlowID `json:"handler,omitempty"`
+	Conditions []condition     `json:"conditions"`
 }
 
 func newReport(file string) reportData {
-	return reportData{File: file, Nodes: []nodeData{}, Bindings: []bindingData{}, Flows: []flowData{}, Contexts: []contextData{}, EntryPoints: []entryData{}, Reads: []resourceData{}, Targets: []resourceData{}, Activations: []activationData{}, ErrorSources: []errorData{}, Capabilities: []resourceData{}, UnusedFlows: []ir.FlowID{}}
+	return reportData{File: file, Nodes: []nodeData{}, Bindings: []bindingData{}, Flows: []flowData{}, Contexts: []contextData{}, EntryPoints: []entryData{}, Reads: []resourceData{}, Targets: []resourceData{}, Activations: []activationData{}, ErrorSources: []errorData{}, Capabilities: []resourceData{}, UnusedFlows: []identity.FlowID{}}
 }
 func (r *report) Text() string {
 	var b strings.Builder

@@ -79,3 +79,11 @@ func (s location) MarshalJSON() ([]byte, error) {
 		End   Position `json:"end"`
 	}{s.path, s.start, s.end})
 }
+
+// NewSpan constructs a source location without retaining the original text.
+func NewSpan(path string, start, end Position) (Span, error) {
+	if path == "" || start.Offset < 0 || end.Offset < start.Offset || start.Line < 1 || start.Column < 1 || end.Line < start.Line || end.Column < 1 || end.Line == start.Line && end.Column < start.Column {
+		return nil, fmt.Errorf("invalid source location")
+	}
+	return location{path, start, end}, nil
+}

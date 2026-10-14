@@ -3,6 +3,7 @@ package check
 import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/syntax"
@@ -231,7 +232,7 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 	if f.signature.Output().Kind() == types.FallibleKind {
 		result = must(types.NewFallible(result))
 	}
-	nodes[len(args)-1] = must(ir.FlowArg(len(args)-1, ir.FlowID(f.entry.ID()), args[len(args)-1].Span))
+	nodes[len(args)-1] = must(ir.FlowArg(len(args)-1, identity.FlowID(f.entry.ID()), args[len(args)-1].Span))
 	value := builtinResult(op, result, nodes, nil, span, values...)
 	value.effects = value.effects.With(f.graph.Effects())
 	return value, nil

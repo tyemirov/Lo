@@ -2,6 +2,7 @@ package inspect
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"slices"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/autodiff"
@@ -17,12 +18,12 @@ type graphIndex struct {
 	nodeData   map[nodeID]nodeData
 	parameters map[ir.BindingID]nodeID
 	statements map[int]nodeID
-	flows      map[ir.FlowID]ir.Flow
+	flows      map[identity.FlowID]ir.Flow
 	order      []ir.Flow
 }
 
 func index(program ir.Program, data *reportData, metadata map[ir.Expression]*tensorfacts.Metadata) *graphIndex {
-	g := &graphIndex{report: data, nodes: map[ir.Expression]nodeID{}, nodeData: map[nodeID]nodeData{}, parameters: map[ir.BindingID]nodeID{}, statements: map[int]nodeID{}, flows: map[ir.FlowID]ir.Flow{}}
+	g := &graphIndex{report: data, nodes: map[ir.Expression]nodeID{}, nodeData: map[nodeID]nodeData{}, parameters: map[ir.BindingID]nodeID{}, statements: map[int]nodeID{}, flows: map[identity.FlowID]ir.Flow{}}
 	g.order = program.Flows()
 	g.metadata = metadata
 	slices.SortFunc(g.order, func(a, b ir.Flow) int { return a.Span().Start().Offset - b.Span().Start().Offset })

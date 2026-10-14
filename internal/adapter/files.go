@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"golang.org/x/sys/unix"
 	"io"
 	"os"
@@ -12,12 +13,11 @@ import (
 	"slices"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
 type Files interface {
-	eval.Boundary
+	execution.Boundary
 	Close() error
 	files()
 }
@@ -85,7 +85,7 @@ func closeRoots(roots []grant) error {
 }
 func (f *files) Read(ctx context.Context, path value.Text) (value.Bytes, error) {
 	if err := ctx.Err(); err != nil {
-		return nil, eval.HostFailure(catalog.FileRead, path.Text(), err)
+		return nil, execution.HostFailure(catalog.FileRead, path.Text(), err)
 	}
 	selected, relative, absolute, err := f.resolve(f.reads, catalog.FileRead, path.Text())
 	if err != nil {
@@ -96,16 +96,16 @@ func (f *files) Read(ctx context.Context, path value.Text) (value.Bytes, error) 
 		return nil, fmt.Errorf("%s %q: %w", catalog.FileRead, absolute, err)
 	}
 	closeFile := cancelFile(ctx, file)
-	data, readErr := io.ReadAll(io.LimitReader(contextReader{ctx, file}, eval.MaxBytes+1))
+	data, readErr := io.ReadAll(io.LimitReader(contextReader{ctx, file}, execution.MaxBytes+1))
 	closeErr := closeFile()
 	if readErr != nil || closeErr != nil {
 		return nil, fmt.Errorf("%s %q: %w", catalog.FileRead, absolute, errors.Join(readErr, closeErr))
 	}
-	if len(data) > eval.MaxBytes {
-		return nil, eval.Limit("file read bytes")
+	if len(data) > execution.MaxBytes {
+		return nil, execution.Limit("file read bytes")
 	}
 	if err := ctx.Err(); err != nil {
-		return nil, eval.HostFailure(catalog.FileRead, absolute, err)
+		return nil, execution.HostFailure(catalog.FileRead, absolute, err)
 	}
 	return value.NewBytes(data), nil
 }
@@ -121,12 +121,12 @@ func (f *files) resolve(roots []grant, operation, path string) (*os.Root, string
 			return g.root, rel, absolute, nil
 		}
 	}
-	return nil, "", absolute, eval.Denied(operation, absolute)
+	return nil, "", absolute, execution.Denied(operation, absolute)
 }
 func (f *files) Commit(ctx context.Context, target value.Target) error {
 	switch target := target.(type) {
 	case value.Server:
-		return eval.ServerRequiresServe()
+		return execution.ServerRequiresServe()
 	case value.Effect:
 		operation := target.Operation().Name()
 		root, relative, absolute, err := f.resolve(f.writes, operation, target.Path().Text())
@@ -134,7 +134,7 @@ func (f *files) Commit(ctx context.Context, target value.Target) error {
 			return err
 		}
 		if err := ctx.Err(); err != nil {
-			return eval.HostFailure(operation, absolute, err)
+			return execution.HostFailure(operation, absolute, err)
 		}
 		var file *os.File
 		var data []byte
@@ -155,7 +155,7 @@ func (f *files) Commit(ctx context.Context, target value.Target) error {
 			return fmt.Errorf("%s %q: %w", operation, absolute, errors.Join(writeErr, closeErr))
 		}
 		if err := ctx.Err(); err != nil {
-			return eval.HostFailure(operation, absolute, err)
+			return execution.HostFailure(operation, absolute, err)
 		}
 		return nil
 	default:

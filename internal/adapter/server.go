@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"net"
 	"net/http"
 	"slices"
@@ -12,8 +13,6 @@ import (
 	"time"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
-	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
@@ -50,7 +49,7 @@ type ServerInfo struct {
 	Address string `json:"address"`
 }
 type Servers interface {
-	eval.Boundary
+	execution.Boundary
 	Start(context.Context) (value.Value, error)
 	Snapshot() []ServerInfo
 	Failures() <-chan error
@@ -62,10 +61,10 @@ type activeServer struct {
 	http *http.Server
 }
 type servers struct {
-	program        ir.Program
+	program        execution.Program
 	files          Files
 	policy         ListenPolicy
-	budget         eval.Budget
+	budget         execution.Budget
 	mu             sync.Mutex
 	active         []activeServer
 	stopping       bool
@@ -82,7 +81,7 @@ type servers struct {
 }
 
 func (*servers) servers() {}
-func NewServers(p ir.Program, files Files, policy ListenPolicy, budget eval.Budget) (Servers, error) {
+func NewServers(p execution.Program, files Files, policy ListenPolicy, budget execution.Budget) (Servers, error) {
 	if p == nil || files == nil || policy == nil || budget == nil {
 		return nil, fmt.Errorf("servers require a checked program, files, policy, and budget")
 	}
@@ -93,13 +92,13 @@ func (s *servers) Start(ctx context.Context) (value.Value, error) {
 	s.mu.Lock()
 	if s.started || s.stopping {
 		s.mu.Unlock()
-		return nil, eval.HostFailure("start HTTP service", "program", errors.New("service already started or stopped"))
+		return nil, execution.HostFailure("start HTTP service", "program", errors.New("service already started or stopped"))
 	}
 	s.started = true
 	s.mu.Unlock()
-	output, err := eval.Run(ctx, s.program, s, s.budget)
+	output, err := s.program.Run(ctx, s, s.budget)
 	if err == nil && len(s.Snapshot()) == 0 {
-		err = eval.NoServer()
+		err = execution.NoServer()
 	}
 	if err == nil {
 		return output, nil
@@ -107,7 +106,7 @@ func (s *servers) Start(ctx context.Context) (value.Value, error) {
 	shutdown, cancel := context.WithTimeout(context.Background(), ShutdownTimeout)
 	defer cancel()
 	if closeErr := s.Shutdown(shutdown); closeErr != nil {
-		return nil, eval.HostFailure("close failed startup", "program", errors.Join(err, closeErr))
+		return nil, execution.HostFailure("close failed startup", "program", errors.Join(err, closeErr))
 	}
 	return nil, err
 }
@@ -126,7 +125,7 @@ func (s *servers) Commit(ctx context.Context, target value.Target) error {
 	port := uint16(n.Uint64())
 	address := net.JoinHostPort(LoopbackHost, strconv.Itoa(int(port)))
 	if !s.policy.Allows(port) {
-		return eval.Denied(catalog.HTTPListen, address)
+		return execution.Denied(catalog.HTTPListen, address)
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -134,7 +133,7 @@ func (s *servers) Commit(ctx context.Context, target value.Target) error {
 		return context.Canceled
 	}
 	if len(s.active) == MaxServers {
-		return eval.Limit("active HTTP servers")
+		return execution.Limit("active HTTP servers")
 	}
 	listener, err := (&net.ListenConfig{}).Listen(ctx, "tcp", address)
 	if err != nil {
@@ -151,7 +150,7 @@ func (s *servers) Commit(ctx context.Context, target value.Target) error {
 	go func() {
 		defer s.workers.Done()
 		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			s.fail(eval.HostFailure(catalog.HTTPListen, address, err))
+			s.fail(execution.HostFailure(catalog.HTTPListen, address, err))
 		}
 	}()
 	return nil
@@ -184,7 +183,7 @@ func (s *servers) connectionState(conn net.Conn, state http.ConnState) {
 }
 func closePendingConnection(conn net.Conn) error {
 	if err := conn.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
-		return eval.HostFailure("close pending HTTP connection", conn.RemoteAddr().String(), err)
+		return execution.HostFailure("close pending HTTP connection", conn.RemoteAddr().String(), err)
 	}
 	return nil
 }

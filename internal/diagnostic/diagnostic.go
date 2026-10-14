@@ -9,6 +9,7 @@ import (
 type Stage string
 
 const (
+	Build      Stage = "build"
 	CLI        Stage = "cli"
 	Inspection Stage = "inspect"
 	Source     Stage = "source"
@@ -22,6 +23,13 @@ const (
 type Code string
 
 const (
+	BuildTarget         Code = "build.unsupported-target"
+	BuildOutput         Code = "build.output"
+	BuildToolchain      Code = "build.toolchain"
+	BuildGenerate       Code = "build.generation"
+	BuildFailed         Code = "build.failed"
+	BuildLimit          Code = "build.limit"
+	BuildCancelled      Code = "build.cancelled"
 	RuntimeUnhandled    Code = "runtime.unhandled-error"
 	RuntimeHost         Code = "runtime.host-failure"
 	RuntimeLimit        Code = "runtime.limit"

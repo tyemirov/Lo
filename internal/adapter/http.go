@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"io"
 	"net/http"
 	"slices"
@@ -11,7 +12,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
@@ -28,7 +28,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	defer func() {
 		if p := recover(); p != nil {
 			if p != http.ErrAbortHandler {
-				s.fail(eval.HostFailure(catalog.HTTPRequest, r.URL.Path, fmt.Errorf("runtime invariant: %v", p)))
+				s.fail(execution.HostFailure(catalog.HTTPRequest, r.URL.Path, fmt.Errorf("runtime invariant: %v", p)))
 			}
 			panic(http.ErrAbortHandler)
 		}
@@ -42,7 +42,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 		ctx, stop = context.WithTimeout(s.requestContext, IOTimeout)
 		defer stop()
 	}
-	invocation, err := eval.NewInvocation(ctx, s.program, s, s.budget)
+	invocation, err := s.program.NewInvocation(ctx, s, s.budget)
 	if err != nil {
 		s.abort(err)
 	}
@@ -50,7 +50,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	if cause == nil {
 		output, err = invocation.Invoke(target.Handler(), []value.Value{request})
 		if err != nil {
-			var failure eval.Failure
+			var failure execution.Failure
 			if errors.As(err, &failure) {
 				cause = failure.Value()
 			} else {
@@ -76,7 +76,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 		var invalid value.Error
 		response, invalid = responseValue(output)
 		if invalid != nil {
-			s.abort(eval.HostFailure(catalog.HTTPRespond, "onError", fmt.Errorf("%s: %s", invalid.Kind(), invalid.Message())))
+			s.abort(execution.HostFailure(catalog.HTTPRespond, "onError", fmt.Errorf("%s: %s", invalid.Kind(), invalid.Message())))
 		}
 	}
 	for name, v := range response.headers {
@@ -85,7 +85,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	w.WriteHeader(response.status)
 	if r.Method != http.MethodHead && len(response.body) > 0 {
 		if _, err := w.Write(response.body); err != nil {
-			s.requestAbort(r.Context(), eval.HostFailure(catalog.HTTPRespond, r.URL.Path, err))
+			s.requestAbort(r.Context(), execution.HostFailure(catalog.HTTPRespond, r.URL.Path, err))
 		}
 	}
 }

@@ -2,6 +2,7 @@ package check
 
 import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/syntax"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
@@ -35,7 +36,7 @@ func (c *checker) match(e syntax.Match, expected types.Type) (expression, diagno
 	result := expression{}.with(selector)
 	branches := make([]expression, len(cases))
 	heads := make([]expression, len(cases))
-	predicates := make([]ir.FlowID, len(cases))
+	predicates := make([]identity.FlowID, len(cases))
 	var output types.Type
 	for i, arm := range cases {
 		switch a := arm.(type) {
@@ -74,7 +75,7 @@ func (c *checker) match(e syntax.Match, expected types.Type) (expression, diagno
 			if d := c.callback(f, []types.Type{selector.Type()}, types.Bool(), a.Span()); d != nil {
 				return expression{}, d
 			}
-			predicates[i] = ir.FlowID(f.entry.ID())
+			predicates[i] = identity.FlowID(f.entry.ID())
 			result.effects = result.effects.With(f.graph.Effects())
 		case syntax.DefaultCase:
 		default:

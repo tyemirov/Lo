@@ -2,6 +2,7 @@ package check
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"unicode/utf8"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
@@ -119,7 +120,7 @@ func (c *checker) call(name string, args []syntax.Argument, expected types.Type,
 		values[i] = must(ir.ValueArg(pos, v.node))
 		result = result.with(v)
 	}
-	result.node = must(ir.NewFlowCall(f.signature.Output(), ir.FlowID(f.entry.ID()), values, span))
+	result.node = must(ir.NewFlowCall(f.signature.Output(), identity.FlowID(f.entry.ID()), values, span))
 	return result, nil
 }
 func (c *checker) builtin(op catalog.Operation, args []syntax.Argument, expected types.Type, span source.Span) (expression, diagnostic.Diagnostic) {
@@ -306,9 +307,9 @@ func (c *checker) builtin(op catalog.Operation, args []syntax.Argument, expected
 			case 0:
 				nodes[i] = must(ir.ValueArg(0, values[0].node))
 			case 1:
-				nodes[i] = must(ir.FlowArg(1, ir.FlowID(handler.entry.ID()), bound.byPosition[1].Span))
+				nodes[i] = must(ir.FlowArg(1, identity.FlowID(handler.entry.ID()), bound.byPosition[1].Span))
 			case 2:
-				nodes[i] = must(ir.FlowArg(2, ir.FlowID(onError.entry.ID()), bound.byPosition[2].Span))
+				nodes[i] = must(ir.FlowArg(2, identity.FlowID(onError.entry.ID()), bound.byPosition[2].Span))
 			}
 		}
 		return builtinResult(op, types.Server(), nodes, nil, span, values[0]), nil

@@ -2,6 +2,7 @@ package ir
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"slices"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
@@ -9,7 +10,6 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
-type FlowID string
 type BindingID string
 type Effects struct {
 	Reads   bool
@@ -112,15 +112,15 @@ func ValueArg(position int, value Expression) (ValueArgument, error) {
 
 type FlowArgument interface {
 	Argument
-	Flow() FlowID
+	Flow() identity.FlowID
 }
 type flowArgument struct {
 	argBase
-	flow FlowID
+	flow identity.FlowID
 }
 
-func (a flowArgument) Flow() FlowID { return a.flow }
-func FlowArg(position int, id FlowID, s source.Span) (FlowArgument, error) {
+func (a flowArgument) Flow() identity.FlowID { return a.flow }
+func FlowArg(position int, id identity.FlowID, s source.Span) (FlowArgument, error) {
 	if id == "" || s == nil || position < 0 {
 		return nil, fmt.Errorf("invalid checked flow argument")
 	}
@@ -156,18 +156,18 @@ func NewBuiltin(t types.Type, op catalog.Operation, args []Argument, labels []st
 
 type FlowCall interface {
 	Expression
-	Flow() FlowID
+	Flow() identity.FlowID
 	Arguments() []ValueArgument
 }
 type flowCall struct {
 	base
-	flow FlowID
+	flow identity.FlowID
 	args []ValueArgument
 }
 
-func (c *flowCall) Flow() FlowID               { return c.flow }
+func (c *flowCall) Flow() identity.FlowID      { return c.flow }
 func (c *flowCall) Arguments() []ValueArgument { return slices.Clone(c.args) }
-func NewFlowCall(t types.Type, id FlowID, args []ValueArgument, s source.Span) (FlowCall, error) {
+func NewFlowCall(t types.Type, id identity.FlowID, args []ValueArgument, s source.Span) (FlowCall, error) {
 	b, e := newBase(t, s)
 	if e != nil {
 		return nil, e
@@ -296,15 +296,15 @@ func NewExactCase(head, body Expression, s source.Span) (ExactCase, error) {
 
 type PredicateCase interface {
 	Case
-	Flow() FlowID
+	Flow() identity.FlowID
 }
 type predicateCase struct {
 	caseBase
-	flow FlowID
+	flow identity.FlowID
 }
 
-func (c predicateCase) Flow() FlowID { return c.flow }
-func NewPredicateCase(id FlowID, body Expression, s source.Span) (PredicateCase, error) {
+func (c predicateCase) Flow() identity.FlowID { return c.flow }
+func NewPredicateCase(id identity.FlowID, body Expression, s source.Span) (PredicateCase, error) {
 	if id == "" || body == nil || s == nil {
 		return nil, fmt.Errorf("incomplete predicate case")
 	}
@@ -442,37 +442,37 @@ type Parameter struct {
 	Span source.Span
 }
 type Flow interface {
-	ID() FlowID
+	ID() identity.FlowID
 	Name() string
 	Signature() types.Signature
 	Parameters() []Parameter
-	Handler() FlowID
+	Handler() identity.FlowID
 	Body() []Statement
 	Effects() Effects
 	Span() source.Span
 	flow()
 }
 type flow struct {
-	id         FlowID
+	id         identity.FlowID
 	name       string
 	signature  types.Signature
 	parameters []Parameter
-	handler    FlowID
+	handler    identity.FlowID
 	body       []Statement
 	effects    Effects
 	span       source.Span
 }
 
 func (*flow) flow()                        {}
-func (f *flow) ID() FlowID                 { return f.id }
+func (f *flow) ID() identity.FlowID        { return f.id }
 func (f *flow) Name() string               { return f.name }
 func (f *flow) Signature() types.Signature { return f.signature }
 func (f *flow) Parameters() []Parameter    { return slices.Clone(f.parameters) }
-func (f *flow) Handler() FlowID            { return f.handler }
+func (f *flow) Handler() identity.FlowID   { return f.handler }
 func (f *flow) Body() []Statement          { return slices.Clone(f.body) }
 func (f *flow) Effects() Effects           { return f.effects }
 func (f *flow) Span() source.Span          { return f.span }
-func NewFlow(id FlowID, name string, sig types.Signature, params []Parameter, handler FlowID, body []Statement, effects Effects, s source.Span) (Flow, error) {
+func NewFlow(id identity.FlowID, name string, sig types.Signature, params []Parameter, handler identity.FlowID, body []Statement, effects Effects, s source.Span) (Flow, error) {
 	if id == "" || name == "" || sig == nil || len(body) == 0 || s == nil {
 		return nil, fmt.Errorf("incomplete checked flow")
 	}
@@ -525,7 +525,7 @@ func NewProgram(src source.File, body []Statement, flows []Flow) (Program, error
 	if err := validBody(body); err != nil {
 		return nil, err
 	}
-	seen := map[FlowID]bool{}
+	seen := map[identity.FlowID]bool{}
 	for _, f := range flows {
 		if f == nil || seen[f.ID()] {
 			return nil, fmt.Errorf("invalid checked flow table")
