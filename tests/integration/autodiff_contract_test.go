@@ -11,6 +11,61 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
 )
 
+func TestAutodiffFallibleContext(t *testing.T) {
+	for _, tc := range []struct {
+		name, helper, contextType, outputType, body, argument, value, gradient string
+	}{
+		{"unused", "", "Int!", "Tensor<FP32>", `return p.x`, `Error.new("Context.Unused","unused",Record.new())`, "2", "1"},
+		{"helper", `flow Helper(c: Int!, x: Tensor<FP32>) -> Tensor<FP32> { return x }`, "Int!", "Tensor<FP32>", `return Helper(c,p.x)`, `Error.new("Context.Unused","unused",Record.new())`, "2", "1"},
+		{"stored", "", "Int!", "Tensor<FP32>", `stored=List.new(c); return p.x`, `Error.new("Context.Unused","unused",Record.new())`, "2", "1"},
+		{"record-field", "", "Record{c: Int!}", "Tensor<FP32>", `stored=List.new(c.c); return p.x`, `Record.new(c:Error.new("Context.Unused","unused",Record.new()))`, "2", "1"},
+		{"success", "", "Int!", "Tensor<FP32>!", `used=c; return p.x`, `2`, "2", "1"},
+		{"tensor-unused", "", "Tensor<FP32>!", "Tensor<FP32>", `return p.x`, `Error.new("Context.Unused","unused",Record.new())`, "2", "1"},
+		{"tensor-returned", "", "Tensor<FP32>!", "Tensor<FP32>!", `return c`, `x`, "2", "0"},
+		{"tensor-helper", `flow Helper(c: Tensor<FP32>!, x: Tensor<FP32>) -> Tensor<FP32>! { return Tensor.mul(c,x) }`, "Tensor<FP32>!", "Tensor<FP32>!", `return Helper(c,p.x)`, `x`, "4", "2"},
+		{"target-success", `flow Helper(x: Tensor<FP32>!) -> Tensor<FP32>! { return Tensor.mul(x,x) }`, "Int!", "Tensor<FP32>!", `return Helper(p.x)`, `Error.new("Context.Unused","unused",Record.new())`, "4", "4"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, result := range []struct{ expression, want string }{
+				{`return Loss(%s,p)`, tc.value},
+				{`r=Autodiff.grad(p,%s,Loss); return r.value`, tc.value},
+				{`r=Autodiff.grad(p,%s,Loss); return r.gradients.x`, tc.gradient},
+			} {
+				source := fmt.Sprintf(`%s
+flow Loss(c: %s, p: Record{x: Tensor<FP32>}) -> %s { %s }
+flow Run() -> Tensor<FP32>! {
+ x=Tensor.new(List.new(2.0),List.new()); p=Record.new(x:x)
+ %s
+}; return Run()`, tc.helper, tc.contextType, tc.outputType, tc.body, fmt.Sprintf(result.expression, tc.argument))
+				tensorResult(t, source, []string{}, []string{result.want})
+			}
+		})
+	}
+}
+
+func TestAutodiffFallibleContextPropagation(t *testing.T) {
+	for _, tc := range []struct{ name, helper, contextType, body string }{
+		{"binding", "", "Int!", `used=c; return p.x`},
+		{"return", "", "Tensor<FP32>!", `return c`},
+		{"helper-return", `flow Helper(c: Tensor<FP32>!) -> Tensor<FP32>! { return c }`, "Tensor<FP32>!", `return Helper(c)`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, expression := range []string{`return Loss(Error.new("Context.Used","used",Record.new()),p)`, `r=Autodiff.grad(p,Error.new("Context.Used","used",Record.new()),Loss); return r.value`} {
+				source := fmt.Sprintf(`%s
+flow Loss(c: %s, p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { %s }
+flow Run() -> Tensor<FP32>! { x=Tensor.new(List.new(2.0),List.new()); p=Record.new(x:x); %s }; return Run()`, tc.helper, tc.contextType, tc.body, expression)
+				got := run(t, "run", sourceFile(t, source), "--format", "json")
+				if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"Context.Used"`) || !strings.Contains(got.stderr, `"value":"Loss"`) {
+					t.Fatalf("context propagation: %+v", got)
+				}
+				if tc.helper != "" && !strings.Contains(got.stderr, `"value":"Helper"`) {
+					t.Fatalf("helper context propagation: %+v", got)
+				}
+			}
+		})
+	}
+}
+
 func TestAutodiffInspection(t *testing.T) {
 	const source = `flow Square(x: Tensor<FP32>) -> Tensor<FP32>! { return Tensor.mul(x,x) }
 flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { a=Square(p.x); b=Square(p.x); return Tensor.add(a,b) }
