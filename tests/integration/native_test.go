@@ -251,6 +251,47 @@ func TestNativeLargeArguments(t *testing.T) {
 	}
 }
 
+func TestNativeLargeCallbackContexts(t *testing.T) {
+	for _, count := range []int{62, 63, 64, 127, 128} {
+		t.Run(strconv.Itoa(count), func(t *testing.T) {
+			parameters := make([]string, count)
+			arguments := make([]string, count)
+			terms := make([]string, count)
+			for i := range parameters {
+				parameters[i] = fmt.Sprintf("context%d: Int", i)
+				arguments[i] = fmt.Sprintf("Math.add(seed, %d)", i+1)
+				terms[i] = fmt.Sprintf("Math.mul(context%d, %d)", i, i+1)
+			}
+			text := fmt.Sprintf(`flow Add(%s, item: Int) -> Int { return Math.sum(List.new(%s, item)) }; seed = 0; return Math.sum(List.map(List.new(1, 2), %s, Add))`, strings.Join(parameters, ","), strings.Join(terms, ","), strings.Join(arguments, ","))
+			source := sourceFile(t, text)
+			checked := runExecutable(t, binary, "check", source, "--format", "json")
+			if checked.status != 0 || checked.stderr != "" {
+				t.Fatalf("check callback contexts: %+v", checked)
+			}
+			want := strconv.Itoa(count*(count+1)*(2*count+1)/3+3) + "\n"
+			expected := runExecutable(t, binary, "run", source)
+			if expected.status != 0 || expected.stdout != want || expected.stderr != "" {
+				t.Fatalf("interpreter callback result: %+v, want %q", expected, want)
+			}
+			artifact, built := buildForTest(t, source)
+			if built.status != 0 {
+				t.Fatalf("build callback contexts: %+v", built)
+			}
+			actual := runExecutable(t, artifact, "run")
+			if actual != expected {
+				t.Fatalf("callback result: native %+v interpreter %+v", actual, expected)
+			}
+			for _, steps := range []string{"1", "100", "500", "1000", "100000"} {
+				expected := runExecutable(t, binary, "run", source, "--max-steps", steps, "--format", "json")
+				actual := runExecutable(t, artifact, "run", "--max-steps", steps, "--format", "json")
+				if actual != expected {
+					t.Fatalf("budget %s: native %+v interpreter %+v", steps, actual, expected)
+				}
+			}
+		})
+	}
+}
+
 func TestNativeRemovedSourceDiagnostics(t *testing.T) {
 	source := sourceFile(t, `flow F(x: Int) -> Int! { return Math.div(7,x) }; return F(0)`)
 	artifact, built := buildForTest(t, source)
