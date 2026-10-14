@@ -342,6 +342,12 @@ The composite types are:
 * Range<T>
 * Tensor<FP32>
 * Device
+* Parameters<R>
+* Gradients<R>
+* Optimizer.SGD.Config
+* Optimizer.AdamW.Config
+* Optimizer.SGD.State<R>
+* Optimizer.AdamW.State<R>
 * Error
 
 Error is a built-in nominal composite type with required fields. It is not structurally interchangeable with Record.
@@ -360,6 +366,8 @@ records, maps, lists, ranges, Error, and boundary types are not comparable
 except through explicit comparison processors.
 Float comparison processors do not make Float a valid map key or range endpoint.
 Tensor<FP32> and Device have no equality or ordering operations.
+Parameters, gradients, optimizer configs, and optimizer states also have no equality or ordering operations.
+Their `R` argument requires a nonempty exact record of `Tensor<FP32>` fields.
 
 6.4 Boundary Types
 
@@ -1422,6 +1430,7 @@ The verifier rejects float literals outside that finite representation.
 `Float.new` preserves its Float input without implicit integer conversion.
 `Tensor.new` converts each Float input to FP32 explicitly.
 Section 24.2 defines its shape and element-count boundaries.
+Sections 24.6 and 24.7 define Parameter schemas, gradient boundaries, and validated optimizer configs.
 
 Fixed signatures accept positional arguments, named arguments, or a positional prefix followed by named arguments.
 A positional argument cannot follow a named argument.
@@ -1656,9 +1665,9 @@ The compiler design specifies request limits, cancellation, startup, and shutdow
 
 24. Numeric and CPU Tensor Extension
 
-F002, F003, and F004 implement this extension through the reference interpreter.
+F002 through F007 implement this extension through the reference interpreter.
 All operations in this section are pure.
-Native executable generation, autodiff, optimizers, and device transfers have separate implementation issues.
+Native executable generation and device transfers have separate implementation issues.
 
 24.1 Binary64 Arithmetic
 
@@ -1800,3 +1809,168 @@ The fields are `tensor_type: String`, `dtype: String`, `shape: List<Int>`, and `
 The same transformation applies inside lists, maps, records, and fallible values.
 These records retain no tensor storage.
 Public tensor results contain complete row-major data under the compiler design serialization contract.
+
+24.5 Reverse-mode Autodiff
+
+`Autodiff.grad(targets, context..., Loss)` returns `Record{value: Tensor<FP32>, gradients: R}!`.
+`R` is a nonempty exact record whose fields all have type `Tensor<FP32>`.
+`Loss` is a named flow with signature `(context..., R) -> Tensor<FP32>!`.
+A total loss flow with the same successful output type is also valid.
+Arguments are positional.
+The loss receives context first and the selected record last.
+
+The loss must return a rank-zero tensor.
+A known positive rank produces `check.autodiff-loss` before execution.
+An unknown positive rank produces `Autodiff.InvalidLoss` before reverse evaluation.
+Context values are constants for differentiation, even when they share storage with selected fields.
+Each selected field has an independent gradient accumulator.
+Disconnected fields receive positive-zero tensors with the original shape.
+
+The loss graph permits these source constructs:
+
+- Tensor operations in the VJP table below and tensor metadata operations.
+- Literals, record construction, record projection, `List.new`, and `Int.new`.
+- Total integer `Math` operations.
+- Calls to named helpers within this same subset.
+
+The checker rejects unsupported operations with `check.autodiff-unsupported` and the originating source span.
+Restrictions apply to all eager bindings and all indirect calls.
+Boundary reads, commits, tensor construction, host numeric observation, and device transfers are unsupported.
+Match branches, list callbacks, self-handling flows, nested gradients, Float arithmetic, and optimizer operations are unsupported.
+An outer flow can handle the final gradient failure.
+
+| Forward operation | Contribution from output gradient `g` |
+| --- | --- |
+| `add(a,b)` | `g` for each operand. |
+| `sub(a,b)` | `g` for `a`, and `-g` for `b`. |
+| `mul(a,b)` | `g*b` for `a`, and `g*a` for `b`. |
+| `div(a,b)` | `g/b` for `a`, and `-(g/b)*(a/b)` for `b`, in that order. |
+| `sqrt(a)` | `g/(2*sqrt(a))`. |
+| `relu(a)` | `g` where `a > 0`, otherwise positive zero. |
+| `matmul(A,B)` | `matmul(g,transpose(B))` and `matmul(transpose(A),g)`. |
+| `broadcast(a)` | Sum across repeated and added dimensions, then restore the input shape. |
+| `reshape(a)` | Restore the input shape. |
+| `transpose(a,axes)` | Apply the inverse permutation. |
+| `sum(a,axes)` | Insert size-one dimensions, then broadcast to the input shape. |
+| `mean(a,axes)` | Divide by the reduced count, then apply the sum rule. |
+
+Binary elementwise rules reduce broadcast contributions to each operand shape.
+ReLU has a zero subgradient at zero.
+An active square-root input equal to zero produces `Autodiff.UndefinedDerivative`.
+An unused derivative path does not produce this error.
+Forward operations on unused bindings still execute and can fail.
+
+The reverse pass uses reverse stable forward order.
+Operand contributions use increasing operand-index order.
+Each dependency edge contributes once, including both edges of `Tensor.mul(x,x)`.
+Each selected accumulator starts at positive zero.
+All generated arithmetic uses the FP32 rules in section 24.3.
+Generated results and primitive work receive the resource charges in section 24.4.
+
+The derivative plan permits at most 100,000 expression visits, 100,000 nodes, and 256 active helper invocations.
+An exceeded compiler bound produces `check.autodiff-limit`.
+Saved tensor storage has a 32 MiB tape limit.
+Shared views count their storage once.
+The existing 64 MiB cumulative value limit also applies.
+The tape belongs to one gradient call and becomes unreachable after success, failure, or cancellation.
+No failure publishes a partial loss or gradient record.
+
+24.6 Parameters and Gradient Lifecycle
+
+`R` has the exact tensor record contract from section 24.5.
+Each field name identifies one Parameter within that record schema.
+Field names use lexicographic order for schema checks and diagnostics.
+Two fields remain separate Parameters when their values or private storage are equal.
+Repeated use of one field accumulates contributions into that field's gradient.
+
+| Signature | Contract |
+| --- | --- |
+| `Parameters.new(values: R) -> Parameters<R>!` | Construct immutable Parameters. |
+| `Parameters.values(parameters: Parameters<R>) -> R` | Return the exact tensor record. |
+| `Gradients.new(parameters: Parameters<R>, values: R) -> Gradients<R>!` | Validate the gradient schema. |
+| `Gradients.values(gradients: Gradients<R>) -> R` | Return the exact tensor record. |
+| `Gradients.zero(parameters: Parameters<R>) -> Gradients<R>!` | Construct positive-zero gradients. |
+| `Gradients.add(left: Gradients<R>, right: Gradients<R>) -> Gradients<R>!` | Add matching fields in FP32. |
+| `Gradients.scale(gradients: Gradients<R>, factor: Float) -> Gradients<R>!` | Convert the factor to FP32 once, then multiply each field. |
+| `Autodiff.stop(value: Tensor<FP32>) -> Tensor<FP32>` | Preserve the value and remove its derivative path. |
+
+Constructors require a nonempty record with exact keys and FP32 tensor fields.
+The current CPU contract gives each field the same device location.
+Gradient construction and addition validate each shape before numeric work.
+A metadata conflict produces `Gradient.SchemaMismatch`.
+The checker rejects missing keys, additional keys, duplicate keys, and incompatible field types.
+FP32 scale conversion and arithmetic retain the numeric failures from section 24.1.
+
+Reset means construction of a new `Gradients.zero` value.
+Earlier Parameters and gradients remain unchanged.
+Named flows and `List.fold` carry these values explicitly.
+There is no hidden Parameter registry or mutable gradient accumulator.
+
+For a mean loss, multiply each microbatch gradient by its example count divided by the complete batch count.
+Add the scaled gradients in microbatch source order.
+An empty complete batch is invalid.
+The complete-batch comparison uses absolute tolerance `1e-6` and relative tolerance `1e-5`.
+Different reduction groups need not produce identical bits.
+
+Parameters and gradients have 16 bytes of wrapper weight plus their exact record weight.
+Their JSON `value` is an object of named, typed tensors.
+Error snapshots replace their tensor fields with the metadata records in section 24.4.
+
+24.7 Pure Optimizer Transitions
+
+| Signature | Contract |
+| --- | --- |
+| `Optimizer.SGD.Config.new(learning_rate: Float) -> Optimizer.SGD.Config!` | Validate the FP32 rate. |
+| `Optimizer.AdamW.Config.new(learning_rate: Float, beta1: Float, beta2: Float, epsilon: Float, weight_decay: Float) -> Optimizer.AdamW.Config!` | Validate all FP32 config fields. |
+| `Optimizer.SGD.State.new(parameters: Parameters<R>, config: Optimizer.SGD.Config) -> Optimizer.SGD.State<R>!` | Construct state at step zero. |
+| `Optimizer.AdamW.State.new(parameters: Parameters<R>, config: Optimizer.AdamW.Config) -> Optimizer.AdamW.State<R>!` | Construct state with zero moments and unit beta powers. |
+| `Optimizer.SGD.step(state: Optimizer.SGD.State<R>, gradients: Gradients<R>) -> Optimizer.SGD.State<R>!` | Return the next SGD state. |
+| `Optimizer.AdamW.step(state: Optimizer.AdamW.State<R>, gradients: Gradients<R>) -> Optimizer.AdamW.State<R>!` | Return the next AdamW state. |
+
+Config constructors convert each field to FP32 once, then validate the converted values.
+The learning rate and epsilon must be positive.
+Each beta must be in `[0,1)`.
+Weight decay must be nonnegative.
+The product of learning rate and weight decay must be finite FP32.
+Invalid config produces `Optimizer.InvalidConfig`, including overflow, underflow to zero, and betas rounded to one.
+
+State exposes only `parameters: Parameters<R>` and `step: Int` through source projection.
+SGD stores its immutable config.
+AdamW also stores first and second moment records and rank-zero beta-power tensors.
+JSON contains the complete state, including these private fields.
+Config fields use typed Float values equal to the validated FP32 values.
+
+SGD applies `p_next = sub(p, mul(rate, g))` to each field.
+It has no momentum or weight decay.
+AdamW uses this arithmetic order for each field:
+
+```text
+m_next = add(mul(beta1, m), mul(sub(1, beta1), g))
+v_next = add(mul(beta2, v), mul(sub(1, beta2), mul(g, g)))
+b1power_next = mul(b1power, beta1)
+b2power_next = mul(b2power, beta2)
+m_hat = div(m_next, sub(1, b1power_next))
+v_hat = div(v_next, sub(1, b2power_next))
+decayed = sub(p, mul(mul(rate, weight_decay), p))
+update = mul(rate, div(m_hat, add(sqrt(v_hat), epsilon)))
+p_next = sub(decayed, update)
+step_next = step + 1
+```
+
+Beta powers advance once per step and apply to every field.
+Every arithmetic operation rounds to FP32.
+Epsilon is outside the square root.
+Weight decay applies to all fields and is separate from moment calculations.
+The optimizer square root is ordinary arithmetic and permits zero moments.
+
+Each step validates the complete gradient schema before numeric work.
+The next state retains the same keys and shapes.
+Earlier Parameters, gradients, and states remain unchanged after success or failure.
+No failure publishes a partial state or permits a dependent commit.
+The step count increases only in the returned successful state.
+`List.fold` supplies each update with the previous returned state.
+
+Live AdamW moments and beta powers have a 32 MiB limit.
+Generated primitives receive the work and value charges in section 24.4.
+Config and state weights add 16 bytes to their complete exact record weights.
+Diagnostic snapshots retain metadata for nested tensors and optimizer fields.
