@@ -67,6 +67,7 @@ def calculate(round_value: Callable[[float], float]) -> dict[str, object]:
         if first_parameters is None:
             first_parameters = parameters[:]
     final_loss, _, final_predictions = evaluate(parameters)
+    final_parameters = parameters[:]
     assert final_loss < 0.001
     assert abs(first_parameters[6] - 0.33125) < 1e-7
     assert abs(first_parameters[7] - 0.35625) < 1e-7
@@ -110,6 +111,7 @@ def calculate(round_value: Callable[[float], float]) -> dict[str, object]:
         "initial_gradients_w1_b1_w2_b2": initial_gradients,
         "first_parameters_w1_b1_w2_b2": first_parameters,
         "final_loss": final_loss,
+        "final_parameters_w1_b1_w2_b2": final_parameters,
         "final_predictions": final_predictions,
         "finite_difference_max_error": max(differences),
         "adamw_steps": adamw_steps,

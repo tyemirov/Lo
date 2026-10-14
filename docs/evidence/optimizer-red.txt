@@ -1,0 +1,14 @@
+go test ./tests/integration -run TestOptimizer -count=1
+--- FAIL: TestOptimizerSGDTransitions (0.15s)
+    optimizer_test.go:29: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type Optimizer.SGD.State","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestOptimizerSGDTransitions2776227408/001/2651559338.lo","start":{"offset":26,"line":1,"column":27},"end":{"offset":70,"line":1,"column":71}}}]}
+         status:1}
+--- FAIL: TestOptimizerAdamWTransitions (0.01s)
+    optimizer_test.go:48: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type Optimizer.AdamW.State","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestOptimizerAdamWTransitions4259217604/001/2142066339.lo","start":{"offset":26,"line":1,"column":27},"end":{"offset":72,"line":1,"column":73}}}]}
+         status:1}
+--- FAIL: TestOptimizerInvalidConfigurations (0.01s)
+    optimizer_test.go:77: invalid optimizer config: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Optimizer.SGD.Config.new","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestOptimizerInvalidConfigurations1786370166/001/473138356.lo","start":{"offset":7,"line":1,"column":8},"end":{"offset":36,"line":1,"column":37}}}]}
+         status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.713s
+FAIL
+make: *** [test-integration] Error 1

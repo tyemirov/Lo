@@ -1,0 +1,74 @@
+F005-F007 completion checkpoint: October 13, 2026
+Platform: macOS arm64; Go 1.27.1.
+
+go fmt ./...
+tests/integration/training_test.go
+go vet ./...
+go test ./... 
+?   	github.com/MarcoPoloResearchLab/Lo/cmd/lo	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/adapter	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/autodiff	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/catalog	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/check	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/compiler	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/diagnostic	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/eval	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/inspect	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/ir	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/resolve	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/source	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/syntax	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensor	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/types	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/value	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/benchmark	0.177s [no tests to run]
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	10.562s
+go build -o bin/lo ./cmd/lo
+
+Public acceptance evidence:
+- All 100 catalog operations have check and runtime assertions.
+- The complete integration suite includes all 83 conformance fixtures.
+- TestAutodiffAnalyticalAndFiniteDifferences covers every arithmetic VJP.
+  Fixed central step: 1e-3. Comparison: atol 2e-3, rtol 2e-2.
+  Analytical comparison: atol 1e-6, rtol 1e-5.
+- TestAutodiffSharedEdgesAndContext covers repeated helpers, shared edges,
+  disconnected fields, explicit context, and unchanged selected values.
+- TestAutodiffInspection verifies invocation identities, edges, and source spans.
+- Loss validation and transitive rejection tests cover rank, target types,
+  branches, callbacks, reads, commits, nested gradients, and self-handling flows.
+- Forward and reverse failures retain context and prevent later commits.
+- Work, cancellation, expansion, and diagnostic-context budget tests passed.
+- Parameter lifecycle tests cover exact keys, shape failures, reset, stop-gradient,
+  tied use, separate equal values, and immutable previous values.
+- Weighted microbatches through List.fold match the complete batch at
+  atol 1e-6 and rtol 1e-5.
+- SGD and AdamW tests match independent multi-step results and moments.
+  They cover invalid rounded config, zero gradients, weight decay, step count,
+  private fields, schema failures, blocked commits, and primitive charges.
+- TestCPUTrainingExample passes parse, check, inspect, and repeated CLI execution.
+  Initial loss: 2.46875. Final loss: 0.00013215476064942777.
+  All nine final Parameter values match the independent FP32 reference.
+- Python training-reference.py passed binary64 and FP32 arithmetic assertions.
+  Full independent results are in training-reference-results.json.
+
+Benchmark evidence:
+- make benchmark-training passed with ten samples per phase and workload.
+- make benchmark-training-cli passed with two warmups and ten measured runs.
+- make benchmark-training-profile passed and recorded allocation profiles.
+- Source and result hashes, environment, and samples are recorded in
+  training-benchmark-cli.json and training-benchmark-go.txt.
+- The CPU profile attributes most samples to runtime.kevent. It does not
+  establish a useful CPU cost breakdown or a predicted native speedup.
+- No native Lo artifact, Linux execution, CUDA execution, or I001 completion
+  is claimed by this checkpoint.
+
+Documentation checks:
+- Official ASD-STE100 Issue 9 reference verified at SHA-256
+  d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431.
+- Producing-agent Part 1 and Part 2 review covers changed prose only.
+- Mechanical check: no new findings; 46 unchanged findings.
+- Governor check: eight existing managed-file differences, unchanged in scope.
+  Paths: .gitignore, AGENTS.md, .mprlab/PLANNING.md, .mprlab/POLICY.md,
+  .mprlab/issues-md-format.md, and missing API, Go, and Python guides.
+- git diff --check passed.

@@ -1,0 +1,72 @@
+{
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "architecture": "arm64",
+  "processor": "Apple M5 Pro",
+  "go_version": "go version go1.27.1 darwin/arm64",
+  "gomaxprocs": 1,
+  "binary_sha256": "3a5eab537dcbe9afe73c99e68b100b869c1482c47a07f15ada9873141ef8a940",
+  "binary_bytes": 11052690,
+  "clock": "perf_counter_ns",
+  "cache_policy": "two warmup processes per workload; OS caches remain warm",
+  "concurrency": 1,
+  "workloads": [
+    {
+      "name": "MVP200",
+      "source": "examples/training_cpu.lo",
+      "source_sha256": "86a8899580f196ebf822efd80f08dca717017104bbd4e45ce65a7deabc344b85",
+      "updates": 200,
+      "max_steps": 10000000,
+      "warmup_runs": 2,
+      "samples_ms": [
+        15.261583,
+        12.858333,
+        11.657542,
+        10.500333,
+        10.263083,
+        10.708166,
+        10.417292,
+        10.547292,
+        10.59575,
+        11.531541
+      ],
+      "median_ms": 10.651958,
+      "median_bootstrap_95_percent_ms": [
+        10.482292000000001,
+        11.7832495
+      ],
+      "p95_ms": 15.261583,
+      "result_sha256": "7d1198a7b552a7d4d4dcffba19ac249f81a4543554ade457dbb0fc7110a6d272",
+      "initial_loss": 2.46875,
+      "final_loss": 0.00013215476064942777
+    },
+    {
+      "name": "Dense20",
+      "source": "tests/benchmark/testdata/training_dense.lo",
+      "source_sha256": "0a19fa7d15fe3a6e8c1fe71dd47ed890a9130468e830244d81a8939c9f464fb0",
+      "updates": 20,
+      "max_steps": 10000000,
+      "warmup_runs": 2,
+      "samples_ms": [
+        10.31975,
+        10.321708,
+        10.113167,
+        10.216833,
+        11.05875,
+        11.323291,
+        11.311042,
+        11.246792,
+        11.242333,
+        11.169834
+      ],
+      "median_ms": 11.114291999999999,
+      "median_bootstrap_95_percent_ms": [
+        10.31975,
+        11.246792
+      ],
+      "p95_ms": 11.323291,
+      "result_sha256": "1b412fb76acd44a783dd2fc9b024198216030d6b98a372784e17cf11dc934fb5",
+      "initial_loss": 0.015582273714244366,
+      "final_loss": 0.015550335869193077
+    }
+  ]
+}
