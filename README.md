@@ -10,7 +10,7 @@ Lo is not a replacement for Go, Python, or shell. It is an execution contract be
 
 ## Status
 
-Lo has a **v0.3 core with implemented Float and CPU tensor extensions**.
+Lo implements the **v0.3 core, native compilation, and CPU training**.
 
 The reference implementation has a Go frontend, verifier, checked execution graph, and static inspector.
 The parser and verifier accept all six specification examples.
@@ -37,7 +37,8 @@ The [forward example](examples/tensor_forward.lo) executes a two-layer ReLU netw
 F005, F006, and F007 add reverse-mode autodiff, immutable Parameters, gradient operations, SGD, and AdamW.
 The [CPU training example](examples/training_cpu.lo) completes 200 SGD updates and reduces loss from `2.46875` to `0.00013215476`.
 F008 through F011 and I001 retain device execution, later precision work, and complete training acceptance.
-The [training benchmark](docs/training-benchmark.md) records interpreter costs and the implications for F001.
+The [training benchmark](docs/training-benchmark.md) records the interpreter baseline before F001.
+The [native acceptance report](docs/native-compilation-results.md) compares the two execution backends, including CPU training.
 
 This repository is public early so the design can be evaluated as an AI-agent execution language. It is not production-ready.
 
@@ -347,9 +348,13 @@ lo/
 
 ## Implementation Roadmap
 
+Milestones 1 through 5 are implemented.
+The sections below record their scope.
+F008 through F011 and I001 own the remaining device, precision, and training acceptance work.
+
 ### Milestone 1: Verifier MVP
 
-Build a verifier that can:
+The verifier can:
 
 - parse `.lo` files
 - validate the grammar
@@ -361,7 +366,7 @@ Build a verifier that can:
 - report possible side effects
 - report possible `Error.kind` values
 
-Target command:
+Command:
 
 ```bash
 lo check examples/list_sum.lo
@@ -369,15 +374,15 @@ lo check examples/list_sum.lo
 
 ### Milestone 2: Inspection Report
 
-Build static inspection for agent-generated programs.
+`lo inspect` provides static inspection for agent-generated programs.
 
-Target command:
+Command:
 
 ```bash
 lo inspect examples/agent_file_workflow.lo
 ```
 
-The inspection report should expose:
+The inspection report includes:
 
 - pure graph nodes
 - fallible graph nodes
@@ -389,7 +394,7 @@ The inspection report should expose:
 
 ### Milestone 3: Minimal Interpreter
 
-Build an interpreter for pure expressions and file workflows.
+The interpreter executes pure expressions and File workflows.
 
 Initial support:
 
@@ -408,7 +413,7 @@ Initial support:
 - `T!` bubbling
 - self-handling flows
 
-Target command:
+Command:
 
 ```bash
 lo run examples/count_letter.lo
@@ -416,7 +421,7 @@ lo run examples/count_letter.lo
 
 ### Milestone 4: Commit and HTTP
 
-Add side-effect activation and HTTP serving.
+The runtime implements commit activation and HTTP services.
 
 Initial support:
 
@@ -429,7 +434,7 @@ Initial support:
 - `HTTP.Response`
 - adapter-level `onError`
 
-Target command:
+Command:
 
 ```bash
 lo serve examples/http_division.lo
