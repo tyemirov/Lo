@@ -3,10 +3,18 @@ export GOTOOLCHAIN := go1.27.1
 TEST_ARGS ?=
 BENCH_COUNT ?= 10
 BENCH_TIME ?= 300ms
+NATIVE_BENCH_WORK ?= _scratch/f001-native/benchmark
+NATIVE_BENCH_LANE ?= all
 
-.PHONY: build fmt lint test test-integration test-conformance benchmark-training benchmark-training-cli benchmark-training-profile ci
+.PHONY: build fmt lint test test-integration test-conformance test-native test-native-race runtime-bundle verify-runtime-bundle benchmark-training benchmark-training-cli benchmark-training-profile benchmark-native-baseline benchmark-native ci
 
-build:
+runtime-bundle:
+	$(GO) run ./tools/runtimebundle
+
+verify-runtime-bundle:
+	$(GO) run ./tools/runtimebundle --check
+
+build: runtime-bundle
 	$(GO) build -o bin/lo ./cmd/lo
 
 fmt:
@@ -15,17 +23,29 @@ fmt:
 lint:
 	$(GO) vet ./...
 
-test:
+test: runtime-bundle
 	$(GO) test ./... $(TEST_ARGS)
 
-test-integration:
+test-integration: runtime-bundle
 	$(GO) test ./tests/integration $(TEST_ARGS)
 
-test-conformance:
+test-native: runtime-bundle
+	LO_TEST_BACKEND=native $(GO) test ./tests/integration $(TEST_ARGS)
+
+test-native-race: runtime-bundle
+	LO_TEST_BACKEND=native LO_TEST_NATIVE_RACE=1 GORACE=atexit_sleep_ms=0 $(GO) test -race ./tests/integration $(TEST_ARGS)
+
+test-conformance: runtime-bundle
 	$(GO) test ./tests/integration -run TestConformance $(TEST_ARGS)
 
 benchmark-training:
 	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkTraining -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME)
+
+benchmark-native-baseline:
+	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkNativeBaseline -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME)
+
+benchmark-native: build
+	GOMAXPROCS=1 python3 scripts/qualify_native.py --binary bin/lo --workdir $(NATIVE_BENCH_WORK) --samples $(BENCH_COUNT) --lane $(NATIVE_BENCH_LANE)
 
 benchmark-training-cli: build
 	GOMAXPROCS=1 python3 scripts/benchmark_training.py --binary bin/lo --samples $(BENCH_COUNT)
@@ -36,4 +56,4 @@ benchmark-training-profile: build
 	$(GO) tool pprof -top -cum -nodecount=30 bin/training-benchmark.test bin/training-cpu.pprof
 	$(GO) tool pprof -sample_index=alloc_space -top -nodecount=30 bin/training-benchmark.test bin/training-alloc.pprof
 
-ci: fmt lint test build
+ci: verify-runtime-bundle fmt lint test test-native build
