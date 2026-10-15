@@ -156,7 +156,7 @@ Empty constructor lists receive their element type from the signature.
 Construction rejects FP32 overflow after conversion.
 
 F003 owns the `Device` descriptor type and its constructor for tensor metadata.
-F008 owns device sessions, grants, allocation boundaries, and transfers.
+F008 implements device sessions, grants, allocation boundaries, and transfers.
 The descriptor alone does not require an active device backend.
 
 The canonical layout is contiguous row-major order.
@@ -833,7 +833,8 @@ The table includes those completed changes and the remaining device contracts.
 
 F001 implements these CPU contracts through generated code and shared runtime operations.
 The generated code implements derivative plans, Parameters, gradients, and optimizer transitions.
-F008 through F011 and I001 retain their device and complete training acceptance scope.
+F008 implements grants, synchronous transfers, and the resource ledger through the [device resource contract](device-resources.md).
+F009, F010, F011, and I001 retain their remaining scope.
 
 ## Implementation and acceptance sequence
 
@@ -902,4 +903,5 @@ The following decisions belong to later scope or implementation evidence.
 
 P001 closes the design task only.
 Each implementation issue closes only after its required evidence passes.
-F008 through F011 and I001 retain the device and complete training acceptance scope.
+F008 implements device resources and explicit transfers.
+F009, F010, F011, and I001 retain device arithmetic, deferred execution, precision, and complete training acceptance.

@@ -1,0 +1,17 @@
+{
+  "entries": [],
+  "issue_format": {
+    "sha256": "adc2ef25b029445f719358cbfda8e6425dd60869a831efb50d6c7142e492c2a2",
+    "url": "https://issues-api.mprlab.com/api/contracts/issue-format"
+  },
+  "issue_tracker": "ISSUES.md",
+  "profiles": [
+    "api",
+    "go",
+    "python"
+  ],
+  "repo": "/Users/tyemirov/Development/Research/Lo",
+  "warnings": [
+    "Root ISSUES.md exists; not creating .mprlab/ISSUES.md to avoid duplicate active trackers."
+  ]
+}

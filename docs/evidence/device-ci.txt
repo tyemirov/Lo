@@ -1,0 +1,41 @@
+go run ./tools/runtimebundle --check
+go fmt ./...
+go vet ./...
+go run ./tools/runtimebundle
+go test ./... 
+?   	github.com/MarcoPoloResearchLab/Lo/cmd/lo	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/adapter	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/autodiff	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/catalog	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/check	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/codegen	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/compiler	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/derivative	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/device	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/diagnostic	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/eval	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/execution	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/identity	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/inspect	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/ir	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/nativebuild	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/resolve	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/runner	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/runtimebundle	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/runtimeops	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/source	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/syntax	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensor	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/types	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/value	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/benchmark	0.160s [no tests to run]
+?   	github.com/MarcoPoloResearchLab/Lo/tests/corpus	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	30.129s
+?   	github.com/MarcoPoloResearchLab/Lo/tools/nativebench	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/tools/nativecache	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/tools/nativecorpus	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/tools/runtimebundle	[no test files]
+LO_TEST_BACKEND=native go test ./tests/integration 
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	369.920s
+go build -o bin/lo ./cmd/lo

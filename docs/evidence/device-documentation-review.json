@@ -1,0 +1,22 @@
+{
+  "scope": "F008 changed prose",
+  "documents": [
+    ".mprlab/TERMINOLOGY.md",
+    "ISSUES.md",
+    "README.md",
+    "docs/compiler-design.md",
+    "docs/device-resources.md",
+    "docs/implementation-audit.md",
+    "docs/native-compilation-plan.md",
+    "docs/training-extension-design.md",
+    "specification.md"
+  ],
+  "reference": "ASD-STE100 Issue 9",
+  "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+  "review": "Changed descriptive prose reviewed against Part 1 and Part 2. Existing source literals preserved.",
+  "changed_findings": [],
+  "unchanged_findings": 45,
+  "new_local_links_checked": 19,
+  "missing_links": [],
+  "governor_check": "passed"
+}
