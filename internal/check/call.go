@@ -71,6 +71,7 @@ func builtinResult(op catalog.Operation, out types.Type, args []ir.Argument, lab
 	if op.Boundary() == catalog.Read {
 		result.effects.Reads = true
 	}
+	result.effects.Devices = result.effects.Devices || catalog.UsesDevice(op.Name())
 	return result
 }
 func boundBuiltin(op catalog.Operation, out types.Type, args arguments, values []expression, span source.Span) expression {

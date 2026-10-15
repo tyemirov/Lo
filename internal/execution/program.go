@@ -2,7 +2,9 @@ package execution
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
@@ -21,8 +23,8 @@ type Handler struct {
 
 // Program is the sealed adapter contract for either execution backend.
 type Program interface {
-	Run(context.Context, Boundary, Budget) (value.Value, error)
-	NewInvocation(context.Context, Boundary, Budget) (Invocation, error)
+	Run(context.Context, Boundary, Budget, device.Config) (value.Value, error)
+	NewInvocation(context.Context, Boundary, Budget, device.Config) (Invocation, error)
 	program()
 }
 type program struct {
@@ -53,11 +55,17 @@ func NewProgram(body func(Session) (value.Value, error), handlers []Handler) (Pr
 	}
 	return &program{body, table}, nil
 }
-func (p *program) Run(ctx context.Context, b Boundary, budget Budget) (value.Value, error) {
-	s, err := NewSession(ctx, b, budget)
+func (p *program) Run(ctx context.Context, b Boundary, budget Budget, config device.Config) (output value.Value, resultErr error) {
+	s, err := NewSession(ctx, b, budget, config)
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if err := s.Resources().Close(); err != nil {
+			output = nil
+			resultErr = HostFailure("close device resources", "program", errors.Join(resultErr, err))
+		}
+	}()
 	v, err := p.body(s)
 	if err != nil {
 		return nil, err
@@ -66,6 +74,7 @@ func (p *program) Run(ctx context.Context, b Boundary, budget Budget) (value.Val
 }
 
 type Invocation interface {
+	Close() error
 	Invoke(identity.FlowID, []value.Value) (value.Value, error)
 	invocation()
 }
@@ -75,8 +84,8 @@ type invocation struct {
 }
 
 func (*invocation) invocation() {}
-func (p *program) NewInvocation(ctx context.Context, b Boundary, budget Budget) (Invocation, error) {
-	s, err := NewSession(ctx, b, budget)
+func (p *program) NewInvocation(ctx context.Context, b Boundary, budget Budget, config device.Config) (Invocation, error) {
+	s, err := NewSession(ctx, b, budget, config)
 	if err != nil {
 		return nil, err
 	}
@@ -98,3 +107,5 @@ func (i *invocation) Invoke(id identity.FlowID, args []value.Value) (value.Value
 	}
 	return Published(v)
 }
+
+func (i *invocation) Close() error { return i.session.Resources().Close() }

@@ -16,7 +16,8 @@ The [native contract](native-compilation-contract.md) records the selected toolc
 The completed [compiler design](compiler-design.md) remains the reference for the existing six stages.
 The [implementation audit](implementation-audit.md) records their acceptance evidence.
 
-The milestone covers all currently supported Lo programs and all 100 built-in operations after F007.
+F001 qualified the 100 built-in operations available after F007.
+F008 adds [device transfers](device-resources.md) to the current compiler and native runtime.
 It includes File workflows and HTTP services.
 The initial targets are `darwin/arm64` and `linux/arm64`, which match the currently qualified platforms.
 Each target requires execution tests on that target.

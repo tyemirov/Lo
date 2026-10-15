@@ -2,6 +2,7 @@ package runtimeops
 
 import (
 	"errors"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"math/big"
 
@@ -11,8 +12,6 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
-
-const MaxOptimizerBytes uint64 = 32 << 20
 
 type optimizerCalculation struct {
 	arithmetic tensorArithmetic
@@ -44,7 +43,25 @@ func (c *optimizerCalculation) sqrt(v tensor.Data) tensor.Data {
 	return x
 }
 
-func (m *machine) optimizerOperation(call Call, args []value.Value) (value.Value, error) {
+func (m *machine) optimizerOperation(call Call, args []value.Value) (output value.Value, resultErr error) {
+	scope := m.Scope()
+	defer func() { scope.Close(output) }()
+	defer func() {
+		if resultErr != nil || output == nil {
+			return
+		}
+		v := output
+		if wrapped, ok := v.(value.Fallible); ok {
+			v, _ = wrapped.Outcome()
+		}
+		if state, ok := v.(value.AdamWState); ok {
+			err := m.Resources().Classify(value.Allocations(state.FirstMoment(), state.SecondMoment(), state.Beta1Power(), state.Beta2Power()), device.OptimizerStorage)
+			if err != nil {
+				output = nil
+				resultErr = execution.BoundaryHostError(err)
+			}
+		}
+	}()
 	name := call.Operation().Name()
 	fail := func(err error) (value.Value, error) {
 		if host := execution.BoundaryHostError(err); host != nil {
@@ -53,6 +70,10 @@ func (m *machine) optimizerOperation(call Call, args []value.Value) (value.Value
 		var f tensor.Fault
 		if errors.As(err, &f) {
 			return OperationFailure(call, args, f.Kind(), f.Error()), nil
+		}
+		var backend device.Fault
+		if errors.As(err, &backend) {
+			return OperationFailure(call, args, backend.Kind(), backend.Error()), nil
 		}
 		return nil, execution.Limit(name + ": " + err.Error())
 	}
@@ -72,14 +93,17 @@ func (m *machine) optimizerOperation(call Call, args []value.Value) (value.Value
 	if name == catalog.SGDStateNew {
 		return Success(call.Type(), must(value.NewSGDState(args[0].(value.TensorBundle), value.Int64(0), args[1].(value.SGDConfig)))), nil
 	}
+	if !value.HostPublishable(args[0]) {
+		return OperationFailure(call, args, device.UnsupportedOperation, "optimizer arithmetic requires the selected device backend"), nil
+	}
 	if name == catalog.AdamWStateNew {
 		p := args[0].(value.TensorBundle)
-		var bytes uint64 = 8
+		var bytes uint64 = 4
 		for _, f := range p.Contents().Fields() {
 			bytes += 8 * f.Value.(value.Tensor).Data().Shape().Count()
 		}
-		if bytes > MaxOptimizerBytes {
-			return nil, execution.Limit("AdamW moment and beta-power bytes")
+		if err := m.Resources().CheckBudget(device.OptimizerStorage, bytes); err != nil {
+			return nil, execution.BoundaryHostError(err)
 		}
 		maths := tensorArithmetic{m}
 		first, second := p.Contents().Fields(), p.Contents().Fields()
@@ -128,6 +152,13 @@ func (m *machine) optimizerOperation(call Call, args []value.Value) (value.Value
 		}
 		p := must(value.NewTensorBundle(state.Parameters().Type().(types.TensorBundle), must(value.NewRecord(fields))))
 		return Success(call.Type(), must(value.NewSGDState(p, step.(value.Integer), state.Config().(value.SGDConfig)))), nil
+	}
+	var additional uint64 = 8
+	for _, f := range fields {
+		additional += 8 * f.Value.(value.Tensor).Data().Shape().Count()
+	}
+	if err := m.Resources().CheckBudget(device.OptimizerStorage, additional); err != nil {
+		return nil, execution.BoundaryHostError(err)
 	}
 	adam := state.(value.AdamWState)
 	config := adam.Config().(value.AdamWConfig)

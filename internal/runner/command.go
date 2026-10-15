@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
@@ -13,24 +14,25 @@ import (
 )
 
 const (
-	BuildCommand    = "build"
-	outputOption    = "--output"
-	targetOption    = "--target"
-	ParseCommand    = "parse"
-	CheckCommand    = "check"
-	InspectCommand  = "inspect"
-	RunCommand      = "run"
-	ServeCommand    = "serve"
-	listenOption    = "--listen"
-	readRootOption  = "--read-root"
-	writeRootOption = "--write-root"
-	maxStepsOption  = "--max-steps"
-	formatOption    = "--format"
-	TextFormat      = "text"
-	JsonFormat      = "json"
-	ExitSuccess     = 0
-	ExitRejected    = 1
-	ExitHost        = 2
+	BuildCommand      = "build"
+	outputOption      = "--output"
+	targetOption      = "--target"
+	ParseCommand      = "parse"
+	CheckCommand      = "check"
+	InspectCommand    = "inspect"
+	RunCommand        = "run"
+	ServeCommand      = "serve"
+	listenOption      = "--listen"
+	readRootOption    = "--read-root"
+	writeRootOption   = "--write-root"
+	allowDeviceOption = "--allow-device"
+	maxStepsOption    = "--max-steps"
+	formatOption      = "--format"
+	TextFormat        = "text"
+	JsonFormat        = "json"
+	ExitSuccess       = 0
+	ExitRejected      = 1
+	ExitHost          = 2
 )
 
 type invocation struct {
@@ -38,18 +40,20 @@ type invocation struct {
 	output, target        string
 	readRoots             []string
 	writeRoots            []string
+	devices               device.Config
 	budget                execution.Budget
 	listenPolicy          adapter.ListenPolicy
 }
 
 func parseArgs(args []string, embedded bool) (invocation, error) {
-	inv := invocation{format: TextFormat, budget: execution.DefaultBudget()}
+	inv := invocation{format: TextFormat, budget: execution.DefaultBudget(), devices: device.DefaultConfig()}
 	if len(args) == 0 {
 		return inv, fmt.Errorf("expected a command: parse, check, inspect, run, or serve")
 	}
 	inv.command = args[0]
 	formatSet := false
 	stepsSet := false
+	deviceSet := false
 	var ports []uint16
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
@@ -71,6 +75,23 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 					return inv, fmt.Errorf("duplicate --target")
 				}
 				inv.target = args[i]
+			}
+			continue
+		}
+
+		if arg == allowDeviceOption {
+			if deviceSet || i+1 == len(args) || inv.command != RunCommand && inv.command != ServeCommand {
+				return inv, fmt.Errorf("--allow-device requires one selector with run or serve")
+			}
+			i++
+			deviceSet = true
+			if args[i] == "" || args[i] == device.CPU {
+				return inv, fmt.Errorf("--allow-device requires a non-CPU selector")
+			}
+			var err error
+			inv.devices, err = device.NewConfig(args[i], device.SoftwareFactory{}, nil)
+			if err != nil {
+				return inv, err
 			}
 			continue
 		}

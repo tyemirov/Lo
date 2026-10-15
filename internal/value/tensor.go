@@ -2,6 +2,7 @@ package value
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"strconv"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/tensor"
@@ -22,40 +23,43 @@ func NewTensor(d tensor.Data) (Tensor, error) {
 	if d == nil {
 		return nil, fmt.Errorf("absent tensor data")
 	}
-	return tensorValue{base{types.Tensor(), d.Shape().Weight()}, d}, nil
+	return tensorValue{base{types.Tensor(), tensor.Weight(d.Shape(), d.Location())}, d}, nil
 }
 func (v tensorValue) MarshalJSON() ([]byte, error) {
+	if v.data.Location() != device.CPU {
+		return nil, fmt.Errorf("device tensor requires explicit CPU transfer")
+	}
 	shape := make([]string, v.data.Shape().Rank())
 	for i, d := range v.data.Shape().Dims() {
 		shape[i] = strconv.FormatInt(d, 10)
 	}
 	elements := make([]string, int(v.data.Shape().Count()))
 	for i := range elements {
-		elements[i] = strconv.FormatFloat(float64(v.data.At(i)), 'g', -1, 32)
+		elements[i] = strconv.FormatFloat(float64(v.data.(tensor.HostData).At(i)), 'g', -1, 32)
 	}
 	return encode(v, struct {
 		Dtype  string   `json:"dtype"`
 		Shape  []string `json:"shape"`
 		Device string   `json:"device"`
 		Values []string `json:"values"`
-	}{tensor.Dtype, shape, tensor.CPU, elements})
+	}{tensor.Dtype, shape, v.data.Location(), elements})
 }
 
 type Device interface {
 	Value
 	Selector() string
 }
-type device struct {
+type deviceValue struct {
 	base
 	selector string
 }
 
-func (v device) Selector() string             { return v.selector }
-func (v device) MarshalJSON() ([]byte, error) { return encode(v, v.selector) }
+func (v deviceValue) Selector() string             { return v.selector }
+func (v deviceValue) MarshalJSON() ([]byte, error) { return encode(v, v.selector) }
 func NewDevice(selector string) (Device, error) {
 	switch selector {
-	case tensor.CPU, tensor.CUDA, tensor.Simulation:
-		return device{newBase(types.Device(), uint64(len(selector))), selector}, nil
+	case device.CPU, device.CUDA, device.Simulation:
+		return deviceValue{newBase(types.Device(), uint64(len(selector))), selector}, nil
 	default:
 		return nil, fmt.Errorf("invalid device selector %q", selector)
 	}
@@ -79,7 +83,7 @@ func Snapshot(v Value) Value {
 			{"tensor_type", must(NewText(types.String(), types.Tensor().String()))},
 			{"dtype", must(NewText(types.String(), tensor.Dtype))},
 			{"shape", must(NewList(must(types.NewList(types.Int())), shape))},
-			{"device", must(NewText(types.String(), tensor.CPU))},
+			{"device", must(NewText(types.String(), x.Data().Location()))},
 		}))
 	case Record:
 		fields := x.Fields()

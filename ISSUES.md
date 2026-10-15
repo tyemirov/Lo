@@ -8,7 +8,9 @@ Scope note: v0.3 uses `T!` and `Error` for fallibility and keeps `Null` as an at
 P001 completed the [training extension design](docs/training-extension-design.md).
 That design selects the implementation contract for F002 through F011 and I001.
 F002 through F004 add Float arithmetic, tensor values, and CPU tensor operations.
-Autodiff, Parameters, optimizers, transfers, and complete training remain open.
+F005 through F007 add autodiff, Parameters, gradients, SGD, and AdamW.
+F008 adds device grants, explicit transfers, and live resource receipts.
+F009, F010, F011, and I001 retain device arithmetic, deferred execution, precision, and complete training acceptance.
 
 ## D001 - Make Recoverable Failure Semantics Mechanically Enforceable
 
@@ -575,7 +577,7 @@ F011 owns the deferred mixed-precision decisions after I001.
 F008, F009, and F010 implement the P001 device and NVIDIA contracts.
 F011 extends the accepted FP32 path with a later precision contract.
 
-- [ ] [F008] (P1) {F003} Add device resources and explicit tensor transfers
+- [x] [F008] (P1) {F003} Add device resources and explicit tensor transfers
   Goal:
   Define device location and resource lifetime while preserving immutable value semantics.
 
@@ -600,6 +602,13 @@ F011 extends the accepted FP32 path with a later precision contract.
   - Inject allocation and transfer failures through the public execution path.
   - Verify release after success, failure, and cancellation with allocation receipts.
   - Verify that `lo check` and `lo inspect` operate without device initialization.
+
+  F008 implemented grants, synchronous transfers, allocation receipts, storage limits, and static device summaries.
+  Interpreter and native CLI cases passed, including exact FP32 results and HTTP requests.
+  Injected failures verified cancellation cleanup, blocked later commits, and release of every allocation receipt.
+  The full `make ci` gate and focused native race tests passed on macOS arm64.
+  The [device resource contract](docs/device-resources.md) records interfaces and validation evidence.
+  F009 retains NVIDIA arithmetic. F010 retains deferred execution.
 
 - [ ] [F009] (P1) {F007,F008} Lower checked tensor graphs to NVIDIA operations
   Goal:

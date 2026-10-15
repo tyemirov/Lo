@@ -2,6 +2,7 @@ package inspect
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"math/big"
 	"strings"
@@ -136,6 +137,39 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		a.targets[targetID(r.ID)] = r
 		out.targets = []targetReference{{ID: targetID(r.ID), Conditions: mergeConditions(nil, c.conditions)}}
 	}
+
+	if catalog.UsesDevice(op.Name()) || op.Name() == catalog.TensorNew {
+		target := a.unknown(node, types.Device())
+		var from *string
+		if op.Name() == catalog.TensorTo {
+			target = values[1]
+			from = values[0].location
+		} else if op.Name() == catalog.TensorNew {
+			cpu := device.CPU
+			target.known = &cpu
+		} else if len(values) > 0 {
+			target.known = values[0].location
+		}
+		resource := a.resource(c, op.Name(), node, target)
+		resource.ID = nextID("d", len(a.data.DeviceResources))
+		entry := deviceResourceData{resourceData: resource, SourceDevice: from}
+		if info := a.graph.nodeData[node].Tensor; info != nil {
+			entry.StorageBytes = info.StorageBytes
+		}
+		a.data.DeviceResources = append(a.data.DeviceResources, entry)
+		if op.Name() == catalog.TensorTo {
+			a.data.Transfers = append(a.data.Transfers, entry)
+		}
+		if target.known == nil || *target.known != device.CPU {
+			a.capability(resource, device.Capability)
+		}
+		if op.Name() == catalog.TensorTo && (from == nil || *from != device.CPU) {
+			source := values[0]
+			source.known = from
+			a.capability(a.resource(c, op.Name(), node, source), device.Capability)
+		}
+		out.location = target.known
+	}
 	switch op.Rule() {
 	case catalog.Gradient:
 		arguments := append([]abstract{}, values[1:len(values)-1]...)
@@ -202,6 +236,10 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 				out.known = &s
 			}
 		}
+	case catalog.DeviceNew:
+		out.known = values[0].known
+	case catalog.TensorDevice:
+		out.known = values[0].location
 	case catalog.IntToString:
 		out.known = values[0].known
 	case catalog.ErrorNew:

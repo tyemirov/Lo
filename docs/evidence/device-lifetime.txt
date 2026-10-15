@@ -1,0 +1,70 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run "TestDevice|TestCPUTrainingExample|TestList" -count=1 -v
+=== RUN   TestDeviceInjectedFailures
+=== RUN   TestDeviceInjectedFailures/success
+=== RUN   TestDeviceInjectedFailures/unavailable
+=== RUN   TestDeviceInjectedFailures/allocation
+=== RUN   TestDeviceInjectedFailures/upload
+=== RUN   TestDeviceInjectedFailures/download
+=== RUN   TestDeviceInjectedFailures/cancel
+=== RUN   TestDeviceInjectedFailures/reserved_budget
+=== RUN   TestDeviceInjectedFailures/cleanup
+--- PASS: TestDeviceInjectedFailures (0.00s)
+    --- PASS: TestDeviceInjectedFailures/success (0.00s)
+    --- PASS: TestDeviceInjectedFailures/unavailable (0.00s)
+    --- PASS: TestDeviceInjectedFailures/allocation (0.00s)
+    --- PASS: TestDeviceInjectedFailures/upload (0.00s)
+    --- PASS: TestDeviceInjectedFailures/download (0.00s)
+    --- PASS: TestDeviceInjectedFailures/cancel (0.00s)
+    --- PASS: TestDeviceInjectedFailures/reserved_budget (0.00s)
+    --- PASS: TestDeviceInjectedFailures/cleanup (0.00s)
+=== RUN   TestDeviceDeniedBeforeInitialization
+--- PASS: TestDeviceDeniedBeforeInitialization (0.00s)
+=== RUN   TestDeviceFailurePreventsCommit
+--- PASS: TestDeviceFailurePreventsCommit (0.00s)
+=== RUN   TestDeviceCallbackLifetime
+--- PASS: TestDeviceCallbackLifetime (0.18s)
+=== RUN   TestDeviceSharedStorageAndIdentity
+--- PASS: TestDeviceSharedStorageAndIdentity (0.00s)
+=== RUN   TestDeviceDiagnosticsAndRecovery
+--- PASS: TestDeviceDiagnosticsAndRecovery (0.01s)
+=== RUN   TestDeviceParameterLocations
+--- PASS: TestDeviceParameterLocations (0.01s)
+=== RUN   TestDeviceRetainedCallbackValues
+--- PASS: TestDeviceRetainedCallbackValues (0.01s)
+=== RUN   TestDeviceTrainingLifetime
+    device_resources_test.go:350: SGD: peak=608 bytes allocations=8222
+    device_resources_test.go:350: AdamW: peak=1008 bytes allocations=24831
+--- PASS: TestDeviceTrainingLifetime (0.03s)
+=== RUN   TestDeviceTransferRoundTrip
+--- PASS: TestDeviceTransferRoundTrip (0.01s)
+=== RUN   TestDeviceAuthorizationAndFailures
+=== RUN   TestDeviceAuthorizationAndFailures/denied_simulation
+=== RUN   TestDeviceAuthorizationAndFailures/denied_CUDA
+=== RUN   TestDeviceAuthorizationAndFailures/unavailable_CUDA
+=== RUN   TestDeviceAuthorizationAndFailures/different_grant
+=== RUN   TestDeviceAuthorizationAndFailures/observation
+=== RUN   TestDeviceAuthorizationAndFailures/publication
+=== RUN   TestDeviceAuthorizationAndFailures/nested_publication
+=== RUN   TestDeviceAuthorizationAndFailures/arithmetic_pending
+=== RUN   TestDeviceAuthorizationAndFailures/location_mismatch
+--- PASS: TestDeviceAuthorizationAndFailures (0.05s)
+    --- PASS: TestDeviceAuthorizationAndFailures/denied_simulation (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/denied_CUDA (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/unavailable_CUDA (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/different_grant (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/observation (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/publication (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/nested_publication (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/arithmetic_pending (0.01s)
+    --- PASS: TestDeviceAuthorizationAndFailures/location_mismatch (0.01s)
+=== RUN   TestDeviceGrantArguments
+--- PASS: TestDeviceGrantArguments (0.03s)
+=== RUN   TestDeviceStaticInspection
+--- PASS: TestDeviceStaticInspection (0.01s)
+=== RUN   TestDeviceCPUIdentity
+--- PASS: TestDeviceCPUIdentity (0.01s)
+=== RUN   TestCPUTrainingExample
+--- PASS: TestCPUTrainingExample (0.05s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.098s

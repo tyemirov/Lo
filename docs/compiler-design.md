@@ -90,7 +90,8 @@ The selected [training extension design](training-extension-design.md) defines t
 P001 completed that design task.
 F002, F003, and F004 implement Float arithmetic and CPU tensors.
 F005, F006, and F007 add CPU autodiff, Parameters, gradients, and pure optimizer transitions.
-F008 through F011 and I001 retain device implementation and complete training acceptance.
+F008 implements device grants, explicit transfers, and the resource ledger.
+F009, F010, F011, and I001 retain device arithmetic, deferred execution, precision, and complete training acceptance.
 F001 implements the same CPU training contracts in native executables.
 The extension document maps each required specification change to its owning issue.
 
@@ -574,11 +575,12 @@ This rule bounds live CPU element payloads through the stricter cumulative value
 Shared reshape storage does not reduce value charges.
 Failed work retains no output buffer in an error snapshot.
 The Go allocator and garbage collector remain outside exact process-memory guarantees.
-F008 owns device allocation receipts, transfers, and the combined live resource ledger.
+F008 implements allocation receipts, explicit transfers, and the combined live resource ledger.
+The [device resource contract](device-resources.md) specifies live limits and allocation lifetime.
 
 | Tensor work | Additional steps |
 | --- | --- |
-| Construction, conversion, elementwise operation, broadcast, or transpose | One per output element. |
+| Construction, conversion, transfer, elementwise operation, broadcast, or transpose | One per output element. |
 | Sum | One per input element. |
 | Mean | One per input element plus one per output element. |
 | Matrix multiplication | `2*m*n*k`. |
@@ -598,7 +600,7 @@ The runtime does not narrow integers or silently truncate collections to meet a 
 
 ### Numeric and Tensor Analysis
 
-The catalog defines 100 built-in operations after F002 through F007.
+The catalog defines 101 built-in operations after F002 through F008.
 `internal/tensor` owns validated shapes, operation plans, immutable data, and CPU kernels.
 `internal/tensorfacts` propagates static metadata through bindings, records, Match branches, and named flow calls.
 It examines every declared flow, including unused flows.
@@ -726,6 +728,8 @@ Node fields are absent when they do not apply to that node kind.
 | `flows` | Flow identities, names, parameters, outputs, handlers, effect summaries, and invocation classes. |
 | `contexts` | Invocation identities, entry points, parent contexts, flow references, and call sites. |
 | `entry_points` | The program and handlers of possibly activated HTTP servers. |
+| `device_resources` | Device operations, target selectors, source locations, contexts, conditions, and storage bytes or explicit unknowns. |
+| `transfers` | The subset of device resources for explicit `Tensor.to` calls. |
 | `reads` | Boundary reads with target descriptions and invocation contexts. |
 | `targets` | Constructed effects and servers, their target descriptions, and configured handler references. |
 | `activations` | Commit sites, their possible targets, and target selection conditions. |
@@ -737,7 +741,8 @@ Each report identity is deterministic within one source program.
 Node identities refer to checked expressions, including explicit conversions.
 Repeated flow calls have different contexts.
 Repeated commits have different activation identities.
-The inspector does not resolve host paths or read resource contents.
+The inspector does not resolve host paths, read resource contents, or initialize devices.
+Flow effect summaries include a transitive `devices` flag beside `reads` and `commits`.
 
 A target description has `kind`, `type`, `node`, `span`, and `dependencies`.
 Its `kind` is `known` or `dynamic`.
@@ -836,7 +841,8 @@ The following paths identify the implemented Go package responsibilities.
 | `internal/resolve/` | Symbols, lexical scopes, and reference resolution. |
 | `internal/types/` | Type identities, constraints, and type unification. |
 | `internal/catalog/` | Canonical built-in definitions and operation identifiers. |
-| `internal/tensor/` | Shape boundaries, immutable CPU data, operation plans, and FP32 kernels. |
+| `internal/device/` | Grants, backend sessions, allocation receipts, storage budgets, and software transfers. |
+| `internal/tensor/` | Shape boundaries, immutable CPU and device data, transfers, operation plans, and FP32 kernels. |
 | `internal/tensorfacts/` | Static shape facts, shape diagnostics, and inspection metadata. |
 | `internal/check/` | Type checks, fallibility rules, and flow analysis. |
 | `internal/ir/` | Checked graph types and graph construction. |
@@ -1039,9 +1045,12 @@ Inspection does not grant access.
 | `--read-root DIRECTORY` | Read files within the selected directory tree. | `run`, `serve` |
 | `--write-root DIRECTORY` | Append or write files within the selected directory tree. | `run`, `serve` |
 | `--listen PORT` | Activate servers at the specified port on `127.0.0.1`. | `serve` |
-| No capability inputs | Deny all program resource access. | `run`, `serve` |
+| `--allow-device SELECTOR` | Permit one exact non-CPU device selector. | `run`, `serve` |
+| No capability inputs | Deny external resource access. | `run`, `serve` |
 
-Each capability input can occur more than once with different targets.
+File and listen capability inputs can occur more than once with different targets.
+The device grant can occur only once.
+CPU execution requires no device grant.
 Read roots and write roots use different grants.
 The same directory can have both grants.
 Duplicate normalized roots within one operation group are invalid.
@@ -1344,7 +1353,7 @@ Those differences concern repository templates and remain outside F002 through F
 ## F005 Through F007 Acceptance
 
 The CPU training stack passed `make ci` on October 13, 2026, with Go 1.27.1 on macOS arm64.
-The catalog has public check and runtime assertions for all 100 operations.
+The catalog has public check and runtime assertions for all 101 operations.
 The conformance suite contains 83 fixtures.
 CLI tests cover each VJP against analytical values and central finite differences.
 Other tests cover source mapping, restrictions, budgets, cancellation, weighted microbatches, optimizer transitions, and immutable prior values.
@@ -1354,7 +1363,8 @@ Its final loss and all nine Parameter values matched the independent FP32 refere
 The loss decreased from `2.46875` to `0.00013215476064942777` after 200 SGD updates.
 This result established CPU training through the interpreter before F001.
 The [native acceptance report](native-compilation-results.md) records CPU training results for native artifacts on macOS arm64 and Linux arm64.
-F008 through F011 and I001 retain their device and complete acceptance scope.
+F008 adds the [device resource contract](device-resources.md).
+F009, F010, F011, and I001 retain their remaining scope.
 
 The [stack evidence](evidence/training-stack-green.txt) records final checks and the requirement audit.
 The [benchmark report](training-benchmark.md) records raw samples and allocation evidence from the interpreter baseline before F001.

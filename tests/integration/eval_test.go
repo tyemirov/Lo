@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"math/big"
 	"reflect"
@@ -41,7 +42,7 @@ func evaluate(t *testing.T, text string, b execution.Boundary) (value.Value, err
 	if d != nil {
 		t.Fatal(d)
 	}
-	return eval.Run(context.Background(), p, b, execution.DefaultBudget())
+	return eval.Run(context.Background(), p, b, execution.DefaultBudget(), device.DefaultConfig())
 }
 
 func TestEvaluatorReadOrder(t *testing.T) {
@@ -155,7 +156,7 @@ func TestEvaluatorCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	b := &observedBoundary{read: func(string, int) (value.Bytes, error) { t.Fatal("unexpected read"); return nil, nil }}
-	_, err = eval.Run(ctx, p, b, execution.DefaultBudget())
+	_, err = eval.Run(ctx, p, b, execution.DefaultBudget(), device.DefaultConfig())
 	if h, ok := err.(execution.HostError); !ok || h.Code() != "runtime.cancelled" || !errors.Is(err, context.Canceled) {
 		t.Fatalf("cancellation: %v", err)
 	}
@@ -201,7 +202,7 @@ func FuzzRuntimeSource(f *testing.F) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		v, err := eval.Run(context.Background(), p, b, budget)
+		v, err := eval.Run(context.Background(), p, b, budget, device.DefaultConfig())
 		if err != nil {
 			if v != nil {
 				t.Fatal("failed execution published a result")

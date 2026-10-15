@@ -48,7 +48,7 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	} {
 		want[name] = expected
 	}
-	for name, element := range map[string]string{catalog.TensorNew: "4", catalog.TensorAdd: "6", catalog.TensorSub: "2", catalog.TensorMul: "8", catalog.TensorDiv: "2", catalog.TensorSqrt: "2", catalog.TensorRelu: "4", catalog.TensorTranspose: "4", catalog.TensorSum: "4", catalog.TensorMean: "4", catalog.TensorMatmul: "8", catalog.TensorBroadcast: "4", catalog.TensorReshape: "4"} {
+	for name, element := range map[string]string{catalog.TensorTo: "4", catalog.TensorNew: "4", catalog.TensorAdd: "6", catalog.TensorSub: "2", catalog.TensorMul: "8", catalog.TensorDiv: "2", catalog.TensorSqrt: "2", catalog.TensorRelu: "4", catalog.TensorTranspose: "4", catalog.TensorSum: "4", catalog.TensorMean: "4", catalog.TensorMatmul: "8", catalog.TensorBroadcast: "4", catalog.TensorReshape: "4"} {
 		shape := "[]"
 		if name == catalog.TensorMatmul {
 			shape = `["1","1"]`

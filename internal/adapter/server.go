@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"net"
 	"net/http"
@@ -64,6 +65,7 @@ type servers struct {
 	program        execution.Program
 	files          Files
 	policy         ListenPolicy
+	devices        device.Config
 	budget         execution.Budget
 	mu             sync.Mutex
 	active         []activeServer
@@ -81,12 +83,12 @@ type servers struct {
 }
 
 func (*servers) servers() {}
-func NewServers(p execution.Program, files Files, policy ListenPolicy, budget execution.Budget) (Servers, error) {
-	if p == nil || files == nil || policy == nil || budget == nil {
+func NewServers(p execution.Program, files Files, policy ListenPolicy, budget execution.Budget, devices device.Config) (Servers, error) {
+	if p == nil || files == nil || policy == nil || budget == nil || devices == nil {
 		return nil, fmt.Errorf("servers require a checked program, files, policy, and budget")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	return &servers{program: p, files: files, policy: policy, budget: budget, fatal: make(chan error, 1), requestContext: ctx, cancelRequests: cancel, pending: map[net.Conn]struct{}{}}, nil
+	return &servers{program: p, files: files, policy: policy, budget: budget, devices: devices, fatal: make(chan error, 1), requestContext: ctx, cancelRequests: cancel, pending: map[net.Conn]struct{}{}}, nil
 }
 func (s *servers) Start(ctx context.Context) (value.Value, error) {
 	s.mu.Lock()
@@ -96,7 +98,7 @@ func (s *servers) Start(ctx context.Context) (value.Value, error) {
 	}
 	s.started = true
 	s.mu.Unlock()
-	output, err := s.program.Run(ctx, s, s.budget)
+	output, err := s.program.Run(ctx, s, s.budget, s.devices)
 	if err == nil && len(s.Snapshot()) == 0 {
 		err = execution.NoServer()
 	}

@@ -1,7 +1,7 @@
 Lo Draft Specification
 
 This specification includes the v0.3 core and the implemented F002, F003, and F004 extensions.
-Section 24 defines binary64 arithmetic and CPU tensors.
+Section 24 defines binary64 arithmetic, tensors, CPU training, and explicit device transfers.
 
 1. Purpose
 
@@ -1666,13 +1666,15 @@ An unusable connection prevents delivery of an error response.
 The compiler design specifies request limits, cancellation, startup, and shutdown for the reference CLI.
 
 
-24. Numeric and CPU Tensor Extension
+24. Numeric, Tensor, and Device Extension
 
 F002 through F007 implement Float arithmetic, CPU tensors, reverse-mode autodiff, Parameters, gradients, and optimizers.
 F001 implements these operations in native executables.
 The reference interpreter and native artifacts use the same numeric and runtime contracts.
-All operations in this section are pure.
-F008 through F011 and I001 own the remaining device, precision, and training acceptance work.
+All operations in this section are pure under the rule that prohibits commit activation.
+Device resource boundaries have a separate transitive effect summary.
+F008 adds device resources and explicit transfers.
+F009, F010, F011, and I001 own device arithmetic, deferred execution, precision, and complete training acceptance.
 
 24.1 Binary64 Arithmetic
 
@@ -1701,7 +1703,7 @@ Float comparisons do not extend the comparable domains for maps, ranges, or Matc
 24.2 Tensor Values and Shape Boundaries
 
 `Tensor<FP32>` represents an immutable, contiguous, row-major array of finite FP32 values.
-Its shape and CPU location are metadata, not type arguments.
+Its shape and device location are metadata, not type arguments.
 `Tensor`, `Tensor<Int>`, and standalone `FP32` are invalid types.
 `Device` is an immutable nominal descriptor.
 The following tables use `T` to mean `Tensor<FP32>`.
@@ -1714,13 +1716,16 @@ This abbreviation is not a source type alias.
 | `Tensor.shape(value: T) -> List<Int>` | Return ordered dimensions. |
 | `Tensor.rank(value: T) -> Int` | Return the number of dimensions. |
 | `Tensor.dtype(value: T) -> String` | Return `fp32`. |
-| `Tensor.device(value: T) -> Device` | Return the `cpu` descriptor. |
+| `Tensor.device(value: T) -> Device` | Return the actual location descriptor. |
+| `Tensor.to(value: T, device: Device) -> T!` | Transfer to the selected location with unchanged FP32 bits and shape. |
 | `Tensor.to_float(value: T) -> Float!` | Convert one rank-zero element exactly to binary64. |
 | `Tensor.values(value: T) -> List<Float>!` | Convert all elements exactly to binary64 in row-major order. |
 
 Device construction validates the selector without device initialization.
 An invalid selector produces `Device.InvalidSelector`.
-Device transfers and CUDA execution remain outside this implementation.
+The current software backend executes explicit transfers for `cuda-sim:0`.
+Authorized `cuda:0` access produces `Device.Unavailable` until F009 supplies that backend.
+Device arithmetic produces `Device.UnsupportedOperation` in this implementation.
 
 An empty shape has one element and rank zero.
 A zero dimension makes the element count zero.
@@ -1900,7 +1905,7 @@ Repeated use of one field accumulates contributions into that field's gradient.
 | `Autodiff.stop(value: Tensor<FP32>) -> Tensor<FP32>` | Preserve the value and remove its derivative path. |
 
 Constructors require a nonempty record with exact keys and FP32 tensor fields.
-The current CPU contract gives each field the same device location.
+Each tensor record requires one shared device location.
 Gradient construction and addition validate each shape before numeric work.
 A metadata conflict produces `Gradient.SchemaMismatch`.
 The checker rejects missing keys, additional keys, duplicate keys, and incompatible field types.
@@ -1979,3 +1984,44 @@ Live AdamW moments and beta powers have a 32 MiB limit.
 Generated primitives receive the work and value charges in section 24.4.
 Config and state weights add 16 bytes to their complete exact record weights.
 Diagnostic snapshots retain metadata for nested tensors and optimizer fields.
+
+
+24.8 Device Resources and Explicit Transfers
+
+`Tensor.to` requires an exact host grant for every non-CPU location it uses.
+The CLI accepts one `--allow-device cuda:0` or `--allow-device cuda-sim:0` grant with `run` or `serve`.
+CPU operations require no device grant.
+A duplicate grant or unsupported selector produces `cli.invalid-invocation` with exit status 2.
+Authorization denial produces `runtime.capability-denied` before device initialization, allocation, or transfer.
+Authorization does not change the source selector.
+
+Each run or HTTP request has a separate device session and its allocation receipts.
+The session initializes its backend at first authorized access.
+Transfers complete before execution continues.
+A transfer keeps its source allocation live until completion.
+Same-location transfers share the original immutable storage without a copy.
+
+A transfer between different compute locations produces an error.
+`Device.Unavailable`, `Device.AllocationFailed`, and `Device.TransferFailed` are recoverable errors.
+A failed transfer publishes no output tensor.
+
+`Tensor.values` and `Tensor.to_float` require CPU data and otherwise produce `Tensor.HostObservationRequired`.
+CLI publication recursively requires CPU tensors in records, lists, maps, Parameters, gradients, and optimizer state.
+A device tensor at publication produces `runtime.tensor-publication` with exit status 2 before any result bytes.
+Error snapshots contain tensor metadata and never cause numeric downloads.
+
+The live resource ledger counts each backing allocation once at its actual reserved size.
+Tensor views share one receipt, but expanded value weight still counts each occurrence.
+The total limit is 64 MiB per invocation across CPU and device storage.
+
+Tape storage and optimizer moments each have a 32 MiB limit within that total.
+The optimizer limit includes beta powers.
+Library workspace has a 16 MiB limit within the total.
+A resource budget failure produces `runtime.limit` outside Lo handlers.
+Transfers charge one logical step per copied element.
+
+Flow exits release temporary allocations.
+Callback loops release superseded state and keep output values that remain reachable.
+Success, failure, and cancellation close the invocation's remaining receipts and backend.
+A cleanup failure prevents successful result publication.
+The [device resource contract](docs/device-resources.md) defines the backend interface and validation evidence.

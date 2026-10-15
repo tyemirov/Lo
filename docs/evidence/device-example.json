@@ -1,0 +1,40 @@
+{
+  "check": {
+    "exit_status": 0
+  },
+  "inspect": {
+    "exit_status": 0
+  },
+  "interpreter": {
+    "exit_status": 0
+  },
+  "build": {
+    "exit_status": 0
+  },
+  "native": {
+    "exit_status": 0
+  },
+  "identical_results": true,
+  "result": {
+    "type": "Tensor<FP32>!",
+    "status": "ok",
+    "value": {
+      "type": "Tensor<FP32>",
+      "value": {
+        "dtype": "fp32",
+        "shape": [
+          "2",
+          "2"
+        ],
+        "device": "cpu",
+        "values": [
+          "1.25",
+          "-0",
+          "1e-45",
+          "-2.5"
+        ]
+      }
+    }
+  },
+  "expected_shape_and_values": true
+}

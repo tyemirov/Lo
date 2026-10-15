@@ -1,0 +1,46 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestDevice -count=1
+--- FAIL: TestDeviceTransferRoundTrip (0.24s)
+    device_test.go:23: transfer round trip: {stdout: stderr:cli.invalid-invocation: unknown option "--allow-device"
+         status:2}
+--- FAIL: TestDeviceAuthorizationAndFailures (0.06s)
+    --- FAIL: TestDeviceAuthorizationAndFailures/denied_simulation (0.01s)
+        device_test.go:50: want runtime.capability-denied status 2: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Tensor.to","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestDeviceAuthorizationAndFailuresdenied_simulation2019211211/001/957286127.lo","start":{"offset":168,"line":4,"column":17},"end":{"offset":195,"line":4,"column":44}}}]}
+             status:1}
+    --- FAIL: TestDeviceAuthorizationAndFailures/denied_CUDA (0.01s)
+        device_test.go:50: want runtime.capability-denied status 2: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Tensor.to","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestDeviceAuthorizationAndFailuresdenied_CUDA1491034521/001/959767929.lo","start":{"offset":164,"line":4,"column":17},"end":{"offset":191,"line":4,"column":44}}}]}
+             status:1}
+    --- FAIL: TestDeviceAuthorizationAndFailures/unavailable_CUDA (0.01s)
+        device_test.go:50: want Device.Unavailable status 1: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+             status:2}
+    --- FAIL: TestDeviceAuthorizationAndFailures/different_grant (0.01s)
+        device_test.go:50: want runtime.capability-denied status 2: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+             status:2}
+    --- FAIL: TestDeviceAuthorizationAndFailures/observation (0.01s)
+        device_test.go:50: want Tensor.HostObservationRequired status 1: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+             status:2}
+    --- FAIL: TestDeviceAuthorizationAndFailures/publication (0.01s)
+        device_test.go:50: want runtime.tensor-publication status 2: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+             status:2}
+    --- FAIL: TestDeviceAuthorizationAndFailures/nested_publication (0.01s)
+        device_test.go:50: want runtime.tensor-publication status 2: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+             status:2}
+    --- FAIL: TestDeviceAuthorizationAndFailures/arithmetic_pending (0.01s)
+        device_test.go:50: want Device.UnsupportedOperation status 1: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+             status:2}
+    --- FAIL: TestDeviceAuthorizationAndFailures/location_mismatch (0.01s)
+        device_test.go:50: want Tensor.DeviceMismatch status 1: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+             status:2}
+--- FAIL: TestDeviceGrantArguments (0.01s)
+    device_test.go:59: grant arguments: {stdout: stderr:{"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--allow-device\""}]}
+         status:2}
+--- FAIL: TestDeviceStaticInspection (0.00s)
+    device_test.go:66: device-free check: {stdout: stderr:/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestDeviceStaticInspection1259104211/001/3383363989.lo:4:17: resolve.unknown-name: unknown flow Tensor.to
+         status:1}
+--- FAIL: TestDeviceCPUIdentity (0.01s)
+    device_test.go:77: CPU identity: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Tensor.to","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestDeviceCPUIdentity699984286/001/2096352789.lo","start":{"offset":167,"line":4,"column":17},"end":{"offset":194,"line":4,"column":44}}}]}
+         status:1}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.952s
+FAIL
+make: *** [test-integration] Error 1

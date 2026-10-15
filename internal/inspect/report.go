@@ -26,19 +26,21 @@ func (*report) report()                        {}
 func (r *report) MarshalJSON() ([]byte, error) { return json.Marshal(r.data) }
 
 type reportData struct {
-	File         string            `json:"file"`
-	ResultType   string            `json:"result_type,omitempty"`
-	Nodes        []nodeData        `json:"nodes"`
-	Bindings     []bindingData     `json:"bindings"`
-	Flows        []flowData        `json:"flows"`
-	Contexts     []contextData     `json:"contexts"`
-	EntryPoints  []entryData       `json:"entry_points"`
-	Reads        []resourceData    `json:"reads"`
-	Targets      []resourceData    `json:"targets"`
-	Activations  []activationData  `json:"activations"`
-	ErrorSources []errorData       `json:"error_sources"`
-	Capabilities []resourceData    `json:"capabilities"`
-	UnusedFlows  []identity.FlowID `json:"unused_flows"`
+	DeviceResources []deviceResourceData `json:"device_resources"`
+	Transfers       []deviceResourceData `json:"transfers"`
+	File            string               `json:"file"`
+	ResultType      string               `json:"result_type,omitempty"`
+	Nodes           []nodeData           `json:"nodes"`
+	Bindings        []bindingData        `json:"bindings"`
+	Flows           []flowData           `json:"flows"`
+	Contexts        []contextData        `json:"contexts"`
+	EntryPoints     []entryData          `json:"entry_points"`
+	Reads           []resourceData       `json:"reads"`
+	Targets         []resourceData       `json:"targets"`
+	Activations     []activationData     `json:"activations"`
+	ErrorSources    []errorData          `json:"error_sources"`
+	Capabilities    []resourceData       `json:"capabilities"`
+	UnusedFlows     []identity.FlowID    `json:"unused_flows"`
 }
 type nodeData struct {
 	Derivative *derivativePlanData   `json:"derivative,omitempty"`
@@ -81,6 +83,7 @@ type parameterData struct {
 	Type string       `json:"type"`
 }
 type effectsData struct {
+	Devices bool `json:"devices"`
 	Reads   bool `json:"reads"`
 	Commits bool `json:"commits"`
 }
@@ -162,7 +165,7 @@ type errorData struct {
 }
 
 func newReport(file string) reportData {
-	return reportData{File: file, Nodes: []nodeData{}, Bindings: []bindingData{}, Flows: []flowData{}, Contexts: []contextData{}, EntryPoints: []entryData{}, Reads: []resourceData{}, Targets: []resourceData{}, Activations: []activationData{}, ErrorSources: []errorData{}, Capabilities: []resourceData{}, UnusedFlows: []identity.FlowID{}}
+	return reportData{DeviceResources: []deviceResourceData{}, Transfers: []deviceResourceData{}, File: file, Nodes: []nodeData{}, Bindings: []bindingData{}, Flows: []flowData{}, Contexts: []contextData{}, EntryPoints: []entryData{}, Reads: []resourceData{}, Targets: []resourceData{}, Activations: []activationData{}, ErrorSources: []errorData{}, Capabilities: []resourceData{}, UnusedFlows: []identity.FlowID{}}
 }
 func (r *report) Text() string {
 	var b strings.Builder
@@ -180,7 +183,7 @@ func (r *report) Text() string {
 		for i, p := range f.Parameters {
 			parameters[i] = p.Name + ": " + p.Type
 		}
-		fmt.Fprintf(&b, "  %s %s(%s) -> %s uses=%s reads=%t commits=%t handler=%s at %s\n", f.ID, f.Name, strings.Join(parameters, ", "), f.Output, strings.Join(f.Uses, ","), f.Effects.Reads, f.Effects.Commits, f.Handler, location(f.Span))
+		fmt.Fprintf(&b, "  %s %s(%s) -> %s uses=%s reads=%t commits=%t devices=%t handler=%s at %s\n", f.ID, f.Name, strings.Join(parameters, ", "), f.Output, strings.Join(f.Uses, ","), f.Effects.Reads, f.Effects.Commits, f.Effects.Devices, f.Handler, location(f.Span))
 	}
 	b.WriteString("contexts:\n")
 	for _, c := range r.data.Contexts {
@@ -202,6 +205,17 @@ func (r *report) Text() string {
 			}
 			fmt.Fprintf(&b, " at %s\n", location(r.Target.Span))
 		}
+	}
+	for _, site := range r.data.DeviceResources {
+		resources("device resource", []resourceData{site.resourceData})
+		source, size := "unknown", "unknown"
+		if site.SourceDevice != nil {
+			source = *site.SourceDevice
+		}
+		if site.StorageBytes != nil {
+			size = fmt.Sprint(*site.StorageBytes)
+		}
+		fmt.Fprintf(&b, "    source_device=%s storage_bytes=%s\n", source, size)
 	}
 	resources("reads", r.data.Reads)
 	resources("targets", r.data.Targets)
@@ -264,4 +278,10 @@ func conditionsText(conditions []condition) string {
 		parts[i] += ")"
 	}
 	return strings.Join(parts, " & ")
+}
+
+type deviceResourceData struct {
+	resourceData
+	SourceDevice *string `json:"source_device"`
+	StorageBytes *uint64 `json:"storage_bytes"`
 }

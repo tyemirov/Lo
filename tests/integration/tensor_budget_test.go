@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"sync/atomic"
 	"testing"
@@ -36,7 +37,7 @@ func minimumTensorSteps(t *testing.T, text string) uint64 {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = eval.Run(context.Background(), p, &observedBoundary{}, budget)
+		_, err = eval.Run(context.Background(), p, &observedBoundary{}, budget, device.DefaultConfig())
 		if err == nil {
 			hi = mid
 			continue
@@ -107,7 +108,7 @@ flow Work() -> Int onError Handle { seed=Tensor.new(List.new(1.0),List.new()); a
 	if err != nil {
 		t.Fatal(err)
 	}
-	v, err := eval.Run(controlled, p, &observedBoundary{}, budget)
+	v, err := eval.Run(controlled, p, &observedBoundary{}, budget, device.DefaultConfig())
 	var host execution.HostError
 	if v != nil || !errors.As(err, &host) || host.Code() != "runtime.cancelled" || !errors.Is(err, context.Canceled) {
 		t.Fatalf("kernel cancellation entered handler: value=%v, error=%v", v, err)

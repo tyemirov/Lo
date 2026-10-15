@@ -2,6 +2,7 @@ package runtimeops
 
 import (
 	"errors"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/tensor"
@@ -10,13 +11,12 @@ import (
 	"strconv"
 )
 
-const MaxTapeBytes uint64 = 32 << 20
-
 type GradientFrame struct {
 	Invocation int
 	Name       string
 }
 type Tape interface {
+	Close()
 	Retain(value.Value) error
 	Snapshot(int, []value.Field) error
 	Fail(error, types.Fallible, string, source.Span, []value.Value, []GradientFrame) (value.Value, error)
@@ -54,8 +54,11 @@ func (t *tape) Retain(v value.Value) error {
 	if v, ok := v.(value.Tensor); ok {
 		storage := v.Data().Storage()
 		if !t.storage[storage] {
-			if storage.Bytes() > MaxTapeBytes-t.bytes {
+			if storage.Bytes() > device.MaxTape-t.bytes {
 				return execution.Limit("derivative tape bytes")
+			}
+			if err := t.session.Resources().Classify([]device.Allocation{storage.Allocation()}, device.TapeStorage); err != nil {
+				return execution.BoundaryHostError(err)
 			}
 			t.storage[storage] = true
 			t.bytes += storage.Bytes()
@@ -89,4 +92,12 @@ func (t *tape) Fail(err error, out types.Fallible, op string, span source.Span, 
 		cause = value.WithFrame(cause, frame.Name, cause.Operation(), t.snapshots[frame.Invocation])
 	}
 	return value.Failure(out, cause)
+}
+
+func (t *tape) Close() {
+	var allocations []device.Allocation
+	for storage := range t.storage {
+		allocations = append(allocations, storage.Allocation())
+	}
+	t.session.Resources().Unclassify(allocations, device.TapeStorage)
 }

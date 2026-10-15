@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"io"
 	"os"
@@ -25,12 +26,27 @@ type executionResult struct {
 func executeProgram(inv invocation, p execution.Program, stdout, stderr io.Writer) int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	return runProgram(ctx, inv, p, stdout, stderr)
+}
+
+// RunContext executes the CLI contract with explicit backend dependencies.
+func RunContext(ctx context.Context, options Options, p execution.Program, factory device.Factory, observer device.Observer, stdout, stderr io.Writer) int {
+	inv := options.(invocation)
+	config, err := device.NewConfig(inv.devices.Grant(), factory, observer)
+	if err != nil {
+		return ReportRuntime(stderr, inv.format, execution.HostFailure("configure device backend", "command", err))
+	}
+	inv.devices = config
+	return runProgram(ctx, inv, p, stdout, stderr)
+}
+
+func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout, stderr io.Writer) int {
 	files, err := adapter.OpenFiles(inv.readRoots, inv.writeRoots)
 	if err != nil {
 		return ReportRuntime(stderr, inv.format, err)
 	}
 	if inv.command == RunCommand {
-		output, runErr := p.Run(ctx, files, inv.budget)
+		output, runErr := p.Run(ctx, files, inv.budget, inv.devices)
 		if err := runtimeCleanup(runErr, files.Close()); err != nil {
 			return ReportRuntime(stderr, inv.format, err)
 		}
@@ -39,7 +55,7 @@ func executeProgram(inv invocation, p execution.Program, stdout, stderr io.Write
 		}
 		return ExitSuccess
 	}
-	servers, err := adapter.NewServers(p, files, inv.listenPolicy, inv.budget)
+	servers, err := adapter.NewServers(p, files, inv.listenPolicy, inv.budget, inv.devices)
 	if err != nil {
 		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
 	}

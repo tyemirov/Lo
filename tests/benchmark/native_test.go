@@ -3,6 +3,7 @@ package benchmark_test
 import (
 	"context"
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
@@ -26,14 +27,14 @@ func BenchmarkNativeBaseline(b *testing.B) {
 			if err != nil {
 				b.Fatal(err)
 			}
-			result, err := eval.Run(context.Background(), p, noBoundaries{}, budget)
+			result, err := eval.Run(context.Background(), p, noBoundaries{}, budget, device.DefaultConfig())
 			if err != nil || value.TextResult(result) != fixture.Expected {
 				b.Fatalf("result %v error %v, want %s", result, err, fixture.Expected)
 			}
 			b.ReportAllocs()
 			b.ResetTimer()
 			for b.Loop() {
-				result, err := eval.Run(context.Background(), p, noBoundaries{}, budget)
+				result, err := eval.Run(context.Background(), p, noBoundaries{}, budget, device.DefaultConfig())
 				if err != nil {
 					b.Fatal(err)
 				}

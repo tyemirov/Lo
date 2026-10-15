@@ -160,6 +160,9 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `logical cost`: The execution steps and value weight charged under the Lo host execution contract.
 - `lowering plan`: A compiler representation with explicit statements, branches, calls, source locations, and logical costs.
 - `source map`: Data that connects generated code or runtime failures to positions in the original source.
+- `allocation receipt`: A session record that identifies one reserved buffer and its release.
+- `resource ledger`: Per-invocation records for live tensor storage and storage budgets.
+- `backing allocation`: The reserved buffer shared by immutable tensor views.
 - `allocation`: A runtime operation that reserves memory for a value or internal object.
 - `garbage collector`: A runtime component that reclaims memory which a program can no longer access.
 - `latency`: The time between an operation's start and its observable completion.

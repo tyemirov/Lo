@@ -55,7 +55,10 @@ func (g *generator) list(call ir.BuiltinCall, metadata string, callback identity
 	case catalog.ListFlatMap:
 		b.line("extra:=v.(value.List).Items();if len(extra)>execution.MaxItems-len(output){return nil,execution.Limit(\"list elements\")};output=append(output,extra...)")
 	case catalog.ListUnfold:
-		b.line("record:=v.(value.Record);output=append(output,record.Field(\"value\"));state=record.Field(\"next_state\")")
+		b.line("record:=v.(value.Record);output=append(output,record.Field(\"value\"));scope.Retain(record.Field(\"value\"));state=record.Field(\"next_state\")")
+	}
+	if op == catalog.ListFold || op == catalog.ListUnfold {
+		b.line("scope.Keep(state)")
 	}
 	b.line("}")
 	if op == catalog.ListFold {
@@ -69,6 +72,6 @@ func (g *generator) list(call ir.BuiltinCall, metadata string, callback identity
 		b.check()
 		b.line("return runtimeops.Success(%s,result),nil", g.typeOf(call.Type()))
 	}
-	fmt.Fprintf(&g.functions, "func(p *program)%s(s execution.Session,%s)(value.Value,error){%s}\n", name, strings.Join(params, ","), b.out.String())
+	fmt.Fprintf(&g.functions, "func(p *program)%s(s execution.Session,%s)(resultValue value.Value,resultErr error){scope:=s.Scope();defer func(){scope.Close(resultValue)}();%s}\n", name, strings.Join(params, ","), b.out.String())
 	return name
 }

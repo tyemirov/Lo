@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
@@ -238,7 +239,7 @@ func TestServerPartialStartupCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	servers, err := adapter.NewServers(executable(t, p), files, policy, execution.DefaultBudget())
+	servers, err := adapter.NewServers(executable(t, p), files, policy, execution.DefaultBudget(), device.DefaultConfig())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -281,7 +282,7 @@ func startAdapter(t *testing.T, text string) adapter.Servers {
 	if err != nil {
 		t.Fatal(err)
 	}
-	servers, err := adapter.NewServers(executable(t, p), files, policy, execution.DefaultBudget())
+	servers, err := adapter.NewServers(executable(t, p), files, policy, execution.DefaultBudget(), device.DefaultConfig())
 	if err != nil {
 		t.Fatal(err)
 	}

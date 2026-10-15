@@ -114,6 +114,7 @@ func TestVerifierBuiltinContracts(t *testing.T) {
 func tensorBuiltinExamples() []builtinExample {
 	examples := []builtinExample{{"Device.new", `return Device.new("cpu")`, "Device!"}, {"Tensor.new", `return Tensor.new(List.new(4.0),List.new())`, "Tensor<FP32>!"}}
 	for _, tc := range []struct{ name, expression, typ string }{
+		{"Tensor.to", `Tensor.to(a,Device.new("cpu"))`, "Tensor<FP32>"},
 		{"Tensor.shape", "Tensor.shape(a)", "List<Int>"},
 		{"Tensor.rank", "Tensor.rank(a)", "Int"},
 		{"Tensor.dtype", "Tensor.dtype(a)", "String"},

@@ -17,7 +17,7 @@ F001 extends this audit with the native compiler and shared runtime described be
 | [Graph tests](../tests/integration/graph_test.go) | Compiler publication, references, spans, conversions, immutability, and static-only behavior. |
 | [Inspection tests](../tests/integration/inspect_test.go) | Report fields, references, conditions, capabilities, errors, and deterministic output. |
 | [Runtime tests](../tests/integration/run_test.go) | CLI values, serialization, recoverable errors, traces, file reads, and host limits. |
-| [Runtime catalog tests](../tests/integration/runtime_catalog_test.go) | Expected runtime behavior for all 100 built-in operations. |
+| [Runtime catalog tests](../tests/integration/runtime_catalog_test.go) | Expected runtime behavior for all 101 built-in operations. |
 | [Evaluator tests](../tests/integration/eval_test.go) | Evaluation order, branch selection, repeated reads, error precedence, cancellation, and immutable results. |
 | [File tests](../tests/integration/activation_test.go) | Commit order, failure handling, authorization, and the executable File workflow. |
 | [HTTP tests](../tests/integration/serve_test.go) | Real CLI processes, local HTTP requests, readiness, failures, and shutdown. |
@@ -259,3 +259,12 @@ The [native contract](native-compilation-contract.md) owns the build limits and 
 
 F001 retains the current language, value, authorization, and error contracts.
 The native backend adds no language syntax or automatic backend selection.
+
+
+## F008 Device Resources
+
+F008 adds explicit transfers and device grants to the interpreter and native artifacts.
+The runtime ledger counts CPU buffers, device buffers, shared views, tape values, and optimizer state.
+Flow and callback scopes release temporary buffers while retained values remain live.
+The [device resource contract](device-resources.md) records interfaces, limits, tests, and the software validation environment.
+NVIDIA arithmetic remains F009 scope.

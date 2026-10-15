@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"strings"
 	"testing"
@@ -198,13 +199,13 @@ func TestAutodiffWorkAndCancellation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	v, err := eval.Run(controlled, p, &observedBoundary{}, budget)
+	v, err := eval.Run(controlled, p, &observedBoundary{}, budget, device.DefaultConfig())
 	var host execution.HostError
 	if v != nil || !errors.As(err, &host) || host.Code() != "runtime.cancelled" {
 		t.Fatalf("derivative cancellation: %v %v", v, err)
 	}
 	// Reuse the same checked plan after cancellation with a fresh invocation.
-	if _, err = eval.Run(context.Background(), p, &observedBoundary{}, budget); err != nil {
+	if _, err = eval.Run(context.Background(), p, &observedBoundary{}, budget, device.DefaultConfig()); err != nil {
 		t.Fatal(err)
 	}
 }

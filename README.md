@@ -10,7 +10,7 @@ Lo is not a replacement for Go, Python, or shell. It is an execution contract be
 
 ## Status
 
-Lo implements the **v0.3 core, native compilation, and CPU training**.
+Lo implements the **v0.3 core, native compilation, CPU training, and explicit device transfers**.
 
 The reference implementation has a Go frontend, verifier, checked execution graph, and static inspector.
 The parser and verifier accept all six specification examples.
@@ -36,7 +36,9 @@ F002, F003, and F004 implement binary64 arithmetic, immutable FP32 tensors, shap
 The [forward example](examples/tensor_forward.lo) executes a two-layer ReLU network and returns loss from mean squared error `3`.
 F005, F006, and F007 add reverse-mode autodiff, immutable Parameters, gradient operations, SGD, and AdamW.
 The [CPU training example](examples/training_cpu.lo) completes 200 SGD updates and reduces loss from `2.46875` to `0.00013215476`.
-F008 through F011 and I001 retain device execution, later precision work, and complete training acceptance.
+F008 adds device grants, explicit transfers, and a resource ledger to interpreter and native execution.
+The [device resource contract](docs/device-resources.md) records the implementation and software validation.
+F009, F010, F011, and I001 retain device arithmetic, deferred execution, later precision work, and complete training acceptance.
 The [training benchmark](docs/training-benchmark.md) records the interpreter baseline before F001.
 The [native acceptance report](docs/native-compilation-results.md) compares the two execution backends, including CPU training.
 
@@ -57,6 +59,7 @@ make build
 ./bin/list-sum run
 ./bin/lo run examples/tensor_forward.lo
 ./bin/lo run examples/training_cpu.lo --format json
+./bin/lo run examples/device_transfer.lo --allow-device cuda-sim:0 --format json
 ./bin/lo run examples/count_letter.lo --read-root examples
 ./bin/lo serve examples/http_echo.lo --listen 0 --format json
 make test-conformance
@@ -64,7 +67,7 @@ make ci
 ```
 
 The conformance suite runs 83 static and runtime fixtures.
-The catalog tests verify all 100 built-in operations.
+The catalog tests verify all 101 built-in operations.
 The integration suite also tests built-in signatures, runtime values, evaluation order, error traces, and adapter authorization.
 The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.
@@ -74,7 +77,7 @@ Native builds require Go 1.27.1 on the build host.
 Artifacts need no Go installation, Lo installation, source file, or repository checkout during execution.
 Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact target.
 The build uses the host target when this option is absent.
-Supply file and listen grants when you execute the artifact.
+Supply file, listen, and device grants when you execute the artifact.
 Use the artifact's `metadata` command to inspect its source digest, runtime bundle digest, target, and toolchain.
 `lo run` and `lo serve` select interpreter execution.
 
@@ -350,7 +353,8 @@ lo/
 
 Milestones 1 through 5 are implemented.
 The sections below record their scope.
-F008 through F011 and I001 own the remaining device, precision, and training acceptance work.
+F008 adds explicit transfers and device resource budgets.
+F009, F010, F011, and I001 own device arithmetic, deferred execution, precision, and complete training acceptance.
 
 ### Milestone 1: Verifier MVP
 

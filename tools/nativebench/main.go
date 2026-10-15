@@ -67,7 +67,8 @@ func run(out string) error {
 			return err
 		}
 		test := fmt.Sprintf(`package fixture
-import("context";"os";"testing";"github.com/MarcoPoloResearchLab/Lo/internal/compiler";"github.com/MarcoPoloResearchLab/Lo/internal/eval";"github.com/MarcoPoloResearchLab/Lo/internal/execution";"github.com/MarcoPoloResearchLab/Lo/internal/source";"github.com/MarcoPoloResearchLab/Lo/internal/value")
+import("context";"os";"testing";"github.com/MarcoPoloResearchLab/Lo/internal/compiler";"github.com/MarcoPoloResearchLab/Lo/internal/eval";"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+"github.com/MarcoPoloResearchLab/Lo/internal/device";"github.com/MarcoPoloResearchLab/Lo/internal/source";"github.com/MarcoPoloResearchLab/Lo/internal/value")
 type boundary struct{}
 func(boundary)Read(context.Context,value.Text)(value.Bytes,error){return nil,execution.Denied("read","benchmark")}
 func(boundary)Commit(context.Context,value.Target)error{return execution.Denied("commit","benchmark")}
@@ -76,12 +77,12 @@ func BenchmarkExecution(b *testing.B){
  file,err:=source.New(%q,%q);if err!=nil{b.Fatal(err)};p,d:=compiler.Check(file);if d!=nil{b.Fatal(d)}
  interpreted,err:=eval.Program(p);if err!=nil{b.Fatal(err)}
  native,err:=New();if err!=nil{b.Fatal(err)};budget,err:=execution.NewBudget(10000000);if err!=nil{b.Fatal(err)}
- reference,err:=interpreted.Run(context.Background(),boundary{},budget);if err!=nil{b.Fatal(err)}
+ reference,err:=interpreted.Run(context.Background(),boundary{},budget,device.DefaultConfig());if err!=nil{b.Fatal(err)}
  expected:=value.TextResult(reference);if independent:=%q;independent!=""&&expected!=independent{b.Fatalf("reference %%s want %%s",expected,independent)}
  order:=[]string{"Interpreter","Native"};if os.Getenv("LO_BENCH_FIRST")=="native"{order=[]string{"Native","Interpreter"}}
  for _,backend:=range order{b.Run(backend,func(b *testing.B){
  program:=interpreted;if backend=="Native"{program=native}
- run:=func()(value.Value,error){return program.Run(context.Background(),boundary{},budget)}
+ run:=func()(value.Value,error){return program.Run(context.Background(),boundary{},budget,device.DefaultConfig())}
  result,err:=run();if err!=nil{b.Fatal(err)};if value.TextResult(result)!=expected{b.Fatalf("result %%s want %%s",value.TextResult(result),expected)}
  b.ReportAllocs();b.ResetTimer();for b.Loop(){v,err:=run();if err!=nil{b.Fatal(err)};sink=v}
  })}

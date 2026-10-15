@@ -3,6 +3,7 @@ package benchmark_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"os"
 	"path/filepath"
@@ -49,7 +50,7 @@ func BenchmarkTraining(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		result, err := eval.Run(context.Background(), program, noBoundaries{}, budget)
+		result, err := eval.Run(context.Background(), program, noBoundaries{}, budget, device.DefaultConfig())
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -66,7 +67,7 @@ func BenchmarkTraining(b *testing.B) {
 		b.Run(fixture.name+"/Execute", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
-				v, err := eval.Run(context.Background(), program, noBoundaries{}, budget)
+				v, err := eval.Run(context.Background(), program, noBoundaries{}, budget, device.DefaultConfig())
 				if err != nil {
 					b.Fatal(err)
 				}
