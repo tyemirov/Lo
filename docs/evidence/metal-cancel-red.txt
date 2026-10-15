@@ -1,0 +1,14 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestMetalControlledFailures/cancel -count=1 -v
+=== RUN   TestMetalControlledFailures
+=== RUN   TestMetalControlledFailures/cancel
+=== RUN   TestMetalControlledFailures/cancel_and_transfer_failure
+    metal_test.go:137: want runtime.cancelled: {stdout: stderr:{"diagnostics":[{"code":"runtime.unhandled-error","stage":"runtime","message":"Device.TransferFailed: Tensor.to: Device.TransferFailed: controlled Metal failure","span":{"file":"device-test.lo","start":{"offset":475,"line":6,"column":11},"end":{"offset":481,"line":6,"column":17}},"error":{"type":"Error","kind":"Device.TransferFailed","message":"Tensor.to: Device.TransferFailed: controlled Metal failure","input":{"type":"Record","value":{"device":{"type":"Device","value":"metal:0"},"value":{"type":"Record{device: String, dtype: String, shape: List\u003cInt\u003e, tensor_type: String}","value":{"device":{"type":"String","value":"cpu"},"dtype":{"type":"String","value":"fp32"},"shape":{"type":"List\u003cInt\u003e","value":[{"type":"Int","value":"2"},{"type":"Int","value":"2"}]},"tensor_type":{"type":"String","value":"Tensor\u003cFP32\u003e"}}}}},"trace":[{"type":"Record{flow: String, input: Record, operation: String}","value":{"flow":{"type":"String","value":"Main"},"input":{"type":"Record","value":{}},"operation":{"type":"String","value":"Tensor.to"}}}]}}]}
+         status:1}
+--- FAIL: TestMetalControlledFailures (0.00s)
+    --- PASS: TestMetalControlledFailures/cancel (0.00s)
+    --- FAIL: TestMetalControlledFailures/cancel_and_transfer_failure (0.00s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.650s
+FAIL
+make: *** [test-integration] Error 1

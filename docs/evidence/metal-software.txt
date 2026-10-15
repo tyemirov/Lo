@@ -1,0 +1,62 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run ^TestMetal -count=1 -v
+=== RUN   TestMetalSelection
+=== RUN   TestMetalSelection/denied
+=== RUN   TestMetalSelection/unavailable_build
+=== RUN   TestMetalSelection/different_grant
+=== RUN   TestMetalSelection/duplicate
+=== RUN   TestMetalSelection/multiple
+--- PASS: TestMetalSelection (0.26s)
+    --- PASS: TestMetalSelection/denied (0.20s)
+    --- PASS: TestMetalSelection/unavailable_build (0.01s)
+    --- PASS: TestMetalSelection/different_grant (0.01s)
+    --- PASS: TestMetalSelection/duplicate (0.01s)
+    --- PASS: TestMetalSelection/multiple (0.01s)
+=== RUN   TestMetalStaticInspection
+--- PASS: TestMetalStaticInspection (0.02s)
+=== RUN   TestMetalTransferContract
+=== RUN   TestMetalTransferContract/bits_and_source
+=== RUN   TestMetalTransferContract/empty
+--- PASS: TestMetalTransferContract (0.00s)
+    --- PASS: TestMetalTransferContract/bits_and_source (0.00s)
+    --- PASS: TestMetalTransferContract/empty (0.00s)
+=== RUN   TestMetalControlledFailures
+=== RUN   TestMetalControlledFailures/unavailable
+=== RUN   TestMetalControlledFailures/allocate
+=== RUN   TestMetalControlledFailures/upload
+=== RUN   TestMetalControlledFailures/download
+=== RUN   TestMetalControlledFailures/cancel
+=== RUN   TestMetalControlledFailures/cancel_and_transfer_failure
+=== RUN   TestMetalControlledFailures/reserved_storage
+=== RUN   TestMetalControlledFailures/cleanup
+--- PASS: TestMetalControlledFailures (0.00s)
+    --- PASS: TestMetalControlledFailures/unavailable (0.00s)
+    --- PASS: TestMetalControlledFailures/allocate (0.00s)
+    --- PASS: TestMetalControlledFailures/upload (0.00s)
+    --- PASS: TestMetalControlledFailures/download (0.00s)
+    --- PASS: TestMetalControlledFailures/cancel (0.00s)
+    --- PASS: TestMetalControlledFailures/cancel_and_transfer_failure (0.00s)
+    --- PASS: TestMetalControlledFailures/reserved_storage (0.00s)
+    --- PASS: TestMetalControlledFailures/cleanup (0.00s)
+=== RUN   TestMetalLostSession
+--- PASS: TestMetalLostSession (0.00s)
+=== RUN   TestMetalTensorBoundaries
+=== RUN   TestMetalTensorBoundaries/observation
+=== RUN   TestMetalTensorBoundaries/publication
+=== RUN   TestMetalTensorBoundaries/arithmetic_pending
+=== RUN   TestMetalTensorBoundaries/mismatched_locations
+--- PASS: TestMetalTensorBoundaries (0.00s)
+    --- PASS: TestMetalTensorBoundaries/observation (0.00s)
+    --- PASS: TestMetalTensorBoundaries/publication (0.00s)
+    --- PASS: TestMetalTensorBoundaries/arithmetic_pending (0.00s)
+    --- PASS: TestMetalTensorBoundaries/mismatched_locations (0.00s)
+=== RUN   TestMetalBackendFaultKinds
+=== RUN   TestMetalBackendFaultKinds/Device.UnsupportedProfile
+=== RUN   TestMetalBackendFaultKinds/Device.LibraryFailed
+=== RUN   TestMetalBackendFaultKinds/Device.Lost
+--- PASS: TestMetalBackendFaultKinds (0.00s)
+    --- PASS: TestMetalBackendFaultKinds/Device.UnsupportedProfile (0.00s)
+    --- PASS: TestMetalBackendFaultKinds/Device.LibraryFailed (0.00s)
+    --- PASS: TestMetalBackendFaultKinds/Device.Lost (0.00s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.019s

@@ -1,0 +1,23 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test -- -count=1 -race -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+=== RUN   TestMetalLiveTransfers
+=== RUN   TestMetalLiveTransfers/finite_edges_and_samples
+    metal_live_test.go:64: Metal identity: {"name":"Apple M5 Pro","profile":"metal-transfer-fp32","registry_id":"100000696","kernel_sha256":"44db837c1143dea8d409b888bb4b083b82acf2cd24f60a51ee135eba720f72ad"}
+    metal_live_test.go:73: transfers=2 peak_reserved_bytes=8208
+=== RUN   TestMetalLiveTransfers/empty
+    metal_live_test.go:64: Metal identity: {"name":"Apple M5 Pro","profile":"metal-transfer-fp32","registry_id":"100000696","kernel_sha256":"44db837c1143dea8d409b888bb4b083b82acf2cd24f60a51ee135eba720f72ad"}
+    metal_live_test.go:73: transfers=2 peak_reserved_bytes=0
+=== RUN   TestMetalLiveTransfers/scalar
+    metal_live_test.go:64: Metal identity: {"name":"Apple M5 Pro","profile":"metal-transfer-fp32","registry_id":"100000696","kernel_sha256":"44db837c1143dea8d409b888bb4b083b82acf2cd24f60a51ee135eba720f72ad"}
+    metal_live_test.go:73: transfers=2 peak_reserved_bytes=16
+--- PASS: TestMetalLiveTransfers (0.57s)
+    --- PASS: TestMetalLiveTransfers/finite_edges_and_samples (0.47s)
+    --- PASS: TestMetalLiveTransfers/empty (0.04s)
+    --- PASS: TestMetalLiveTransfers/scalar (0.06s)
+=== RUN   TestMetalLiveLifetime
+    metal_live_test.go:98: 100 steps: transfers=200 peak_reserved_bytes=80
+--- PASS: TestMetalLiveLifetime (0.05s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	2.295s
