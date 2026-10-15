@@ -351,6 +351,29 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   Changed prose passed the mechanical language checks after review against the official reference.
   Existing tracker and README language findings remain outside this change.
 
+- [x] [P002] (P1) {P001,F008} Plan an explicit Metal backend
+  Goal:
+  Define the implementation sequence for Apple GPU execution through Metal.
+
+  Requirements:
+  - Review current device resources, tensor operations, native builds, and numerical contracts.
+  - Define explicit selection, authorization, storage, failures, and acceptance environments.
+  - Identify unresolved arithmetic and toolchain decisions before implementation.
+  - Implement Metal independently of pending CUDA work.
+
+  Deliverables:
+  - Add the [Metal implementation plan](docs/metal-backend-plan.md) and dependent implementation issues.
+
+  Validation:
+  - Verify the plan against current source and official Apple documentation.
+  - Verify issue identifiers, dependencies, document links, and changed prose.
+
+  P002 records the planned `metal:0` selector, synchronous FP32 execution, adapter route, and native artifact changes.
+  F012, F013, F014, and I002 own implementation and acceptance.
+  A direct Metal kernel executed successfully on the available Apple M5 Pro.
+  This probe establishes local GPU access, without evidence of Lo Metal execution.
+  The plan assigns subnormal arithmetic and toolchain decisions to implementation preparation.
+
 ## Features
 
 - [x] [F001] (P1) Build native Lo executables
@@ -682,6 +705,91 @@ F011 extends the accepted FP32 path with a later precision contract.
   - Verify that a skipped update preserves Parameters and changes only the state specified by the policy.
   - Record precision limitations of the selected software validation environment.
 
+### Metal backend
+
+The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned backend contract and implementation sequence.
+
+- [x] [F012] (P1) {P002,F008} Add explicit Metal access and tensor transfers
+  Goal:
+  Provide authorized Metal storage through Lo's public execution contract.
+
+  Requirements:
+  - Add `metal:0` and its exact host grant without automatic backend substitution.
+  - Add the cgo and Objective-C adapter with an explicit Metal build target.
+  - Pin the Metal language version, device features, SDK, compiler flags, and kernel identities.
+  - Keep device initialization after authorization and outside static compiler commands.
+  - Keep transfer bits, immutable values, storage budgets, and allocation receipts.
+  - Define empty allocations, cancellation cleanup, unavailable devices, and unusable sessions.
+
+  Deliverables:
+  - Add `make build-metal`, interpreter transfers, static inspection, and device contract updates.
+
+  Validation:
+  - Start with failing CLI integration tests for explicit Metal transfers.
+  - Verify exact transfer results with signed zero, subnormals, empty tensors, and unchanged source values.
+  - Inject unavailable-device, allocation, transfer, cancellation, and cleanup failures through the public execution path.
+  - Verify authorization before initialization and complete resource release.
+  - Verify that a failed Metal request never selects another backend.
+  - Use software tests as sufficient acceptance evidence under repository policy.
+
+  F012 completed on October 15, 2026.
+  The [transfer contract](docs/metal-transfers.md) documents explicit selection, the pinned build, resource accounting, errors, and cancellation.
+  Software integration tests passed for authorization, transfers, failures, and cleanup.
+  Local Metal tests passed with the race detector on the Apple M5 Pro.
+  The tests preserved 513 finite FP32 values exactly and completed 200 transfers with bounded storage.
+  The [final CI record](docs/evidence/metal-ci.txt) records successful software and native suites, static checks, and the standard build.
+  F013 retains arithmetic and training. F014 retains native Metal artifacts.
+
+- [ ] [F013] (P1) {F012,F007} Execute FP32 tensor operations and training through Metal
+  Goal:
+  Execute tensor operations, derivatives, and optimizer transitions on the selected Metal backend.
+
+  Requirements:
+  - Resolve subnormal arithmetic and signed-zero rules before production kernel implementation.
+  - Define the `metal-fp32` identity and exact repeatability contract.
+  - Add closed operation descriptors shared by interpreter and native runtime code.
+  - Implement the accepted tensor operations, VJPs, gradient operations, SGD, and AdamW.
+  - Keep tensor state on Metal between explicit transfers.
+  - Use fixed operation order and synchronous completion before subsequent observable effects.
+  - Keep source traces, finite-value checks, logical charges, and immutable optimizer state.
+  - Reject unsupported profiles and operations before their submission.
+
+  Deliverables:
+  - Add MSL kernels, an independent software executor, numeric fixtures, and specification updates.
+  - Extend `make test-metal` with arithmetic and training tests.
+
+  Validation:
+  - Start with failing CLI integration tests for device arithmetic and training.
+  - Compare primitives, derivatives, and optimizer updates with independent numerical references.
+  - Verify exact fixtures for the selected subnormal and signed-zero behavior.
+  - Verify fixed reductions and non-square matrix products.
+  - Verify no implicit tensor transfers between training steps.
+  - Inject command failures and verify blocked subsequent commits, source traces, and cleanup.
+  - Verify bitwise repeatability across three runs within each fixed numeric profile.
+
+- [ ] [F014] (P1) {F013,F001} Add Metal support to native executables
+  Goal:
+  Execute the Metal contract from standalone Lo artifacts on macOS arm64.
+
+  Requirements:
+  - Add explicit `lo build --device-backend metal` selection.
+  - Reject unsupported host and target combinations before compiler execution.
+  - Include the adapter, headers, and compiled kernels through an explicit runtime manifest.
+  - Enable cgo for the selected Metal artifact configuration.
+  - Record backend, compiler, SDK, kernel, and profile identities in artifact metadata.
+  - Keep grants as execution inputs.
+  - Keep build limits, cancellation, and atomic artifact publication.
+
+  Deliverables:
+  - Add native Metal construction, the updated artifact contract, and `make test-native-metal`.
+
+  Validation:
+  - Start with failing public build and artifact execution tests.
+  - Verify execution without a source checkout or separate kernel files.
+  - Verify interpreter and native parity within the same numeric profile.
+  - Verify unavailable-device results and unchanged previous artifacts after build failure.
+  - Verify software artifacts on the current macOS and Linux targets.
+
 ## Improvements
 
 - [ ] [I001] (P1) {F007,F010} Qualify deterministic training with a small complete MVP
@@ -721,6 +829,31 @@ F011 extends the accepted FP32 path with a later precision contract.
   - Verify bounded live allocation across repeated steps and release after completion or failure.
   - Verify invalid shapes, unsupported operations, unavailable devices, transfer failures, and deferred failures through CLI diagnostics.
   - Run `make test-integration`, `make test-conformance`, and `make ci` at the implementation completion checkpoint.
+
+- [ ] [I002] (P1) {F014} Qualify complete Metal training
+  Goal:
+  Establish complete training acceptance for the explicit Metal backend.
+
+  Requirements:
+  - Reuse I001's fixed network, inputs, initial Parameters, and 200-step SGD procedure.
+  - Include F007's independent AdamW fixture.
+  - Use the Metal profile and fixed fixture tolerances from the implementation plan.
+  - Accept simulation and controlled backend tests without a physical-device prerequisite.
+  - Record available local Metal execution and its evidence separately.
+  - Keep this work independent of I001's pending CUDA prerequisites.
+
+  Deliverables:
+  - Add the Metal example, acceptance report, public CLI tests, and current README instructions.
+
+  Validation:
+  - Verify parse, check, inspect, run, and native execution.
+  - Verify finite gradients and final loss below `0.001` after 200 steps.
+  - Verify six uploads, six downloads, bounded live storage, and complete cleanup.
+  - Verify three runs with the same inputs within each fixed numeric profile.
+  - Verify numerical agreement with independent references under the fixed tolerances.
+  - Verify failure diagnostics and prevention of subsequent observable effects.
+  - Run `make ci` at the final implementation checkpoint.
+  - Report unmeasured Metal behavior explicitly when only software evidence is available.
 
 ## Maintenance
 
