@@ -740,7 +740,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [final CI record](docs/evidence/metal-ci.txt) records successful software and native suites, static checks, and the standard build.
   F013 retains arithmetic and training. F014 retains native Metal artifacts.
 
-- [ ] [F013] (P1) {F012,F007} Execute FP32 tensor operations and training through Metal
+- [x] [F013] (P1) {F012,F007} Execute FP32 tensor operations and training through Metal
   Goal:
   Execute tensor operations, derivatives, and optimizer transitions on the selected Metal backend.
 
@@ -766,6 +766,15 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify no implicit tensor transfers between training steps.
   - Inject command failures and verify blocked subsequent commits, source traces, and cleanup.
   - Verify bitwise repeatability across three runs within each fixed numeric profile.
+
+  F013 completed on October 15, 2026.
+  The [arithmetic contract](docs/metal-arithmetic.md) defines `metal-fp32`, typed computation, kernels, derivatives, gradient operations, SGD, and AdamW.
+  Independent software tests and local Metal tests passed, including exact profile fixtures and the Go race detector.
+  Three 200-step runs per environment reached loss `0.00013215476064942777` and matched all nine reference Parameter values.
+  Each run used six uploads, six downloads, and 1,312 peak accounted bytes with complete cleanup.
+  Failure tests verified source traces, cancellation, workspace limits, blocked later commits, and unusable-session rejection.
+  The [final CI record](docs/evidence/metal-arithmetic-ci.txt) records successful static checks, software tests, native tests, and the standard build.
+  F014 retains native Metal artifacts. I002 retains complete training acceptance.
 
 - [ ] [F014] (P1) {F013,F001} Add Metal support to native executables
   Goal:
