@@ -1,0 +1,43 @@
+{
+  "target": "darwin/arm64",
+  "profile": "metal-fp32",
+  "device_features": [
+    "Apple7",
+    "unified memory"
+  ],
+  "versions": {
+    "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "go": "go1.27.1",
+    "macos": "27.0.1",
+    "macos_build": "26A434",
+    "metal": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+    "metallib": "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)",
+    "sdk": "27.0",
+    "xcode": "Xcode 27.0\nBuild version 27A266a"
+  },
+  "source_sha256": {
+    "go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+    "go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03",
+    "internal/device/metal_bridge.h": "24bb8d03421440d1d22df9c0d6a5454959daa35dc28317bfd221d2c6e772ff47",
+    "internal/device/metal_bridge_darwin.m": "3532af5341db44c7003aa12c3c2df94ba49217f7dfec87b0724afa721887ae74",
+    "internal/device/metal_darwin.go": "feafecd54b00946646cc73a9c32460b72f0ada46ce7eba83f17712a2c22c45a4",
+    "internal/device/metal_kernels.metal": "eec1b13249c95d41c3754049c62b15008a3c307424557fb8bcff5580a771b16e",
+    "internal/device/metal_types.h": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683",
+    "internal/runtimebundle/runtime.zip": "bc2cad9fbda8563fb536e4cab55bc8e951380d180f81c734c0053bbf03f4f8d7",
+    "tools/metalbuild/main.go": "e5ea89697dbdcc92f3b8676ff556a3a50f825c76ebb54c46576e07ed62efd381"
+  },
+  "metal_flags": [
+    "-std=metal3.1",
+    "-mmacosx-version-min=27.0",
+    "-fmetal-math-mode=safe",
+    "-fmetal-math-fp32-functions=precise",
+    "-ffp-contract=off"
+  ],
+  "go_flags": [
+    "build",
+    "-trimpath",
+    "-tags=metal"
+  ],
+  "metallib_sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6",
+  "binary_sha256": "6971cb3f2f87c06e0def53da41a624e18275bc8a3b372597b73bd1b08b627d45"
+}

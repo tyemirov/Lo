@@ -3,7 +3,23 @@ package catalog
 import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
+	"slices"
 )
+
+func addComputeFailures(operations map[string]Operation) {
+	for name, definition := range operations {
+		if !UsesDevice(name) || name == TensorTo {
+			continue
+		}
+		entry := definition.(operation)
+		for _, kind := range []string{device.Unavailable, device.UnsupportedProfile, device.UnsupportedOperation, device.AllocationFailed, device.LibraryFailed, device.ExecutionFailed, device.Lost, device.Mismatch} {
+			if !slices.Contains(entry.errors, kind) {
+				entry.errors = append(entry.errors, kind)
+			}
+		}
+		operations[name] = entry
+	}
+}
 
 const (
 	TensorTo                = "Tensor.to"

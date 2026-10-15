@@ -63,7 +63,7 @@ func TestMetalStaticInspection(t *testing.T) {
 			t.Fatalf("static %s: %+v", command, got)
 		}
 		if command == "inspect" {
-			for _, fragment := range []string{`"metal:0"`, `"storage_bytes":16`, `"devices":true`, `metal-transfer-fp32`, `Device.UnsupportedProfile`, `Device.LibraryFailed`, `Device.Lost`} {
+			for _, fragment := range []string{`"metal:0"`, `"storage_bytes":16`, `"devices":true`, `metal-fp32`, `Device.UnsupportedProfile`, `Device.LibraryFailed`, `Device.Lost`} {
 				if !strings.Contains(got.stdout, fragment) {
 					t.Fatalf("inspection lacks %s: %s", fragment, got.stdout)
 				}
@@ -175,7 +175,7 @@ func TestMetalTensorBoundaries(t *testing.T) {
 	}{
 		{"observation", "List<Float>", "Tensor.values(transferred)", "Tensor.HostObservationRequired", 1},
 		{"publication", "Tensor<FP32>", "transferred", "runtime.tensor-publication", 2},
-		{"arithmetic pending", "Tensor<FP32>", "Tensor.add(transferred,transferred)", "Device.UnsupportedOperation", 1},
+		{"storage-only backend", "Tensor<FP32>", "Tensor.add(transferred,transferred)", "Device.UnsupportedOperation", 1},
 		{"mismatched locations", "Tensor<FP32>", "Tensor.add(source,transferred)", "Tensor.DeviceMismatch", 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

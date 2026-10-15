@@ -27,6 +27,7 @@ type Metadata struct {
 	Profile      string   `json:"profile"`
 	Device       string   `json:"device"`
 	Layout       string   `json:"layout"`
+	Execution    string   `json:"execution,omitempty"`
 	Shape        []string `json:"shape"`
 	StorageBytes *uint64  `json:"storage_bytes"`
 }
@@ -122,7 +123,8 @@ func Analyze(p ir.Program) (map[ir.Expression]*Metadata, diagnostic.Diagnostic) 
 			case device.CUDA:
 				m.Profile = device.CUDAProfile
 			case device.Metal:
-				m.Profile = device.MetalTransferProfile
+				m.Profile = device.MetalProfile
+				m.Execution = "synchronous"
 			}
 		}
 		if f.Shape != nil {

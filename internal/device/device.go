@@ -14,7 +14,6 @@ const (
 	Mismatch                    = "Tensor.DeviceMismatch"
 	SimulationProfile           = "cuda-sim-fp32"
 	CUDAProfile                 = "cuda-fp32-pedantic"
-	MetalTransferProfile        = "metal-transfer-fp32"
 	EventOpen                   = "open"
 	EventAllocate               = "allocate"
 	EventTransfer               = "transfer"
@@ -58,7 +57,7 @@ func NewFault(kind string, cause error) (Fault, error) {
 		return nil, fmt.Errorf("device failure requires a cause")
 	}
 	switch kind {
-	case Unavailable, AllocationFailed, TransferFailed, UnsupportedOperation, UnsupportedProfile, LibraryFailed, Lost, Mismatch:
+	case Unavailable, AllocationFailed, TransferFailed, UnsupportedOperation, UnsupportedProfile, LibraryFailed, Lost, Mismatch, ExecutionFailed:
 		return &fault{kind, cause}, nil
 	default:
 		return nil, fmt.Errorf("invalid device failure kind %q", kind)
@@ -86,6 +85,8 @@ type Buffer interface {
 // Backend owns one invocation's device context.
 type Backend interface {
 	Allocate(context.Context, uint64) (Buffer, error)
+	Supports(Operation) error
+	Compute(context.Context, Operation, []Buffer, Buffer, Buffer) error
 	Identity() Identity
 	Close() error
 }
@@ -95,6 +96,7 @@ type Identity struct {
 	Name         string `json:"name"`
 	Profile      string `json:"profile"`
 	RegistryID   string `json:"registry_id,omitempty"`
+	System       string `json:"system,omitempty"`
 	KernelSHA256 string `json:"kernel_sha256,omitempty"`
 }
 
@@ -230,6 +232,7 @@ func (a *allocation) Host() []float32  { return a.host }
 type session struct {
 	config      configuration
 	backend     Backend
+	identity    Identity
 	next, live  uint64
 	classBytes  [4]uint64
 	current     *scope
@@ -281,8 +284,9 @@ func (s *session) Open(ctx context.Context, selector string) error {
 		return &fault{Unavailable, fmt.Errorf("backend factory returned no device")}
 	}
 	s.backend = backend
+	s.identity = backend.Identity()
 	if s.config.observer != nil {
-		identity := backend.Identity()
+		identity := s.identity
 		s.config.observer(Receipt{Event: EventOpen, Device: selector, Live: s.live, Backend: &identity})
 	}
 	return nil
@@ -542,6 +546,7 @@ func (a *allocation) receipt() *allocation { return a }
 // Session owns an invocation's lazy backend and resource ledger.
 type Session interface {
 	Granted(string) bool
+	Compute(context.Context, string, Operation, []Allocation) (Allocation, error)
 	Allocate(context.Context, string, uint64) (Allocation, error)
 	Transfer(context.Context, Allocation, Allocation) error
 	CheckBudget(Class, uint64) error

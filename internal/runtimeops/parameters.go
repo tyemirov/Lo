@@ -46,9 +46,7 @@ func (m *machine) parameterOperation(call Call, args []value.Value) (value.Value
 	if name == catalog.GradientsNew {
 		return wrap(right), nil
 	}
-	if !value.HostPublishable(left) {
-		return OperationFailure(call, args, device.UnsupportedOperation, "gradient arithmetic requires the selected device backend"), nil
-	}
+	location := left.Fields()[0].Value.(value.Tensor).Data().Location()
 	maths := tensorArithmetic{m}
 	fail := func(err error) (value.Value, error) {
 		if host := execution.BoundaryHostError(err); host != nil {
@@ -71,7 +69,7 @@ func (m *machine) parameterOperation(call Call, args []value.Value) (value.Value
 			return OperationFailure(call, args, catalog.NumericNonFinite, "gradient scale factor exceeds finite FP32"), nil
 		}
 		var err error
-		factor, err = maths.Constant(must(tensor.NewShape(nil)), f)
+		factor, err = maths.Constant(must(tensor.NewShape(nil)), location, f)
 		if err != nil {
 			return fail(err)
 		}
@@ -83,7 +81,7 @@ func (m *machine) parameterOperation(call Call, args []value.Value) (value.Value
 		var err error
 		switch name {
 		case catalog.GradientsZero:
-			result, err = maths.Constant(a.Shape(), 0)
+			result, err = maths.Constant(a.Shape(), location, 0)
 		case catalog.GradientsAdd:
 			result, err = maths.Apply(catalog.TensorAdd, a, right.Field(f.Name).(value.Tensor).Data(), nil)
 		case catalog.GradientsScale:

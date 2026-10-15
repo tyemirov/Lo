@@ -298,6 +298,7 @@ func build() map[string]Operation {
 	addAutodiff(m)
 	addParameters(m)
 	addOptimizers(m)
+	addComputeFailures(m)
 	return m
 }
 func Lookup(name string) (Operation, bool) { o, ok := operations[name]; return o, ok }

@@ -19,11 +19,6 @@ import (
 func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (output value.Value, resultErr error) {
 	scope := m.Scope()
 	defer func() { scope.Close(output) }()
-	for _, arg := range args {
-		if !value.HostPublishable(arg) {
-			return runtimeops.OperationFailure(original, args, device.UnsupportedOperation, "device autodiff requires the selected device backend"), nil
-		}
-	}
 	call := original.(autodiff.Call)
 	parameters := call.Parameters()
 	f := frame{bindings: map[ir.BindingID]value.Value{}}
@@ -46,7 +41,10 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (output 
 		}
 		var cause value.Error
 		var runtime execution.Failure
-		var numeric tensor.Fault
+		var numeric interface {
+			error
+			Kind() string
+		}
 		switch {
 		case errors.As(err, &runtime):
 			cause = runtime.Value()
@@ -119,13 +117,13 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (output 
 	for _, s := range call.Selections() {
 		n := nodes[s.Node-1]
 		input := f.bindings[n.Binding()].(value.Tensor)
-		zero, err := math.Constant(input.Data().Shape(), 0)
+		zero, err := math.Constant(input.Data().Shape(), input.Data().Location(), 0)
 		if err != nil {
 			return fail(err, n)
 		}
 		adjoints[s.Node] = zero
 	}
-	seed, err := math.Constant(loss.Data().Shape(), 1)
+	seed, err := math.Constant(loss.Data().Shape(), loss.Data().Location(), 1)
 	if err != nil {
 		return fail(err, nodes[call.ResultNode()-1])
 	}
