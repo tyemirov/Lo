@@ -496,7 +496,7 @@ Most values also have a `value` field.
 | --- | --- |
 | `Int` | Decimal string with exact integer precision. |
 | `Float` | Shortest round-trip decimal string for a finite binary64 value, including signed zero. |
-| `Device` | Selector string: `cpu`, `cuda:0`, or `cuda-sim:0`. |
+| `Device` | Selector string: `cpu`, `cuda:0`, `cuda-sim:0`, or `metal:0`. |
 | `Tensor<FP32>` | Object with `dtype`, `shape`, `device`, and complete row-major `values`. |
 | `String`, `Scalar`, `File.Path` | JSON string. |
 | `Bool`, `Null` | JSON boolean or null. |

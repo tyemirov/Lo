@@ -4,6 +4,8 @@ F008 implements device authorization, explicit tensor transfers, and invocation 
 The interpreter and native artifacts use the same resource contract.
 The software backend implements transfers for the explicit `cuda-sim:0` selector.
 The current build reports `Device.Unavailable` for authorized `cuda:0` access.
+F012 adds explicit `metal:0` transfers in the Metal interpreter build.
+The [Metal transfer contract](metal-transfers.md) defines that build and its validation.
 F009 will implement NVIDIA arithmetic and its backend.
 F010 will implement deferred execution and source-order failure selection for asynchronous operations.
 
@@ -44,8 +46,11 @@ Each HTTP request receives a separate session with the configured grant.
 | Authorized backend unavailable | Recoverable `Device.Unavailable`. |
 | Backend allocation failure | Recoverable `Device.AllocationFailed`. |
 | Upload or download failure | Recoverable `Device.TransferFailed`, with no result tensor. |
+| Unsupported device profile | Recoverable `Device.UnsupportedProfile`. |
+| Metal library or pipeline creation failure | Recoverable `Device.LibraryFailed`. |
+| Unusable device session | Recoverable `Device.Lost`, with no subsequent device submissions. |
 | Arithmetic across locations | Recoverable `Tensor.DeviceMismatch`. |
-| Arithmetic on a compute tensor | Recoverable `Device.UnsupportedOperation` until F009. |
+| Arithmetic on a compute tensor | Recoverable `Device.UnsupportedOperation` until F009 or F013 implements the selected backend. |
 | Numeric CPU observation of a compute tensor | Recoverable `Tensor.HostObservationRequired`. |
 | Device tensor in the final result | Host `runtime.tensor-publication`, with exit status 2. |
 | Storage or work budget exceeded | Host `runtime.limit`, with exit status 2. |
@@ -104,7 +109,9 @@ The `Factory`, `Backend`, and `Buffer` interfaces isolate backend initialization
 A compute tensor has metadata and opaque storage.
 CPU numeric kernels require CPU data.
 `runner.RunContext` accepts a factory and receipt observer for tests through the public CLI execution contract.
-The production CLI uses the software factory.
+The production CLI selects a backend through the factory for its build.
+The standard build provides simulation. The Metal build also provides authorized Metal transfers.
+Open receipts record the selected backend identity without tensor contents.
 A failed CUDA request never changes its selected backend.
 
 ## Validation

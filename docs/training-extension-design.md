@@ -888,7 +888,10 @@ No runtime implementation or native compilation change formed part of P001.
 
 ## Open Decisions
 
-No unresolved decision blocks the P1 issues.
+The separate [Metal implementation plan](metal-backend-plan.md) defines the proposed Apple backend and its remaining decisions.
+F012, F013, F014, and I002 own that work independently of the NVIDIA implementation sequence below.
+
+No unresolved decision blocks the NVIDIA P1 issues described in this document.
 The following decisions belong to later scope or implementation evidence.
 
 | Item | Status and owner | Required resolution |

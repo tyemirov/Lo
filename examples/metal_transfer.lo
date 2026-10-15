@@ -1,0 +1,7 @@
+flow Main() -> Tensor<FP32>! {
+  source = Tensor.new(List.new(1.25, -0.0, 1.401298464324817e-45, -2.5), List.new(2, 2))
+  remote = Tensor.to(source, Device.new("metal:0"))
+  return Tensor.to(remote, Device.new("cpu"))
+}
+
+return Main()

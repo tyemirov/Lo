@@ -58,7 +58,7 @@ func (v deviceValue) Selector() string             { return v.selector }
 func (v deviceValue) MarshalJSON() ([]byte, error) { return encode(v, v.selector) }
 func NewDevice(selector string) (Device, error) {
 	switch selector {
-	case device.CPU, device.CUDA, device.Simulation:
+	case device.CPU, device.CUDA, device.Simulation, device.Metal:
 		return deviceValue{newBase(types.Device(), uint64(len(selector))), selector}, nil
 	default:
 		return nil, fmt.Errorf("invalid device selector %q", selector)

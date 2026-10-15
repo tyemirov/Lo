@@ -19,6 +19,15 @@ verify-runtime-bundle:
 build: runtime-bundle
 	$(GO) build -o bin/lo ./cmd/lo
 
+.PHONY: build-metal test-metal
+build-metal: runtime-bundle
+	mkdir -p bin
+	$(GO) run ./tools/metalbuild
+
+test-metal: runtime-bundle
+	mkdir -p bin
+	$(GO) run ./tools/metalbuild -test -- $(TEST_ARGS)
+
 fmt:
 	$(GO) fmt ./...
 

@@ -121,6 +121,8 @@ func Analyze(p ir.Program) (map[ir.Expression]*Metadata, diagnostic.Diagnostic) 
 				m.Profile = device.SimulationProfile
 			case device.CUDA:
 				m.Profile = device.CUDAProfile
+			case device.Metal:
+				m.Profile = device.MetalTransferProfile
 			}
 		}
 		if f.Shape != nil {
