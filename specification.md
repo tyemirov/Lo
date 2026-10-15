@@ -1724,8 +1724,10 @@ This abbreviation is not a source type alias.
 Device construction validates the selector without device initialization.
 An invalid selector produces `Device.InvalidSelector`.
 The current software backend executes explicit transfers for `cuda-sim:0`.
-The Metal interpreter build executes explicit transfers and synchronous FP32 computation for `metal:0`.
-The standard build and native artifacts report `Device.Unavailable` for authorized Metal access.
+The Metal interpreter and explicitly selected Metal artifacts execute transfers and synchronous FP32 computation for `metal:0`.
+The standard compiler and software artifacts report `Device.Unavailable` for authorized Metal access.
+Use `lo-metal build --device-backend metal` for a native Metal artifact on `darwin/arm64`.
+The [native Metal contract](docs/native-metal.md) defines build inputs, metadata, and execution requirements.
 Authorized `cuda:0` access produces `Device.Unavailable` until F009 supplies that backend.
 Unsupported backend arithmetic produces `Device.UnsupportedOperation` before submission.
 
