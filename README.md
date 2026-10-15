@@ -41,7 +41,8 @@ The [device resource contract](docs/device-resources.md) records the implementat
 P002 adds the [Metal implementation plan](docs/metal-backend-plan.md).
 F012 adds explicit Apple GPU transfers through the Metal interpreter build.
 The [Metal transfer contract](docs/metal-transfers.md) defines the build, device profile, and validation evidence.
-F013, F014, and I002 retain Metal arithmetic, native artifacts, and complete training acceptance.
+F013 adds [Metal arithmetic, derivatives, gradient operations, and optimizers](docs/metal-arithmetic.md).
+F014 and I002 retain native Metal artifacts and complete training acceptance.
 F009, F010, F011, and I001 retain device arithmetic, deferred execution, later precision work, and complete training acceptance.
 The [training benchmark](docs/training-benchmark.md) records the interpreter baseline before F001.
 The [native acceptance report](docs/native-compilation-results.md) compares the two execution backends, including CPU training.
