@@ -1724,10 +1724,10 @@ This abbreviation is not a source type alias.
 Device construction validates the selector without device initialization.
 An invalid selector produces `Device.InvalidSelector`.
 The current software backend executes explicit transfers for `cuda-sim:0`.
-The Metal interpreter build executes explicit transfers for `metal:0`.
+The Metal interpreter build executes explicit transfers and synchronous FP32 computation for `metal:0`.
 The standard build and native artifacts report `Device.Unavailable` for authorized Metal access.
 Authorized `cuda:0` access produces `Device.Unavailable` until F009 supplies that backend.
-Device arithmetic produces `Device.UnsupportedOperation` in this implementation.
+Unsupported backend arithmetic produces `Device.UnsupportedOperation` before submission.
 
 An empty shape has one element and rank zero.
 A zero dimension makes the element count zero.
@@ -1741,7 +1741,7 @@ Shape facts propagate through literals, bindings, records, projections, and name
 The checker joins facts across Match branches.
 General arithmetic and list callbacks can leave dimensions unknown.
 Dynamic constructor and operation boundaries validate unknown shapes before output allocation.
-CPU kernels consume the validated shapes and axes.
+CPU and Metal kernels consume the validated shapes and axes.
 
 Reshape preserves the element count and row-major element order.
 It can share immutable storage.
@@ -1749,7 +1749,7 @@ Transpose constructs a new row-major result.
 All previous bindings retain their values after these operations.
 No Lo operation exposes tensor storage identity or host pointers.
 
-24.3 CPU Operation Set
+24.3 Tensor Operation Set
 
 | Signature | Contract |
 | --- | --- |
@@ -1792,7 +1792,18 @@ No partial tensor result is published.
 
 Mean squared error composes subtraction, elementwise multiplication, and mean.
 The executable `examples/tensor_forward.lo` composes a two-layer ReLU network and returns rank-zero loss `3`.
-F005 and F009 must support the selected differentiable operations from this table under their derivative and backend contracts.
+F005 and F013 implement derivatives for these operations on CPU and Metal.
+F009 retains the NVIDIA backend.
+
+The `metal-fp32` profile uses the same shapes, operations, logical charges, and finite-value checks.
+It normalizes subnormal arithmetic operands and results to positive zero.
+It also normalizes signed arithmetic zeros to positive zero.
+Division and square-root domain checks apply after normalization.
+An active square-root derivative rejects a normalized zero input.
+Transfers, layout operations, constant construction, and empty-axis reductions preserve their input bits.
+Matrix products and reductions use fixed traversal order, with no fused multiplication and addition.
+Device tensors remain at their selected location until an explicit transfer.
+The profile requires identical bits across repeated executions with the same build, device, system, and inputs.
 
 24.4 Resource and Diagnostic Contracts
 
@@ -2008,6 +2019,8 @@ A transfer between different compute locations produces an error.
 `Device.Unavailable`, `Device.AllocationFailed`, and `Device.TransferFailed` are recoverable errors.
 An unsupported device profile produces `Device.UnsupportedProfile`.
 Metal library or pipeline creation can produce `Device.LibraryFailed`.
+Computation command construction failures produce `Device.ExecutionFailed`.
+A failed submitted Metal command makes its session unusable.
 An unusable session produces `Device.Lost` and rejects subsequent device resource access without submission.
 CPU error handling and resource cleanup remain available after device loss.
 Cancellation remains a host diagnostic when a device boundary also reports a failure.
@@ -2033,4 +2046,5 @@ Callback loops release superseded state and keep output values that remain reach
 Success, failure, and cancellation close the invocation's remaining receipts and backend.
 A cleanup failure prevents successful result publication.
 The [device resource contract](docs/device-resources.md) defines the backend interface and validation evidence.
-The [Metal transfer contract](docs/metal-transfers.md) defines the current Metal implementation.
+The [Metal transfer contract](docs/metal-transfers.md) defines the current Metal build and storage.
+The [Metal arithmetic contract](docs/metal-arithmetic.md) defines `metal-fp32`, operation support, and computation evidence.
