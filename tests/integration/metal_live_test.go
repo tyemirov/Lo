@@ -14,6 +14,9 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 )
 
+func TestMetalLivePrimitives(t *testing.T)  { metalPrimitives(t, device.DefaultFactory) }
+func TestMetalLiveDerivatives(t *testing.T) { metalDerivatives(t, device.DefaultFactory) }
+
 func TestMetalLiveTransfers(t *testing.T) {
 	bits := []uint32{0, 0x80000000, 1, 0x80000001, 0x007fffff, 0x807fffff, 0x00800000, 0x80800000, 0x7f7fffff, 0xff7fffff}
 	state := uint32(127)
@@ -57,7 +60,7 @@ func TestMetalLiveTransfers(t *testing.T) {
 				}
 				if r.Event == device.EventOpen {
 					opens++
-					if r.Backend == nil || r.Backend.Profile != device.MetalTransferProfile || r.Backend.Name == "" || r.Backend.RegistryID == "" || len(r.Backend.KernelSHA256) != 64 {
+					if r.Backend == nil || r.Backend.Profile != device.MetalProfile || r.Backend.Name == "" || r.Backend.RegistryID == "" || r.Backend.System == "" || len(r.Backend.KernelSHA256) != 64 {
 						t.Fatalf("missing device identity: %+v", r)
 					}
 					identity, _ := json.Marshal(r.Backend)
@@ -97,4 +100,27 @@ flow Main()->Tensor<FP32>!{a=Tensor.new(List.new(1.25,-0.0,1.401298464324817e-45
 	}
 	t.Logf("100 steps: transfers=%d peak_reserved_bytes=%d", transfers, peak)
 	assertReleased(t, receipts)
+}
+
+func TestMetalLiveOptimizers(t *testing.T) { metalOptimizers(t, device.DefaultFactory) }
+func TestMetalLiveProfile(t *testing.T)    { metalNumericProfile(t, device.DefaultFactory) }
+
+func TestMetalLiveTraining(t *testing.T)        { metalTraining(t, device.DefaultFactory) }
+func TestMetalLiveNumericFailures(t *testing.T) { metalNumericFailures(t, device.DefaultFactory) }
+
+func TestMetalLiveCLIComputation(t *testing.T) {
+	path := filepath.Join(repository, "examples", "metal_arithmetic.lo")
+	for _, command := range []string{"check", "inspect", "run"} {
+		args := []string{command, path, "--format", "json"}
+		if command == "run" {
+			args = append(args, "--allow-device", "metal:0")
+		}
+		got := runExecutable(t, filepath.Join(repository, "bin", "lo-metal"), args...)
+		if got.status != 0 || got.stderr != "" {
+			t.Fatalf("Metal CLI %s: %+v", command, got)
+		}
+		if command == "run" && !strings.Contains(got.stdout, `"values":["0.8","-1.6"]`) {
+			t.Fatalf("Metal CLI result: %s", got.stdout)
+		}
+	}
 }
