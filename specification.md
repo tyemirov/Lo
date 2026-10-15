@@ -1711,7 +1711,7 @@ This abbreviation is not a source type alias.
 
 | Signature | Contract |
 | --- | --- |
-| `Device.new(selector: String) -> Device!` | Accept exactly `cpu`, `cuda:0`, or `cuda-sim:0`. |
+| `Device.new(selector: String) -> Device!` | Accept `cpu`, `cuda:0`, `cuda-sim:0`, or `metal:0`. |
 | `Tensor.new(values: List<Float>, shape: List<Int>) -> T!` | Convert finite binary64 inputs to FP32 and construct a CPU tensor. |
 | `Tensor.shape(value: T) -> List<Int>` | Return ordered dimensions. |
 | `Tensor.rank(value: T) -> Int` | Return the number of dimensions. |
@@ -1724,6 +1724,8 @@ This abbreviation is not a source type alias.
 Device construction validates the selector without device initialization.
 An invalid selector produces `Device.InvalidSelector`.
 The current software backend executes explicit transfers for `cuda-sim:0`.
+The Metal interpreter build executes explicit transfers for `metal:0`.
+The standard build and native artifacts report `Device.Unavailable` for authorized Metal access.
 Authorized `cuda:0` access produces `Device.Unavailable` until F009 supplies that backend.
 Device arithmetic produces `Device.UnsupportedOperation` in this implementation.
 
@@ -1989,7 +1991,8 @@ Diagnostic snapshots retain metadata for nested tensors and optimizer fields.
 24.8 Device Resources and Explicit Transfers
 
 `Tensor.to` requires an exact host grant for every non-CPU location it uses.
-The CLI accepts one `--allow-device cuda:0` or `--allow-device cuda-sim:0` grant with `run` or `serve`.
+The CLI accepts one non-CPU grant with `run` or `serve`.
+Use `--allow-device cuda:0`, `--allow-device cuda-sim:0`, or `--allow-device metal:0` for the selected backend.
 CPU operations require no device grant.
 A duplicate grant or unsupported selector produces `cli.invalid-invocation` with exit status 2.
 Authorization denial produces `runtime.capability-denied` before device initialization, allocation, or transfer.
@@ -2003,6 +2006,11 @@ Same-location transfers share the original immutable storage without a copy.
 
 A transfer between different compute locations produces an error.
 `Device.Unavailable`, `Device.AllocationFailed`, and `Device.TransferFailed` are recoverable errors.
+An unsupported device profile produces `Device.UnsupportedProfile`.
+Metal library or pipeline creation can produce `Device.LibraryFailed`.
+An unusable session produces `Device.Lost` and rejects subsequent device resource access without submission.
+CPU error handling and resource cleanup remain available after device loss.
+Cancellation remains a host diagnostic when a device boundary also reports a failure.
 A failed transfer publishes no output tensor.
 
 `Tensor.values` and `Tensor.to_float` require CPU data and otherwise produce `Tensor.HostObservationRequired`.
@@ -2025,3 +2033,4 @@ Callback loops release superseded state and keep output values that remain reach
 Success, failure, and cancellation close the invocation's remaining receipts and backend.
 A cleanup failure prevents successful result publication.
 The [device resource contract](docs/device-resources.md) defines the backend interface and validation evidence.
+The [Metal transfer contract](docs/metal-transfers.md) defines the current Metal implementation.
