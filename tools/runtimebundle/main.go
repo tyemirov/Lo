@@ -45,6 +45,9 @@ func run(check bool) error {
 		}
 		for _, entry := range entries {
 			name := entry.Name()
+			if pkg == "device" && name == "metal_darwin.go" {
+				continue
+			}
 			if strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, "_test.go") {
 				if err := add(filepath.Join(directory, name), filepath.ToSlash(filepath.Join(directory, name))); err != nil {
 					return err

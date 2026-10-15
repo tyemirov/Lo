@@ -40,7 +40,7 @@ func run() int {
 	if d != nil {
 		return runner.Report(os.Stderr, inv.Format(), d, 1)
 	}
-	receipt, d := nativebuild.BuildRace(context.Background(), p, inv.Output(), inv.Target())
+	receipt, d := nativebuild.BuildRace(context.Background(), p, inv.Output(), inv.Target(), inv.DeviceBackend())
 	if d != nil {
 		return runner.Report(os.Stderr, inv.Format(), d, 2)
 	}
