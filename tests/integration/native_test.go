@@ -440,13 +440,18 @@ flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),s
 }
 
 func TestNativeToolchainCancellationAndOutputLimit(t *testing.T) {
+	nativeToolchainFailures(t, binary, nil)
+}
+
+func nativeToolchainFailures(t *testing.T, compiler string, buildArgs []string) {
+	t.Helper()
 	helper := filepath.Join(t.TempDir(), "go")
 	command := exec.Command("go", "build", "-o", helper, "./testdata/native_toolchain")
 	command.Dir = repository
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("build controlled toolchain: %v %s", err, output)
 	}
-	for _, action := range []string{"cancel", "overflow", "version-overflow"} {
+	for _, action := range []string{"cancel", "overflow", "version-overflow", "failure", "artifact-overflow"} {
 		t.Run(action, func(t *testing.T) {
 			state := t.TempDir()
 			artifact := filepath.Join(state, "artifact")
@@ -460,8 +465,9 @@ func TestNativeToolchainCancellationAndOutputLimit(t *testing.T) {
 			if err = file.Close(); err != nil {
 				t.Fatal(err)
 			}
-			command := exec.Command(binary, "build", sourceFile(t, "return 1"), "--output", artifact, "--format", "json")
-			command.Env = append(os.Environ(), "PATH="+filepath.Dir(helper), "LO_TEST_TOOL_STATE="+state, "LO_TEST_TOOL_ACTION="+action)
+			args := append([]string{"build", sourceFile(t, "return 1"), "--output", artifact, "--format", "json"}, buildArgs...)
+			command := exec.Command(compiler, args...)
+			command.Env = append(os.Environ(), "PATH="+filepath.Dir(helper)+string(os.PathListSeparator)+os.Getenv("PATH"), "LO_TEST_TOOL_STATE="+state, "LO_TEST_TOOL_ACTION="+action)
 			var stderr bytes.Buffer
 			command.Stderr = &stderr
 			if err := command.Start(); err != nil {
@@ -501,6 +507,9 @@ func TestNativeToolchainCancellationAndOutputLimit(t *testing.T) {
 				t.Fatal("build did not stop")
 			}
 			code := "build.cancelled"
+			if action == "failure" {
+				code = "build.failed"
+			}
 			if strings.HasSuffix(action, "overflow") {
 				code = "build.limit"
 			}
