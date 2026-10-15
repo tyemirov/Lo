@@ -3,7 +3,8 @@
 P002 records the plan for an explicit Apple Metal backend.
 F012, F013, F014, and I002 own implementation and acceptance.
 F012 implements Metal transfers in the interpreter through the [current transfer contract](metal-transfers.md).
-The remaining sections retain the planned arithmetic, native artifact, and training work.
+F013 implements [Metal arithmetic, derivatives, and optimizers](metal-arithmetic.md).
+F014 and I002 retain native artifacts and complete training acceptance.
 
 ## Goal and Scope
 
@@ -21,9 +22,8 @@ F009 and F010 keep their CUDA scope and are not prerequisites for Metal.
 
 The standard backend implements `cuda-sim:0` transfers and rejects authorized `cuda:0` access with `Device.Unavailable`.
 F012 adds the explicit Metal build and bit-preserving transfers.
-Device arithmetic currently returns `Device.UnsupportedOperation`.
-The backend interfaces expose identity, allocation, upload, download, and cleanup.
-They do not yet expose tensor computation.
+Metal arithmetic uses typed operation descriptors and synchronous kernels.
+The backend interfaces expose identity, allocation, transfers, computation, and cleanup.
 
 On October 15, 2026, a direct Swift probe compiled and executed a Metal kernel on this Mac.
 The Apple M5 Pro has 20 GPU cores and reports Metal 4 support.
@@ -38,7 +38,7 @@ F014 must change both contracts for Metal artifacts.
 
 ## Explicit Selection
 
-Use the following planned source and execution forms:
+Use the following explicit source and execution forms:
 
 ```lo
 device = Device.new("metal:0")
@@ -48,7 +48,7 @@ result = Tensor.to(remote, Device.new("cpu"))
 
 ```bash
 make build-metal
-./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
+./bin/lo-metal run examples/metal_transfer.lo --allow-device metal:0 --format json
 ```
 
 - Accept `metal:0` as the only Metal selector.
@@ -118,9 +118,10 @@ The first implementation does not promise immediate GPU preemption.
 ## Operation and Numeric Contract
 
 F013 extends the resource interface with closed, typed operation descriptors.
-It must reuse tensor shape preparation, logical charges, source spans, and validated dtype information.
-It must remove the current NVIDIA-specific arithmetic rejection from shared execution code.
-Backend support checks must precede submission of the affected operation.
+The [current arithmetic contract](metal-arithmetic.md) records the implemented profile and validation.
+It reuses tensor shape preparation, logical charges, source spans, and validated dtype information.
+Shared execution selects computation through the tensor's actual location.
+Backend support checks precede output allocation and submission of the affected operation.
 
 | Operation group | First Metal scope |
 | --- | --- |
@@ -131,7 +132,7 @@ Backend support checks must precede submission of the affected operation.
 | Derivatives | Current VJPs, shared contributions, stop-gradient, and gradient operations. |
 | Optimizers | Immutable SGD and AdamW transitions with device-resident tensor state. |
 
-The proposed numeric profile is `metal-fp32`.
+The implemented numeric profile is `metal-fp32`.
 Its identity includes Lo, kernels, compiler options, macOS build, GPU identity, and effective operation configuration.
 Each fixed identity must produce the same numeric bits across three runs with the same inputs.
 Interpreter and native execution must agree within the same identity.
@@ -143,11 +144,10 @@ Apple defines these controls in the [MSL specification](https://developer.apple.
 The specification lets subnormal arithmetic flush to zero, including with precise functions.
 Safe math alone cannot establish the CPU subnormal contract.
 
-F013 must resolve the arithmetic decision below before production kernels are implemented.
-Transfers must keep every bit regardless of that decision.
-The preferred arithmetic profile makes flush-to-zero behavior explicit and deterministic.
-The final rules must define subnormal operands, subnormal results, signed zero, division, square root, and finite-value checks.
-Reject a profile that cannot meet those rules without automatic substitution.
+F013 normalizes subnormal arithmetic operands and results to positive zero.
+It also normalizes signed arithmetic zeros to positive zero.
+Transfers and layout operations preserve every bit.
+The current arithmetic contract defines division, square root, derivatives, and finite-value checks under these rules.
 
 Use the existing [fixture tolerances](training-extension-design.md#reproducibility) for normal-range primitive, derivative, optimizer, and training comparisons.
 Define separate exact fixtures for the selected subnormal and signed-zero rules.
@@ -210,7 +210,8 @@ Use an independent software executor for Metal operation descriptors and the sel
 Do not use the CPU tensor evaluator as its numerical oracle.
 Do not add a public `metal-sim:0` selector for this test dependency.
 
-Add planned `make test-metal` and `make test-native-metal` targets for explicit local Metal execution.
+Use `make test-metal` for explicit local Metal execution.
+F014 adds `make test-native-metal` for native artifacts.
 These targets must fail clearly when their requested Metal environment is unavailable.
 Routine CI must run the software contract tests without a GPU prerequisite.
 Simulation and controlled failures are sufficient acceptance environments under repository policy.
@@ -244,7 +245,7 @@ I002 updates the README, examples, and acceptance evidence with implemented capa
 
 | Decision | Owner | Necessary resolution |
 | --- | --- | --- |
-| Exact arithmetic for subnormals and signed zero | F013 | Run a bounded MSL probe and independent reference before selecting final profile rules. |
+| Exact arithmetic for subnormals and signed zero | F013 | Resolved through explicit positive-zero normalization, independent fixtures, and local Metal execution. |
 | Metal language version and device feature predicate | F012 | Resolved: MSL 3.1, Apple GPU family 7 support, unified memory, and macOS 27. |
 | Source and compiled kernel identities | F012 | Resolved through the pinned build manifest and its generated receipt. |
 

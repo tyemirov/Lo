@@ -3,7 +3,7 @@
 F012 implements explicit Metal transfers through the interpreter on macOS arm64.
 The device selector is `metal:0`. Its host grant is `--allow-device metal:0`.
 The standard build and native artifacts report `Device.Unavailable` for authorized Metal access.
-F013 owns tensor arithmetic and training. F014 owns native Metal artifacts.
+F013 adds [tensor arithmetic and training](metal-arithmetic.md). F014 owns native Metal artifacts.
 
 ## Build and Execute
 
@@ -41,7 +41,7 @@ Missing or different build inputs stop the build.
 The build does not install tools or change its selected compiler automatically.
 The Go build uses the selected SDK and clears conflicting Go and cgo flag overrides.
 
-The build compiles `metal_copy.metal` into the ignored `internal/device/metal.metallib` artifact.
+The build compiles `metal_kernels.metal` into the ignored `internal/device/metal.metallib` artifact.
 Go embeds that library in `bin/lo-metal`.
 The resulting compiler needs system Apple frameworks during execution, with no external kernel file.
 The generated `bin/lo-metal-build.json` records tool versions, source hashes, compiler flags, kernel hash, and binary hash.
@@ -49,12 +49,12 @@ It also records the build host's macOS version and build identifier.
 
 ## Transfer Profile and Storage
 
-The profile is `metal-transfer-fp32`.
+The current profile is `metal-fp32`.
 The `lo_copy_words` kernel copies 32-bit integer words without numeric conversion.
 Transfers keep every FP32 bit, including signed zero and subnormals.
-This profile does not define FP32 device arithmetic.
+The [arithmetic contract](metal-arithmetic.md) defines numeric computation separately from bit-preserving transfers.
 
-Each invocation owns one command queue and one copy pipeline.
+Each invocation owns one command queue, one copy pipeline, and one computation pipeline.
 Each nonempty buffer contains equal regions for tensor data and transfer staging.
 Upload copies host bytes into staging before a GPU copy into the tensor region.
 Download copies the tensor region into staging before the host reads the completed result.
@@ -68,7 +68,7 @@ Driver objects and command infrastructure remain outside logical tensor storage 
 An empty tensor has a zero-byte receipt and needs no Metal buffer or kernel dispatch.
 Same-location transfers share their original immutable storage.
 
-An open receipt records the device name, registry identifier, transfer profile, and embedded kernel hash.
+An open receipt records the device name, registry identifier, numeric profile, runtime macOS identity, and embedded kernel hash.
 Static inspection reports logical tensor bytes rather than a device reservation that does not yet exist.
 Receipt identity and allocation evidence contain no tensor payload.
 
@@ -91,7 +91,7 @@ The adapter then checks cancellation before the runtime can publish a result or 
 This implementation does not promise immediate GPU preemption.
 Cleanup failures remain host diagnostics and prevent successful result publication.
 
-## Validation
+## F012 Validation
 
 The initial public tests rejected the absent selector, grant, transfer profile, and lost-session error.
 The [initial failure record](evidence/metal-red.txt) contains that evidence.

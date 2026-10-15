@@ -1,0 +1,130 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test -- -count=1 -race -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+=== RUN   TestMetalLivePrimitives
+=== RUN   TestMetalLivePrimitives/broadcast_add
+=== RUN   TestMetalLivePrimitives/subtract
+=== RUN   TestMetalLivePrimitives/multiply
+=== RUN   TestMetalLivePrimitives/divide
+=== RUN   TestMetalLivePrimitives/sqrt
+=== RUN   TestMetalLivePrimitives/relu
+=== RUN   TestMetalLivePrimitives/transpose
+=== RUN   TestMetalLivePrimitives/reshape
+=== RUN   TestMetalLivePrimitives/broadcast
+=== RUN   TestMetalLivePrimitives/sum
+=== RUN   TestMetalLivePrimitives/mean
+=== RUN   TestMetalLivePrimitives/matmul_non-square
+=== RUN   TestMetalLivePrimitives/matmul_rectangular_output
+=== RUN   TestMetalLivePrimitives/nonadjacent_reduction_axes
+=== RUN   TestMetalLivePrimitives/rank-three_transpose
+--- PASS: TestMetalLivePrimitives (0.37s)
+    --- PASS: TestMetalLivePrimitives/broadcast_add (0.07s)
+    --- PASS: TestMetalLivePrimitives/subtract (0.03s)
+    --- PASS: TestMetalLivePrimitives/multiply (0.03s)
+    --- PASS: TestMetalLivePrimitives/divide (0.02s)
+    --- PASS: TestMetalLivePrimitives/sqrt (0.02s)
+    --- PASS: TestMetalLivePrimitives/relu (0.02s)
+    --- PASS: TestMetalLivePrimitives/transpose (0.02s)
+    --- PASS: TestMetalLivePrimitives/reshape (0.02s)
+    --- PASS: TestMetalLivePrimitives/broadcast (0.02s)
+    --- PASS: TestMetalLivePrimitives/sum (0.02s)
+    --- PASS: TestMetalLivePrimitives/mean (0.02s)
+    --- PASS: TestMetalLivePrimitives/matmul_non-square (0.02s)
+    --- PASS: TestMetalLivePrimitives/matmul_rectangular_output (0.02s)
+    --- PASS: TestMetalLivePrimitives/nonadjacent_reduction_axes (0.02s)
+    --- PASS: TestMetalLivePrimitives/rank-three_transpose (0.02s)
+=== RUN   TestMetalLiveDerivatives
+=== RUN   TestMetalLiveDerivatives/add-broadcast
+=== RUN   TestMetalLiveDerivatives/subtract-broadcast
+=== RUN   TestMetalLiveDerivatives/multiply-broadcast
+=== RUN   TestMetalLiveDerivatives/divide-broadcast
+=== RUN   TestMetalLiveDerivatives/sqrt
+=== RUN   TestMetalLiveDerivatives/relu
+=== RUN   TestMetalLiveDerivatives/matmul
+=== RUN   TestMetalLiveDerivatives/broadcast
+=== RUN   TestMetalLiveDerivatives/reshape
+=== RUN   TestMetalLiveDerivatives/transpose
+=== RUN   TestMetalLiveDerivatives/sum
+=== RUN   TestMetalLiveDerivatives/mean
+=== RUN   TestMetalLiveDerivatives/metadata
+=== RUN   TestMetalLiveDerivatives/shared_and_stopped
+--- PASS: TestMetalLiveDerivatives (0.24s)
+    --- PASS: TestMetalLiveDerivatives/add-broadcast (0.02s)
+    --- PASS: TestMetalLiveDerivatives/subtract-broadcast (0.02s)
+    --- PASS: TestMetalLiveDerivatives/multiply-broadcast (0.02s)
+    --- PASS: TestMetalLiveDerivatives/divide-broadcast (0.02s)
+    --- PASS: TestMetalLiveDerivatives/sqrt (0.01s)
+    --- PASS: TestMetalLiveDerivatives/relu (0.01s)
+    --- PASS: TestMetalLiveDerivatives/matmul (0.02s)
+    --- PASS: TestMetalLiveDerivatives/broadcast (0.02s)
+    --- PASS: TestMetalLiveDerivatives/reshape (0.02s)
+    --- PASS: TestMetalLiveDerivatives/transpose (0.02s)
+    --- PASS: TestMetalLiveDerivatives/sum (0.02s)
+    --- PASS: TestMetalLiveDerivatives/mean (0.02s)
+    --- PASS: TestMetalLiveDerivatives/metadata (0.01s)
+    --- PASS: TestMetalLiveDerivatives/shared_and_stopped (0.02s)
+=== RUN   TestMetalLiveTransfers
+=== RUN   TestMetalLiveTransfers/finite_edges_and_samples
+    metal_live_test.go:67: Metal identity: {"name":"Apple M5 Pro","profile":"metal-fp32","registry_id":"100000696","system":"Version 27.0.1 (Build 26A434)","kernel_sha256":"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"}
+    metal_live_test.go:76: transfers=2 peak_reserved_bytes=8208
+=== RUN   TestMetalLiveTransfers/empty
+    metal_live_test.go:67: Metal identity: {"name":"Apple M5 Pro","profile":"metal-fp32","registry_id":"100000696","system":"Version 27.0.1 (Build 26A434)","kernel_sha256":"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"}
+    metal_live_test.go:76: transfers=2 peak_reserved_bytes=0
+=== RUN   TestMetalLiveTransfers/scalar
+    metal_live_test.go:67: Metal identity: {"name":"Apple M5 Pro","profile":"metal-fp32","registry_id":"100000696","system":"Version 27.0.1 (Build 26A434)","kernel_sha256":"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"}
+    metal_live_test.go:76: transfers=2 peak_reserved_bytes=16
+--- PASS: TestMetalLiveTransfers (0.44s)
+    --- PASS: TestMetalLiveTransfers/finite_edges_and_samples (0.30s)
+    --- PASS: TestMetalLiveTransfers/empty (0.06s)
+    --- PASS: TestMetalLiveTransfers/scalar (0.08s)
+=== RUN   TestMetalLiveLifetime
+    metal_live_test.go:101: 100 steps: transfers=200 peak_reserved_bytes=80
+--- PASS: TestMetalLiveLifetime (0.06s)
+=== RUN   TestMetalLiveOptimizers
+=== RUN   TestMetalLiveOptimizers/SGD
+=== RUN   TestMetalLiveOptimizers/AdamW
+--- PASS: TestMetalLiveOptimizers (0.11s)
+    --- PASS: TestMetalLiveOptimizers/SGD (0.04s)
+    --- PASS: TestMetalLiveOptimizers/AdamW (0.06s)
+=== RUN   TestMetalLiveProfile
+=== RUN   TestMetalLiveProfile/normalization_add
+=== RUN   TestMetalLiveProfile/underflow_multiply
+=== RUN   TestMetalLiveProfile/signed_zero_divide
+=== RUN   TestMetalLiveProfile/sqrt_subnormals
+=== RUN   TestMetalLiveProfile/layout_keeps_bits
+=== RUN   TestMetalLiveProfile/fixed_reduction
+=== RUN   TestMetalLiveProfile/empty_sum
+=== RUN   TestMetalLiveProfile/empty_matmul
+=== RUN   TestMetalLiveProfile/empty_broadcast
+--- PASS: TestMetalLiveProfile (0.12s)
+    --- PASS: TestMetalLiveProfile/normalization_add (0.02s)
+    --- PASS: TestMetalLiveProfile/underflow_multiply (0.02s)
+    --- PASS: TestMetalLiveProfile/signed_zero_divide (0.02s)
+    --- PASS: TestMetalLiveProfile/sqrt_subnormals (0.02s)
+    --- PASS: TestMetalLiveProfile/layout_keeps_bits (0.02s)
+    --- PASS: TestMetalLiveProfile/fixed_reduction (0.02s)
+    --- PASS: TestMetalLiveProfile/empty_sum (0.00s)
+    --- PASS: TestMetalLiveProfile/empty_matmul (0.01s)
+    --- PASS: TestMetalLiveProfile/empty_broadcast (0.00s)
+=== RUN   TestMetalLiveTraining
+    metal_compute_test.go:274: run=1 steps=200 loss=0.000132154760649 transfers=12 computes=8216 peak_reserved_bytes=1312
+    metal_compute_test.go:274: run=2 steps=200 loss=0.000132154760649 transfers=12 computes=8216 peak_reserved_bytes=1312
+    metal_compute_test.go:274: run=3 steps=200 loss=0.000132154760649 transfers=12 computes=8216 peak_reserved_bytes=1312
+--- PASS: TestMetalLiveTraining (4.22s)
+=== RUN   TestMetalLiveNumericFailures
+=== RUN   TestMetalLiveNumericFailures/division_subnormal_divisor
+=== RUN   TestMetalLiveNumericFailures/negative_square_root
+=== RUN   TestMetalLiveNumericFailures/overflow
+=== RUN   TestMetalLiveNumericFailures/ordered_element_failure
+=== RUN   TestMetalLiveNumericFailures/empty_mean
+--- PASS: TestMetalLiveNumericFailures (0.05s)
+    --- PASS: TestMetalLiveNumericFailures/division_subnormal_divisor (0.01s)
+    --- PASS: TestMetalLiveNumericFailures/negative_square_root (0.01s)
+    --- PASS: TestMetalLiveNumericFailures/overflow (0.01s)
+    --- PASS: TestMetalLiveNumericFailures/ordered_element_failure (0.01s)
+    --- PASS: TestMetalLiveNumericFailures/empty_mean (0.00s)
+=== RUN   TestMetalLiveCLIComputation
+--- PASS: TestMetalLiveCLIComputation (0.08s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	7.490s

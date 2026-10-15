@@ -6,6 +6,7 @@ The software backend implements transfers for the explicit `cuda-sim:0` selector
 The current build reports `Device.Unavailable` for authorized `cuda:0` access.
 F012 adds explicit `metal:0` transfers in the Metal interpreter build.
 The [Metal transfer contract](metal-transfers.md) defines that build and its validation.
+F013 adds [synchronous Metal computation](metal-arithmetic.md) through typed operation descriptors.
 F009 will implement NVIDIA arithmetic and its backend.
 F010 will implement deferred execution and source-order failure selection for asynchronous operations.
 
@@ -50,7 +51,8 @@ Each HTTP request receives a separate session with the configured grant.
 | Metal library or pipeline creation failure | Recoverable `Device.LibraryFailed`. |
 | Unusable device session | Recoverable `Device.Lost`, with no subsequent device submissions. |
 | Arithmetic across locations | Recoverable `Tensor.DeviceMismatch`. |
-| Arithmetic on a compute tensor | Recoverable `Device.UnsupportedOperation` until F009 or F013 implements the selected backend. |
+| Unsupported arithmetic | Recoverable `Device.UnsupportedOperation` before output allocation or submission. |
+| Computation command construction failure | Recoverable `Device.ExecutionFailed`. |
 | Numeric CPU observation of a compute tensor | Recoverable `Tensor.HostObservationRequired`. |
 | Device tensor in the final result | Host `runtime.tensor-publication`, with exit status 2. |
 | Storage or work budget exceeded | Host `runtime.limit`, with exit status 2. |
@@ -85,7 +87,7 @@ Backend reservations count at their reported size, including padding.
 A reservation that exceeds the available budget is released before transfer.
 
 F009 can use the workspace class through the same ledger boundary.
-F008 submits no library operations and needs no library workspace.
+Metal computation charges status buffers to the workspace class.
 Driver context overhead and Go process memory are outside these logical storage limits.
 
 Execution scopes release temporary allocations at flow exits.
@@ -105,12 +107,12 @@ Unknown storage sizes and source locations use JSON `null`.
 Known sizes describe logical element payloads before any backend padding.
 Inspection includes unused flows without resource access.
 
-The `Factory`, `Backend`, and `Buffer` interfaces isolate backend initialization, allocation, transfers, and cleanup.
+The `Factory`, `Backend`, and `Buffer` interfaces isolate backend initialization, allocation, transfers, computation, and cleanup.
 A compute tensor has metadata and opaque storage.
 CPU numeric kernels require CPU data.
 `runner.RunContext` accepts a factory and receipt observer for tests through the public CLI execution contract.
 The production CLI selects a backend through the factory for its build.
-The standard build provides simulation. The Metal build also provides authorized Metal transfers.
+The standard build provides simulation. The Metal build also provides authorized Metal transfers and computation.
 Open receipts record the selected backend identity without tensor contents.
 A failed CUDA request never changes its selected backend.
 

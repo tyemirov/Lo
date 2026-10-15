@@ -1,0 +1,2 @@
+go vet -tags=metal ./internal/device
+exit_status=0
