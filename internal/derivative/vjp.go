@@ -12,12 +12,13 @@ import (
 // A native backend can execute the same derivative plan through this boundary.
 type Arithmetic interface {
 	Apply(string, tensor.Data, tensor.Data, []*big.Int) (tensor.Data, error)
-	Constant(tensor.Shape, float32) (tensor.Data, error)
+	Constant(tensor.Shape, string, float32) (tensor.Data, error)
 	Relu(tensor.Data, tensor.Data) (tensor.Data, error)
 	CheckSqrt(tensor.Data) error
 }
 type calculation struct {
 	arithmetic Arithmetic
+	location   string
 	err        error
 }
 
@@ -38,7 +39,7 @@ func (c *calculation) scalar(v float32) tensor.Data {
 		return nil
 	}
 	s := must(tensor.NewShape(nil))
-	x, err := c.arithmetic.Constant(s, v)
+	x, err := c.arithmetic.Constant(s, c.location, v)
 	c.err = err
 	return x
 }
@@ -69,7 +70,7 @@ func (c *calculation) unbroadcast(g tensor.Data, shape tensor.Shape) tensor.Data
 // VJP evaluates only the requested active operand edge. The caller invokes
 // edges in operand order and nodes in reverse stable forward order.
 func VJP(arithmetic Arithmetic, op string, operand int, g, a, b, result tensor.Data, indices []int64) (tensor.Data, error) {
-	c := &calculation{arithmetic: arithmetic}
+	c := &calculation{arithmetic: arithmetic, location: g.Location()}
 	var out tensor.Data
 	switch op {
 	case catalog.TensorAdd:

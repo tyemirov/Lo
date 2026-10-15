@@ -7,17 +7,18 @@ import (
 )
 
 type deviceData struct {
-	shape      Shape
-	allocation device.Allocation
+	shape Shape
+	*deviceStorage
 }
+type deviceStorage struct{ allocation device.Allocation }
 
-func (*deviceData) data()                           {}
-func (*deviceData) storage()                        {}
-func (d *deviceData) Shape() Shape                  { return d.shape }
-func (d *deviceData) Location() string              { return d.allocation.Location() }
-func (d *deviceData) Storage() Storage              { return d }
-func (d *deviceData) Bytes() uint64                 { return d.allocation.Bytes() }
-func (d *deviceData) Allocation() device.Allocation { return d.allocation }
+func (*deviceData) data()                              {}
+func (*deviceStorage) storage()                        {}
+func (d *deviceData) Shape() Shape                     { return d.shape }
+func (d *deviceData) Location() string                 { return d.allocation.Location() }
+func (d *deviceData) Storage() Storage                 { return d.deviceStorage }
+func (s *deviceStorage) Bytes() uint64                 { return s.allocation.Bytes() }
+func (s *deviceStorage) Allocation() device.Allocation { return s.allocation }
 
 // Transfer copies numeric storage only through the selected device boundary.
 func Transfer(ctx context.Context, resources device.Session, source Data, location string) (Data, error) {
@@ -38,7 +39,7 @@ func Transfer(ctx context.Context, resources device.Session, source Data, locati
 	if location == device.CPU {
 		return &data{source.Shape(), &storage{target.Host(), target}}, nil
 	}
-	return &deviceData{source.Shape(), target}, nil
+	return &deviceData{source.Shape(), &deviceStorage{target}}, nil
 }
 
 // Weight includes location metadata without device addresses or handles.

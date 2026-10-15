@@ -2,8 +2,6 @@ package value
 
 import (
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/tensor"
 	"math"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
@@ -164,8 +162,8 @@ func NewAdamWState(p TensorBundle, step Integer, config AdamWConfig, first, seco
 		}
 	}
 	for _, power := range []Tensor{beta1, beta2} {
-		if power.Data().Location() != device.CPU || power.Data().Shape().Rank() != 0 || power.Data().(tensor.HostData).At(0) < 0 || power.Data().(tensor.HostData).At(0) > 1 {
-			return nil, fmt.Errorf("AdamW beta power must be a rank-zero value in [0,1]")
+		if power.Data().Location() != p.Contents().Fields()[0].Value.(Tensor).Data().Location() || power.Data().Shape().Rank() != 0 {
+			return nil, fmt.Errorf("AdamW beta power must be rank zero at the Parameter location")
 		}
 	}
 	s, err := stateBase(types.AdamWStateKind, p, step, config, []Field{{Name: types.FieldFirstMoment, Value: first}, {Name: types.FieldSecondMoment, Value: second}, {Name: types.FieldBeta1Power, Value: beta1}, {Name: types.FieldBeta2Power, Value: beta2}})

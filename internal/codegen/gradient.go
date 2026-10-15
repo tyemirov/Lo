@@ -24,7 +24,6 @@ func (g *generator) gradient(call autodiff.Call, metadata string) string {
 		}
 		b.bindings[p.ID] = args[argument]
 	}
-	b.line("for _,arg:=range []value.Value{%s}{if !value.HostPublishable(arg){return runtimeops.OperationFailure(%s,[]value.Value{%s},device.UnsupportedOperation,\"device autodiff requires the selected device backend\"),nil}}", strings.Join(args, ","), metadata, strings.Join(args, ","))
 	nodes := call.Nodes()
 	b.line("var err error;_ = err;tape:=runtimeops.NewTape(s);defer tape.Close();maths:=runtimeops.Arithmetic(s);adjoints:=make([]tensor.Data,%d)", len(nodes)+1)
 	seenFrames := map[int]bool{}
@@ -59,9 +58,9 @@ func (g *generator) gradient(call autodiff.Call, metadata string) string {
 	b.line("loss:=%s.(value.Tensor);if loss.Data().Shape().Rank()!=0{return runtimeops.OperationFailure(%s,[]value.Value{%s},catalog.InvalidLoss,\"loss must return a rank-zero tensor\"),nil}", loss, metadata, strings.Join(args, ","))
 	for _, selected := range call.Selections() {
 		node := nodes[selected.Node-1]
-		b.line("adjoints[%d],err=maths.Constant(%s.(value.Tensor).Data().Shape(),0);if err!=nil{%s}", selected.Node, b.bindings[node.Binding()], b.gradientFailure(call, node))
+		b.line("adjoints[%d],err=maths.Constant(%s.(value.Tensor).Data().Shape(),%s.(value.Tensor).Data().Location(),0);if err!=nil{%s}", selected.Node, b.bindings[node.Binding()], b.bindings[node.Binding()], b.gradientFailure(call, node))
 	}
-	b.line("adjoints[%d],err=maths.Constant(loss.Data().Shape(),1);if err!=nil{%s}", call.ResultNode(), b.gradientFailure(call, nodes[call.ResultNode()-1]))
+	b.line("adjoints[%d],err=maths.Constant(loss.Data().Shape(),loss.Data().Location(),1);if err!=nil{%s}", call.ResultNode(), b.gradientFailure(call, nodes[call.ResultNode()-1]))
 	for i := len(nodes) - 1; i >= 0; i-- {
 		node := nodes[i]
 		if !node.Reverse() || len(node.Edges()) == 0 {

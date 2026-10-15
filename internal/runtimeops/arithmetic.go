@@ -19,16 +19,12 @@ func (d tensorArithmetic) finish(data tensor.Data, err error) (tensor.Data, erro
 	if err != nil {
 		return nil, err
 	}
-	d.machine.AddWeight(data.Shape().Weight())
+	d.machine.AddWeight(tensor.Weight(data.Shape(), data.Location()))
 	return data, nil
 }
 func (d tensorArithmetic) Apply(op string, a, b tensor.Data, indices []*big.Int) (tensor.Data, error) {
-	if a.Location() != device.CPU || b != nil && b.Location() != device.CPU {
-		kind := device.UnsupportedOperation
-		if b != nil && a.Location() != b.Location() {
-			kind = device.Mismatch
-		}
-		return nil, must(device.NewFault(kind, fmt.Errorf("numeric operation %s requires the selected device backend", op)))
+	if b != nil && a.Location() != b.Location() {
+		return nil, must(device.NewFault(device.Mismatch, fmt.Errorf("numeric operation %s requires matching input locations", op)))
 	}
 	var bs tensor.Shape
 	if b != nil {
@@ -38,29 +34,26 @@ func (d tensorArithmetic) Apply(op string, a, b tensor.Data, indices []*big.Int)
 	if err != nil {
 		return nil, err
 	}
-	if err = d.machine.tensorBudget(p.Steps(), p.Shape().Weight()); err != nil {
+	if err = d.machine.tensorBudget(p.Steps(), tensor.Weight(p.Shape(), a.Location())); err != nil {
 		return nil, err
 	}
 	return d.finish(tensor.Execute(d.machine.Context(), d.machine.Resources(), p, a, b))
 }
-func (d tensorArithmetic) Constant(shape tensor.Shape, v float32) (tensor.Data, error) {
-	if err := d.machine.tensorBudget(shape.Count(), shape.Weight()); err != nil {
+func (d tensorArithmetic) Constant(shape tensor.Shape, location string, v float32) (tensor.Data, error) {
+	if err := d.machine.tensorBudget(shape.Count(), tensor.Weight(shape, location)); err != nil {
 		return nil, err
 	}
-	return d.finish(tensor.Construct(d.machine.Context(), d.machine.Resources(), shape, func(int) float64 { return float64(v) }))
+	return d.finish(tensor.Constant(d.machine.Context(), d.machine.Resources(), shape, location, v))
 }
 func (d tensorArithmetic) Relu(g, a tensor.Data) (tensor.Data, error) {
-	if a.Location() != device.CPU || g.Location() != device.CPU {
-		return nil, must(device.NewFault(device.UnsupportedOperation, fmt.Errorf("device derivative arithmetic is not implemented")))
+	if a.Location() != g.Location() {
+		return nil, must(device.NewFault(device.Mismatch, fmt.Errorf("derivative inputs require matching locations")))
 	}
-	if err := d.machine.tensorBudget(a.Shape().Count(), a.Shape().Weight()); err != nil {
+	if err := d.machine.tensorBudget(a.Shape().Count(), tensor.Weight(a.Shape(), a.Location())); err != nil {
 		return nil, err
 	}
 	return d.finish(tensor.ReluDerivative(d.machine.Context(), d.machine.Resources(), g, a))
 }
 func (d tensorArithmetic) CheckSqrt(a tensor.Data) error {
-	if a.Location() != device.CPU {
-		return must(device.NewFault(device.UnsupportedOperation, fmt.Errorf("device derivative arithmetic is not implemented")))
-	}
-	return tensor.CheckSqrtDerivative(d.machine.Context(), a)
+	return tensor.CheckSqrtDerivative(d.machine.Context(), d.machine.Resources(), a)
 }

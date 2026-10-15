@@ -15,6 +15,7 @@ import (
 
 type optimizerCalculation struct {
 	arithmetic tensorArithmetic
+	location   string
 	err        error
 }
 
@@ -30,7 +31,7 @@ func (c *optimizerCalculation) scalar(v float32) tensor.Data {
 	if c.err != nil {
 		return nil
 	}
-	x, err := c.arithmetic.Constant(must(tensor.NewShape(nil)), v)
+	x, err := c.arithmetic.Constant(must(tensor.NewShape(nil)), c.location, v)
 	c.err = err
 	return x
 }
@@ -93,11 +94,9 @@ func (m *machine) optimizerOperation(call Call, args []value.Value) (output valu
 	if name == catalog.SGDStateNew {
 		return Success(call.Type(), must(value.NewSGDState(args[0].(value.TensorBundle), value.Int64(0), args[1].(value.SGDConfig)))), nil
 	}
-	if !value.HostPublishable(args[0]) {
-		return OperationFailure(call, args, device.UnsupportedOperation, "optimizer arithmetic requires the selected device backend"), nil
-	}
 	if name == catalog.AdamWStateNew {
 		p := args[0].(value.TensorBundle)
+		location := p.Contents().Fields()[0].Value.(value.Tensor).Data().Location()
 		var bytes uint64 = 4
 		for _, f := range p.Contents().Fields() {
 			bytes += 8 * f.Value.(value.Tensor).Data().Shape().Count()
@@ -109,18 +108,18 @@ func (m *machine) optimizerOperation(call Call, args []value.Value) (output valu
 		first, second := p.Contents().Fields(), p.Contents().Fields()
 		for i, f := range first {
 			shape := f.Value.(value.Tensor).Data().Shape()
-			a, err := maths.Constant(shape, 0)
+			a, err := maths.Constant(shape, location, 0)
 			if err != nil {
 				return fail(err)
 			}
-			b, err := maths.Constant(shape, 0)
+			b, err := maths.Constant(shape, location, 0)
 			if err != nil {
 				return fail(err)
 			}
 			first[i].Value = must(value.NewTensor(a))
 			second[i].Value = must(value.NewTensor(b))
 		}
-		one, err := maths.Constant(must(tensor.NewShape(nil)), 1)
+		one, err := maths.Constant(must(tensor.NewShape(nil)), location, 1)
 		if err != nil {
 			return fail(err)
 		}
@@ -133,7 +132,7 @@ func (m *machine) optimizerOperation(call Call, args []value.Value) (output valu
 	if err := value.MatchTensorSchema(state.Parameters().Contents(), gradients); err != nil {
 		return OperationFailure(call, args, catalog.GradientSchemaMismatch, err.Error()), nil
 	}
-	c := &optimizerCalculation{arithmetic: tensorArithmetic{m}}
+	c := &optimizerCalculation{arithmetic: tensorArithmetic{m}, location: state.Parameters().Contents().Fields()[0].Value.(value.Tensor).Data().Location()}
 	rate := c.scalar(state.Config().Rate())
 	fields := state.Parameters().Contents().Fields()
 	if name == catalog.SGDStep {

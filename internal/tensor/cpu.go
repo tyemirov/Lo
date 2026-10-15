@@ -82,6 +82,9 @@ func Execute(ctx context.Context, resources device.Session, operation Plan, a, b
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	if a.Location() != device.CPU {
+		return executeDevice(ctx, resources, p, a, b)
+	}
 	if p.op == catalog.TensorReshape || (p.op == catalog.TensorSum || p.op == catalog.TensorMean) && len(p.axes) == 0 {
 		return &data{p.shape, a.(*data).storage}, nil
 	}
@@ -229,6 +232,9 @@ func Execute(ctx context.Context, resources device.Session, operation Plan, a, b
 }
 
 func ReluDerivative(ctx context.Context, resources device.Session, gradient, input Data) (Data, error) {
+	if input.Location() != device.CPU {
+		return compute(ctx, resources, input.Location(), device.ReluGradient, computeLayout(input.Shape(), input, gradient), 0, input.Shape(), input, gradient)
+	}
 	allocation, err := resources.Allocate(ctx, device.CPU, 4*input.Shape().Count())
 	if err != nil {
 		return nil, err
@@ -251,7 +257,14 @@ func ReluDerivative(ctx context.Context, resources device.Session, gradient, inp
 	complete = true
 	return &data{input.Shape(), &storage{out, allocation}}, nil
 }
-func CheckSqrtDerivative(ctx context.Context, input Data) error {
+func CheckSqrtDerivative(ctx context.Context, resources device.Session, input Data) error {
+	if input.Location() != device.CPU {
+		out, err := compute(ctx, resources, input.Location(), device.CheckSqrtGradient, computeLayout(input.Shape(), input, nil), 0, input.Shape(), input)
+		if out != nil {
+			resources.Release(out.Storage().Allocation())
+		}
+		return err
+	}
 	for i := 0; i < int(input.Shape().Count()); i++ {
 		if err := poll(ctx, i); err != nil {
 			return err

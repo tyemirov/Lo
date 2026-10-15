@@ -8,6 +8,8 @@ struct LoMetalSession {
     id<MTLDevice> device;
     id<MTLCommandQueue> queue;
     id<MTLComputePipelineState> copy;
+    id<MTLComputePipelineState> compute;
+    NSString *system;
     int lost;
 };
 struct LoMetalBuffer {
@@ -24,8 +26,10 @@ static void fail(LoMetalError *error, int code, NSString *message) {
 void lo_metal_close(LoMetalSession *session) {
     if (!session) return;
     [session->copy release];
+    [session->compute release];
     [session->queue release];
     [session->device release];
+    [session->system release];
     free(session);
 }
 
@@ -33,6 +37,7 @@ LoMetalSession *lo_metal_open(const void *bytes, size_t length, LoMetalError *er
     @autoreleasepool {
         LoMetalSession *session = calloc(1, sizeof(*session));
         if (!session) { fail(error, LO_METAL_UNAVAILABLE, @"allocate session"); return NULL; }
+        session->system = [[[NSProcessInfo processInfo] operatingSystemVersionString] copy];
         session->device = MTLCreateSystemDefaultDevice();
         if (!session->device) { fail(error, LO_METAL_UNAVAILABLE, @"no system Metal device"); lo_metal_close(session); return NULL; }
         if (![session->device supportsFamily:MTLGPUFamilyApple7] || !session->device.hasUnifiedMemory) {
@@ -47,11 +52,16 @@ LoMetalSession *lo_metal_open(const void *bytes, size_t length, LoMetalError *er
         dispatch_release(data);
         if (!library) { fail(error, LO_METAL_LIBRARY, [NSString stringWithFormat:@"load embedded library: %@", cause]); lo_metal_close(session); return NULL; }
         id<MTLFunction> function = [library newFunctionWithName:@"lo_copy_words"];
-        [library release];
-        if (!function) { fail(error, LO_METAL_LIBRARY, @"missing lo_copy_words kernel"); lo_metal_close(session); return NULL; }
+        if (!function) { [library release]; fail(error, LO_METAL_LIBRARY, @"missing lo_copy_words kernel"); lo_metal_close(session); return NULL; }
         session->copy = [session->device newComputePipelineStateWithFunction:function error:&cause];
         [function release];
-        if (!session->copy) { fail(error, LO_METAL_LIBRARY, [NSString stringWithFormat:@"create copy pipeline: %@", cause]); lo_metal_close(session); return NULL; }
+        if (!session->copy) { [library release]; fail(error, LO_METAL_LIBRARY, [NSString stringWithFormat:@"create copy pipeline: %@", cause]); lo_metal_close(session); return NULL; }
+        function = [library newFunctionWithName:@"lo_compute"];
+        [library release];
+        if (!function) { fail(error, LO_METAL_LIBRARY, @"missing lo_compute kernel"); lo_metal_close(session); return NULL; }
+        session->compute = [session->device newComputePipelineStateWithFunction:function error:&cause];
+        [function release];
+        if (!session->compute) { fail(error, LO_METAL_LIBRARY, [NSString stringWithFormat:@"create compute pipeline: %@", cause]); lo_metal_close(session); return NULL; }
         return session;
     }
 }
@@ -77,6 +87,7 @@ LoMetalBuffer *lo_metal_allocate(LoMetalSession *session, uint64_t bytes, LoMeta
 
 uint64_t lo_metal_reserved(LoMetalBuffer *buffer) { return buffer->storage ? buffer->storage.allocatedSize : 0; }
 const char *lo_metal_name(LoMetalSession *session) { return session->device.name.UTF8String; }
+const char *lo_metal_system(LoMetalSession *session) { return session->system.UTF8String; }
 uint64_t lo_metal_registry(LoMetalSession *session) { return session->device.registryID; }
 void lo_metal_release(LoMetalBuffer *buffer) {
     if (!buffer) return;
@@ -123,6 +134,33 @@ int lo_metal_download(LoMetalBuffer *buffer, void *values, uint64_t bytes, LoMet
         if (bytes != buffer->length) { fail(error, LO_METAL_TRANSFER, @"download length differs from allocation"); return 0; }
         if (!copy_words(buffer, 0, bytes, error)) return 0;
         if (bytes) memcpy(values, (char *)buffer->storage.contents + bytes, bytes);
+        return 1;
+    }
+}
+
+int lo_metal_compute(LoMetalSession *session, const LoMetalOperation *operation, LoMetalBuffer *a, LoMetalBuffer *b,
+                     LoMetalBuffer *output, LoMetalBuffer *status, uint32_t *numeric, LoMetalError *error) {
+    @autoreleasepool {
+        if(session->lost){fail(error,LO_METAL_LOST,@"device session is unusable");return 0;}
+        *(uint32_t *)status->storage.contents=UINT32_MAX;
+        id<MTLCommandBuffer> command=[session->queue commandBuffer];
+        id<MTLComputeCommandEncoder> encoder=[command computeCommandEncoder];
+        if(!command||!encoder){fail(error,LO_METAL_EXECUTION,@"create compute command");return 0;}
+        [encoder setComputePipelineState:session->compute];
+        // Unused empty bindings use status storage, without a tensor read.
+        [encoder setBuffer:(a && a->storage ? a->storage : status->storage) offset:0 atIndex:0];
+        [encoder setBuffer:(b && b->storage ? b->storage : status->storage) offset:0 atIndex:1];
+        [encoder setBuffer:(output->storage ? output->storage : status->storage) offset:0 atIndex:2];
+        [encoder setBuffer:status->storage offset:0 atIndex:3];
+        [encoder setBytes:operation length:sizeof(*operation) atIndex:4];
+        NSUInteger width=MIN(operation->count,session->compute.maxTotalThreadsPerThreadgroup);
+        [encoder dispatchThreads:MTLSizeMake(operation->count,1,1) threadsPerThreadgroup:MTLSizeMake(width,1,1)];
+        [encoder endEncoding];[command commit];[command waitUntilCompleted];
+        if(command.status!=MTLCommandBufferStatusCompleted){
+            session->lost=1;
+            fail(error,LO_METAL_LOST,[NSString stringWithFormat:@"compute command failed: %@",command.error]);return 0;
+        }
+        *numeric=*(uint32_t *)status->storage.contents;
         return 1;
     }
 }

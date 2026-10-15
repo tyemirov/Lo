@@ -138,14 +138,12 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 	if b != nil && a.Location() != b.Location() {
 		return OperationFailure(call, args, device.Mismatch, "tensor input locations differ"), nil
 	}
-	if a.Location() != device.CPU {
-		return OperationFailure(call, args, device.UnsupportedOperation, "tensor arithmetic is unavailable on "+a.Location()), nil
-	}
+
 	p, err := tensor.Prepare(op, s, bs, indices)
 	if err != nil {
 		return fail(err)
 	}
-	if err = m.tensorBudget(p.Steps(), p.Shape().Weight()+16); err != nil {
+	if err = m.tensorBudget(p.Steps(), tensor.Weight(p.Shape(), a.Location())+16); err != nil {
 		return nil, err
 	}
 	d, err := tensor.Execute(m.Context(), m.Resources(), p, a, b)

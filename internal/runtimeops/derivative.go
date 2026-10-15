@@ -72,7 +72,10 @@ func (t *tape) Fail(err error, out types.Fallible, op string, span source.Span, 
 	}
 	var cause value.Error
 	var runtime execution.Failure
-	var numeric tensor.Fault
+	var numeric interface {
+		error
+		Kind() string
+	}
 	switch {
 	case errors.As(err, &runtime):
 		cause = runtime.Value()
