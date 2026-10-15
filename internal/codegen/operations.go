@@ -9,6 +9,7 @@ var operationFunctions = map[string]string{
 	catalog.AdamWStateNew:    "AdamWStateNew",
 	catalog.SGDStep:          "SGDStep",
 	catalog.AdamWStep:        "AdamWStep",
+	catalog.TensorTo:         "TensorTo",
 	catalog.AutodiffStop:     "AutodiffStop",
 	catalog.ParametersNew:    "ParametersNew",
 	catalog.ParametersValues: "ParametersValues",

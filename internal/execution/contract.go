@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
@@ -86,6 +87,10 @@ func NoServer() HostError {
 	return hostError{diagnostic.NoServer, "serve requires an activated HTTP server", nil}
 }
 func BoundaryHostError(err error) HostError {
+	var budget device.BudgetError
+	if errors.As(err, &budget) {
+		return Limit(budget.Error())
+	}
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return hostError{diagnostic.RuntimeCancelled, "execution cancelled", err}
 	}
@@ -104,6 +109,9 @@ func Published(v value.Value) (value.Value, error) {
 		if cause != nil {
 			return nil, failure{cause}
 		}
+	}
+	if !value.HostPublishable(v) {
+		return nil, hostError{diagnostic.TensorPublication, "result contains a tensor without an explicit CPU transfer", nil}
 	}
 	return v, nil
 }

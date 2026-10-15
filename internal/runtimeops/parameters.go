@@ -2,6 +2,7 @@ package runtimeops
 
 import (
 	"errors"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"math"
 
@@ -19,7 +20,12 @@ func (m *machine) parameterOperation(call Call, args []value.Value) (value.Value
 		return Success(call.Type(), must(value.NewTensorBundle(t, r)))
 	}
 	if name == catalog.ParametersNew {
-		return wrap(args[0].(value.Record)), nil
+		t := call.Type().(types.Fallible).Base().(types.TensorBundle)
+		bundle, err := value.NewTensorBundle(t, args[0].(value.Record))
+		if err != nil {
+			return OperationFailure(call, args, catalog.GradientSchemaMismatch, err.Error()), nil
+		}
+		return Success(call.Type(), bundle), nil
 	}
 	left := args[0].(value.TensorBundle).Contents()
 	if name == catalog.ParametersValues || name == catalog.GradientsValues {
@@ -40,6 +46,9 @@ func (m *machine) parameterOperation(call Call, args []value.Value) (value.Value
 	if name == catalog.GradientsNew {
 		return wrap(right), nil
 	}
+	if !value.HostPublishable(left) {
+		return OperationFailure(call, args, device.UnsupportedOperation, "gradient arithmetic requires the selected device backend"), nil
+	}
 	maths := tensorArithmetic{m}
 	fail := func(err error) (value.Value, error) {
 		if host := execution.BoundaryHostError(err); host != nil {
@@ -48,6 +57,10 @@ func (m *machine) parameterOperation(call Call, args []value.Value) (value.Value
 		var f tensor.Fault
 		if errors.As(err, &f) {
 			return OperationFailure(call, args, f.Kind(), f.Error()), nil
+		}
+		var backend device.Fault
+		if errors.As(err, &backend) {
+			return OperationFailure(call, args, backend.Kind(), backend.Error()), nil
 		}
 		return nil, execution.Limit(name + ": " + err.Error())
 	}

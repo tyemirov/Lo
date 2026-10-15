@@ -2,6 +2,8 @@ package value
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
+	"github.com/MarcoPoloResearchLab/Lo/internal/tensor"
 	"math"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
@@ -162,7 +164,7 @@ func NewAdamWState(p TensorBundle, step Integer, config AdamWConfig, first, seco
 		}
 	}
 	for _, power := range []Tensor{beta1, beta2} {
-		if power.Data().Shape().Rank() != 0 || power.Data().At(0) < 0 || power.Data().At(0) > 1 {
+		if power.Data().Location() != device.CPU || power.Data().Shape().Rank() != 0 || power.Data().(tensor.HostData).At(0) < 0 || power.Data().(tensor.HostData).At(0) > 1 {
 			return nil, fmt.Errorf("AdamW beta power must be a rank-zero value in [0,1]")
 		}
 	}

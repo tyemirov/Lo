@@ -6,22 +6,28 @@ import (
 	"math"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 )
 
 type Data interface {
 	Shape() Shape
-	At(int) float32
+	Location() string
 	Storage() Storage
 	data()
 }
 type Storage interface {
 	Bytes() uint64
+	Allocation() device.Allocation
 	storage()
 }
-type storage struct{ elements []float32 }
+type storage struct {
+	elements   []float32
+	allocation device.Allocation
+}
 
-func (*storage) storage()        {}
-func (s *storage) Bytes() uint64 { return uint64(len(s.elements)) * 4 }
+func (*storage) storage()                        {}
+func (s *storage) Bytes() uint64                 { return s.allocation.Bytes() }
+func (s *storage) Allocation() device.Allocation { return s.allocation }
 
 type data struct {
 	shape Shape
@@ -32,14 +38,31 @@ func (*data) data()              {}
 func (d *data) Shape() Shape     { return d.shape }
 func (d *data) At(i int) float32 { return d.elements[i] }
 func (d *data) Storage() Storage { return d.storage }
+func (d *data) Location() string { return device.CPU }
+
+// HostData exposes numeric elements only for CPU tensors.
+type HostData interface {
+	Data
+	At(int) float32
+}
 
 // Construct receives a validated shape and indexed input from the runtime edge.
 // The caller reserves the work and value budgets before this allocation.
-func Construct(ctx context.Context, s Shape, input func(int) float64) (Data, error) {
+func Construct(ctx context.Context, resources device.Session, s Shape, input func(int) float64) (Data, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	out := make([]float32, int(s.Count()))
+	allocation, err := resources.Allocate(ctx, device.CPU, 4*s.Count())
+	if err != nil {
+		return nil, err
+	}
+	out := allocation.Host()
+	complete := false
+	defer func() {
+		if !complete {
+			resources.Release(allocation)
+		}
+	}()
 	for i := range out {
 		if err := poll(ctx, i); err != nil {
 			return nil, err
@@ -50,10 +73,11 @@ func Construct(ctx context.Context, s Shape, input func(int) float64) (Data, err
 		}
 		out[i] = v
 	}
-	return &data{s, &storage{out}}, nil
+	complete = true
+	return &data{s, &storage{out, allocation}}, nil
 }
 
-func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
+func Execute(ctx context.Context, resources device.Session, operation Plan, a, b Data) (Data, error) {
 	p := operation.(*plan)
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -64,9 +88,20 @@ func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
 	if p.op == catalog.TensorMean && p.region == 0 {
 		return nil, fault{catalog.EmptyReduction, "nonempty mean reduction region", fmt.Sprint(a.Shape().Dims())}
 	}
-	out := make([]float32, int(p.shape.Count()))
+	allocation, err := resources.Allocate(ctx, device.CPU, 4*p.shape.Count())
+	if err != nil {
+		return nil, err
+	}
+	out := allocation.Host()
+	complete := false
+	defer func() {
+		if !complete {
+			resources.Release(allocation)
+		}
+	}()
 	if len(out) == 0 {
-		return &data{p.shape, &storage{out}}, nil
+		complete = true
+		return &data{p.shape, &storage{out, allocation}}, nil
 	}
 	ad := a.Shape().Dims()
 	od := p.shape.Dims()
@@ -85,7 +120,7 @@ func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
 				if err := poll(ctx, j); err != nil {
 					return nil, err
 				}
-				product := float32(a.At((i/n)*k+j) * b.At(j*n+i%n))
+				product := float32(a.(HostData).At((i/n)*k+j) * b.(HostData).At(j*n+i%n))
 				if !finite(product) {
 					return nil, numeric(catalog.NumericNonFinite, i, fmt.Sprintf("finite product at contracted index %d", j))
 				}
@@ -113,7 +148,7 @@ func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
 					stride *= int(ad[axis])
 				}
 			}
-			out[index] = float32(out[index] + a.At(i))
+			out[index] = float32(out[index] + a.(HostData).At(i))
 			if !finite(out[index]) {
 				return nil, numeric(catalog.NumericNonFinite, i, "finite reduction intermediate")
 			}
@@ -145,17 +180,17 @@ func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
 				index += (rest % int(od[axis])) * strides[p.axes[axis]]
 				rest /= int(od[axis])
 			}
-			out[i] = a.At(index)
+			out[i] = a.(HostData).At(index)
 		}
 	default:
 		for i := range out {
 			if err := poll(ctx, i); err != nil {
 				return nil, err
 			}
-			x := a.At(broadcastIndex(i, od, ad))
+			x := a.(HostData).At(broadcastIndex(i, od, ad))
 			var y, z float32
 			if b != nil {
-				y = b.At(broadcastIndex(i, od, bd))
+				y = b.(HostData).At(broadcastIndex(i, od, bd))
 			}
 			switch p.op {
 			case catalog.TensorAdd:
@@ -189,27 +224,39 @@ func Execute(ctx context.Context, operation Plan, a, b Data) (Data, error) {
 			out[i] = z
 		}
 	}
-	return &data{p.shape, &storage{out}}, nil
+	complete = true
+	return &data{p.shape, &storage{out, allocation}}, nil
 }
 
-func ReluDerivative(ctx context.Context, gradient, input Data) (Data, error) {
-	out := make([]float32, int(input.Shape().Count()))
+func ReluDerivative(ctx context.Context, resources device.Session, gradient, input Data) (Data, error) {
+	allocation, err := resources.Allocate(ctx, device.CPU, 4*input.Shape().Count())
+	if err != nil {
+		return nil, err
+	}
+	out := allocation.Host()
+	complete := false
+	defer func() {
+		if !complete {
+			resources.Release(allocation)
+		}
+	}()
 	for i := range out {
 		if err := poll(ctx, i); err != nil {
 			return nil, err
 		}
-		if input.At(i) > 0 {
-			out[i] = gradient.At(i)
+		if input.(HostData).At(i) > 0 {
+			out[i] = gradient.(HostData).At(i)
 		}
 	}
-	return &data{input.Shape(), &storage{out}}, nil
+	complete = true
+	return &data{input.Shape(), &storage{out, allocation}}, nil
 }
 func CheckSqrtDerivative(ctx context.Context, input Data) error {
 	for i := 0; i < int(input.Shape().Count()); i++ {
 		if err := poll(ctx, i); err != nil {
 			return err
 		}
-		if input.At(i) == 0 {
+		if input.(HostData).At(i) == 0 {
 			return numeric(catalog.UndefinedDerivative, i, "nonzero active square-root input")
 		}
 	}

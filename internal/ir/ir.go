@@ -12,12 +12,13 @@ import (
 
 type BindingID string
 type Effects struct {
+	Devices bool
 	Reads   bool
 	Commits bool
 }
 
 func (e Effects) With(other Effects) Effects {
-	return Effects{e.Reads || other.Reads, e.Commits || other.Commits}
+	return Effects{Devices: e.Devices || other.Devices, Reads: e.Reads || other.Reads, Commits: e.Commits || other.Commits}
 }
 
 type Expression interface {

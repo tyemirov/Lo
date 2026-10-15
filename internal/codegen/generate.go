@@ -46,7 +46,7 @@ func Generate(program ir.Program, packageName string) ([]byte, error) {
 	}
 	top := &block{g: g, bindings: map[ir.BindingID]string{}}
 	top.body(program.Body())
-	fmt.Fprintf(&g.functions, "func(p *program)top(s execution.Session)(value.Value,error){var err error;_ = err\n%s}\n", top.out.String())
+	fmt.Fprintf(&g.functions, "func(p *program)top(s execution.Session)(resultValue value.Value,resultErr error){scope:=s.Scope();defer func(){scope.Close(resultValue)}();var err error;_ = err\n%s}\n", top.out.String())
 	for _, f := range program.Flows() {
 		g.flow(f)
 	}
@@ -68,12 +68,13 @@ func Generate(program ir.Program, packageName string) ([]byte, error) {
 	}
 	var out strings.Builder
 	fmt.Fprintf(&out, "package %s\n", packageName)
-	out.WriteString(`import("fmt";"math";"github.com/MarcoPoloResearchLab/Lo/internal/catalog";"github.com/MarcoPoloResearchLab/Lo/internal/derivative";"github.com/MarcoPoloResearchLab/Lo/internal/tensor";"github.com/MarcoPoloResearchLab/Lo/internal/execution";"github.com/MarcoPoloResearchLab/Lo/internal/identity";"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops";"github.com/MarcoPoloResearchLab/Lo/internal/source";"github.com/MarcoPoloResearchLab/Lo/internal/types";"github.com/MarcoPoloResearchLab/Lo/internal/value")
+	out.WriteString(`import("fmt";"math";"github.com/MarcoPoloResearchLab/Lo/internal/catalog";"github.com/MarcoPoloResearchLab/Lo/internal/derivative";"github.com/MarcoPoloResearchLab/Lo/internal/device";"github.com/MarcoPoloResearchLab/Lo/internal/tensor";"github.com/MarcoPoloResearchLab/Lo/internal/execution";"github.com/MarcoPoloResearchLab/Lo/internal/identity";"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops";"github.com/MarcoPoloResearchLab/Lo/internal/source";"github.com/MarcoPoloResearchLab/Lo/internal/types";"github.com/MarcoPoloResearchLab/Lo/internal/value")
 func operation(name string)(catalog.Operation,error){op,ok:=catalog.Lookup(name);if !ok{return nil,fmt.Errorf("unknown compiled operation %s",name)};return op,nil}
 var _=math.Float64frombits
 var _=fmt.Errorf
 var _=catalog.Lookup
 var _=derivative.VJP
+var _=device.CPU
 var _ tensor.Data
 var _ identity.FlowID
 var _=runtimeops.Match
@@ -238,7 +239,7 @@ func (g *generator) flow(f ir.Flow) {
 	}
 	name := g.flows[f.ID()]
 	b.body(f.Body())
-	fmt.Fprintf(&g.functions, "func(p *program)%sBody(s execution.Session%s)(value.Value,error){var err error;_ = err\n%s}\n", name, suffix, b.out.String())
+	fmt.Fprintf(&g.functions, "func(p *program)%sBody(s execution.Session%s)(resultValue value.Value,resultErr error){scope:=s.Scope();defer func(){scope.Close(resultValue)}();var err error;_ = err\n%s}\n", name, suffix, b.out.String())
 	fmt.Fprintf(&g.functions, "func(p *program)%s(s execution.Session,span source.Span%s)(value.Value,error){if err:=s.Enter();err!=nil{return nil,err};defer s.Leave();result,err:=p.%sBody(s%s);cause,host:=runtimeops.Cause(result,err);if host!=nil{return nil,host};if cause==nil{return result,nil};input,err:=value.NewRecord([]value.Field{%s});if err!=nil{return nil,err};cause=value.WithFrame(cause,%q,cause.Operation(),input)\n", name, suffix, name, arguments, strings.Join(fields, ","), f.Name())
 	if f.Handler() != "" {
 		fmt.Fprintf(&g.functions, "return p.%s(s,span,cause)}\n", g.flows[f.Handler()])

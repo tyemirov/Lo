@@ -1,6 +1,9 @@
 package catalog
 
-import "github.com/MarcoPoloResearchLab/Lo/internal/types"
+import (
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
+)
 
 const (
 	ParametersNew          = "Parameters.new"
@@ -28,6 +31,9 @@ func addParameters(m map[string]Operation) {
 		}
 		if name == GradientsAdd || name == GradientsScale {
 			errors = append(errors, NumericNonFinite)
+		}
+		if UsesDevice(name) {
+			errors = append(errors, device.UnsupportedOperation)
 		}
 		m[name] = operation{name: name, rule: TensorBundleOperation, parameters: parameters, errors: errors}
 	}

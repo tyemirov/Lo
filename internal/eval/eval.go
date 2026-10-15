@@ -3,6 +3,7 @@ package eval
 import (
 	"context"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops"
@@ -45,14 +46,16 @@ func Program(p ir.Program) (execution.Program, error) {
 		return m.body(p.Body(), frame{bindings: map[ir.BindingID]value.Value{}})
 	}, handlers)
 }
-func Run(ctx context.Context, p ir.Program, boundary execution.Boundary, budget execution.Budget) (value.Value, error) {
+func Run(ctx context.Context, p ir.Program, boundary execution.Boundary, budget execution.Budget, config device.Config) (value.Value, error) {
 	program, err := Program(p)
 	if err != nil {
 		return nil, err
 	}
-	return program.Run(ctx, boundary, budget)
+	return program.Run(ctx, boundary, budget, config)
 }
-func (m *machine) body(body []ir.Statement, f frame) (value.Value, error) {
+func (m *machine) body(body []ir.Statement, f frame) (output value.Value, resultErr error) {
+	scope := m.Scope()
+	defer func() { scope.Close(output) }()
 	for _, s := range body {
 		if err := m.Step(); err != nil {
 			return nil, err

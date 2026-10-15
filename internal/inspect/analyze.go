@@ -30,6 +30,7 @@ const (
 type abstract struct {
 	typ          types.Type
 	node         nodeID
+	location     *string
 	known        *string
 	dependencies []nodeID
 	fields       map[string]abstract
@@ -227,6 +228,14 @@ func (a *analyzer) join(values []abstract, node nodeID, t types.Type) abstract {
 	if same {
 		v := *values[0].known
 		result.known = &v
+	}
+	sameLocation := values[0].location != nil
+	for _, v := range values[1:] {
+		sameLocation = sameLocation && v.location != nil && *values[0].location == *v.location
+	}
+	if sameLocation {
+		v := *values[0].location
+		result.location = &v
 	}
 	shape := t
 	if fallible, ok := shape.(types.Fallible); ok {

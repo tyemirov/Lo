@@ -1,5 +1,7 @@
 package catalog
 
+import "github.com/MarcoPoloResearchLab/Lo/internal/device"
+
 const (
 	AutodiffGrad        = "Autodiff.grad"
 	AutodiffStop        = "Autodiff.stop"
@@ -10,5 +12,5 @@ const (
 )
 
 func addAutodiff(m map[string]Operation) {
-	m[AutodiffGrad] = operation{name: AutodiffGrad, rule: Gradient, errors: []string{InvalidLoss, UndefinedDerivative, NumericNonFinite, NumericZero, NumericDomain, ShapeMismatch, InvalidShape, EmptyReduction}}
+	m[AutodiffGrad] = operation{name: AutodiffGrad, rule: Gradient, errors: []string{InvalidLoss, UndefinedDerivative, NumericNonFinite, NumericZero, NumericDomain, ShapeMismatch, InvalidShape, EmptyReduction, device.UnsupportedOperation}}
 }

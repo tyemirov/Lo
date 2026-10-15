@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 	"math"
 	"math/big"
@@ -31,25 +32,28 @@ type Metadata struct {
 }
 
 func Unknown() *Metadata {
-	return &Metadata{Dtype: tensor.Dtype, Profile: tensor.Profile, Device: tensor.CPU, Layout: "row-major"}
+	return &Metadata{Dtype: tensor.Dtype, Profile: "unknown", Device: "unknown", Layout: "row-major"}
 }
 
 type fact struct {
-	key    [32]byte
-	Number string
-	List   bool
-	Items  []fact
-	Fields map[string]fact
-	Shape  tensor.Shape
+	key      [32]byte
+	Location string
+	Text     string
+	Number   string
+	List     bool
+	Items    []fact
+	Fields   map[string]fact
+	Shape    tensor.Shape
 }
 
 // Each immutable fact has a fixed-size structural key. Shared nested lists
 // therefore do not expand into an exponential cache key.
 func seal(f fact) fact {
-	if f.Number == "" && !f.List && f.Fields == nil && f.Shape == nil {
+	if f.Location == "" && f.Text == "" && f.Number == "" && !f.List && f.Fields == nil && f.Shape == nil {
 		return fact{}
 	}
 	h := sha256.New()
+	fmt.Fprintf(h, "location:%q;text:%q;", f.Location, f.Text)
 	fmt.Fprintf(h, "n%d:%s;l%t:%d;", len(f.Number), f.Number, f.List, len(f.Items))
 	for _, item := range f.Items {
 		h.Write(item.key[:])
@@ -108,6 +112,17 @@ func Analyze(p ir.Program) (map[ir.Expression]*Metadata, diagnostic.Diagnostic) 
 			continue
 		}
 		m := Unknown()
+		if f.Location != "" {
+			m.Device = f.Location
+			switch f.Location {
+			case device.CPU:
+				m.Profile = tensor.Profile
+			case device.Simulation:
+				m.Profile = device.SimulationProfile
+			case device.CUDA:
+				m.Profile = device.CUDAProfile
+			}
+		}
 		if f.Shape != nil {
 			m.Shape = make([]string, f.Shape.Rank())
 			for i, d := range f.Shape.Dims() {
@@ -182,6 +197,9 @@ func (a *analyzer) expression(e ir.Expression, env map[ir.BindingID]fact) (resul
 	}()
 	switch x := e.(type) {
 	case ir.Literal:
+		if x.Type().Kind() == types.StringKind {
+			result.Text = x.Text()
+		}
 		if x.Type().Kind() == types.IntKind {
 			result.Number = x.Text()
 		}
@@ -236,6 +254,12 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 		}
 	}
 	switch op {
+	case catalog.StringNew, catalog.DeviceNew:
+		return args[0]
+	case catalog.TensorTo:
+		return fact{Shape: args[0].Shape, Location: args[1].Text}
+	case catalog.TensorDevice:
+		return fact{Text: args[0].Location}
 	case catalog.SGDStateNew, catalog.AdamWStateNew:
 		return fact{Fields: map[string]fact{types.FieldParameters: args[0]}}
 	case catalog.SGDStep, catalog.AdamWStep:
@@ -284,7 +308,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 	case catalog.TensorNew:
 		dims, known := integers(args[1])
 		if !known {
-			return fact{}
+			return fact{Location: device.CPU}
 		}
 		s, err := tensor.NewShape(dims)
 		if err != nil {
@@ -297,7 +321,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 				return fact{}
 			}
 		}
-		return fact{Shape: s}
+		return fact{Shape: s, Location: device.CPU}
 	case catalog.TensorShape:
 		if args[0].Shape != nil {
 			items := make([]fact, args[0].Shape.Rank())
@@ -317,17 +341,17 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 			return fact{Number: strconv.Itoa(args[0].Shape.Rank())}
 		}
 	case catalog.TensorSqrt, catalog.TensorRelu:
-		return fact{Shape: args[0].Shape}
+		return fact{Shape: args[0].Shape, Location: args[0].Location}
 	case catalog.TensorAdd, catalog.TensorSub, catalog.TensorMul, catalog.TensorDiv, catalog.TensorMatmul:
 		if args[0].Shape == nil || args[1].Shape == nil {
-			return fact{}
+			return fact{Location: args[0].Location}
 		}
 		p, err := tensor.Prepare(op, args[0].Shape, args[1].Shape, nil)
 		if err != nil {
 			failure(err)
 			return fact{}
 		}
-		return fact{Shape: p.Shape()}
+		return fact{Shape: p.Shape(), Location: args[0].Location}
 	case catalog.TensorReshape, catalog.TensorBroadcast, catalog.TensorTranspose, catalog.TensorSum, catalog.TensorMean:
 		dims, known := integers(args[1])
 		if !known {
@@ -340,7 +364,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 					failure(err)
 					return fact{}
 				}
-				return fact{Shape: s}
+				return fact{Shape: s, Location: args[0].Location}
 			}
 			if _, err := tensor.ValidateAxes(op, dims, nil); err != nil {
 				failure(err)
@@ -352,7 +376,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 			failure(err)
 			return fact{}
 		}
-		return fact{Shape: p.Shape()}
+		return fact{Shape: p.Shape(), Location: args[0].Location}
 	}
 	return fact{}
 }
@@ -379,6 +403,12 @@ func (an *analyzer) join(a, b fact) fact {
 		return f
 	}
 	f := fact{}
+	if a.Location == b.Location {
+		f.Location = a.Location
+	}
+	if a.Text == b.Text {
+		f.Text = a.Text
+	}
 	if a.Number == b.Number {
 		f.Number = a.Number
 	}

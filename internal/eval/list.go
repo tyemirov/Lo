@@ -10,7 +10,9 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callback identity.FlowID, f frame) (value.Value, error) {
+func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callback identity.FlowID, f frame) (resultValue value.Value, resultErr error) {
+	scope := m.Scope()
+	defer func() { scope.Close(resultValue) }()
 	op := call.Operation().Name()
 	contextStart := 1
 	var state value.Value
@@ -82,7 +84,11 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 		case catalog.ListUnfold:
 			r := v.(value.Record)
 			output = append(output, r.Field("value"))
+			scope.Retain(r.Field("value"))
 			state = r.Field("next_state")
+		}
+		if op == catalog.ListFold || op == catalog.ListUnfold {
+			scope.Keep(state)
 		}
 	}
 	if op == catalog.ListFold {

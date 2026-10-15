@@ -3,12 +3,15 @@ package execution
 import (
 	"context"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
 // Session owns the logical resources of one top-level run or HTTP request.
 type Session interface {
+	Resources() device.Session
+	Scope() Scope
 	Context() context.Context
 	Boundary() Boundary
 	Step() error
@@ -20,6 +23,7 @@ type Session interface {
 	session()
 }
 type session struct {
+	resources         device.Session
 	ctx               context.Context
 	boundary          Boundary
 	remaining, weight uint64
@@ -27,11 +31,15 @@ type session struct {
 }
 
 func (*session) session() {}
-func NewSession(ctx context.Context, boundary Boundary, budget Budget) (Session, error) {
+func NewSession(ctx context.Context, boundary Boundary, budget Budget, config device.Config) (Session, error) {
 	if ctx == nil || boundary == nil || budget == nil {
 		return nil, fmt.Errorf("execution requires context, boundary, and budget")
 	}
-	return &session{ctx: ctx, boundary: boundary, remaining: budget.Steps()}, nil
+	resources, err := device.NewSession(config)
+	if err != nil {
+		return nil, err
+	}
+	return &session{ctx: ctx, boundary: boundary, remaining: budget.Steps(), resources: resources}, nil
 }
 func (s *session) Context() context.Context { return s.ctx }
 func (s *session) Boundary() Boundary       { return s.boundary }
@@ -81,3 +89,33 @@ func (s *session) Enter() error {
 	return nil
 }
 func (s *session) Leave() { s.depth-- }
+
+func (s *session) Resources() device.Session { return s.resources }
+
+type Scope interface {
+	Retain(value.Value)
+	Close(value.Value)
+	Keep(...value.Value)
+	scope()
+}
+type resourceScope struct{ owner device.Scope }
+
+func (resourceScope) scope()    {}
+func (s *session) Scope() Scope { return resourceScope{s.resources.Scope()} }
+func (s resourceScope) Close(v value.Value) {
+	var roots []device.Allocation
+	if !s.owner.Empty() {
+		roots = value.Allocations(v)
+	}
+	s.owner.Close(roots)
+}
+func (s resourceScope) Keep(values ...value.Value) {
+	if !s.owner.Empty() {
+		s.owner.Keep(value.Allocations(values...))
+	}
+}
+func (s resourceScope) Retain(v value.Value) {
+	if !s.owner.Empty() {
+		s.owner.Retain(value.Allocations(v))
+	}
+}

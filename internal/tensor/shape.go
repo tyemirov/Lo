@@ -2,6 +2,7 @@ package tensor
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"math"
 	"math/big"
 	"slices"
@@ -12,9 +13,6 @@ import (
 const (
 	Dtype        = "fp32"
 	Profile      = "cpu-fp32-strict"
-	CPU          = "cpu"
-	CUDA         = "cuda:0"
-	Simulation   = "cuda-sim:0"
 	MaxRank      = 8
 	MaxDimension = 1_000_000
 	MaxElements  = 1_000_000
@@ -59,7 +57,7 @@ func (s shape) Dims() []int64 { return slices.Clone(s.dims) }
 func (s shape) Rank() int     { return len(s.dims) }
 func (s shape) Count() uint64 { return s.count }
 func (s shape) Weight() uint64 {
-	return 16 + 4*s.count + 8*uint64(s.Rank()) + uint64(len(Dtype)+len(CPU))
+	return 16 + 4*s.count + 8*uint64(s.Rank()) + uint64(len(Dtype)+len(device.CPU))
 }
 func (s shape) Limits() error {
 	if len(s.dims) > MaxRank {

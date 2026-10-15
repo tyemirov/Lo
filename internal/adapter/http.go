@@ -42,10 +42,15 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 		ctx, stop = context.WithTimeout(s.requestContext, IOTimeout)
 		defer stop()
 	}
-	invocation, err := s.program.NewInvocation(ctx, s, s.budget)
+	invocation, err := s.program.NewInvocation(ctx, s, s.budget, s.devices)
 	if err != nil {
 		s.abort(err)
 	}
+	defer func() {
+		if closeErr := invocation.Close(); closeErr != nil {
+			s.abort(execution.HostFailure("close device resources", "request", closeErr))
+		}
+	}()
 	var output value.Value
 	if cause == nil {
 		output, err = invocation.Invoke(target.Handler(), []value.Value{request})
@@ -78,6 +83,9 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 		if invalid != nil {
 			s.abort(execution.HostFailure(catalog.HTTPRespond, "onError", fmt.Errorf("%s: %s", invalid.Kind(), invalid.Message())))
 		}
+	}
+	if closeErr := invocation.Close(); closeErr != nil {
+		s.abort(execution.HostFailure("close device resources", "request", closeErr))
 	}
 	for name, v := range response.headers {
 		w.Header().Set(name, v)

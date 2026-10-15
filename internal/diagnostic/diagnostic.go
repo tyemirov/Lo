@@ -20,6 +20,8 @@ const (
 	Runtime    Stage = "runtime"
 )
 
+const TensorPublication Code = "runtime.tensor-publication"
+
 type Code string
 
 const (

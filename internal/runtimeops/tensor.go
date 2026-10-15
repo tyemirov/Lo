@@ -2,6 +2,7 @@ package runtimeops
 
 import (
 	"errors"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"math/big"
 
@@ -21,6 +22,10 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 		var f tensor.Fault
 		if errors.As(err, &f) {
 			return OperationFailure(call, args, f.Kind(), op+": "+f.Error()), nil
+		}
+		var backend device.Fault
+		if errors.As(err, &backend) {
+			return OperationFailure(call, args, backend.Kind(), op+": "+backend.Error()), nil
 		}
 		return nil, execution.Limit(op + ": " + err.Error())
 	}
@@ -46,7 +51,7 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 		if err = m.tensorBudget(s.Count(), s.Weight()+16); err != nil {
 			return nil, err
 		}
-		d, err := tensor.Construct(m.Context(), s, func(i int) float64 { return items[i].(value.Float).Number() })
+		d, err := tensor.Construct(m.Context(), m.Resources(), s, func(i int) float64 { return items[i].(value.Float).Number() })
 		if err != nil {
 			return fail(err)
 		}
@@ -54,6 +59,29 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 	}
 	a := args[0].(value.Tensor).Data()
 	s := a.Shape()
+	if op == catalog.TensorTo {
+		location := args[1].(value.Device).Selector()
+		for _, selector := range []string{a.Location(), location} {
+			if !m.Resources().Granted(selector) {
+				return nil, execution.Denied(op, selector)
+			}
+		}
+		if a.Location() != device.CPU && location != device.CPU && a.Location() != location {
+			return OperationFailure(call, args, device.Mismatch, "transfers require CPU and one compute location"), nil
+		}
+		steps := uint64(0)
+		if a.Location() != location {
+			steps = s.Count()
+		}
+		if err := m.tensorBudget(steps, tensor.Weight(s, location)+16); err != nil {
+			return nil, err
+		}
+		result, err := tensor.Transfer(m.Context(), m.Resources(), a, location)
+		if err != nil {
+			return fail(err)
+		}
+		return Success(call.Type(), must(value.NewTensor(result))), nil
+	}
 	switch op {
 	case catalog.TensorShape:
 		items := make([]value.Value, s.Rank())
@@ -66,16 +94,22 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 	case catalog.TensorDtype:
 		return must(value.NewText(types.String(), tensor.Dtype)), nil
 	case catalog.TensorDevice:
-		return must(value.NewDevice(tensor.CPU)), nil
+		return must(value.NewDevice(a.Location())), nil
 	case catalog.TensorToFloat:
+		if a.Location() != device.CPU {
+			return OperationFailure(call, args, catalog.HostObservationRequired, "transfer tensor to CPU before numeric observation"), nil
+		}
 		if err := tensor.ValidateScalar(s); err != nil {
 			return fail(err)
 		}
 		if err := m.tensorBudget(1, 40); err != nil {
 			return nil, err
 		}
-		return Success(call.Type(), must(value.NewFloat(float64(a.At(0))))), nil
+		return Success(call.Type(), must(value.NewFloat(float64(a.(tensor.HostData).At(0))))), nil
 	case catalog.TensorValues:
+		if a.Location() != device.CPU {
+			return OperationFailure(call, args, catalog.HostObservationRequired, "transfer tensor to CPU before numeric observation"), nil
+		}
 		if err := m.tensorBudget(s.Count(), 32+24*s.Count()); err != nil {
 			return nil, err
 		}
@@ -86,7 +120,7 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 					return nil, execution.BoundaryHostError(err)
 				}
 			}
-			items[i] = must(value.NewFloat(float64(a.At(i))))
+			items[i] = must(value.NewFloat(float64(a.(tensor.HostData).At(i))))
 		}
 		return Success(call.Type(), must(value.NewList(call.Type().(types.Fallible).Base().(types.List), items))), nil
 	}
@@ -101,6 +135,12 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 			indices = tensorIntegers(args[1])
 		}
 	}
+	if b != nil && a.Location() != b.Location() {
+		return OperationFailure(call, args, device.Mismatch, "tensor input locations differ"), nil
+	}
+	if a.Location() != device.CPU {
+		return OperationFailure(call, args, device.UnsupportedOperation, "device arithmetic requires the NVIDIA backend"), nil
+	}
 	p, err := tensor.Prepare(op, s, bs, indices)
 	if err != nil {
 		return fail(err)
@@ -108,7 +148,7 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 	if err = m.tensorBudget(p.Steps(), p.Shape().Weight()+16); err != nil {
 		return nil, err
 	}
-	d, err := tensor.Execute(m.Context(), p, a, b)
+	d, err := tensor.Execute(m.Context(), m.Resources(), p, a, b)
 	if err != nil {
 		return fail(err)
 	}

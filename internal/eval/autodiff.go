@@ -3,6 +3,7 @@ package eval
 import (
 	"errors"
 	"github.com/MarcoPoloResearchLab/Lo/internal/derivative"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/runtimeops"
 	"math/big"
@@ -15,9 +16,14 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-const MaxTapeBytes uint64 = 32 << 20
-
-func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.Value, error) {
+func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (output value.Value, resultErr error) {
+	scope := m.Scope()
+	defer func() { scope.Close(output) }()
+	for _, arg := range args {
+		if !value.HostPublishable(arg) {
+			return runtimeops.OperationFailure(original, args, device.UnsupportedOperation, "device autodiff requires the selected device backend"), nil
+		}
+	}
 	call := original.(autodiff.Call)
 	parameters := call.Parameters()
 	f := frame{bindings: map[ir.BindingID]value.Value{}}
@@ -32,6 +38,8 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 	snapshots := map[int]value.Record{}
 	tape := map[tensor.Storage]bool{}
 	var tapeBytes uint64
+	var tapeAllocations []device.Allocation
+	defer func() { m.Resources().Unclassify(tapeAllocations, device.TapeStorage) }()
 	fail := func(err error, n autodiff.Node) (value.Value, error) {
 		if host := execution.BoundaryHostError(err); host != nil {
 			return nil, host
@@ -86,9 +94,13 @@ func (m *machine) gradient(original ir.BuiltinCall, args []value.Value) (value.V
 			if t, ok := v.(value.Tensor); ok {
 				storage := t.Data().Storage()
 				if !tape[storage] {
-					if storage.Bytes() > MaxTapeBytes-tapeBytes {
+					if storage.Bytes() > device.MaxTape-tapeBytes {
 						return nil, execution.Limit("derivative tape bytes")
 					}
+					if err := m.Resources().Classify([]device.Allocation{storage.Allocation()}, device.TapeStorage); err != nil {
+						return nil, execution.BoundaryHostError(err)
+					}
+					tapeAllocations = append(tapeAllocations, storage.Allocation())
 					tape[storage] = true
 					tapeBytes += storage.Bytes()
 				}

@@ -35,7 +35,7 @@ func index(program ir.Program, data *reportData, metadata map[ir.Expression]*ten
 			g.parameters[p.ID] = id
 			parameters = append(parameters, parameterData{p.ID, p.Name, p.Type.String()})
 		}
-		data.Flows = append(data.Flows, flowData{ID: f.ID(), Name: f.Name(), Span: f.Span(), Parameters: parameters, Output: f.Signature().Output().String(), Handler: f.Handler(), Effects: effectsData{f.Effects().Reads, f.Effects().Commits}, Uses: []string{}})
+		data.Flows = append(data.Flows, flowData{ID: f.ID(), Name: f.Name(), Span: f.Span(), Parameters: parameters, Output: f.Signature().Output().String(), Handler: f.Handler(), Effects: effectsData{Devices: f.Effects().Devices, Reads: f.Effects().Reads, Commits: f.Effects().Commits}, Uses: []string{}})
 		g.body(f.Body(), string(f.ID()))
 	}
 	g.body(program.Body(), programEntry)

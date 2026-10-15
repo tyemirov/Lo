@@ -763,3 +763,7 @@ func ResponseBytesNew(session execution.Session, call Call, args []value.Value, 
 	fields := must(value.NewRecord([]value.Field{{Name: "status", Value: args[0]}, {Name: "headers", Value: headers}, {Name: "body", Value: body}}))
 	return must(value.NewHTTP(types.Response(), fields)), nil
 }
+
+func TensorTo(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	return (&machine{session}).tensorOperation(call, args)
+}

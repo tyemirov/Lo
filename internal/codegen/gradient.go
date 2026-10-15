@@ -24,8 +24,9 @@ func (g *generator) gradient(call autodiff.Call, metadata string) string {
 		}
 		b.bindings[p.ID] = args[argument]
 	}
+	b.line("for _,arg:=range []value.Value{%s}{if !value.HostPublishable(arg){return runtimeops.OperationFailure(%s,[]value.Value{%s},device.UnsupportedOperation,\"device autodiff requires the selected device backend\"),nil}}", strings.Join(args, ","), metadata, strings.Join(args, ","))
 	nodes := call.Nodes()
-	b.line("var err error;_ = err;tape:=runtimeops.NewTape(s);maths:=runtimeops.Arithmetic(s);adjoints:=make([]tensor.Data,%d)", len(nodes)+1)
+	b.line("var err error;_ = err;tape:=runtimeops.NewTape(s);defer tape.Close();maths:=runtimeops.Arithmetic(s);adjoints:=make([]tensor.Data,%d)", len(nodes)+1)
 	seenFrames := map[int]bool{}
 	for _, node := range nodes {
 		for _, frame := range node.Frames() {
@@ -95,7 +96,7 @@ func (g *generator) gradient(call autodiff.Call, metadata string) string {
 	b.line("result,err:=value.NewRecord([]value.Field{{Name:catalog.ParamValue,Value:loss},{Name:catalog.FieldGradients,Value:gradients}})")
 	b.check()
 	b.line("return runtimeops.Success(%s,result),nil", g.typeOf(call.Type()))
-	fmt.Fprintf(&g.functions, "func(p *program)%s(s execution.Session,%s)(value.Value,error){%s}\n", name, strings.Join(params, ","), b.out.String())
+	fmt.Fprintf(&g.functions, "func(p *program)%s(s execution.Session,%s)(resultValue value.Value,resultErr error){scope:=s.Scope();defer func(){scope.Close(resultValue)}();%s}\n", name, strings.Join(params, ","), b.out.String())
 	return name
 }
 func (b *block) gradientFailure(call autodiff.Call, node autodiff.Node) string {
