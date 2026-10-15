@@ -89,7 +89,7 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 				return inv, fmt.Errorf("--allow-device requires a non-CPU selector")
 			}
 			var err error
-			inv.devices, err = device.NewConfig(args[i], device.SoftwareFactory{}, nil)
+			inv.devices, err = device.NewConfig(args[i], device.DefaultFactory(), nil)
 			if err != nil {
 				return inv, err
 			}

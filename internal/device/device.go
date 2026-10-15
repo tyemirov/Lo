@@ -14,6 +14,7 @@ const (
 	Mismatch                    = "Tensor.DeviceMismatch"
 	SimulationProfile           = "cuda-sim-fp32"
 	CUDAProfile                 = "cuda-fp32-pedantic"
+	MetalTransferProfile        = "metal-transfer-fp32"
 	EventOpen                   = "open"
 	EventAllocate               = "allocate"
 	EventTransfer               = "transfer"
@@ -21,10 +22,14 @@ const (
 	EventClose                  = "close"
 	CUDA                        = "cuda:0"
 	Simulation                  = "cuda-sim:0"
+	Metal                       = "metal:0"
 	Unavailable                 = "Device.Unavailable"
 	AllocationFailed            = "Device.AllocationFailed"
 	TransferFailed              = "Device.TransferFailed"
 	UnsupportedOperation        = "Device.UnsupportedOperation"
+	UnsupportedProfile          = "Device.UnsupportedProfile"
+	LibraryFailed               = "Device.LibraryFailed"
+	Lost                        = "Device.Lost"
 	MaxStorage           uint64 = 64 << 20
 	MaxTape              uint64 = 32 << 20
 	MaxOptimizer         uint64 = 32 << 20
@@ -53,7 +58,7 @@ func NewFault(kind string, cause error) (Fault, error) {
 		return nil, fmt.Errorf("device failure requires a cause")
 	}
 	switch kind {
-	case Unavailable, AllocationFailed, TransferFailed, UnsupportedOperation, Mismatch:
+	case Unavailable, AllocationFailed, TransferFailed, UnsupportedOperation, UnsupportedProfile, LibraryFailed, Lost, Mismatch:
 		return &fault{kind, cause}, nil
 	default:
 		return nil, fmt.Errorf("invalid device failure kind %q", kind)
@@ -81,7 +86,16 @@ type Buffer interface {
 // Backend owns one invocation's device context.
 type Backend interface {
 	Allocate(context.Context, uint64) (Buffer, error)
+	Identity() Identity
 	Close() error
+}
+
+// Identity describes the opened backend without tensor data.
+type Identity struct {
+	Name         string `json:"name"`
+	Profile      string `json:"profile"`
+	RegistryID   string `json:"registry_id,omitempty"`
+	KernelSHA256 string `json:"kernel_sha256,omitempty"`
 }
 
 // Factory opens only the explicitly selected backend after authorization.
@@ -91,11 +105,12 @@ type Factory interface {
 
 // Receipt records resource lifetime without tensor contents.
 type Receipt struct {
-	Event  string `json:"event"`
-	ID     uint64 `json:"allocation"`
-	Device string `json:"device"`
-	Bytes  uint64 `json:"bytes"`
-	Live   uint64 `json:"live_bytes"`
+	Event   string    `json:"event"`
+	ID      uint64    `json:"allocation"`
+	Device  string    `json:"device"`
+	Bytes   uint64    `json:"bytes"`
+	Live    uint64    `json:"live_bytes"`
+	Backend *Identity `json:"backend,omitempty"`
 }
 type Observer func(Receipt)
 
@@ -114,7 +129,7 @@ type configuration struct {
 func (configuration) config()                   {}
 func (c configuration) settings() configuration { return c }
 func NewConfig(grant string, factory Factory, observer Observer) (Config, error) {
-	if grant != "" && grant != CUDA && grant != Simulation {
+	if grant != "" && grant != CUDA && grant != Simulation && grant != Metal {
 		return nil, fmt.Errorf("invalid device grant %q", grant)
 	}
 	if factory == nil {
@@ -122,9 +137,24 @@ func NewConfig(grant string, factory Factory, observer Observer) (Config, error)
 	}
 	return configuration{grant, factory, observer}, nil
 }
-func DefaultConfig() Config { return configuration{factory: SoftwareFactory{}} }
+func DefaultConfig() Config { return configuration{factory: DefaultFactory()} }
 
-// SoftwareFactory implements explicit simulation and rejects unavailable CUDA.
+// DefaultFactory dispatches only to the explicitly selected backend.
+func DefaultFactory() Factory { return buildFactory{} }
+
+type buildFactory struct{}
+
+func (buildFactory) Open(ctx context.Context, selector string) (Backend, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if selector == Metal {
+		return openMetal(ctx)
+	}
+	return (SoftwareFactory{}).Open(ctx, selector)
+}
+
+// SoftwareFactory implements explicit simulation and rejects other selectors.
 type SoftwareFactory struct{}
 
 func (SoftwareFactory) Open(ctx context.Context, selector string) (Backend, error) {
@@ -139,6 +169,9 @@ func (SoftwareFactory) Open(ctx context.Context, selector string) (Backend, erro
 
 type softwareBackend struct{}
 
+func (*softwareBackend) Identity() Identity {
+	return Identity{Name: "software simulation", Profile: SimulationProfile}
+}
 func (*softwareBackend) Close() error { return nil }
 func (*softwareBackend) Allocate(ctx context.Context, bytes uint64) (Buffer, error) {
 	if err := ctx.Err(); err != nil {
@@ -202,6 +235,7 @@ type session struct {
 	current     *scope
 	allocations map[uint64]*allocation
 	cleanup     error
+	lost        error
 	closed      bool
 }
 
@@ -233,18 +267,24 @@ func (s *session) Open(ctx context.Context, selector string) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	if s.lost != nil {
+		return s.lost
+	}
 	if s.backend != nil {
 		return nil
 	}
 	backend, err := s.config.factory.Open(ctx, selector)
 	if err != nil {
-		return backendFault(Unavailable, err)
+		return s.backendFault(ctx, Unavailable, err)
 	}
 	if backend == nil {
 		return &fault{Unavailable, fmt.Errorf("backend factory returned no device")}
 	}
 	s.backend = backend
-	s.emit(EventOpen, nil)
+	if s.config.observer != nil {
+		identity := backend.Identity()
+		s.config.observer(Receipt{Event: EventOpen, Device: selector, Live: s.live, Backend: &identity})
+	}
 	return nil
 }
 func (s *session) Allocate(ctx context.Context, location string, bytes uint64) (Allocation, error) {
@@ -269,7 +309,7 @@ func (s *session) Allocate(ctx context.Context, location string, bytes uint64) (
 		}
 		buffer, err := s.backend.Allocate(ctx, bytes)
 		if err != nil {
-			return nil, backendFault(AllocationFailed, err)
+			return nil, s.backendFault(ctx, AllocationFailed, err)
 		}
 		if buffer == nil {
 			return nil, &fault{AllocationFailed, fmt.Errorf("device allocation returned no buffer")}
@@ -298,14 +338,32 @@ func (s *session) Allocate(ctx context.Context, location string, bytes uint64) (
 	s.emit(EventAllocate, a)
 	return a, nil
 }
-func backendFault(kind string, err error) error {
+func (s *session) backendFault(ctx context.Context, kind string, err error) error {
 	var failure Fault
-	if errors.As(err, &failure) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+	isFault := errors.As(err, &failure)
+	if isFault && failure.Kind() == Lost {
+		s.lost = err
+	}
+	// A boundary can fail while cancellation is pending. Cancellation remains
+	// a host diagnostic and cannot enter a Lo error handler.
+	if cancelled := ctx.Err(); cancelled != nil {
+		return cancelled
+	}
+	if isFault {
+		return err
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return err
 	}
 	return &fault{kind, err}
 }
 func (s *session) Transfer(ctx context.Context, from, to Allocation) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if s.lost != nil {
+		return s.lost
+	}
 	source, target := from.receipt(), to.receipt()
 	if source.owner != s || target.owner != s {
 		return fmt.Errorf("transfer allocation belongs to another invocation")
@@ -319,7 +377,7 @@ func (s *session) Transfer(ctx context.Context, from, to Allocation) error {
 		return fmt.Errorf("invalid transfer allocation pair")
 	}
 	if err != nil {
-		return backendFault(TransferFailed, err)
+		return s.backendFault(ctx, TransferFailed, err)
 	}
 	if err = ctx.Err(); err != nil {
 		return err

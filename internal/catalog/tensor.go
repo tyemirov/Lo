@@ -50,7 +50,7 @@ func addTensors(m map[string]Operation) {
 	one := []types.Parameter{{Name: ParamValue, Type: t}}
 	add(DeviceNew, []types.Parameter{{Name: ParamSelector, Type: types.String()}}, must(types.NewFallible(types.Device())), InvalidSelector)
 	add(TensorNew, []types.Parameter{{Name: ParamValues, Type: floats}, {Name: ParamShape, Type: ints}}, ft, InvalidShape, NumericNonFinite)
-	add(TensorTo, []types.Parameter{{Name: ParamValue, Type: t}, {Name: ParamDevice, Type: types.Device()}}, ft, device.Mismatch, device.Unavailable, device.AllocationFailed, device.TransferFailed)
+	add(TensorTo, []types.Parameter{{Name: ParamValue, Type: t}, {Name: ParamDevice, Type: types.Device()}}, ft, device.Mismatch, device.Unavailable, device.AllocationFailed, device.TransferFailed, device.UnsupportedProfile, device.LibraryFailed, device.Lost)
 	add(TensorShape, one, ints)
 	add(TensorRank, one, types.Int())
 	add(TensorDtype, one, types.String())

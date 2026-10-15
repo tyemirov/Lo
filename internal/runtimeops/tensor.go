@@ -139,7 +139,7 @@ func (m *machine) tensorOperation(call Call, args []value.Value) (value.Value, e
 		return OperationFailure(call, args, device.Mismatch, "tensor input locations differ"), nil
 	}
 	if a.Location() != device.CPU {
-		return OperationFailure(call, args, device.UnsupportedOperation, "device arithmetic requires the NVIDIA backend"), nil
+		return OperationFailure(call, args, device.UnsupportedOperation, "tensor arithmetic is unavailable on "+a.Location()), nil
 	}
 	p, err := tensor.Prepare(op, s, bs, indices)
 	if err != nil {
