@@ -59,4 +59,12 @@ Preserve the previous artifact on failure or cancellation.
 Include source and bundle digests, source identity, target, and toolchain in artifact metadata.
 Exclude timestamps, temporary paths, and resource grants from metadata.
 
+## Device Backend Selection
+
+The default `--device-backend software` configuration disables cgo and supports both selected targets.
+The explicit `--device-backend metal` configuration requires the Metal-enabled compiler and a local `darwin/arm64` target.
+Unsupported combinations fail before toolchain execution.
+The [native Metal contract](native-metal.md) defines its additional manifest, toolchain checks, and metadata.
+Both configurations use the same build limits, cancellation, and atomic publication path.
+
 The [acceptance report](native-compilation-results.md) records completed qualification on both targets.

@@ -1,0 +1,16 @@
+go run ./tools/runtimebundle
+LO_TEST_BACKEND=native LO_TEST_NATIVE_RACE=1 GORACE=atexit_sleep_ms=0 go test -race ./tests/integration -run TestMetalSelection -count=1 -v
+=== RUN   TestMetalSelection
+=== RUN   TestMetalSelection/denied
+=== RUN   TestMetalSelection/unavailable_build
+=== RUN   TestMetalSelection/different_grant
+=== RUN   TestMetalSelection/duplicate
+=== RUN   TestMetalSelection/multiple
+--- PASS: TestMetalSelection (10.94s)
+    --- PASS: TestMetalSelection/denied (3.54s)
+    --- PASS: TestMetalSelection/unavailable_build (0.03s)
+    --- PASS: TestMetalSelection/different_grant (0.03s)
+    --- PASS: TestMetalSelection/duplicate (0.21s)
+    --- PASS: TestMetalSelection/multiple (0.01s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	13.878s
