@@ -14,30 +14,32 @@ import (
 )
 
 const (
-	BuildCommand      = "build"
-	outputOption      = "--output"
-	targetOption      = "--target"
-	ParseCommand      = "parse"
-	CheckCommand      = "check"
-	InspectCommand    = "inspect"
-	RunCommand        = "run"
-	ServeCommand      = "serve"
-	listenOption      = "--listen"
-	readRootOption    = "--read-root"
-	writeRootOption   = "--write-root"
-	allowDeviceOption = "--allow-device"
-	maxStepsOption    = "--max-steps"
-	formatOption      = "--format"
-	TextFormat        = "text"
-	JsonFormat        = "json"
-	ExitSuccess       = 0
-	ExitRejected      = 1
-	ExitHost          = 2
+	BuildCommand        = "build"
+	outputOption        = "--output"
+	targetOption        = "--target"
+	deviceBackendOption = "--device-backend"
+	ParseCommand        = "parse"
+	CheckCommand        = "check"
+	InspectCommand      = "inspect"
+	RunCommand          = "run"
+	ServeCommand        = "serve"
+	listenOption        = "--listen"
+	readRootOption      = "--read-root"
+	writeRootOption     = "--write-root"
+	allowDeviceOption   = "--allow-device"
+	maxStepsOption      = "--max-steps"
+	formatOption        = "--format"
+	TextFormat          = "text"
+	JsonFormat          = "json"
+	ExitSuccess         = 0
+	ExitRejected        = 1
+	ExitHost            = 2
 )
 
 type invocation struct {
 	command, path, format string
 	output, target        string
+	deviceBackend         device.BuildBackend
 	readRoots             []string
 	writeRoots            []string
 	devices               device.Config
@@ -46,7 +48,7 @@ type invocation struct {
 }
 
 func parseArgs(args []string, embedded bool) (invocation, error) {
-	inv := invocation{format: TextFormat, budget: execution.DefaultBudget(), devices: device.DefaultConfig()}
+	inv := invocation{format: TextFormat, budget: execution.DefaultBudget(), devices: device.DefaultConfig(), deviceBackend: device.SoftwareBuild}
 	if len(args) == 0 {
 		return inv, fmt.Errorf("expected a command: parse, check, inspect, run, or serve")
 	}
@@ -54,9 +56,23 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	formatSet := false
 	stepsSet := false
 	deviceSet := false
+	backendSet := false
 	var ports []uint16
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
+		if arg == deviceBackendOption {
+			if embedded || inv.command != BuildCommand || backendSet || i+1 == len(args) {
+				return inv, fmt.Errorf("--device-backend requires one software or metal value with build")
+			}
+			i++
+			backendSet = true
+			var err error
+			inv.deviceBackend, err = device.ParseBuildBackend(args[i])
+			if err != nil {
+				return inv, err
+			}
+			continue
+		}
 		if arg == outputOption || arg == targetOption {
 			if embedded || inv.command != BuildCommand || i+1 == len(args) {
 				return inv, fmt.Errorf("%s requires a value with build", arg)
@@ -183,6 +199,7 @@ type Options interface {
 	Format() string
 	Output() string
 	Target() string
+	DeviceBackend() device.BuildBackend
 	options()
 }
 
@@ -250,5 +267,6 @@ func Report(stderr io.Writer, format string, d diagnostic.Diagnostic, status int
 	return status
 }
 
-func (inv invocation) Output() string { return inv.output }
-func (inv invocation) Target() string { return inv.target }
+func (inv invocation) Output() string                     { return inv.output }
+func (inv invocation) Target() string                     { return inv.target }
+func (inv invocation) DeviceBackend() device.BuildBackend { return inv.deviceBackend }
