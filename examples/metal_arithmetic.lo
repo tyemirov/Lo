@@ -1,0 +1,21 @@
+flow Loss(values: Record{x: Tensor<FP32>}) -> Tensor<FP32>! {
+  squared = Tensor.mul(values.x, values.x)
+  return Tensor.sum(squared, List.new(0))
+}
+
+flow Main() -> Record{before: Tensor<FP32>, after: Tensor<FP32>, loss: Float}! {
+  device = Device.new("metal:0")
+  x = Tensor.to(Tensor.new(List.new(1.0, -2.0), List.new(2)), device)
+  parameters = Parameters.new(Record.new(x: x))
+  differentiated = Autodiff.grad(Parameters.values(parameters), Loss)
+  gradients = Gradients.new(parameters, differentiated.gradients)
+  state = Optimizer.SGD.State.new(parameters, Optimizer.SGD.Config.new(0.1))
+  next = Optimizer.SGD.step(state, gradients)
+  values = Parameters.values(next.parameters)
+  before = Tensor.to(x, Device.new("cpu"))
+  after = Tensor.to(values.x, Device.new("cpu"))
+  loss = Tensor.to_float(Tensor.to(differentiated.value, Device.new("cpu")))
+  return Record.new(before: before, after: after, loss: loss)
+}
+
+return Main()
