@@ -147,6 +147,8 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `metallib`: A compiled library that contains Metal device functions.
 - `command buffer`: A Metal object that contains device commands submitted together.
 - `command queue`: A Metal object that orders submitted command buffers.
+- `operation descriptor`: A typed device request with a primitive operation, validated shape metadata, and scalar configuration.
+- `status buffer`: Device storage that contains a computation failure category and element index without tensor values.
 - `flush to zero`: Arithmetic treatment that replaces subnormal operands or results with zero.
 - `Objective-C`: The implementation language used by Lo's Metal adapter.
 - `backend`: The runtime component that implements operations for one selected execution environment.
