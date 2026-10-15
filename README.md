@@ -42,7 +42,8 @@ P002 adds the [Metal implementation plan](docs/metal-backend-plan.md).
 F012 adds explicit Apple GPU transfers through the Metal interpreter build.
 The [Metal transfer contract](docs/metal-transfers.md) defines the build, device profile, and validation evidence.
 F013 adds [Metal arithmetic, derivatives, gradient operations, and optimizers](docs/metal-arithmetic.md).
-F014 and I002 retain native Metal artifacts and complete training acceptance.
+F014 adds [standalone Metal artifacts](docs/native-metal.md).
+I002 retains complete training acceptance.
 F009, F010, F011, and I001 retain device arithmetic, deferred execution, later precision work, and complete training acceptance.
 The [training benchmark](docs/training-benchmark.md) records the interpreter baseline before F001.
 The [native acceptance report](docs/native-compilation-results.md) compares the two execution backends, including CPU training.
@@ -84,6 +85,18 @@ Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact tar
 The build uses the host target when this option is absent.
 Supply file, listen, and device grants when you execute the artifact.
 Use the artifact's `metadata` command to inspect its source digest, runtime bundle digest, target, and toolchain.
+The default artifact backend is `software`.
+For a Metal artifact, use the explicit build option:
+
+```bash
+make build-metal
+./bin/lo-metal build examples/metal_arithmetic.lo --device-backend metal --output ./bin/metal-example
+./bin/metal-example run --allow-device metal:0 --format json
+./bin/metal-example metadata
+```
+
+Metal builds require the pinned Apple toolchain and a local `darwin/arm64` target.
+The [native Metal contract](docs/native-metal.md) specifies the toolchain, metadata, and validation commands.
 `lo run` and `lo serve` select interpreter execution.
 
 ## Core Idea
