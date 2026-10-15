@@ -142,6 +142,14 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `numeric profile`: Fixed arithmetic rules and implementation identities for reproducible numeric execution.
 - `kernel`: A compiled program that executes tensor operations on a device.
 - `CUDA`: NVIDIA's platform for device computation.
+- `Metal`: Apple's API for graphics and device computation.
+- `MSL`: Metal Shading Language, the source language for Metal kernels.
+- `metallib`: A compiled library that contains Metal device functions.
+- `command buffer`: A Metal object that contains device commands submitted together.
+- `command queue`: A Metal object that orders submitted command buffers.
+- `flush to zero`: Arithmetic treatment that replaces subnormal operands or results with zero.
+- `Objective-C`: The implementation language used by Lo's Metal adapter.
+- `backend`: The runtime component that implements operations for one selected execution environment.
 - `cuBLAS`: NVIDIA's library for basic linear algebra on CUDA devices.
 - `cgo`: The Go toolchain interface for calls between Go and C code.
 - `ABI`: The binary interface between compiled components.
