@@ -21,7 +21,7 @@ import (
 
 const (
 	libraryPath = "internal/device/metal.metallib"
-	kernelPath  = "internal/device/metal_copy.metal"
+	kernelPath  = "internal/device/metal_kernels.metal"
 	binaryPath  = "bin/lo-metal"
 	receiptPath = "bin/lo-metal-build.json"
 )
@@ -29,7 +29,7 @@ const (
 // This manifest lists Metal source inputs and kernel compiler options.
 var sources = []string{
 	"internal/device/metal_darwin.go", "internal/device/metal_bridge.h",
-	"internal/device/metal_bridge_darwin.m", kernelPath, "tools/metalbuild/main.go",
+	"internal/device/metal_bridge_darwin.m", "internal/device/metal_types.h", kernelPath, "tools/metalbuild/main.go",
 }
 var metalFlags = []string{"-std=metal3.1", "-mmacosx-version-min=27.0", "-fmetal-math-mode=safe", "-fmetal-math-fp32-functions=precise", "-ffp-contract=off"}
 var goFlags = []string{"build", "-trimpath", "-tags=metal"}
@@ -77,7 +77,7 @@ func run(test bool, testArgs []string) (result error) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
-	r := receipt{Target: "darwin/arm64", Profile: device.MetalTransferProfile, DeviceFeatures: []string{"Apple7", "unified memory"}, Versions: map[string]string{"go": runtime.Version()}, Sources: map[string]string{}, MetalFlags: metalFlags, GoFlags: goFlags}
+	r := receipt{Target: "darwin/arm64", Profile: device.MetalProfile, DeviceFeatures: []string{"Apple7", "unified memory"}, Versions: map[string]string{"go": runtime.Version()}, Sources: map[string]string{}, MetalFlags: metalFlags, GoFlags: goFlags}
 	for _, pin := range pins {
 		output, err := command(ctx, nil, pin.Args...)
 		if err != nil {
