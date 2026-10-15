@@ -1,5 +1,6 @@
 .DS_Store
 /bin/
+/internal/device/metal.metallib
 __pycache__/
 
 # BEGIN MPRLAB-GOVERNANCE
