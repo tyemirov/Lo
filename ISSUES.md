@@ -374,6 +374,26 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   This probe establishes local GPU access, without evidence of Lo Metal execution.
   The plan assigns subnormal arithmetic and toolchain decisions to implementation preparation.
 
+- [x] [P003] (P1) {F007,I002} Define reusable trained models for CPU and Metal
+  Goal:
+  Select the contract for model inference and training resumption across processes.
+
+  Requirements:
+  - Define typed Parameter checkpoints and complete SGD and AdamW checkpoints.
+  - Require explicit transfers and the current file authorization contract.
+  - Select one canonical format with strict schema validation and bounded execution.
+  - Prioritize this sequence before further NVIDIA implementation.
+
+  Deliverables:
+  - Add the [checkpoint implementation contract](docs/model-checkpoints.md) and F015, F016, and I003.
+
+  Validation:
+  - Review the contract against current value serialization, optimizers, resource accounting, and native compilation.
+  - Verify identifiers against the active tracker and archive.
+
+  P003 selects typed canonical JSON, CPU checkpoint boundaries, and explicit container transfers.
+  F015, F016, and I003 own implementation and acceptance.
+
 ## Features
 
 - [x] [F001] (P1) Build native Lo executables
@@ -807,6 +827,60 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [final CI record](docs/evidence/native-metal-ci.txt) records successful bundle verification, static checks, software tests, native tests, and compiler construction.
   I002 records complete training acceptance.
 
+### Reusable trained models
+
+- [x] [F015] (P1) {P003,F006,F001} Add typed Parameter checkpoints
+  Goal:
+  Save trained Parameters and restore them for inference in a separate process.
+
+  Requirements:
+  - Implement `Checkpoint.encode`, `Checkpoint.decode`, and `Parameters.to` under the P003 contract.
+  - Infer the exact result type from a CPU checkpoint template.
+  - Validate fields, shapes, dtype, finite elements, canonical bytes, and resource limits at import.
+  - Keep explicit file reads, write construction, commit activation, and device authorization.
+  - Reject unsupported values and prevent implicit device transfers.
+
+  Deliverables:
+  - Add catalog rules, checker support, runtime operations, inspector facts, and native code generation.
+  - Update the specification and public integration tests.
+
+  Validation:
+  - Record failing public tests before implementation.
+  - Verify exact round trips, separate-process inference, and malformed input diagnostics.
+  - Verify blocked later commits, allocation cleanup, and execution limits.
+  - Verify interpreter and native results.
+
+  F015 completed on October 16, 2026.
+  The [checkpoint contract](docs/model-checkpoints.md) and specification section 24.9 define the implemented operations.
+  Public tests passed canonical imports, independent processes, schema diagnostics, FP32 bit checks, and the 16 MiB byte limit.
+  Interpreter and native catalog tests passed.
+
+- [x] [F016] (P1) {F015,F007,F014} Restore complete optimizer state on CPU and Metal
+  Goal:
+  Resume SGD and AdamW without loss of optimizer state.
+
+  Requirements:
+  - Extend the canonical codec to complete SGD and AdamW states.
+  - Keep configuration, step count, moments, and beta powers.
+  - Add explicit `Optimizer.SGD.State.to` and `Optimizer.AdamW.State.to` operations.
+  - Transfer every state tensor through current device authorization and resource accounting.
+  - Reject invalid state, mismatched optimizer kinds, and partial imported results.
+
+  Deliverables:
+  - Add state codec support, container transfers, and public CPU/Metal tests.
+
+  Validation:
+  - Compare resumed and uninterrupted SGD execution within each fixed profile.
+  - Verify AdamW transitions against the independent fixture.
+  - Verify upload/download receipts, bounded storage, cancellation, and transfer-failure cleanup.
+  - Verify software and native execution without a physical-device prerequisite.
+
+  F016 completed on October 16, 2026.
+  Complete SGD and AdamW checkpoints restore configuration, steps, moments, and beta powers.
+  Explicit container transfers keep FP32 values and use current device authorization.
+  Controlled failures verified partial-transfer cleanup, cancellation, resource limits, and prevention of later commits.
+  Software and local Metal tests passed with the Go race detector.
+
 ## Improvements
 
 - [ ] [I001] (P1) {F007,F010} Qualify deterministic training with a small complete MVP
@@ -884,6 +958,34 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The software and local Metal suites passed with the Go race detector.
   The [final CI record](docs/evidence/metal-training-ci.txt) records successful software and native validation.
   I001 remains open for its independent NVIDIA scope.
+
+- [x] [I003] (P1) {F016,I002} Qualify reusable XOR models and training resumption
+  Goal:
+  Demonstrate the complete train, save, load, infer, and resume workflows.
+
+  Requirements:
+  - Reuse the existing XOR network, data, initial values, and 500-step SGD procedure.
+  - Save Parameters for a separate inference example with no training steps.
+  - Save complete state after 250 steps and resume for another 250 steps.
+  - Keep CPU and Metal selection explicit.
+  - Record available local Metal evidence separately from controlled software execution.
+
+  Deliverables:
+  - Add runnable examples, execution instructions, regression coverage, and maintained validation evidence.
+
+  Validation:
+  - Verify correct classification of all four XOR rows after a fresh-process load.
+  - Verify exact resumed and uninterrupted results within the same numeric profile.
+  - Verify CPU, controlled Metal, interpreter, and native execution.
+  - Run final `make ci` after F015 and F016 implementation.
+
+  I003 completed on October 16, 2026.
+  Six examples implement CPU and Metal save, resume, and separate inference workflows.
+  The 250-plus-250 result equals the uninterrupted 500-step XOR result in the tested profiles.
+  Final loss is approximately `4.25e-13`, and all four XOR classifications are correct.
+  Three local interpreter workflows and three native Metal workflows returned identical predictions and complete AdamW state.
+  The [final CI record](docs/evidence/checkpoint-ci.txt) records successful software tests, native tests, static checks, and compiler construction.
+  The [checkpoint report](docs/model-checkpoints.md#validation-evidence) links the source identity and scoped documentation review.
 
 ## Maintenance
 
