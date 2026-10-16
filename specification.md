@@ -1,11 +1,296 @@
-Lo Draft Specification
+# Lo Language Reference
 
-This specification includes the v0.3 core and the implemented F002, F003, and F004 extensions.
-Section 24 defines binary64 arithmetic, tensors, CPU training, and explicit device transfers.
+Lo is a typed dataflow language for executable plans, file workflows, HTTP services, and tensor training.
+This reference defines the implemented v0.3 core, reverse-mode autodiff, SGD, AdamW, and explicit device transfers.
+CPU execution and the selected Metal backend support training.
+Native executables use the same language contracts as the interpreter.
+The [audit boundary](docs/language-reference-audit.md#audit-boundary) identifies the validated revision and concurrent checkpoint work.
 
-1. Purpose
+## Start Here
 
-Lo is a typed declarative dataflow language for building transformation pipelines, file-processing jobs, and HTTP services.
+| Task | Read |
+| --- | --- |
+| Write a first program | [Quick start](#quick-start), [flows](#10-flow-definitions), and [pipes](#14-pipe-operator) |
+| Train with gradients | [Training examples](#train-with-autodiff-sgd-and-adamw) and [backpropagation](#245-reverse-mode-autodiff-and-backpropagation) |
+| Select tensor operations | [Tensor values](#242-tensor-values-and-shape-boundaries) and [operation signatures](#243-tensor-operation-set) |
+| Update Parameters | [Gradient lifecycle](#246-parameters-and-gradient-lifecycle) and [SGD and AdamW](#247-sgd-and-adamw) |
+| Handle failures | [Error handling](#12-error-handling) and [fallible values](#223-fallible-values) |
+| Use files or HTTP | [Adapters](#9-adapters), [activation](#236-file-and-server-activation), and [examples](#19-examples) |
+| Select CPU or Metal | [Backend support](#backend-support) and [device resources](#248-device-resources-and-explicit-transfers) |
+| Inspect implementation evidence | [Reference audit](docs/language-reference-audit.md) |
+
+Numbered sections define the language contracts.
+Their numbers also identify rules in the conformance fixtures.
+Code blocks marked `lo` contain source code.
+Blocks marked `text` show signature notation or source fragments with placeholders.
+`T`, `R`, and `context...` in signature tables are notation, not user-defined type aliases.
+
+## Quick Start
+
+```lo
+flow Double(value: Int) -> Int {
+    return Math.mul(value, 2)
+}
+
+numbers = List.new(1, 2, 3)
+return numbers |> List.map(Double) |> Math.sum()
+```
+
+The result is `12`.
+Bindings are immutable.
+`|>` supplies the left value as the first argument of the next call.
+Named flows provide callbacks for list operations.
+
+Build the CLI with `make build`.
+Use `lo check` to verify a program before execution.
+The repository examples provide complete input files:
+
+```bash
+make build
+./bin/lo check examples/list_sum.lo
+./bin/lo inspect examples/training_adamw.lo --format json
+./bin/lo run examples/training_adamw.lo --format json
+```
+
+## Train With Autodiff, SGD, and AdamW
+
+Both optimizers use the same loss flow, backpropagation, and gradient schema.
+Both return a new state after each update.
+
+| Contract | SGD | AdamW |
+| --- | --- | --- |
+| Config | Positive learning rate | Positive learning rate and epsilon, two beta values, nonnegative weight decay |
+| Update | Subtract `learning_rate * gradient` | Use first and second moments, bias correction, and separate weight decay |
+| Retained state | Parameters, step count, config | SGD fields plus moments and beta powers |
+| Momentum | None | Gradient moments controlled by `beta1` and `beta2` |
+| Weight decay | None | Applies to every Parameter field |
+| Complete source | [SGD](examples/training_sgd.lo) | [AdamW](examples/training_adamw.lo) |
+
+These examples use the same initial value, target, and 100 updates.
+Their learning rates differ, so these results are examples rather than an optimizer benchmark.
+
+### SGD Example
+
+The [SGD example](examples/training_sgd.lo) uses a learning rate of `0.05`.
+Its loss decreases from `9` to approximately `6.34122e-9`.
+Its original Parameter remains `0`, and its trained Parameter is approximately `2.9999204`.
+
+```bash
+./bin/lo check examples/training_sgd.lo
+./bin/lo run examples/training_sgd.lo --format json
+./bin/lo build examples/training_sgd.lo --output ./bin/training-sgd
+./bin/training-sgd run --format json
+```
+
+SGD applies `p_next = p - learning_rate * gradient` with the FP32 operation order in section 24.7.
+It has no momentum or weight decay.
+The complete program is:
+
+```lo
+// CPU training with reverse-mode autodiff and 100 SGD updates.
+
+flow Loss(target: Tensor<FP32>, values: Record{x: Tensor<FP32>}) -> Tensor<FP32>! {
+  residual = Tensor.sub(values.x, target)
+  squared = Tensor.mul(residual, residual)
+  return Tensor.mean(squared, List.new(0))
+}
+
+flow Counter(index: Int) -> Record{value: Int, next_state: Int} {
+  return Record.new(value: index, next_state: Math.add(index, 1))
+}
+
+flow TrainStep(target: Tensor<FP32>, state: Optimizer.SGD.State<Record{x: Tensor<FP32>}>, index: Int) -> Optimizer.SGD.State<Record{x: Tensor<FP32>}>! {
+  values = Parameters.values(state.parameters)
+  differentiated = Autodiff.grad(values, target, Loss)
+  gradients = Gradients.new(state.parameters, differentiated.gradients)
+  return Optimizer.SGD.step(state, gradients)
+}
+
+flow Main() -> Record{initial_loss: Float, final_loss: Float, steps: Int, original: Tensor<FP32>, trained: Tensor<FP32>}! {
+  target = Tensor.new(List.new(3.0), List.new(1))
+  x = Tensor.new(List.new(0.0), List.new(1))
+  parameters = Parameters.new(Record.new(x: x))
+  config = Optimizer.SGD.Config.new(learning_rate: 0.05)
+  initial_state = Optimizer.SGD.State.new(parameters, config)
+  initial_values = Parameters.values(initial_state.parameters)
+  initial_loss = Loss(target, initial_values) |> Tensor.to_float()
+  steps = List.unfold(0, 100, Counter)
+  final_state = List.fold(steps, initial_state, target, TrainStep)
+  final_values = Parameters.values(final_state.parameters)
+  final_loss = Loss(target, final_values) |> Tensor.to_float()
+  original_values = Parameters.values(initial_state.parameters)
+  return Record.new(
+    initial_loss: initial_loss, final_loss: final_loss,
+    steps: final_state.step, original: original_values.x, trained: final_values.x
+  )
+}
+
+return Main()
+```
+
+### AdamW Example
+
+The [AdamW example](examples/training_adamw.lo) trains one tensor toward the target value `3`.
+It executes 100 updates with a learning rate of `0.1` and weight decay of `0.01`.
+The loss decreases from `9` to approximately `0.00217853`.
+The original Parameter remains `0`, and the trained Parameter is approximately `2.9533253`.
+
+The training sequence is:
+
+1. Construct tensors, Parameters, and the initial optimizer state.
+2. Obtain the current tensor record with `Parameters.values(state.parameters)`.
+3. Evaluate the loss and backpropagation with `Autodiff.grad(values, target, Loss)`.
+4. Validate the returned gradient record with `Gradients.new(state.parameters, differentiated.gradients)`.
+5. Calculate the next state with `Optimizer.AdamW.step(state, gradients)`.
+6. Supply the returned state to the next update through `List.fold`.
+
+Each update calculates gradients from the current Parameters.
+AdamW keeps its moments and step count in the returned immutable state.
+No training operation requires `commit`.
+
+### Loss and Backpropagation
+
+The loss in this example is:
+
+```lo
+flow Loss(target: Tensor<FP32>, values: Record{x: Tensor<FP32>}) -> Tensor<FP32>! {
+  residual = Tensor.sub(values.x, target)
+  squared = Tensor.mul(residual, residual)
+  return Tensor.mean(squared, List.new(0))
+}
+```
+
+`values` contains the selected inputs for differentiation.
+`target` is explicit context and receives no gradient.
+The mean removes axis `0`, so the loss has rank zero.
+A tensor with shape `[1]` has rank one and is not a valid loss output.
+
+Backpropagation transfers the derivative of the loss through the executed tensor operations in reverse dependency order.
+For this loss, the gradient of `x` is `2 * (x - target)`.
+At the initial value `0`, the gradient is `-6`.
+`Autodiff.grad` returns both the forward loss in `value` and the derivative record in `gradients`.
+
+The loss flow uses a restricted set of operations.
+Float arithmetic is also outside this set.
+Construct tensors and optimizer state outside this flow.
+Keep device transfers and host observations outside this flow.
+The checker rejects `Match.new`, list callbacks, nested differentiation, and optimizer operations inside the loss graph.
+[Section 24.5](#245-reverse-mode-autodiff-and-backpropagation) defines the complete restrictions and derivative rules.
+
+### Complete AdamW Program
+
+```lo
+// CPU training with reverse-mode autodiff and 100 AdamW updates.
+
+flow Loss(target: Tensor<FP32>, values: Record{x: Tensor<FP32>}) -> Tensor<FP32>! {
+  residual = Tensor.sub(values.x, target)
+  squared = Tensor.mul(residual, residual)
+  return Tensor.mean(squared, List.new(0))
+}
+
+flow Counter(index: Int) -> Record{value: Int, next_state: Int} {
+  return Record.new(value: index, next_state: Math.add(index, 1))
+}
+
+flow TrainStep(target: Tensor<FP32>, state: Optimizer.AdamW.State<Record{x: Tensor<FP32>}>, index: Int) -> Optimizer.AdamW.State<Record{x: Tensor<FP32>}>! {
+  values = Parameters.values(state.parameters)
+  differentiated = Autodiff.grad(values, target, Loss)
+  gradients = Gradients.new(state.parameters, differentiated.gradients)
+  return Optimizer.AdamW.step(state, gradients)
+}
+
+flow Main() -> Record{initial_loss: Float, final_loss: Float, steps: Int, original: Tensor<FP32>, trained: Tensor<FP32>}! {
+  target = Tensor.new(List.new(3.0), List.new(1))
+  x = Tensor.new(List.new(0.0), List.new(1))
+  parameters = Parameters.new(Record.new(x: x))
+  config = Optimizer.AdamW.Config.new(
+    learning_rate: 0.1, beta1: 0.9, beta2: 0.999,
+    epsilon: 1e-8, weight_decay: 0.01
+  )
+  initial_state = Optimizer.AdamW.State.new(parameters, config)
+  initial_values = Parameters.values(initial_state.parameters)
+  initial_loss = Loss(target, initial_values) |> Tensor.to_float()
+  steps = List.unfold(0, 100, Counter)
+  final_state = List.fold(steps, initial_state, target, TrainStep)
+  final_values = Parameters.values(final_state.parameters)
+  final_loss = Loss(target, final_values) |> Tensor.to_float()
+  original_values = Parameters.values(initial_state.parameters)
+  return Record.new(
+    initial_loss: initial_loss, final_loss: final_loss,
+    steps: final_state.step, original: original_values.x, trained: final_values.x
+  )
+}
+
+return Main()
+```
+
+`Optimizer.AdamW.Config.new` requires all five fields.
+There are no implicit defaults.
+The config converts each Float field to FP32 before validation.
+The optimizer applies weight decay separately from the gradient moments.
+[Section 24.7](#247-sgd-and-adamw) specifies the arithmetic order and config limits.
+
+For a native executable, use the same source:
+
+```bash
+./bin/lo build examples/training_adamw.lo --output ./bin/training-adamw
+./bin/training-adamw run --format json
+```
+
+For a larger model, see the [XOR tutorial](docs/xor-neural-network.md), [CPU network](examples/training_cpu.lo), and [Metal network](examples/training_metal.lo).
+
+## Backend Support
+
+| Location | Transfers | Tensor arithmetic, autodiff, SGD, AdamW |
+| --- | --- | --- |
+| `cpu` | CPU construction and explicit transfers | Supported by the standard interpreter and native artifacts |
+| `metal:0` | Supported by the Metal build | Supported by the Metal interpreter and explicitly selected Metal artifacts |
+| `cuda-sim:0` | Software simulation | Unsupported. Operations produce `Device.UnsupportedOperation` |
+| `cuda:0` | Unavailable | Unavailable. Authorized access produces `Device.Unavailable` |
+
+Device grants control access separately from backend support.
+The standard software build cannot execute Metal operations.
+[Device resources](#248-device-resources-and-explicit-transfers) defines grants, explicit downloads, and resource limits.
+The [native Metal contract](docs/native-metal.md) defines build selection.
+
+## Contents
+
+- [1. Purpose](#1-purpose)
+- [2. Design Principles](#2-design-principles)
+- [3. Non-Goals for v0.3](#3-non-goals-for-v03)
+- [4. Core Semantic Categories](#4-core-semantic-categories)
+- [5. Execution Model](#5-execution-model)
+- [6. Type System](#6-type-system)
+- [7. Constructors](#7-constructors)
+- [8. Processors](#8-processors)
+- [9. Adapters](#9-adapters)
+- [10. Flow Definitions](#10-flow-definitions)
+- [11. Match](#11-match)
+- [12. Error Handling](#12-error-handling)
+- [13. Statements](#13-statements)
+- [14. Pipe Operator](#14-pipe-operator)
+- [15. Type Checking Rules](#15-type-checking-rules)
+- [16. Operational Semantics for HTTP](#16-operational-semantics-for-http)
+- [17. Surface Grammar](#17-surface-grammar)
+- [18. Built-in Operation Index](#18-built-in-operation-index)
+- [19. Examples](#19-examples)
+- [20. Conformance Matrix](#20-conformance-matrix)
+- [21. Summary](#21-summary)
+- [22. Verifier Contract Details](#22-verifier-contract-details)
+- [23. Runtime Contracts](#23-runtime-contracts)
+- [24. Numeric and Training Contracts](#24-numeric-and-training-contracts)
+- [24.1 Binary64 Arithmetic](#241-binary64-arithmetic)
+- [24.2 Tensor Values and Shape Boundaries](#242-tensor-values-and-shape-boundaries)
+- [24.3 Tensor Operation Set](#243-tensor-operation-set)
+- [24.4 Resource and Diagnostic Contracts](#244-resource-and-diagnostic-contracts)
+- [24.5 Reverse-mode Autodiff and Backpropagation](#245-reverse-mode-autodiff-and-backpropagation)
+- [24.6 Parameters and Gradient Lifecycle](#246-parameters-and-gradient-lifecycle)
+- [24.7 SGD and AdamW](#247-sgd-and-adamw)
+- [24.8 Device Resources and Explicit Transfers](#248-device-resources-and-explicit-transfers)
+
+## 1. Purpose
+
+Lo is a typed declarative dataflow language for transformation pipelines, file workflows, HTTP services, and tensor training.
 
 The language is built around a simple discipline:
 
@@ -16,16 +301,16 @@ The language is built around a simple discipline:
 
 Lo is graph-first. A program describes data dependencies, branching, fallibility, and boundary activation. It does not describe imperative step-by-step control flow.
 
-⸻
+---
 
-2. Design Principles
+## 2. Design Principles
 
 Lo follows these principles.
 
 1. Explicit data over hidden behavior. Values, processors, flows, adapters, errors, and commits are separate concepts.
 2. Construction is separate from activation. .new(...) constructs. commit activates only side effects and activatable adapters.
 3. Named flows only. Lo does not support lambdas or anonymous functions in v0.3.
-4. List<T> represents general-purpose sequences. Tensor<FP32> represents dense numeric arrays. Laziness is a runtime concern.
+4. `List<T>` represents general-purpose sequences. `Tensor<FP32>` represents dense numeric arrays. Laziness is a runtime concern.
 5. Pragmatic standard library. Common arithmetic and aggregate operations belong in Math. Users should not be forced to express routine math through folds.
 6. Typed boundaries. The language exposes domain-oriented adapters such as File and HTTP, not generic IO.
 7. Readable pipeline syntax. Lo uses |> as first-argument threading syntax.
@@ -33,9 +318,9 @@ Lo follows these principles.
 9. Boundary handlers are mandatory. Adapters that invoke flows must require an onError handler so uncaught errors are always translated at the boundary.
 10. Constructors are uniform. Any operation that constructs a value uses .new(...).
 
-⸻
+---
 
-3. Non-Goals for v0.3
+## 3. Non-Goals for v0.3
 
 The following are out of scope in v0.3:
 
@@ -53,28 +338,28 @@ The following are out of scope in v0.3:
 12. A Unit type.
 13. Expression-level onError operators.
 
-⸻
+---
 
-4. Core Semantic Categories
+## 4. Core Semantic Categories
 
 Lo has five core semantic categories.
 
-4.1 Values
+### 4.1 Values
 
 Immutable typed data such as strings, integers, records, maps, lists, ranges, HTTP requests, HTTP responses, and errors.
 
-4.2 Processors
+### 4.2 Processors
 
 Pure operations that transform input values into output values.
 
 Examples:
 
-* String.concat
-* Math.add
-* List.filter
-* Range.contains
+* `String.concat`
+* `Math.add`
+* `List.filter`
+* `Range.contains`
 
-4.3 Flows
+### 4.3 Flows
 
 Named reusable graph templates.
 
@@ -91,25 +376,25 @@ A flow may also be:
 
 Only pure named flows may be passed to pure data processors.
 
-4.4 Adapters and Effects
+### 4.4 Adapters and Effects
 
 Adapters model typed boundaries to the external world.
 
 Examples:
 
-* File.Path
-* HTTP.Server
+* `File.Path`
+* `HTTP.Server`
 
 Some adapter operations produce committable targets.
 
 Examples:
 
-* File.append(...) -> Effect
-* HTTP.Server.new(...) -> HTTP.Server
+* `File.append(...) -> Effect`
+* `HTTP.Server.new(...) -> HTTP.Server`
 
 A committable target is activated only by commit.
 
-4.5 Errors and Fallibility
+### 4.5 Errors and Fallibility
 
 Runtime failure is represented explicitly by:
 
@@ -137,23 +422,25 @@ Fatal host panics are outside the recoverable Error model and are reserved for:
 2. violated runtime invariants after successful type checking, and
 3. unrecoverable host failures such as process termination or memory corruption.
 
-⸻
+---
 
-5. Execution Model
+## 5. Execution Model
 
-5.1 Pure Expressions
+### 5.1 Pure Expressions
 
-Pure expressions evaluate as ordinary expressions when referenced. They do not require commit.
+Pure expressions do not require `commit`.
+Each binding initializer executes when execution reaches that binding, even if no later expression uses its value.
+Section 23.3 defines the evaluation order.
 
 Examples:
 
-* String.new(...)
-* Record.new(...)
-* List.new(...)
-* Range.new(...)
-* Match.new(...)
+* `String.new(...)`
+* `Record.new(...)`
+* `List.new(...)`
+* `Range.new(...)`
+* `Match.new(...)`
 
-5.2 Commit
+### 5.2 Commit
 
 commit is the only activation keyword in Lo.
 
@@ -166,12 +453,14 @@ A committable target may be:
 
 Examples:
 
+```text
 write_effect = File.append(file_path, content_string)
 commit write_effect
 target_server = HTTP.Server.new(port: Int.new(8080), handler: HelloHandler, onError: HelloError)
 commit target_server
+```
 
-5.3 Fallible Execution and Bubbling
+### 5.3 Fallible Execution and Bubbling
 
 If an expression has type T!, then it may produce either a successful T or an Error.
 
@@ -179,7 +468,7 @@ If a fallible expression yields an Error, then downstream dependent nodes are no
 
 When an error bubbles across a flow boundary, the runtime appends a trace frame to the error.
 
-5.4 Top-Level Execution
+### 5.4 Top-Level Execution
 
 A source file may contain:
 
@@ -197,7 +486,7 @@ A top-level return may produce either T or T!.
 
 If a top-level return produces an uncaught Error, the host runtime reports it using an implementation-defined diagnostic format.
 
-5.5 Commit Failure in v0.3
+### 5.5 Commit Failure in v0.3
 
 Statement-level commit failure participates in the same bubbling model inside flows.
 
@@ -210,7 +499,7 @@ Rules:
 
 This means any flow that uses commit must declare either -> T! or -> T onError ErrorHandler in v0.3.
 
-5.6 Deterministic Evaluation and Host Runtime Constraints
+### 5.6 Deterministic Evaluation and Host Runtime Constraints
 
 CPU tensor execution uses the `cpu-fp32-strict` numeric profile.
 Identical inputs produce identical numeric bits under the operation order in section 24.3.
@@ -245,7 +534,7 @@ semantics remain unchanged.
 v0.3 exposes no shared mutable memory, thread creation, channel creation,
 async/await syntax, lock syntax, concurrency annotations, or scheduler controls.
 
-5.7 Binding and Value Passing
+### 5.7 Binding and Value Passing
 
 Tensor storage sharing preserves all prior values.
 Storage identity and host pointers are not observable.
@@ -272,7 +561,7 @@ primitive in v0.3.
 Two bindings may name equal values, but there is no operation that asks whether
 they refer to the same host object or storage location.
 
-Composite values such as List<T>, Map<K, V>, Record{...}, Range<T>, Error, and
+Composite values such as `List<T>`, `Map<K, V>`, Record{...}, `Range<T>`, Error, and
 boundary values are immutable after construction. Passing such a value to a flow
 or processor does not copy it semantically and does not transfer ownership.
 
@@ -281,21 +570,21 @@ activation descriptions. Passing them around does not activate them. Only commit
 activates them, and each evaluated commit statement activates its target exactly
 once.
 
-⸻
+---
 
-6. Type System
+## 6. Type System
 
-6.1 Atomic Types
+### 6.1 Atomic Types
 
 The atomic built-in types are:
 
-* Scalar
-* String
-* Bytes
-* Int
-* Float
-* Bool
-* Null
+* `Scalar`
+* `String`
+* `Bytes`
+* `Int`
+* `Float`
+* `Bool`
+* `Null`
 
 Scalar denotes a single Unicode scalar value.
 
@@ -306,7 +595,7 @@ in section 18.3.
 
 Float denotes a finite IEEE 754 binary64 value.
 Section 24.1 specifies arithmetic, comparison, and explicit conversion.
-FP32 is a dtype marker accepted only in Tensor<FP32>.
+FP32 is a dtype marker accepted only in `Tensor<FP32>`.
 FP32 has no standalone values or constructor.
 
 Bool has exactly two values, true and false.
@@ -320,7 +609,7 @@ The type name Null is not a value expression. Passing either the null literal or
 an unresolved identifier named Null where another type is required is a type
 error.
 
-6.2 Fallible Types
+### 6.2 Fallible Types
 
 If T is a type, then T! is the corresponding fallible type.
 
@@ -332,23 +621,23 @@ Examples:
 
 T! is the only built-in user-visible representation of fallibility.
 
-6.3 Composite Types
+### 6.3 Composite Types
 
 The composite types are:
 
-* List<T>
-* Map<K, V>
-* Record{ field_name: FieldType, ... }
-* Range<T>
-* Tensor<FP32>
-* Device
-* Parameters<R>
-* Gradients<R>
-* Optimizer.SGD.Config
-* Optimizer.AdamW.Config
-* Optimizer.SGD.State<R>
-* Optimizer.AdamW.State<R>
-* Error
+* `List<T>`
+* `Map<K, V>`
+* `Record{ field_name: FieldType, ... }`
+* `Range<T>`
+* `Tensor<FP32>`
+* `Device`
+* `Parameters<R>`
+* `Gradients<R>`
+* `Optimizer.SGD.Config`
+* `Optimizer.AdamW.Config`
+* `Optimizer.SGD.State<R>`
+* `Optimizer.AdamW.State<R>`
+* `Error`
 
 Error is a built-in nominal composite type with required fields. It is not structurally interchangeable with Record.
 
@@ -365,31 +654,33 @@ The ordered-comparable types in v0.3 are Scalar, String, and Int. Bytes, Float,
 records, maps, lists, ranges, Error, and boundary types are not comparable
 except through explicit comparison processors.
 Float comparison processors do not make Float a valid map key or range endpoint.
-Tensor<FP32> and Device have no equality or ordering operations.
+`Tensor<FP32>` and Device have no equality or ordering operations.
 Parameters, gradients, optimizer configs, and optimizer states also have no equality or ordering operations.
 Their `R` argument requires a nonempty exact record of `Tensor<FP32>` fields.
 
-6.4 Boundary Types
+### 6.4 Boundary Types
 
 The initial boundary-oriented built-in types are:
 
-* File.Path
-* HTTP.Request
-* HTTP.Response
-* HTTP.Server
-* Effect
+* `File.Path`
+* `HTTP.Request`
+* `HTTP.Response`
+* `HTTP.Server`
+* `Effect`
 
 These are first-class language types, but their host-language representation is implementation-defined.
 
-6.5 String Model
+### 6.5 String Model
 
 String is semantically an ordered finite sequence of Scalar values.
 
-Where a processor expects List<Scalar>, a String value is valid input. A list of scalars can be explicitly converted back into a String using String.FromScalars.new(scalar_list).
+Where a processor expects `List<Scalar>`, a String value is valid input. A list of scalars can be explicitly converted back into a String using String.FromScalars.new(scalar_list).
 
 This means the following is valid:
 
+```text
 match_count = file_text |> List.filter(IsMatchingScalar) |> List.length()
+```
 
 provided IsMatchingScalar has signature (Scalar) -> Bool.
 
@@ -397,23 +688,23 @@ String remains a distinct surface type so that text-specific operations remain e
 
 String.length(value) -> Int returns the number of Unicode scalar values.
 
-6.6 List Model
+### 6.6 List Model
 
-List<T> is the general-purpose sequence type.
-Tensor<FP32> is a separate immutable numeric array with dtype, shape, and device metadata.
+`List<T>` is the general-purpose sequence type.
+`Tensor<FP32>` is a separate immutable numeric array with dtype, shape, and device metadata.
 
 The language does not expose a separate sequence type. Laziness, streaming, and incremental realization are runtime concerns.
 
 A runtime may evaluate list-producing expressions lazily, incrementally, or eagerly, provided observable semantics do not change.
 
-6.7 Error Model
+### 6.7 Error Model
 
 Error is a built-in nominal composite value with the following required fields:
 
-* kind: String
-* message: String
-* input: Record
-* trace: List<Record{ flow: String, operation: String, input: Record }>
+* `kind: String`
+* `message: String`
+* `input: Record`
+* `trace: List<Record{ flow: String, operation: String, input: Record }>`
 
 Notes:
 
@@ -424,38 +715,41 @@ Notes:
    kind strings, but must preserve the minimum required kind strings listed in
    section 18.3 for the corresponding recoverable failures.
 
-⸻
+---
 
-7. Constructors
+## 7. Constructors
 
 Lo favors .new(...) for construction.
 
-7.1 Built-in Constructors
+### 7.1 Built-in Constructors
 
-* Scalar.new(value)
-* String.new(value)
-* Bytes.new(value)
-* Int.new(value)
-* Float.new(value)
-* Bool.new(value)
-* List.new(value_one, value_two, ...)
-* Map.new(entry_one, entry_two, ...)
-* Record.new(field_one: value_one, field_two: value_two, ...)
-* Range.new(start: ..., end: ..., include_start: ..., include_end: ...)
-* File.Path.new(path)
-* HTTP.Server.new(port: ..., handler: ..., onError: ...)
-* HTTP.Response.Text.new(status: ..., body: ...)
-* HTTP.Response.Bytes.new(status: ..., body: ...)
-* Error.new(kind: ..., message: ..., input: ...)
-* UTF8.String.new(bytes) -> String!
-* String.FromScalars.new(scalar_list)
+This list contains the core constructors.
+[Section 18.1](#181-constructors) includes tensor, device, and training constructors.
 
-7.2 Constructor Rules
+* `Scalar.new(value)`
+* `String.new(value)`
+* `Bytes.new(value)`
+* `Int.new(value)`
+* `Float.new(value)`
+* `Bool.new(value)`
+* `List.new(value_one, value_two, ...)`
+* `Map.new(entry_one, entry_two, ...)`
+* `Record.new(field_one: value_one, field_two: value_two, ...)`
+* `Range.new(start: ..., end: ..., include_start: ..., include_end: ...)`
+* `File.Path.new(path)`
+* `HTTP.Server.new(port: ..., handler: ..., onError: ...)`
+* `HTTP.Response.Text.new(status: ..., body: ...)`
+* `HTTP.Response.Bytes.new(status: ..., body: ...)`
+* `Error.new(kind: ..., message: ..., input: ...)`
+* `UTF8.String.new(bytes) -> String!`
+* `String.FromScalars.new(scalar_list)`
+
+### 7.2 Constructor Rules
 
 1. List.new requires elements of one unified type.
 2. Map.new requires each entry to have exact type Record{ key: K, value: V }
    for one unified equality-comparable key type K and one unified value type V.
-   Map.new() is valid only when an expected Map<K, V> type is available from
+   Map.new() is valid only when an expected `Map<K, V>` type is available from
    context.
 3. Record.new produces an exact structural record type from the field names and
    values supplied to the constructor. It does not create optional fields.
@@ -465,67 +759,67 @@ Lo favors .new(...) for construction.
 6. HTTP.Server.new(...) constructs a server instance but does not start it. It requires a mandatory onError flow.
 7. Any operation that constructs a value must use .new(...) in v0.3.
 
-⸻
+---
 
-8. Processors
+## 8. Processors
 
 Processors are pure.
 
-8.1 String Processors
+### 8.1 String Processors
 
-* String.concat(value_one, value_two, ...) -> String
-* String.upper(value) -> String
-* String.lower(value) -> String
-* String.length(value) -> Int
-* String.eq(left_value, right_value) -> Bool
+* `String.concat(value_one, value_two, ...) -> String`
+* `String.upper(value) -> String`
+* `String.lower(value) -> String`
+* `String.length(value) -> Int`
+* `String.eq(left_value, right_value) -> Bool`
 
-8.2 Scalar Processors
+### 8.2 Scalar Processors
 
-* Scalar.eq(left_value, right_value) -> Bool
+* `Scalar.eq(left_value, right_value) -> Bool`
 
-8.3 Conversion Processors
+### 8.3 Conversion Processors
 
-* Int.to_string(value) -> String
-* Int.to_float(value: Int) -> Float!
-* Float.to_int(value: Float) -> Int
-* Float.to_string(value: Float) -> String
+* `Int.to_string(value) -> String`
+* `Int.to_float(value: Int) -> Float!`
+* `Float.to_int(value: Float) -> Int`
+* `Float.to_string(value: Float) -> String`
 
-8.4 Math Processors
+### 8.4 Math Processors
 
 Lo includes a pragmatic Math namespace.
 
-All Math processors in v0.3 operate on Int operands or List<Int> inputs.
+All Math processors in v0.3 operate on Int operands or `List<Int>` inputs.
 
-* Math.add(left_value, right_value) -> Int
-* Math.sub(left_value, right_value) -> Int
-* Math.mul(left_value, right_value) -> Int
-* Math.div(left_value, right_value) -> Int!
-* Math.mod(left_value, right_value) -> Int!
-* Math.lt(left_value, right_value) -> Bool
-* Math.lte(left_value, right_value) -> Bool
-* Math.gt(left_value, right_value) -> Bool
-* Math.gte(left_value, right_value) -> Bool
-* Math.eq(left_value, right_value) -> Bool
-* Math.sum(number_list) -> Int
-* Math.product(number_list) -> Int
-* Math.min(number_list) -> Int!
-* Math.max(number_list) -> Int!
+* `Math.add(left_value, right_value) -> Int`
+* `Math.sub(left_value, right_value) -> Int`
+* `Math.mul(left_value, right_value) -> Int`
+* `Math.div(left_value, right_value) -> Int!`
+* `Math.mod(left_value, right_value) -> Int!`
+* `Math.lt(left_value, right_value) -> Bool`
+* `Math.lte(left_value, right_value) -> Bool`
+* `Math.gt(left_value, right_value) -> Bool`
+* `Math.gte(left_value, right_value) -> Bool`
+* `Math.eq(left_value, right_value) -> Bool`
+* `Math.sum(number_list) -> Int`
+* `Math.product(number_list) -> Int`
+* `Math.min(number_list) -> Int!`
+* `Math.max(number_list) -> Int!`
 
 Section 24.1 defines Float arithmetic with explicit Float operands.
 Section 24.3 defines CPU tensor arithmetic.
 
-8.5 Range Processors
+### 8.5 Range Processors
 
-* Range.contains(target_range, target_value) -> Bool
-* Range.is_empty(target_range) -> Bool
+* `Range.contains(target_range, target_value) -> Bool`
+* `Range.is_empty(target_range) -> Bool`
 
-A Range<T> is an immutable value with four semantic components: start, end, include_start, and include_end.
+A `Range<T>` is an immutable value with four semantic components: start, end, include_start, and include_end.
 
-8.6 Record and Map Processors
+### 8.6 Record and Map Processors
 
-* Map.has_key(target_map, target_key) -> Bool
-* Map.get(target_map, target_key) -> ValueType!
-* Record.merge(left_record, right_record) -> Record
+* `Map.has_key(target_map, target_key) -> Bool`
+* `Map.get(target_map, target_key) -> ValueType!`
+* `Record.merge(left_record, right_record) -> Record`
 
 Map.get returns Error when the requested key is not present. Missing keys are
 not represented as null. Use Map.has_key when a flow needs a total presence
@@ -536,7 +830,7 @@ right_record. If both records contain the same field name, the right_record fiel
 is used in the result. The signature is written as Record because the exact
 result shape is computed by the type checker from the input shapes.
 
-8.7 List Processors
+### 8.7 List Processors
 
 List processors accept pure named flow references, not anonymous functions.
 
@@ -544,57 +838,57 @@ The target list is always the first argument. The flow reference is always the f
 
 Examples of surface forms:
 
-* List.map(target_list, FlowName)
-* List.map(target_list, context_data, FlowName)
-* List.filter(target_list, context_a, context_b, FlowName)
+* `List.map(target_list, FlowName)`
+* `List.map(target_list, context_data, FlowName)`
+* `List.filter(target_list, context_a, context_b, FlowName)`
 
 If extra context arguments are supplied, the referenced flow must accept them first and the list element last.
 
 Type rules:
 
-* List.map(target_list, FlowName) -> List<MappedType> where FlowName: (ElementType) -> MappedType
-* List.map(target_list, context_one, ..., context_n, FlowName) -> List<MappedType> where FlowName: (ContextOneType, ..., ContextNType, ElementType) -> MappedType
-* List.map(...) -> List<MappedType>! when the referenced flow is fallible and returns MappedType!
-* List.filter(target_list, FlowName) -> List<ElementType> where FlowName: (ElementType) -> Bool
-* List.filter(target_list, context_one, ..., context_n, FlowName) -> List<ElementType> where FlowName: (ContextOneType, ..., ContextNType, ElementType) -> Bool
-* List.filter(...) -> List<ElementType>! when the referenced flow is fallible and returns Bool!
-* List.fold(target_list, initial_state, FlowName) -> AccumulatorType where FlowName: (AccumulatorType, ElementType) -> AccumulatorType
-* List.fold(target_list, initial_state, context_one, ..., context_n, FlowName) -> AccumulatorType where FlowName: (ContextOneType, ..., ContextNType, AccumulatorType, ElementType) -> AccumulatorType
-* List.fold(...) -> AccumulatorType! when the referenced flow is fallible and returns AccumulatorType!
-* List.flat_map(target_list, FlowName) -> List<MappedType> where FlowName: (ElementType) -> List<MappedType>
-* List.flat_map(target_list, context_one, ..., context_n, FlowName) -> List<MappedType> where FlowName: (ContextOneType, ..., ContextNType, ElementType) -> List<MappedType>
-* List.flat_map(...) -> List<MappedType>! when the referenced flow is fallible and returns List<MappedType>!
-* List.length(target_list) -> Int
-* List.unfold(seed_value, iteration_count, FlowName) -> List<ElementType> where FlowName: (StateType) -> Record{ value: ElementType, next_state: StateType }
-* List.unfold(seed_value, iteration_count, context_one, ..., context_n, FlowName) -> List<ElementType> where FlowName: (ContextOneType, ..., ContextNType, StateType) -> Record{ value: ElementType, next_state: StateType }
-* List.unfold(...) -> List<ElementType>! when the referenced flow is fallible and returns Record{ value: ElementType, next_state: StateType }!
+* `List.map(target_list, FlowName) -> List<MappedType> where FlowName: (ElementType) -> MappedType`
+* `List.map(target_list, context_one, ..., context_n, FlowName) -> List<MappedType> where FlowName: (ContextOneType, ..., ContextNType, ElementType) -> MappedType`
+* `List.map(...) -> List<MappedType>! when the referenced flow is fallible and returns MappedType!`
+* `List.filter(target_list, FlowName) -> List<ElementType> where FlowName: (ElementType) -> Bool`
+* `List.filter(target_list, context_one, ..., context_n, FlowName) -> List<ElementType> where FlowName: (ContextOneType, ..., ContextNType, ElementType) -> Bool`
+* `List.filter(...) -> List<ElementType>! when the referenced flow is fallible and returns Bool!`
+* `List.fold(target_list, initial_state, FlowName) -> AccumulatorType where FlowName: (AccumulatorType, ElementType) -> AccumulatorType`
+* `List.fold(target_list, initial_state, context_one, ..., context_n, FlowName) -> AccumulatorType where FlowName: (ContextOneType, ..., ContextNType, AccumulatorType, ElementType) -> AccumulatorType`
+* `List.fold(...) -> AccumulatorType! when the referenced flow is fallible and returns AccumulatorType!`
+* `List.flat_map(target_list, FlowName) -> List<MappedType> where FlowName: (ElementType) -> List<MappedType>`
+* `List.flat_map(target_list, context_one, ..., context_n, FlowName) -> List<MappedType> where FlowName: (ContextOneType, ..., ContextNType, ElementType) -> List<MappedType>`
+* `List.flat_map(...) -> List<MappedType>! when the referenced flow is fallible and returns List<MappedType>!`
+* `List.length(target_list) -> Int`
+* `List.unfold(seed_value, iteration_count, FlowName) -> List<ElementType> where FlowName: (StateType) -> Record{ value: ElementType, next_state: StateType }`
+* `List.unfold(seed_value, iteration_count, context_one, ..., context_n, FlowName) -> List<ElementType> where FlowName: (ContextOneType, ..., ContextNType, StateType) -> Record{ value: ElementType, next_state: StateType }`
+* `List.unfold(...) -> List<ElementType>! when the referenced flow is fallible and returns Record{ value: ElementType, next_state: StateType }!`
 
-The old _with operator family is removed. Explicit context passing is handled by the normal list operators.
+List operators receive explicit context arguments before the callback reference.
 
-Because String is semantically compatible with List<Scalar>, these processors may also operate on strings.
+Because String is semantically compatible with `List<Scalar>`, these processors may also operate on strings.
 
-⸻
+---
 
-9. Adapters
+## 9. Adapters
 
 Adapters define typed boundaries to the external world.
 
-9.1 File Adapter
+### 9.1 File Adapter
 
-* File.Path.new(file_path: String) -> File.Path
-* File.read(file_path: File.Path) -> Bytes!
-* File.append(file_path: File.Path, file_content: String) -> Effect
-* File.write(file_path: File.Path, file_content: Bytes) -> Effect
+* `File.Path.new(file_path: String) -> File.Path`
+* `File.read(file_path: File.Path) -> Bytes!`
+* `File.append(file_path: File.Path, file_content: String) -> Effect`
+* `File.write(file_path: File.Path, file_content: Bytes) -> Effect`
 
 File.read is a fallible boundary read.
 
 File.append and File.write produce effects and therefore require commit.
 
-9.2 HTTP Adapter
+### 9.2 HTTP Adapter
 
-* HTTP.Server.new(port: Int, handler: FlowName, onError: FlowName) -> HTTP.Server
-* HTTP.Response.Text.new(status: Int, body: String) -> HTTP.Response
-* HTTP.Response.Bytes.new(status: Int, body: Bytes) -> HTTP.Response
+* `HTTP.Server.new(port: Int, handler: FlowName, onError: FlowName) -> HTTP.Server`
+* `HTTP.Response.Text.new(status: Int, body: String) -> HTTP.Response`
+* `HTTP.Response.Bytes.new(status: Int, body: Bytes) -> HTTP.Response`
 
 HTTP.Response.Text.new encodes body as UTF-8 bytes and constructs a response
 with an empty headers map. HTTP.Response.Bytes.new uses the supplied bytes as
@@ -602,29 +896,29 @@ the body and constructs a response with an empty headers map.
 
 handler must reference a named flow with one of these signatures:
 
-* (HTTP.Request) -> HTTP.Response
-* (HTTP.Request) -> HTTP.Response!
+* `(HTTP.Request) -> HTTP.Response`
+* `(HTTP.Request) -> HTTP.Response!`
 
 onError must reference a pure total named flow with signature:
 
-* (Error) -> HTTP.Response
+* `(Error) -> HTTP.Response`
 
 onError is mandatory. It guarantees that uncaught handler errors and ordinary request-processing boundary errors are translated at the adapter boundary.
 
-9.3 HTTP Request and Response Shape
+### 9.3 HTTP Request and Response Shape
 
 HTTP.Request is a structured semantic value with at least these fields:
 
-* method: String
-* path: String
-* headers: Map<String, String>
-* body: Bytes
+* `method: String`
+* `path: String`
+* `headers: Map<String, String>`
+* `body: Bytes`
 
 HTTP.Response is a structured semantic value with at least these fields:
 
-* status: Int
-* headers: Map<String, String>
-* body: Bytes
+* `status: Int`
+* `headers: Map<String, String>`
+* `body: Bytes`
 
 The adapter is responsible for parsing incoming bytes into HTTP.Request and serializing HTTP.Response back to bytes.
 
@@ -634,14 +928,15 @@ revision specifies additional fields. Optional or extension data must be modeled
 through maps and accessed with Map.has_key or Map.get rather than nullable
 fields.
 
-⸻
+---
 
-10. Flow Definitions
+## 10. Flow Definitions
 
 A flow is a named reusable graph template.
 
-10.1 Forms
+### 10.1 Forms
 
+```text
 flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType {
     statement
 }
@@ -651,8 +946,9 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType! {
 flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onError ErrorHandler {
     statement
 }
+```
 
-10.2 Flow Rules
+### 10.2 Flow Rules
 
 1. A flow may appear at top level or inside another flow.
 2. A flow may have zero or more parameters.
@@ -670,7 +966,7 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onEr
 13. ErrorHandler in a self-handling flow must be a pure total named flow with signature (Error) -> T.
 14. An effectful flow must declare either -> T! or -> T onError ErrorHandler.
 
-10.3 Automatic Propagation in Fallible Flows
+### 10.3 Automatic Propagation in Fallible Flows
 
 Inside a fallible flow (-> T!) or self-handling flow (-> T onError ErrorHandler):
 
@@ -681,24 +977,26 @@ Inside a fallible flow (-> T!) or self-handling flow (-> T onError ErrorHandler)
 
 In a self-handling flow, the nearest handler boundary is the flow signature’s onError ErrorHandler clause.
 
-⸻
+---
 
-11. Match
+## 11. Match
 
 Branching is expression-based, not statement-based.
 
 Lo uses a single pure match constructor:
 
+```text
 Match.new(selector_value,
     case_head_one: expression_one,
     case_head_two: expression_two,
     _: default_expression
 )
+```
 
 Each case head is one of:
 
 * an expression compatible with the selector type for exact matching,
-* an expression of type Range<T> compatible with the selector type for range
+* an expression of type `Range<T>` compatible with the selector type for range
   matching,
 * when FlowName for predicate matching, where FlowName is a pure total named
   flow with signature (T) -> Bool, or
@@ -713,15 +1011,15 @@ Match rules:
 5. Only the selected branch is evaluated.
 6. If a branch must trigger a side effect, the branch must evaluate to a committable target value, which must then be explicitly activated by a commit statement in the outer scope.
 
-⸻
+---
 
-12. Error Handling
+## 12. Error Handling
 
-12.1 Expression-Level Fallibility
+### 12.1 Expression-Level Fallibility
 
 Expression-level fallibility is represented with T!.
 
-12.2 Bubbling
+### 12.2 Bubbling
 
 If a fallible expression yields Error, then downstream dependent nodes are not evaluated. The error bubbles outward to the nearest enclosing handler boundary.
 
@@ -731,25 +1029,27 @@ The handler boundary order is:
 2. otherwise the next enclosing fallible caller flow,
 3. otherwise the nearest adapter boundary with mandatory onError.
 
-12.3 Self-Handling Flow Resolution
+### 12.3 Self-Handling Flow Resolution
 
 A flow declared as:
 
+```text
 flow FlowName(...) -> T onError ErrorHandler {
     ...
 }
+```
 
 is internally fallible but externally total.
 
 If an unresolved error reaches the flow boundary, control transfers to ErrorHandler(error). The handler’s total T becomes the published result of the flow.
 
-12.4 Mandatory Adapter Handlers
+### 12.4 Mandatory Adapter Handlers
 
 Every adapter that invokes user flows must require a boundary onError handler.
 
 This guarantees that uncaught bubbled errors are translated at the boundary.
 
-12.5 Error Trace Enrichment
+### 12.5 Error Trace Enrichment
 
 Whenever an Error bubbles across a flow boundary, the runtime appends a trace frame containing the current flow name, the current operation name if available, and the current input record if available.
 
@@ -762,7 +1062,7 @@ flow bubbles through the list processor. The runtime appends operation context
 for the list processor, including the processor name and element index when that
 index is available, before the Error crosses the enclosing flow boundary.
 
-12.6 Recoverable Failure Contract
+### 12.6 Recoverable Failure Contract
 
 The following failures are recoverable in v0.3 and must be represented as Error
 values, not hidden host exceptions:
@@ -783,53 +1083,69 @@ technique. Such exceptions must be caught at the implementation boundary and
 translated into Error values whenever the failure is recoverable under this
 specification.
 
-⸻
+---
 
-13. Statements
+## 13. Statements
 
-13.1 Binding
+### 13.1 Binding
 
+```text
 bound_name = expression
+```
 
-13.2 Flow Definition
+### 13.2 Flow Definition
 
+```text
 flow FlowName(target_param: ParamType) -> OutputType { ... }
+```
 
-13.3 Commit
+### 13.3 Commit
 
+```text
 commit target_name
+```
 
 target_name must resolve to a previously bound committable target.
 
-13.4 Return
+### 13.4 Return
 
+```text
 return return_expression
+```
 
 There is no run keyword and no export keyword in v0.3.
 
-⸻
+---
 
-14. Pipe Operator
+## 14. Pipe Operator
 
 Lo uses |> as first-argument threading syntax.
 
-14.1 Form
+### 14.1 Form
 
+```text
 left_value |> Namespace.operation(argument_two)
+```
 
 desugars to:
 
+```text
 Namespace.operation(left_value, argument_two)
+```
 
-14.2 Flow Form
+### 14.2 Flow Form
 
+```text
 left_value |> FlowName(argument_two)
+```
 
 desugars to:
 
+```text
 FlowName(left_value, argument_two)
+```
 
-14.3 Fallibility-Aware Pipe
+### 14.3 Fallibility-Aware Pipe
 
 Inside fallible or self-handling flows, |> is fallibility-aware.
 
@@ -837,19 +1153,21 @@ If the left side is fallible and the next processor or flow expects the successf
 
 Examples:
 
+```text
 file_text = input_path
   |> File.read()
   |> UTF8.String.new()
 quotient = left
   |> Math.div(right)
+```
 
 Pipe is surface syntax only. The lowered graph remains explicit and typed.
 
-⸻
+---
 
-15. Type Checking Rules
+## 15. Type Checking Rules
 
-15.1 General Rules
+### 15.1 General Rules
 
 * Every expression has a statically known type in v0.3.
 * Every binding name must be unique within its scope.
@@ -859,38 +1177,38 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 * Member projection must target a type that defines the projected field.
 * Processor arguments must satisfy the declared processor signature.
 
-15.2 Flow-Reference Rules
+### 15.2 Flow-Reference Rules
 
 * Only pure named flows may be used where a pure data processor requires a flow reference.
 * Adapter boundary parameters may accept effectful flows as defined by the adapter signature.
-* HTTP.Server.new(..., handler: Name, onError: ErrorFlow) must verify:
+* `HTTP.Server.new(..., handler: Name, onError: ErrorFlow) must verify:`
     * Name has signature (HTTP.Request) -> HTTP.Response or (HTTP.Request) -> HTTP.Response!
     * ErrorFlow has signature (Error) -> HTTP.Response
 * Nested flows do not implicitly capture outer bindings.
 
-15.3 Fallibility Rules
+### 15.3 Fallibility Rules
 
 * A plain total flow (-> T) may not contain unresolved expressions of type U!.
 * A fallible flow (-> T!) may contain unresolved expressions of type U!, which auto-propagate on failure.
 * A self-handling flow (-> T onError ErrorHandler) may contain unresolved expressions of type U!, which bubble to the flow-level handler.
 * Any effectful flow must declare either -> T! or -> T onError ErrorHandler.
 
-15.4 Match Rules
+### 15.4 Match Rules
 
 * An exact-value case head must be equality-comparable and compatible with the
   selector type.
-* A range case head must be a Range<T> whose ordered-comparable endpoint type is
+* A range case head must be a `Range<T>` whose ordered-comparable endpoint type is
   compatible with the selector type.
 * A predicate flow case head must use when FlowName syntax and must reference a
   pure total flow with signature (T) -> Bool.
 * All branch expressions must unify to one type.
 
-15.5 Commit Rules
+### 15.5 Commit Rules
 
 * commit may target only a bound value of type Effect or another activatable adapter type such as HTTP.Server.
 * A committed target activates exactly once per commit statement evaluation.
 
-15.6 Null, Absence, and Record Rules
+### 15.6 Null, Absence, and Record Rules
 
 * The null literal has only type Null.
 * Null is assignable only where the expected type is exactly Null.
@@ -903,17 +1221,17 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 * A future revision may add first-class optional data, such as Option<T> or
   broader union types, but v0.3 does not include those features.
 
-⸻
+---
 
-16. Operational Semantics for HTTP
+## 16. Operational Semantics for HTTP
 
-16.1 Startup
+### 16.1 Startup
 
 1. Evaluate top-level bindings.
 2. Construct the server with HTTP.Server.new(...).
 3. Activate the server with commit target_server.
 
-16.2 Request Lifecycle
+### 16.2 Request Lifecycle
 
 1. The HTTP adapter parses incoming wire bytes into an HTTP.Request value.
 2. If request parsing or request-level boundary handling fails before the handler is entered, the adapter invokes its mandatory onError flow.
@@ -924,9 +1242,9 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 7. If the selected path explicitly evaluates to effects and commits them, they execute in source order.
 8. The final HTTP.Response is serialized and sent.
 
-⸻
+---
 
-17. Surface Grammar
+## 17. Surface Grammar
 
 This grammar is normative for v0.3. It is written in EBNF-style notation.
 Semantic rules in sections 10, 12, and 15 may reject programs that are
@@ -1017,7 +1335,7 @@ Disambiguation rules:
    left side of onError. A fallible self-handling return such as T! onError H is
    invalid in v0.3.
 
-17.1 Lexical Rules
+### 17.1 Lexical Rules
 
 Source files contain UTF-8 text without a byte order mark.
 Identifiers use ASCII letters, ASCII digits, and underscores.
@@ -1073,91 +1391,115 @@ Blank lines and comments can occur in such a continuation.
 A semicolon always separates statements and cannot continue an expression.
 Whitespace can occur between the components of a qualified name and before its call parenthesis.
 
-⸻
+---
 
-18. Minimal Standard Library for v0.3
+## 18. Built-in Operation Index
 
-18.1 Constructors
+### 18.1 Constructors
 
-* Scalar.new
-* String.new
-* Bytes.new
-* Int.new
-* Float.new
-* Bool.new
-* List.new
-* Map.new
-* Record.new
-* Range.new
-* Error.new
-* File.Path.new
-* UTF8.String.new
-* HTTP.Server.new
-* HTTP.Response.Text.new
-* HTTP.Response.Bytes.new
-* String.FromScalars.new
-* Device.new
-* Tensor.new
+* `Scalar.new`
+* `String.new`
+* `Bytes.new`
+* `Int.new`
+* `Float.new`
+* `Bool.new`
+* `List.new`
+* `Map.new`
+* `Record.new`
+* `Range.new`
+* `Error.new`
+* `File.Path.new`
+* `UTF8.String.new`
+* `HTTP.Server.new`
+* `HTTP.Response.Text.new`
+* `HTTP.Response.Bytes.new`
+* `String.FromScalars.new`
+* `Device.new`
+* `Tensor.new`
+* `Parameters.new`
+* `Gradients.new`
+* `Optimizer.SGD.Config.new`
+* `Optimizer.AdamW.Config.new`
+* `Optimizer.SGD.State.new`
+* `Optimizer.AdamW.State.new`
 
-18.2 Pure Processors
+### 18.2 Pure Processors
 
-The Float and Tensor processors in section 24 are also pure.
+Purity excludes commit activation.
+A pure operation can still be fallible.
+The numeric and training operations in section 24 are also pure.
+Device access has a separate resource summary.
 
-* Scalar.eq
-* String.concat
-* String.upper
-* String.lower
-* String.length
-* String.eq
-* Int.to_string
-* Range.contains
-* Range.is_empty
-* Math.add
-* Math.sub
-* Math.mul
-* Math.lt
-* Math.lte
-* Math.gt
-* Math.gte
-* Math.eq
-* Math.sum
-* Math.product
-* Map.has_key
-* Record.merge
-* List.map
-* List.filter
-* List.fold
-* List.flat_map
-* List.length
-* List.unfold
+| Operation family | Signatures and rules |
+| --- | --- |
+| Float arithmetic and conversions | [24.1](#241-binary64-arithmetic) |
+| Tensor metadata, transfers, and observation | [24.2](#242-tensor-values-and-shape-boundaries) |
+| Tensor arithmetic and layout | [24.3](#243-tensor-operation-set) |
+| `Autodiff.grad` | [24.5](#245-reverse-mode-autodiff-and-backpropagation) |
+| Parameters, gradients, and `Autodiff.stop` | [24.6](#246-parameters-and-gradient-lifecycle) |
+| SGD and AdamW transitions | [24.7](#247-sgd-and-adamw) |
+| Checkpoints and training-state transfers | [24.9](#249-model-checkpoints-and-training-state-transfers) |
 
-18.3 Fallible Constructors and Processors
+* `Scalar.eq`
+* `String.concat`
+* `String.upper`
+* `String.lower`
+* `String.length`
+* `String.eq`
+* `Int.to_string`
+* `Range.contains`
+* `Range.is_empty`
+* `Math.add`
+* `Math.sub`
+* `Math.mul`
+* `Math.div`
+* `Math.mod`
+* `Math.lt`
+* `Math.lte`
+* `Math.gt`
+* `Math.gte`
+* `Math.eq`
+* `Math.sum`
+* `Math.product`
+* `Math.min`
+* `Math.max`
+* `Map.has_key`
+* `Map.get`
+* `Record.merge`
+* `List.map`
+* `List.filter`
+* `List.fold`
+* `List.flat_map`
+* `List.length`
+* `List.unfold`
 
-Section 24 defines the additional numeric and tensor failures.
+### 18.3 Fallible Constructors and Processors
+
+Section 24 defines numeric, tensor, autodiff, gradient, optimizer, and device failures.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
 include additional fields in Error.input when useful.
 
-* UTF8.String.new(bytes) -> String!
+* `UTF8.String.new(bytes) -> String!`
   * Failure: bytes are not valid UTF-8.
   * Required Error.kind: String.new("UTF8.InvalidBytes")
-* Math.div(left_value, right_value) -> Int!
+* `Math.div(left_value, right_value) -> Int!`
   * Failure: right_value is zero.
   * Required Error.kind: String.new("Math.DivideByZero")
-* Math.mod(left_value, right_value) -> Int!
+* `Math.mod(left_value, right_value) -> Int!`
   * Failure: right_value is zero.
   * Required Error.kind: String.new("Math.ModuloByZero")
-* Math.min(number_list) -> Int!
+* `Math.min(number_list) -> Int!`
   * Failure: number_list is empty.
   * Required Error.kind: String.new("Math.EmptyList")
-* Math.max(number_list) -> Int!
+* `Math.max(number_list) -> Int!`
   * Failure: number_list is empty.
   * Required Error.kind: String.new("Math.EmptyList")
-* Map.get(target_map, target_key) -> ValueType!
+* `Map.get(target_map, target_key) -> ValueType!`
   * Failure: target_key is not present in target_map.
   * Required Error.kind: String.new("Map.MissingKey")
-* File.read(file_path) -> Bytes!
+* `File.read(file_path) -> Bytes!`
   * Failure: the host cannot read the path as bytes, including not-found,
     permission-denied, and non-file cases.
   * Required Error.kind: String.new("File.ReadFailed")
@@ -1174,18 +1516,19 @@ Error.kind String.new("File.WriteFailed"). A failed HTTP.Server commit must
 produce Error.kind String.new("HTTP.ServerStartFailed"). At top level, a failed
 commit aborts activation and the host reports the Error diagnostic.
 
-18.4 Committable Targets
+### 18.4 Committable Targets
 
-* File.append
-* File.write
-* HTTP.Server.new
+* `File.append`
+* `File.write`
+* `HTTP.Server.new`
 
-⸻
+---
 
-19. Examples
+## 19. Examples
 
-19.1 Dynamic Filtering with Context
+### 19.1 Dynamic Filtering with Context
 
+```lo
 flow IsAboveThreshold(context_data: Record{ limit: Int }, target_value: Int) -> Bool {
     return Math.gt(target_value, context_data.limit)
 }
@@ -1193,9 +1536,11 @@ raw_numbers = List.new(Int.new(4), Int.new(12), Int.new(20))
 threshold_config = Record.new(limit: Int.new(10))
 filtered_numbers = raw_numbers |> List.filter(threshold_config, IsAboveThreshold)
 return filtered_numbers
+```
 
-19.2 Round-trip String Processing
+### 19.2 Round-trip String Processing
 
+```lo
 flow IsVowel(target_scalar: Scalar) -> Bool {
     return Match.new(target_scalar,
         Scalar.new("a"): Bool.new(true),
@@ -1210,9 +1555,11 @@ flow ExtractVowels(input_text: String) -> String {
     vowel_scalars = input_text |> List.filter(IsVowel)
     return vowel_scalars |> String.FromScalars.new()
 }
+```
 
-19.3 Evaluating Branches to Committable Effects
+### 19.3 Evaluating Branches to Committable Effects
 
+```lo
 flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
     success_log = File.Path.new(String.new("/logs/success.log"))
     error_log = File.Path.new(String.new("/logs/error.log"))
@@ -1232,9 +1579,11 @@ flow StatusError(error: Error) -> HTTP.Response {
         body: String.new("status handling failed")
     )
 }
+```
 
-19.4 Count a Letter in a File with Self-Handling Flow
+### 19.4 Count a Letter in a File with Self-Handling Flow
 
+```lo
 flow IsMatchingScalar(target_scalar: Scalar) -> Bool {
     return Scalar.eq(target_scalar, Scalar.new("a"))
 }
@@ -1250,9 +1599,11 @@ flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
         |> List.length()
     return match_count
 }
+```
 
-19.5 HTTP Division with Bubbled Error Handling
+### 19.5 HTTP Division with Bubbled Error Handling
 
+```lo
 flow Calculate(request: HTTP.Request) -> HTTP.Response! {
     denominator = Int.new(0)
     result_value = Int.new(10) |> Math.div(denominator)
@@ -1279,16 +1630,19 @@ server = HTTP.Server.new(
     onError: CalculatorHttpError
 )
 commit server
+```
 
-19.6 Pragmatic List Sum
+### 19.6 Pragmatic List Sum
 
+```lo
 numbers = List.new(Int.new(1), Int.new(2), Int.new(3), Int.new(4))
 total = numbers |> Math.sum()
 return total
+```
 
-⸻
+---
 
-20. Conformance Matrix
+## 20. Conformance Matrix
 
 An implementation should maintain a conformance suite with at least the cases
 below. "Reject" means parser rejection for syntax-only failures and type-checker
@@ -1323,7 +1677,7 @@ rejection for syntactically valid programs that violate semantic rules.
 | Predeclared name shadowing | `flow UserHandler(request: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(status: Int.new(200), body: String.new("ok")) }` | `flow String(value: Int) -> Int { return value }` or `HTTP = String.new("x")`. |
 | Grammar examples | Every example in section 19 parses under section 17 and type-checks under section 15. | Any section 19 example relying on an undeclared non-standard processor or undocumented precedence rule. |
 
-21. Summary
+## 21. Summary
 
 Lo v0.3 is a typed declarative dataflow language with:
 
@@ -1334,7 +1688,7 @@ Lo v0.3 is a typed declarative dataflow language with:
 5. a single pure Match.new(...) construct for branching,
 6. a first-argument threading operator |>,
 7. a pragmatic Math namespace,
-8. general-purpose List<T> sequences and dense Tensor<FP32> arrays,
+8. general-purpose `List<T>` sequences and dense `Tensor<FP32>` arrays,
 9. explicit activation through commit for side effects and activatable adapters,
 10. atomic Null and built-in nominal composite Error,
 11. built-in fallible types via T!,
@@ -1342,18 +1696,14 @@ Lo v0.3 is a typed declarative dataflow language with:
 13. self-handling flows through signature-level onError, and
 14. mandatory adapter-level onError flows to guarantee a boundary catch.
 
-This specification is sufficient to begin implementation of:
+The implementation includes the lexer, parser, type checker, checked graph, interpreter, and native compiler.
+File and HTTP adapters use explicit host grants.
+Tensor training includes reverse-mode autodiff, gradient operations, SGD, and AdamW.
+Sections 24.1 through 24.8 define the numeric and device contracts.
 
-* a lexer,
-* a parser,
-* a type checker,
-* a graph IR lowerer,
-* a runtime with error bubbling and commit, and
-* initial File and HTTP adapters.
+## 22. Verifier Contract Details
 
-22. Verifier Contract Details
-
-22.1 Names and Flow References
+### 22.1 Names and Flow References
 
 Each block declares all its flow names before verification of its statements.
 A flow name is visible in its declaration block and nested blocks.
@@ -1372,7 +1722,7 @@ Record field names and member names can use reserved keywords.
 Named argument labels can also use reserved keywords.
 These labels do not declare variables.
 
-22.2 Transitive Effects
+### 22.2 Transitive Effects
 
 A flow is effectful when its evaluated body can activate a commit directly or through an invoked flow.
 List callbacks and match predicates participate in the same analysis.
@@ -1387,7 +1737,7 @@ A branch can construct a committable target for an outer commit.
 Boundary reads have a separate summary and do not constitute commit activation.
 The runtime must not speculate boundary reads.
 
-22.3 Fallible Values
+### 22.3 Fallible Values
 
 A fallible value has a success tag or a failure tag.
 The failure payload is an `Error` value.
@@ -1419,7 +1769,7 @@ The verifier does not add optional fields or widen exact record shapes.
 A return from a fallible flow uses its declared output as the expected type.
 A return from a self-handling flow permits propagation to its declared handler.
 
-22.4 Constructor and Argument Contracts
+### 22.4 Constructor and Argument Contracts
 
 `Int.new`, `String.new`, `Float.new`, and `Bool.new` accept one value of their output type.
 `Bytes.new(value: String)` encodes its input as UTF-8 bytes.
@@ -1449,7 +1799,7 @@ Its result keeps the right field when a field occurs in each input.
 The output field types come from these selected fields.
 Bare `Record` accepts an exact record of any shape, but does not expose unknown fields for projection.
 
-22.5 Match Contracts
+### 22.5 Match Contracts
 
 A match has exactly one default, which must be its final case.
 Exact case heads must be total and equality-comparable.
@@ -1459,14 +1809,14 @@ The verifier checks every case, including cases that cannot execute for a consta
 The runtime evaluates heads in source order until the first match.
 It evaluates only the selected branch.
 
-⸻
+---
 
-23. Runtime Contracts
+## 23. Runtime Contracts
 
 The interpreter and native backend use these runtime contracts.
 The two backends use the same evaluation order, errors, authorization rules, and logical execution limits.
 
-23.1 Numeric and Collection Results
+### 23.1 Numeric and Collection Results
 
 Integer operations use exact mathematical integers within the host execution budget.
 Division removes the fractional part toward zero.
@@ -1497,7 +1847,7 @@ Unfold uses the previous callback result as its next state.
 A zero or negative unfold count produces an empty list without callback invocation.
 A count above the host limit produces a host failure before callback invocation.
 
-23.2 Comparison and Ranges
+### 23.2 Comparison and Ranges
 
 Integer comparison uses mathematical order.
 Scalar comparison uses Unicode scalar order.
@@ -1516,7 +1866,7 @@ The immediate successor of a string is that string with one final U+0000 scalar.
 String case conversion uses the Unicode tables of the pinned Go toolchain.
 It applies the simple upper or lower mapping to each scalar.
 
-23.3 Evaluation Order
+### 23.3 Evaluation Order
 
 The runtime evaluates statements in source order.
 It evaluates every binding in an entered body, including bindings without later references.
@@ -1543,7 +1893,7 @@ A fallible or self-handling flow propagates an unresolved binding failure even w
 A top-level return with an outer failure tag produces an unhandled Lo error.
 Failure tags inside returned containers remain data.
 
-23.4 Runtime Error Context
+### 23.4 Runtime Error Context
 
 An operation error retains its required kind and immediate input record.
 Fixed operation inputs use the canonical parameter names from the built-in catalog.
@@ -1569,7 +1919,7 @@ Trace updates construct a new error value and do not change stored errors.
 Authorization denial, cancellation, and execution limits are host failures.
 Lo handlers cannot catch these host failures.
 
-23.5 Host Execution Contract
+### 23.5 Host Execution Contract
 
 The host supplies adapter authorization and execution limits.
 A successful check or inspection does not grant authorization.
@@ -1589,7 +1939,7 @@ The compiler design specifies CLI authorization inputs, resource limits, and res
 Host limits do not change the declared fallibility of Lo operations.
 An exceeded limit aborts execution with a host diagnostic.
 
-23.6 File and Server Activation
+### 23.6 File and Server Activation
 
 File effect construction does not access a file.
 An evaluated commit activates its target once.
@@ -1619,7 +1969,7 @@ An invalid port or a failed authorized listener operation produces `HTTP.ServerS
 Its input record contains `port`.
 The host capability contract controls the listen address and authorized ports.
 
-23.7 HTTP Request and Response Processing
+### 23.7 HTTP Request and Response Processing
 
 Each HTTP request starts a new invocation of the configured handler.
 The request fields have the types in section 9.3.
@@ -1666,7 +2016,7 @@ An unusable connection prevents delivery of an error response.
 The compiler design specifies request limits, cancellation, startup, and shutdown for the reference CLI.
 
 
-24. Numeric, Tensor, and Device Extension
+## 24. Numeric and Training Contracts
 
 F002 through F007 implement Float arithmetic, CPU tensors, reverse-mode autodiff, Parameters, gradients, and optimizers.
 F001 implements these operations in native executables.
@@ -1674,15 +2024,24 @@ The reference interpreter and native artifacts use the same numeric and runtime 
 All operations in this section are pure under the rule that prohibits commit activation.
 Device resource boundaries have a separate transitive effect summary.
 F008 adds device resources and explicit transfers.
-F009, F010, F011, and I001 own device arithmetic, deferred execution, precision, and complete training acceptance.
+F013 and F014 implement Metal arithmetic and native Metal artifacts.
+I002 records complete Metal training acceptance.
+NVIDIA arithmetic, deferred execution, later precision work, and NVIDIA training remain pending under F009, F010, F011, and I001.
 
-24.1 Binary64 Arithmetic
+## 24.1 Binary64 Arithmetic
 
 | Signature | Result |
 | --- | --- |
-| `Float.add/sub/mul/div(left: Float, right: Float) -> Float!` | Binary64 arithmetic. |
+| `Float.add(left: Float, right: Float) -> Float!` | Binary64 arithmetic. |
+| `Float.sub(left: Float, right: Float) -> Float!` | Binary64 arithmetic. |
+| `Float.mul(left: Float, right: Float) -> Float!` | Binary64 arithmetic. |
+| `Float.div(left: Float, right: Float) -> Float!` | Binary64 arithmetic. |
 | `Float.sqrt(value: Float) -> Float!` | Binary64 square root. |
-| `Float.eq/lt/lte/gt/gte(left: Float, right: Float) -> Bool` | Numeric comparison, with equal positive and negative zero. |
+| `Float.eq(left: Float, right: Float) -> Bool` | Numeric comparison, with equal positive and negative zero. |
+| `Float.lt(left: Float, right: Float) -> Bool` | Numeric comparison, with equal positive and negative zero. |
+| `Float.lte(left: Float, right: Float) -> Bool` | Numeric comparison, with equal positive and negative zero. |
+| `Float.gt(left: Float, right: Float) -> Bool` | Numeric comparison, with equal positive and negative zero. |
+| `Float.gte(left: Float, right: Float) -> Bool` | Numeric comparison, with equal positive and negative zero. |
 | `Int.to_float(value: Int) -> Float!` | Nearest finite binary64 value. |
 | `Float.to_int(value: Float) -> Int` | Exact integer after truncation toward zero. |
 | `Float.to_string(value: Float) -> String` | Shortest round-trip decimal, with signed zero kept. |
@@ -1700,7 +2059,7 @@ Integer arithmetic remains exact.
 Float construction remains an identity operation on a finite Float input.
 Float comparisons do not extend the comparable domains for maps, ranges, or Match case heads.
 
-24.2 Tensor Values and Shape Boundaries
+## 24.2 Tensor Values and Shape Boundaries
 
 `Tensor<FP32>` represents an immutable, contiguous, row-major array of finite FP32 values.
 Its shape and device location are metadata, not type arguments.
@@ -1751,11 +2110,14 @@ Transpose constructs a new row-major result.
 All previous bindings retain their values after these operations.
 No Lo operation exposes tensor storage identity or host pointers.
 
-24.3 Tensor Operation Set
+## 24.3 Tensor Operation Set
 
 | Signature | Contract |
 | --- | --- |
-| `Tensor.add/sub/mul/div(left: T, right: T) -> T!` | Elementwise arithmetic with trailing-dimension broadcasting. |
+| `Tensor.add(left: T, right: T) -> T!` | Elementwise arithmetic with trailing-dimension broadcasting. |
+| `Tensor.sub(left: T, right: T) -> T!` | Elementwise arithmetic with trailing-dimension broadcasting. |
+| `Tensor.mul(left: T, right: T) -> T!` | Elementwise arithmetic with trailing-dimension broadcasting. |
+| `Tensor.div(left: T, right: T) -> T!` | Elementwise arithmetic with trailing-dimension broadcasting. |
 | `Tensor.sqrt(value: T) -> T!` | Elementwise square root. |
 | `Tensor.relu(value: T) -> T!` | Keep positive inputs. Replace all other inputs with positive zero. |
 | `Tensor.matmul(left: T, right: T) -> T!` | Multiply `[m,k]` by `[k,n]` to produce `[m,n]`. |
@@ -1795,7 +2157,8 @@ No partial tensor result is published.
 Mean squared error composes subtraction, elementwise multiplication, and mean.
 The executable `examples/tensor_forward.lo` composes a two-layer ReLU network and returns rank-zero loss `3`.
 F005 and F013 implement derivatives for these operations on CPU and Metal.
-F009 retains the NVIDIA backend.
+NVIDIA arithmetic remains pending under F009.
+The `cuda-sim:0` backend supports transfers only.
 
 The `metal-fp32` profile uses the same shapes, operations, logical charges, and finite-value checks.
 It normalizes subnormal arithmetic operands and results to positive zero.
@@ -1807,7 +2170,7 @@ Matrix products and reductions use fixed traversal order, with no fused multipli
 Device tensors remain at their selected location until an explicit transfer.
 The profile requires identical bits across repeated executions with the same build, device, system, and inputs.
 
-24.4 Resource and Diagnostic Contracts
+## 24.4 Resource and Diagnostic Contracts
 
 Tensor rank is at most eight.
 Each dimension and each tensor element count is at most 1,000,000.
@@ -1835,7 +2198,7 @@ The same transformation applies inside lists, maps, records, and fallible values
 These records retain no tensor storage.
 Public tensor results contain complete row-major data under the compiler design serialization contract.
 
-24.5 Reverse-mode Autodiff
+## 24.5 Reverse-mode Autodiff and Backpropagation
 
 `Autodiff.grad(targets, context..., Loss)` returns `Record{value: Tensor<FP32>, gradients: R}!`.
 `R` is a nonempty exact record whose fields all have type `Tensor<FP32>`.
@@ -1853,7 +2216,7 @@ Disconnected fields receive positive-zero tensors with the original shape.
 
 The loss graph permits these source constructs:
 
-- Tensor operations in the VJP table below and tensor metadata operations.
+- Tensor operations in the VJP table below, tensor metadata operations, and `Autodiff.stop`.
 - Literals, record construction, record projection, `List.new`, and `Int.new`.
 - Total integer `Math` operations.
 - Calls to named helpers within this same subset.
@@ -1900,7 +2263,7 @@ The existing 64 MiB cumulative value limit also applies.
 The tape belongs to one gradient call and becomes unreachable after success, failure, or cancellation.
 No failure publishes a partial loss or gradient record.
 
-24.6 Parameters and Gradient Lifecycle
+## 24.6 Parameters and Gradient Lifecycle
 
 `R` has the exact tensor record contract from section 24.5.
 Each field name identifies one Parameter within that record schema.
@@ -1941,7 +2304,7 @@ Parameters and gradients have 16 bytes of wrapper weight plus their exact record
 Their JSON `value` is an object of named, typed tensors.
 Error snapshots replace their tensor fields with the metadata records in section 24.4.
 
-24.7 Pure Optimizer Transitions
+## 24.7 SGD and AdamW
 
 | Signature | Contract |
 | --- | --- |
@@ -2001,7 +2364,7 @@ Config and state weights add 16 bytes to their complete exact record weights.
 Diagnostic snapshots retain metadata for nested tensors and optimizer fields.
 
 
-24.8 Device Resources and Explicit Transfers
+## 24.8 Device Resources and Explicit Transfers
 
 `Tensor.to` requires an exact host grant for every non-CPU location it uses.
 The CLI accepts one non-CPU grant with `run` or `serve`.
@@ -2017,7 +2380,11 @@ Transfers complete before execution continues.
 A transfer keeps its source allocation live until completion.
 Same-location transfers share the original immutable storage without a copy.
 
-A transfer between different compute locations produces an error.
+Authorization checks occur before location checks.
+The CLI grant permits only one non-CPU selector per invocation.
+A request for another non-CPU selector produces `runtime.capability-denied`.
+The transfer boundary rejects different non-CPU locations with `Tensor.DeviceMismatch` after authorization.
+Tensor arithmetic also requires operands at the same location and otherwise produces `Tensor.DeviceMismatch`.
 `Device.Unavailable`, `Device.AllocationFailed`, and `Device.TransferFailed` are recoverable errors.
 An unsupported device profile produces `Device.UnsupportedProfile`.
 Metal library or pipeline creation can produce `Device.LibraryFailed`.
@@ -2050,3 +2417,35 @@ A cleanup failure prevents successful result publication.
 The [device resource contract](docs/device-resources.md) defines the backend interface and validation evidence.
 The [Metal transfer contract](docs/metal-transfers.md) defines the current Metal build and storage.
 The [Metal arithmetic contract](docs/metal-arithmetic.md) defines `metal-fp32`, operation support, and computation evidence.
+
+## 24.9 Model Checkpoints and Training-state Transfers
+
+The [checkpoint contract](docs/model-checkpoints.md) defines canonical bytes, schema checks, limits, and execution examples.
+The operations below support Parameters and complete SGD or AdamW state.
+`R` is a nonempty exact record of FP32 tensors.
+`T` is one of these three supported container types, inferred from the value or checkpoint template.
+
+| Operation | Behavior |
+| --- | --- |
+| `Checkpoint.encode(value: T) -> Bytes!` | Encode a CPU value as canonical typed JSON bytes. |
+| `Checkpoint.decode(data: Bytes, template: T) -> T!` | Validate the checkpoint against a CPU template and restore its complete value. |
+| `Parameters.to(parameters: Parameters<R>, device: Device) -> Parameters<R>!` | Transfer all Parameter tensors explicitly. |
+| `Optimizer.SGD.State.to(state: Optimizer.SGD.State<R>, device: Device) -> Optimizer.SGD.State<R>!` | Transfer all state tensors and keep configuration and step count. |
+| `Optimizer.AdamW.State.to(state: Optimizer.AdamW.State<R>, device: Device) -> Optimizer.AdamW.State<R>!` | Transfer Parameters, moments, and beta powers with configuration and step count unchanged. |
+
+The template supplies types, field names, and shapes.
+The checkpoint supplies all numeric values, configuration, and optimizer history.
+Decoding returns CPU tensors and does not select a compute device.
+Encoding and decoding reject device tensors with `Tensor.HostObservationRequired`.
+The transfer operations obey section 24.8, including authorization and cleanup.
+
+`Checkpoint.InvalidData` reports malformed, invalid, or noncanonical data.
+`Checkpoint.SchemaMismatch` reports incompatible types, fields, dtypes, devices, shapes, or element counts.
+Duplicate keys, unknown fields, trailing data, and alternative numeric encodings are invalid.
+Encoded bytes have the existing 16 MiB value limit.
+All operations consume the current execution and resource budgets.
+
+The checkpoint operations do not access files.
+Use `File.read` to obtain bytes and an explicit `File.write` commit to persist them.
+The codec operations are pure, fallible, and outside the differentiable subset.
+An unresolved failure prevents later observable effects.
