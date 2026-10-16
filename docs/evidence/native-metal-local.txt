@@ -1,0 +1,60 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test '^TestNativeMetal' -- -race -count=1 -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+=== RUN   TestNativeMetalLiveStandalone
+    native_metal_live_test.go:59: runtime identity: &{Name:Apple M5 Pro Profile:metal-fp32 RegistryID:100000696 System:Version 27.0.1 (Build 26A434) KernelSHA256:d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6}
+    native_metal_live_test.go:65: artifact metadata: {"source_sha256":"febccd0cd810cc27603661620f7d59fc94d164ea3b7bff591106c5d3c0fbabbb","source":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestNativeMetalLiveStandalone2019705557/001/3973013534.lo","compiler":"lo-native-go-v1","runtime_bundle_sha256":"2ce5dc375b53dae7019a811862c305418499d0a6b512980039ca02553e785d1a","toolchain":"go1.27.1","target":"darwin/arm64","device_backend":"metal","metal":{"profile":"metal-fp32","go":"go1.27.1","xcode":"Xcode 27.0\nBuild version 27A266a","sdk":"27.0","clang":"Apple clang version 21.0.0 (clang-2100.3.34.2)","metal_compiler":"Apple metal version 32023.921 (metalfe-32023.921.6)","kernel_linker":"AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)","deployment_target":"27.0","kernel_flags":["-std=metal3.1","-mmacosx-version-min=27.0","-fmetal-math-mode=safe","-fmetal-math-fp32-functions=precise","-ffp-contract=off"],"kernel_sha256":"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"},"metal_runtime_sha256":"43c38ea16cbf9429075595a458954a518c5723dbce77de70386495a090169660","metal_manifest_sha256":"01bca69f37087affc63358a2d7b842cf659ea0eaa051e732cfdacbd23ad448c9"}
+--- PASS: TestNativeMetalLiveStandalone (3.47s)
+=== RUN   TestNativeMetalLiveDifferential
+=== RUN   TestNativeMetalLiveDifferential/profile
+=== RUN   TestNativeMetalLiveDifferential/fixed-reduction
+=== RUN   TestNativeMetalLiveDifferential/rectangular-matmul
+=== RUN   TestNativeMetalLiveDifferential/adamw
+=== RUN   TestNativeMetalLiveDifferential/training-200
+=== RUN   TestNativeMetalLiveDifferential/reverse-error
+--- PASS: TestNativeMetalLiveDifferential (23.01s)
+    --- PASS: TestNativeMetalLiveDifferential/profile (2.33s)
+    --- PASS: TestNativeMetalLiveDifferential/fixed-reduction (2.41s)
+    --- PASS: TestNativeMetalLiveDifferential/rectangular-matmul (2.54s)
+    --- PASS: TestNativeMetalLiveDifferential/adamw (3.06s)
+    --- PASS: TestNativeMetalLiveDifferential/training-200 (8.75s)
+    --- PASS: TestNativeMetalLiveDifferential/reverse-error (3.91s)
+=== RUN   TestNativeMetalLiveFailurePreventsCommit
+=== RUN   TestNativeMetalLiveFailurePreventsCommit/metal:0
+=== RUN   TestNativeMetalLiveFailurePreventsCommit/cuda:0
+--- PASS: TestNativeMetalLiveFailurePreventsCommit (6.69s)
+    --- PASS: TestNativeMetalLiveFailurePreventsCommit/metal:0 (3.54s)
+    --- PASS: TestNativeMetalLiveFailurePreventsCommit/cuda:0 (3.15s)
+=== RUN   TestNativeMetalLiveBuildFailures
+=== RUN   TestNativeMetalLiveBuildFailures/cancel
+=== RUN   TestNativeMetalLiveBuildFailures/overflow
+=== RUN   TestNativeMetalLiveBuildFailures/version-overflow
+=== RUN   TestNativeMetalLiveBuildFailures/failure
+=== RUN   TestNativeMetalLiveBuildFailures/artifact-overflow
+--- PASS: TestNativeMetalLiveBuildFailures (3.87s)
+    --- PASS: TestNativeMetalLiveBuildFailures/cancel (1.37s)
+    --- PASS: TestNativeMetalLiveBuildFailures/overflow (0.55s)
+    --- PASS: TestNativeMetalLiveBuildFailures/version-overflow (0.03s)
+    --- PASS: TestNativeMetalLiveBuildFailures/failure (0.57s)
+    --- PASS: TestNativeMetalLiveBuildFailures/artifact-overflow (0.56s)
+=== RUN   TestNativeMetalLiveUnavailable
+--- PASS: TestNativeMetalLiveUnavailable (2.71s)
+=== RUN   TestNativeMetalLiveBuildIsolation
+--- PASS: TestNativeMetalLiveBuildIsolation (10.47s)
+=== RUN   TestNativeMetalSelection
+=== RUN   TestNativeMetalSelection/cross-target
+=== RUN   TestNativeMetalSelection/compiler-unavailable
+=== RUN   TestNativeMetalSelection/unknown
+=== RUN   TestNativeMetalSelection/duplicate
+=== RUN   TestNativeMetalSelection/grant
+--- PASS: TestNativeMetalSelection (0.57s)
+    --- PASS: TestNativeMetalSelection/cross-target (0.38s)
+    --- PASS: TestNativeMetalSelection/compiler-unavailable (0.11s)
+    --- PASS: TestNativeMetalSelection/unknown (0.02s)
+    --- PASS: TestNativeMetalSelection/duplicate (0.03s)
+    --- PASS: TestNativeMetalSelection/grant (0.02s)
+=== RUN   TestNativeMetalSoftwareArtifact
+--- PASS: TestNativeMetalSoftwareArtifact (2.61s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	56.287s

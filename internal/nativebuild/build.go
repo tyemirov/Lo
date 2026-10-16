@@ -11,8 +11,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/codegen"
+	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
+	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
 	"github.com/MarcoPoloResearchLab/Lo/internal/runtimebundle"
 	"io"
 	"os"
@@ -25,7 +27,7 @@ import (
 	"time"
 )
 
-const Toolchain = "go1.27.1"
+const Toolchain = metalconfig.GoToolchain
 const BuildTimeout = 180 * time.Second
 const MaxDiagnostics = 1 << 20
 const MaxArtifactBytes = 64 << 20
@@ -38,12 +40,16 @@ type Receipt struct {
 	Target   string `json:"target"`
 }
 type Metadata struct {
-	SourceDigest string `json:"source_sha256"`
-	Source       string `json:"source"`
-	Compiler     string `json:"compiler"`
-	Bundle       string `json:"runtime_bundle_sha256"`
-	Toolchain    string `json:"toolchain"`
-	Target       string `json:"target"`
+	SourceDigest  string                `json:"source_sha256"`
+	Source        string                `json:"source"`
+	Compiler      string                `json:"compiler"`
+	Bundle        string                `json:"runtime_bundle_sha256"`
+	Toolchain     string                `json:"toolchain"`
+	Target        string                `json:"target"`
+	DeviceBackend device.BuildBackend   `json:"device_backend"`
+	Metal         *metalconfig.Identity `json:"metal,omitempty"`
+	MetalBundle   string                `json:"metal_runtime_sha256,omitempty"`
+	MetalManifest string                `json:"metal_manifest_sha256,omitempty"`
 }
 
 type buildProfile uint8
@@ -53,10 +59,10 @@ const (
 	raceProfile
 )
 
-func Build(ctx context.Context, program ir.Program, output, target string) (Receipt, diagnostic.Diagnostic) {
-	return build(ctx, program, output, target, productionProfile)
+func Build(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend) (Receipt, diagnostic.Diagnostic) {
+	return build(ctx, program, output, target, backend, productionProfile)
 }
-func build(ctx context.Context, program ir.Program, output, target string, profile buildProfile) (receipt Receipt, failure diagnostic.Diagnostic) {
+func build(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend, profile buildProfile) (receipt Receipt, failure diagnostic.Diagnostic) {
 	fail := func(code diagnostic.Code, err error) (Receipt, diagnostic.Diagnostic) {
 		return Receipt{}, diagnostic.New(code, diagnostic.Build, fmt.Sprintf("build %s with %s: %v", program.Source().Path(), Toolchain, err), nil)
 	}
@@ -68,6 +74,22 @@ func build(ctx context.Context, program ir.Program, output, target string, profi
 	}
 	if target != "darwin/arm64" && target != "linux/arm64" {
 		return fail(diagnostic.BuildTarget, fmt.Errorf("unsupported target %q", target))
+	}
+	var metalArchive, metalManifest []byte
+	var metalIdentity *metalconfig.Identity
+	switch backend {
+	case device.MetalBuild:
+		if target != metalconfig.Target || runtime.GOOS+"/"+runtime.GOARCH != metalconfig.Target {
+			return fail(diagnostic.BuildTarget, fmt.Errorf("Metal requires a %s host and target", metalconfig.Target))
+		}
+		var err error
+		metalArchive, metalManifest, metalIdentity, err = metalInputs()
+		if err != nil {
+			return fail(diagnostic.BuildBackend, err)
+		}
+	case device.SoftwareBuild:
+	default:
+		return fail(diagnostic.BuildBackend, fmt.Errorf("unsupported device backend %q", backend))
 	}
 	if output == "" {
 		return fail(diagnostic.BuildOutput, fmt.Errorf("an output path is required"))
@@ -130,6 +152,30 @@ func build(ctx context.Context, program ir.Program, output, target string, profi
 	if err != nil || !strings.HasPrefix(string(versionOutput), "go version "+Toolchain+" ") {
 		return fail(diagnostic.BuildToolchain, fmt.Errorf("require %s, received %q: %v", Toolchain, strings.TrimSpace(string(versionOutput)), err))
 	}
+	if backend == device.MetalBuild {
+		limited := false
+		run := func(args ...string) (string, error) {
+			command := exec.CommandContext(ctx, args[0], args[1:]...)
+			command.Dir, command.Env = work, env
+			output, err, exceeded := runTool(command, cancel)
+			limited = limited || exceeded
+			if err != nil {
+				return "", fmt.Errorf("%s: %w: %s", strings.Join(args, " "), err, output)
+			}
+			return string(output), nil
+		}
+		settings, err := metalconfig.NativeEnvironment(run)
+		if limited {
+			return fail(diagnostic.BuildLimit, fmt.Errorf("toolchain diagnostics exceed %d bytes", MaxDiagnostics))
+		}
+		if ctx.Err() != nil {
+			return fail(diagnostic.BuildCancelled, ctx.Err())
+		}
+		if err != nil {
+			return fail(diagnostic.BuildToolchain, err)
+		}
+		env = append(env, settings...)
+	}
 	generated, err := codegen.Generate(program, "generated")
 	if err != nil {
 		return fail(diagnostic.BuildGenerate, err)
@@ -137,8 +183,17 @@ func build(ctx context.Context, program ir.Program, output, target string, profi
 	if err := extract(work); err != nil {
 		return fail(diagnostic.BuildFailed, err)
 	}
+	if backend == device.MetalBuild {
+		if err := extractArchive(work, metalArchive); err != nil {
+			return fail(diagnostic.BuildFailed, err)
+		}
+	}
 	sum := sha256.Sum256([]byte(program.Source().Text()))
-	metadata := Metadata{hex.EncodeToString(sum[:]), program.Source().Path(), CompilerIdentity, runtimebundle.Digest(), Toolchain, target}
+	metadata := Metadata{SourceDigest: hex.EncodeToString(sum[:]), Source: program.Source().Path(), Compiler: CompilerIdentity, Bundle: runtimebundle.Digest(), Toolchain: Toolchain, Target: target, DeviceBackend: backend, Metal: metalIdentity}
+	if backend == device.MetalBuild {
+		metadata.MetalBundle = digestBytes(metalArchive)
+		metadata.MetalManifest = digestBytes(metalManifest)
+	}
 	identity, err := json.Marshal(metadata)
 	if err != nil {
 		return fail(diagnostic.BuildFailed, err)
@@ -162,9 +217,17 @@ func build(ctx context.Context, program ir.Program, output, target string, profi
 	if err := staging.Close(); err != nil {
 		return fail(diagnostic.BuildOutput, err)
 	}
-	arguments := []string{"build", "-mod=vendor", "-trimpath", "-buildvcs=false", "-pgo=off", "-ldflags=-buildid=", "-p=2", "-o", staged}
+	linkFlags := "-ldflags=-buildid="
+	if backend == device.MetalBuild {
+		// Go uses this content identity to replace Apple's path-dependent Mach-O UUID.
+		linkFlags += digestBytes(append(append(append([]byte(nil), generated...), identity...), byte(profile)))
+	}
+	arguments := []string{"build", "-mod=vendor", "-trimpath", "-buildvcs=false", "-pgo=off", linkFlags, "-p=2", "-o", staged}
 	if profile == raceProfile {
 		arguments = append(arguments, "-race")
+	}
+	if backend == device.MetalBuild {
+		arguments = append(arguments, "-tags=metal")
 	}
 	arguments = append(arguments, "./cmd/program")
 	command := exec.CommandContext(ctx, tool, arguments...)
@@ -223,7 +286,7 @@ func environment(work, cache, target string) []string {
 	env := []string{}
 	for _, entry := range os.Environ() {
 		key, _, _ := strings.Cut(entry, "=")
-		if strings.HasPrefix(key, "GO") || strings.HasPrefix(key, "CGO") || key == "CC" || key == "CXX" || key == "AR" {
+		if strings.HasPrefix(key, "GO") || strings.HasPrefix(key, "CGO") || key == "CC" || key == "CXX" || key == "AR" || key == "SDKROOT" || key == "MACOSX_DEPLOYMENT_TARGET" {
 			continue
 		}
 		env = append(env, entry)
@@ -232,7 +295,9 @@ func environment(work, cache, target string) []string {
 	return append(env, "GOTOOLCHAIN=local", "GOWORK=off", "GOENV=off", "GOFLAGS=", "CGO_ENABLED=0", "GOOS="+osName, "GOARCH="+arch, "GOPROXY=off", "GOSUMDB=off", "GONOPROXY=none", "GOPRIVATE=", "GOMODCACHE="+filepath.Join(work, "module-cache"), "GOCACHE="+cache, "GOMAXPROCS=2")
 }
 func extract(work string) error {
-	data := runtimebundle.Bytes()
+	return extractArchive(work, runtimebundle.Bytes())
+}
+func extractArchive(work string, data []byte) error {
 	reader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return err

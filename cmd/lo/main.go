@@ -67,7 +67,7 @@ func execute(args []string, stdout, stderr io.Writer) int {
 		if inv.Command() == runner.BuildCommand {
 			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 			defer stop()
-			receipt, d := nativebuild.Build(ctx, result, inv.Output(), inv.Target())
+			receipt, d := nativebuild.Build(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
 			if d != nil {
 				return runner.Report(stderr, inv.Format(), d, runner.ExitHost)
 			}

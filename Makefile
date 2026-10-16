@@ -19,14 +19,18 @@ verify-runtime-bundle:
 build: runtime-bundle
 	$(GO) build -o bin/lo ./cmd/lo
 
-.PHONY: build-metal test-metal
+.PHONY: build-metal test-metal test-native-metal
 build-metal: runtime-bundle
 	mkdir -p bin
 	$(GO) run ./tools/metalbuild
 
 test-metal: runtime-bundle
 	mkdir -p bin
-	$(GO) run ./tools/metalbuild -test -- $(TEST_ARGS)
+	$(GO) run ./tools/metalbuild -test '^TestMetalLive' -- $(TEST_ARGS)
+
+test-native-metal: runtime-bundle
+	mkdir -p bin
+	$(GO) run ./tools/metalbuild -test '^TestNativeMetal' -- $(TEST_ARGS)
 
 fmt:
 	$(GO) fmt ./...

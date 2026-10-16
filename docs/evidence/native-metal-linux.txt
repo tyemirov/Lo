@@ -1,0 +1,61 @@
+Unable to find image 'golang:1.27.1' locally
+1.27.1: Pulling from library/golang
+4f4fb700ef54: Pulling fs layer
+df9831efb49c: Pulling fs layer
+86f385aa2c76: Pulling fs layer
+a7f73cdbf7c7: Pulling fs layer
+4a1596a794cd: Pulling fs layer
+125215c6056c: Pulling fs layer
+4a6adabd6283: Pulling fs layer
+4f4fb700ef54: Already exists
+4a6adabd6283: Download complete
+86f385aa2c76: Download complete
+4a1596a794cd: Download complete
+125215c6056c: Download complete
+df9831efb49c: Download complete
+35dfe04e7388: Download complete
+2dbd1d442d86: Download complete
+a7f73cdbf7c7: Download complete
+df9831efb49c: Pull complete
+86f385aa2c76: Pull complete
+a7f73cdbf7c7: Pull complete
+4a1596a794cd: Pull complete
+4a6adabd6283: Pull complete
+125215c6056c: Pull complete
+4f4fb700ef54: Pull complete
+Digest: sha256:162be5298a40ed317005c8339c6de4d10d3eef336d66dc8e9259b03ab9d3a6d2
+Status: Downloaded newer image for golang:1.27.1
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestNativeMetal\|TestNativeStandalone\|TestNativeCrossTarget\|TestNativeToolchainCancellationAndOutputLimit -count=1 -v
+=== RUN   TestNativeMetalSelection
+=== RUN   TestNativeMetalSelection/cross-target
+=== RUN   TestNativeMetalSelection/compiler-unavailable
+=== RUN   TestNativeMetalSelection/unknown
+=== RUN   TestNativeMetalSelection/duplicate
+=== RUN   TestNativeMetalSelection/grant
+--- PASS: TestNativeMetalSelection (0.02s)
+    --- PASS: TestNativeMetalSelection/cross-target (0.01s)
+    --- PASS: TestNativeMetalSelection/compiler-unavailable (0.00s)
+    --- PASS: TestNativeMetalSelection/unknown (0.00s)
+    --- PASS: TestNativeMetalSelection/duplicate (0.00s)
+    --- PASS: TestNativeMetalSelection/grant (0.00s)
+=== RUN   TestNativeMetalSoftwareArtifact
+--- PASS: TestNativeMetalSoftwareArtifact (11.91s)
+=== RUN   TestNativeStandalone
+--- PASS: TestNativeStandalone (1.17s)
+=== RUN   TestNativeCrossTarget
+--- PASS: TestNativeCrossTarget (12.38s)
+=== RUN   TestNativeToolchainCancellationAndOutputLimit
+=== RUN   TestNativeToolchainCancellationAndOutputLimit/cancel
+=== RUN   TestNativeToolchainCancellationAndOutputLimit/overflow
+=== RUN   TestNativeToolchainCancellationAndOutputLimit/version-overflow
+=== RUN   TestNativeToolchainCancellationAndOutputLimit/failure
+=== RUN   TestNativeToolchainCancellationAndOutputLimit/artifact-overflow
+--- PASS: TestNativeToolchainCancellationAndOutputLimit (1.50s)
+    --- PASS: TestNativeToolchainCancellationAndOutputLimit/cancel (0.90s)
+    --- PASS: TestNativeToolchainCancellationAndOutputLimit/overflow (0.09s)
+    --- PASS: TestNativeToolchainCancellationAndOutputLimit/version-overflow (0.03s)
+    --- PASS: TestNativeToolchainCancellationAndOutputLimit/failure (0.08s)
+    --- PASS: TestNativeToolchainCancellationAndOutputLimit/artifact-overflow (0.13s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	28.591s

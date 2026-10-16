@@ -774,9 +774,9 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Each run used six uploads, six downloads, and 1,312 peak accounted bytes with complete cleanup.
   Failure tests verified source traces, cancellation, workspace limits, blocked later commits, and unusable-session rejection.
   The [final CI record](docs/evidence/metal-arithmetic-ci.txt) records successful static checks, software tests, native tests, and the standard build.
-  F014 retains native Metal artifacts. I002 retains complete training acceptance.
+  F014 extends this contract to native artifacts. I002 retains complete training acceptance.
 
-- [ ] [F014] (P1) {F013,F001} Add Metal support to native executables
+- [x] [F014] (P1) {F013,F001} Add Metal support to native executables
   Goal:
   Execute the Metal contract from standalone Lo artifacts on macOS arm64.
 
@@ -798,6 +798,14 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify interpreter and native parity within the same numeric profile.
   - Verify unavailable-device results and unchanged previous artifacts after build failure.
   - Verify software artifacts on the current macOS and Linux targets.
+
+  F014 completed on October 15, 2026.
+  The [native Metal contract](docs/native-metal.md) defines explicit selection, runtime manifests, pinned toolchains, and artifact metadata.
+  Standalone Metal execution matched the interpreter across numeric fixtures, error traces, execution budgets, and three 200-step SGD runs.
+  Controlled failures verified unavailable devices, cancellation, build limits, blocked commits, and unchanged previous artifacts.
+  The local Metal suite, race checks, and Linux software tests passed.
+  The [final CI record](docs/evidence/native-metal-ci.txt) records successful bundle verification, static checks, software tests, native tests, and compiler construction.
+  I002 retains complete training acceptance.
 
 ## Improvements
 

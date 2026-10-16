@@ -28,8 +28,10 @@ func main() {
 	case "version":
 		if os.Getenv("LO_TEST_TOOL_ACTION") == "version-overflow" {
 			cwd, err := os.Getwd()
-			if err != nil { panic(err) }
-			record(filepath.Join(state,"work"),cwd)
+			if err != nil {
+				panic(err)
+			}
+			record(filepath.Join(state, "work"), cwd)
 			fmt.Print(strings.Repeat("x", 2<<20))
 			return
 		}
@@ -43,6 +45,28 @@ func main() {
 			panic(err)
 		}
 		record(filepath.Join(state, "work"), cwd)
+		if os.Getenv("LO_TEST_TOOL_ACTION") == "failure" {
+			fmt.Fprintln(os.Stderr, "controlled compiler failure")
+			os.Exit(1)
+		}
+		if os.Getenv("LO_TEST_TOOL_ACTION") == "artifact-overflow" {
+			for i, arg := range os.Args {
+				if arg == "-o" {
+					file, err := os.Create(os.Args[i+1])
+					if err != nil {
+						panic(err)
+					}
+					if err := file.Truncate((64 << 20) + 1); err != nil {
+						panic(err)
+					}
+					if err := file.Close(); err != nil {
+						panic(err)
+					}
+					return
+				}
+			}
+			panic("missing output")
+		}
 		if os.Getenv("LO_TEST_TOOL_ACTION") == "overflow" {
 			fmt.Fprint(os.Stderr, strings.Repeat("x", 2<<20))
 			time.Sleep(10 * time.Second)

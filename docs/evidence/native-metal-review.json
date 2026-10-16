@@ -1,0 +1,41 @@
+{
+  "issue": "F014",
+  "date": "2026-10-15",
+  "validation": {
+    "make_ci": "passed",
+    "native_metal_with_race_detector": "passed",
+    "software_native_race": "passed",
+    "linux_arm64_software_network_disabled": "passed",
+    "metal_go_vet": "passed"
+  },
+  "documentation": {
+    "files": [
+      "ISSUES.md",
+      "README.md",
+      "specification.md",
+      "docs/native-compilation-contract.md",
+      "docs/native-metal.md"
+    ],
+    "reviewed_scope": "Changed prose and the new native Metal contract",
+    "official_issue": 9,
+    "official_reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "part_1_review": "completed",
+    "part_2_review": "completed",
+    "changed_prose_mechanical_findings": 0,
+    "unchanged_mechanical_findings": 45,
+    "full_document_compliance_claimed": false,
+    "local_links_checked": 78,
+    "missing_local_links": []
+  },
+  "issue_identifiers": {
+    "count": 26,
+    "duplicates": [],
+    "missing_local_dependencies": []
+  },
+  "governance_entries": [],
+  "metal_build_receipt": {
+    "inputs_checked": 15,
+    "matches_current_inputs": true
+  },
+  "remaining_scope": "I002 retains complete training acceptance."
+}

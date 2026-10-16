@@ -1,0 +1,14 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -native -- -run TestNativeMetalLiveBuildIsolation -count=1 -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+Metal build go test -tags=metal ./tests/integration -run ^TestNativeMetal -run TestNativeMetalLiveBuildIsolation -count=1 -v: exit status 1
+=== RUN   TestNativeMetalLiveBuildIsolation
+    native_metal_live_test.go:206: identical inputs produced different artifact bytes
+--- FAIL: TestNativeMetalLiveBuildIsolation (2.74s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	3.688s
+FAIL
+
+exit status 1
+make: *** [test-native-metal] Error 1

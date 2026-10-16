@@ -1,0 +1,14 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test -- -run TestNativeMetalLiveStandalone -count=1
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+Metal build go test -tags=metal ./tests/integration -run ^TestMetalLive -run TestNativeMetalLiveStandalone -count=1: exit status 1
+--- FAIL: TestNativeMetalLiveStandalone (0.20s)
+    native_metal_live_test.go:20: Metal artifact build: {stdout: stderr:cli.invalid-invocation: unknown option "--device-backend"
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.900s
+FAIL
+
+exit status 1
+make: *** [test-metal] Error 1

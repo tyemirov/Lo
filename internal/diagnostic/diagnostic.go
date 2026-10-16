@@ -26,6 +26,7 @@ type Code string
 
 const (
 	BuildTarget         Code = "build.unsupported-target"
+	BuildBackend        Code = "build.backend-unavailable"
 	BuildOutput         Code = "build.output"
 	BuildToolchain      Code = "build.toolchain"
 	BuildGenerate       Code = "build.generation"

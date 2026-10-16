@@ -1,0 +1,14 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestNativeMetal -count=1
+--- FAIL: TestNativeMetalSelection (0.24s)
+    --- FAIL: TestNativeMetalSelection/cross-target (0.20s)
+        native_metal_test.go:27: preflight rejection: exit status 2 {"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--device-backend\""}]}
+    --- FAIL: TestNativeMetalSelection/compiler-unavailable (0.01s)
+        native_metal_test.go:27: preflight rejection: exit status 2 {"diagnostics":[{"code":"cli.invalid-invocation","stage":"cli","message":"unknown option \"--device-backend\""}]}
+--- FAIL: TestNativeMetalSoftwareArtifact (0.01s)
+    native_metal_test.go:37: software build: {stdout: stderr:cli.invalid-invocation: unknown option "--device-backend"
+         status:2}
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.015s
+FAIL
+make: *** [test-integration] Error 1

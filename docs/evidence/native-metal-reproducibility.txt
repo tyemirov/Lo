@@ -1,0 +1,16 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -native -- -run TestNativeMetalLiveBuildIsolation -count=5 -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+=== RUN   TestNativeMetalLiveBuildIsolation
+--- PASS: TestNativeMetalLiveBuildIsolation (4.04s)
+=== RUN   TestNativeMetalLiveBuildIsolation
+--- PASS: TestNativeMetalLiveBuildIsolation (3.14s)
+=== RUN   TestNativeMetalLiveBuildIsolation
+--- PASS: TestNativeMetalLiveBuildIsolation (4.02s)
+=== RUN   TestNativeMetalLiveBuildIsolation
+--- PASS: TestNativeMetalLiveBuildIsolation (4.03s)
+=== RUN   TestNativeMetalLiveBuildIsolation
+--- PASS: TestNativeMetalLiveBuildIsolation (3.41s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	19.562s
