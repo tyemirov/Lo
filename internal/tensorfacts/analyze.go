@@ -262,6 +262,10 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 		return args[0]
 	case catalog.TensorTo:
 		return fact{Shape: args[0].Shape, Location: args[1].Text}
+	case catalog.ParametersTo, catalog.SGDStateTo, catalog.AdamWStateTo:
+		return trainingLocation(args[0], args[1].Text)
+	case catalog.CheckpointDecode:
+		return trainingLocation(args[1], device.CPU)
 	case catalog.TensorDevice:
 		return fact{Text: args[0].Location}
 	case catalog.SGDStateNew, catalog.AdamWStateNew:
@@ -383,6 +387,16 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 		return fact{Shape: p.Shape(), Location: args[0].Location}
 	}
 	return fact{}
+}
+func trainingLocation(input fact, location string) fact {
+	output := fact{Shape: input.Shape, Location: location}
+	if input.Fields != nil {
+		output.Fields = make(map[string]fact, len(input.Fields))
+		for name, field := range input.Fields {
+			output.Fields[name] = trainingLocation(field, location)
+		}
+	}
+	return seal(output)
 }
 func integers(f fact) ([]*big.Int, bool) {
 	if !f.List {

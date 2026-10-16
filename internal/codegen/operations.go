@@ -3,6 +3,11 @@ package codegen
 import "github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 
 var operationFunctions = map[string]string{
+	catalog.CheckpointEncode: "Checkpoint",
+	catalog.CheckpointDecode: "Checkpoint",
+	catalog.ParametersTo:     "Checkpoint",
+	catalog.SGDStateTo:       "Checkpoint",
+	catalog.AdamWStateTo:     "Checkpoint",
 	catalog.SGDConfigNew:     "SGDConfigNew",
 	catalog.AdamWConfigNew:   "AdamWConfigNew",
 	catalog.SGDStateNew:      "SGDStateNew",

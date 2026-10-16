@@ -8,7 +8,7 @@ import (
 
 func addComputeFailures(operations map[string]Operation) {
 	for name, definition := range operations {
-		if !UsesDevice(name) || name == TensorTo {
+		if !UsesDevice(name) || IsTransfer(name) {
 			continue
 		}
 		entry := definition.(operation)
@@ -100,6 +100,9 @@ func addTensors(m map[string]Operation) {
 
 // UsesDevice identifies operations with possible device resource access.
 func UsesDevice(name string) bool {
+	if IsTransfer(name) {
+		return true
+	}
 	switch name {
 	case TensorTo, TensorAdd, TensorSub, TensorMul, TensorDiv, TensorSqrt, TensorRelu, TensorMatmul, TensorBroadcast, TensorReshape, TensorTranspose, TensorSum, TensorMean, AutodiffGrad, GradientsZero, GradientsAdd, GradientsScale, SGDStep, AdamWStep, AdamWStateNew:
 		return true

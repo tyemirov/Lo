@@ -132,6 +132,8 @@ func (c *checker) builtin(op catalog.Operation, args []syntax.Argument, expected
 		return c.tensorBundle(op, args, span)
 	case catalog.OptimizerOperation:
 		return c.optimizer(op, args, span)
+	case catalog.CheckpointOperation:
+		return c.checkpoint(op, args, span)
 	case catalog.ListConstructor:
 		return c.list(op, args, expected, span)
 	case catalog.MapConstructor:
