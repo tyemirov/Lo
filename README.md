@@ -8,6 +8,8 @@ Language models are good at proposing workflows, but unsafe as direct executors 
 
 Lo is not a replacement for Go, Python, or shell. It is an execution contract between an AI planner, a verifier, and a runtime.
 
+For language rules and training examples, start with the [Lo Language Reference](specification.md).
+
 ## Status
 
 Lo implements the **v0.3 core, native compilation, CPU and Metal training, and explicit device transfers**.
@@ -38,6 +40,8 @@ F005, F006, and F007 add reverse-mode autodiff, immutable Parameters, gradient o
 The [CPU training example](examples/training_cpu.lo) completes 200 SGD updates and reduces loss from `2.46875` to `0.00013215476`.
 The [XOR tutorial](docs/xor-neural-network.md) adds a small neural network that learns all four XOR inputs.
 Its [CPU example](examples/xor_cpu.lo) and [Metal example](examples/xor_metal.lo) use two ReLU units and 500 SGD updates.
+The [checkpoint workflow](docs/model-checkpoints.md#execution) saves trained Parameters for separate inference and restores complete SGD or AdamW state.
+The XOR examples save after 250 updates and resume for another 250 updates on CPU or Metal.
 F008 adds device grants, explicit transfers, and a resource ledger to interpreter and native execution.
 The [device resource contract](docs/device-resources.md) records the implementation and software validation.
 P002 adds the [Metal implementation plan](docs/metal-backend-plan.md).
@@ -520,42 +524,19 @@ A secure Lo runtime should:
 - log all commit activations
 - preserve structured error traces
 
-## Current Specification
+## Language Reference
 
-The current language version is:
+The [Lo Language Reference](specification.md) defines the implemented v0.3 core and tensor training contracts.
+It includes a contents list, operation signatures, examples, and current backend limits.
 
-```text
-Lo v0.3
-```
-
-The v0.3 specification defines:
-
-- values
-- processors
-- flows
-- adapters
-- effects
-- `commit`
-- fallible types
-- `Error`
-- `Null`
-- records
-- maps
-- lists
-- ranges
-- `Match.new`
-- pipe syntax
-- flow purity
-- adapter boundary handlers
-- HTTP semantics
-- grammar
-- minimal standard library
-- conformance matrix
-
-See:
-
-- [specification.md](specification.md)
-- [ISSUES.md](ISSUES.md)
+- [Quick start](specification.md#quick-start)
+- [Autodiff and backpropagation](specification.md#245-reverse-mode-autodiff-and-backpropagation)
+- [Parameters and gradients](specification.md#246-parameters-and-gradient-lifecycle)
+- [SGD and AdamW](specification.md#247-sgd-and-adamw)
+- [Complete SGD example](examples/training_sgd.lo)
+- [Complete AdamW example](examples/training_adamw.lo)
+- [CPU, Metal, and CUDA status](specification.md#backend-support)
+- [Implementation audit of the reference](docs/language-reference-audit.md)
 
 ## Non-Goals
 
