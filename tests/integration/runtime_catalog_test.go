@@ -74,6 +74,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	for name, expected := range optimizerCatalogResults() {
 		want[name] = expected
 	}
+	for name, expected := range checkpointCatalogResults() {
+		want[name] = expected
+	}
 	covered := map[string]bool{}
 	for _, tc := range builtinExamples() {
 		if _, ok := want[tc.name]; ok {
