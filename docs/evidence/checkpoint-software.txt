@@ -1,0 +1,516 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run "TestCheckpoint|TestVerifierBuiltinContracts|TestRunBuiltinCatalog|TestMetalTrainingCLI" -count=1 -race -v
+=== RUN   TestVerifierBuiltinContracts
+=== RUN   TestVerifierBuiltinContracts/Autodiff.grad
+=== RUN   TestVerifierBuiltinContracts/Int.new
+=== RUN   TestVerifierBuiltinContracts/String.new
+=== RUN   TestVerifierBuiltinContracts/Bool.new
+=== RUN   TestVerifierBuiltinContracts/Float.new
+=== RUN   TestVerifierBuiltinContracts/Float.add
+=== RUN   TestVerifierBuiltinContracts/Float.sub
+=== RUN   TestVerifierBuiltinContracts/Float.mul
+=== RUN   TestVerifierBuiltinContracts/Float.div
+=== RUN   TestVerifierBuiltinContracts/Float.sqrt
+=== RUN   TestVerifierBuiltinContracts/Float.eq
+=== RUN   TestVerifierBuiltinContracts/Float.lt
+=== RUN   TestVerifierBuiltinContracts/Float.lte
+=== RUN   TestVerifierBuiltinContracts/Float.gt
+=== RUN   TestVerifierBuiltinContracts/Float.gte
+=== RUN   TestVerifierBuiltinContracts/Int.to_float
+=== RUN   TestVerifierBuiltinContracts/Float.to_int
+=== RUN   TestVerifierBuiltinContracts/Float.to_string
+=== RUN   TestVerifierBuiltinContracts/Bytes.new
+=== RUN   TestVerifierBuiltinContracts/Scalar.new
+=== RUN   TestVerifierBuiltinContracts/List.new
+=== RUN   TestVerifierBuiltinContracts/Map.new
+=== RUN   TestVerifierBuiltinContracts/Record.new
+=== RUN   TestVerifierBuiltinContracts/Range.new
+=== RUN   TestVerifierBuiltinContracts/Error.new
+=== RUN   TestVerifierBuiltinContracts/File.Path.new
+=== RUN   TestVerifierBuiltinContracts/HTTP.Server.new
+=== RUN   TestVerifierBuiltinContracts/HTTP.Response.Text.new
+=== RUN   TestVerifierBuiltinContracts/HTTP.Response.Bytes.new
+=== RUN   TestVerifierBuiltinContracts/UTF8.String.new
+=== RUN   TestVerifierBuiltinContracts/String.FromScalars.new
+=== RUN   TestVerifierBuiltinContracts/String.concat
+=== RUN   TestVerifierBuiltinContracts/String.upper
+=== RUN   TestVerifierBuiltinContracts/String.lower
+=== RUN   TestVerifierBuiltinContracts/String.length
+=== RUN   TestVerifierBuiltinContracts/String.eq
+=== RUN   TestVerifierBuiltinContracts/Scalar.eq
+=== RUN   TestVerifierBuiltinContracts/Int.to_string
+=== RUN   TestVerifierBuiltinContracts/Math.add
+=== RUN   TestVerifierBuiltinContracts/Math.sub
+=== RUN   TestVerifierBuiltinContracts/Math.mul
+=== RUN   TestVerifierBuiltinContracts/Math.div
+=== RUN   TestVerifierBuiltinContracts/Math.mod
+=== RUN   TestVerifierBuiltinContracts/Math.lt
+=== RUN   TestVerifierBuiltinContracts/Math.lte
+=== RUN   TestVerifierBuiltinContracts/Math.gt
+=== RUN   TestVerifierBuiltinContracts/Math.gte
+=== RUN   TestVerifierBuiltinContracts/Math.eq
+=== RUN   TestVerifierBuiltinContracts/Math.sum
+=== RUN   TestVerifierBuiltinContracts/Math.product
+=== RUN   TestVerifierBuiltinContracts/Math.min
+=== RUN   TestVerifierBuiltinContracts/Math.max
+=== RUN   TestVerifierBuiltinContracts/Range.contains
+=== RUN   TestVerifierBuiltinContracts/Range.is_empty
+=== RUN   TestVerifierBuiltinContracts/Map.has_key
+=== RUN   TestVerifierBuiltinContracts/Map.get
+=== RUN   TestVerifierBuiltinContracts/Record.merge
+=== RUN   TestVerifierBuiltinContracts/List.map
+=== RUN   TestVerifierBuiltinContracts/List.filter
+=== RUN   TestVerifierBuiltinContracts/List.fold
+=== RUN   TestVerifierBuiltinContracts/List.flat_map
+=== RUN   TestVerifierBuiltinContracts/List.unfold
+=== RUN   TestVerifierBuiltinContracts/List.length
+=== RUN   TestVerifierBuiltinContracts/File.read
+=== RUN   TestVerifierBuiltinContracts/File.append
+=== RUN   TestVerifierBuiltinContracts/File.write
+=== RUN   TestVerifierBuiltinContracts/Parameters.new
+=== RUN   TestVerifierBuiltinContracts/Parameters.values
+=== RUN   TestVerifierBuiltinContracts/Gradients.new
+=== RUN   TestVerifierBuiltinContracts/Gradients.values
+=== RUN   TestVerifierBuiltinContracts/Gradients.zero
+=== RUN   TestVerifierBuiltinContracts/Gradients.add
+=== RUN   TestVerifierBuiltinContracts/Gradients.scale
+=== RUN   TestVerifierBuiltinContracts/Autodiff.stop
+=== RUN   TestVerifierBuiltinContracts/Optimizer.SGD.Config.new
+=== RUN   TestVerifierBuiltinContracts/Optimizer.SGD.State.new
+=== RUN   TestVerifierBuiltinContracts/Optimizer.SGD.step
+=== RUN   TestVerifierBuiltinContracts/Optimizer.AdamW.Config.new
+=== RUN   TestVerifierBuiltinContracts/Optimizer.AdamW.State.new
+=== RUN   TestVerifierBuiltinContracts/Optimizer.AdamW.step
+=== RUN   TestVerifierBuiltinContracts/Checkpoint.encode
+=== RUN   TestVerifierBuiltinContracts/Checkpoint.decode
+=== RUN   TestVerifierBuiltinContracts/Parameters.to
+=== RUN   TestVerifierBuiltinContracts/Optimizer.SGD.State.to
+=== RUN   TestVerifierBuiltinContracts/Optimizer.AdamW.State.to
+=== RUN   TestVerifierBuiltinContracts/Device.new
+=== RUN   TestVerifierBuiltinContracts/Tensor.new
+=== RUN   TestVerifierBuiltinContracts/Tensor.to
+=== RUN   TestVerifierBuiltinContracts/Tensor.shape
+=== RUN   TestVerifierBuiltinContracts/Tensor.rank
+=== RUN   TestVerifierBuiltinContracts/Tensor.dtype
+=== RUN   TestVerifierBuiltinContracts/Tensor.device
+=== RUN   TestVerifierBuiltinContracts/Tensor.to_float
+=== RUN   TestVerifierBuiltinContracts/Tensor.values
+=== RUN   TestVerifierBuiltinContracts/Tensor.add
+=== RUN   TestVerifierBuiltinContracts/Tensor.sub
+=== RUN   TestVerifierBuiltinContracts/Tensor.mul
+=== RUN   TestVerifierBuiltinContracts/Tensor.div
+=== RUN   TestVerifierBuiltinContracts/Tensor.sqrt
+=== RUN   TestVerifierBuiltinContracts/Tensor.relu
+=== RUN   TestVerifierBuiltinContracts/Tensor.matmul
+=== RUN   TestVerifierBuiltinContracts/Tensor.broadcast
+=== RUN   TestVerifierBuiltinContracts/Tensor.reshape
+=== RUN   TestVerifierBuiltinContracts/Tensor.transpose
+=== RUN   TestVerifierBuiltinContracts/Tensor.sum
+=== RUN   TestVerifierBuiltinContracts/Tensor.mean
+--- PASS: TestVerifierBuiltinContracts (1.03s)
+    --- PASS: TestVerifierBuiltinContracts/Autodiff.grad (0.19s)
+    --- PASS: TestVerifierBuiltinContracts/Int.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/String.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Bool.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.add (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.sub (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.mul (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.div (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.sqrt (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.eq (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.lt (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.lte (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.gt (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.gte (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Int.to_float (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.to_int (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Float.to_string (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Bytes.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Scalar.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/List.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Map.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Record.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Range.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Error.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/File.Path.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/HTTP.Server.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/HTTP.Response.Text.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/HTTP.Response.Bytes.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/UTF8.String.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/String.FromScalars.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/String.concat (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/String.upper (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/String.lower (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/String.length (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/String.eq (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Scalar.eq (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Int.to_string (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.add (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.sub (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.mul (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.div (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.mod (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.lt (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.lte (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.gt (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.gte (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.eq (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.sum (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.product (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.min (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Math.max (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Range.contains (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Range.is_empty (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Map.has_key (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Map.get (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Record.merge (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/List.map (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/List.filter (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/List.fold (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/List.flat_map (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/List.unfold (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/List.length (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/File.read (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/File.append (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/File.write (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Parameters.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Parameters.values (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Gradients.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Gradients.values (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Gradients.zero (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Gradients.add (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Gradients.scale (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Autodiff.stop (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.SGD.Config.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.SGD.State.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.SGD.step (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.AdamW.Config.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.AdamW.State.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.AdamW.step (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Checkpoint.encode (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Checkpoint.decode (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Parameters.to (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.SGD.State.to (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Optimizer.AdamW.State.to (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Device.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.new (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.to (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.shape (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.rank (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.dtype (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.device (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.to_float (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.values (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.add (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.sub (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.mul (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.div (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.sqrt (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.relu (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.matmul (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.broadcast (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.reshape (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.transpose (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.sum (0.01s)
+    --- PASS: TestVerifierBuiltinContracts/Tensor.mean (0.01s)
+=== RUN   TestCheckpointTypeAndInspection
+--- PASS: TestCheckpointTypeAndInspection (0.07s)
+=== RUN   TestCheckpointMetalTransfers
+=== RUN   TestCheckpointMetalTransfers/Parameters
+=== RUN   TestCheckpointMetalTransfers/SGD
+=== RUN   TestCheckpointMetalTransfers/AdamW
+=== RUN   TestCheckpointMetalTransfers/denied
+=== RUN   TestCheckpointMetalTransfers/unavailable
+--- PASS: TestCheckpointMetalTransfers (0.02s)
+    --- PASS: TestCheckpointMetalTransfers/Parameters (0.00s)
+    --- PASS: TestCheckpointMetalTransfers/SGD (0.00s)
+    --- PASS: TestCheckpointMetalTransfers/AdamW (0.00s)
+    --- PASS: TestCheckpointMetalTransfers/denied (0.00s)
+    --- PASS: TestCheckpointMetalTransfers/unavailable (0.00s)
+=== RUN   TestCheckpointAdamWMetalResume
+--- PASS: TestCheckpointAdamWMetalResume (0.01s)
+=== RUN   TestCheckpointOptimizerValidation
+=== RUN   TestCheckpointOptimizerValidation/negative_step
+=== RUN   TestCheckpointOptimizerValidation/invalid_rate
+=== RUN   TestCheckpointOptimizerValidation/beta_power
+=== RUN   TestCheckpointOptimizerValidation/second_moment
+--- PASS: TestCheckpointOptimizerValidation (0.02s)
+    --- PASS: TestCheckpointOptimizerValidation/negative_step (0.00s)
+    --- PASS: TestCheckpointOptimizerValidation/invalid_rate (0.00s)
+    --- PASS: TestCheckpointOptimizerValidation/beta_power (0.00s)
+    --- PASS: TestCheckpointOptimizerValidation/second_moment (0.00s)
+=== RUN   TestCheckpointTransferFailureCleanup
+=== RUN   TestCheckpointTransferFailureCleanup/partial_upload
+=== RUN   TestCheckpointTransferFailureCleanup/download
+=== RUN   TestCheckpointTransferFailureCleanup/cancel
+=== RUN   TestCheckpointTransferFailureCleanup/allocation_budget
+--- PASS: TestCheckpointTransferFailureCleanup (0.01s)
+    --- PASS: TestCheckpointTransferFailureCleanup/partial_upload (0.00s)
+    --- PASS: TestCheckpointTransferFailureCleanup/download (0.00s)
+    --- PASS: TestCheckpointTransferFailureCleanup/cancel (0.00s)
+    --- PASS: TestCheckpointTransferFailureCleanup/allocation_budget (0.00s)
+=== RUN   TestCheckpointBitsAndWork
+--- PASS: TestCheckpointBitsAndWork (0.01s)
+=== RUN   TestCheckpointEncodingLimit
+--- PASS: TestCheckpointEncodingLimit (1.30s)
+=== RUN   TestCheckpointFreshProcess
+=== RUN   TestCheckpointFreshProcess/Parameters
+=== RUN   TestCheckpointFreshProcess/SGD
+=== RUN   TestCheckpointFreshProcess/AdamW
+--- PASS: TestCheckpointFreshProcess (0.12s)
+    --- PASS: TestCheckpointFreshProcess/Parameters (0.02s)
+    --- PASS: TestCheckpointFreshProcess/SGD (0.04s)
+    --- PASS: TestCheckpointFreshProcess/AdamW (0.05s)
+=== RUN   TestCheckpointRejectsInvalidData
+=== RUN   TestCheckpointRejectsInvalidData/truncated
+=== RUN   TestCheckpointRejectsInvalidData/trailing
+=== RUN   TestCheckpointRejectsInvalidData/whitespace
+=== RUN   TestCheckpointRejectsInvalidData/duplicate
+=== RUN   TestCheckpointRejectsInvalidData/extra
+=== RUN   TestCheckpointRejectsInvalidData/dtype
+=== RUN   TestCheckpointRejectsInvalidData/shape
+=== RUN   TestCheckpointRejectsInvalidData/field
+=== RUN   TestCheckpointRejectsInvalidData/nonfinite
+=== RUN   TestCheckpointRejectsInvalidData/device
+--- PASS: TestCheckpointRejectsInvalidData (0.02s)
+    --- PASS: TestCheckpointRejectsInvalidData/truncated (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/trailing (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/whitespace (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/duplicate (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/extra (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/dtype (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/shape (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/field (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/nonfinite (0.00s)
+    --- PASS: TestCheckpointRejectsInvalidData/device (0.00s)
+=== RUN   TestCheckpointXOR
+=== RUN   TestCheckpointXOR/cpu
+    checkpoint_xor_test.go:77: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+=== RUN   TestCheckpointXOR/metal
+    checkpoint_xor_test.go:77: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+--- PASS: TestCheckpointXOR (0.53s)
+    --- PASS: TestCheckpointXOR/cpu (0.14s)
+    --- PASS: TestCheckpointXOR/metal (0.36s)
+=== RUN   TestMetalTrainingCLI
+=== RUN   TestMetalTrainingCLI/denied
+=== RUN   TestMetalTrainingCLI/unavailable
+--- PASS: TestMetalTrainingCLI (0.04s)
+    --- PASS: TestMetalTrainingCLI/denied (0.01s)
+    --- PASS: TestMetalTrainingCLI/unavailable (0.01s)
+=== RUN   TestRunBuiltinCatalog
+=== RUN   TestRunBuiltinCatalog/Autodiff.grad
+=== RUN   TestRunBuiltinCatalog/Int.new
+=== RUN   TestRunBuiltinCatalog/String.new
+=== RUN   TestRunBuiltinCatalog/Bool.new
+=== RUN   TestRunBuiltinCatalog/Float.new
+=== RUN   TestRunBuiltinCatalog/Float.add
+=== RUN   TestRunBuiltinCatalog/Float.sub
+=== RUN   TestRunBuiltinCatalog/Float.mul
+=== RUN   TestRunBuiltinCatalog/Float.div
+=== RUN   TestRunBuiltinCatalog/Float.sqrt
+=== RUN   TestRunBuiltinCatalog/Float.eq
+=== RUN   TestRunBuiltinCatalog/Float.lt
+=== RUN   TestRunBuiltinCatalog/Float.lte
+=== RUN   TestRunBuiltinCatalog/Float.gt
+=== RUN   TestRunBuiltinCatalog/Float.gte
+=== RUN   TestRunBuiltinCatalog/Int.to_float
+=== RUN   TestRunBuiltinCatalog/Float.to_int
+=== RUN   TestRunBuiltinCatalog/Float.to_string
+=== RUN   TestRunBuiltinCatalog/Bytes.new
+=== RUN   TestRunBuiltinCatalog/Scalar.new
+=== RUN   TestRunBuiltinCatalog/List.new
+=== RUN   TestRunBuiltinCatalog/Map.new
+=== RUN   TestRunBuiltinCatalog/Record.new
+=== RUN   TestRunBuiltinCatalog/Range.new
+=== RUN   TestRunBuiltinCatalog/Error.new
+=== RUN   TestRunBuiltinCatalog/File.Path.new
+=== RUN   TestRunBuiltinCatalog/HTTP.Server.new
+=== RUN   TestRunBuiltinCatalog/HTTP.Response.Text.new
+=== RUN   TestRunBuiltinCatalog/HTTP.Response.Bytes.new
+=== RUN   TestRunBuiltinCatalog/UTF8.String.new
+=== RUN   TestRunBuiltinCatalog/String.FromScalars.new
+=== RUN   TestRunBuiltinCatalog/String.concat
+=== RUN   TestRunBuiltinCatalog/String.upper
+=== RUN   TestRunBuiltinCatalog/String.lower
+=== RUN   TestRunBuiltinCatalog/String.length
+=== RUN   TestRunBuiltinCatalog/String.eq
+=== RUN   TestRunBuiltinCatalog/Scalar.eq
+=== RUN   TestRunBuiltinCatalog/Int.to_string
+=== RUN   TestRunBuiltinCatalog/Math.add
+=== RUN   TestRunBuiltinCatalog/Math.sub
+=== RUN   TestRunBuiltinCatalog/Math.mul
+=== RUN   TestRunBuiltinCatalog/Math.div
+=== RUN   TestRunBuiltinCatalog/Math.mod
+=== RUN   TestRunBuiltinCatalog/Math.lt
+=== RUN   TestRunBuiltinCatalog/Math.lte
+=== RUN   TestRunBuiltinCatalog/Math.gt
+=== RUN   TestRunBuiltinCatalog/Math.gte
+=== RUN   TestRunBuiltinCatalog/Math.eq
+=== RUN   TestRunBuiltinCatalog/Math.sum
+=== RUN   TestRunBuiltinCatalog/Math.product
+=== RUN   TestRunBuiltinCatalog/Math.min
+=== RUN   TestRunBuiltinCatalog/Math.max
+=== RUN   TestRunBuiltinCatalog/Range.contains
+=== RUN   TestRunBuiltinCatalog/Range.is_empty
+=== RUN   TestRunBuiltinCatalog/Map.has_key
+=== RUN   TestRunBuiltinCatalog/Map.get
+=== RUN   TestRunBuiltinCatalog/Record.merge
+=== RUN   TestRunBuiltinCatalog/List.map
+=== RUN   TestRunBuiltinCatalog/List.filter
+=== RUN   TestRunBuiltinCatalog/List.fold
+=== RUN   TestRunBuiltinCatalog/List.flat_map
+=== RUN   TestRunBuiltinCatalog/List.unfold
+=== RUN   TestRunBuiltinCatalog/List.length
+=== RUN   TestRunBuiltinCatalog/File.read
+=== RUN   TestRunBuiltinCatalog/File.append
+=== RUN   TestRunBuiltinCatalog/File.write
+=== RUN   TestRunBuiltinCatalog/Parameters.new
+=== RUN   TestRunBuiltinCatalog/Parameters.values
+=== RUN   TestRunBuiltinCatalog/Gradients.new
+=== RUN   TestRunBuiltinCatalog/Gradients.values
+=== RUN   TestRunBuiltinCatalog/Gradients.zero
+=== RUN   TestRunBuiltinCatalog/Gradients.add
+=== RUN   TestRunBuiltinCatalog/Gradients.scale
+=== RUN   TestRunBuiltinCatalog/Autodiff.stop
+=== RUN   TestRunBuiltinCatalog/Optimizer.SGD.Config.new
+=== RUN   TestRunBuiltinCatalog/Optimizer.SGD.State.new
+=== RUN   TestRunBuiltinCatalog/Optimizer.SGD.step
+=== RUN   TestRunBuiltinCatalog/Optimizer.AdamW.Config.new
+=== RUN   TestRunBuiltinCatalog/Optimizer.AdamW.State.new
+=== RUN   TestRunBuiltinCatalog/Optimizer.AdamW.step
+=== RUN   TestRunBuiltinCatalog/Checkpoint.encode
+=== RUN   TestRunBuiltinCatalog/Checkpoint.decode
+=== RUN   TestRunBuiltinCatalog/Parameters.to
+=== RUN   TestRunBuiltinCatalog/Optimizer.SGD.State.to
+=== RUN   TestRunBuiltinCatalog/Optimizer.AdamW.State.to
+=== RUN   TestRunBuiltinCatalog/Device.new
+=== RUN   TestRunBuiltinCatalog/Tensor.new
+=== RUN   TestRunBuiltinCatalog/Tensor.to
+=== RUN   TestRunBuiltinCatalog/Tensor.shape
+=== RUN   TestRunBuiltinCatalog/Tensor.rank
+=== RUN   TestRunBuiltinCatalog/Tensor.dtype
+=== RUN   TestRunBuiltinCatalog/Tensor.device
+=== RUN   TestRunBuiltinCatalog/Tensor.to_float
+=== RUN   TestRunBuiltinCatalog/Tensor.values
+=== RUN   TestRunBuiltinCatalog/Tensor.add
+=== RUN   TestRunBuiltinCatalog/Tensor.sub
+=== RUN   TestRunBuiltinCatalog/Tensor.mul
+=== RUN   TestRunBuiltinCatalog/Tensor.div
+=== RUN   TestRunBuiltinCatalog/Tensor.sqrt
+=== RUN   TestRunBuiltinCatalog/Tensor.relu
+=== RUN   TestRunBuiltinCatalog/Tensor.matmul
+=== RUN   TestRunBuiltinCatalog/Tensor.broadcast
+=== RUN   TestRunBuiltinCatalog/Tensor.reshape
+=== RUN   TestRunBuiltinCatalog/Tensor.transpose
+=== RUN   TestRunBuiltinCatalog/Tensor.sum
+=== RUN   TestRunBuiltinCatalog/Tensor.mean
+--- PASS: TestRunBuiltinCatalog (0.91s)
+    --- PASS: TestRunBuiltinCatalog/Autodiff.grad (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Int.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/String.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Bool.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.add (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.sub (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.mul (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.div (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.sqrt (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.eq (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.lt (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.lte (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.gt (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.gte (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Int.to_float (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.to_int (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Float.to_string (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Bytes.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Scalar.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/List.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Map.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Record.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Range.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Error.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/File.Path.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/HTTP.Server.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/HTTP.Response.Text.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/HTTP.Response.Bytes.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/UTF8.String.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/String.FromScalars.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/String.concat (0.01s)
+    --- PASS: TestRunBuiltinCatalog/String.upper (0.01s)
+    --- PASS: TestRunBuiltinCatalog/String.lower (0.01s)
+    --- PASS: TestRunBuiltinCatalog/String.length (0.01s)
+    --- PASS: TestRunBuiltinCatalog/String.eq (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Scalar.eq (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Int.to_string (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.add (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.sub (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.mul (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.div (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.mod (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.lt (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.lte (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.gt (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.gte (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.eq (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.sum (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.product (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.min (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Math.max (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Range.contains (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Range.is_empty (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Map.has_key (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Map.get (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Record.merge (0.01s)
+    --- PASS: TestRunBuiltinCatalog/List.map (0.01s)
+    --- PASS: TestRunBuiltinCatalog/List.filter (0.01s)
+    --- PASS: TestRunBuiltinCatalog/List.fold (0.01s)
+    --- PASS: TestRunBuiltinCatalog/List.flat_map (0.01s)
+    --- PASS: TestRunBuiltinCatalog/List.unfold (0.01s)
+    --- PASS: TestRunBuiltinCatalog/List.length (0.01s)
+    --- PASS: TestRunBuiltinCatalog/File.read (0.01s)
+    --- PASS: TestRunBuiltinCatalog/File.append (0.01s)
+    --- PASS: TestRunBuiltinCatalog/File.write (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Parameters.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Parameters.values (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Gradients.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Gradients.values (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Gradients.zero (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Gradients.add (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Gradients.scale (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Autodiff.stop (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.SGD.Config.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.SGD.State.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.SGD.step (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.AdamW.Config.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.AdamW.State.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.AdamW.step (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Checkpoint.encode (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Checkpoint.decode (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Parameters.to (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.SGD.State.to (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Optimizer.AdamW.State.to (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Device.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.new (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.to (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.shape (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.rank (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.dtype (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.device (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.to_float (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.values (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.add (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.sub (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.mul (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.div (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.sqrt (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.relu (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.matmul (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.broadcast (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.reshape (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.transpose (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.sum (0.01s)
+    --- PASS: TestRunBuiltinCatalog/Tensor.mean (0.01s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	5.882s

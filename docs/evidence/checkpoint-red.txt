@@ -1,0 +1,24 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestCheckpoint -count=1 -v
+=== RUN   TestCheckpointFreshProcess
+=== RUN   TestCheckpointFreshProcess/Parameters
+    checkpoint_test.go:37: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Parameters.to","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestCheckpointFreshProcessParameters2017055939/002/794808306.lo","start":{"offset":166,"line":1,"column":167},"end":{"offset":186,"line":1,"column":187}}}]}
+         status:1}
+=== RUN   TestCheckpointFreshProcess/SGD
+    checkpoint_test.go:37: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Optimizer.SGD.State.to","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestCheckpointFreshProcessSGD3668936869/002/2859911030.lo","start":{"offset":391,"line":1,"column":392},"end":{"offset":424,"line":1,"column":425}}}]}
+         status:1}
+=== RUN   TestCheckpointFreshProcess/AdamW
+    checkpoint_test.go:37: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Optimizer.AdamW.State.to","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestCheckpointFreshProcessAdamW209127533/002/4031799279.lo","start":{"offset":419,"line":1,"column":420},"end":{"offset":454,"line":1,"column":455}}}]}
+         status:1}
+--- FAIL: TestCheckpointFreshProcess (0.14s)
+    --- FAIL: TestCheckpointFreshProcess/Parameters (0.13s)
+    --- FAIL: TestCheckpointFreshProcess/SGD (0.01s)
+    --- FAIL: TestCheckpointFreshProcess/AdamW (0.01s)
+=== RUN   TestCheckpointRejectsInvalidData
+    checkpoint_test.go:71: run: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Parameters.to","span":{"file":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestCheckpointRejectsInvalidData1329232710/002/917383348.lo","start":{"offset":166,"line":1,"column":167},"end":{"offset":186,"line":1,"column":187}}}]}
+         status:1}
+--- FAIL: TestCheckpointRejectsInvalidData (0.01s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.956s
+FAIL
+make: *** [test-integration] Error 1

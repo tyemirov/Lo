@@ -1,0 +1,16 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test '^TestMetalLive' -- -run "TestMetalLiveCheckpoints|TestNativeMetalCheckpoints" -count=1 -race -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+=== RUN   TestMetalLiveCheckpoints
+    checkpoint_metal_live_test.go:45: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    checkpoint_metal_live_test.go:45: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    checkpoint_metal_live_test.go:45: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+--- PASS: TestMetalLiveCheckpoints (10.88s)
+=== RUN   TestNativeMetalCheckpoints
+    checkpoint_metal_live_test.go:55: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    checkpoint_metal_live_test.go:55: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    checkpoint_metal_live_test.go:55: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+--- PASS: TestNativeMetalCheckpoints (21.84s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	34.538s

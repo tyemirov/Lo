@@ -48,7 +48,8 @@ This distinction does not change their implementation requirements.
 The first implementation uses one compute device per invocation.
 CPU staging values can coexist with that device for explicit transfers.
 Multiple compute devices, distributed training, sparse tensors, convolution, attention, and higher-order derivatives are deferred.
-User-defined kernels, automatic placement, random initialization, checkpoint formats, and differentiation through control flow are also deferred.
+User-defined kernels, automatic placement, random initialization, and differentiation through control flow are also deferred.
+P003 defines the subsequent [checkpoint contract](model-checkpoints.md) for F015, F016, and I003.
 
 ## Types and public signatures
 
@@ -722,7 +723,7 @@ Other extension values use the existing typed `type` and `value` JSON envelope.
 Moment fields use the exact record type `R`.
 Beta-power fields use rank-zero tensors.
 The JSON state contains complete immutable data, including fields unavailable through source projection.
-State import and persistent checkpoint formats remain deferred.
+The [checkpoint contract](model-checkpoints.md) defines state import and persistent checkpoints through the current typed value representation.
 
 An error snapshot represents each tensor as a typed metadata record.
 Its exact fields are `tensor_type: String`, `dtype: String`, `shape: List<Int>`, and `device: String`.
