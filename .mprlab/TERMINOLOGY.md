@@ -135,6 +135,8 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `minibatch`: A group of training examples used for one loss evaluation.
 - `microbatch`: One part of a minibatch used for gradient accumulation.
 - `ReLU`: The rectified linear operation that returns the greater of its input and zero.
+- `neural network`: A model with connected layers, trainable weights, and trainable biases.
+- `XOR`: The binary operation that returns one when exactly one of two inputs is one.
 - `subgradient`: A selected derivative value at a point without a unique derivative.
 - `finite difference`: A derivative estimate from changes in independently evaluated function values.
 - `broadcasting`: Alignment of tensor dimensions with implicit repetition of dimensions of size one.
