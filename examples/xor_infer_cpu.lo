@@ -1,0 +1,27 @@
+// XOR inference from saved Parameters.
+
+flow Forward(inputs: Tensor<FP32>, values: Record{b1: Tensor<FP32>, b2: Tensor<FP32>, w1: Tensor<FP32>, w2: Tensor<FP32>}) -> Tensor<FP32>! {
+  hidden_linear = Tensor.matmul(inputs, values.w1)
+  hidden_biased = Tensor.add(hidden_linear, values.b1)
+  hidden = Tensor.relu(hidden_biased)
+  output_linear = Tensor.matmul(hidden, values.w2)
+  return Tensor.add(output_linear, values.b2)
+}
+
+flow Main() -> Tensor<FP32>! {
+  device = Device.new("cpu")
+  cpu = Device.new("cpu")
+  w1 = Tensor.new(List.new(0.5, -0.5, -0.4, 0.6), List.new(2, 2))
+  b1 = Tensor.new(List.new(0.1, 0.1), List.new(2))
+  w2 = Tensor.new(List.new(0.3, 0.2), List.new(2, 1))
+  b2 = Tensor.new(List.new(0.0), List.new(1))
+  values = Record.new(b1: b1, b2: b2, w1: w1, w2: w2)
+  template = Parameters.new(values)
+  data = File.read(File.Path.new("bin/xor-parameters.json"))
+  restored = Checkpoint.decode(data, template)
+  parameters = Parameters.to(restored, device)
+  inputs = Tensor.to(Tensor.new(List.new(0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0), List.new(4, 2)), device)
+  return Tensor.to(Forward(inputs, Parameters.values(parameters)), cpu)
+}
+
+return Main()

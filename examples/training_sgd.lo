@@ -1,0 +1,39 @@
+// CPU training with reverse-mode autodiff and 100 SGD updates.
+
+flow Loss(target: Tensor<FP32>, values: Record{x: Tensor<FP32>}) -> Tensor<FP32>! {
+  residual = Tensor.sub(values.x, target)
+  squared = Tensor.mul(residual, residual)
+  return Tensor.mean(squared, List.new(0))
+}
+
+flow Counter(index: Int) -> Record{value: Int, next_state: Int} {
+  return Record.new(value: index, next_state: Math.add(index, 1))
+}
+
+flow TrainStep(target: Tensor<FP32>, state: Optimizer.SGD.State<Record{x: Tensor<FP32>}>, index: Int) -> Optimizer.SGD.State<Record{x: Tensor<FP32>}>! {
+  values = Parameters.values(state.parameters)
+  differentiated = Autodiff.grad(values, target, Loss)
+  gradients = Gradients.new(state.parameters, differentiated.gradients)
+  return Optimizer.SGD.step(state, gradients)
+}
+
+flow Main() -> Record{initial_loss: Float, final_loss: Float, steps: Int, original: Tensor<FP32>, trained: Tensor<FP32>}! {
+  target = Tensor.new(List.new(3.0), List.new(1))
+  x = Tensor.new(List.new(0.0), List.new(1))
+  parameters = Parameters.new(Record.new(x: x))
+  config = Optimizer.SGD.Config.new(learning_rate: 0.05)
+  initial_state = Optimizer.SGD.State.new(parameters, config)
+  initial_values = Parameters.values(initial_state.parameters)
+  initial_loss = Loss(target, initial_values) |> Tensor.to_float()
+  steps = List.unfold(0, 100, Counter)
+  final_state = List.fold(steps, initial_state, target, TrainStep)
+  final_values = Parameters.values(final_state.parameters)
+  final_loss = Loss(target, final_values) |> Tensor.to_float()
+  original_values = Parameters.values(initial_state.parameters)
+  return Record.new(
+    initial_loss: initial_loss, final_loss: final_loss,
+    steps: final_state.step, original: original_values.x, trained: final_values.x
+  )
+}
+
+return Main()
