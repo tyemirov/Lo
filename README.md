@@ -10,7 +10,7 @@ Lo is not a replacement for Go, Python, or shell. It is an execution contract be
 
 ## Status
 
-Lo implements the **v0.3 core, native compilation, CPU training, and explicit device transfers**.
+Lo implements the **v0.3 core, native compilation, CPU and Metal training, and explicit device transfers**.
 
 The reference implementation has a Go frontend, verifier, checked execution graph, and static inspector.
 The parser and verifier accept all six specification examples.
@@ -36,6 +36,8 @@ F002, F003, and F004 implement binary64 arithmetic, immutable FP32 tensors, shap
 The [forward example](examples/tensor_forward.lo) executes a two-layer ReLU network and returns loss from mean squared error `3`.
 F005, F006, and F007 add reverse-mode autodiff, immutable Parameters, gradient operations, SGD, and AdamW.
 The [CPU training example](examples/training_cpu.lo) completes 200 SGD updates and reduces loss from `2.46875` to `0.00013215476`.
+The [XOR tutorial](docs/xor-neural-network.md) adds a small neural network that learns all four XOR inputs.
+Its [CPU example](examples/xor_cpu.lo) and [Metal example](examples/xor_metal.lo) use two ReLU units and 500 SGD updates.
 F008 adds device grants, explicit transfers, and a resource ledger to interpreter and native execution.
 The [device resource contract](docs/device-resources.md) records the implementation and software validation.
 P002 adds the [Metal implementation plan](docs/metal-backend-plan.md).
@@ -43,8 +45,9 @@ F012 adds explicit Apple GPU transfers through the Metal interpreter build.
 The [Metal transfer contract](docs/metal-transfers.md) defines the build, device profile, and validation evidence.
 F013 adds [Metal arithmetic, derivatives, gradient operations, and optimizers](docs/metal-arithmetic.md).
 F014 adds [standalone Metal artifacts](docs/native-metal.md).
-I002 retains complete training acceptance.
-F009, F010, F011, and I001 retain device arithmetic, deferred execution, later precision work, and complete training acceptance.
+I002 qualifies [complete Metal training](docs/metal-training.md) through software tests, the local interpreter, and standalone artifacts.
+The [Metal training example](examples/training_metal.lo) completes 200 SGD updates with six uploads and six downloads.
+F009, F010, F011, and I001 retain NVIDIA arithmetic, deferred execution, later precision work, and complete NVIDIA training acceptance.
 The [training benchmark](docs/training-benchmark.md) records the interpreter baseline before F001.
 The [native acceptance report](docs/native-compilation-results.md) compares the two execution backends, including CPU training.
 
@@ -65,6 +68,7 @@ make build
 ./bin/list-sum run
 ./bin/lo run examples/tensor_forward.lo
 ./bin/lo run examples/training_cpu.lo --format json
+./bin/lo run examples/xor_cpu.lo --format json
 ./bin/lo run examples/device_transfer.lo --allow-device cuda-sim:0 --format json
 ./bin/lo run examples/count_letter.lo --read-root examples
 ./bin/lo serve examples/http_echo.lo --listen 0 --format json
@@ -90,13 +94,19 @@ For a Metal artifact, use the explicit build option:
 
 ```bash
 make build-metal
-./bin/lo-metal build examples/metal_arithmetic.lo --device-backend metal --output ./bin/metal-example
-./bin/metal-example run --allow-device metal:0 --format json
-./bin/metal-example metadata
+./bin/lo-metal parse examples/training_metal.lo --format json
+./bin/lo-metal check examples/training_metal.lo --format json
+./bin/lo-metal inspect examples/training_metal.lo --format json
+./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
+./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
+./bin/metal-training run --allow-device metal:0 --format json
+./bin/metal-training metadata
 ```
 
 Metal builds require the pinned Apple toolchain and a local `darwin/arm64` target.
 The [native Metal contract](docs/native-metal.md) specifies the toolchain, metadata, and validation commands.
+The training example returns initial loss `2.46875` and final loss `0.00013215476064942777` after 200 updates.
+The [training acceptance report](docs/metal-training.md) separates software acceptance from optional local Metal execution.
 `lo run` and `lo serve` select interpreter execution.
 
 ## Core Idea
