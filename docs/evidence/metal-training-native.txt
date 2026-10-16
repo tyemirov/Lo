@@ -1,0 +1,70 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test '^TestNativeMetal' -- -count=1 -race -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+=== RUN   TestNativeMetalLiveStandalone
+    native_metal_live_test.go:59: runtime identity: &{Name:Apple M5 Pro Profile:metal-fp32 RegistryID:100000696 System:Version 27.0.1 (Build 26A434) KernelSHA256:d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6}
+    native_metal_live_test.go:65: artifact metadata: {"source_sha256":"febccd0cd810cc27603661620f7d59fc94d164ea3b7bff591106c5d3c0fbabbb","source":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestNativeMetalLiveStandalone4189794236/001/125673622.lo","compiler":"lo-native-go-v1","runtime_bundle_sha256":"2ce5dc375b53dae7019a811862c305418499d0a6b512980039ca02553e785d1a","toolchain":"go1.27.1","target":"darwin/arm64","device_backend":"metal","metal":{"profile":"metal-fp32","go":"go1.27.1","xcode":"Xcode 27.1\nBuild version 27A9275","sdk":"27.0","clang":"Apple clang version 21.0.0 (clang-2100.3.34.2)","metal_compiler":"Apple metal version 32023.921 (metalfe-32023.921.6)","kernel_linker":"AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)","deployment_target":"27.0","kernel_flags":["-std=metal3.1","-mmacosx-version-min=27.0","-fmetal-math-mode=safe","-fmetal-math-fp32-functions=precise","-ffp-contract=off"],"kernel_sha256":"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"},"metal_runtime_sha256":"43c38ea16cbf9429075595a458954a518c5723dbce77de70386495a090169660","metal_manifest_sha256":"8ca107dd0528be8158735518b83e5c9c1403bb5809e9d34a47755b3be4c59f10"}
+--- PASS: TestNativeMetalLiveStandalone (2.30s)
+=== RUN   TestNativeMetalLiveDifferential
+=== RUN   TestNativeMetalLiveDifferential/profile
+=== RUN   TestNativeMetalLiveDifferential/fixed-reduction
+=== RUN   TestNativeMetalLiveDifferential/rectangular-matmul
+=== RUN   TestNativeMetalLiveDifferential/adamw
+=== RUN   TestNativeMetalLiveDifferential/reverse-error
+--- PASS: TestNativeMetalLiveDifferential (8.42s)
+    --- PASS: TestNativeMetalLiveDifferential/profile (2.03s)
+    --- PASS: TestNativeMetalLiveDifferential/fixed-reduction (1.81s)
+    --- PASS: TestNativeMetalLiveDifferential/rectangular-matmul (1.37s)
+    --- PASS: TestNativeMetalLiveDifferential/adamw (1.59s)
+    --- PASS: TestNativeMetalLiveDifferential/reverse-error (1.62s)
+=== RUN   TestNativeMetalLiveFailurePreventsCommit
+=== RUN   TestNativeMetalLiveFailurePreventsCommit/metal:0
+=== RUN   TestNativeMetalLiveFailurePreventsCommit/cuda:0
+--- PASS: TestNativeMetalLiveFailurePreventsCommit (2.56s)
+    --- PASS: TestNativeMetalLiveFailurePreventsCommit/metal:0 (1.37s)
+    --- PASS: TestNativeMetalLiveFailurePreventsCommit/cuda:0 (1.19s)
+=== RUN   TestNativeMetalLiveBuildFailures
+=== RUN   TestNativeMetalLiveBuildFailures/cancel
+=== RUN   TestNativeMetalLiveBuildFailures/overflow
+=== RUN   TestNativeMetalLiveBuildFailures/version-overflow
+=== RUN   TestNativeMetalLiveBuildFailures/failure
+=== RUN   TestNativeMetalLiveBuildFailures/artifact-overflow
+--- PASS: TestNativeMetalLiveBuildFailures (2.22s)
+    --- PASS: TestNativeMetalLiveBuildFailures/cancel (1.17s)
+    --- PASS: TestNativeMetalLiveBuildFailures/overflow (0.24s)
+    --- PASS: TestNativeMetalLiveBuildFailures/version-overflow (0.02s)
+    --- PASS: TestNativeMetalLiveBuildFailures/failure (0.23s)
+    --- PASS: TestNativeMetalLiveBuildFailures/artifact-overflow (0.25s)
+=== RUN   TestNativeMetalLiveUnavailable
+--- PASS: TestNativeMetalLiveUnavailable (1.33s)
+=== RUN   TestNativeMetalLiveBuildIsolation
+--- PASS: TestNativeMetalLiveBuildIsolation (3.74s)
+=== RUN   TestNativeMetalLiveTraining
+=== RUN   TestNativeMetalLiveTraining/200-steps
+    native_metal_live_test.go:306: training artifact: {"source_sha256":"9168404f86323398c22fcfd7f41ff36a53bb35d61bed29fc5d40ea71d65b14d0","source":"/Users/tyemirov/Development/Research/Lo/examples/training_metal.lo","compiler":"lo-native-go-v1","runtime_bundle_sha256":"2ce5dc375b53dae7019a811862c305418499d0a6b512980039ca02553e785d1a","toolchain":"go1.27.1","target":"darwin/arm64","device_backend":"metal","metal":{"profile":"metal-fp32","go":"go1.27.1","xcode":"Xcode 27.1\nBuild version 27A9275","sdk":"27.0","clang":"Apple clang version 21.0.0 (clang-2100.3.34.2)","metal_compiler":"Apple metal version 32023.921 (metalfe-32023.921.6)","kernel_linker":"AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)","deployment_target":"27.0","kernel_flags":["-std=metal3.1","-mmacosx-version-min=27.0","-fmetal-math-mode=safe","-fmetal-math-fp32-functions=precise","-ffp-contract=off"],"kernel_sha256":"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"},"metal_runtime_sha256":"43c38ea16cbf9429075595a458954a518c5723dbce77de70386495a090169660","metal_manifest_sha256":"8ca107dd0528be8158735518b83e5c9c1403bb5809e9d34a47755b3be4c59f10"}
+    native_metal_live_test.go:316: native run=1 loss=0.00013215476064942777
+    native_metal_live_test.go:316: native run=2 loss=0.00013215476064942777
+    native_metal_live_test.go:316: native run=3 loss=0.00013215476064942777
+=== RUN   TestNativeMetalLiveTraining/finite-gradients
+    native_metal_live_test.go:306: training artifact: {"source_sha256":"2f318c86c2f6dc97fa7897954bdde8d2c45fd5b38a694150419f1d1bfaf7f64e","source":"/var/folders/pb/vzcy64ws6y3651h___7nm6nw0000gn/T/TestNativeMetalLiveTraining974415971/001/1416760901.lo","compiler":"lo-native-go-v1","runtime_bundle_sha256":"2ce5dc375b53dae7019a811862c305418499d0a6b512980039ca02553e785d1a","toolchain":"go1.27.1","target":"darwin/arm64","device_backend":"metal","metal":{"profile":"metal-fp32","go":"go1.27.1","xcode":"Xcode 27.1\nBuild version 27A9275","sdk":"27.0","clang":"Apple clang version 21.0.0 (clang-2100.3.34.2)","metal_compiler":"Apple metal version 32023.921 (metalfe-32023.921.6)","kernel_linker":"AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)","deployment_target":"27.0","kernel_flags":["-std=metal3.1","-mmacosx-version-min=27.0","-fmetal-math-mode=safe","-fmetal-math-fp32-functions=precise","-ffp-contract=off"],"kernel_sha256":"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"},"metal_runtime_sha256":"43c38ea16cbf9429075595a458954a518c5723dbce77de70386495a090169660","metal_manifest_sha256":"8ca107dd0528be8158735518b83e5c9c1403bb5809e9d34a47755b3be4c59f10"}
+    native_metal_live_test.go:326: native: 200 finite losses and 1800 finite gradient coordinates match the interpreter exactly
+--- PASS: TestNativeMetalLiveTraining (11.82s)
+    --- PASS: TestNativeMetalLiveTraining/200-steps (7.24s)
+    --- PASS: TestNativeMetalLiveTraining/finite-gradients (4.58s)
+=== RUN   TestNativeMetalSelection
+=== RUN   TestNativeMetalSelection/cross-target
+=== RUN   TestNativeMetalSelection/compiler-unavailable
+=== RUN   TestNativeMetalSelection/unknown
+=== RUN   TestNativeMetalSelection/duplicate
+=== RUN   TestNativeMetalSelection/grant
+--- PASS: TestNativeMetalSelection (0.21s)
+    --- PASS: TestNativeMetalSelection/cross-target (0.17s)
+    --- PASS: TestNativeMetalSelection/compiler-unavailable (0.01s)
+    --- PASS: TestNativeMetalSelection/unknown (0.01s)
+    --- PASS: TestNativeMetalSelection/duplicate (0.01s)
+    --- PASS: TestNativeMetalSelection/grant (0.01s)
+=== RUN   TestNativeMetalSoftwareArtifact
+--- PASS: TestNativeMetalSoftwareArtifact (0.58s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	35.568s

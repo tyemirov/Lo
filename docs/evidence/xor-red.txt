@@ -1,0 +1,13 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestXOR -count=1 -v
+=== RUN   TestXORExamples
+    xor_test.go:50: parse xor_cpu.lo: {stdout: stderr:{"diagnostics":[{"code":"source.read-failed","stage":"source","message":"read source /Users/tyemirov/Development/Research/Lo/examples/xor_cpu.lo: open /Users/tyemirov/Development/Research/Lo/examples/xor_cpu.lo: no such file or directory"}]}
+         status:2}
+--- FAIL: TestXORExamples (0.19s)
+=== RUN   TestXORMetalModel
+    xor_test.go:68: open /Users/tyemirov/Development/Research/Lo/examples/xor_metal.lo: no such file or directory
+--- FAIL: TestXORMetalModel (0.00s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.465s
+FAIL
+make: *** [test-integration] Error 1

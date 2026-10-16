@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-16",
+  "base_revision": "f9c023271e7ce6a90239f8cb91a6782d27f8c3d4",
+  "source_state": "base revision plus the prior I002 changes and the XOR examples",
+  "source_sha256": {
+    "examples/xor_cpu.lo": "2615df58471b98592433366a1338ad0a0473d3feb762e2c71a0e9c40277656df",
+    "examples/xor_metal.lo": "0a236df5c943858ea54c5652a31063ccdd677322c9b216bd2f84f856edfdf571",
+    "tests/integration/xor_test.go": "5e555b5e90d8a48cb6a0d0ee0e50bd6327ba62c12c8abbfd223b12273fc690e3",
+    "tests/integration/xor_metal_live_test.go": "b7c6e5c0becf6e4c328ff5e9e960ea7b624810624b39d7cc710a5618a9e15f39"
+  },
+  "metal_profile": "metal-fp32",
+  "toolchain_versions": {
+    "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "go": "go1.27.1",
+    "macos": "27.0.1",
+    "macos_build": "26A434",
+    "metal": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+    "metallib": "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)",
+    "sdk": "27.0",
+    "xcode": "Xcode 27.1\nBuild version 27A9275"
+  },
+  "kernel_sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6",
+  "initial_loss": 0.35612499713897705,
+  "steps": 500,
+  "learning_rate": 0.1,
+  "targets": [
+    0,
+    1,
+    1,
+    0
+  ],
+  "network": {
+    "inputs": 2,
+    "hidden_relu_units": 2,
+    "outputs": 1,
+    "trainable_values": 9
+  },
+  "final_loss": 4.251353501009969e-13,
+  "predictions": [
+    6.6410286e-07,
+    0.9999993,
+    0.9999995,
+    7.2148754e-07
+  ]
+}

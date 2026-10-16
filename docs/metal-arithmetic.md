@@ -91,7 +91,8 @@ Repeated primitive, optimizer, profile, and training executions produced identic
 The 200-step SGD fixture reached loss `0.00013215476064942777` and matched all nine reference Parameter values.
 Each run used six uploads, six downloads, 8,216 computation commands, and 1,312 peak accounted bytes.
 The software and local Metal environments each completed three runs with these results and complete cleanup.
-The fixture checks training arithmetic and resource lifetime. F014 and I002 retain native artifacts and complete training acceptance.
+The fixture checks training arithmetic and resource lifetime.
+F014 implements [native artifacts](native-metal.md), and I002 supplies [complete training acceptance](metal-training.md).
 
 Controlled failures verified unsupported profiles and operations, allocation failures, workspace limits, command failures, cancellation, and device loss.
 They also verified reverse-mode source traces, blocked later commits, and rejection of subsequent device work after session loss.

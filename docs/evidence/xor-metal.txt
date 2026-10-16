@@ -1,0 +1,18 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test '^TestMetalLive' -- -run "TestMetalLiveXOR|TestNativeMetalLiveXOR" -count=1 -race -v
+Built bin/lo-metal; identity recorded in bin/lo-metal-build.json
+=== RUN   TestMetalLiveXOR
+    xor_metal_live_test.go:13: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_metal_live_test.go:16: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_metal_live_test.go:16: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_metal_live_test.go:16: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+--- PASS: TestMetalLiveXOR (11.93s)
+=== RUN   TestNativeMetalLiveXOR
+    xor_metal_live_test.go:32: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_metal_live_test.go:35: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_metal_live_test.go:35: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_metal_live_test.go:35: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+--- PASS: TestNativeMetalLiveXOR (17.10s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	31.170s

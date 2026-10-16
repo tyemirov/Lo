@@ -1,0 +1,10 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestMetalTrainingCLI -count=1 -v
+=== RUN   TestMetalTrainingCLI
+    metal_training_test.go:14: training parse: {stdout: stderr:{"diagnostics":[{"code":"source.read-failed","stage":"source","message":"read source /Users/tyemirov/Development/Research/Lo/examples/training_metal.lo: open /Users/tyemirov/Development/Research/Lo/examples/training_metal.lo: no such file or directory"}]}
+         status:2}
+--- FAIL: TestMetalTrainingCLI (0.19s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	0.888s
+FAIL
+make: *** [test-integration] Error 1
