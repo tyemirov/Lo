@@ -28,13 +28,15 @@ The [build manifest](../tools/metalbuild/main.go) pins the following inputs:
 | --- | --- |
 | Host and target | `darwin/arm64`, macOS 27 deployment target. |
 | Go | `go1.27.1`. |
-| Xcode | `27.0`, build `27A266a`. |
+| Xcode | `27.1`, build `27A9275`. |
 | SDK | macOS `27.0`. |
 | Clang | `21.0.0`, build `clang-2100.3.34.2`. |
 | Metal compiler and linker | `32023.921`, build `metalfe-32023.921.6`. |
 | Kernel language | MSL `3.1`. |
 | Kernel math options | Safe math, precise FP32 functions, and disabled contraction. |
 | Device features | Apple GPU family 7 support and unified memory. |
+
+I002 records the current Xcode pin and its [training qualification](metal-training.md).
 
 If the Metal compiler component is absent, install it with `xcodebuild -downloadComponent MetalToolchain`.
 Missing or different build inputs stop the build.

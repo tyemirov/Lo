@@ -4,7 +4,8 @@ P002 records the plan for an explicit Apple Metal backend.
 F012, F013, F014, and I002 own implementation and acceptance.
 F012 implements Metal transfers in the interpreter through the [current transfer contract](metal-transfers.md).
 F013 implements [Metal arithmetic, derivatives, and optimizers](metal-arithmetic.md).
-F014 and I002 retain native artifacts and complete training acceptance.
+F014 implements [native artifacts](native-metal.md).
+I002 supplies [complete training acceptance](metal-training.md).
 
 ## Goal and Scope
 
@@ -30,11 +31,10 @@ The Apple M5 Pro has 20 GPU cores and reports Metal 4 support.
 The kernel doubled `[1,2,3,4]` and returned `[2,4,6,8]`.
 This result establishes local Metal access. It does not establish Lo execution, training, or performance.
 
-The host has macOS 27.0.1, Xcode 27.0, and the macOS 27.0 SDK.
+The October 15 probe used macOS 27.0.1, Xcode 27.0, and the macOS 27.0 SDK.
 The Metal Toolchain component was installed during F012 implementation.
-The existing native builder disables cgo for production artifacts.
-The runtime bundle currently includes only Go files from repository runtime packages.
-F014 must change both contracts for Metal artifacts.
+F014 adds cgo and a separate runtime manifest for explicitly selected Metal artifacts.
+I002 updates the Xcode pin to 27.1 build 27A9275 and repeats local qualification.
 
 ## Explicit Selection
 

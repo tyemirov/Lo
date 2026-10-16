@@ -1,0 +1,30 @@
+{
+  "issue": "I002",
+  "date": "2026-10-16",
+  "base_revision": "f9c023271e7ce6a90239f8cb91a6782d27f8c3d4",
+  "source_state": "base revision plus I002 working tree changes",
+  "source_sha256": {
+    "examples/training_metal.lo": "9168404f86323398c22fcfd7f41ff36a53bb35d61bed29fc5d40ea71d65b14d0",
+    "examples/training_cpu.lo": "86a8899580f196ebf822efd80f08dca717017104bbd4e45ce65a7deabc344b85",
+    "internal/metalconfig/config.go": "de4297ef13cb86faa5259e9270ffe5a76679b0ecb54600d231eafb5f247828e2",
+    "tests/integration/metal_training_test.go": "cb02b1aa4d9e45e3739e3ea79bdcbe310345f945d890c36d5a79b5b1b7c88b2c",
+    "tests/integration/metal_compute_test.go": "b4f24b92fdaf20e4669021665416ea20bcb1778be4bc765c188fb7784ce6bb6f",
+    "tests/integration/metal_live_test.go": "da6370f5f9b92ee9c98a544b782621cd0bb900c464e36e5b752324211221394d",
+    "tests/integration/native_metal_live_test.go": "c09873cea3c922591f67661d07f9ec738620f31e59075669c2635eaab006bb53",
+    "docs/evidence/training-reference.py": "3046cd286ffaac16232eb69f55cec63bea754caa3738bf1d35e730da8d657d2e",
+    "docs/evidence/training-reference-results.json": "d83f1c3f1b7154fe1af2c98b10f604c8dab05b0539f0134678dbd9cc8d0bb814"
+  },
+  "compiler_sha256": "f5d68dd10968595fd72e51d690b8d89bbf5ea0089b7638388f8efebc6f66fabc",
+  "artifact_sha256": "92b3653139cc9108e833da82dcf07e157a675e186d32a35bd503be19db181d7c",
+  "artifact_metadata_sha256": "e35127f212da25b3166abc56616f8ca212e63e97bdd1f82808e3fcdae6d7e8b5",
+  "result_sha256": "7d1198a7b552a7d4d4dcffba19ac249f81a4543554ade457dbb0fc7110a6d272",
+  "reference_reproduction": "byte-identical to training-reference-results.json",
+  "numeric_profile": "metal-fp32",
+  "local_device": {
+    "name": "Apple M5 Pro",
+    "registry_id": "100000696",
+    "system": "Version 27.0.1 (Build 26A434)",
+    "kernel_sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"
+  },
+  "performance": "unmeasured"
+}

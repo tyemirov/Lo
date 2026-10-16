@@ -8,8 +8,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -198,80 +196,6 @@ func metalNumericProfile(t *testing.T, factory func() device.Factory) {
 			v, _, _ := metalResult(t, `flow Main()->Tensor<FP32>!{`+tc.source+`};return Main()`, factory())
 			checkNumbers(t, tensorNumbers(t, v), tc.want, 0, 0)
 		})
-	}
-}
-
-func metalTrainingSource(t *testing.T) string {
-	t.Helper()
-	data, err := os.ReadFile(filepath.Join(repository, "examples", "training_cpu.lo"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	text := string(data)
-	for _, name := range []string{"inputs", "targets", "w1", "b1", "w2", "b2"} {
-		pattern := regexp.MustCompile(`(?m)^  ` + name + ` = (Tensor.new\([^\n]+\))$`)
-		text = pattern.ReplaceAllString(text, `  `+name+` = Tensor.to($1, Device.new("metal:0"))`)
-	}
-	text = strings.ReplaceAll(text, "Tensor.to_float(first_loss)", `Tensor.to_float(Tensor.to(first_loss,Device.new("cpu")))`)
-	text = strings.ReplaceAll(text, "Tensor.to_float(final_loss)", `Tensor.to_float(Tensor.to(final_loss,Device.new("cpu")))`)
-	var observations strings.Builder
-	for _, name := range []string{"b1", "b2", "w1", "w2"} {
-		fmt.Fprintf(&observations, "  observed_%s = Tensor.to(final_values.%s,Device.new(\"cpu\"))\n", name, name)
-		text = strings.ReplaceAll(text, name+": final_values."+name, name+": observed_"+name)
-	}
-	text = strings.Replace(text, "  observed = Record.new", observations.String()+"  observed = Record.new", 1)
-	return text
-}
-func TestMetalComputeTraining(t *testing.T) { metalTraining(t, metalComputeFactory) }
-func metalTraining(t *testing.T, factory func() device.Factory) {
-	source := metalTrainingSource(t)
-	var previous string
-	for repeat := 0; repeat < 3; repeat++ {
-		v, receipts, serialized := metalResult(t, source, factory())
-		var lossText string
-		if err := json.Unmarshal(recordField(t, v, "loss").Value, &lossText); err != nil {
-			t.Fatal(err)
-		}
-		loss, err := strconv.ParseFloat(lossText, 64)
-		if err != nil {
-			t.Fatal(err)
-		}
-		checkNumbers(t, []float64{loss}, []float64{.00013215476064942777}, 1e-8, 1e-5)
-		if loss >= .001 {
-			t.Fatalf("training loss %g", loss)
-		}
-		parameters := recordField(t, v, "parameters")
-		for _, tc := range []struct {
-			name     string
-			expected []float64
-		}{
-			{"w1", []float64{1.1966239213943481, -.045796893537044525, .08913600444793701, 1.388328194618225}},
-			{"b1", []float64{.19662371277809143, .38832828402519226}},
-			{"w2", []float64{.7451153993606567, 1.0836396217346191}},
-			{"b2", []float64{.021668776869773865}},
-		} {
-			checkNumbers(t, tensorNumbers(t, recordField(t, parameters, tc.name)), tc.expected, 1e-6, 1e-5)
-		}
-
-		if repeat > 0 && serialized != previous {
-			t.Fatal("training bits changed between runs")
-		}
-		previous = serialized
-		transfers, computes := 0, 0
-		var peak uint64
-		for _, r := range receipts {
-			peak = max(peak, r.Live)
-			if r.Event == device.EventTransfer {
-				transfers++
-			}
-			if r.Event == device.EventCompute {
-				computes++
-			}
-		}
-		if transfers != 12 || computes < 200 || peak > 65536 {
-			t.Fatalf("training lifetime: transfers=%d computes=%d peak=%d", transfers, computes, peak)
-		}
-		t.Logf("run=%d steps=200 loss=%.12g transfers=%d computes=%d peak_reserved_bytes=%d", repeat+1, loss, transfers, computes, peak)
 	}
 }
 

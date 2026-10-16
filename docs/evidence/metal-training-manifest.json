@@ -1,0 +1,27 @@
+{
+  "identity": {
+    "profile": "metal-fp32",
+    "go": "go1.27.1",
+    "xcode": "Xcode 27.1\nBuild version 27A9275",
+    "sdk": "27.0",
+    "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "metal_compiler": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+    "kernel_linker": "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)",
+    "deployment_target": "27.0",
+    "kernel_flags": [
+      "-std=metal3.1",
+      "-mmacosx-version-min=27.0",
+      "-fmetal-math-mode=safe",
+      "-fmetal-math-fp32-functions=precise",
+      "-ffp-contract=off"
+    ],
+    "kernel_sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"
+  },
+  "files": {
+    "internal/device/metal.metallib": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6",
+    "internal/device/metal_bridge.h": "24bb8d03421440d1d22df9c0d6a5454959daa35dc28317bfd221d2c6e772ff47",
+    "internal/device/metal_bridge_darwin.m": "3532af5341db44c7003aa12c3c2df94ba49217f7dfec87b0724afa721887ae74",
+    "internal/device/metal_darwin.go": "feafecd54b00946646cc73a9c32460b72f0ada46ce7eba83f17712a2c22c45a4",
+    "internal/device/metal_types.h": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683"
+  }
+}

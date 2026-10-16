@@ -1,0 +1,46 @@
+{
+  "issue": "I002",
+  "date": "2026-10-16",
+  "validation": {
+    "make_ci": "passed",
+    "software_with_race_detector": "passed",
+    "local_metal_with_race_detector": "passed",
+    "native_metal_with_race_detector": "passed",
+    "independent_reference_reproduction": "byte-identical"
+  },
+  "documentation": {
+    "files": [
+      "ISSUES.md",
+      "README.md",
+      "docs/metal-training.md",
+      "docs/metal-transfers.md",
+      "docs/native-metal.md",
+      "docs/metal-backend-plan.md",
+      "docs/metal-arithmetic.md"
+    ],
+    "reviewed_scope": "Changed prose and the complete new Metal training acceptance report",
+    "official_issue": 9,
+    "official_reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "part_1_review": "completed",
+    "part_2_review": "completed",
+    "changed_prose_mechanical_findings": 0,
+    "unchanged_mechanical_findings": {
+      "ISSUES.md": 12,
+      "README.md": 10
+    },
+    "full_document_compliance_claimed": false,
+    "local_links_checked": 129,
+    "missing_local_links": []
+  },
+  "issue_identifiers": {
+    "count": 26,
+    "duplicates": [],
+    "missing_local_dependencies": []
+  },
+  "governance_entries": [],
+  "metal_build_receipt": {
+    "inputs_checked": 13,
+    "matches_current_inputs": true
+  },
+  "remaining_scope": "I001 and its NVIDIA dependencies remain open. GPU performance remains unmeasured."
+}

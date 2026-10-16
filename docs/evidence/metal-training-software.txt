@@ -1,0 +1,165 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run "TestMetalTraining|TestMetalCompute" -count=1 -race -v
+=== RUN   TestMetalComputePrimitives
+=== RUN   TestMetalComputePrimitives/broadcast_add
+=== RUN   TestMetalComputePrimitives/subtract
+=== RUN   TestMetalComputePrimitives/multiply
+=== RUN   TestMetalComputePrimitives/divide
+=== RUN   TestMetalComputePrimitives/sqrt
+=== RUN   TestMetalComputePrimitives/relu
+=== RUN   TestMetalComputePrimitives/transpose
+=== RUN   TestMetalComputePrimitives/reshape
+=== RUN   TestMetalComputePrimitives/broadcast
+=== RUN   TestMetalComputePrimitives/sum
+=== RUN   TestMetalComputePrimitives/mean
+=== RUN   TestMetalComputePrimitives/matmul_non-square
+=== RUN   TestMetalComputePrimitives/matmul_rectangular_output
+=== RUN   TestMetalComputePrimitives/nonadjacent_reduction_axes
+=== RUN   TestMetalComputePrimitives/rank-three_transpose
+--- PASS: TestMetalComputePrimitives (0.05s)
+    --- PASS: TestMetalComputePrimitives/broadcast_add (0.00s)
+    --- PASS: TestMetalComputePrimitives/subtract (0.00s)
+    --- PASS: TestMetalComputePrimitives/multiply (0.00s)
+    --- PASS: TestMetalComputePrimitives/divide (0.00s)
+    --- PASS: TestMetalComputePrimitives/sqrt (0.00s)
+    --- PASS: TestMetalComputePrimitives/relu (0.00s)
+    --- PASS: TestMetalComputePrimitives/transpose (0.00s)
+    --- PASS: TestMetalComputePrimitives/reshape (0.00s)
+    --- PASS: TestMetalComputePrimitives/broadcast (0.00s)
+    --- PASS: TestMetalComputePrimitives/sum (0.00s)
+    --- PASS: TestMetalComputePrimitives/mean (0.00s)
+    --- PASS: TestMetalComputePrimitives/matmul_non-square (0.00s)
+    --- PASS: TestMetalComputePrimitives/matmul_rectangular_output (0.00s)
+    --- PASS: TestMetalComputePrimitives/nonadjacent_reduction_axes (0.00s)
+    --- PASS: TestMetalComputePrimitives/rank-three_transpose (0.00s)
+=== RUN   TestMetalComputeDerivatives
+=== RUN   TestMetalComputeDerivatives/add-broadcast
+=== RUN   TestMetalComputeDerivatives/subtract-broadcast
+=== RUN   TestMetalComputeDerivatives/multiply-broadcast
+=== RUN   TestMetalComputeDerivatives/divide-broadcast
+=== RUN   TestMetalComputeDerivatives/sqrt
+=== RUN   TestMetalComputeDerivatives/relu
+=== RUN   TestMetalComputeDerivatives/matmul
+=== RUN   TestMetalComputeDerivatives/broadcast
+=== RUN   TestMetalComputeDerivatives/reshape
+=== RUN   TestMetalComputeDerivatives/transpose
+=== RUN   TestMetalComputeDerivatives/sum
+=== RUN   TestMetalComputeDerivatives/mean
+=== RUN   TestMetalComputeDerivatives/metadata
+=== RUN   TestMetalComputeDerivatives/shared_and_stopped
+--- PASS: TestMetalComputeDerivatives (0.04s)
+    --- PASS: TestMetalComputeDerivatives/add-broadcast (0.00s)
+    --- PASS: TestMetalComputeDerivatives/subtract-broadcast (0.00s)
+    --- PASS: TestMetalComputeDerivatives/multiply-broadcast (0.00s)
+    --- PASS: TestMetalComputeDerivatives/divide-broadcast (0.00s)
+    --- PASS: TestMetalComputeDerivatives/sqrt (0.00s)
+    --- PASS: TestMetalComputeDerivatives/relu (0.00s)
+    --- PASS: TestMetalComputeDerivatives/matmul (0.00s)
+    --- PASS: TestMetalComputeDerivatives/broadcast (0.00s)
+    --- PASS: TestMetalComputeDerivatives/reshape (0.00s)
+    --- PASS: TestMetalComputeDerivatives/transpose (0.00s)
+    --- PASS: TestMetalComputeDerivatives/sum (0.00s)
+    --- PASS: TestMetalComputeDerivatives/mean (0.00s)
+    --- PASS: TestMetalComputeDerivatives/metadata (0.00s)
+    --- PASS: TestMetalComputeDerivatives/shared_and_stopped (0.00s)
+=== RUN   TestMetalComputeOptimizers
+=== RUN   TestMetalComputeOptimizers/SGD
+=== RUN   TestMetalComputeOptimizers/AdamW
+--- PASS: TestMetalComputeOptimizers (0.02s)
+    --- PASS: TestMetalComputeOptimizers/SGD (0.01s)
+    --- PASS: TestMetalComputeOptimizers/AdamW (0.01s)
+=== RUN   TestMetalComputeProfile
+=== RUN   TestMetalComputeProfile/normalization_add
+=== RUN   TestMetalComputeProfile/underflow_multiply
+=== RUN   TestMetalComputeProfile/signed_zero_divide
+=== RUN   TestMetalComputeProfile/sqrt_subnormals
+=== RUN   TestMetalComputeProfile/layout_keeps_bits
+=== RUN   TestMetalComputeProfile/fixed_reduction
+=== RUN   TestMetalComputeProfile/empty_sum
+=== RUN   TestMetalComputeProfile/empty_matmul
+=== RUN   TestMetalComputeProfile/empty_broadcast
+--- PASS: TestMetalComputeProfile (0.01s)
+    --- PASS: TestMetalComputeProfile/normalization_add (0.00s)
+    --- PASS: TestMetalComputeProfile/underflow_multiply (0.00s)
+    --- PASS: TestMetalComputeProfile/signed_zero_divide (0.00s)
+    --- PASS: TestMetalComputeProfile/sqrt_subnormals (0.00s)
+    --- PASS: TestMetalComputeProfile/layout_keeps_bits (0.00s)
+    --- PASS: TestMetalComputeProfile/fixed_reduction (0.00s)
+    --- PASS: TestMetalComputeProfile/empty_sum (0.00s)
+    --- PASS: TestMetalComputeProfile/empty_matmul (0.00s)
+    --- PASS: TestMetalComputeProfile/empty_broadcast (0.00s)
+=== RUN   TestMetalComputeNumericFailures
+=== RUN   TestMetalComputeNumericFailures/division_subnormal_divisor
+=== RUN   TestMetalComputeNumericFailures/negative_square_root
+=== RUN   TestMetalComputeNumericFailures/overflow
+=== RUN   TestMetalComputeNumericFailures/ordered_element_failure
+=== RUN   TestMetalComputeNumericFailures/empty_mean
+--- PASS: TestMetalComputeNumericFailures (0.08s)
+    --- PASS: TestMetalComputeNumericFailures/division_subnormal_divisor (0.05s)
+    --- PASS: TestMetalComputeNumericFailures/negative_square_root (0.01s)
+    --- PASS: TestMetalComputeNumericFailures/overflow (0.02s)
+    --- PASS: TestMetalComputeNumericFailures/ordered_element_failure (0.00s)
+    --- PASS: TestMetalComputeNumericFailures/empty_mean (0.00s)
+=== RUN   TestMetalComputeControlledFailures
+=== RUN   TestMetalComputeControlledFailures/command
+=== RUN   TestMetalComputeControlledFailures/lost
+=== RUN   TestMetalComputeControlledFailures/cancel
+=== RUN   TestMetalComputeControlledFailures/profile
+--- PASS: TestMetalComputeControlledFailures (0.02s)
+    --- PASS: TestMetalComputeControlledFailures/command (0.00s)
+    --- PASS: TestMetalComputeControlledFailures/lost (0.01s)
+    --- PASS: TestMetalComputeControlledFailures/cancel (0.00s)
+    --- PASS: TestMetalComputeControlledFailures/profile (0.00s)
+=== RUN   TestMetalComputeReverseFailureTrace
+--- PASS: TestMetalComputeReverseFailureTrace (0.00s)
+=== RUN   TestMetalComputeLostSession
+--- PASS: TestMetalComputeLostSession (0.00s)
+=== RUN   TestMetalComputeStaticInspection
+--- PASS: TestMetalComputeStaticInspection (0.16s)
+=== RUN   TestMetalComputeViewTapeLifetime
+--- PASS: TestMetalComputeViewTapeLifetime (0.00s)
+=== RUN   TestMetalComputeAdmissionAndBudgets
+=== RUN   TestMetalComputeAdmissionAndBudgets/unsupported_operation
+=== RUN   TestMetalComputeAdmissionAndBudgets/output_allocation
+=== RUN   TestMetalComputeAdmissionAndBudgets/status_allocation
+=== RUN   TestMetalComputeAdmissionAndBudgets/workspace_reservation
+--- PASS: TestMetalComputeAdmissionAndBudgets (0.00s)
+    --- PASS: TestMetalComputeAdmissionAndBudgets/unsupported_operation (0.00s)
+    --- PASS: TestMetalComputeAdmissionAndBudgets/output_allocation (0.00s)
+    --- PASS: TestMetalComputeAdmissionAndBudgets/status_allocation (0.00s)
+    --- PASS: TestMetalComputeAdmissionAndBudgets/workspace_reservation (0.00s)
+=== RUN   TestMetalComputeExample
+--- PASS: TestMetalComputeExample (0.00s)
+=== RUN   TestMetalTrainingCLI
+=== RUN   TestMetalTrainingCLI/denied
+=== RUN   TestMetalTrainingCLI/unavailable
+--- PASS: TestMetalTrainingCLI (0.08s)
+    --- PASS: TestMetalTrainingCLI/denied (0.02s)
+    --- PASS: TestMetalTrainingCLI/unavailable (0.02s)
+=== RUN   TestMetalComputeTraining
+    metal_training_test.go:184: training identity: {"name":"independent Metal descriptor model","profile":"metal-fp32"}
+    metal_training_test.go:213: run=1 steps=200 loss=0.00013215476064942777 uploads=6 downloads=6 computes=8216 peak_reserved_bytes=1312 cleanup=complete
+    metal_training_test.go:184: training identity: {"name":"independent Metal descriptor model","profile":"metal-fp32"}
+    metal_training_test.go:213: run=2 steps=200 loss=0.00013215476064942777 uploads=6 downloads=6 computes=8216 peak_reserved_bytes=1312 cleanup=complete
+    metal_training_test.go:184: training identity: {"name":"independent Metal descriptor model","profile":"metal-fp32"}
+    metal_training_test.go:213: run=3 steps=200 loss=0.00013215476064942777 uploads=6 downloads=6 computes=8216 peak_reserved_bytes=1312 cleanup=complete
+--- PASS: TestMetalComputeTraining (0.42s)
+=== RUN   TestMetalTrainingGradients
+    metal_training_test.go:281: 200 finite losses and 1800 finite gradient coordinates match the CPU profile; initial gradients and all nine first-step Parameters match independent references
+--- PASS: TestMetalTrainingGradients (0.75s)
+=== RUN   TestMetalTrainingFailurePreventsEffects
+=== RUN   TestMetalTrainingFailurePreventsEffects/numeric
+    metal_training_test.go:346: step=101 kind=Numeric.NonFinite transfers=7 result=absent commit=absent cleanup=complete
+=== RUN   TestMetalTrainingFailurePreventsEffects/command
+    metal_training_test.go:346: step=101 kind=Device.ExecutionFailed transfers=7 result=absent commit=absent cleanup=complete
+=== RUN   TestMetalTrainingFailurePreventsEffects/lost
+    metal_training_test.go:346: step=101 kind=Device.Lost transfers=7 result=absent commit=absent cleanup=complete
+=== RUN   TestMetalTrainingFailurePreventsEffects/cancel
+    metal_training_test.go:346: step=101 kind=runtime.cancelled transfers=7 result=absent commit=absent cleanup=complete
+--- PASS: TestMetalTrainingFailurePreventsEffects (0.32s)
+    --- PASS: TestMetalTrainingFailurePreventsEffects/numeric (0.08s)
+    --- PASS: TestMetalTrainingFailurePreventsEffects/command (0.08s)
+    --- PASS: TestMetalTrainingFailurePreventsEffects/lost (0.08s)
+    --- PASS: TestMetalTrainingFailurePreventsEffects/cancel (0.07s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	5.133s

@@ -28,7 +28,7 @@ The standard compiler rejects a Metal build with `build.backend-unavailable` on 
 An unsupported host or target produces `build.unsupported-target` before toolchain execution.
 Unknown backend names and duplicate options produce `cli.invalid-invocation`.
 
-Native Metal construction uses Go 1.27.1, Xcode 27.0 build 27A266a, macOS SDK 27.0, and Apple Clang 21.0.0.
+Native Metal construction uses Go 1.27.1, Xcode 27.1 build 27A9275, macOS SDK 27.0, and Apple Clang 21.0.0.
 The builder verifies these versions and sets the compiler, SDK, deployment target, and cgo configuration.
 The kernel compilers and arithmetic flags remain fixed by the [Metal build contract](metal-transfers.md).
 Native artifact construction uses the compiled kernels supplied by the compiler.
@@ -107,7 +107,7 @@ The local suite checks these contracts:
 The unavailable-device test replaces the framework device constructor through the [Apple dyld interface](https://github.com/apple-oss-distributions/dyld/blob/main/include/mach-o/dyld-interposing.h).
 This test changes only the framework boundary.
 The public CLI, generated program, device session, and error serialization remain real.
-I002 retains complete training acceptance and its broader evidence record.
+I002 supplies [complete training acceptance](metal-training.md), the maintained example, and its evidence record.
 
 ## Recorded Results
 

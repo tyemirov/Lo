@@ -1,0 +1,39 @@
+{
+  "task": "XOR neural network example",
+  "date": "2026-10-16",
+  "validation": {
+    "expected_missing_examples_failure": "recorded",
+    "make_ci": "passed",
+    "software_cpu_and_metal_model": "passed",
+    "local_metal_with_race_detector": "passed",
+    "native_metal_with_race_detector": "passed",
+    "cpu_metal_native_results": "identical",
+    "source_digests_verified": true
+  },
+  "documentation": {
+    "files": [
+      "README.md",
+      "docs/xor-neural-network.md",
+      ".mprlab/TERMINOLOGY.md"
+    ],
+    "reviewed_scope": "Changed README prose, two new technical terms, and the complete XOR tutorial",
+    "official_issue": 9,
+    "official_reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "part_1_review": "completed",
+    "part_2_review": "completed",
+    "changed_prose_mechanical_findings": 0,
+    "unchanged_mechanical_findings": {
+      "README.md": 10
+    },
+    "full_document_compliance_claimed": false,
+    "local_links_checked": 46,
+    "missing_local_links": []
+  },
+  "governance_entries": [],
+  "prior_work": {
+    "issue": "I002",
+    "preserved_files_checked": 25,
+    "shared_document_changed": "README.md",
+    "shared_document_change": "Added the XOR example description and execution command"
+  }
+}

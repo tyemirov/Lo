@@ -805,7 +805,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Controlled failures verified unavailable devices, cancellation, build limits, blocked commits, and unchanged previous artifacts.
   The local Metal suite, race checks, and Linux software tests passed.
   The [final CI record](docs/evidence/native-metal-ci.txt) records successful bundle verification, static checks, software tests, native tests, and compiler construction.
-  I002 retains complete training acceptance.
+  I002 records complete training acceptance.
 
 ## Improvements
 
@@ -847,7 +847,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify invalid shapes, unsupported operations, unavailable devices, transfer failures, and deferred failures through CLI diagnostics.
   - Run `make test-integration`, `make test-conformance`, and `make ci` at the implementation completion checkpoint.
 
-- [ ] [I002] (P1) {F014} Qualify complete Metal training
+- [x] [I002] (P1) {F014} Qualify complete Metal training
   Goal:
   Establish complete training acceptance for the explicit Metal backend.
 
@@ -871,6 +871,19 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify failure diagnostics and prevention of subsequent observable effects.
   - Run `make ci` at the final implementation checkpoint.
   - Report unmeasured Metal behavior explicitly when only software evidence is available.
+
+  I002 completed on October 16, 2026.
+  The [acceptance report](docs/metal-training.md) records the maintained example, fixed tolerances, software acceptance, and separate local Metal results.
+  The independent executor, Metal interpreter, and native artifact each returned identical results across three runs.
+  The final loss was `0.00013215476064942777` after 200 SGD updates.
+  All nine final Parameters matched the independent binary64 and FP32 references.
+  Diagnostic execution verified 200 finite losses and 1,800 finite gradient coordinates.
+  The maintained example used six uploads, six downloads, and 1,312 peak accounted bytes with complete cleanup.
+  Controlled failures at step 101 prevented final output and the later file commit.
+  The exact Xcode pin is now 27.1 build 27A9275.
+  The software and local Metal suites passed with the Go race detector.
+  The [final CI record](docs/evidence/metal-training-ci.txt) records successful software and native validation.
+  I001 remains open for its independent NVIDIA scope.
 
 ## Maintenance
 

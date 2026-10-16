@@ -105,8 +105,30 @@ flow Main()->Tensor<FP32>!{a=Tensor.new(List.new(1.25,-0.0,1.401298464324817e-45
 func TestMetalLiveOptimizers(t *testing.T) { metalOptimizers(t, device.DefaultFactory) }
 func TestMetalLiveProfile(t *testing.T)    { metalNumericProfile(t, device.DefaultFactory) }
 
-func TestMetalLiveTraining(t *testing.T)        { metalTraining(t, device.DefaultFactory) }
-func TestMetalLiveNumericFailures(t *testing.T) { metalNumericFailures(t, device.DefaultFactory) }
+func TestMetalLiveTraining(t *testing.T)          { metalTraining(t, device.DefaultFactory) }
+func TestMetalLiveTrainingGradients(t *testing.T) { metalTrainingGradients(t, device.DefaultFactory) }
+func TestMetalLiveNumericFailures(t *testing.T)   { metalNumericFailures(t, device.DefaultFactory) }
+
+func TestMetalLiveTrainingCLI(t *testing.T) {
+	path := filepath.Join(repository, "examples", "training_metal.lo")
+	compiler := filepath.Join(repository, "bin", "lo-metal")
+	for _, command := range []string{"parse", "check", "inspect"} {
+		got := runExecutable(t, compiler, command, path, "--format", "json")
+		if got.status != 0 || got.stderr != "" {
+			t.Fatalf("training %s: %+v", command, got)
+		}
+	}
+	var previous result
+	for repeat := 0; repeat < 3; repeat++ {
+		got := runExecutable(t, compiler, "run", path, "--allow-device", "metal:0", "--format", "json")
+		loss := assertMetalTrainingResult(t, trainingResult(t, got))
+		if repeat > 0 && got != previous {
+			t.Fatal("training CLI results changed between runs")
+		}
+		previous = got
+		t.Logf("CLI run=%d loss=%.17g", repeat+1, loss)
+	}
+}
 
 func TestMetalLiveCLIComputation(t *testing.T) {
 	path := filepath.Join(repository, "examples", "metal_arithmetic.lo")

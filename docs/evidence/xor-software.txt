@@ -1,0 +1,14 @@
+go run ./tools/runtimebundle
+go test ./tests/integration -run TestXOR -count=1 -v
+=== RUN   TestXORExamples
+    xor_test.go:57: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_test.go:57: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_test.go:57: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+--- PASS: TestXORExamples (0.33s)
+=== RUN   TestXORMetalModel
+    xor_test.go:73: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_test.go:73: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+    xor_test.go:73: XOR steps=500 initial_loss=0.3561249971 loss=4.251353501e-13 predictions=[6.6410286e-07 0.9999993 0.9999995 7.2148754e-07]
+--- PASS: TestXORMetalModel (0.17s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.297s

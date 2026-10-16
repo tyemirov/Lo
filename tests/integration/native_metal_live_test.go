@@ -118,7 +118,6 @@ func TestNativeMetalLiveDifferential(t *testing.T) {
 		{"fixed-reduction", `flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(16777216.0,1.0,-16777216.0),List.new(3)),Device.new("metal:0"));return Tensor.to(Tensor.sum(a,List.new(0)),Device.new("cpu"))};return Main()`, 0, `"values":["0"]`},
 		{"rectangular-matmul", `flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(1.0,2.0,3.0,4.0,5.0,6.0),List.new(3,2)),Device.new("metal:0"));b=Tensor.reshape(a,List.new(2,3));return Tensor.to(Tensor.matmul(a,b),Device.new("cpu"))};return Main()`, 0, `"values":["9","12","15","19","26","33","29","40","51"]`},
 		{"adamw", `flow Main()->Tensor<FP32>!{x=Tensor.to(Tensor.new(List.new(1.0,-2.0),List.new(2)),Device.new("metal:0"));p=Parameters.new(Record.new(x:x));state=Optimizer.AdamW.State.new(p,Optimizer.AdamW.Config.new(0.01,0.9,0.999,1e-8,0.1));g1=Tensor.to(Tensor.new(List.new(0.1,-0.2),List.new(2)),Device.new("metal:0"));g2=Tensor.to(Tensor.new(List.new(0.0,0.3),List.new(2)),Device.new("metal:0"));first=Optimizer.AdamW.step(state,Gradients.new(p,Record.new(x:g1)));second=Optimizer.AdamW.step(first,Gradients.new(p,Record.new(x:g2)));v=Parameters.values(second.parameters);return Tensor.to(v.x,Device.new("cpu"))};return Main()`, 0, `"values":["0.9813104","-1.988489"]`},
-		{"training-200", metalTrainingSource(t), 0, `0.00013215476064942777`},
 		{"reverse-error", `flow Loss(p:Record{x:Tensor<FP32>})->Tensor<FP32>!{return Tensor.sqrt(p.x)};flow Main()->Tensor<FP32>!{x=Tensor.to(Tensor.new(List.new(0.0),List.new()),Device.new("metal:0"));r=Autodiff.grad(Record.new(x:x),Loss);return Tensor.to(r.gradients.x,Device.new("cpu"))};return Main()`, 1, `Autodiff.UndefinedDerivative`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -277,5 +276,63 @@ func TestNativeMetalLiveBuildIsolation(t *testing.T) {
 	unchanged, err := os.ReadFile(first)
 	if err != nil || !bytes.Equal(a, unchanged) {
 		t.Fatalf("failed preflight replaced artifact: %v", err)
+	}
+}
+
+func TestNativeMetalLiveTraining(t *testing.T) {
+	compiler := filepath.Join(repository, "bin", "lo-metal")
+	for _, tc := range []struct {
+		name, source string
+		repeats      int
+	}{
+		{"200-steps", filepath.Join(repository, "examples", "training_metal.lo"), 3},
+		{"finite-gradients", sourceFile(t, metalTrainingGradientSource(t)), 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			artifact := filepath.Join(t.TempDir(), "training")
+			built := runExecutable(t, compiler, "build", tc.source, "--device-backend", "metal", "--output", artifact, "--format", "json")
+			if built.status != 0 {
+				t.Fatalf("training build: %+v", built)
+			}
+			metadata := runExecutable(t, artifact, "metadata")
+			var identity nativebuild.Metadata
+			data, err := os.ReadFile(tc.source)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if metadata.status != 0 || json.Unmarshal([]byte(metadata.stdout), &identity) != nil || identity.DeviceBackend != device.MetalBuild || identity.SourceDigest != hashText(data) || identity.Metal == nil || identity.Metal.Xcode != "Xcode 27.1\nBuild version 27A9275" || identity.Metal.Profile != device.MetalProfile {
+				t.Fatalf("training metadata: %+v", metadata)
+			}
+			t.Logf("training artifact: %s", metadata.stdout)
+			for _, budget := range []string{"1", "30"} {
+				expected := runExecutable(t, compiler, "run", tc.source, "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
+				actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
+				if actual != expected || actual.status != 2 || actual.stdout != "" || !strings.Contains(actual.stderr, "runtime.limit") {
+					t.Fatalf("training budget=%s: native=%+v interpreter=%+v", budget, actual, expected)
+				}
+			}
+			expected := runExecutable(t, compiler, "run", tc.source, "--allow-device", "metal:0", "--format", "json")
+			trainingResult(t, expected)
+			for repeat := 0; repeat < tc.repeats; repeat++ {
+				got := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--format", "json")
+				if got != expected {
+					t.Fatalf("training parity: native=%+v interpreter=%+v", got, expected)
+				}
+				if tc.name == "200-steps" {
+					loss := assertMetalTrainingResult(t, trainingResult(t, got))
+					t.Logf("native run=%d loss=%.17g", repeat+1, loss)
+				} else {
+					var steps []runtimeValue
+					if err := json.Unmarshal(trainingResult(t, got).Value, &steps); err != nil || len(steps) != 200 {
+						t.Fatalf("native gradient steps=%d (%v)", len(steps), err)
+					}
+					for _, step := range steps {
+						trainingFloat(t, recordField(t, step, "loss"))
+						trainingParameters(t, recordField(t, step, "gradients"))
+					}
+					t.Log("native: 200 finite losses and 1800 finite gradient coordinates match the interpreter exactly")
+				}
+			}
+		})
 	}
 }

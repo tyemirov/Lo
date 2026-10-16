@@ -1,0 +1,6 @@
+go run ./tools/runtimebundle
+mkdir -p bin
+go run ./tools/metalbuild -test '^TestMetalLive' -- -run "TestMetalLiveTraining|TestMetalLiveOptimizers|TestMetalLiveNumericFailures" -count=1 -race -v
+Metal xcodebuild -version requires "Xcode 27.0\nBuild version 27A266a", received "Xcode 27.1\nBuild version 27A9275"
+exit status 1
+make: *** [test-metal] Error 1

@@ -1,0 +1,47 @@
+{
+  "target": "darwin/arm64",
+  "profile": "metal-fp32",
+  "device_features": [
+    "Apple7",
+    "unified memory"
+  ],
+  "versions": {
+    "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "go": "go1.27.1",
+    "macos": "27.0.1",
+    "macos_build": "26A434",
+    "metal": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+    "metallib": "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)",
+    "sdk": "27.0",
+    "xcode": "Xcode 27.1\nBuild version 27A9275"
+  },
+  "source_sha256": {
+    "go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+    "go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03",
+    "internal/device/metal_bridge.h": "24bb8d03421440d1d22df9c0d6a5454959daa35dc28317bfd221d2c6e772ff47",
+    "internal/device/metal_bridge_darwin.m": "3532af5341db44c7003aa12c3c2df94ba49217f7dfec87b0724afa721887ae74",
+    "internal/device/metal_darwin.go": "feafecd54b00946646cc73a9c32460b72f0ada46ce7eba83f17712a2c22c45a4",
+    "internal/device/metal_kernels.metal": "eec1b13249c95d41c3754049c62b15008a3c307424557fb8bcff5580a771b16e",
+    "internal/device/metal_types.h": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683",
+    "internal/metalconfig/config.go": "de4297ef13cb86faa5259e9270ffe5a76679b0ecb54600d231eafb5f247828e2",
+    "internal/runtimebundle/metal-manifest.json": "8ca107dd0528be8158735518b83e5c9c1403bb5809e9d34a47755b3be4c59f10",
+    "internal/runtimebundle/metal.zip": "43c38ea16cbf9429075595a458954a518c5723dbce77de70386495a090169660",
+    "internal/runtimebundle/runtime.zip": "2ce5dc375b53dae7019a811862c305418499d0a6b512980039ca02553e785d1a",
+    "tools/metalbuild/main.go": "342eb670e3eb19bca6ac50060cb45a68330907f512f1f22b8ee6a9bc92507740",
+    "tools/runtimebundle/main.go": "158daa63eea749877878f4cfbeb9e2fb054bb84e14925beb325c85c1d7c47d4a"
+  },
+  "metal_flags": [
+    "-std=metal3.1",
+    "-mmacosx-version-min=27.0",
+    "-fmetal-math-mode=safe",
+    "-fmetal-math-fp32-functions=precise",
+    "-ffp-contract=off"
+  ],
+  "go_flags": [
+    "build",
+    "-trimpath",
+    "-tags=metal"
+  ],
+  "metallib_sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6",
+  "binary_sha256": "f5d68dd10968595fd72e51d690b8d89bbf5ea0089b7638388f8efebc6f66fabc"
+}
