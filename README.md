@@ -59,6 +59,10 @@ This repository is public early so the design can be evaluated as an AI-agent ex
 
 ## Build and Validate
 
+The [standalone compiler plan](docs/standalone-compiler-plan.md) defines the proposed native backend migration and language extensions.
+The [backend experiment](docs/native-backend-experiment.md) records LLVM and Cranelift probe results separately from compiler acceptance.
+The current native build still requires the Go toolchain below.
+
 The Makefile selects Go 1.27.1.
 The qualified platforms are macOS on arm64 and Linux on arm64.
 
@@ -523,6 +527,12 @@ A secure Lo runtime should:
 - treat `commit` as the only side-effect activation point
 - log all commit activations
 - preserve structured error traces
+
+## Planned File Workflows
+
+The [File adapter design](docs/file-adapter-design.md) proposes directory discovery and committed batch removal.
+The [implementation plan](docs/file-adapter-plan.md) uses Gateway log cleanup as its first complete workflow.
+These operations are planned additions to Lo.
 
 ## Language Reference
 
