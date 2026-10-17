@@ -93,6 +93,33 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `file observation`: Immutable metadata obtained for one directory entry during a listing operation.
+- `entry provenance`: Private runtime data that connects a file observation to its execution session and directory.
+- `removal batch`: An ordered collection of selected file observations in one removal effect.
+- `cooperative lock`: A host lock protocol followed by every process within its stated concurrency guarantee.
+- `shared lock`: A lock that permits concurrent participating readers or lifecycle owners and excludes an exclusive lock.
+- `exclusive lock`: A lock that excludes all other participating shared and exclusive holders.
+- `basename`: The final name component of a filesystem path.
+- `Unix epoch`: The time origin at 00:00:00 UTC on January 1, 1970.
+- `logical size`: The observed file length in bytes, independent of reclaimed disk storage.
+
+- `standalone compiler`: An installed compiler distribution that supplies its compile and link tools without a separate development toolchain.
+- `linker`: A tool that combines object files and libraries into an executable.
+- `object file`: Machine code and relocation data prepared for a linker.
+- `sysroot`: A directory that supplies target headers and libraries to build tools.
+- `target triple`: A toolchain identifier for an architecture, operating system, and ABI.
+- `link input`: An object, library, startup file, or platform description consumed by a linker.
+- `reference counting`: Memory management that releases an object when its retained reference count reaches zero.
+- `opaque handle`: An identifier whose internal representation is private to its runtime.
+- `tagged variant`: A value type with a finite set of named alternatives and their associated data.
+- `generic`: A declaration with type parameters resolved under defined type and effect rules.
+- `specialization`: Compiled code for one concrete set of generic type arguments.
+- `package manifest`: The canonical declaration of a package and its dependencies.
+- `lockfile`: A record of exact dependency identities selected for a reproducible build.
+- `offline build`: Compilation and linking without external network access.
+- `smoke probe`: A small executable test that establishes a limited toolchain capability.
+- `clean environment`: A declared base operating system without undeclared compiler tools, SDKs, caches, or repository files.
+
 - `checkpoint`: Canonical bytes that keep typed Parameters or complete optimizer state for later execution.
 - `checkpoint template`: A CPU value that supplies the expected checkpoint type, field names, and tensor shapes.
 - `checkpoint codec`: The operations that convert typed training values to canonical bytes and restore those values.
