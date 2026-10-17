@@ -1,0 +1,209 @@
+{
+  "base_revision": "53b7bf1859fd5a4c5495321315be84e1833d41eb",
+  "issue_count": 19,
+  "issues": {
+    "P004": {
+      "state": "x",
+      "dependencies": [
+        "F016",
+        "I003"
+      ],
+      "title": "Plan the standalone compiler and language evolution"
+    },
+    "P005": {
+      "state": " ",
+      "dependencies": [
+        "I004",
+        "I005"
+      ],
+      "title": "Select the native backend and runtime contract"
+    },
+    "P006": {
+      "state": " ",
+      "dependencies": [
+        "P004"
+      ],
+      "title": "Specify modules, user types, generics, and packages"
+    },
+    "F017": {
+      "state": " ",
+      "dependencies": [
+        "P005",
+        "I008",
+        "I009",
+        "I010"
+      ],
+      "title": "Supply a complete offline compiler distribution"
+    },
+    "F018": {
+      "state": " ",
+      "dependencies": [
+        "P006",
+        "I011"
+      ],
+      "title": "Add modules and explicit visibility"
+    },
+    "F019": {
+      "state": " ",
+      "dependencies": [
+        "F018",
+        "P006"
+      ],
+      "title": "Add user-defined records and tagged variants"
+    },
+    "F020": {
+      "state": " ",
+      "dependencies": [
+        "F019",
+        "P006"
+      ],
+      "title": "Add generics with bounded specialization"
+    },
+    "F021": {
+      "state": " ",
+      "dependencies": [
+        "F018",
+        "F020",
+        "P006"
+      ],
+      "title": "Add reproducible offline packages"
+    },
+    "F022": {
+      "state": " ",
+      "dependencies": [
+        "F021"
+      ],
+      "title": "Add the initial application standard library"
+    },
+    "F023": {
+      "state": " ",
+      "dependencies": [
+        "F018",
+        "I011"
+      ],
+      "title": "Add formatter, test runner, editor, and debug support"
+    },
+    "I004": {
+      "state": "-",
+      "dependencies": [
+        "P004"
+      ],
+      "title": "Compare offline LLVM and Cranelift compile-and-link paths"
+    },
+    "I005": {
+      "state": " ",
+      "dependencies": [
+        "P004"
+      ],
+      "title": "Record complete semantic migration coverage"
+    },
+    "I006": {
+      "state": " ",
+      "dependencies": [
+        "P005",
+        "I005"
+      ],
+      "title": "Add a native lowering plan with explicit semantics"
+    },
+    "I007": {
+      "state": " ",
+      "dependencies": [
+        "I006"
+      ],
+      "title": "Port core values and execution to the native runtime"
+    },
+    "I008": {
+      "state": " ",
+      "dependencies": [
+        "I007",
+        "F016"
+      ],
+      "title": "Port tensors, differentiation, optimizers, and checkpoints"
+    },
+    "I009": {
+      "state": " ",
+      "dependencies": [
+        "I007"
+      ],
+      "title": "Port confined files and HTTP execution"
+    },
+    "I010": {
+      "state": " ",
+      "dependencies": [
+        "I008",
+        "I009",
+        "F014"
+      ],
+      "title": "Port device resources and Metal execution"
+    },
+    "I011": {
+      "state": " ",
+      "dependencies": [
+        "F017",
+        "I005"
+      ],
+      "title": "Qualify the standalone compiler and remove Go generation"
+    },
+    "I012": {
+      "state": " ",
+      "dependencies": [
+        "F022",
+        "F023"
+      ],
+      "title": "Qualify complete application development"
+    }
+  },
+  "identifier_allocation": "Checked all active identifiers. No repository issue archive was present.",
+  "dependency_validation": {
+    "duplicates": [],
+    "missing": [],
+    "cycles": []
+  },
+  "delegation": [
+    {
+      "agent": "/root/architecture",
+      "requested_role": "mpr-architect",
+      "requested_model": "gpt-6-astra",
+      "requested_effort": "high",
+      "actual": "role metadata fixes the requested pair; no per-run telemetry supplied"
+    },
+    {
+      "agent": "/root/backend_experiment",
+      "requested_role": "mpr-worker",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "medium",
+      "actual": "role metadata fixes the requested pair; no per-run telemetry supplied"
+    }
+  ],
+  "architect_review": {
+    "result": "no blocking findings for the bounded experiment",
+    "resolved": [
+      "I006 owns a minimal ABI test runtime before I007.",
+      "I004 acceptance does not require downstream Lo runtime or distribution work.",
+      "Preparation binds source hashes to the image and rejects stale inputs."
+    ],
+    "limits": [
+      "LLD qualification pending",
+      "SDK-free distribution pending",
+      "Lo lowering and full runtime acceptance pending"
+    ]
+  },
+  "checks": {
+    "probe_matrix": "4/4 passed",
+    "isolation": "passed",
+    "public_cli_tests": "5 passed",
+    "governor": "passed, no drift",
+    "changed_prose": "zero new mechanical findings; preserved findings recorded separately",
+    "document_file_links": 28,
+    "make_ci": {
+      "exit_code": 0,
+      "record": "ci.txt",
+      "native_integration_seconds": 459.005
+    }
+  },
+  "scratch_cleanup": {
+    "directory": "_scratch/native-backends-20261016",
+    "status": "removed after evidence preservation",
+    "execution_plan": ".mprlab/X9D4-PLAN.md"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "scope": "Current CLI missing-Go diagnostic. PATH isolation is not clean-environment acceptance.",
+  "binary_sha256": "4fd6a82765f392db798e08c55c62e8472375916a37a325096d1c5b4b82bb37ff",
+  "command": [
+    "/Users/tyemirov/Development/Research/Lo/bin/lo",
+    "build",
+    "/Users/tyemirov/Development/Research/Lo/examples/list_sum.lo",
+    "--output",
+    "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/current-lo-no-go",
+    "--format",
+    "json"
+  ],
+  "path": "/usr/bin:/bin",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build /Users/tyemirov/Development/Research/Lo/examples/list_sum.lo with go1.27.1: exec: \\\"go\\\": executable file not found in $PATH\"}]}\n"
+}
