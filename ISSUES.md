@@ -394,6 +394,71 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   P003 selects typed canonical JSON, CPU checkpoint boundaries, and explicit container transfers.
   F015, F016, and I003 own implementation and acceptance.
 
+- [x] [P004] (P1) {F016,I003} Plan the standalone compiler and language evolution
+  Goal:
+  Define a native compiler migration that preserves the complete current language.
+
+  Requirements:
+  - Preserve the user's offline compile-and-link acceptance criterion.
+  - Compare backend options and separate proposals from current behavior.
+  - Include checkpoint bytes, container transfers, and exact optimizer resumption.
+  - Define implementation dependencies and software acceptance environments.
+
+  Deliverables:
+  - Add the [standalone compiler plan](docs/standalone-compiler-plan.md) and dependent issues.
+
+  Validation:
+  - Review current source contracts and primary backend documentation.
+  - Verify issue identifiers, dependency existence, dependency cycles, and document links.
+  - Complete the documentation checks and independent architecture review.
+
+  P004 records the proposed LLVM and LLD destination with a precompiled runtime.
+  I004 starts the experiment.
+  P005 owns the final backend, ABI, and platform decisions.
+  This plan does not change the current compiler or language specification.
+
+- [ ] [P005] (P1) {I004,I005} Select the native backend and runtime contract
+  Goal:
+  Select one complete native toolchain before the runtime migration.
+
+  Requirements:
+  - Compare the four experiment cells and record unsupported claims or missing evidence.
+  - Select exact tool versions, minimum OS versions, system libraries, and the host-to-target matrix.
+  - Establish SDK-free macOS link inputs and their distribution authority.
+  - Define value layout, ownership, callback lifetime, thread entry, and error status in the runtime ABI.
+  - Prohibit unwinding across the ABI.
+  - Audit reference cycles and preserve tensor resource-release points.
+  - Select debug information, strict numeric lowering, and optimization constraints.
+
+  Deliverables:
+  - Add the backend decision, runtime ABI, complete input manifest, and measured comparison.
+
+  Validation:
+  - Verify complete executable links and runtime calls on both targets.
+  - Verify the selected inputs without an installed SDK or undeclared compiler tools.
+  - Resolve every decision needed by I006 through F017 before their implementation.
+  - Record license inventory and source provenance for supplied third-party components.
+
+- [ ] [P006] (P2) {P004} Specify modules, user types, generics, and packages
+  Goal:
+  Define application composition while preserving Lo effects and immutable values.
+
+  Requirements:
+  - Define modules, visibility, imports, type identity, records, and tagged variants.
+  - Define exhaustive matching and bounded generic specialization.
+  - Preserve transitive effects, callback restrictions, fallibility, and explicit capability grants.
+  - Prohibit import-time effects and network access during compilation.
+  - Define one package manifest, exact lockfile identities, and offline dependency inputs.
+  - Keep recursion, closures, concurrency, and foreign-function access outside this specification.
+
+  Deliverables:
+  - Add specifications and accepted multi-module CLI, service, and training examples.
+
+  Validation:
+  - Review positive and negative examples for every new rule.
+  - Verify that package boundaries cannot hide effects or grant capabilities.
+  - Resolve each syntax and semantic decision before its dependent feature starts.
+
 ## Features
 
 - [x] [F001] (P1) Build native Lo executables
@@ -881,6 +946,138 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Controlled failures verified partial-transfer cleanup, cancellation, resource limits, and prevention of later commits.
   Software and local Metal tests passed with the Go race detector.
 
+### Standalone compiler and application language
+
+- [ ] [F017] (P1) {P005,I008,I009,I010} Supply a complete offline compiler distribution
+  Goal:
+  Compile and link Lo programs without separately installed development tools.
+
+  Requirements:
+  - Supply the selected backend, linker, precompiled runtime, and complete platform link inputs.
+  - Preserve both arm64 targets and the selected host-to-target matrix.
+  - Resolve tools inside the distribution without PATH lookup or downloads.
+  - Reject missing, corrupt, or incompatible inputs.
+  - Preserve cancellation cleanup and atomic output replacement.
+  - Support installation relocation and empty caches.
+
+  Deliverables:
+  - Add package construction, input digests, provenance, license inventory, and noninteractive installation tests.
+  - Document permitted operating-system dependencies and the exact target matrix.
+
+  Validation:
+  - Compile and link offline in declared clean environments without Go, Rust, C compilers, or developer SDKs.
+  - Set CI=1 and close standard input for lifecycle commands and their children.
+  - Execute copied artifacts without Lo, source, repository files, or compiler tools.
+  - Verify relocation, corrupt inputs, cancellation, and preservation of an existing output after failure.
+  - Verify software and Metal packaging independently without a physical-device gate.
+
+- [ ] [F018] (P2) {P006,I011} Add modules and explicit visibility
+  Goal:
+  Compose programs from multiple source modules.
+
+  Requirements:
+  - Implement the selected import and visibility rules.
+  - Preserve deterministic resolution and diagnostics across modules.
+  - Propagate effects, fallibility, and capability summaries across every imported flow.
+  - Reject import cycles under the selected contract and prevent import-time execution.
+
+  Deliverables:
+  - Add parser, resolver, verifier, inspector, interpreter, and native module support.
+
+  Validation:
+  - Execute a multi-module CLI and service through public commands.
+  - Reject inaccessible names, invalid cycles, hidden effects, and malformed imports with source diagnostics.
+  - Verify equivalent interpreter and native results.
+
+- [ ] [F019] (P2) {F018,P006} Add user-defined records and tagged variants
+  Goal:
+  Express application data with checked user-defined types.
+
+  Requirements:
+  - Implement the selected type identity and constructor rules.
+  - Preserve immutable fields and checked projections.
+  - Require exhaustive matching under the selected variant contract.
+
+  Deliverables:
+  - Add type declarations, construction, pattern checks, runtime values, and native representations.
+
+  Validation:
+  - Execute imported type declarations and nested variants through the public CLI.
+  - Reject missing fields, invalid alternatives, incomplete matches, and identity mismatches.
+  - Verify stable error context and equivalent interpreter and native behavior.
+
+- [ ] [F020] (P2) {F019,P006} Add generics with bounded specialization
+  Goal:
+  Reuse typed flows and data without runtime type ambiguity.
+
+  Requirements:
+  - Implement the selected type parameter and specialization rules.
+  - Preserve effects, fallibility, and callback restrictions through specialization.
+  - Bound specialization count and generated code size.
+
+  Deliverables:
+  - Add generic checking, specialization, diagnostics, and native generation.
+
+  Validation:
+  - Execute generic collection and variant examples across module boundaries.
+  - Reject invalid type arguments and effect constraints.
+  - Verify deterministic limit failures for excessive specialization.
+  - Compare interpreter and native results and errors.
+
+- [ ] [F021] (P2) {F018,F020,P006} Add reproducible offline packages
+  Goal:
+  Build applications from exact local dependency inputs.
+
+  Requirements:
+  - Implement one package manifest and lockfile contract.
+  - Separate dependency retrieval from compilation.
+  - Validate dependency identities and reject absent or changed locked inputs.
+  - Prohibit build scripts that obtain implicit capabilities or execute during import.
+
+  Deliverables:
+  - Add package commands, local dependency bundles, resolution, and diagnostics.
+
+  Validation:
+  - Build a multi-package application offline from an empty compiler cache.
+  - Reject missing, corrupt, conflicting, and cyclic dependency inputs under the selected contract.
+  - Verify equivalent builds after package relocation.
+
+- [ ] [F022] (P2) {F021} Add the initial application standard library
+  Goal:
+  Support reusable text, collections, JSON, file, and HTTP application operations.
+
+  Requirements:
+  - Specify each public operation before implementation.
+  - Preserve explicit capabilities, immutable values, fallibility, and resource limits.
+  - Use the selected modules and package contract.
+
+  Deliverables:
+  - Add maintained library modules, examples, public signatures, and diagnostics.
+
+  Validation:
+  - Execute CLI, service, and training applications with the library offline.
+  - Verify malformed input, denied capabilities, limits, and cancellation through public commands.
+  - Compare interpreter and native behavior.
+
+- [ ] [F023] (P2) {F018,I011} Add formatter, test runner, editor, and debug support
+  Goal:
+  Make multi-module application development practical.
+
+  Requirements:
+  - Use the canonical parser and source locations in every tool.
+  - Preserve program meaning during formatting.
+  - Expose structured diagnostics, navigation, and source-level debug information.
+  - Execute tests with explicit capabilities and reproducible inputs.
+
+  Deliverables:
+  - Add formatter and test commands, editor integration, and native debug support.
+
+  Validation:
+  - Verify formatting idempotence and unchanged checked behavior.
+  - Verify navigation and diagnostics across imported modules.
+  - Verify source locations for native breakpoints and error traces.
+  - Run the test command offline with declared grants and controlled failures.
+
 ## Improvements
 
 - [ ] [I001] (P1) {F007,F010} Qualify deterministic training with a small complete MVP
@@ -986,6 +1183,191 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Three local interpreter workflows and three native Metal workflows returned identical predictions and complete AdamW state.
   The [final CI record](docs/evidence/checkpoint-ci.txt) records successful software tests, native tests, static checks, and compiler construction.
   The [checkpoint report](docs/model-checkpoints.md#validation-evidence) links the source identity and scoped documentation review.
+
+### Standalone compiler migration
+
+- [-] [I004] (P1) {P004} Compare offline LLVM and Cranelift compile-and-link paths
+  Goal:
+  Establish complete toolchain feasibility on both current arm64 targets.
+
+  Requirements:
+  - Use equivalent arithmetic, branch, runtime-call, and error-status probes for LLVM and Cranelift.
+  - Use the direct Cranelift object API.
+  - Separate network-enabled tool preparation from offline compile, link, and execution.
+  - Pin tools and dependency inputs.
+  - Record their digests and exact commands.
+  - Record object generation, linking, execution, isolation, and external inputs for each matrix cell.
+  - Distinguish low-level smoke probes from Lo frontend integration and full runtime packaging.
+  - Record SDK use explicitly.
+  - Do not treat PATH filtering as proof of a clean environment.
+
+  Deliverables:
+  - Add maintained experiment sources, repeatable commands, and the [experiment report](docs/native-backend-experiment.md).
+  - Record all four backend/target cells and the remaining distribution gaps.
+
+  Validation:
+  - Compare exact expected success and error results for both backends on both targets.
+  - Verify offline execution and report its isolation boundary.
+  - Verify representative C ABI runtime and platform links beyond freestanding return-only code.
+  - Keep complete Lo runtime and clean-distribution acceptance in F017 and I011.
+  - Record source mapping, build time, memory, artifact size, and debug feasibility where measured.
+  - Keep standalone acceptance open until the full clean-environment procedure passes.
+
+- [ ] [I005] (P1) {P004} Record complete semantic migration coverage
+  Goal:
+  Define observable behavior independently of the replacement backend.
+
+  Requirements:
+  - Inventory every current built-in and public CLI contract.
+  - Cover evaluation order, reads, commits, errors, cancellation, charges, and cleanup.
+  - Include checkpoint bytes, container transfers, and exact resumed optimizer state.
+  - Distinguish CPU and Metal numeric profiles and their accepted comparisons.
+
+  Deliverables:
+  - Add a coverage matrix and independent expected results for the migration corpus.
+
+  Validation:
+  - Run fixtures through the current interpreter and native public commands.
+  - Verify every current catalog operation has positive and applicable negative coverage.
+  - Verify resource-limit boundaries and prevention of later effects after failure.
+  - Identify absent coverage before the new backend uses the corpus.
+
+- [ ] [I006] (P1) {P005,I005} Add a native lowering plan with explicit semantics
+  Goal:
+  Represent native control flow without dependence on Go source generation.
+
+  Requirements:
+  - Lower the checked graph into explicit calls, branches, errors, charges, and cleanup.
+  - Preserve source locations and ordered cancellation boundaries.
+  - Keep inspection independent of execution and machine-code generation.
+  - Validate the lowering boundary once before backend consumption.
+
+  Deliverables:
+  - Add the lowering representation, verifier, selected backend emitter, and source maps.
+  - Add a minimal test runtime for charged calls, status results, and callbacks under the P005 ABI.
+
+  Validation:
+  - Record failing public build tests before implementation.
+  - Verify branch, callback, error, and charge order with independent fixtures.
+  - Compare optimized and unoptimized test-runtime execution at exact budget boundaries.
+  - Keep complete Lo runtime execution acceptance in I007 and I011.
+  - Reject unsupported lowering without automatic fallback.
+
+- [ ] [I007] (P1) {I006} Port core values and execution to the native runtime
+  Goal:
+  Execute core Lo values through the selected native ABI.
+
+  Requirements:
+  - Implement arbitrary-precision integers, Unicode, bytes, collections, records, and serialization.
+  - Preserve finite Float values, error traces, handlers, logical charges, and flow depth.
+  - Implement the selected ownership and callback lifetime rules.
+  - Keep host failures separate from recoverable Lo errors.
+
+  Deliverables:
+  - Add the precompiled core runtime and generated ABI calls.
+
+  Validation:
+  - Execute the I005 core corpus through public compiler and artifact entry points.
+  - Verify independent expected values, serialization, errors, and cancellation outcomes.
+  - Verify bounded memory across repeated calls and complete cleanup after failure.
+  - Verify no unwinding crosses the ABI.
+
+- [ ] [I008] (P1) {I007,F016} Port tensors, differentiation, optimizers, and checkpoints
+  Goal:
+  Preserve complete CPU training and model persistence in the native runtime.
+
+  Requirements:
+  - Port the current FP32 operation set, autodiff, Parameters, gradients, SGD, and AdamW.
+  - Preserve tape lifetime, numeric checks, execution charges, and tensor admission.
+  - Preserve canonical checkpoint bytes and typed import diagnostics.
+  - Restore complete optimizer state without changes to resumed results.
+
+  Deliverables:
+  - Add numerical runtime operations, checkpoint codecs, and native fixtures.
+
+  Validation:
+  - Compare numerical results with independent references under each selected profile.
+  - Verify the existing 200-step training and 500-step XOR workflows.
+  - Compare uninterrupted and resumed execution exactly within the same profile.
+  - Verify malformed checkpoints, resource limits, cancellation, and failure cleanup.
+
+- [ ] [I009] (P1) {I007} Port confined files and HTTP execution
+  Goal:
+  Preserve adapter authority and lifecycle behavior without the Go runtime.
+
+  Requirements:
+  - Preserve opened-root path confinement and protection against path replacement races.
+  - Preserve ordered commits, request isolation, listeners, cancellation, and orderly shutdown.
+  - Keep capabilities absent until explicitly granted at execution.
+  - Release per-request storage during service execution.
+
+  Deliverables:
+  - Add native file and HTTP adapters with the selected runtime boundary.
+
+  Validation:
+  - Execute authorized and denied file operations through artifact commands.
+  - Verify traversal, symlink replacement, failed writes, and prevention of later commits.
+  - Exercise concurrent loopback requests, cancellation, shutdown, and bounded resource use.
+  - Compare CLI outputs, errors, and lifecycle events with current behavior.
+
+- [ ] [I010] (P1) {I008,I009,F014} Port device resources and Metal execution
+  Goal:
+  Preserve explicit device behavior in the replacement runtime.
+
+  Requirements:
+  - Preserve grants, transfers, scoped release, and the resource ledger.
+  - Preserve the fixed Metal numeric profile and precompiled kernel identity.
+  - Preserve complete Parameter and optimizer container transfers.
+  - Reject unsupported devices without automatic CPU substitution.
+
+  Deliverables:
+  - Add the native device boundary, Metal adapter, and controlled software implementations.
+
+  Validation:
+  - Verify exact transfer receipts, failure cleanup, and prevention of subsequent commits.
+  - Verify profile-specific arithmetic and optimizer fixtures through software simulation or emulation.
+  - Verify unavailable-device errors through the public artifact command.
+  - Record unmeasured Metal behavior without requiring physical devices.
+  - Verify Metal link inputs independently from software artifact inputs.
+
+- [ ] [I011] (P1) {F017,I005} Qualify the standalone compiler and remove Go generation
+  Goal:
+  Replace the current native build path after complete semantic acceptance.
+
+  Requirements:
+  - Preserve the complete current catalog, CLI behavior, and documented target matrix.
+  - Use the plan's clean-environment procedure for both targets.
+  - Retain the interpreter as an explicit current-language implementation.
+  - Remove the Go generator, source bundles, and installed-Go build requirement after parity.
+  - Keep no compatibility backend or automatic fallback.
+
+  Deliverables:
+  - Add the acceptance report, updated user documentation, and removal of obsolete native build code.
+
+  Validation:
+  - Pass the complete I005 corpus with independent and differential comparisons.
+  - Compile offline and execute copied artifacts in a second environment without Lo or compiler tools.
+  - Verify optimization preserves numeric profiles, charges, errors, and effect order.
+  - Verify the declared performance and build-resource contracts.
+  - Run final make ci and the explicit clean-environment targets before closure.
+
+- [ ] [I012] (P2) {F022,F023} Qualify complete application development
+  Goal:
+  Demonstrate the selected language extensions in maintained applications.
+
+  Requirements:
+  - Cover a multi-module CLI, an HTTP service, and a training application with checkpoint resumption.
+  - Use user-defined types, generics, packages, library modules, and development tools.
+  - Preserve explicit capabilities, deterministic inputs, and offline compilation.
+
+  Deliverables:
+  - Add applications, documented commands, conformance coverage, and measured acceptance evidence.
+
+  Validation:
+  - Build all applications offline with the installed distribution on both supported targets.
+  - Execute artifacts without Lo and compare independent expected results.
+  - Verify package errors, denied capabilities, execution limits, and diagnostics across modules.
+  - Verify the formatter, test runner, editor navigation, and source-level debugging on these applications.
 
 ## Maintenance
 
