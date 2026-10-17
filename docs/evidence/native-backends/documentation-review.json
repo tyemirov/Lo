@@ -1,0 +1,299 @@
+{
+  "language_reference": {
+    "issue": "9",
+    "sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431"
+  },
+  "scope": [
+    "new plan and experiment report",
+    "19 new issues",
+    "README addition",
+    "terminology additions",
+    "Docker guide and root reading condition"
+  ],
+  "changed_prose_findings": [],
+  "preserved_findings": [
+    {
+      "line": 7,
+      "message": "Do not use a progressive verb form.",
+      "path": "/Users/tyemirov/Development/Research/Lo/AGENTS.md",
+      "rule": "3.5",
+      "text": "Repeat for emphasis because this rule is binding: no fallbacks, no backward compatibility, no legacy compatibility. Delete or reject obsolete code paths, stale schemas, deprecated config, and old persisted shapes instead of preserving them through compatibility layers, dual reads/writes, aliases, or best-effort recovery."
+    },
+    {
+      "line": 7,
+      "message": "Sentence has 27 words. Maximum is 25.",
+      "path": "/Users/tyemirov/Development/Research/Lo/AGENTS.md",
+      "rule": "6.3",
+      "text": "Delete or reject obsolete code paths, stale schemas, deprecated config, and old persisted shapes instead of preserving them through compatibility layers, dual reads/writes, aliases, or best-effort recovery."
+    },
+    {
+      "line": 21,
+      "message": "Sentence has 39 words. Maximum is 25.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "6.3",
+      "text": "Resolution: Addressed in `specification.md` by adding the recoverable failure contract, fatal-panic boundary, trace enrichment rules, required Error.kind values for fallible standard operations, commit failure kinds, and conformance cases for fallibility, self-handling flows, adapter handlers, and hidden host exceptions."
+    },
+    {
+      "line": 32,
+      "message": "Sentence has 32 words. Maximum is 25.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "6.3",
+      "text": "Spec context: Sections 3, 4.5, 5.3, 5.5, 6.7, 10.3, 12, and 15.3 define `T!`, `Error`, automatic bubbling, self-handling flows, commit failure, and mandatory adapter `onError` boundaries."
+    },
+    {
+      "line": 81,
+      "message": "Sentence has 39 words. Maximum is 25.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "6.3",
+      "text": "Resolution: Addressed in `specification.md` by making Null a non-inhabiting atomic type, defining the null literal, requiring exact record fields, modeling absence through Map.has_key and fallible Map.get, documenting the post-v0.3 optional data deferral, and adding null/record/map conformance cases."
+    },
+    {
+      "line": 132,
+      "message": "Sentence has 41 words. Maximum is 25.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "6.3",
+      "text": "Resolution: Addressed in `specification.md` by adding deterministic evaluation and host runtime constraints, explicitly deferring memory-management and concurrency syntax to host implementation concerns, replacing the grammar sketch with a normative grammar and disambiguation rules, cleaning up examples, and adding a conformance matrix."
+    },
+    {
+      "line": 159,
+      "message": "Sentence has 26 words. Maximum is 25.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "6.3",
+      "text": "collection, OS threads, green threads, channels, and scheduler policy are implementation concerns in v0.3 unless and until the language exposes them in a later spec."
+    },
+    {
+      "line": 1404,
+      "message": "Use 'make sure'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "dictionary",
+      "text": "Make priorities concrete and ensure each open issue has actionable deliverables."
+    },
+    {
+      "line": 1447,
+      "message": "Do not use a semicolon.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "8.1",
+      "text": "Prefer current supported dependencies; do not add compatibility shims for obsolete dependency behavior."
+    },
+    {
+      "line": 1467,
+      "message": "Use 'make sure', 'measure', 'examine', or 'do a check of' for the applicable meaning.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "dictionary",
+      "text": "Check generated artifacts, release tags, published images, and Pages outputs for source-to-public drift."
+    },
+    {
+      "line": 1469,
+      "message": "Use 'do'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "dictionary",
+      "text": "Do not perform production deployment from this runbook unless the operator explicitly requests that deployment."
+    },
+    {
+      "line": 1488,
+      "message": "Use 'make sure', 'measure', 'examine', or 'do a check of' for the applicable meaning.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "dictionary",
+      "text": "Check static analysis, coverage, schema, and contract guards that are supposed to prevent drift."
+    },
+    {
+      "line": 1490,
+      "message": "Do not use a semicolon.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "8.1",
+      "text": "Keep the current canonical contract only; do not preserve obsolete behavior unless a product requirement explicitly says so."
+    },
+    {
+      "line": 1540,
+      "message": "Use 'make sure', 'measure', 'examine', or 'do a check of' for the applicable meaning.",
+      "path": "/Users/tyemirov/Development/Research/Lo/ISSUES.md",
+      "rule": "dictionary",
+      "text": "Check links, command names, paths, and public contract descriptions touched by the pass."
+    },
+    {
+      "line": 122,
+      "message": "Use 'do'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "AI agents should not directly perform irreversible actions. Instead, an agent should emit a typed action graph:"
+    },
+    {
+      "line": 122,
+      "message": "Use 'must'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "AI agents should not directly perform irreversible actions. Instead, an agent should emit a typed action graph:"
+    },
+    {
+      "line": 140,
+      "message": "Use 'must'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "A verifier should be able to inspect a Lo program before execution and answer:"
+    },
+    {
+      "line": 288,
+      "message": "Use 'do'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "The branch does not perform the write. The branch constructs an effect. The write happens only when the effect is committed."
+    },
+    {
+      "line": 320,
+      "message": "Use 'must'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "A Lo program should be inspectable before execution."
+    },
+    {
+      "line": 341,
+      "message": "Use 'must'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "The agent should not execute arbitrary Python. It should generate a Lo program that can be checked, inspected, approved, and executed."
+    },
+    {
+      "line": 492,
+      "message": "Use 'must'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "Lo should support a canonical agent-generation profile."
+    },
+    {
+      "line": 494,
+      "message": "Use 'must'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "The agent profile should require:"
+    },
+    {
+      "line": 497,
+      "message": "Use 'alternative'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "no alternate equivalent syntax"
+    },
+    {
+      "line": 519,
+      "message": "Use 'must'.",
+      "path": "/Users/tyemirov/Development/Research/Lo/README.md",
+      "rule": "dictionary",
+      "text": "A secure Lo runtime should:"
+    }
+  ],
+  "review": "Changed prose reviewed against applicable Part 1 rules, Part 2 word meanings, and repository terminology. No full-document compliance claim for preserved prose.",
+  "file_links_verified": [
+    [
+      "docs/standalone-compiler-plan.md",
+      "../internal/compiler/compiler.go"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "../internal/ir/ir.go"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "../internal/codegen/generate.go"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "../internal/nativebuild/build.go"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "model-checkpoints.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "compiler-design.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "compiler-design.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "../specification.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "native-compilation-contract.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "training-extension-design.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "device-resources.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "metal-arithmetic.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "model-checkpoints.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "compiler-design.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "compiler-design.md"
+    ],
+    [
+      "docs/standalone-compiler-plan.md",
+      "native-backend-experiment.md"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "standalone-compiler-plan.md"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "evidence/native-backends/experiment.json"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "evidence/native-backends/experiment-initial.json"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "evidence/native-backends/experiment-validation.json"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "../experiments/native-backends/probe.ll"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "../experiments/native-backends/cranelift/src/main.rs"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "../experiments/native-backends/runtime.c"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "evidence/native-backends/experiment.json"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "standalone-compiler-plan.md#offline-acceptance-procedure"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "evidence/native-backends/current-lo-no-go.json"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "evidence/native-backends/review.json"
+    ],
+    [
+      "docs/native-backend-experiment.md",
+      "evidence/native-backends/documentation-review.json"
+    ]
+  ]
+}

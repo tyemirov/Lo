@@ -26,6 +26,7 @@ const (
 	Gradient
 	TensorBundleOperation
 	OptimizerOperation
+	CheckpointOperation
 )
 
 type Boundary uint8
@@ -298,6 +299,7 @@ func build() map[string]Operation {
 	addAutodiff(m)
 	addParameters(m)
 	addOptimizers(m)
+	addCheckpoints(m)
 	addComputeFailures(m)
 	return m
 }
@@ -315,7 +317,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer":
+	case "List", "Map", "Range", "File", "HTTP", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
 		return true
 	}
 	return false

@@ -1,0 +1,100 @@
+// Proposed example. File.Entry, File.list, and File.remove are not implemented.
+// The host supplies the directory and cutoff under the Gateway lock protocol.
+
+flow NameCharacter(total: Int, index: Int, character: Scalar) -> Bool {
+    return Match.new(index,
+        0: Scalar.eq(character, Scalar.new("d")),
+        1: Scalar.eq(character, Scalar.new("e")),
+        2: Scalar.eq(character, Scalar.new("p")),
+        3: Scalar.eq(character, Scalar.new("l")),
+        4: Scalar.eq(character, Scalar.new("o")),
+        5: Scalar.eq(character, Scalar.new("y")),
+        6: Scalar.eq(character, Scalar.new("m")),
+        7: Scalar.eq(character, Scalar.new("e")),
+        8: Scalar.eq(character, Scalar.new("n")),
+        9: Scalar.eq(character, Scalar.new("t")),
+        10: Scalar.eq(character, Scalar.new("-")),
+        Math.sub(total, 4): Scalar.eq(character, Scalar.new(".")),
+        Math.sub(total, 3): Scalar.eq(character, Scalar.new("l")),
+        Math.sub(total, 2): Scalar.eq(character, Scalar.new("o")),
+        Math.sub(total, 1): Scalar.eq(character, Scalar.new("g")),
+        _: Range.contains(
+            Range.new(Scalar.new("0"), Scalar.new("9"), true, true),
+            character
+        )
+    )
+}
+
+flow NameStep(total: Int, state: Record{index: Int, valid: Bool}, character: Scalar) -> Record{index: Int, valid: Bool} {
+    valid = Match.new(state.valid,
+        true: NameCharacter(total, state.index, character),
+        _: false
+    )
+    return Record.new(index: Math.add(state.index, 1), valid: valid)
+}
+
+flow FullName(name: String, total: Int) -> Bool {
+    initial = Record.new(index: 0, valid: true)
+    result = List.fold(name, initial, total, NameStep)
+    return result.valid
+}
+
+flow IsGatewayLogName(name: String) -> Bool {
+    total = String.length(name)
+    return Match.new(Math.gte(total, 16),
+        true: FullName(name, total),
+        _: false
+    )
+}
+
+flow IsCandidate(cutoff_unix_ns: Int, entry: File.Entry) -> Bool {
+    return Match.new(entry.kind,
+        "regular": Match.new(Math.eq(entry.link_count, 1),
+            true: Match.new(IsGatewayLogName(entry.name),
+                true: Math.lt(entry.modified_unix_ns, cutoff_unix_ns),
+                _: false
+            ),
+            _: false
+        ),
+        _: false
+    )
+}
+
+flow ObservedBytes(entry: File.Entry) -> Int {
+    return entry.size_bytes
+}
+
+flow CandidateName(entry: File.Entry) -> String {
+    return entry.name
+}
+
+flow Select(root: File.Path, cutoff_unix_ns: Int) -> List<File.Entry>! {
+    entries = File.list(root)
+    return entries |> List.filter(cutoff_unix_ns, IsCandidate)
+}
+
+flow Preview(root: File.Path, cutoff_unix_ns: Int) -> Record{names: List<String>, selected_count: Int, observed_bytes: Int}! {
+    selected = Select(root, cutoff_unix_ns)
+    sizes = selected |> List.map(ObservedBytes)
+    return Record.new(
+        names: selected |> List.map(CandidateName),
+        selected_count: List.length(selected),
+        observed_bytes: Math.sum(sizes)
+    )
+}
+
+flow Cleanup(root: File.Path, cutoff_unix_ns: Int) -> Record{removed_count: Int, observed_bytes: Int}! {
+    selected = Select(root, cutoff_unix_ns)
+    sizes = selected |> List.map(ObservedBytes)
+    count = List.length(selected)
+    observed_bytes = Math.sum(sizes)
+    removal = File.remove(selected)
+    commit removal
+    return Record.new(removed_count: count, observed_bytes: observed_bytes)
+}
+
+// Fixture input. The wrapper renders these two literals and selects a fixed entry point.
+// Cleanup uses the expression below. Preview uses: return Preview(root, cutoff_unix_ns)
+root = File.Path.new("gateway-logs")
+cutoff_unix_ns = Int.new(2000000000000000000)
+return Cleanup(root, cutoff_unix_ns)

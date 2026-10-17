@@ -31,6 +31,7 @@ Read each selected guide in full before its first applicable action.
 - For HTTP or gRPC API changes: `.mprlab/AGENTS.API.md`.
 - For Go changes: `.mprlab/AGENTS.GO.md`.
 - For Python changes: `.mprlab/AGENTS.PY.md`.
+- For container changes: `.mprlab/AGENTS.DOCKER.md`.
 
 File permission modes are outside agent scope.
 Never examine, validate, compare, require, change, or record a file permission mode.

@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-16",
+  "base_revision": "12940d9fca6f95f9360678c37d172b1e592e72dd",
+  "issues": [
+    "P003",
+    "F015",
+    "F016",
+    "I003"
+  ],
+  "source_state": "base revision plus checkpoint implementation and concurrent documentation work",
+  "source_sha256": {
+    "internal/catalog/catalog.go": "6ae8f4e84d1e6fcb2521785eaac4e018e25bd9a05cbaa3365e7531cd3359573d",
+    "internal/catalog/tensor.go": "e6be8c898d76c6eeba8ac33c2b5a7173ad130e13741bddfecc73beae2d3acb36",
+    "internal/catalog/checkpoint.go": "18ff7cbd4fdd22b11c971572b0737a7721e04fce600b718bd611c04e8f41440a",
+    "internal/check/call.go": "4d1e8c6a4dfd45ee89e7c6650fe389958a77050792001eb0e8122b3c341aa7c2",
+    "internal/check/checkpoint.go": "89760844818292c3a33751ac5125407bd9d549718b2ed147822ed3982526f8d1",
+    "internal/runtimeops/checkpoint.go": "5e6e0b3c3caac5533119299f0d056579da24397e02c2e71f9c416566394fe0a7",
+    "internal/eval/builtin.go": "482554ec4620aeaffe24ea4945d397170006e599dcabdc6e9fa97a8b293eb0b3",
+    "internal/codegen/operations.go": "37da64f51de5b578bdf5ebea705e857ead9445f0bd1fc734b10ccf61645be3d8",
+    "internal/inspect/expression.go": "8c4cbfee6416284823387a2471732b45cfee345a57ce68a2583f17f8f5199178",
+    "internal/tensorfacts/analyze.go": "e9080f0245aace725547a7c66069fbc476efbdfb2040eeb90c4f055f2aa7ff12",
+    "internal/runtimebundle/manifest.json": "483658f2621916bc009d943fb4ce686844c0c1f441e5732cd68d5077984f3024",
+    "internal/runtimebundle/runtime.zip": "b94c5b22958bc3643da4da26006c03456f523797e4a8296397ffbdb569ef051c",
+    "tests/integration/catalog_test.go": "ed879fe28241cddb406770b776f4057322e240a29e48181b807a224a7175c837",
+    "tests/integration/runtime_catalog_test.go": "8cab4c48b50dfad3f3a18540f9629babf55195618a3bc340f0aaa24c85d066d7",
+    "tests/integration/checkpoint_contract_test.go": "7e8771d59e8d34ecb1847fde434a54dffd31195d60ea886dbbede73a6ea2f4c6",
+    "tests/integration/checkpoint_failure_test.go": "2dfb5330a508b2ec0d51c8cf42ed1d98773c3eaabd70d306bdf26f79439d0de0",
+    "tests/integration/checkpoint_metal_live_test.go": "2b0f47d13bb2473af6f1b0facfb6d98cfbe5489e325e9b2e3b84556828e67e56",
+    "tests/integration/checkpoint_test.go": "f50f8ea1f54cc2d459f74326e5fc583d1bf5a01330f9a62529b45831285770a8",
+    "tests/integration/checkpoint_xor_test.go": "7e2fec8f9bbb6baaacbcfc9cd949ea35691445b89f22a03644964b86f75c3948",
+    "examples/xor_infer_cpu.lo": "5a0bf7328e348b3f67bb3c279e160febc498e700a229e466eecce15db4c25f64",
+    "examples/xor_infer_metal.lo": "b53f14a424b3f7915bbce2061987f6c85223964a6c1a461b85fc0742e8326244",
+    "examples/xor_resume_cpu.lo": "09673ed60113f69848fbd323f86397974cb7d0fcb16cd8529c3d4ec5b6012bf9",
+    "examples/xor_resume_metal.lo": "88abb713bd1edef39feff27939d8e4ad65665310ca982376557718e7ae2c10e2",
+    "examples/xor_save_cpu.lo": "22c6762d0b33bb92cf6fbefc106841b354a6c6e09806449aef8908aec1375d08",
+    "examples/xor_save_metal.lo": "8836f0c463888c00ac1783e23c2046630446f2d86a58fc8ec0661e2ad6f5d6aa"
+  },
+  "metal_build_receipt": "checkpoint-metal-build.json",
+  "cpu_profile": "cpu-fp32-strict",
+  "metal_profile": "metal-fp32",
+  "xor_steps_before_save": 250,
+  "xor_steps_after_resume": 500,
+  "xor_final_loss": 4.251353501009969e-13,
+  "xor_predictions": [
+    6.6410286e-07,
+    0.9999993,
+    0.9999995,
+    7.2148754e-07
+  ],
+  "metal_training_transfers": {
+    "uploads": 6,
+    "downloads": 6
+  },
+  "metal_inference_transfers": {
+    "uploads": 5,
+    "downloads": 1
+  }
+}

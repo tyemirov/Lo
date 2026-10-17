@@ -93,6 +93,38 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `file observation`: Immutable metadata obtained for one directory entry during a listing operation.
+- `entry provenance`: Private runtime data that connects a file observation to its execution session and directory.
+- `removal batch`: An ordered collection of selected file observations in one removal effect.
+- `cooperative lock`: A host lock protocol followed by every process within its stated concurrency guarantee.
+- `shared lock`: A lock that permits concurrent participating readers or lifecycle owners and excludes an exclusive lock.
+- `exclusive lock`: A lock that excludes all other participating shared and exclusive holders.
+- `basename`: The final name component of a filesystem path.
+- `Unix epoch`: The time origin at 00:00:00 UTC on January 1, 1970.
+- `logical size`: The observed file length in bytes, independent of reclaimed disk storage.
+
+- `standalone compiler`: An installed compiler distribution that supplies its compile and link tools without a separate development toolchain.
+- `linker`: A tool that combines object files and libraries into an executable.
+- `object file`: Machine code and relocation data prepared for a linker.
+- `sysroot`: A directory that supplies target headers and libraries to build tools.
+- `target triple`: A toolchain identifier for an architecture, operating system, and ABI.
+- `link input`: An object, library, startup file, or platform description consumed by a linker.
+- `reference counting`: Memory management that releases an object when its retained reference count reaches zero.
+- `opaque handle`: An identifier whose internal representation is private to its runtime.
+- `tagged variant`: A value type with a finite set of named alternatives and their associated data.
+- `generic`: A declaration with type parameters resolved under defined type and effect rules.
+- `specialization`: Compiled code for one concrete set of generic type arguments.
+- `package manifest`: The canonical declaration of a package and its dependencies.
+- `lockfile`: A record of exact dependency identities selected for a reproducible build.
+- `offline build`: Compilation and linking without external network access.
+- `smoke probe`: A small executable test that establishes a limited toolchain capability.
+- `clean environment`: A declared base operating system without undeclared compiler tools, SDKs, caches, or repository files.
+
+- `checkpoint`: Canonical bytes that keep typed Parameters or complete optimizer state for later execution.
+- `checkpoint template`: A CPU value that supplies the expected checkpoint type, field names, and tensor shapes.
+- `checkpoint codec`: The operations that convert typed training values to canonical bytes and restore those values.
+- `inference`: Neural network execution that calculates predictions from trained Parameters without gradient updates.
+
 - `geometric mean`: The root of the product of positive measurements, with the root degree equal to their count.
 - `resident set size`: The amount of process memory present in physical memory at a measurement point.
 - `build cache`: Compiled data that the Go toolchain stores for use in subsequent builds.
@@ -122,6 +154,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `subnormal`: A floating-point value below the smallest positive normal magnitude of its numeric format.
 - `rounding`: Selection of a representable numeric value from a more precise result.
 - `autodiff`: Automatic construction and evaluation of derivatives from a computation graph.
+- `backpropagation`: Transfer of loss derivatives through a computation graph in reverse dependency order.
 - `reverse-mode autodiff`: Autodiff that propagates derivative contributions in reverse dependency order.
 - `gradient`: A derivative of a numeric loss with respect to a selected input.
 - `VJP`: A vector-Jacobian product that transfers output derivative contributions to operation inputs.
@@ -130,6 +163,8 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `Parameter`: A selected trainable tensor identified by an explicit record field name.
 - `optimizer`: An operation family that calculates new Parameters and state from gradients.
 - `SGD`: Stochastic gradient descent with the update rule selected by the training contract.
+- `bias correction`: Division of an optimizer moment by one minus its accumulated beta power.
+- `momentum`: Gradient history used to calculate a later optimizer update.
 - `AdamW`: An adaptive optimizer with first and second moments and decoupled weight decay.
 - `moment`: An optimizer state value that accumulates weighted gradient data.
 - `minibatch`: A group of training examples used for one loss evaluation.
@@ -288,6 +323,15 @@ Use the simple present, simple past, simple future, imperative, or infinitive fo
 
 ## Repository Technical Verbs
 
+- `encode`: Convert a typed value into its specified byte representation. Forms: encode, encodes, encoded.
+- `decode`: Convert encoded bytes into a validated typed value. Forms: decode, decodes, decoded.
+- `load`: Read persisted model data into the runtime. Forms: load, loads, loaded.
+- `save`: Write model data for later execution. Forms: save, saves, saved.
+- `restore`: Reconstruct model Parameters or optimizer state from a checkpoint. Forms: restore, restores, restored.
+- `resume`: Continue training from saved optimizer state. Forms: resume, resumes, resumed.
+- `transfer`: Move tensor data between explicit device locations. Forms: transfer, transfers, transferred.
+
+- `train`: Calculate successive Parameter values from a loss and its gradients. Forms: train, trains, trained.
 - `differentiate`: Construct or evaluate derivatives of a selected computation. Forms: differentiate, differentiates, differentiated.
 - `broadcast`: Align tensor dimensions through the defined repetition rule. Forms: broadcast, broadcasts, broadcast.
 - `reduce`: Combine tensor elements through a defined reduction. Forms: reduce, reduces, reduced.

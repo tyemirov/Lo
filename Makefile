@@ -71,4 +71,17 @@ benchmark-training-profile: build
 	$(GO) tool pprof -top -cum -nodecount=30 bin/training-benchmark.test bin/training-cpu.pprof
 	$(GO) tool pprof -sample_index=alloc_space -top -nodecount=30 bin/training-benchmark.test bin/training-alloc.pprof
 
+.PHONY: prepare-native-backend-probe experiment-native-backends check-native-backend-probe test-native-backend-probe
+prepare-native-backend-probe:
+	CI=1 python3 experiments/native-backends/probe.py bootstrap </dev/null
+
+experiment-native-backends:
+	CI=1 python3 experiments/native-backends/probe.py run </dev/null
+
+check-native-backend-probe:
+	CI=1 python3 experiments/native-backends/probe.py check </dev/null
+
+test-native-backend-probe:
+	CI=1 uv run --with pytest==8.3.5 python -m pytest -q experiments/native-backends/test_probe.py </dev/null
+
 ci: verify-runtime-bundle fmt lint test test-native build

@@ -1,0 +1,9 @@
+{
+  "record_type": "initial result excerpt",
+  "observed_pass_count": 3,
+  "total": 4,
+  "failed_cell": "llvm/aarch64-unknown-linux-gnu",
+  "failed_command": "clang-14 -opaque-pointers -target aarch64-unknown-linux-gnu -c /input/probe.ll",
+  "diagnostic": "ptr type is only supported in -opaque-pointers mode; error: expected type",
+  "correction": "Use llc-14 -opaque-pointers directly for LLVM IR object emission."
+}

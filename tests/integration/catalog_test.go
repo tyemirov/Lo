@@ -81,6 +81,7 @@ func builtinExamples() []builtinExample {
 	}
 	examples = append(examples, parameterBuiltinExamples()...)
 	examples = append(examples, optimizerBuiltinExamples()...)
+	examples = append(examples, checkpointBuiltinExamples()...)
 	return append(examples, tensorBuiltinExamples()...)
 }
 

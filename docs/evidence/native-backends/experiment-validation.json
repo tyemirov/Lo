@@ -1,0 +1,28 @@
+{
+  "integration_tests": {
+    "command": "python -m pytest --basetemp=_scratch/native-backends-20261016/pytest -q experiments/native-backends/test_probe.py",
+    "passed": 5
+  },
+  "initial_required_behavior_failure": {
+    "test": "test_probe_contract",
+    "result": "failed",
+    "cause": "probe.py absent before implementation"
+  },
+  "stale_preparation_test_before_fix": {
+    "test": "test_run_rejects_stale_preparation_before_docker",
+    "result": "failed",
+    "cause": "receipt image used before source identity check"
+  },
+  "final_probe_command": "python3 experiments/native-backends/probe.py run",
+  "matrix_passed": 4,
+  "matrix_total": 4,
+  "offline_isolation_passed": true,
+  "syntax": "ast.parse passed for both Python modules",
+  "whitespace": "git diff --check passed in assigned scope",
+  "remaining_gaps": [
+    "LLD absent; Apple and GNU system linkers used",
+    "Apple SDK inputs required; no SDK-free compiler acceptance",
+    "Fixed-width arithmetic only; no Lo frontend lowering",
+    "Bootstrap transitive Debian package versions recorded but not individually pinned; repeat offline runs use immutable local image digest"
+  ]
+}

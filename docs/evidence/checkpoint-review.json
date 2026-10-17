@@ -1,0 +1,79 @@
+{
+  "issues": [
+    "P003",
+    "F015",
+    "F016",
+    "I003"
+  ],
+  "date": "2026-10-16",
+  "validation": {
+    "expected_missing_operation_failure": "recorded",
+    "make_ci": "passed",
+    "software_with_race_detector": "passed",
+    "focused_native_cpu": "passed",
+    "local_metal_with_race_detector": "passed",
+    "native_metal_with_race_detector": "passed",
+    "local_metal_repetitions": 3,
+    "native_metal_repetitions": 3,
+    "xor_resumed_vs_uninterrupted": "identical",
+    "adamw_resumed_vs_uninterrupted": "identical",
+    "source_digests_verified": 25,
+    "metal_build_input_digests_verified": 13
+  },
+  "documentation": {
+    "files": [
+      "docs/model-checkpoints.md",
+      "README.md",
+      "specification.md",
+      "docs/training-extension-design.md",
+      ".mprlab/TERMINOLOGY.md",
+      "ISSUES.md"
+    ],
+    "reviewed_scope": "Checkpoint additions in the tracker, README, specification, training design, and terminology, plus the complete checkpoint report",
+    "official_issue": 9,
+    "official_reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "part_1_review": "completed",
+    "part_2_review": "completed",
+    "changed_prose_mechanical_findings": 0,
+    "unchanged_mechanical_findings": {
+      "ISSUES.md": 12,
+      "README.md": 10,
+      "specification.md": 18
+    },
+    "full_document_compliance_claimed": false,
+    "local_links_checked": 118,
+    "missing_local_links": []
+  },
+  "governance_entries": [],
+  "environment": {
+    "software_and_native_ci": "macOS arm64",
+    "metal_profile": "metal-fp32",
+    "toolchain_versions": {
+      "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "go": "go1.27.1",
+      "macos": "27.0.1",
+      "macos_build": "26A434",
+      "metal": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+      "metallib": "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)",
+      "sdk": "27.0",
+      "xcode": "Xcode 27.1\nBuild version 27A9275"
+    }
+  },
+  "limits": {
+    "checkpoint_bytes": 16777216,
+    "checkpoint_value_types": [
+      "Parameters",
+      "Optimizer.SGD.State",
+      "Optimizer.AdamW.State"
+    ],
+    "tensor_dtype": "fp32",
+    "same_profile_resume": "exact",
+    "checkpoint_writes": "Existing File.write contract without crash-atomic replacement",
+    "linux_qualification": "Not repeated for this change"
+  },
+  "issue_identifiers": {
+    "count": 33,
+    "duplicates": [],
+    "missing_local_dependencies": []
+  }
+}

@@ -1,0 +1,522 @@
+{
+  "contract": {
+    "expected_stdout": "23 0\n0 7\n",
+    "inputs": [
+      7,
+      -1
+    ],
+    "arithmetic": "3*x+2",
+    "negative_input": {
+      "value": 0,
+      "status": 7
+    },
+    "success_status": 0
+  },
+  "scope": "fixed-width scalar backend probe; not Lo lowering or compiler acceptance",
+  "assignment": {
+    "requested": "mpr-worker gpt-6.1-sol/medium",
+    "agent": "/root/backend_experiment",
+    "actual": "host role assignment; runtime telemetry unavailable"
+  },
+  "external_inputs": {
+    "bootstrap": {
+      "image": "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+      "base_image": "rust@sha256:e51d0265072d2d9d5d320f6a44dde6b9ef13653b035098febd68cce8fa7c0bc4",
+      "source_sha256": {
+        "experiments/native-backends/Dockerfile": "2c5b0ba85a98a4b84b0d6c644c40e03392261fa9f88e8ba85d12183bcbd082eb",
+        "experiments/native-backends/cranelift/Cargo.lock": "01d5451805716dba051746a5ae77381c9ba7a37a83fd5dabd3656e9027be9d43",
+        "experiments/native-backends/cranelift/Cargo.toml": "c3bae873f7bf63fd3681b49736afe4a984aed8767262130f99b8d45cc2d059cb",
+        "experiments/native-backends/cranelift/src/main.rs": "5ab4d8a8580200adf2771239c7f3d55e4493cd28004652a5c222190ef282824d"
+      },
+      "network": "enabled during bootstrap only",
+      "reproduction": "reuse image digest; apt transitive package versions recorded, not separately pinned",
+      "packages": "adduser\t3.134\napt\t2.6.1\nautoconf\t2.71-3\nautomake\t1:1.16.5-1.3\nautotools-dev\t20220109.1\nbase-files\t12.4+deb12u10\nbase-passwd\t3.6.1\nbash\t5.2.15-2+b7\nbinutils\t2.40-2\nbinutils-aarch64-linux-gnu\t2.40-2\nbinutils-common:arm64\t2.40-2\nbsdutils\t1:2.38.1-5+deb12u3\nbzip2\t1.0.8-5+b1\nca-certificates\t20230311\nclang-14\t1:14.0.6-12\ncomerr-dev:arm64\t2.1-1.47.0-2\ncoreutils\t9.1-1\ncpp\t4:12.2.0-3\ncpp-12\t12.2.0-14+deb12u1\ncurl\t7.88.1-10+deb12u15\ndash\t0.5.12-2\ndebconf\t1.5.82\ndebian-archive-keyring\t2023.3+deb12u1\ndebianutils\t5.7-0.5~deb12u1\ndefault-libmysqlclient-dev:arm64\t1.1.0\ndiffutils\t1:3.8-4\ndirmngr\t2.2.40-1.1\ndpkg\t1.21.22\ndpkg-dev\t1.21.22\ne2fsprogs\t1.47.0-2\nfile\t1:5.44-3\nfindutils\t4.9.0-4\nfontconfig\t2.14.1-4\nfontconfig-config\t2.14.1-4\nfonts-dejavu-core\t2.37-6\ng++\t4:12.2.0-3\ng++-12\t12.2.0-14+deb12u1\ngcc\t4:12.2.0-3\ngcc-12\t12.2.0-14+deb12u1\ngcc-12-base:arm64\t12.2.0-14+deb12u1\ngir1.2-freedesktop:arm64\t1.74.0-3\ngir1.2-gdkpixbuf-2.0:arm64\t2.42.10+dfsg-1+deb12u1\ngir1.2-glib-2.0:arm64\t1.74.0-3\ngir1.2-rsvg-2.0:arm64\t2.54.7+dfsg-1~deb12u1\ngit\t1:2.39.5-0+deb12u2\ngit-man\t1:2.39.5-0+deb12u2\ngnupg\t2.2.40-1.1\ngnupg-l10n\t2.2.40-1.1\ngnupg-utils\t2.2.40-1.1\ngpg\t2.2.40-1.1\ngpg-agent\t2.2.40-1.1\ngpg-wks-client\t2.2.40-1.1\ngpg-wks-server\t2.2.40-1.1\ngpgconf\t2.2.40-1.1\ngpgsm\t2.2.40-1.1\ngpgv\t2.2.40-1.1\ngrep\t3.8-5\ngzip\t1.12-1\nhicolor-icon-theme\t0.17-2\nhostname\t3.23+nmu1\nicu-devtools\t72.1-3\nimagemagick\t8:6.9.11.60+dfsg-1.6+deb12u2\nimagemagick-6-common\t8:6.9.11.60+dfsg-1.6+deb12u2\nimagemagick-6.q16\t8:6.9.11.60+dfsg-1.6+deb12u2\ninit-system-helpers\t1.65.2\nkrb5-multidev:arm64\t1.20.1-2+deb12u2\nlibacl1:arm64\t2.3.1-3\nlibaom3:arm64\t3.6.0-1+deb12u1\nlibapr1:arm64\t1.7.2-3+deb12u1\nlibaprutil1:arm64\t1.6.3-1\nlibapt-pkg6.0:arm64\t2.6.1\nlibasan8:arm64\t12.2.0-14+deb12u1\nlibassuan0:arm64\t2.5.5-5\nlibatomic1:arm64\t12.2.0-14+deb12u1\nlibattr1:arm64\t1:2.5.1-4\nlibaudit-common\t1:3.0.9-1\nlibaudit1:arm64\t1:3.0.9-1\nlibbinutils:arm64\t2.40-2\nlibblkid-dev:arm64\t2.38.1-5+deb12u3\nlibblkid1:arm64\t2.38.1-5+deb12u3\nlibbrotli-dev:arm64\t1.0.9-2+b6\nlibbrotli1:arm64\t1.0.9-2+b6\nlibbsd0:arm64\t0.11.7-2\nlibbz2-1.0:arm64\t1.0.8-5+b1\nlibbz2-dev:arm64\t1.0.8-5+b1\nlibc-bin\t2.36-9+deb12u10\nlibc-dev-bin\t2.36-9+deb12u10\nlibc6:arm64\t2.36-9+deb12u10\nlibc6-dev:arm64\t2.36-9+deb12u10\nlibcairo-gobject2:arm64\t1.16.0-7\nlibcairo-script-interpreter2:arm64\t1.16.0-7\nlibcairo2:arm64\t1.16.0-7\nlibcairo2-dev:arm64\t1.16.0-7\nlibcap-ng0:arm64\t0.8.3-1+b3\nlibcap2:arm64\t1:2.66-4\nlibcbor0.8:arm64\t0.8.0-2+b1\nlibcc1-0:arm64\t12.2.0-14+deb12u1\nlibclang-common-14-dev\t1:14.0.6-12\nlibclang-cpp14\t1:14.0.6-12\nlibclang1-14\t1:14.0.6-12\nlibcom-err2:arm64\t1.47.0-2\nlibcrypt-dev:arm64\t1:4.4.33-2\nlibcrypt1:arm64\t1:4.4.33-2\nlibctf-nobfd0:arm64\t2.40-2\nlibctf0:arm64\t2.40-2\nlibcurl3-gnutls:arm64\t7.88.1-10+deb12u15\nlibcurl3-nss:arm64\t7.88.1-10+deb12u15\nlibcurl4:arm64\t7.88.1-10+deb12u15\nlibcurl4-openssl-dev:arm64\t7.88.1-10+deb12u15\nlibdatrie1:arm64\t0.2.13-2+b1\nlibdav1d6:arm64\t1.0.0-2+deb12u1\nlibdb-dev:arm64\t5.3.2\nlibdb5.3:arm64\t5.3.28+dfsg2-1\nlibdb5.3-dev\t5.3.28+dfsg2-1\nlibde265-0:arm64\t1.0.11-1+deb12u2\nlibdebconfclient0:arm64\t0.270\nlibdeflate-dev:arm64\t1.14-1\nlibdeflate0:arm64\t1.14-1\nlibdjvulibre-dev:arm64\t3.5.28-2+b1\nlibdjvulibre-text\t3.5.28-2\nlibdjvulibre21:arm64\t3.5.28-2+b1\nlibdpkg-perl\t1.21.22\nlibedit2:arm64\t3.1-20221030-2\nlibelf1:arm64\t0.188-2.1\nliberror-perl\t0.17029-2\nlibevent-2.1-7:arm64\t2.1.12-stable-8\nlibevent-core-2.1-7:arm64\t2.1.12-stable-8\nlibevent-dev\t2.1.12-stable-8\nlibevent-extra-2.1-7:arm64\t2.1.12-stable-8\nlibevent-openssl-2.1-7:arm64\t2.1.12-stable-8\nlibevent-pthreads-2.1-7:arm64\t2.1.12-stable-8\nlibexif-dev:arm64\t0.6.24-1+b1\nlibexif12:arm64\t0.6.24-1+b1\nlibexpat1:arm64\t2.5.0-1+deb12u1\nlibexpat1-dev:arm64\t2.5.0-1+deb12u1\nlibext2fs2:arm64\t1.47.0-2\nlibffi-dev:arm64\t3.4.4-1\nlibffi8:arm64\t3.4.4-1\nlibfftw3-double3:arm64\t3.3.10-1\nlibfido2-1:arm64\t1.12.0-2+b1\nlibfontconfig-dev:arm64\t2.14.1-4\nlibfontconfig1:arm64\t2.14.1-4\nlibfreetype-dev:arm64\t2.12.1+dfsg-5+deb12u4\nlibfreetype6:arm64\t2.12.1+dfsg-5+deb12u4\nlibfreetype6-dev:arm64\t2.12.1+dfsg-5+deb12u4\nlibfribidi0:arm64\t1.0.8-2.1\nlibgc1:arm64\t1:8.2.2-3\nlibgcc-12-dev:arm64\t12.2.0-14+deb12u1\nlibgcc-s1:arm64\t12.2.0-14+deb12u1\nlibgcrypt20:arm64\t1.10.1-3\nlibgdbm-compat4:arm64\t1.23-3\nlibgdbm-dev:arm64\t1.23-3\nlibgdbm6:arm64\t1.23-3\nlibgdk-pixbuf-2.0-0:arm64\t2.42.10+dfsg-1+deb12u1\nlibgdk-pixbuf-2.0-dev:arm64\t2.42.10+dfsg-1+deb12u1\nlibgdk-pixbuf2.0-bin\t2.42.10+dfsg-1+deb12u1\nlibgdk-pixbuf2.0-common\t2.42.10+dfsg-1+deb12u1\nlibgirepository-1.0-1:arm64\t1.74.0-3\nlibglib2.0-0:arm64\t2.74.6-2+deb12u5\nlibglib2.0-bin\t2.74.6-2+deb12u5\nlibglib2.0-data\t2.74.6-2+deb12u5\nlibglib2.0-dev:arm64\t2.74.6-2+deb12u5\nlibglib2.0-dev-bin\t2.74.6-2+deb12u5\nlibgmp-dev:arm64\t2:6.2.1+dfsg1-1.1\nlibgmp10:arm64\t2:6.2.1+dfsg1-1.1\nlibgmpxx4ldbl:arm64\t2:6.2.1+dfsg1-1.1\nlibgnutls30:arm64\t3.7.9-2+deb12u4\nlibgomp1:arm64\t12.2.0-14+deb12u1\nlibgpg-error0:arm64\t1.46-1\nlibgprofng0:arm64\t2.40-2\nlibgraphite2-3:arm64\t1.3.14-1\nlibgssapi-krb5-2:arm64\t1.20.1-2+deb12u2\nlibgssrpc4:arm64\t1.20.1-2+deb12u2\nlibharfbuzz0b:arm64\t6.0.0+dfsg-3\nlibheif1:arm64\t1.15.1-1+deb12u1\nlibhogweed6:arm64\t3.8.1-2\nlibhwasan0:arm64\t12.2.0-14+deb12u1\nlibice-dev:arm64\t2:1.0.10-1\nlibice6:arm64\t2:1.0.10-1\nlibicu-dev:arm64\t72.1-3\nlibicu72:arm64\t72.1-3\nlibidn2-0:arm64\t2.3.3-1+b1\nlibimath-3-1-29:arm64\t3.1.6-1\nlibimath-dev:arm64\t3.1.6-1\nlibisl23:arm64\t0.25-1.1\nlibitm1:arm64\t12.2.0-14+deb12u1\nlibjansson4:arm64\t2.14-2\nlibjbig-dev:arm64\t2.1-6.1\nlibjbig0:arm64\t2.1-6.1\nlibjpeg-dev:arm64\t1:2.1.5-2\nlibjpeg62-turbo:arm64\t1:2.1.5-2\nlibjpeg62-turbo-dev:arm64\t1:2.1.5-2\nlibk5crypto3:arm64\t1.20.1-2+deb12u2\nlibkadm5clnt-mit12:arm64\t1.20.1-2+deb12u2\nlibkadm5srv-mit12:arm64\t1.20.1-2+deb12u2\nlibkdb5-10:arm64\t1.20.1-2+deb12u2\nlibkeyutils1:arm64\t1.6.3-2\nlibkrb5-3:arm64\t1.20.1-2+deb12u2\nlibkrb5-dev:arm64\t1.20.1-2+deb12u2\nlibkrb5support0:arm64\t1.20.1-2+deb12u2\nlibksba8:arm64\t1.6.3-2\nliblcms2-2:arm64\t2.14-2\nliblcms2-dev:arm64\t2.14-2\nlibldap-2.5-0:arm64\t2.5.13+dfsg-5\nliblerc-dev:arm64\t4.0.0+ds-2\nliblerc4:arm64\t4.0.0+ds-2\nlibllvm14:arm64\t1:14.0.6-12\nliblqr-1-0:arm64\t0.4.2-2.1\nliblqr-1-0-dev:arm64\t0.4.2-2.1\nliblsan0:arm64\t12.2.0-14+deb12u1\nlibltdl-dev:arm64\t2.4.7-7~deb12u1\nlibltdl7:arm64\t2.4.7-7~deb12u1\nliblz4-1:arm64\t1.9.4-1\nliblzma-dev:arm64\t5.4.1-0.2\nliblzma5:arm64\t5.4.1-0.2\nliblzo2-2:arm64\t2.10-2\nlibmagic-mgc\t1:5.44-3\nlibmagic1:arm64\t1:5.44-3\nlibmagickcore-6-arch-config:arm64\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickcore-6-headers\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickcore-6.q16-6:arm64\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickcore-6.q16-6-extra:arm64\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickcore-6.q16-dev:arm64\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickcore-dev\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickwand-6-headers\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickwand-6.q16-6:arm64\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickwand-6.q16-dev:arm64\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmagickwand-dev\t8:6.9.11.60+dfsg-1.6+deb12u2\nlibmariadb-dev\t1:10.11.11-0+deb12u1\nlibmariadb-dev-compat\t1:10.11.11-0+deb12u1\nlibmariadb3:arm64\t1:10.11.11-0+deb12u1\nlibmaxminddb-dev:arm64\t1.7.1-1\nlibmaxminddb0:arm64\t1.7.1-1\nlibmd0:arm64\t1.0.4-2\nlibmount-dev:arm64\t2.38.1-5+deb12u3\nlibmount1:arm64\t2.38.1-5+deb12u3\nlibmpc3:arm64\t1.3.1-1\nlibmpfr6:arm64\t4.2.0-1\nlibncurses-dev:arm64\t6.4-4\nlibncurses5-dev:arm64\t6.4-4\nlibncurses6:arm64\t6.4-4\nlibncursesw5-dev:arm64\t6.4-4\nlibncursesw6:arm64\t6.4-4\nlibnettle8:arm64\t3.8.1-2\nlibnghttp2-14:arm64\t1.52.0-1+deb12u2\nlibnpth0:arm64\t1.6-3\nlibnsl-dev:arm64\t1.3.0-2\nlibnsl2:arm64\t1.3.0-2\nlibnspr4:arm64\t2:4.35-1\nlibnss3:arm64\t2:3.87.1-1+deb12u4\nlibnuma1:arm64\t2.0.16-1\nlibobjc-12-dev:arm64\t12.2.0-14+deb12u1\nlibobjc4:arm64\t12.2.0-14+deb12u1\nlibopenexr-3-1-30:arm64\t3.1.5-5\nlibopenexr-dev\t3.1.5-5\nlibopenjp2-7:arm64\t2.5.0-2+deb12u1\nlibopenjp2-7-dev:arm64\t2.5.0-2+deb12u1\nlibp11-kit0:arm64\t0.24.1-2\nlibpam-modules:arm64\t1.5.2-6+deb12u1\nlibpam-modules-bin\t1.5.2-6+deb12u1\nlibpam-runtime\t1.5.2-6+deb12u1\nlibpam0g:arm64\t1.5.2-6+deb12u1\nlibpango-1.0-0:arm64\t1.50.12+ds-1\nlibpangocairo-1.0-0:arm64\t1.50.12+ds-1\nlibpangoft2-1.0-0:arm64\t1.50.12+ds-1\nlibpcre2-16-0:arm64\t10.42-1\nlibpcre2-32-0:arm64\t10.42-1\nlibpcre2-8-0:arm64\t10.42-1\nlibpcre2-dev:arm64\t10.42-1\nlibpcre2-posix3:arm64\t10.42-1\nlibperl5.36:arm64\t5.36.0-7+deb12u1\nlibpfm4:arm64\t4.13.0-1\nlibpixman-1-0:arm64\t0.42.2-1\nlibpixman-1-dev:arm64\t0.42.2-1\nlibpkgconf3:arm64\t1.8.1-1\nlibpng-dev:arm64\t1.6.39-2\nlibpng16-16:arm64\t1.6.39-2\nlibpq-dev\t15.12-0+deb12u2\nlibpq5:arm64\t15.12-0+deb12u2\nlibproc2-0:arm64\t2:4.0.2-3\nlibpsl5:arm64\t0.21.2-1\nlibpthread-stubs0-dev:arm64\t0.4-1\nlibpython3-stdlib:arm64\t3.11.2-1+b1\nlibpython3.11-minimal:arm64\t3.11.2-6+deb12u5\nlibpython3.11-stdlib:arm64\t3.11.2-6+deb12u5\nlibreadline-dev:arm64\t8.2-1.3\nlibreadline8:arm64\t8.2-1.3\nlibrsvg2-2:arm64\t2.54.7+dfsg-1~deb12u1\nlibrsvg2-common:arm64\t2.54.7+dfsg-1~deb12u1\nlibrsvg2-dev:arm64\t2.54.7+dfsg-1~deb12u1\nlibrtmp1:arm64\t2.4+20151223.gitfa8646d.1-2+b2\nlibsasl2-2:arm64\t2.1.28+dfsg-10\nlibsasl2-modules-db:arm64\t2.1.28+dfsg-10\nlibseccomp2:arm64\t2.5.4-1+deb12u1\nlibselinux1:arm64\t3.4-1+b6\nlibselinux1-dev:arm64\t3.4-1+b6\nlibsemanage-common\t3.4-1\nlibsemanage2:arm64\t3.4-1+b5\nlibsepol-dev:arm64\t3.4-2.1\nlibsepol2:arm64\t3.4-2.1\nlibserf-1-1:arm64\t1.3.9-11\nlibsm-dev:arm64\t2:1.2.3-1\nlibsm6:arm64\t2:1.2.3-1\nlibsmartcols1:arm64\t2.38.1-5+deb12u3\nlibsqlite3-0:arm64\t3.40.1-2+deb12u1\nlibsqlite3-dev:arm64\t3.40.1-2+deb12u1\nlibss2:arm64\t1.47.0-2\nlibssh2-1:arm64\t1.10.0-3+b1\nlibssl-dev:arm64\t3.0.15-1~deb12u1\nlibssl3:arm64\t3.0.15-1~deb12u1\nlibstdc++-12-dev:arm64\t12.2.0-14+deb12u1\nlibstdc++6:arm64\t12.2.0-14+deb12u1\nlibsvn1:arm64\t1.14.2-4+deb12u1\nlibsystemd0:arm64\t252.36-1~deb12u1\nlibtasn1-6:arm64\t4.19.0-2+deb12u1\nlibthai-data\t0.1.29-1\nlibthai0:arm64\t0.1.29-1\nlibtiff-dev:arm64\t4.5.0-6+deb12u2\nlibtiff6:arm64\t4.5.0-6+deb12u2\nlibtiffxx6:arm64\t4.5.0-6+deb12u2\nlibtinfo6:arm64\t6.4-4\nlibtirpc-common\t1.3.3+ds-1\nlibtirpc-dev:arm64\t1.3.3+ds-1\nlibtirpc3:arm64\t1.3.3+ds-1\nlibtool\t2.4.7-7~deb12u1\nlibtsan2:arm64\t12.2.0-14+deb12u1\nlibubsan1:arm64\t12.2.0-14+deb12u1\nlibudev1:arm64\t252.36-1~deb12u1\nlibunistring2:arm64\t1.0-2\nlibutf8proc2:arm64\t2.8.0-1\nlibuuid1:arm64\t2.38.1-5+deb12u3\nlibwebp-dev:arm64\t1.2.4-0.2+deb12u1\nlibwebp7:arm64\t1.2.4-0.2+deb12u1\nlibwebpdemux2:arm64\t1.2.4-0.2+deb12u1\nlibwebpmux3:arm64\t1.2.4-0.2+deb12u1\nlibwmf-0.2-7:arm64\t0.2.12-5.1\nlibwmf-dev\t0.2.12-5.1\nlibwmflite-0.2-7:arm64\t0.2.12-5.1\nlibx11-6:arm64\t2:1.8.4-2+deb12u2\nlibx11-data\t2:1.8.4-2+deb12u2\nlibx11-dev:arm64\t2:1.8.4-2+deb12u2\nlibx265-199:arm64\t3.5-2+b1\nlibxau-dev:arm64\t1:1.0.9-1\nlibxau6:arm64\t1:1.0.9-1\nlibxcb-render0:arm64\t1.15-1\nlibxcb-render0-dev:arm64\t1.15-1\nlibxcb-shm0:arm64\t1.15-1\nlibxcb-shm0-dev:arm64\t1.15-1\nlibxcb1:arm64\t1.15-1\nlibxcb1-dev:arm64\t1.15-1\nlibxdmcp-dev:arm64\t1:1.1.2-3\nlibxdmcp6:arm64\t1:1.1.2-3\nlibxext-dev:arm64\t2:1.3.4-1+b1\nlibxext6:arm64\t2:1.3.4-1+b1\nlibxml2:arm64\t2.9.14+dfsg-1.3~deb12u1\nlibxml2-dev:arm64\t2.9.14+dfsg-1.3~deb12u1\nlibxrender-dev:arm64\t1:0.9.10-1.1\nlibxrender1:arm64\t1:0.9.10-1.1\nlibxslt1-dev:arm64\t1.1.35-1\nlibxslt1.1:arm64\t1.1.35-1\nlibxt-dev:arm64\t1:1.2.1-1.1\nlibxt6:arm64\t1:1.2.1-1.1\nlibxxhash0:arm64\t0.8.1-1\nlibyaml-0-2:arm64\t0.2.5-1\nlibyaml-dev:arm64\t0.2.5-1\nlibz3-4:arm64\t4.8.12-3.1\nlibzstd-dev:arm64\t1.5.4+dfsg2-5\nlibzstd1:arm64\t1.5.4+dfsg2-5\nlinux-libc-dev:arm64\t6.1.129-1\nllvm-14\t1:14.0.6-12\nllvm-14-linker-tools\t1:14.0.6-12\nllvm-14-runtime\t1:14.0.6-12\nlogin\t1:4.13+dfsg1-1+b1\nlogsave\t1.47.0-2\nm4\t1.4.19-3\nmake\t4.3-4.1\nmariadb-common\t1:10.11.11-0+deb12u1\nmawk\t1.3.4.20200120-3.1\nmedia-types\t10.0.0\nmercurial\t6.3.2-1\nmercurial-common\t6.3.2-1\nmount\t2.38.1-5+deb12u3\nmysql-common\t5.8+1.1.0\nncurses-base\t6.4-4\nncurses-bin\t6.4-4\nnetbase\t6.4\nnss-plugin-pem:arm64\t1.0.8+1-1\nopenssh-client\t1:9.2p1-2+deb12u5\nopenssl\t3.0.15-1~deb12u1\npasswd\t1:4.13+dfsg1-1+b1\npatch\t2.7.6-7\nperl\t5.36.0-7+deb12u1\nperl-base\t5.36.0-7+deb12u1\nperl-modules-5.36\t5.36.0-7+deb12u1\npinentry-curses\t1.2.1-1\npkg-config:arm64\t1.8.1-1\npkgconf:arm64\t1.8.1-1\npkgconf-bin\t1.8.1-1\nprocps\t2:4.0.2-3\npython3\t3.11.2-1+b1\npython3-distutils\t3.11.2-3\npython3-lib2to3\t3.11.2-3\npython3-minimal\t3.11.2-1+b1\npython3.11\t3.11.2-6+deb12u5\npython3.11-minimal\t3.11.2-6+deb12u5\nreadline-common\t8.2-1.3\nrpcsvc-proto\t1.4.3-1\nsed\t4.9-1\nsensible-utils\t0.0.17+nmu1\nshared-mime-info\t2.2-1\nsq\t0.27.0-2+b1\nsubversion\t1.14.2-4+deb12u1\nsysvinit-utils\t3.06-4\ntar\t1.34+dfsg-1.2+deb12u1\ntzdata\t2025a-0+deb12u1\nucf\t3.0043+nmu1+deb12u1\nunzip\t6.0-28\nusr-is-merged\t37~deb12u1\nutil-linux\t2.38.1-5+deb12u3\nutil-linux-extra\t2.38.1-5+deb12u3\nuuid-dev:arm64\t2.38.1-5+deb12u3\nwget\t1.21.3-1+deb12u1\nx11-common\t1:7.7+23\nx11proto-core-dev\t2022.1-1\nx11proto-dev\t2022.1-1\nxorg-sgml-doctools\t1:1.11-1.1\nxtrans-dev\t1.4.0-1\nxz-utils\t5.4.1-0.2\nzlib1g:arm64\t1:1.2.13.dfsg-1\nzlib1g-dev:arm64\t1:1.2.13.dfsg-1",
+      "rustc": "rustc 1.85.1 (4eb161250 2025-03-15)"
+    },
+    "apple_sdk": {
+      "command": [
+        "/usr/bin/xcrun",
+        "--sdk",
+        "macosx",
+        "--show-sdk-path"
+      ],
+      "exit_code": 0,
+      "seconds": 0.012159,
+      "stdout": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk\n",
+      "stderr": ""
+    },
+    "clean_sdk_free": false,
+    "llvm_linux": {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network=none",
+        "--read-only",
+        "--tmpfs",
+        "/tmp",
+        "-e",
+        "CI=1",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+        "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+        "sh",
+        "-eu",
+        "-c",
+        "llc-14 --version"
+      ],
+      "exit_code": 0,
+      "seconds": 0.215833,
+      "stdout": "Debian LLVM version 14.0.6\n  Optimized build.\n  Default target: aarch64-unknown-linux-gnu\n  Host CPU: (unknown)\n\n  Registered Targets:\n    aarch64    - AArch64 (little endian)\n    aarch64_32 - AArch64 (little endian ILP32)\n    aarch64_be - AArch64 (big endian)\n    amdgcn     - AMD GCN GPUs\n    arm        - ARM\n    arm64      - ARM64 (little endian)\n    arm64_32   - ARM64 (little endian ILP32)\n    armeb      - ARM (big endian)\n    avr        - Atmel AVR Microcontroller\n    bpf        - BPF (host endian)\n    bpfeb      - BPF (big endian)\n    bpfel      - BPF (little endian)\n    hexagon    - Hexagon\n    lanai      - Lanai\n    m68k       - Motorola 68000 family\n    mips       - MIPS (32-bit big endian)\n    mips64     - MIPS (64-bit big endian)\n    mips64el   - MIPS (64-bit little endian)\n    mipsel     - MIPS (32-bit little endian)\n    msp430     - MSP430 [experimental]\n    nvptx      - NVIDIA PTX 32-bit\n    nvptx64    - NVIDIA PTX 64-bit\n    ppc32      - PowerPC 32\n    ppc32le    - PowerPC 32 LE\n    ppc64      - PowerPC 64\n    ppc64le    - PowerPC 64 LE\n    r600       - AMD GPUs HD2XXX-HD6XXX\n    riscv32    - 32-bit RISC-V\n    riscv64    - 64-bit RISC-V\n    sparc      - Sparc\n    sparcel    - Sparc LE\n    sparcv9    - Sparc V9\n    systemz    - SystemZ\n    thumb      - Thumb\n    thumbeb    - Thumb (big endian)\n    ve         - VE\n    wasm32     - WebAssembly 32-bit\n    wasm64     - WebAssembly 64-bit\n    x86        - 32-bit X86: Pentium-Pro and above\n    x86-64     - 64-bit X86: EM64T and AMD64\n    xcore      - XCore\n",
+      "stderr": ""
+    },
+    "lld": {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network=none",
+        "--read-only",
+        "--tmpfs",
+        "/tmp",
+        "-e",
+        "CI=1",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+        "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+        "sh",
+        "-eu",
+        "-c",
+        "command -v ld.lld-14"
+      ],
+      "exit_code": 127,
+      "seconds": 0.244059,
+      "stdout": "",
+      "stderr": ""
+    },
+    "tool_sha256": {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network=none",
+        "--read-only",
+        "--tmpfs",
+        "/tmp",
+        "-e",
+        "CI=1",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+        "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+        "sh",
+        "-eu",
+        "-c",
+        "sha256sum /usr/bin/llc-14 /usr/bin/clang-14 /probe/src/target/release/lo-native-probe"
+      ],
+      "exit_code": 0,
+      "seconds": 0.267719,
+      "stdout": "0a20239d8fa548d28fcd9e464733573d6dbc95a65e03b2d634e052b92edeab28  /usr/bin/llc-14\nd597971be1f39ca908f134199e43defbcaca3b109b3391be19443de6c1349a3e  /usr/bin/clang-14\nff0645e4e39c56c671457cc6f2bc84e56545ef1e622424c2098d67f2545e78e4  /probe/src/target/release/lo-native-probe\n",
+      "stderr": ""
+    },
+    "apple_clang_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+    "apple_clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+    "apple_sdk_version": {
+      "command": [
+        "/usr/bin/xcrun",
+        "--sdk",
+        "macosx",
+        "--show-sdk-version"
+      ],
+      "exit_code": 0,
+      "seconds": 0.010879,
+      "stdout": "27.0\n",
+      "stderr": ""
+    },
+    "darwin_dependencies": [
+      "Apple SDK headers",
+      "Apple linker",
+      "libSystem",
+      "printf"
+    ],
+    "linux_dependencies": [
+      "Debian glibc headers",
+      "GNU linker",
+      "glibc",
+      "printf"
+    ],
+    "production_version_recommendation": false
+  },
+  "source_sha256": {
+    "experiments/native-backends/Dockerfile": "2c5b0ba85a98a4b84b0d6c644c40e03392261fa9f88e8ba85d12183bcbd082eb",
+    "experiments/native-backends/cranelift/Cargo.lock": "01d5451805716dba051746a5ae77381c9ba7a37a83fd5dabd3656e9027be9d43",
+    "experiments/native-backends/cranelift/Cargo.toml": "c3bae873f7bf63fd3681b49736afe4a984aed8767262130f99b8d45cc2d059cb",
+    "experiments/native-backends/cranelift/src/main.rs": "5ab4d8a8580200adf2771239c7f3d55e4493cd28004652a5c222190ef282824d",
+    "experiments/native-backends/probe.ll": "795b6167358e65ec4855f1f54b266ff92f495a1dabfe8cd9cebc6465ba9e66c9",
+    "experiments/native-backends/probe.py": "190a2460c61f2bf9f908d492c6acded3aa6dcaafc0309f8bae43c893e92613c5",
+    "experiments/native-backends/runtime.c": "cf8bf4107d9a049493d626a922e1f65f095065c95eecb7f4042e9ccca9b545eb",
+    "experiments/native-backends/test_probe.py": "90d5fe7c210635f22ab9249e3b1f67fca73c1814c3bf9adf7ad23ed3485a325e"
+  },
+  "cells": [
+    {
+      "backend": "llvm",
+      "target": "aarch64-apple-darwin",
+      "offline_isolation": {
+        "object": "sandbox-exec deny network*",
+        "link": "sandbox-exec deny network*",
+        "run": "sandbox-exec deny network*"
+      },
+      "go": "not invoked; host absence unproved",
+      "object": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-p",
+          "(version 1)(allow default)(deny network*)",
+          "/usr/bin/clang",
+          "-target",
+          "aarch64-apple-darwin",
+          "-c",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/probe.ll",
+          "-o",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/llvm-aarch64-apple-darwin.o"
+        ],
+        "exit_code": 0,
+        "seconds": 0.088394,
+        "stdout": "",
+        "stderr": "warning: overriding the module target triple with arm64-apple-macosx27.0.0 [-Woverride-module]\n1 warning generated.\n"
+      },
+      "link": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-p",
+          "(version 1)(allow default)(deny network*)",
+          "/usr/bin/clang",
+          "-isysroot",
+          "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/runtime.c",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/llvm-aarch64-apple-darwin.o",
+          "-o",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/llvm-aarch64-apple-darwin"
+        ],
+        "exit_code": 0,
+        "seconds": 0.215488,
+        "stdout": "",
+        "stderr": ""
+      },
+      "run": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-p",
+          "(version 1)(allow default)(deny network*)",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/llvm-aarch64-apple-darwin"
+        ],
+        "exit_code": 0,
+        "seconds": 0.076978,
+        "stdout": "23 0\n0 7\n",
+        "stderr": ""
+      },
+      "object_sha256": "e967a464b87e062838e6519b85b23c833175340e7f8818e7e36345d835db6070",
+      "executable_sha256": "02b6d239c0bae856770ce638338b15578fcffc1d953f07ae36af7e4c8e6dbff8",
+      "passed": true
+    },
+    {
+      "backend": "cranelift",
+      "target": "aarch64-apple-darwin",
+      "offline_isolation": {
+        "object": "docker --network=none",
+        "link": "sandbox-exec deny network*",
+        "run": "sandbox-exec deny network*"
+      },
+      "go": "not invoked; host absence unproved",
+      "object": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network=none",
+          "--read-only",
+          "--tmpfs",
+          "/tmp",
+          "-e",
+          "CI=1",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+          "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+          "sh",
+          "-eu",
+          "-c",
+          "/probe/src/target/release/lo-native-probe aarch64-apple-darwin /output/cranelift-aarch64-apple-darwin.o"
+        ],
+        "exit_code": 0,
+        "seconds": 0.192619,
+        "stdout": "",
+        "stderr": ""
+      },
+      "link": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-p",
+          "(version 1)(allow default)(deny network*)",
+          "/usr/bin/clang",
+          "-isysroot",
+          "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/runtime.c",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/cranelift-aarch64-apple-darwin.o",
+          "-o",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/cranelift-aarch64-apple-darwin"
+        ],
+        "exit_code": 0,
+        "seconds": 0.086196,
+        "stdout": "",
+        "stderr": "ld: warning: no platform load command found in '/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/cranelift-aarch64-apple-darwin.o', assuming: macOS\n"
+      },
+      "run": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-p",
+          "(version 1)(allow default)(deny network*)",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016/cranelift-aarch64-apple-darwin"
+        ],
+        "exit_code": 0,
+        "seconds": 0.280419,
+        "stdout": "23 0\n0 7\n",
+        "stderr": ""
+      },
+      "object_sha256": "fda88a65081b9cf68227388d81ec687d1b6b5557cb2b8c52d2d858327fd7b14c",
+      "executable_sha256": "9ee44f26545005683f77c47a72c66ed8d7ab7208ec5d1d18cf5a713aedf6044e",
+      "passed": true
+    },
+    {
+      "backend": "llvm",
+      "target": "aarch64-unknown-linux-gnu",
+      "offline_isolation": {
+        "object": "docker --network=none",
+        "link": "docker --network=none",
+        "run": "docker --network=none"
+      },
+      "go": "not invoked; container absence checked",
+      "object": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network=none",
+          "--read-only",
+          "--tmpfs",
+          "/tmp",
+          "-e",
+          "CI=1",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+          "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+          "sh",
+          "-eu",
+          "-c",
+          "llc-14 -opaque-pointers -mtriple=aarch64-unknown-linux-gnu -filetype=obj /input/probe.ll -o /output/llvm-aarch64-unknown-linux-gnu.o"
+        ],
+        "exit_code": 0,
+        "seconds": 0.248597,
+        "stdout": "",
+        "stderr": ""
+      },
+      "link": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network=none",
+          "--read-only",
+          "--tmpfs",
+          "/tmp",
+          "-e",
+          "CI=1",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+          "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+          "sh",
+          "-eu",
+          "-c",
+          "clang-14 /input/runtime.c /output/llvm-aarch64-unknown-linux-gnu.o -o /output/llvm-aarch64-unknown-linux-gnu"
+        ],
+        "exit_code": 0,
+        "seconds": 0.292044,
+        "stdout": "",
+        "stderr": ""
+      },
+      "run": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network=none",
+          "--read-only",
+          "--tmpfs",
+          "/tmp",
+          "-e",
+          "CI=1",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+          "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+          "sh",
+          "-eu",
+          "-c",
+          "/output/llvm-aarch64-unknown-linux-gnu"
+        ],
+        "exit_code": 0,
+        "seconds": 0.221382,
+        "stdout": "23 0\n0 7\n",
+        "stderr": ""
+      },
+      "object_sha256": "49f03016385681861e35ee6af9b4c5bbbac006be274a4a896848953fbc75ffce",
+      "executable_sha256": "cb494b3af7649cf784f614a38cd27faecd23e19c5c8b2304d2759235e5a6d08b",
+      "passed": true
+    },
+    {
+      "backend": "cranelift",
+      "target": "aarch64-unknown-linux-gnu",
+      "offline_isolation": {
+        "object": "docker --network=none",
+        "link": "docker --network=none",
+        "run": "docker --network=none"
+      },
+      "go": "not invoked; container absence checked",
+      "object": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network=none",
+          "--read-only",
+          "--tmpfs",
+          "/tmp",
+          "-e",
+          "CI=1",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+          "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+          "sh",
+          "-eu",
+          "-c",
+          "/probe/src/target/release/lo-native-probe aarch64-unknown-linux-gnu /output/cranelift-aarch64-unknown-linux-gnu.o"
+        ],
+        "exit_code": 0,
+        "seconds": 0.28691,
+        "stdout": "",
+        "stderr": ""
+      },
+      "link": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network=none",
+          "--read-only",
+          "--tmpfs",
+          "/tmp",
+          "-e",
+          "CI=1",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+          "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+          "sh",
+          "-eu",
+          "-c",
+          "clang-14 /input/runtime.c /output/cranelift-aarch64-unknown-linux-gnu.o -o /output/cranelift-aarch64-unknown-linux-gnu"
+        ],
+        "exit_code": 0,
+        "seconds": 0.432129,
+        "stdout": "",
+        "stderr": ""
+      },
+      "run": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network=none",
+          "--read-only",
+          "--tmpfs",
+          "/tmp",
+          "-e",
+          "CI=1",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+          "-v",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+          "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+          "sh",
+          "-eu",
+          "-c",
+          "/output/cranelift-aarch64-unknown-linux-gnu"
+        ],
+        "exit_code": 0,
+        "seconds": 0.496889,
+        "stdout": "23 0\n0 7\n",
+        "stderr": ""
+      },
+      "object_sha256": "027ef77f9273bc7869bab72bab11f775a64b45fa22e6c487b5570496d561617a",
+      "executable_sha256": "7b38d4dd8332b4ede5b2605cb82c4f5190c07ebb5c4f288d7ee578a5de427563",
+      "passed": true
+    }
+  ],
+  "isolation_checks": {
+    "linux": {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network=none",
+        "--read-only",
+        "--tmpfs",
+        "/tmp",
+        "-e",
+        "CI=1",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/experiments/native-backends:/input:ro",
+        "-v",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backends-20261016:/output",
+        "sha256:ff951628c83eef5586bb24a9092eb4df47681957a483dfd83e333195b7e5a21f",
+        "sh",
+        "-eu",
+        "-c",
+        "test ! -e /usr/local/go; ! command -v go; cat /proc/net/route"
+      ],
+      "exit_code": 0,
+      "seconds": 0.355855,
+      "stdout": "Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT                                                       \n",
+      "stderr": ""
+    },
+    "darwin_network_denial": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1)(allow default)(deny network*)",
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-c",
+        "import socket; socket.socket().connect((\"1.1.1.1\",80))"
+      ],
+      "exit_code": 1,
+      "seconds": 0.066675,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import socket; socket.socket().connect((\"1.1.1.1\",80))\n                   ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^\nPermissionError: [Errno 1] Operation not permitted\n"
+    }
+  },
+  "isolation_passed": true
+}

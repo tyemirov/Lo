@@ -1,0 +1,60 @@
+// XOR resume: 250 SGD updates and an explicit checkpoint commit.
+
+flow Forward(inputs: Tensor<FP32>, values: Record{b1: Tensor<FP32>, b2: Tensor<FP32>, w1: Tensor<FP32>, w2: Tensor<FP32>}) -> Tensor<FP32>! {
+  hidden_linear = Tensor.matmul(inputs, values.w1)
+  hidden_biased = Tensor.add(hidden_linear, values.b1)
+  hidden = Tensor.relu(hidden_biased)
+  output_linear = Tensor.matmul(hidden, values.w2)
+  return Tensor.add(output_linear, values.b2)
+}
+
+flow Loss(inputs: Tensor<FP32>, targets: Tensor<FP32>, values: Record{b1: Tensor<FP32>, b2: Tensor<FP32>, w1: Tensor<FP32>, w2: Tensor<FP32>}) -> Tensor<FP32>! {
+  predictions = Forward(inputs, values)
+  residual = Tensor.sub(predictions, targets)
+  squared = Tensor.mul(residual, residual)
+  return Tensor.mean(squared, List.new(0, 1))
+}
+
+flow Counter(state: Int) -> Record{value: Int, next_state: Int} {
+  return Record.new(value: state, next_state: Math.add(state, 1))
+}
+
+flow TrainStep(inputs: Tensor<FP32>, targets: Tensor<FP32>, state: Optimizer.SGD.State<Record{b1: Tensor<FP32>, b2: Tensor<FP32>, w1: Tensor<FP32>, w2: Tensor<FP32>}>, index: Int) -> Optimizer.SGD.State<Record{b1: Tensor<FP32>, b2: Tensor<FP32>, w1: Tensor<FP32>, w2: Tensor<FP32>}>! {
+  values = Parameters.values(state.parameters)
+  differentiated = Autodiff.grad(values, inputs, targets, Loss)
+  gradients = Gradients.new(state.parameters, differentiated.gradients)
+  return Optimizer.SGD.step(state, gradients)
+}
+
+flow Main() -> Record{initial_loss: Float, loss: Float, predictions: Tensor<FP32>, steps: Int, parameters: Record{b1: Tensor<FP32>, b2: Tensor<FP32>, w1: Tensor<FP32>, w2: Tensor<FP32>}}! {
+  device = Device.new("cpu")
+  cpu = Device.new("cpu")
+  cpu_inputs = Tensor.new(List.new(0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0), List.new(4, 2))
+  cpu_targets = Tensor.new(List.new(0.0, 1.0, 1.0, 0.0), List.new(4, 1))
+  w1 = Tensor.new(List.new(0.5, -0.5, -0.4, 0.6), List.new(2, 2))
+  b1 = Tensor.new(List.new(0.1, 0.1), List.new(2))
+  w2 = Tensor.new(List.new(0.3, 0.2), List.new(2, 1))
+  b2 = Tensor.new(List.new(0.0), List.new(1))
+  values = Record.new(b1: b1, b2: b2, w1: w1, w2: w2)
+  template = Parameters.new(values)
+  config = Optimizer.SGD.Config.new(0.1)
+  template_state = Optimizer.SGD.State.new(template, config)
+  data = File.read(File.Path.new("bin/xor-state.json"))
+  source_state = Checkpoint.decode(data, template_state)
+  initial_loss = Tensor.to_float(Loss(cpu_inputs, cpu_targets, values))
+  inputs = Tensor.to(cpu_inputs, device)
+  targets = Tensor.to(cpu_targets, device)
+  initial_state = Optimizer.SGD.State.to(source_state, device)
+  steps = List.unfold(0, 250, Counter)
+  final_state = List.fold(steps, initial_state, inputs, targets, TrainStep)
+  final_values = Parameters.values(final_state.parameters)
+  predictions = Tensor.to(Forward(inputs, final_values), cpu)
+  loss = Tensor.to_float(Tensor.to(Loss(inputs, targets, final_values), cpu))
+  host_state = Optimizer.SGD.State.to(final_state, cpu)
+  encoded = Checkpoint.encode(host_state.parameters)
+  effect = File.write(File.Path.new("bin/xor-parameters.json"), encoded)
+  commit effect
+  return Record.new(initial_loss: initial_loss, loss: loss, predictions: predictions, steps: host_state.step, parameters: Parameters.values(host_state.parameters))
+}
+
+return Main()

@@ -138,13 +138,13 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		out.targets = []targetReference{{ID: targetID(r.ID), Conditions: mergeConditions(nil, c.conditions)}}
 	}
 
-	if catalog.UsesDevice(op.Name()) || op.Name() == catalog.TensorNew {
+	if catalog.UsesDevice(op.Name()) || op.Name() == catalog.TensorNew || op.Name() == catalog.CheckpointDecode {
 		target := a.unknown(node, types.Device())
 		var from *string
-		if op.Name() == catalog.TensorTo {
+		if catalog.IsTransfer(op.Name()) {
 			target = values[1]
 			from = values[0].location
-		} else if op.Name() == catalog.TensorNew {
+		} else if op.Name() == catalog.TensorNew || op.Name() == catalog.CheckpointDecode {
 			cpu := device.CPU
 			target.known = &cpu
 		} else if len(values) > 0 {
@@ -157,13 +157,13 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 			entry.StorageBytes = info.StorageBytes
 		}
 		a.data.DeviceResources = append(a.data.DeviceResources, entry)
-		if op.Name() == catalog.TensorTo {
+		if catalog.IsTransfer(op.Name()) {
 			a.data.Transfers = append(a.data.Transfers, entry)
 		}
 		if target.known == nil || *target.known != device.CPU {
 			a.capability(resource, device.Capability)
 		}
-		if op.Name() == catalog.TensorTo && (from == nil || *from != device.CPU) {
+		if catalog.IsTransfer(op.Name()) && (from == nil || *from != device.CPU) {
 			source := values[0]
 			source.known = from
 			a.capability(a.resource(c, op.Name(), node, source), device.Capability)
@@ -238,6 +238,23 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		}
 	case catalog.DeviceNew:
 		out.known = values[0].known
+	case catalog.ParametersNew, catalog.ParametersValues:
+		out.fields = values[0].fields
+		out.location = values[0].location
+		if len(out.fields) > 0 {
+			out.location = trainingFieldLocation(out.fields)
+		}
+	case catalog.SGDStateNew, catalog.AdamWStateNew:
+		out.fields = map[string]abstract{types.FieldParameters: values[0]}
+		out.location = values[0].location
+	case catalog.SGDStep, catalog.AdamWStep:
+		out.fields = values[0].fields
+		out.location = values[0].location
+	case catalog.ParametersTo, catalog.SGDStateTo, catalog.AdamWStateTo:
+		out.fields = trainingFields(values[0].fields, values[1].known)
+	case catalog.CheckpointDecode:
+		cpu := device.CPU
+		out.fields = trainingFields(values[1].fields, &cpu)
 	case catalog.TensorDevice:
 		out.known = values[0].location
 	case catalog.IntToString:
@@ -252,6 +269,31 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		}
 	}
 	return out
+}
+
+func trainingFields(fields map[string]abstract, location *string) map[string]abstract {
+	if fields == nil {
+		return nil
+	}
+	result := make(map[string]abstract, len(fields))
+	for name, field := range fields {
+		field.known = nil
+		field.location = location
+		field.fields = trainingFields(field.fields, location)
+		result[name] = field
+	}
+	return result
+}
+
+func trainingFieldLocation(fields map[string]abstract) *string {
+	var location *string
+	for _, field := range fields {
+		if field.location == nil || (location != nil && *location != *field.location) {
+			return nil
+		}
+		location = field.location
+	}
+	return location
 }
 func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callback identity.FlowID) abstract {
 	node := a.graph.nodes[e]
