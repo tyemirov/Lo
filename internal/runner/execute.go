@@ -41,17 +41,21 @@ func RunContext(ctx context.Context, options Options, p execution.Program, facto
 }
 
 func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout, stderr io.Writer) int {
-	files, err := adapter.OpenFiles(inv.readRoots, inv.writeRoots)
+	files, err := adapter.OpenFiles(adapter.FileRoots{Read: inv.readRoots, Write: inv.writeRoots, List: inv.listRoots, Remove: inv.removeRoots, OpenFiles: inv.openFilesRoots}, adapter.NativeFileIO())
 	if err != nil {
 		return ReportRuntime(stderr, inv.format, err)
 	}
 	if inv.command == RunCommand {
+		ctx, capture, err := execution.CaptureFailure(ctx)
+		if err != nil {
+			return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
+		}
 		output, runErr := p.Run(ctx, files, inv.budget, inv.devices)
-		if err := runtimeCleanup(runErr, files.Close()); err != nil {
+		if err := capture.Preserve(runtimeCleanup(runErr, files.Close())); err != nil {
 			return ReportRuntime(stderr, inv.format, err)
 		}
 		if err := writeExecution(stdout, inv.format, executionResult{Command: RunCommand, Status: "ok", Result: output}); err != nil {
-			return ReportRuntime(stderr, inv.format, execution.HostFailure("write command result", inv.path, err))
+			return ReportRuntime(stderr, inv.format, capture.Preserve(execution.HostFailure("write command result", inv.path, err)))
 		}
 		return ExitSuccess
 	}
@@ -97,10 +101,7 @@ func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout
 	return ExitSuccess
 }
 func runtimeCleanup(cause, cleanup error) error {
-	if cleanup != nil {
-		return execution.HostFailure("close runtime resources", "program", errors.Join(cause, cleanup))
-	}
-	return cause
+	return execution.PreserveCleanup(cause, cleanup)
 }
 func writeExecution(w io.Writer, format string, result executionResult) error {
 	if format == JsonFormat {

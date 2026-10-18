@@ -21,6 +21,7 @@ const (
 	MapLookup
 	RangeProcessor
 	ListProcessor
+	FlowProcessor
 	ListLength
 	ServerConstructor
 	Gradient
@@ -97,10 +98,22 @@ const (
 	ListMap           = "List.map"
 	ListFilter        = "List.filter"
 	ListFold          = "List.fold"
+	FlowFold          = "Flow.fold"
 	ListFlatMap       = "List.flat_map"
 	ListUnfold        = "List.unfold"
 	Length            = "List.length"
 	FileRead          = "File.read"
+	FileList          = "File.list"
+	FileOpenPaths     = "File.open_paths"
+	FilePathEqual     = "File.Path.eq"
+	OpenFilesFailed   = "File.OpenFilesFailed"
+	DirectoryAbsent   = "File.DirectoryAbsent"
+	FileRemove        = "File.remove"
+	ListFailed        = "File.ListFailed"
+	InvalidName       = "File.InvalidName"
+	InvalidSelection  = "File.InvalidSelection"
+	EntryChanged      = "File.EntryChanged"
+	RemoveFailed      = "File.RemoveFailed"
 	FileAppend        = "File.append"
 	FileWrite         = "File.write"
 	DivideByZero      = "Math.DivideByZero"
@@ -123,6 +136,8 @@ const (
 	ParamNumbers      = "number_list"
 	ParamPath         = "file_path"
 	ParamContent      = "file_content"
+	ParamEntries      = "entries"
+	ParamRoot         = "root"
 	ParamLeftOperand  = "left"
 	ParamRightOperand = "right"
 )
@@ -238,6 +253,10 @@ func build() map[string]Operation {
 	}
 	fixed(UTF8New, []types.Parameter{{Name: "bytes", Type: types.Bytes()}}, must(types.NewFallible(types.String())))
 	fixed(FileRead, []types.Parameter{{Name: ParamPath, Type: types.Path()}}, must(types.NewFallible(types.Bytes())))
+	fixed(FilePathEqual, []types.Parameter{{Name: ParamLeftOperand, Type: types.Path()}, {Name: ParamRightOperand, Type: types.Path()}}, types.Bool())
+	fixed(FileOpenPaths, []types.Parameter{{Name: ParamRoot, Type: types.Path()}}, must(types.NewFallible(must(types.NewList(types.Path())))))
+	fixed(FileList, []types.Parameter{{Name: ParamRoot, Type: types.Path()}}, must(types.NewFallible(must(types.NewList(types.FileEntry())))))
+	fixed(FileRemove, []types.Parameter{{Name: ParamEntries, Type: must(types.NewList(types.FileEntry()))}}, must(types.NewFallible(types.Effect())))
 	fixed(FileAppend, []types.Parameter{{Name: ParamPath, Type: types.Path()}, {Name: ParamContent, Type: types.String()}}, types.Effect())
 	fixed(FileWrite, []types.Parameter{{Name: ParamPath, Type: types.Path()}, {Name: ParamContent, Type: types.Bytes()}}, types.Effect())
 	fixed(ResponseTextNew, []types.Parameter{{Name: "status", Type: types.Int()}, {Name: "body", Type: types.String()}}, types.Response())
@@ -255,7 +274,7 @@ func build() map[string]Operation {
 		{HasKey, MapLookup, []string{"target_map", "target_key"}}, {Get, MapLookup, []string{"target_map", "target_key"}},
 		{Contains, RangeProcessor, []string{"target_range", "target_value"}}, {IsEmpty, RangeProcessor, []string{"target_range"}},
 		{Length, ListLength, []string{"target_list"}}, {ServerNew, ServerConstructor, []string{"port", "handler", "onError"}},
-		{ListMap, ListProcessor, nil}, {ListFilter, ListProcessor, nil}, {ListFold, ListProcessor, nil}, {ListFlatMap, ListProcessor, nil}, {ListUnfold, ListProcessor, nil},
+		{FlowFold, FlowProcessor, nil}, {ListMap, ListProcessor, nil}, {ListFilter, ListProcessor, nil}, {ListFold, ListProcessor, nil}, {ListFlatMap, ListProcessor, nil}, {ListUnfold, ListProcessor, nil},
 	} {
 		params := make([]types.Parameter, len(spec.params))
 		for i, p := range spec.params {
@@ -279,6 +298,19 @@ func build() map[string]Operation {
 		}
 		m[name] = o
 	}
+	listing := m[FileList].(operation)
+	listing.boundary = Read
+	listing.errors = []string{DirectoryAbsent, ListFailed, InvalidName}
+	m[FileList] = listing
+	probe := m[FileOpenPaths].(operation)
+	probe.boundary = Read
+	probe.errors = []string{OpenFilesFailed}
+	m[FileOpenPaths] = probe
+	removal := m[FileRemove].(operation)
+	removal.boundary = Effect
+	removal.errors = []string{InvalidSelection}
+	removal.activation = []string{EntryChanged, RemoveFailed}
+	m[FileRemove] = removal
 	o := m[FileRead].(operation)
 	o.boundary = Read
 	m[FileRead] = o

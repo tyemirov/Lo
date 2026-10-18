@@ -136,7 +136,7 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 		return expression{}, d
 	}
 	minimum := 2
-	if op.Name() == catalog.ListFold || op.Name() == catalog.ListUnfold {
+	if op.Name() == catalog.ListFold || op.Name() == catalog.FlowFold || op.Name() == catalog.ListUnfold {
 		minimum = 3
 	}
 	if len(args) < minimum {
@@ -146,7 +146,7 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 	if d != nil {
 		return expression{}, d
 	}
-	if f.graph.Effects().Commits {
+	if f.graph.Effects().Commits && op.Name() != catalog.FlowFold {
 		return expression{}, problem(diagnostic.EffectfulCallback, "list callback "+f.declaration.Name()+" can activate a commit", args[len(args)-1].Span)
 	}
 	params := f.signature.Parameters()
@@ -176,7 +176,7 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 			t = types.Int()
 		case i == 0:
 			t = must(types.NewList(params[len(params)-1].Type))
-		case i == 1 && op.Name() == catalog.ListFold:
+		case i == 1 && (op.Name() == catalog.ListFold || op.Name() == catalog.FlowFold):
 			t = params[contextCount].Type
 		}
 		v, d := c.processorArgument(args[i], t)
@@ -202,7 +202,7 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 			return expression{}, diagnostic.Mismatch(types.Bool().String(), f.signature.Output().String(), args[len(args)-1].Span)
 		}
 		result = values[0].Type()
-	case catalog.ListFold:
+	case catalog.ListFold, catalog.FlowFold:
 		if !types.Equal(output, values[1].Type()) {
 			return expression{}, diagnostic.Mismatch(values[1].Type().String(), f.signature.Output().String(), args[len(args)-1].Span)
 		}

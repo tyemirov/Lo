@@ -132,7 +132,7 @@ func (b *block) expression(expr ir.Expression) string {
 		op := e.Operation().Name()
 		if derivative, ok := e.(autodiff.Call); ok {
 			b.line("%s,err=p.%s(s,%s)", v, b.g.gradient(derivative, call), strings.Join(args, ","))
-		} else if e.Operation().Rule() == catalog.ListProcessor {
+		} else if e.Operation().Rule() == catalog.ListProcessor || e.Operation().Rule() == catalog.FlowProcessor {
 			b.line("%s,err=p.%s(s,%s)", v, b.g.list(e, call, flows[len(args)-1], b.name), strings.Join(args[:len(args)-1], ","))
 		} else {
 			function, ok := operationFunctions[op]

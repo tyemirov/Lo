@@ -134,12 +134,14 @@ func NewBytes(data []byte) Bytes {
 type List interface {
 	Value
 	Items() []Value
+	Len() int
 }
 type list struct {
 	base
 	items []Value
 }
 
+func (v list) Len() int                     { return len(v.items) }
 func (v list) Items() []Value               { return slices.Clone(v.items) }
 func (v list) MarshalJSON() ([]byte, error) { return encode(v, v.items) }
 func NewList(t types.List, items []Value) (List, error) {

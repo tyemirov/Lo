@@ -48,7 +48,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	}
 	defer func() {
 		if closeErr := invocation.Close(); closeErr != nil {
-			s.abort(execution.HostFailure("close device resources", "request", closeErr))
+			s.abort(execution.PreserveCleanup(err, closeErr))
 		}
 	}()
 	var output value.Value
@@ -85,7 +85,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 		}
 	}
 	if closeErr := invocation.Close(); closeErr != nil {
-		s.abort(execution.HostFailure("close device resources", "request", closeErr))
+		s.abort(execution.PreserveCleanup(nil, closeErr))
 	}
 	for name, v := range response.headers {
 		w.Header().Set(name, v)
@@ -98,6 +98,9 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	}
 }
 func (s *servers) requestAbort(ctx context.Context, err error) {
+	if _, _, ok := execution.RemovalDetails(err); ok {
+		s.abort(err)
+	}
 	s.mu.Lock()
 	stopping := s.stopping
 	s.mu.Unlock()

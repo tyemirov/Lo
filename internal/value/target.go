@@ -15,6 +15,10 @@ type Target interface {
 type Effect interface {
 	Target
 	Operation() catalog.Operation
+	effect()
+}
+type ContentEffect interface {
+	Effect
 	Path() Text
 	Content() Value
 }
@@ -25,6 +29,7 @@ type effect struct {
 	content   Value
 }
 
+func (effect) effect()                        {}
 func (effect) target()                        {}
 func (v effect) Operation() catalog.Operation { return v.operation }
 func (v effect) Path() Text                   { return v.path }
@@ -36,7 +41,7 @@ func (v effect) MarshalJSON() ([]byte, error) {
 		Content   Value  `json:"file_content"`
 	}{v.operation.Name(), v.path, v.content})
 }
-func NewEffect(op catalog.Operation, path Text, content Value) (Effect, error) {
+func NewEffect(op catalog.Operation, path Text, content Value) (ContentEffect, error) {
 	if op == nil || path == nil || path.Type().Kind() != types.PathKind || content == nil {
 		return nil, fmt.Errorf("incomplete file effect")
 	}

@@ -17,14 +17,15 @@ const programEntry = "program"
 const MaxContexts = 4096
 const maxStaticText = 64 * 1024
 const (
-	matchCondition        = "match-case"
-	testCondition         = "match-test"
-	iterationCondition    = "list-iteration"
-	successCondition      = "success"
-	commitCondition       = "commit-success"
-	handlerCondition      = "handler-error"
-	requestCondition      = "adapter-request"
-	adapterErrorCondition = "adapter-error"
+	matchCondition         = "match-case"
+	testCondition          = "match-test"
+	iterationCondition     = "list-iteration"
+	flowIterationCondition = "flow-iteration"
+	successCondition       = "success"
+	commitCondition        = "commit-success"
+	handlerCondition       = "handler-error"
+	requestCondition       = "adapter-request"
+	adapterErrorCondition  = "adapter-error"
 )
 
 type abstract struct {
@@ -32,6 +33,7 @@ type abstract struct {
 	node         nodeID
 	location     *string
 	known        *string
+	fileRoot     *string
 	dependencies []nodeID
 	fields       map[string]abstract
 	items        []abstract
@@ -201,7 +203,12 @@ func (a *analyzer) unknown(node nodeID, t types.Type) abstract {
 func (a *analyzer) describe(value abstract) description {
 	n := a.graph.nodeData[value.node]
 	d := description{Kind: "dynamic", Type: value.typ.String(), Node: value.node, Span: n.Span, Dependencies: uniqueNodes(value.dependencies)}
-	if value.known != nil {
+	if value.fileRoot != nil {
+		d.Kind = "calculated"
+		root := *value.fileRoot
+		d.Value = &root
+		d.Expression = a.program.Source().Text()[n.Span.Start().Offset:n.Span.End().Offset]
+	} else if value.known != nil {
 		v := *value.known
 		d.Kind = "known"
 		d.Value = &v
@@ -229,6 +236,15 @@ func (a *analyzer) join(values []abstract, node nodeID, t types.Type) abstract {
 		v := *values[0].known
 		result.known = &v
 	}
+	sameRoot := values[0].fileRoot != nil
+	for _, v := range values[1:] {
+		sameRoot = sameRoot && v.fileRoot != nil && *values[0].fileRoot == *v.fileRoot
+	}
+	if sameRoot {
+		root := *values[0].fileRoot
+		result.fileRoot = &root
+	}
+
 	sameLocation := values[0].location != nil
 	for _, v := range values[1:] {
 		sameLocation = sameLocation && v.location != nil && *values[0].location == *v.location
@@ -352,7 +368,7 @@ func (a *analyzer) activate(c *context, node nodeID, value abstract) {
 	}
 	targets := withConditions(value, c.conditions).targets
 	if len(targets) == 0 {
-		operations := []string{catalog.FileAppend, catalog.FileWrite}
+		operations := []string{catalog.FileAppend, catalog.FileWrite, catalog.FileRemove}
 		if value.typ.Kind() == types.ServerKind {
 			operations = []string{catalog.ServerNew}
 		}

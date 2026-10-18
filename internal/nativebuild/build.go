@@ -122,7 +122,11 @@ func build(ctx context.Context, program ir.Program, output, target string, backe
 	if err != nil {
 		return fail(diagnostic.BuildToolchain, err)
 	}
-	work, err := os.MkdirTemp("", "lo-native-")
+	paths, err := prepareBuildPaths(os.Getenv("LO_BUILD_ROOT"))
+	if err != nil {
+		return fail(diagnostic.BuildOutput, err)
+	}
+	work, err := os.MkdirTemp(paths.work, "lo-native-")
 	if err != nil {
 		return fail(diagnostic.BuildFailed, err)
 	}
@@ -131,11 +135,11 @@ func build(ctx context.Context, program ir.Program, output, target string, backe
 			receipt, failure = fail(diagnostic.BuildFailed, fmt.Errorf("remove build directory: %w", err))
 		}
 	}()
-	cache, err := os.UserCacheDir()
-	if err != nil {
+	temporary := filepath.Join(work, "tmp")
+	if err := os.MkdirAll(temporary, os.ModePerm); err != nil {
 		return fail(diagnostic.BuildFailed, err)
 	}
-	env := environment(work, filepath.Join(cache, "lo", "go-build"), target)
+	env := environment(work, paths.root, target)
 	if profile == raceProfile {
 		env = append(env, "CGO_ENABLED=1")
 	}
@@ -282,17 +286,17 @@ func runTool(command *exec.Cmd, cancel context.CancelFunc) ([]byte, error, bool)
 	err := command.Run()
 	return output.buffer.Bytes(), err, output.exceeded
 }
-func environment(work, cache, target string) []string {
+func environment(work, root, target string) []string {
 	env := []string{}
 	for _, entry := range os.Environ() {
 		key, _, _ := strings.Cut(entry, "=")
-		if strings.HasPrefix(key, "GO") || strings.HasPrefix(key, "CGO") || key == "CC" || key == "CXX" || key == "AR" || key == "SDKROOT" || key == "MACOSX_DEPLOYMENT_TARGET" {
+		if strings.HasPrefix(key, "GO") || strings.HasPrefix(key, "CGO") || key == "CC" || key == "CXX" || key == "AR" || key == "SDKROOT" || key == "MACOSX_DEPLOYMENT_TARGET" || key == "TMPDIR" || key == "TMP" || key == "TEMP" || key == "XDG_CACHE_HOME" || key == "CLANG_MODULE_CACHE_PATH" || key == "CCACHE_DIR" || key == "CI" {
 			continue
 		}
 		env = append(env, entry)
 	}
 	osName, arch, _ := strings.Cut(target, "/")
-	return append(env, "GOTOOLCHAIN=local", "GOWORK=off", "GOENV=off", "GOFLAGS=", "CGO_ENABLED=0", "GOOS="+osName, "GOARCH="+arch, "GOPROXY=off", "GOSUMDB=off", "GONOPROXY=none", "GOPRIVATE=", "GOMODCACHE="+filepath.Join(work, "module-cache"), "GOCACHE="+cache, "GOMAXPROCS=2")
+	return append(env, "GOTOOLCHAIN=local", "GOWORK=off", "GOENV=off", "GOFLAGS=", "CGO_ENABLED=0", "GOOS="+osName, "GOARCH="+arch, "GOPROXY=off", "GOSUMDB=off", "GONOPROXY=none", "GOPRIVATE=", "GOMODCACHE="+filepath.Join(root, "modules"), "GOCACHE="+filepath.Join(root, "go-build"), "GOPATH="+filepath.Join(root, "gopath"), "GOMAXPROCS=2", "GOTELEMETRY=off", "CI=1", "TMPDIR="+filepath.Join(work, "tmp"), "TMP="+filepath.Join(work, "tmp"), "TEMP="+filepath.Join(work, "tmp"), "XDG_CACHE_HOME="+filepath.Join(root, "cache"), "CLANG_MODULE_CACHE_PATH="+filepath.Join(root, "clang"), "CCACHE_DIR="+filepath.Join(root, "ccache"))
 }
 func extract(work string) error {
 	return extractArchive(work, runtimebundle.Bytes())

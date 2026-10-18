@@ -1,6 +1,7 @@
 package runtimeops
 
 import (
+	"errors"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
@@ -116,7 +117,18 @@ func ActivationError(target value.Target, err error, span source.Span) value.Err
 	var operation, kind string
 	var input value.Record
 	switch v := target.(type) {
-	case value.Effect:
+	case value.RemovalEffect:
+		operation, kind = catalog.FileRemove, catalog.RemoveFailed
+		fields := []value.Field{{Name: catalog.ParamEntries, Value: v.Entries()}}
+		var file execution.FileError
+		if errors.As(err, &file) {
+			kind = file.Kind()
+		}
+		if _, progress, ok := execution.RemovalDetails(err); ok {
+			fields = append(fields, value.Field{Name: "progress", Value: progress})
+		}
+		input = must(value.NewRecord(fields))
+	case value.ContentEffect:
 		operation = v.Operation().Name()
 		kind = v.Operation().ActivationKinds()[0]
 		input = must(value.NewRecord([]value.Field{{Name: catalog.ParamPath, Value: v.Path()}, {Name: catalog.ParamContent, Value: v.Content()}}))

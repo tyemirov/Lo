@@ -115,6 +115,12 @@ func (s *servers) Start(ctx context.Context) (value.Value, error) {
 func (s *servers) Read(ctx context.Context, path value.Text) (value.Bytes, error) {
 	return s.files.Read(ctx, path)
 }
+func (s *servers) List(ctx context.Context, path value.Text) (value.List, error) {
+	return s.files.List(ctx, path)
+}
+func (s *servers) OpenPaths(ctx context.Context, path value.Text) (value.List, error) {
+	return s.files.OpenPaths(ctx, path)
+}
 func (s *servers) Commit(ctx context.Context, target value.Target) error {
 	t, ok := target.(value.Server)
 	if !ok {

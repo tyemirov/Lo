@@ -20,6 +20,7 @@ const (
 	DeviceKind    Kind = "Device"
 	ErrorKind     Kind = "Error"
 	PathKind      Kind = "File.Path"
+	FileEntryKind Kind = "File.Entry"
 	RequestKind   Kind = "HTTP.Request"
 	ResponseKind  Kind = "HTTP.Response"
 	ServerKind    Kind = "HTTP.Server"
@@ -111,6 +112,7 @@ func Tensor() Type            { return atom(TensorKind) }
 func Device() Type            { return atom(DeviceKind) }
 func Error() Type             { return atom(ErrorKind) }
 func Path() Type              { return atom(PathKind) }
+func FileEntry() Type         { return atom(FileEntryKind) }
 func Request() Type           { return atom(RequestKind) }
 func Response() Type          { return atom(ResponseKind) }
 func Server() Type            { return atom(ServerKind) }
@@ -118,7 +120,7 @@ func Effect() Type            { return atom(EffectKind) }
 func AnyRecord() Type         { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, RequestKind, ResponseKind, ServerKind, EffectKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
+	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, RequestKind, ResponseKind, ServerKind, EffectKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true
 	}
 	return nil, false
@@ -270,6 +272,15 @@ func FieldType(t Type, name string) (Type, bool) {
 		return nil, false
 	}
 	switch t.Kind() {
+	case FileEntryKind:
+		switch name {
+		case "path":
+			return Path(), true
+		case "name", "kind":
+			return String(), true
+		case "size_bytes", "modified_unix_ns", "link_count":
+			return Int(), true
+		}
 	case RequestKind:
 		switch name {
 		case "method", "path":

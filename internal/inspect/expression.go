@@ -127,6 +127,9 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		a.capability(r, op.Capability())
 	case catalog.Effect, catalog.Server:
 		r := a.resource(c, op.Name(), node, values[0])
+		if op.Name() == catalog.FileRemove {
+			r.Target.Kind = "calculated"
+		}
 		r.Origin = "construction"
 		r.ID = nextID("t", len(a.data.Targets))
 		if op.Boundary() == catalog.Server {
@@ -204,10 +207,12 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 				out = a.join(candidates, node, e.Type())
 			}
 		}
-	case catalog.ListProcessor:
+	case catalog.ListProcessor, catalog.FlowProcessor:
 		return a.list(c, e, values, flows[len(e.Arguments())-1])
 	}
 	switch op.Name() {
+	case catalog.FileList:
+		out.fileRoot = values[0].known
 	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew, catalog.ScalarNew, catalog.PathNew:
 		out = values[0]
 	case catalog.Concat:
@@ -301,7 +306,7 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 	flow := a.graph.flows[callback]
 	args := make([]abstract, len(flow.Parameters()))
 	contextStart := 1
-	if name == catalog.ListFold || name == catalog.ListUnfold {
+	if name == catalog.ListFold || name == catalog.FlowFold || name == catalog.ListUnfold {
 		contextStart = 2
 	}
 	for i := contextStart; i < len(values)-1; i++ {
@@ -319,14 +324,18 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 			args[len(args)-1] = a.unknown(values[0].node, elementType)
 			args[len(args)-1].targets = values[0].targets
 		}
-		if name == catalog.ListFold {
+		if name == catalog.ListFold || name == catalog.FlowFold {
 			state := a.unknown(values[1].node, flow.Parameters()[len(args)-2].Type)
 			state.targets = values[1].targets
 			args[len(args)-2] = state
 		}
 	}
-	child := branchContext(c, condition{Kind: iterationCondition, Node: node, Context: c.id})
-	result := a.invoke(child, callback, "list-callback", c.entry, node, args, child.conditions)
+	iteration, invocation := iterationCondition, "list-callback"
+	if name == catalog.FlowFold {
+		iteration, invocation = flowIterationCondition, "flow-callback"
+	}
+	child := branchContext(c, condition{Kind: iteration, Node: node, Context: c.id})
+	result := a.invoke(child, callback, invocation, c.entry, node, args, child.conditions)
 	out := a.unknown(node, e.Type())
 	out.dependencies = append(out.dependencies, result.dependencies...)
 	for _, value := range values {
@@ -337,9 +346,10 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 		out.items = []abstract{result}
 		out.targets = result.targets
 	case catalog.ListFilter:
+		out.fileRoot = values[0].fileRoot
 		out.items = values[0].items
 		out.targets = values[0].targets
-	case catalog.ListFold:
+	case catalog.ListFold, catalog.FlowFold:
 		out = a.join([]abstract{values[1], result}, node, e.Type())
 	case catalog.ListFlatMap:
 		out.items = result.items

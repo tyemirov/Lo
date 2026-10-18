@@ -2,6 +2,7 @@ package runner
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
@@ -26,6 +27,9 @@ const (
 	listenOption        = "--listen"
 	readRootOption      = "--read-root"
 	writeRootOption     = "--write-root"
+	listRootOption      = "--list-root"
+	removeRootOption    = "--remove-root"
+	openFilesRootOption = "--open-files-root"
 	allowDeviceOption   = "--allow-device"
 	maxStepsOption      = "--max-steps"
 	formatOption        = "--format"
@@ -42,6 +46,9 @@ type invocation struct {
 	deviceBackend         device.BuildBackend
 	readRoots             []string
 	writeRoots            []string
+	listRoots             []string
+	removeRoots           []string
+	openFilesRoots        []string
 	devices               device.Config
 	budget                execution.Budget
 	listenPolicy          adapter.ListenPolicy
@@ -123,19 +130,26 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 			ports = append(ports, uint16(port))
 			continue
 		}
-		if arg == readRootOption || arg == writeRootOption || arg == maxStepsOption {
+		if arg == readRootOption || arg == writeRootOption || arg == listRootOption || arg == removeRootOption || arg == openFilesRootOption || arg == maxStepsOption {
 			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
 				return inv, fmt.Errorf("%s requires a value with run or serve", arg)
 			}
 			i++
-			if arg == readRootOption || arg == writeRootOption {
+			if arg != maxStepsOption {
 				if args[i] == "" {
 					return inv, fmt.Errorf("empty adapter root")
 				}
-				if arg == readRootOption {
+				switch arg {
+				case readRootOption:
 					inv.readRoots = append(inv.readRoots, args[i])
-				} else {
+				case writeRootOption:
 					inv.writeRoots = append(inv.writeRoots, args[i])
+				case listRootOption:
+					inv.listRoots = append(inv.listRoots, args[i])
+				case removeRootOption:
+					inv.removeRoots = append(inv.removeRoots, args[i])
+				case openFilesRootOption:
+					inv.openFilesRoots = append(inv.openFilesRoots, args[i])
 				}
 			} else {
 				if stepsSet {
@@ -209,6 +223,9 @@ func (inv invocation) Path() string                { return inv.path }
 func (inv invocation) Format() string              { return inv.format }
 func ParseCompiler(args []string) (Options, error) { return parseArgs(args, false) }
 func Execute(program execution.Program, args []string, stdout, stderr io.Writer) int {
+	if adapter.HandleFileProbe(args) {
+		return ExitSuccess
+	}
 	inv, err := parseArgs(args, true)
 	if err != nil {
 		return Report(stderr, inv.format, diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), ExitHost)
@@ -220,15 +237,17 @@ func Run(inv Options, program execution.Program, stdout, stderr io.Writer) int {
 }
 func Main(program execution.Program) { os.Exit(Execute(program, os.Args[1:], os.Stdout, os.Stderr)) }
 func ReportRuntime(stderr io.Writer, format string, err error) int {
-	if failure, ok := err.(execution.Failure); ok {
+	var failure execution.Failure
+	if errors.As(err, &failure) {
 		v := failure.Value()
 		d := diagnostic.New(diagnostic.RuntimeUnhandled, diagnostic.Runtime, err.Error(), v.Span())
 		if format == JsonFormat {
 			type runtimeDiagnostic struct {
 				diagnostic.Data
-				Error value.Error `json:"error"`
+				Error value.Error    `json:"error"`
+				Flows []value.Record `json:"flow_progress,omitempty"`
 			}
-			payload := runtimeDiagnostic{d.Data(), v}
+			payload := runtimeDiagnostic{d.Data(), v, execution.FlowDetails(err)}
 			if err := json.NewEncoder(stderr).Encode(struct {
 				Diagnostics []runtimeDiagnostic `json:"diagnostics"`
 			}{[]runtimeDiagnostic{payload}}); err != nil {
@@ -247,8 +266,41 @@ func ReportRuntime(stderr io.Writer, format string, err error) int {
 		return ExitRejected
 	}
 	code := diagnostic.RuntimeHost
-	if host, ok := err.(execution.HostError); ok {
+	var host execution.HostError
+	if errors.As(err, &host) {
 		code = host.Code()
+	}
+	entries, progress, removal := execution.RemovalDetails(err)
+	flows := execution.FlowDetails(err)
+	if removal || len(flows) > 0 {
+		data := diagnostic.New(code, diagnostic.Runtime, err.Error(), nil).Data()
+		if format == JsonFormat {
+			type removalDiagnostic struct {
+				diagnostic.Data
+				Entries  value.Value    `json:"removal_entries,omitempty"`
+				Progress value.Record   `json:"removal_progress,omitempty"`
+				Flows    []value.Record `json:"flow_progress,omitempty"`
+			}
+			var snapshot value.Value
+			if entries != nil {
+				snapshot = value.Snapshot(entries)
+			}
+			payload := struct {
+				Diagnostics []removalDiagnostic `json:"diagnostics"`
+			}{[]removalDiagnostic{{data, snapshot, progress, flows}}}
+			if err := json.NewEncoder(stderr).Encode(payload); err != nil {
+				return ExitHost
+			}
+			return ExitHost
+		}
+		message := err.Error()
+		if removal {
+			message += fmt.Sprintf(" (completed %s removals, stage %s)", value.TextResult(progress.Field("completed_count")), value.TextResult(progress.Field("stage")))
+		}
+		for _, flow := range flows {
+			message += fmt.Sprintf(" (Flow.fold completed %s/%s, state %s)", value.TextResult(flow.Field("completed_count")), value.TextResult(flow.Field("total_count")), value.TextResult(flow.Field("state")))
+		}
+		return Report(stderr, format, diagnostic.New(code, diagnostic.Runtime, message, nil), ExitHost)
 	}
 	return Report(stderr, format, diagnostic.New(code, diagnostic.Runtime, err.Error(), nil), ExitHost)
 }

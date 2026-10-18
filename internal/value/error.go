@@ -138,6 +138,8 @@ func Project(v Value, field string) Value {
 			}
 			return must(NewList(t.(types.List), items))
 		}
+	case FileEntry:
+		return x.FieldsRecord().Field(field)
 	case HTTPValue:
 		return x.Fields().Field(field)
 	}

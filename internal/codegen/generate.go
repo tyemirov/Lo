@@ -121,7 +121,7 @@ func (g *generator) typeOf(t types.Type) string {
 	if name, ok := g.types[t.String()]; ok {
 		return name
 	}
-	atoms := map[types.Kind]string{types.IntKind: "Int", types.StringKind: "String", types.BoolKind: "Bool", types.NullKind: "Null", types.ScalarKind: "Scalar", types.BytesKind: "Bytes", types.FloatKind: "Float", types.TensorKind: "Tensor", types.DeviceKind: "Device", types.ErrorKind: "Error", types.PathKind: "Path", types.RequestKind: "Request", types.ResponseKind: "Response", types.ServerKind: "Server", types.EffectKind: "Effect", types.AnyRecordKind: "AnyRecord", types.SGDConfigKind: "SGDConfig", types.AdamWConfigKind: "AdamWConfig"}
+	atoms := map[types.Kind]string{types.IntKind: "Int", types.StringKind: "String", types.BoolKind: "Bool", types.NullKind: "Null", types.ScalarKind: "Scalar", types.BytesKind: "Bytes", types.FloatKind: "Float", types.TensorKind: "Tensor", types.DeviceKind: "Device", types.ErrorKind: "Error", types.PathKind: "Path", types.FileEntryKind: "FileEntry", types.RequestKind: "Request", types.ResponseKind: "Response", types.ServerKind: "Server", types.EffectKind: "Effect", types.AnyRecordKind: "AnyRecord", types.SGDConfigKind: "SGDConfig", types.AdamWConfigKind: "AdamWConfig"}
 	if atom, ok := atoms[t.Kind()]; ok {
 		return "types." + atom + "()"
 	}

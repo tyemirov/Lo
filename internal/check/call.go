@@ -155,7 +155,7 @@ func (c *checker) builtin(op catalog.Operation, args []syntax.Argument, expected
 			nodes[i] = must(ir.ValueArg(i, v.node))
 		}
 		return builtinResult(op, types.String(), nodes, nil, span, values...), nil
-	case catalog.ListProcessor:
+	case catalog.ListProcessor, catalog.FlowProcessor:
 		return c.listProcessor(op, args, span)
 	}
 	bound, d := bindArguments(op.Name(), op.Parameters(), args, span)

@@ -17,10 +17,14 @@ const (
 	MaxDepth                   = 256
 	MaxValueWeight      uint64 = 16 << 20
 	MaxEvaluationWeight uint64 = 64 << 20
+	MaxFileEntries             = 10_000
+	MaxFileDirectories         = 128
 )
 
 type Boundary interface {
 	Read(context.Context, value.Text) (value.Bytes, error)
+	List(context.Context, value.Text) (value.List, error)
+	OpenPaths(context.Context, value.Text) (value.List, error)
 	Commit(context.Context, value.Target) error
 }
 type Budget interface {
