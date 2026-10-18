@@ -2,6 +2,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -45,6 +46,19 @@ func main() {
 			panic(err)
 		}
 		record(filepath.Join(state, "work"), cwd)
+		if os.Getenv("LO_TEST_TOOL_ACTION") == "paths" {
+			paths := map[string]string{"work": cwd}
+			for _, key := range []string{"TMPDIR", "TMP", "TEMP", "GOCACHE", "GOMODCACHE", "GOPATH", "CLANG_MODULE_CACHE_PATH", "XDG_CACHE_HOME", "CCACHE_DIR", "GOTELEMETRY", "GOTOOLCHAIN", "CI"} {
+				paths[key] = os.Getenv(key)
+			}
+			data, err := json.Marshal(paths)
+			if err != nil {
+				panic(err)
+			}
+			record(filepath.Join(state, "paths.json"), string(data))
+			fmt.Fprintln(os.Stderr, "controlled path observation")
+			os.Exit(1)
+		}
 		if os.Getenv("LO_TEST_TOOL_ACTION") == "failure" {
 			fmt.Fprintln(os.Stderr, "controlled compiler failure")
 			os.Exit(1)
