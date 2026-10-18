@@ -34,7 +34,7 @@ func TestFileReadCancellation(t *testing.T) {
 	if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
 		t.Fatalf("create local pipe: %v, %s", err, output)
 	}
-	files, err := adapter.OpenFiles([]string{dir}, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{Read: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestFileWriteCancellation(t *testing.T) {
 			if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
 				t.Fatalf("create local pipe: %v, %s", err, output)
 			}
-			files, err := adapter.OpenFiles(nil, []string{dir})
+			files, err := adapter.OpenFiles(adapter.FileRoots{Write: []string{dir}}, adapter.NativeFileIO())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -133,7 +133,7 @@ func TestFileWriteCancellation(t *testing.T) {
 func TestFileConcurrentAppendCreation(t *testing.T) {
 	dir := t.TempDir()
 	name := filepath.Join(dir, "output")
-	files, err := adapter.OpenFiles(nil, []string{dir})
+	files, err := adapter.OpenFiles(adapter.FileRoots{Write: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,7 +185,7 @@ func TestFileOpenDoesNotWaitForPipePeer(t *testing.T) {
 	if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
 		t.Fatalf("create local pipe: %v, %s", err, output)
 	}
-	files, err := adapter.OpenFiles([]string{dir}, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{Read: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +230,7 @@ func TestServerPartialStartupCleanup(t *testing.T) {
 	if d != nil {
 		t.Fatal(d)
 	}
-	files, err := adapter.OpenFiles(nil, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +269,7 @@ func startAdapter(t *testing.T, text string) adapter.Servers {
 	if d != nil {
 		t.Fatal(d)
 	}
-	files, err := adapter.OpenFiles(nil, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}

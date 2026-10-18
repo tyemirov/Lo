@@ -34,8 +34,12 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.ListMap: `[{"type":"String","value":"1"}]`, catalog.ListFilter: `[{"type":"Scalar","value":"a"},{"type":"Scalar","value":"b"},{"type":"Scalar","value":"c"}]`, catalog.ListFold: `"1"`,
 		catalog.ListFlatMap: `{"type":"List<Int>","value":[{"type":"Int","value":"1"}]}`,
 		catalog.ListUnfold:  `{"type":"List<String>","value":[{"type":"String","value":"0"},{"type":"String","value":"1"}]}`, catalog.Length: `"5"`, catalog.FileRead: `{"type":"Bytes","value":"eA=="}`,
-		catalog.FileAppend: `{"operation":"File.append","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"String","value":"data"}}`,
-		catalog.FileWrite:  `{"operation":"File.write","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
+		catalog.FileAppend:    `{"operation":"File.append","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"String","value":"data"}}`,
+		catalog.FileWrite:     `{"operation":"File.write","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
+		catalog.FilePathEqual: `true`, catalog.FlowFold: `"1"`,
+		catalog.FileList:      `{"type":"List<File.Entry>","value":[]}`,
+		catalog.FileOpenPaths: `{"type":"List<File.Path>","value":[]}`,
+		catalog.FileRemove:    `{"type":"Effect","value":{"operation":"File.remove","entries":{"type":"List<File.Entry>","value":[]}}}`,
 	}
 	for name, expected := range map[string]string{
 		catalog.DeviceNew:     `{"type":"Device","value":"cpu"}`,
@@ -101,6 +105,16 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				return
 			}
 			var args []string
+			if tc.name == catalog.FileList || tc.name == catalog.FileOpenPaths {
+				root := fileFixtureRoot(t)
+				flag := "--list-root"
+				if tc.name == catalog.FileOpenPaths {
+					installFileProbeFixture(t)
+					flag = "--open-files-root"
+				}
+				tc.source = fmt.Sprintf("return %s(File.Path.new(%q))", tc.name, root)
+				args = []string{flag, root}
+			}
 			if tc.name == catalog.FileRead {
 				dir := t.TempDir()
 				file, err := os.Create(filepath.Join(dir, "data"))

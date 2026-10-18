@@ -28,6 +28,12 @@ func (b *observedBoundary) Read(_ context.Context, path value.Text) (value.Bytes
 	b.reads = append(b.reads, path.Text())
 	return b.read(path.Text(), len(b.reads))
 }
+func (b *observedBoundary) List(context.Context, value.Text) (value.List, error) {
+	return nil, errors.New("unexpected file listing")
+}
+func (b *observedBoundary) OpenPaths(context.Context, value.Text) (value.List, error) {
+	return nil, errors.New("unexpected open-file observation")
+}
 func (b *observedBoundary) Commit(_ context.Context, _ value.Target) error {
 	b.commits++
 	return errors.New("injected activation failure")

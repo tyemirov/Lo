@@ -442,7 +442,7 @@ func validateInspectionReferences(t *testing.T, report inspectionReport) {
 		for _, n := range d.Dependencies {
 			need(nodes, n)
 		}
-		if d.Kind != "known" && d.Kind != "dynamic" {
+		if d.Kind != "known" && d.Kind != "dynamic" && d.Kind != "calculated" {
 			t.Fatalf("unknown target kind %s", d.Kind)
 		}
 	}

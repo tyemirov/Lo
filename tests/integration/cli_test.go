@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,6 +17,9 @@ var nativeCompiler string
 var repository string
 
 func TestMain(m *testing.M) {
+	if adapter.HandleFileProbe(os.Args[1:]) {
+		return
+	}
 	var err error
 	repository, err = filepath.Abs("../..")
 	if err != nil {

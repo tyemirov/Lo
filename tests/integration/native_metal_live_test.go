@@ -97,7 +97,7 @@ func TestNativeMetalLiveStandalone(t *testing.T) {
 	}
 	command := exec.Command(artifact, "run", "--allow-device", "metal:0", "--format", "json")
 	command.Dir = t.TempDir()
-	command.Env = []string{"PATH=" + t.TempDir()}
+	command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
 	if err := command.Run(); err != nil || stdout.String() != expected.stdout || stderr.Len() != 0 {
@@ -260,7 +260,7 @@ func TestNativeMetalLiveBuildIsolation(t *testing.T) {
 		}
 	}
 	command := exec.Command(compiler, "build", source, "--device-backend", "metal", "--target", "linux/arm64", "--output", first, "--format", "json")
-	command.Env = []string{"PATH=" + t.TempDir()}
+	command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
 	if err := command.Run(); err == nil || diagnostics(t, stderr.String()).Diagnostics[0].Code != "build.unsupported-target" {

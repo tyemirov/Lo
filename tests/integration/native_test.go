@@ -39,7 +39,7 @@ func TestNativeStandalone(t *testing.T) {
 	}
 	command := exec.Command(artifact, "run")
 	command.Dir = t.TempDir()
-	command.Env = []string{"PATH=" + t.TempDir()}
+	command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
 	if err := command.Run(); err != nil || stdout.String() != "10\n" || stderr.Len() != 0 {
@@ -181,7 +181,7 @@ func TestNativeBuildBoundary(t *testing.T) {
 		t.Fatalf("previous artifact changed: %q %v", data, err)
 	}
 	command := exec.Command(binary, "build", source, "--output", artifact, "--format", "json")
-	command.Env = []string{"PATH=" + t.TempDir()}
+	command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
 	if err = command.Run(); err == nil || diagnostics(t, stderr.String()).Diagnostics[0].Code != "build.toolchain" {

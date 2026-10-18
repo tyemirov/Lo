@@ -3,6 +3,7 @@ package integration_test
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -29,7 +30,7 @@ func TestNativeMetalSelection(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			args := append([]string{"build", source, "--output", filepath.Join(t.TempDir(), "program"), "--format", "json"}, tc.args...)
 			command := exec.Command(binary, args...)
-			command.Env = []string{"PATH=" + t.TempDir()}
+			command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 			var stderr bytes.Buffer
 			command.Stderr = &stderr
 			if err := command.Run(); err == nil || diagnostics(t, stderr.String()).Diagnostics[0].Code != tc.code {
