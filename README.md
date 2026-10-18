@@ -9,6 +9,8 @@ Language models are good at proposing workflows, but unsafe as direct executors 
 Lo is not a replacement for Go, Python, or shell. It is an execution contract between an AI planner, a verifier, and a runtime.
 
 For language rules and training examples, start with the [Lo Language Reference](specification.md).
+The [adapter design](docs/adapter-design.md) defines the next shared contract for File, HTTP, and Process.
+Its [implementation plan](docs/adapter-plan.md) separates proposed APIs from current behavior.
 
 ## Status
 
@@ -63,7 +65,8 @@ The [standalone compiler plan](docs/standalone-compiler-plan.md) defines the pro
 The [backend experiment](docs/native-backend-experiment.md) records LLVM and Cranelift probe results separately from compiler acceptance.
 The current native build still requires the Go toolchain below.
 
-The Makefile selects Go 1.27.1.
+The Makefile requires installed Go 1.27.1 and keeps tool state under `_scratch/build-state/`.
+Native build commands require `LO_BUILD_ROOT` to name that existing absolute directory.
 The qualified platforms are macOS on arm64 and Linux on arm64.
 
 ```bash
@@ -72,7 +75,7 @@ make build
 ./bin/lo check examples/list_sum.lo
 ./bin/lo inspect examples/agent_file_workflow.lo --format json
 ./bin/lo run examples/list_sum.lo
-./bin/lo build examples/list_sum.lo --output ./bin/list-sum
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo --output ./bin/list-sum
 ./bin/list-sum run
 ./bin/lo run examples/tensor_forward.lo
 ./bin/lo run examples/training_cpu.lo --format json
@@ -85,7 +88,7 @@ make ci
 ```
 
 The conformance suite runs 83 static and runtime fixtures.
-The catalog tests verify all 101 built-in operations.
+The catalog tests verify all 111 built-in operations.
 The integration suite also tests built-in signatures, runtime values, evaluation order, error traces, and adapter authorization.
 The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.
@@ -93,6 +96,7 @@ The [adapter examples](docs/compiler-design.md#executable-adapter-examples) spec
 
 Native builds require Go 1.27.1 on the build host.
 Artifacts need no Go installation, Lo installation, source file, or repository checkout during execution.
+Programs that use `File.open_paths` require `lsof` on the execution host.
 Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact target.
 The build uses the host target when this option is absent.
 Supply file, listen, and device grants when you execute the artifact.
@@ -106,7 +110,7 @@ make build-metal
 ./bin/lo-metal check examples/training_metal.lo --format json
 ./bin/lo-metal inspect examples/training_metal.lo --format json
 ./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
-./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
 ./bin/metal-training run --allow-device metal:0 --format json
 ./bin/metal-training metadata
 ```
@@ -528,17 +532,22 @@ A secure Lo runtime should:
 - log all commit activations
 - preserve structured error traces
 
-## Planned File Workflows
+## File Workflows
 
-The [File adapter design](docs/file-adapter-design.md) proposes directory discovery and committed batch removal.
-The [implementation plan](docs/file-adapter-plan.md) uses Gateway log cleanup as its first complete workflow.
-These operations are planned additions to Lo.
+The [File adapter](specification.md#91-file-adapter) supports directory observations, open-file probes, and committed removal.
+`Flow.fold` adds ordered activation while List callbacks remain pure.
+The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
+The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, interpreter tests, and native tests.
+The [mac-cleanup plan](docs/mac-cleanup-plan.md) defines the remaining complete-script work.
+All work and fixtures obey the [Lo repository boundary](.mprlab/POLICY.md#lo-repository-boundary).
 
 ## Language Reference
 
 The [Lo Language Reference](specification.md) defines the implemented v0.3 core and tensor training contracts.
 It includes a contents list, operation signatures, examples, and current backend limits.
 
+- [File adapter and cleanup example](specification.md#91-file-adapter)
+- [Sequential activation with Flow.fold](specification.md#88-sequential-flow-processor)
 - [Quick start](specification.md#quick-start)
 - [Autodiff and backpropagation](specification.md#245-reverse-mode-autodiff-and-backpropagation)
 - [Parameters and gradients](specification.md#246-parameters-and-gradient-lifecycle)
