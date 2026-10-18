@@ -35,7 +35,10 @@ This file gives backend rules for Go code. Obey root `AGENTS.md` and `.mprlab/PO
 - Keep the product logic under test real.
 - Prefer black-box integration tests through HTTP, CLI, or public package entry points.
 - Use table-driven scenarios where they cover contract permutations.
-- Use `t.TempDir()` for temporary filesystem work.
+- Before tests, configure temporary directories and all Go caches inside Lo.
+- Use `t.TempDir()` only when its resolved directory stays inside Lo.
+- Verify that child processes preserve these directories and cannot select an external cache.
+- If a target cannot obey the [repository boundary](POLICY.md#lo-repository-boundary), report the blocker without execution.
 - Use focused unit tests for complex algorithms, calculations, and isolated logic when useful.
 - Require integration coverage of public behavior for product acceptance.
 

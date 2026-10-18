@@ -93,7 +93,24 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `host observation`: An operation that obtains external state during program evaluation and publishes an immutable value.
+- `bound commit`: A proposed Lo statement that creates a result binding after successful target activation.
+- `activation result`: The typed value published when an activated target reaches its specified completion event.
+- `completion event`: The operation-specific condition necessary for successful activation result publication.
+- `higher-order operation`: An operation that accepts a named flow and defines when that flow executes.
+- `callback phase`: The construction, evaluation, activation, or external event stage that invokes a stored flow.
+- `execution profile`: Host-enforced restrictions on a child program, its descendants, external access, channels, and lifetime.
+- `confinement`: Enforcement that prevents a process and its descendants from access outside their execution profile.
+- `termination variant`: One nominal representation of normal process exit or signal termination.
+- `request header`: One named HTTP field value supplied with a request.
+- `response header`: One named HTTP field value supplied with a response.
+- `byte framing`: Rules that separate records or fields within a byte sequence.
 - `file observation`: Immutable metadata obtained for one directory entry during a listing operation.
+- `file descriptor`: An integer that identifies an open file or directory within one process.
+- `hardlink`: A filesystem name that refers to the same native file identity as another name.
+- `open-file probe`: The fixed host command that observes open paths under an authorized directory.
+- `flow receipt`: A diagnostic record of the completed prefix and accumulator state of a sequential fold.
+- `singleton removal`: A committed removal effect that contains exactly one file entry.
 - `entry provenance`: Private runtime data that connects a file observation to its execution session and directory.
 - `removal batch`: An ordered collection of selected file observations in one removal effect.
 - `cooperative lock`: A host lock protocol followed by every process within its stated concurrency guarantee.
@@ -297,7 +314,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `authenticate`: Confirm the identity of a client or user.
 - `authorize`: Confirm that an identity can do an operation on a resource.
 - `build`: Convert source code into an executable or generated artifact.
-- `cache`: Store a verified reference outside a target repository for repeated use.
+- `cache`: Store data in a designated directory for repeated use.
 - `commit`: Record a Git change in repository history.
 - `configure`: Set source-controlled values that control system behavior.
 - `deploy`: Change a runtime environment to use a specified artifact and configuration.
