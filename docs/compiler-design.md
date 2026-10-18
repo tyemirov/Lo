@@ -38,6 +38,9 @@ The [language specification](../specification.md) owns Lo syntax and observable 
 This design owns compiler structure, internal contracts, and implementation acceptance criteria.
 The [README roadmap](../README.md#implementation-roadmap) gives the public milestone overview.
 The [repository policy](../.mprlab/POLICY.md) owns development and validation procedures.
+The [next adapter design](adapter-design.md) owns proposed shared adapter rules and domain contracts.
+Its [implementation plan](adapter-plan.md) maps the changes to compiler components and public acceptance.
+The current compiler behavior below does not yet include those extensions.
 
 Specification sections 22 and 23 define the verifier and runtime contracts.
 The [Open Decisions](#open-decisions) section identifies the final contract status.
@@ -356,6 +359,12 @@ The graph keeps source spans for both the original pipe and its supplied argumen
 
 ## Execution and Adapter Boundary
 
+Native builds require an existing absolute `LO_BUILD_ROOT` without symlink traversal.
+Make supplies `_scratch/build-state/` inside Lo for temporary files and tool caches.
+Child processes receive explicit cache paths and closed standard input.
+The [native contract](native-compilation-contract.md#artifact-construction) specifies invalid-input behavior.
+
+
 The interpreter evaluates graph regions, and the native backend executes generated code.
 The two backends use shared execution sessions and pass typed requests to the same adapters.
 The adapter interface owns external operations and converts recoverable failures into Lo errors.
@@ -381,6 +390,21 @@ Approval of a calculated path does not authorize all paths that an expression ca
 
 The capability policy, path resolution rules, and execution limits must have specified behavior before external operations become executable.
 Compiler commands that parse, verify, or inspect a source file do not evaluate its boundary operations.
+
+### File Observations and Ordered Activation
+
+The [File contract](file-adapter-design.md) specifies nominal observations and operation-specific effect payloads.
+A File session retains directory handles and opaque entry provenance.
+Published JSON and error snapshots contain public metadata only.
+Grant authorization and directory identity checks precede removal.
+The same boundary implementation serves interpreted and generated programs.
+
+`Flow.fold` accepts named callbacks that can activate commits.
+It preserves ordered state transitions without changing List purity rules.
+Lo failures retain the fold index and completed state in their trace.
+Host failures carry nested `flow_progress` records and any in-flight `removal_progress`.
+A per-invocation capture preserves CLI progress through late grant cleanup failures.
+Shared HTTP adapters do not transfer fold progress between requests.
 
 ## CLI and Diagnostics
 
@@ -445,6 +469,10 @@ The inspection schema appears below.
 `lo run` verifies the complete source before it opens adapter roots or evaluates the graph.
 Its default adapter policy denies all external operations.
 The `--read-root DIRECTORY` option authorizes reads within one directory tree.
+`--list-root DIRECTORY` and `--remove-root DIRECTORY` authorize direct children of one exact directory.
+`--open-files-root DIRECTORY` authorizes a recursive open-file probe rooted at that exact directory.
+These grants are independent of read and write grants.
+An exact grant for a missing directory stays inert if that directory appears later.
 This option can occur more than once for different roots.
 Duplicate normalized roots are invalid.
 Parse, check, and inspect reject runtime options.
@@ -499,6 +527,7 @@ Most values also have a `value` field.
 | `Device` | Selector string: `cpu`, `cuda:0`, `cuda-sim:0`, or `metal:0`. |
 | `Tensor<FP32>` | Object with `dtype`, `shape`, `device`, and complete row-major `values`. |
 | `String`, `Scalar`, `File.Path` | JSON string. |
+| `File.Entry` | Six public metadata fields, with no opaque provenance. |
 | `Bool`, `Null` | JSON boolean or null. |
 | `Bytes` | Base64 string. |
 | `List<T>` | Array of typed element values. |
@@ -600,7 +629,7 @@ The runtime does not narrow integers or silently truncate collections to meet a 
 
 ### Numeric and Tensor Analysis
 
-The catalog defines 101 built-in operations after F002 through F008.
+The current catalog defines 111 built-in operations, including checkpoints, File observations, removal, and `Flow.fold`.
 `internal/tensor` owns validated shapes, operation plans, immutable data, and CPU kernels.
 `internal/tensorfacts` propagates static metadata through bindings, records, Match branches, and named flow calls.
 It examines every declared flow, including unused flows.
@@ -754,7 +783,7 @@ Dependencies identify the checked nodes that supply its data.
 Reads, targets, activations, and errors include their context and conditions.
 Each condition identifies its node and invocation context.
 Conditions distinguish case tests from selection of case bodies.
-Other conditions identify list iterations, propagation success, commit success, handler entry, or adapter requests.
+Other conditions identify list iterations, flow iterations, propagation success, commit success, handler entry, or adapter requests.
 An operation without conditions occurs on each path that reaches its invocation.
 Earlier failures can prevent later operations.
 The report includes each checked branch with its selection condition.
@@ -788,7 +817,7 @@ Dynamic kinds have a dynamic description of the kind expression.
 Handler references identify the applicable boundary if the error propagates.
 They do not assert that a stored error value invokes a handler.
 
-Capability operations are `File.read`, `File.append`, `File.write`, and `HTTP.listen`.
+Capability operations are `File.read`, `File.list`, `File.open_paths`, `File.remove`, `File.append`, `File.write`, and `HTTP.listen`.
 Each capability identifies its read or activation site and target description.
 Uncommitted targets do not add activation capabilities.
 Unused flow analysis does not add program capabilities.
@@ -800,6 +829,16 @@ Each resource line includes its context, conditions, and target description.
 Source locations use the diagnostic line and column convention.
 
 ### File Workflow Inspection
+
+`File.list` and `File.open_paths` have separate boundary-read capabilities.
+Removal construction retains calculated entries without activation authority.
+A reached commit requires `File.remove` authority for the observed directory.
+`Flow.fold` adds `flow-callback` contexts with `flow-iteration` conditions.
+Inspection follows their transitive commits while List callback purity remains unchanged.
+Unused callbacks remain outside the program entry's capabilities.
+
+The [Gateway log acceptance](file-adapter-plan.md) checks preview and cleanup entry points separately.
+
 
 The [file workflow example](../examples/agent_file_workflow.lo) reads and decodes a file before it selects a write or append target.
 
@@ -1044,6 +1083,9 @@ Inspection does not grant access.
 | --- | --- | --- |
 | `--read-root DIRECTORY` | Read files within the selected directory tree. | `run`, `serve` |
 | `--write-root DIRECTORY` | Append or write files within the selected directory tree. | `run`, `serve` |
+| `--list-root DIRECTORY` | Observe immediate entries in the exact directory. | `run`, `serve` |
+| `--remove-root DIRECTORY` | Remove selected immediate regular entries in the exact directory. | `run`, `serve` |
+| `--open-files-root DIRECTORY` | Probe open paths under the exact directory. | `run`, `serve` |
 | `--listen PORT` | Activate servers at the specified port on `127.0.0.1`. | `serve` |
 | `--allow-device SELECTOR` | Permit one exact non-CPU device selector. | `run`, `serve` |
 | No capability inputs | Deny external resource access. | `run`, `serve` |
@@ -1353,7 +1395,8 @@ Those differences concern repository templates and remain outside F002 through F
 ## F005 Through F007 Acceptance
 
 The CPU training stack passed `make ci` on October 13, 2026, with Go 1.27.1 on macOS arm64.
-The catalog has public check and runtime assertions for all 101 operations.
+The original training acceptance covered 101 operations.
+The current catalog tests extend those assertions to all 111 operations.
 The conformance suite contains 83 fixtures.
 CLI tests cover each VJP against analytical values and central finite differences.
 Other tests cover source mapping, restrictions, budgets, cancellation, weighted microbatches, optimizer transitions, and immutable prior values.

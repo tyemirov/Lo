@@ -1,5 +1,5 @@
-// Proposed example. File.Entry, File.list, and File.remove are not implemented.
-// The host supplies the directory and cutoff under the Gateway lock protocol.
+// Gateway log cleanup with explicit root and cutoff inputs.
+// The acceptance tests use fixtures inside the Lo repository.
 
 flow NameCharacter(total: Int, index: Int, character: Scalar) -> Bool {
     return Match.new(index,
@@ -49,52 +49,101 @@ flow IsGatewayLogName(name: String) -> Bool {
 
 flow IsCandidate(cutoff_unix_ns: Int, entry: File.Entry) -> Bool {
     return Match.new(entry.kind,
-        "regular": Match.new(Math.eq(entry.link_count, 1),
-            true: Match.new(IsGatewayLogName(entry.name),
-                true: Math.lt(entry.modified_unix_ns, cutoff_unix_ns),
-                _: false
-            ),
+        "regular": Match.new(IsGatewayLogName(entry.name),
+            true: Math.lt(entry.modified_unix_ns, cutoff_unix_ns),
             _: false
         ),
         _: false
     )
 }
 
-flow ObservedBytes(entry: File.Entry) -> Int {
-    return entry.size_bytes
+flow EmptyEntries() -> List<File.Entry> { return List.new() }
+
+flow ListingError(error: Error) -> Record{directory_status: String, entries: List<File.Entry>!} {
+    return Record.new(directory_status: "absent", entries: Match.new(error.kind,
+        "File.DirectoryAbsent": EmptyEntries(),
+        _: error
+    ))
 }
 
-flow CandidateName(entry: File.Entry) -> String {
-    return entry.name
-}
-
-flow Select(root: File.Path, cutoff_unix_ns: Int) -> List<File.Entry>! {
+flow Observe(root: File.Path) -> Record{directory_status: String, entries: List<File.Entry>!} onError ListingError {
     entries = File.list(root)
-    return entries |> List.filter(cutoff_unix_ns, IsCandidate)
+    return Record.new(directory_status: "present", entries: entries)
 }
 
-flow Preview(root: File.Path, cutoff_unix_ns: Int) -> Record{names: List<String>, selected_count: Int, observed_bytes: Int}! {
-    selected = Select(root, cutoff_unix_ns)
-    sizes = selected |> List.map(ObservedBytes)
-    return Record.new(
-        names: selected |> List.map(CandidateName),
-        selected_count: List.length(selected),
-        observed_bytes: Math.sum(sizes)
+flow Select(root: File.Path, cutoff_unix_ns: Int) -> Record{directory_status: String, candidates: List<File.Entry>}! {
+    observation = Observe(root)
+    entries = observation.entries
+    return Record.new(directory_status: observation.directory_status, candidates: entries |> List.filter(cutoff_unix_ns, IsCandidate))
+}
+
+flow SeenPath(target: File.Path, found: Bool, path: File.Path) -> Bool {
+    return Match.new(found, true: true, _: File.Path.eq(path, target))
+}
+
+flow Closed(open_paths: List<File.Path>, entry: File.Entry) -> Bool {
+    opened = List.fold(open_paths, false, entry.path, SeenPath)
+    return Match.new(opened, true: false, _: true)
+}
+
+flow ProbeSelection(root: File.Path, candidates: List<File.Entry>) -> List<File.Entry>! {
+    opened = File.open_paths(root)
+    return candidates |> List.filter(opened, Closed)
+}
+
+flow Available(root: File.Path, candidates: List<File.Entry>) -> List<File.Entry>! {
+    return Match.new(List.length(candidates),
+        0: candidates,
+        _: ProbeSelection(root, candidates)
     )
 }
 
-flow Cleanup(root: File.Path, cutoff_unix_ns: Int) -> Record{removed_count: Int, observed_bytes: Int}! {
-    selected = Select(root, cutoff_unix_ns)
-    sizes = selected |> List.map(ObservedBytes)
-    count = List.length(selected)
-    observed_bytes = Math.sum(sizes)
-    removal = File.remove(selected)
-    commit removal
-    return Record.new(removed_count: count, observed_bytes: observed_bytes)
+flow ObservedBytes(entry: File.Entry) -> Int { return entry.size_bytes }
+flow CandidateName(entry: File.Entry) -> String { return entry.name }
+
+flow Preview(root: File.Path, cutoff_unix_ns: Int) -> Record{directory_status: String, names: List<String>, selected_count: Int, observed_bytes: Int}! {
+    observation = Select(root, cutoff_unix_ns)
+    candidates = observation.candidates
+    selected = Available(root, candidates)
+    return Record.new(
+        directory_status: observation.directory_status,
+        names: selected |> List.map(CandidateName),
+        selected_count: List.length(selected),
+        observed_bytes: Math.sum(selected |> List.map(ObservedBytes))
+    )
 }
 
-// Fixture input. The wrapper renders these two literals and selects a fixed entry point.
-// Cleanup uses the expression below. Preview uses: return Preview(root, cutoff_unix_ns)
+flow RemovalError(error: Error) -> Record{removed: Bool!} {
+    return Record.new(removed: Match.new(error.kind,
+        "File.EntryChanged": false,
+        _: error
+    ))
+}
+
+flow RemoveOne(entry: File.Entry) -> Record{removed: Bool!} onError RemovalError {
+    removal = File.remove(List.new(entry))
+    commit removal
+    return Record.new(removed: true)
+}
+
+flow RemoveStep(state: Record{directory_status: String, removed_count: Int, observed_bytes: Int, skipped_count: Int}, entry: File.Entry) -> Record{directory_status: String, removed_count: Int, observed_bytes: Int, skipped_count: Int}! {
+    outcome = RemoveOne(entry)
+    removed = outcome.removed
+    return Match.new(removed,
+        true: Record.new(directory_status: state.directory_status, removed_count: Math.add(state.removed_count, 1), observed_bytes: Math.add(state.observed_bytes, entry.size_bytes), skipped_count: state.skipped_count),
+        _: Record.new(directory_status: state.directory_status, removed_count: state.removed_count, observed_bytes: state.observed_bytes, skipped_count: Math.add(state.skipped_count, 1))
+    )
+}
+
+flow Cleanup(root: File.Path, cutoff_unix_ns: Int) -> Record{directory_status: String, removed_count: Int, observed_bytes: Int, skipped_count: Int}! {
+    observation = Select(root, cutoff_unix_ns)
+    candidates = observation.candidates
+    selected = Available(root, candidates)
+    initial = Record.new(directory_status: observation.directory_status, removed_count: 0, observed_bytes: 0, skipped_count: Math.sub(List.length(candidates), List.length(selected)))
+    return Flow.fold(selected, initial, RemoveStep)
+}
+
+// Tests supply the root and cutoff. Preview uses: return Preview(root, cutoff_unix_ns)
 root = File.Path.new("gateway-logs")
 cutoff_unix_ns = Int.new(2000000000000000000)
 return Cleanup(root, cutoff_unix_ns)

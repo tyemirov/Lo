@@ -4,7 +4,7 @@ Audit date: October 16, 2026.
 Validated implementation revision: `12940d9`.
 
 The [Lo Language Reference](../specification.md) is the language contract.
-This audit records its comparison with the current implementation and tests.
+This audit records implementation comparisons at the dates specified below.
 It does not define a separate language contract.
 
 ## Scope and Findings
@@ -35,9 +35,41 @@ The audit established no new semantic decision or implementation defect.
 
 Concurrent checkpoint work appeared in the shared checkout after the implementation checks.
 It adds checkpoint encoding, decoding, and container transfers.
-Those changes are outside the validated revision and the 101-operation inventory in this report.
-The implementation and its separate checkpoint document remain unchanged by this task.
-Checkpoint qualification must update the reference with its accepted contracts.
+Those changes were outside the original validated revision and its 101-operation inventory.
+The later checkpoint contract appears in section 24.9 and the [checkpoint guide](model-checkpoints.md).
+The update below records the current File scope and expanded inventory.
+
+## File Adapter Update
+
+Update date: October 17, 2026.
+The working tree contains 111 built-in operations, as counted by `catalog.All()`.
+Five checkpoint and container-transfer operations extend the original inventory.
+Five File and flow operations add `File.Path.eq`, `File.list`, `File.open_paths`, `File.remove`, and `Flow.fold`.
+`Match.new` remains a separate syntax construct.
+
+The reference now specifies entry metadata, provenance, exact grants, absent directories, open-file observations, removal progress, and sequential activation.
+The [File design](file-adapter-design.md) defines the host probe and concurrency limits.
+The [acceptance plan](file-adapter-plan.md) maps public behavior to maintained tests.
+The [Gateway log example](examples/gateway-log-cleanup.lo) is the first complete category workflow.
+The complete mac-cleanup script remains outside this implementation scope.
+
+Focused interpreter tests passed for File, Flow, cleanup, catalog coverage, and native build paths.
+The corresponding native File/Flow/cleanup/build-path suite passed on macOS arm64.
+Native fixtures include ordered commits, changed-candidate skips, open-file exclusions, and nested step-limit failure progress.
+Controlled Go entry points exercise cancellation schedules and retained-directory or grant-close failures in the shared runtime.
+These injected tests do not claim native process execution for their schedules.
+
+Final `make ci` passed after the probe parser corrections.
+It verified the runtime bundle, formatting, Go vet, all package tests, the complete native integration suite, and the compiler build.
+Probe regressions include the actual host tool against a held file inside Lo.
+The Gateway example also cross-compiled for Linux arm64. Linux execution was not performed.
+
+All 10 `lo` programs in the reference and the maintained cleanup example passed `lo check`.
+Local document links and changed-prose checks passed.
+The language checker reports 29 findings in unchanged prose.
+The Governor check reports five intentional guide differences that enforce the Lo repository boundary.
+Independent review approved the final contracts and corrections.
+All implementation, fixtures, tool state, and generated artifacts stay inside Lo.
 
 ## Operation Coverage
 
@@ -55,7 +87,9 @@ Runtime tests supply additional behavioral evidence.
 | **Lists**: `List.filter`, `List.flat_map`, `List.fold`, `List.length`, `List.map`, `List.new`, `List.unfold` | [Contract](../specification.md#87-list-processors) | [catalog.go](../internal/catalog/catalog.go) | [run](../tests/integration/run_test.go) |
 | **Records and maps**: `Map.get`, `Map.has_key`, `Map.new`, `Record.merge`, `Record.new` | [Contract](../specification.md#86-record-and-map-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
 | **Ranges**: `Range.contains`, `Range.is_empty`, `Range.new` | [Contract](../specification.md#85-range-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
-| **Files**: `File.Path.new`, `File.append`, `File.read`, `File.write` | [Contract](../specification.md#91-file-adapter) | [catalog.go](../internal/catalog/catalog.go) | [activation](../tests/integration/activation_test.go) |
+| **Files**: `File.Path.new`, `File.Path.eq`, `File.append`, `File.read`, `File.write`, `File.list`, `File.open_paths`, `File.remove` | [Contract](../specification.md#91-file-adapter) | [catalog.go](../internal/catalog/catalog.go) | [activation](../tests/integration/activation_test.go) |
+| **Sequential activation**: `Flow.fold` | [Contract](../specification.md#88-sequential-flow-processor) | [catalog.go](../internal/catalog/catalog.go) | [Flow](../tests/integration/flow_fold_test.go) |
+| **Checkpoints and transfers**: `Checkpoint.encode`, `Checkpoint.decode`, `Parameters.to`, `Optimizer.SGD.State.to`, `Optimizer.AdamW.State.to` | [Contract](../specification.md#249-model-checkpoints-and-training-state-transfers) | [checkpoint.go](../internal/catalog/checkpoint.go) | [Checkpoint](../tests/integration/checkpoint_test.go) |
 | **HTTP**: `HTTP.Response.Bytes.new`, `HTTP.Response.Text.new`, `HTTP.Server.new` | [Contract](../specification.md#92-http-adapter) | [catalog.go](../internal/catalog/catalog.go) | [serve](../tests/integration/serve_test.go) |
 | **Tensor values and devices**: `Device.new`, `Tensor.device`, `Tensor.dtype`, `Tensor.new`, `Tensor.rank`, `Tensor.shape`, `Tensor.to`, `Tensor.to_float`, `Tensor.values` | [Contract](../specification.md#242-tensor-values-and-shape-boundaries) | [tensor.go](../internal/catalog/tensor.go) | [tensor_contract](../tests/integration/tensor_contract_test.go) |
 | **Tensor arithmetic**: `Tensor.add`, `Tensor.broadcast`, `Tensor.div`, `Tensor.matmul`, `Tensor.mean`, `Tensor.mul`, `Tensor.relu`, `Tensor.reshape`, `Tensor.sqrt`, `Tensor.sub`, `Tensor.sum`, `Tensor.transpose` | [Contract](../specification.md#243-tensor-operation-set) | [tensor.go](../internal/catalog/tensor.go) | [tensor](../tests/integration/tensor_test.go) |

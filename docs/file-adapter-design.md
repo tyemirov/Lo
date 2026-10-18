@@ -1,9 +1,13 @@
 # File Adapter Design
 
-Status: proposed contract, ready for implementation planning.
-The operations in this document are not implemented.
-The [implementation plan](file-adapter-plan.md) defines the work and acceptance sequence.
-The [language reference](../specification.md#9-adapters) remains the contract for implemented operations.
+The File adapter supports discovery, open-file observations, and committed removal.
+The [Gateway log example](examples/gateway-log-cleanup.lo) combines these operations into a complete log category.
+The [language reference](../specification.md#91-file-adapter) specifies the public language contract.
+The [implementation plan](file-adapter-plan.md) records acceptance.
+The [mac-cleanup plan](mac-cleanup-plan.md) defines the remaining complete-script requirements.
+This document describes the current implementation.
+The [shared adapter design](adapter-design.md#file) selects the next File contract alongside HTTP and Process.
+Its proposed nominal actions and receipts are not yet implemented.
 
 ## Contents
 
@@ -12,8 +16,10 @@ The [language reference](../specification.md#9-adapters) remains the contract fo
 - [Entry values](#entry-values)
 - [Listing](#listing)
 - [Grants](#grants)
+- [Open-file observations](#open-file-observations)
 - [Removal construction](#removal-construction)
 - [Commit and failure progress](#commit-and-failure-progress)
+- [Sequential cleanup](#sequential-cleanup)
 - [Concurrency boundary](#concurrency-boundary)
 - [Inspection and native execution](#inspection-and-native-execution)
 - [Gateway log cleanup](#gateway-log-cleanup)
@@ -21,389 +27,245 @@ The [language reference](../specification.md#9-adapters) remains the contract fo
 
 ## Decisions
 
-`File` remains a domain adapter.
-There is no `IO` parent type, inheritance, or adapter-to-collection conversion.
-The runtime can share authorization, cancellation, and diagnostic interfaces between adapters.
-
+`File` is a domain adapter, with no `IO` parent or inheritance.
 `File.list` returns ordinary immutable values in `List<File.Entry>`.
 List processors select and summarize those values.
-`File.remove` constructs one batch effect.
-Only `commit` executes removal.
+`File.remove` constructs an effect, and only `commit` executes removal.
+`Flow.fold` permits ordered callback activation when each candidate needs a separate result.
+List callbacks retain their existing prohibition on transitive commits.
 
 ```mermaid
 flowchart LR
-    A["File.list(root)"] --> B["List<File.Entry>"]
-    B --> C["List.filter(cutoff, IsCandidate)"]
-    C --> D["File.remove(selected)"]
-    D --> E["Effect"]
-    E --> F["commit"]
+    A["File.list(root)"] --> B["List.filter(cutoff, IsCandidate)"]
+    C["File.open_paths(root)"] --> D["Exclude observed open paths"]
+    B --> D
+    D --> E["Flow.fold(selected, counts, RemoveStep)"]
+    E --> F["File.remove(single entry), then commit"]
 ```
-
-List callbacks retain the existing purity rule: they cannot activate commits.
-Boundary reads remain separate from commit effects.
-Thus, a callback can read a file, but each read occurs in callback order.
-The cleanup predicate examines only entry metadata.
 
 ## Public Operations
 
-| Signature | Classification | Result |
-| --- | --- | --- |
-| `File.list(root: File.Path) -> List<File.Entry>!` | Boundary read | Observe direct directory children. |
-| `File.remove(entries: List<File.Entry>) -> Effect!` | Pure effect construction | Validate and retain a removal selection without filesystem access. |
-| `File.read(file_path: File.Path) -> Bytes!` | Existing boundary read | Read file contents. |
-| `File.write(file_path: File.Path, file_content: Bytes) -> Effect` | Existing effect construction | Construct a content replacement. |
-| `File.append(file_path: File.Path, file_content: String) -> Effect` | Existing effect construction | Construct a UTF-8 append. |
+| Signature | Behavior |
+| --- | --- |
+| `File.Path.eq(left_operand: File.Path, right_operand: File.Path) -> Bool` | Compare path text without filesystem access or normalization. |
+| `File.list(root: File.Path) -> List<File.Entry>!` | Observe direct directory children. |
+| `File.open_paths(root: File.Path) -> List<File.Path>!` | Observe open paths through a bounded host probe. |
+| `File.remove(entries: List<File.Entry>) -> Effect!` | Construct a removal selection without filesystem access. |
+| `File.read(file_path: File.Path) -> Bytes!` | Read file contents. |
+| `File.write(file_path: File.Path, file_content: Bytes) -> Effect` | Construct a content replacement. |
+| `File.append(file_path: File.Path, file_content: String) -> Effect` | Construct a UTF-8 append. |
 
-`File.read` does not return a list implicitly.
-A decoder or parser determines the values represented by its bytes.
-
-`File.Entry` is a nominal, immutable type.
-It has no public constructor, equality operation, ordering operation, or checkpoint encoding.
-Its projections are ordinary typed values.
+`File.read` does not convert bytes to a list implicitly.
+`File.Path` contains text, not authority.
+`File.Entry` has no public constructor, equality, ordering, or checkpoint encoding.
 
 ## Entry Values
 
 | Projection | Type | Meaning |
 | --- | --- | --- |
 | `path` | `File.Path` | Absolute lexical path under the observed directory. |
-| `name` | `String` | One direct-child basename. |
-| `kind` | `String` | Exactly `regular`, `directory`, `symlink`, or `other`. |
+| `name` | `String` | Direct-child basename. |
+| `kind` | `String` | `regular`, `directory`, `symlink`, or `other`. |
 | `size_bytes` | `Int` | Observed nonnegative logical size. |
-| `modified_unix_ns` | `Int` | Observed modification time in nanoseconds since the Unix epoch. |
+| `modified_unix_ns` | `Int` | Observed modification time since the Unix epoch, in nanoseconds. |
 | `link_count` | `Int` | Observed number of filesystem links. |
 
-The adapter validates these projections at the filesystem boundary.
-The runtime uses a closed internal type for `kind`.
-Entry metadata has no content-read capability.
-
-Each entry also contains opaque provenance:
-
-- The execution-session identity and observed directory identity.
-- The relative basename and native file identity.
-- The observed size, modification time, change time, file kind, and link count.
-
-A directory handle remains available until the session ends.
-The first implementation permits at most 128 observed directories per session.
-Repeated listings of the same resolved directory and native directory identity reuse one retained handle slot.
-HTTP startup and each request have separate session identities and retained-entry registries.
-Shared grant configuration cannot make entries valid across those sessions.
-List copies, record fields, flow arguments, and `List.filter` preserve entry provenance.
+Opaque provenance connects an entry to its execution session, retained directory, basename, native identity, size, modification time, and kind.
+The adapter validates metadata at the filesystem boundary.
+Copies, records, flow arguments, and filters preserve provenance.
 A reconstructed record cannot satisfy `File.Entry`.
-Provenance identifies an observation, not an access grant.
+JSON and diagnostic snapshots expose only the six public projections.
+Printed values cannot become executable observations in another invocation.
 
-JSON output contains only the six public projections under the `File.Entry` type tag.
-JSON does not expose directory handles or opaque identities.
-Printed entries cannot become executable entries in a later invocation.
-Diagnostic snapshots use the same public projections.
+Each session retains at most 128 observed directories.
+Repeated observations of one directory identity reuse its handle slot.
+HTTP startup and each request have separate sessions.
+Grant configuration does not authorize transfer of entries between sessions.
 
 ## Listing
 
-1. Resolve the supplied path against the invocation's captured working directory.
-2. Authorize the exact directory through a list grant.
-3. Open the directory without traversal through symlinks.
-4. Enumerate direct children without recursion.
-5. Read each child's metadata without following a symlink.
-6. Reject invalid UTF-8 names and metadata failures.
-7. Sort entries by basename in Unicode scalar order.
-8. Return the complete list.
+`File.list` authorizes an exact directory and enumerates its direct children without recursion.
+It includes hidden entries and all four file kinds.
+It reads metadata without following child symlinks, then sorts by basename in Unicode scalar order.
+It does not read file contents.
+A listing is not an atomic snapshot.
 
-The list contains hidden entries, directories, symlinks, and regular files.
-A predicate selects the required kinds.
-The operation does not read file contents.
-It does not expose an open-file status.
+An absent, explicitly granted directory produces `File.DirectoryAbsent`.
+A child that disappears during discovery produces `File.ListFailed`.
+Invalid UTF-8 names produce `File.InvalidName`.
+Other metadata failures produce `File.ListFailed`.
+A failed listing never returns a partial list.
 
-The result contains observations made at different times.
-It is not an atomic filesystem snapshot.
-A child that appears after enumeration is outside that result.
-A child that disappears before its metadata read causes `File.ListFailed`.
-The operation never substitutes an empty or partial list after a failure.
-
-The first implementation limits one listing to 10,000 entries.
-A name must fit the existing String and value limits.
-The 16 MiB expanded-value limit and 64 MiB evaluation limit also apply.
-The adapter checks limits before result allocation and publication.
-It closes temporary handles on success, failure, and cancellation.
-
-Each enumerated entry consumes one logical step.
-Sorting reserves `N * ceil(log2(max(N, 1)))` steps before it starts.
-These charges apply equally to interpreter and native execution.
-An exceeded entry, handle, work, or value limit produces `runtime.limit`.
-Cancellation produces `runtime.cancelled`.
-Both host diagnostics bypass Lo handlers.
+Each entry consumes one logical step.
+Sorting reserves `N * ceil(log2(max(N, 1)))` steps before execution.
+One result permits at most 10,000 entries, subject to the 16 MiB value and 64 MiB evaluation limits.
+Limits and cancellation produce host diagnostics that bypass Lo handlers.
+Handles close on success and failure.
 
 ## Grants
 
-The CLI adds separate repeatable inputs for `run` and `serve`:
+The `run` and `serve` commands accept separate repeatable grants:
 
-```text
---list-root <directory>
---remove-root <directory>
-```
+| Option | Authority |
+| --- | --- |
+| `--read-root DIRECTORY` | Read contents within the directory tree. |
+| `--write-root DIRECTORY` | Write or append contents within the directory tree. |
+| `--list-root DIRECTORY` | List the exact directory's immediate children. |
+| `--remove-root DIRECTORY` | Remove selected immediate regular files in the exact directory. |
+| `--open-files-root DIRECTORY` | Probe open paths in the exact directory and its descendants. |
 
-Each new grant authorizes one exact directory and its immediate children.
-It does not authorize descendant directories.
-Paths are resolved once at CLI validation and retained as opened roots.
-Symlinked grant paths are rejected.
-Duplicate grants within one operation are invalid CLI input.
-The same directory can have both a list grant and a removal grant.
+No grant implies another grant.
+The open-file grant is separate because the host probe traverses descendants.
+A descendant cannot become a separately queried root through its ancestor's grant.
+Duplicate grants for one operation are invalid CLI input.
+Exact grant paths reject symlink traversal.
 
-A list grant does not permit content reads or removal.
-A removal grant does not permit discovery, content reads, writes, or appends.
-Existing read and write grants do not imply either new grant.
-The existing read/write subtree contract remains unchanged.
+An exact grant for a missing directory stays inert for the invocation.
+Listing reports absence while that path remains absent.
+If a directory later appears at that path, access is denied.
+A replaced directory cannot acquire the previous directory's authority.
+Missing authority produces `runtime.capability-denied`.
+Inspection never creates authority.
+Native artifacts receive grants when they execute.
 
-The adapter checks the whole removal batch before the first deletion.
-Every entry must belong to the current invocation and the same observed directory.
-That directory must match an opened removal grant by path and directory identity.
-A replaced directory cannot acquire authority from its previous path.
+## Open-file Observations
 
-An absent grant produces `runtime.capability-denied` before filesystem mutation.
-Inspection reports requirements but never creates grants.
-Native artifacts receive grants at execution time, not build time.
+The native boundary uses the fixed command `lsof -Fn +D .`.
+A private child changes its working directory through an inherited directory handle before it executes `lsof`.
+It never resolves the authorized pathname again to select its working directory.
+The helper accepts no Lo-supplied executable or argument list.
+Standard input is closed.
+
+The parser accepts process records, descriptor records, and relative name records from the line-framed output.
+It omits the root name `.` and maps child names to the original lexical root.
+It removes duplicates and sorts the resulting paths.
+An unknown record, invalid UTF-8, NUL byte, invalid relative path, or malformed identifier fails explicitly.
+Backslashes and control characters in name payloads fail with `File.OpenFilesFailed`.
+This line-framed probe cannot represent those filenames without ambiguity.
+It never interprets display escapes as literal filesystem names.
+Probe exit status 0 or 1 is accepted only when stripped standard error is empty.
+Launch failures and invalid output produce `File.OpenFilesFailed`.
+
+Each output stream permits at most 8 MiB.
+Overflow cancels the child and produces `runtime.limit`.
+Cancellation stops the child and produces `runtime.cancelled`.
+Parsing reserves one step per output byte before scanning and one step per nonempty record.
+Path construction and sorting reserve their work and value storage before execution.
+A result permits at most 10,000 distinct paths, subject to the normal value limits.
+
+The process fixture verifies the command contract without examining application data.
+The [binding test](../tests/integration/file_probe_binding_test.go) replaces a directory path before the child starts.
+The child still examines the retained directory.
 
 ## Removal Construction
 
-`File.remove` performs no filesystem access and acquires no lock.
-It checks the supplied values and constructs an immutable effect payload.
-The construction rules are:
+Construction accepts regular entries from one directory and one session.
+It rejects duplicate basenames, foreign provenance, and other file kinds with `File.InvalidSelection`.
+It preserves list order and accepts an empty typed list.
+Hardlinks are valid, including distinct selected basenames with the same native identity.
+Link-count policy belongs in the Lo predicate.
 
-- Accept only regular entries with an observed link count of one.
-- Accept entries from one observed directory in one invocation.
-- Reject duplicate basenames and duplicate native identities.
-- Reject reconstructed records and values from another session.
-- Preserve the supplied list order.
-- Accept an empty typed list as an empty effect.
-
-Invalid selections produce `File.InvalidSelection`.
-Construction does not claim that the observations are still current.
-Repeated construction from the same entry values is valid.
-The effect retains those values until execution no longer needs them.
-
-The first implementation limits one removal batch to 10,000 entries.
-Construction charges one logical step per entry and checks value weight before allocation.
-The batch uses the existing `Effect` type, with a distinct internal removal payload.
-It does not encode entries as fictitious file contents.
+Construction performs no filesystem access and acquires no lock.
+It reserves one step per entry and checks value weight before allocation.
+The maximum batch size is 10,000 entries.
+The existing `Effect` type has a separate internal removal payload.
 
 ## Commit and Failure Progress
 
-Commit uses this sequence:
+Commit authorizes the complete selection before mutation.
+It reserves `3 * N` steps and diagnostic storage before removal.
+It revalidates the complete batch, then revalidates each entry immediately before removal.
+Revalidation compares native identity, size, modification time, and regular-file kind.
+It does not compare link count or change time.
+Removal uses the retained directory and basename.
 
-1. Authorize every entry and reserve work, diagnostic space, and the progress record.
-2. Revalidate every selected entry before any deletion.
-3. For each entry in list order, check cancellation and revalidate its identity and metadata again.
-4. Remove that basename through the retained directory boundary.
-5. Record each successful removal before checking cancellation again.
-
-The commit reserves `3 * N` logical steps before mutation.
-This covers batch preflight, per-entry revalidation, and removal.
-The progress record is also reserved before mutation.
-The revalidation fields are the opaque fields listed in [Entry values](#entry-values).
-Changes to any field produce `File.EntryChanged`.
-An absent selected entry produces the same error.
-Construction and revalidation reject observed directories, symlinks, and entries with multiple links.
-Protection against a replacement after the final revalidation requires the coordination described in [Concurrency boundary](#concurrency-boundary).
-
-The operation stops at the first failure.
+A changed or absent entry produces `File.EntryChanged`.
+Other metadata or removal failures produce `File.RemoveFailed`.
+A batch stops at its first failure without retry or rollback.
 Successful earlier removals remain completed.
-There is no rollback, automatic retry, or silent skip.
-One batch effect is not an atomic transaction.
-A repeated commit revalidates the entries and fails when a previous commit removed them.
-An empty effect succeeds without filesystem access.
+An empty effect succeeds without access.
+A repeated commit fails when its observations are stale.
 
-### Failure Types
-
-| Condition | Result |
-| --- | --- |
-| Listing cannot obtain complete observations | `File.ListFailed` |
-| Invalid names in directory entries | `File.InvalidName` |
-| Invalid removal selection | `File.InvalidSelection` |
-| Selected identity or metadata changed | `File.EntryChanged` |
-| Removal system call failed | `File.RemoveFailed` |
-| Missing operation grant | `runtime.capability-denied` |
-| Work, value, entry, or handle budget exceeded | `runtime.limit` |
-| Host cancellation | `runtime.cancelled` |
-| Required boundary cleanup failed | `runtime.host-failure` |
-
-Lo errors keep the operation arguments in `Error.input` and the existing source trace.
-Removal failures add a `progress` record beside the `entries` argument snapshot.
-The record has this fixed shape:
+The removal progress record contains:
 
 ```text
-Record{
-    total_count: Int,
-    completed_count: Int,
-    completed_bytes: Int,
-    failed_index: Int,
-    stage: String
-}
+Record{total_count: Int, completed_count: Int, completed_bytes: Int,
+       failed_index: Int, stage: String}
 ```
 
-`completed_count` identifies the confirmed successful prefix of the supplied list.
-`completed_bytes` sums the observed sizes of that prefix.
-It is not a measurement of reclaimed disk space.
-`failed_index` identifies the failing entry, or `-1` when no entry caused the failure.
-`stage` is exactly `preflight`, `remove`, or `finalize`.
-A preflight failure always has `completed_count: 0`.
+`completed_count` identifies the confirmed prefix.
+`completed_bytes` sums observed sizes, not reclaimed disk space.
+`failed_index` is the failing index, or `-1` when no entry caused the failure.
+`stage` is `preflight`, `remove`, or `finalize`.
+Preflight failure has zero completed removals.
 
-Host diagnostics preserve the same record in a new structured `removal_progress` field.
-A `removal_entries` field retains the ordered public entry descriptions needed to identify the completed prefix.
-This applies to cancellation, limits, and cleanup failures after removal starts.
-The text formatter includes the confirmed count and failure stage.
-Cleanup failure cannot overwrite the original failure or its progress.
+Lo errors retain argument snapshots, source traces, and removal progress.
+Host diagnostics expose `removal_entries` and `removal_progress`.
+Cleanup errors preserve the original failure and confirmed progress.
+A successful `commit` still returns no value.
 
-A successful `commit` still has no result value.
-A flow can calculate its selected count and observed bytes before commit, then return them after success.
-Bare `Error.input` retains its current projection restrictions.
-The structured progress is available in diagnostic JSON without a new dynamic-record accessor.
+## Sequential Cleanup
 
-No completion report is guaranteed after process termination or an output-channel failure.
-A new execution must obtain new observations instead of replaying a printed effect.
+`Flow.fold(items, initial, context..., Step)` invokes `Step(context..., state, item)` in list order.
+The callback can commit effects under the existing fallibility rules.
+A successful result becomes the next state.
+An empty input returns the initial state.
+An unhandled error stops the suffix.
+
+The cleanup example commits singleton removals.
+Its self-handler converts only `File.EntryChanged` to a skip.
+All other failures propagate.
+This gives the workflow explicit continuation without changing generic batch behavior.
+
+Failure traces retain the fold index and completed state.
+Host diagnostics add a `flow_progress` array from the outermost active fold to the innermost.
+Each record has `operation`, `total_count`, `completed_count`, `next_index`, and `state`.
+An in-flight singleton removal can have its own receipt before the callback completes.
+The runtime preserves both receipts instead of claiming that the callback completed.
+Late session or grant cleanup failures retain the final completed state for CLI runs.
 
 ## Concurrency Boundary
 
-Directory-relative access prevents traversal outside the authorized root.
-Identity revalidation detects changes observed before removal.
-It cannot make the identity check and removal one atomic operation.
-The [Go Root.Remove contract](https://pkg.go.dev/os#Root.Remove) accepts a name, not an expected file identity.
-
-The adapter does not claim protection against an uncoordinated process that changes the directory between revalidation and removal.
-An open-file scan cannot prevent a later open either.
-Thus, the adapter does not treat an `lsof` observation as exclusion.
-It does not add a quarantine rename with an implied atomic guarantee.
-
-A host that requires protection for active files must coordinate all relevant participants.
-The Gateway workflow below selects a cooperative lock protocol.
-Generic File operations contain no Gateway policy and no implicit lifecycle lock.
+Directory-relative access preserves the authorized directory boundary.
+The final identity check and unlink remain separate operations.
+An uncoordinated writer can replace a basename between them.
+Open-file observations cannot prevent a later open.
+The adapter claims neither atomic identity-checked deletion nor writer exclusion.
+It adds no application coordination protocol.
 
 ## Inspection and Native Execution
 
-Static inspection reports `File.list` as a boundary read with the `File.list` capability.
-It reports a committed removal effect with the `File.remove` capability.
-Uncommitted removal construction does not imply activation.
-The report identifies a known root when dataflow permits it.
-A filtered selection is a calculated set, not an enumerated static filename list.
+Inspection reports listing and open-file reads separately from removal activation.
+It reports `Flow.fold` callback contexts and reachable commits.
+A filtered selection remains calculated data, not an invented static filename list.
+Unused flows have separate contexts.
+Inspection performs no discovery or subprocess execution.
 
-Inspection never enumerates a directory, examines files, or obtains a lock.
-A runtime preview performs discovery and returns public entry descriptions without constructing an applied change.
-Preview output is informational and cannot be replayed as authority.
-Execution obtains fresh observations.
-
-The same typed target, grant checks, limits, error kinds, and progress schema apply to native artifacts.
-The runtime bundle includes all new value, boundary, diagnostic, and platform code.
-File entries and removal effects cannot enter checkpoint encoding.
+Interpreter and native artifacts share grants, parsing, removal, limits, and diagnostic schemas.
+Native builds require an existing absolute `LO_BUILD_ROOT` with no symlink traversal.
+The Makefile supplies `_scratch/build-state/` inside Lo for build caches and temporary files.
+The [native contract](native-compilation-contract.md#artifact-construction) specifies that boundary.
 
 ## Gateway Log Cleanup
 
-The first complete workflow removes old deployment logs from one exact Gateway cache directory.
-The [proposed Lo program](examples/gateway-log-cleanup.lo) defines selection and activation.
-It uses existing String, Scalar, List, Math, and Match operations for the name predicate.
-It adds no regex, clock, environment, subprocess, or general IO operation.
+The [maintained example](examples/gateway-log-cleanup.lo) takes a fixture root and explicit cutoff.
+It selects sorted direct regular files with names matching `deployment-[0-9]+\.log`.
+The comparison uses ASCII digits and modification time strictly below the cutoff.
+The intended category uses a 30-day cutoff.
+It does not apply owner, access-time, or single-link restrictions.
 
-### Selected Policy
+Preview returns `directory_status`, selected names, count, and observed bytes without mutation.
+Cleanup returns `directory_status`, removed count, observed bytes, and skipped candidate count.
+Directory status is `present` or `absent`.
+The workflow avoids a probe when no candidates remain.
+It excludes observed open paths and continues after changed or absent candidates.
 
-| Input or rule | Contract |
-| --- | --- |
-| Directory | Gateway's configured runtime cache plus `deployments` |
-| Default macOS path | `$HOME/Library/Caches/mprlab-gateway/deployments` |
-| Scope | Direct children of that exact directory |
-| Name | Full basename matches `deployment-[0-9]+.log` with ASCII digits |
-| Kind | Regular file with one link |
-| Retention | `30 * 86400` seconds |
-| Cutoff | One captured host time minus retention, expressed as Unix nanoseconds |
-| Age comparison | `entry.modified_unix_ns < cutoff_unix_ns` |
-| Success result | Removed count and sum of observed sizes |
-| Missing directory | Explicit failure, with no substitution of an empty selection |
-| Concurrent deployment | Explicit busy result before Lo starts, with zero deletions |
-
-The wrapper resolves the configured Gateway cache through Gateway's existing runtime-path code.
-It does not hardcode the default macOS directory when an override is active.
-It grants only that directory for listing and removal.
-It gives no read-root or write-root grant.
-Lifecycle records, installed runtimes, and operator state are outside the granted directory.
-
-### Cooperative Host Protocol
-
-Gateway owns the application-specific lock and wrapper.
-All Gateway users of deployment logs must obey this protocol:
-
-1. Use one persistent lock file at `<runtime-cache>/deployment-logs.lock`.
-2. Hold a shared lock for the entire lifecycle that can create, open, write, rename, or remove deployment logs.
-3. Keep the shared lock between handle closes and subsequent reopens in that lifecycle.
-4. Acquire an exclusive nonblocking lock before cleanup captures time or starts discovery.
-5. Keep the exclusive lock until the Lo child exits and its report is collected.
-6. Do not replace or delete the lock file while any participant can use it.
-
-Every surviving process that can access the logs must retain the required lock.
-This includes the Lo child and lifecycle children if their parent terminates.
-Use an inherited lock handle whose exclusion remains effective until the last participating reference closes.
-The parent must not explicitly unlock that handle while a child can still access logs.
-Test these ownership and release semantics on each supported platform.
-
-Readers that require an active-log guarantee must also hold the shared lock for their complete access interval.
-A busy lock produces an explicit nonzero result with no deletion.
-Lock acquisition failure produces an explicit nonzero result.
-There is no automatic retry or interactive prompt.
-
-The existing Gateway log creation path does not implement this protocol.
-The Gateway implementation stage must add it before operational cleanup qualification.
-The old cleanup script cannot run against the same directory outside the protocol.
-Uncoordinated external readers and writers remain outside the active-log guarantee.
-This limit must remain visible in the operator documentation.
-
-### Inputs and Execution
-
-The checked example uses a fixture directory and a fixed cutoff.
-The production wrapper supplies an absolute directory and one captured cutoff.
-Current Lo commands do not accept arbitrary flow arguments.
-The first wrapper renders a complete source program from the reviewed example template.
-The command selects one of two fixed final expressions:
-
-| Command | Final expression |
-| --- | --- |
-| `logs cleanup` | `return Cleanup(root, cutoff_unix_ns)` |
-| `logs preview` | `return Preview(root, cutoff_unix_ns)` |
-
-The example shows the cleanup expression.
-The command owns this closed choice.
-User input cannot supply an entry-point name or source expression.
-It encodes the path as a Lo string literal and the cutoff as a decimal Int literal.
-Within each command's template, only those two literals vary.
-
-The template contains no user-supplied source fragments.
-
-The proposed wrapper command is `mprlab-gateway logs cleanup`.
-It sets `CI=1`, closes child standard input, and invokes the selected installed Lo binary without a shell.
-It executes the generated source with exact list and removal grants and JSON output.
-It retains the lock through child termination and forwards the child's failure and progress.
-The child retains its inherited lock reference if the wrapper terminates first.
-
-A preview command, `mprlab-gateway logs preview`, uses the same selection flow without `commit`.
-It returns names, selected count, and observed bytes under a shared lock.
-Inspection and execution tests must confirm that its selected entry point cannot reach a commit.
-A later cleanup captures time again and obtains fresh observations.
-The preview is not a frozen approval token.
-
-For native qualification, compile one fixture program and execute it with runtime grants.
-The acceptance tests compare its output and resulting directory with interpreter execution.
-Operational use of native artifacts with changing inputs is outside this first wrapper contract.
-
-### Difference From the Existing Script
-
-The current script selects old logs, examines open files, rechecks metadata, and removes eligible paths.
-The planned workflow keeps the naming and age policy.
-It replaces the open-file observation with explicit exclusion among cooperating Gateway participants.
-It stops on changed entries instead of silently skipping them.
-A missing directory is an explicit failure.
-A busy Gateway lifecycle prevents the complete cleanup run.
-These behavior changes are part of the proposed contract.
+All example execution, fixtures, and validation stay inside Lo.
+The application name identifies a log category only.
+No source project, installed script, or real application cache is an acceptance input.
 
 ## Scope Limits
 
-The first implementation includes nonrecursive discovery and regular-file removal only.
-Recursive traversal, directory removal, arbitrary subprocesses, file watchers, and stream collections are outside this plan.
-There is no cross-invocation effect replay or persistent removal journal.
-Other package caches and Docker cleanup need separate adapters and acceptance plans.
-
-No language decision remains open for the first slice.
-Platform-specific identity capture must satisfy the selected fields and fail explicitly when it cannot.
-The Gateway lock integration is a required implementation dependency, not evidence that it already exists.
+This slice includes nonrecursive entry discovery, regular-file removal, and a fixed recursive open-file probe.
+It excludes arbitrary subprocesses, directory removal, file watchers, persistent journals, and effect replay.
+The complete mac-cleanup script still needs host inputs, process results, cleanup locking, additional metadata, and category orchestration.

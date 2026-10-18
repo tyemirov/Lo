@@ -1,260 +1,114 @@
 # File Adapter Implementation Plan
 
-Status: proposed implementation sequence.
-This document does not report completed adapter implementation.
-The [design](file-adapter-design.md) owns the public contracts.
-Gateway log cleanup is the first complete acceptance workflow.
+The File adapter and Gateway log category are implemented in Lo.
+The [design](file-adapter-design.md) defines their current contracts.
+The [mac-cleanup plan](mac-cleanup-plan.md) covers the remaining complete-script work.
+The [shared adapter plan](adapter-plan.md) controls future adapter changes.
+The completed stages below qualify the current implementation only.
 
 ## Contents
 
-- [Current implementation](#current-implementation)
-- [Ownership and dependencies](#ownership-and-dependencies)
-- [Stage 1: Entry values and discovery](#stage-1-entry-values-and-discovery)
-- [Stage 2: Removal and progress](#stage-2-removal-and-progress)
-- [Stage 3: Inspection and native parity](#stage-3-inspection-and-native-parity)
-- [Stage 4: Gateway coordination](#stage-4-gateway-coordination)
-- [Stage 5: Complete workflow](#stage-5-complete-workflow)
+- [Scope and ownership](#scope-and-ownership)
+- [Implemented stages](#implemented-stages)
 - [Acceptance matrix](#acceptance-matrix)
-- [Validation and completion](#validation-and-completion)
+- [Validation](#validation)
+- [Remaining scope](#remaining-scope)
 
-## Current Implementation
+## Scope and Ownership
 
-| Concern | Current source | Necessary change |
-| --- | --- | --- |
-| Built-in operations and boundary classification | [Catalog](../internal/catalog/catalog.go) | Add listing and removal signatures, capability names, and errors. |
-| Nominal types and projections | [Types](../internal/types/types.go), [checker](../internal/check/type.go) | Add `File.Entry` and its closed projection schema. |
-| Runtime values | [Values](../internal/value/value.go), [targets](../internal/value/target.go) | Add entry provenance and operation-specific effect payloads. |
-| Host boundary | [Execution contract](../internal/execution/contract.go), [server boundary](../internal/adapter/server.go) | Add listing and preserve the same boundary through HTTP requests. |
-| Grants and filesystem operations | [File adapter](../internal/adapter/files.go), [file IO](../internal/adapter/file_io.go) | Add exact-directory list/removal grants and identity revalidation. |
-| CLI validation and diagnostics | [Commands](../internal/runner/command.go), [execution](../internal/runner/execute.go) | Add grants and partial-removal diagnostic data. |
-| Interpreter and shared operations | [Evaluator](../internal/eval/eval.go), [runtime operations](../internal/runtimeops/builtin.go) | Execute listing and route removal activation without duplicate logic. |
-| Error mapping | [Runtime helpers](../internal/runtimeops/helpers.go) | Preserve the selected removal error kind, argument snapshot, progress, and source trace. |
-| Inspection | [Analysis](../internal/inspect/analyze.go), [report](../internal/inspect/report.go) | Represent calculated entry sets and removal capability requirements. |
-| Native operation dispatch | [Code generation](../internal/codegen/operations.go), [runtime bundle](../internal/runtimebundle/bundle.go) | Include the same new operations and runtime payloads. |
-| Public tests | [Activation](../tests/integration/activation_test.go), [adapter tests](../tests/integration/adapter_test.go) | Extend behavior tests through the CLI and native artifacts. |
+Every source change, document, fixture, temporary file, cache, and generated output stays inside Lo.
+The [repository boundary](../.mprlab/POLICY.md#lo-repository-boundary) applies without exceptions.
+Gateway identifies a log category only.
+The acceptance workflow uses repository fixtures and an injected cutoff.
+It does not access another repository, an installed script, or real application data.
 
-`File.Path` currently contains text, not directory authority.
-Current file effects contain one path and one content value.
-The new removal payload must replace that assumption with closed operation-specific payloads.
-The source-level `Effect` type remains unchanged.
+The primary agent owns integration and final validation.
+Separate workers own bounded runtime and native-build changes.
+The architect reviews shared contracts and final evidence.
+No release, publication, installation, or real cleanup is part of this task.
 
-`commit` currently returns no value.
-The plan keeps that rule and adds progress to failure diagnostics.
-List callbacks already reject transitive commits, while boundary reads have a separate summary.
-There is no need for effectful list callbacks or an IO base type.
+## Implemented Stages
 
-## Ownership and Dependencies
+| Stage | Implementation |
+| --- | --- |
+| Entry values and discovery | Nominal `File.Entry`, six projections, opaque session provenance, exact list grants, bounded sorted discovery. |
+| Removal and progress | Pure `File.remove` construction, exact removal grants, complete preflight, ordered removal, and confirmed-prefix diagnostics. |
+| Open-file observations | Separate grant, descriptor-bound host probe, bounded output, explicit parsing errors, cancellation, and typed paths. |
+| Sequential activation | `Flow.fold` with named callbacks, ordered commits, first-failure termination, and cumulative state diagnostics. |
+| Workflow policy | Missing-directory status, ASCII filename predicate, strict cutoff, open-file exclusions, hardlinks, and changed-candidate skips. |
+| Inspection and native execution | Static read/activation reports and shared interpreter/native contracts. |
+| Build confinement | Repository-local Make state and required validated `LO_BUILD_ROOT` for native builds. |
 
-The Lo repository owns the File contract, compiler integration, runtime implementation, documentation, and software fixtures.
-The Gateway repository owns cache resolution, lifecycle locking, and the application wrapper.
-Gateway policy must not enter Lo's generic File adapter.
+`File` has no `IO` parent and does not convert itself into a collection.
+`File.list` returns a list of observations.
+List callbacks remain free of commits.
+The workflow uses `Flow.fold` for explicit sequential activation.
 
-One worker must own each edited module during implementation.
-Stages 1 through 3 change shared Lo contracts and must integrate in order.
-Stage 4 can proceed independently after the lock protocol is accepted.
-Stage 5 requires all four stages.
-
-The current Gateway source is `internal/lifecycle/deployment_progress.go` in the Gateway repository.
-Its log path can be reopened during one lifecycle.
-The shared lock must cover the lifecycle, not only an individual open handle.
-The existing `internal/runtimepaths` package owns cache selection.
-
-The primary agent owns integration decisions and final validation.
-The architect reviews the initial implementation plan and final evidence.
-No release, publication, deployment, or real cache cleanup is part of this plan's implementation acceptance.
-
-## Stage 1: Entry Values and Discovery
-
-1. Add a failing CLI integration test for `File.list` and `File.Entry` projections.
-2. Record rejection because the operation and type are absent.
-3. Add the nominal type, public projections, opaque provenance, and typed JSON representation.
-4. Add the exact-directory `--list-root` grant and host boundary method.
-5. Implement bounded, ordered, nonrecursive discovery.
-6. Add work, value, entry-count, and retained-handle accounting.
-7. Verify immutable entries through named flows, records, filters, maps, and folds.
-8. Verify separate entry registries for HTTP startup and each request.
-9. Verify denial without a list grant and denial for descendant directories.
-10. Verify cleanup on success, cancellation, and metadata failure.
-
-Acceptance: a granted listing returns complete ordered observations.
-No file content is read, no directory is modified, and no partial list escapes failure.
-Records with matching visible fields do not satisfy `File.Entry`.
-Diagnostic JSON contains no opaque provenance.
-
-## Stage 2: Removal and Progress
-
-1. Add a failing CLI test that constructs a removal effect without changing the fixture directory.
-2. Add a failing CLI test that commits a granted selection and returns its summary.
-3. Define closed append, write, and removal payloads under the existing `Effect` interface.
-4. Add pure selection validation and `--remove-root` authorization.
-5. Add whole-batch authorization and preflight before the first removal.
-6. Revalidate each entry immediately before its removal operation.
-7. Reserve diagnostic and progress storage before mutation.
-8. Add ordered removal, first-failure termination, and confirmed-prefix reporting.
-9. Preserve progress through Lo errors, host cancellation, limits, and cleanup errors.
-10. Verify that a repeated commit fails on stale observations.
-
-Acceptance: construction performs no IO, and only commit removes files.
-Read, write, and list grants cannot substitute for removal authority.
-Construction and revalidation reject observed directories, symlinks, and entries with multiple links.
-Protection against replacement after the final revalidation requires the design's cooperative concurrency conditions.
-An empty effect succeeds without access.
-All failures preserve confirmed progress without claiming rollback.
-
-Use injected boundary scheduling to change a file between discovery and preflight.
-Also inject changes between preflight and the per-entry revalidation.
-Keep the real selection, grant, error, and filesystem behavior under test.
-
-Add a controlled race fixture for replacement after the final revalidation.
-Record the unsupported uncoordinated-writer boundary instead of claiming atomic identity-checked deletion.
-Do not increase timeouts to hide ordering failures.
-
-## Stage 3: Inspection and Native Parity
-
-1. Add failing inspection tests for listing, calculated selections, and removal commits.
-2. Report discovery and removal capabilities separately.
-3. Preserve known root expressions without inventing filenames from an unexecuted directory scan.
-4. Add native operation dispatch and the current runtime-bundle sources.
-5. Run the same listing, removal, failure, and cancellation fixtures through native artifacts.
-6. Verify JSON parity, source traces, grant behavior, limits, and resulting directories.
-7. Verify that native artifacts accept grants only at execution time.
-8. Reject checkpoint encoding of entries and removal effects.
-
-Acceptance: inspection performs no filesystem discovery or activation.
-Interpreter and native execution satisfy one public File contract.
-Existing File.read, File.write, File.append, and HTTP behavior still pass their public tests.
-
-## Stage 4: Gateway Coordination
-
-This stage changes Gateway implementation under that repository's applicable instructions.
-It is not a request to run a lifecycle or cleanup command now.
-
-1. Add a public integration test for a writer that retains a shared lock across close and reopen.
-2. Add a cleanup test that fails busy while that lifecycle remains active.
-3. Add the persistent cache-level lock identity from the design.
-4. Apply the shared lock to every Gateway lifecycle and tool that accesses deployment logs.
-5. Add the cleanup wrapper with exclusive nonblocking acquisition.
-6. Resolve the cache through the existing Gateway runtime-path contract.
-7. Capture one host time and calculate the cutoff with integer nanoseconds.
-8. Select the command's fixed entry point and render only the reviewed path and cutoff literals.
-9. Invoke the configured installed Lo binary without a shell and with closed standard input.
-10. Retain the lock in every participating child, including after parent termination.
-11. Hold the wrapper's lock reference until the child exits and its report is collected.
-12. Add preview execution with the same predicate and no reachable commit.
-13. Update the old cleanup entry point to use the coordinated Gateway workflow for this directory.
-
-Acceptance: a participating active lifecycle prevents cleanup before discovery.
-Two cleanup processes cannot remove concurrently.
-Use synchronized parent-termination tests for both cleanup and lifecycle children.
-A new cleaner remains excluded while a surviving lifecycle child retains its shared lock.
-A new writer or cleaner remains excluded while a surviving cleanup child retains its exclusive lock.
-Exclusion ends only when the last participating child releases its reference.
-Lock failure, busy state, absent dependencies, and child failure produce explicit nonzero results.
-Neither command prompts, installs dependencies, modifies source, or selects a default response.
-An alternative runtime-cache setting controls both logs and lock identity.
-
-External readers and writers do not automatically participate in this protocol.
-Document the guarantee for participating processes only.
-Do not present an open-file probe as an equivalent mechanism.
-
-## Stage 5: Complete Workflow
-
-1. Promote the [proposed example](examples/gateway-log-cleanup.lo) to a maintained executable example after stages 1 through 4 pass.
-2. Create fixture logs in a task-owned temporary directory.
-3. Include old, recent, exact-cutoff, malformed-name, symlink, directory, and multiple-link cases.
-4. Run preview with an injected host time and assert the complete selected set.
-5. Run cleanup with the same fixed time and assert the returned count and observed bytes.
-6. Assert that only the selected direct regular files disappeared.
-7. Assert that sibling directories and ungranted targets remain unchanged.
-8. Run the same fixture through an interpreter and a native artifact.
-9. Verify busy-writer behavior with real cooperating processes and event synchronization.
-10. Verify partial failure and cancellation with deterministic boundary injection.
-
-Acceptance: the real public commands exercise discovery, selection, activation, reporting, and host coordination.
-All filesystem tests use isolated software fixtures on macOS arm64 and Linux arm64.
-No real Gateway cache is an acceptance fixture.
+Public-entrypoint tests preceded production changes for new language behavior.
+Initial failures included unknown File operations, absent `Flow.fold`, missing-directory grant rejection, and hardlink rejection.
+Review regressions also exposed malformed probe output and missing directory status.
+The output-limit regression exposed an inherited buffer method that bypassed the bounded writer.
+The implementation now uses a private buffer and validates probe records before publication.
 
 ## Acceptance Matrix
 
-| Scenario | Required result |
-| --- | --- |
-| Empty directory | Empty selection and successful no-op commit |
-| No list grant | Host denial before enumeration |
-| List grant without removal grant | Preview succeeds and commit is denied before mutation |
-| Write grant without removal grant | Commit is denied |
-| Exact root versus descendant directory | Only the exact granted directory is accepted |
-| Symlinked root | Explicit rejection |
-| Child symlink | Listed without traversal, excluded by selection, and rejected by removal construction |
-| Multiple links | Entry is excluded by Gateway selection and rejected by removal construction |
-| Duplicate entry or mixed observed roots | `File.InvalidSelection` before mutation |
-| More than 10,000 entries | `runtime.limit`, with no partial list |
-| 128 versus 129 retained directories | 128 distinct directories succeed within other budgets. The 129th produces `runtime.limit`. |
-| Repeated listing of one directory | Reuse one handle slot while producing new observations |
-| Work or value budget exhausted before commit | Failure before mutation, with zero completed removals |
-| Entry or effect crosses an execution session | Reject foreign provenance before mutation, including HTTP startup and request boundaries |
-| Invalid filename encoding | `File.InvalidName`, with no partial list |
-| Entry disappears during discovery | `File.ListFailed` |
-| Entry replaced, resized, or retimed before removal | `File.EntryChanged` |
-| Root replaced after discovery | No authority transfer to the replacement directory |
-| Failure on removal index 2 | Confirmed prefix count 2, no attempt on the suffix |
-| Cancellation after one successful removal | Host cancellation with confirmed prefix count 1 |
-| Cleanup failure after successful removals | Host failure with retained completion evidence |
-| Repeated commit | Stale-entry error, with no silent success |
-| Uncommitted effect | No directory mutation |
-| Inspection | No discovery, locks, or removal |
-| Exact-cutoff timestamp | File is retained because comparison is strict |
-| Full name policy | Only `deployment-` plus ASCII digits plus `.log` is accepted |
-| Participating active writer | Wrapper fails busy with zero deletions |
-| Two cleanup processes | At most one obtains the exclusive lock |
-| Parent terminates while cleanup child survives | Child retains exclusion against new writers and cleaners until it exits |
-| Parent terminates while lifecycle child survives | Child retains exclusion against cleanup until it exits |
-| Preview entry point | Inspection finds no reachable commit. Execution with only a list grant leaves every fixture unchanged. |
-| Non-default Gateway cache | Only that cache's deployment directory is granted |
-| Invalid injected path literal | Source rendering preserves one string literal without code injection |
+| Scenario | Required result | Maintained evidence |
+| --- | --- | --- |
+| Ordered direct discovery | Complete sorted list, including hidden entries and metadata only | [File workflow tests](../tests/integration/file_workflow_test.go) |
+| Empty directory | Successful empty selection, with no probe | [Cleanup tests](../tests/integration/gateway_cleanup_test.go) |
+| Missing directory | Observable `directory_status: absent`, with no probe | Cleanup tests |
+| Missing or wrong grant | Host denial before access or mutation | File workflow and [File failure tests](../tests/integration/file_failures_test.go) |
+| Exact root and descendants | Exact root only for list, removal, and probe root selection | File failure tests |
+| Inert missing grant | Later creation cannot acquire authority | [Probe binding tests](../tests/integration/file_probe_binding_test.go) |
+| Symlinked root or child | Reject root traversal, observe child without traversal, reject child removal | File failure tests |
+| Hardlinks | Remove selected basenames and retain unselected links | [Probe and policy tests](../tests/integration/file_probe_test.go) |
+| Duplicate basename or mixed roots | `File.InvalidSelection` before mutation | File failure tests |
+| Entry, directory, work, or value limit | `runtime.limit` without partial listing or false success | File failure and probe tests |
+| Foreign session entry | Reject provenance, including HTTP boundaries | File failure tests |
+| Invalid filename | `File.InvalidName` | File failure tests |
+| Discovery metadata failure | `File.ListFailed` | File failure tests |
+| Changed or absent candidate | Generic batch fails, cleanup workflow skips and continues | Cleanup tests |
+| Other removal error | Stop suffix and retain completed prefix | File failure and cleanup tests |
+| Replaced probe path | Probe the retained directory only | Probe binding tests |
+| Probe exit status 0 or 1 | Accept valid output with empty stripped stderr | Probe and policy tests |
+| Probe launch, stderr, or parse error | `File.OpenFilesFailed`, with no cleanup mutation | Probe and cleanup tests |
+| Probe cancellation or overflow | Stop the actual child and return the host diagnostic | Probe binding and cleanup tests |
+| Nested fold failure | Outer and inner completed prefixes plus in-flight removal progress | [Flow tests](../tests/integration/flow_fold_test.go) |
+| Session or grant cleanup failure | Preserve original error class and completed fold state | Flow tests |
+| Preview and inspection | No reachable commit, no removal authority, no mutation | Cleanup tests |
+| Exact cutoff and filename | Retain exact-cutoff files and reject malformed basenames | File workflow tests |
+| Build paths | Confine subprocess caches and temporary output inside Lo | [Native path tests](../tests/integration/native_paths_test.go) |
 
-## Validation and Completion
+## Validation
 
-For each behavior change, run its new public integration test before production edits.
-Keep the expected failing result as evidence.
-During implementation, run the smallest applicable repository target.
-The planned focused commands are:
+The Makefile supplies all build and test state under `_scratch/build-state/`.
+The runtime-bundle generator and integration setup share generated files.
+Run these targets sequentially:
 
 ```bash
-make test-integration TEST_ARGS='-run TestFileDiscovery -count=1'
-make test-integration TEST_ARGS='-run TestFileRemoval -count=1'
-make test-integration TEST_ARGS='-run TestGatewayLogCleanup -count=1'
-make test-native TEST_ARGS='-run TestFileDiscovery\|TestFileRemoval\|TestGatewayLogCleanup -count=1'
+CI=1 make test-integration TEST_ARGS='-run TestFlowFold\|TestFile\|TestGatewayLogCleanup\|TestNativeBuildPaths\|TestNativeBuildRootValidation -count=1' </dev/null
+CI=1 make test-native TEST_ARGS='-run TestFlowFold\|TestFile\|TestGatewayLogCleanup -count=1' </dev/null
+CI=1 make ci </dev/null
 ```
 
-These test groups are future deliverables, not existing passing tests.
-Gateway uses its own repository-native test target for the wrapper and lifecycle lock.
-After the final Lo stack change, run `make ci` once.
-Run a failing component target during corrections, then run `make ci` once after the last correction.
+Acceptance uses the CPU interpreter, native macOS arm64 artifacts, and controlled filesystem/process fixtures inside Lo.
+Injected schedules exercise races and failures that ordinary execution cannot reproduce reliably.
+Native CLI fixtures separately exercise step-limit failure and cumulative progress.
+Linux cross-compilation can validate the target source contract, but does not prove Linux execution.
+No container or external validation environment is required.
 
-Before implementation completion:
+Final validation status is recorded in the [reference audit](language-reference-audit.md#file-adapter-update).
+Independent review findings are resolved.
+Final `make ci` passed, including the complete interpreter and native integration suites.
+The maintained example also cross-compiled for Linux arm64 without Linux execution.
+The completion checks include document links, language checks, catalog coverage, and `git diff --check`.
+Task-owned temporary evidence is removed after useful results enter maintained tests and documents.
+The shared Make cache remains available for later repository tasks.
 
-- Complete the acceptance matrix and independent review.
-- Add the implemented signatures and limits to the language reference.
-- Update the built-in catalog count and reference audit.
-- Update the compiler design, CLI grants, and native runtime documentation.
-- Record interpreter, native, and host-coordination evidence.
-- Complete the documentation-language checks.
-- Remove task-owned temporary files.
+## Remaining Scope
 
-## Design Validation
-
-This design task reviews source contracts and documentation.
-Validation on 2026-10-16 produced these results:
-
-| Validation | Result |
-| --- | --- |
-| Complete proposed example | Parsing passed. Type checking rejected the absent `File.Entry` type, as expected. |
-| Filename predicate | All 15 cases passed in the interpreter and a native artifact. |
-| Metadata selection | All eight cases passed with ordinary record fixtures in place of `File.Entry`. |
-| Local documentation links | All 88 file links and anchors passed. |
-| Documentation language | No findings in the new design, plan, or glossary additions. Ten existing README findings remain outside the added section. |
-| Independent architect review | All findings resolved. No remaining material defect in the design and plan. |
-
-The metadata fixtures verify the predicate's age, name, kind, and link-count rules.
-They do not verify entry provenance, filesystem removal, or Gateway locking.
-Those features remain implementation work under the stages above.
+The Gateway log category is the first complete File workflow.
+The complete mac-cleanup script still needs typed host inputs, general process results, category continuation, cleanup locking, and additional file metadata.
+Implement shared adapter semantics before further application-specific extensions.
+Use the [File stage](adapter-plan.md#2-bound-activation-and-file-targets) for nominal actions and typed receipts.
+Those requirements do not authorize access outside Lo.

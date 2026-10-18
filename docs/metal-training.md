@@ -99,7 +99,7 @@ make test-native-metal TEST_ARGS='-count=1 -race -v'
 ./bin/lo-metal check examples/training_metal.lo --format json
 ./bin/lo-metal inspect examples/training_metal.lo --format json
 ./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
-./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
 ./bin/metal-training run --allow-device metal:0 --format json
 ./bin/metal-training metadata
 ```
