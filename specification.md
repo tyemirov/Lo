@@ -1,10 +1,10 @@
 # Lo Language Reference
 
 Lo is a typed dataflow language for executable plans, file workflows, HTTP services, and tensor training.
-This reference defines the implemented v0.3 core, reverse-mode autodiff, SGD, AdamW, and explicit device transfers.
+This reference defines the implemented v0.3 core, File workflows, reverse-mode autodiff, SGD, AdamW, and explicit device transfers.
 CPU execution and the selected Metal backend support training.
 Native executables use the same language contracts as the interpreter.
-The [audit boundary](docs/language-reference-audit.md#audit-boundary) identifies the validated revision and concurrent checkpoint work.
+The [reference audit](docs/language-reference-audit.md) records implementation evidence and its scope.
 
 ## Start Here
 
@@ -15,7 +15,9 @@ The [audit boundary](docs/language-reference-audit.md#audit-boundary) identifies
 | Select tensor operations | [Tensor values](#242-tensor-values-and-shape-boundaries) and [operation signatures](#243-tensor-operation-set) |
 | Update Parameters | [Gradient lifecycle](#246-parameters-and-gradient-lifecycle) and [SGD and AdamW](#247-sgd-and-adamw) |
 | Handle failures | [Error handling](#12-error-handling) and [fallible values](#223-fallible-values) |
+| Clean up observed files | [File adapter](#91-file-adapter), [sequential activation](#88-sequential-flow-processor), and [Gateway log example](docs/examples/gateway-log-cleanup.lo) |
 | Use files or HTTP | [Adapters](#9-adapters), [activation](#236-file-and-server-activation), and [examples](#19-examples) |
+| Review future adapter rules | [Shared adapter design](docs/adapter-design.md) and [implementation plan](docs/adapter-plan.md), both separate from the implemented reference |
 | Select CPU or Metal | [Backend support](#backend-support) and [device resources](#248-device-resources-and-explicit-transfers) |
 | Inspect implementation evidence | [Reference audit](docs/language-reference-audit.md) |
 
@@ -383,6 +385,7 @@ Adapters model typed boundaries to the external world.
 Examples:
 
 * `File.Path`
+* `File.Entry`
 * `HTTP.Server`
 
 Some adapter operations produce committable targets.
@@ -602,7 +605,7 @@ Bool has exactly two values, true and false.
 
 Null is its own atomic type. The null literal is spelled null and has type Null.
 Other types do not inherit from Null. Null is not an implicit inhabitant of
-String, Bytes, Int, Float, Bool, records, maps, lists, ranges, Error, File.Path,
+String, Bytes, Int, Float, Bool, records, maps, lists, ranges, Error, File.Path, File.Entry,
 HTTP.Request, HTTP.Response, HTTP.Server, or Effect.
 
 The type name Null is not a value expression. Passing either the null literal or
@@ -663,6 +666,7 @@ Their `R` argument requires a nonempty exact record of `Tensor<FP32>` fields.
 The initial boundary-oriented built-in types are:
 
 * `File.Path`
+* `File.Entry`
 * `HTTP.Request`
 * `HTTP.Response`
 * `HTTP.Server`
@@ -867,22 +871,110 @@ List operators receive explicit context arguments before the callback reference.
 
 Because String is semantically compatible with `List<Scalar>`, these processors may also operate on strings.
 
+### 8.8 Sequential Flow Processor
+
+`Flow.fold(items, initial_state, context..., Step)` applies a named flow to each item in order.
+`Step` receives `context..., state, item` and returns the next state.
+The operation returns the initial state for an empty list.
+It also accepts strings as sequences of scalars.
+
+The signature follows `List.fold`, including its context and type rules.
+The result is fallible when the callback is fallible.
+Unlike List callbacks, this callback can activate commits.
+Transitive effect analysis still requires a fallible or self-handling enclosing flow.
+Match branches and pure callbacks cannot hide an effectful fold.
+
+An unhandled callback failure stops the remaining iterations.
+A self-handler can return an explicit skip state and permit continuation.
+Lo error traces include the fold operation, failed index, and completed accumulator.
+Host diagnostics retain completed fold prefixes in `flow_progress`, plus any in-flight `removal_progress`.
+Each fold receipt has `operation`, `total_count`, `completed_count`, `next_index`, and `state`.
+Nested receipts appear from outermost to innermost.
+A callback's successful commit does not imply that the callback itself completed.
+
 ---
 
 ## 9. Adapters
 
 Adapters define typed boundaries to the external world.
+This section describes the implemented contract.
+The [next adapter design](docs/adapter-design.md) proposes stricter purity, bound commit results, and coordinated File, HTTP, and Process contracts.
+Its proposed syntax and types are not yet implemented.
 
 ### 9.1 File Adapter
 
-* `File.Path.new(file_path: String) -> File.Path`
-* `File.read(file_path: File.Path) -> Bytes!`
-* `File.append(file_path: File.Path, file_content: String) -> Effect`
-* `File.write(file_path: File.Path, file_content: Bytes) -> Effect`
+| Operation | Result |
+| --- | --- |
+| `File.Path.new(file_path: String)` | `File.Path` |
+| `File.Path.eq(left_operand: File.Path, right_operand: File.Path)` | `Bool` |
+| `File.read(file_path: File.Path)` | `Bytes!` |
+| `File.list(root: File.Path)` | `List<File.Entry>!` |
+| `File.open_paths(root: File.Path)` | `List<File.Path>!` |
+| `File.remove(entries: List<File.Entry>)` | `Effect!` |
+| `File.append(file_path: File.Path, file_content: String)` | `Effect` |
+| `File.write(file_path: File.Path, file_content: Bytes)` | `Effect` |
 
-File.read is a fallible boundary read.
+`File` has no `IO` parent type.
+Boundary reads return values directly.
+Effect construction performs no file access, and only `commit` activates an effect.
+Path equality compares text without normalization or access.
+It does not add path ordering or make paths valid Match selectors or map keys.
 
-File.append and File.write produce effects and therefore require commit.
+`File.list` returns sorted direct children without recursion or content reads.
+Each immutable `File.Entry` exposes these projections:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `path` | `File.Path` | Absolute lexical path. |
+| `name` | `String` | Direct-child basename. |
+| `kind` | `String` | `regular`, `directory`, `symlink`, or `other`. |
+| `size_bytes` | `Int` | Observed logical size. |
+| `modified_unix_ns` | `Int` | Modification time since the Unix epoch, in nanoseconds. |
+| `link_count` | `Int` | Observed filesystem link count. |
+
+Entries have opaque session and directory provenance, with no public constructor or checkpoint representation.
+Copies and List processors preserve provenance.
+JSON exposes only the public fields and cannot restore authority.
+One listing permits at most 10,000 entries.
+One session retains at most 128 observed directories, with repeated observations reusing a directory slot.
+
+`--list-root` and `--remove-root` authorize one exact directory and its immediate children.
+`--open-files-root` separately authorizes a recursive open-file probe rooted at that exact directory.
+Read and write grants do not imply these grants.
+Exact grant paths reject symlink traversal and replacement-directory authority.
+A grant for an absent directory stays inert if the directory appears later.
+An absent granted directory produces `File.DirectoryAbsent` from listing.
+
+`File.open_paths` runs a fixed `lsof -Fn +D .` probe from a retained directory descriptor.
+It returns sorted distinct paths, with no claim that the files remain open or closed.
+It accepts exit status 0 or 1 only with empty stripped standard error and valid process, descriptor, and name records.
+It rejects backslashes and control characters in name payloads because the line-framed format is ambiguous for those filenames.
+Each stream is bounded to 8 MiB, and the result to 10,000 paths.
+Invalid output or launch failure produces `File.OpenFilesFailed`.
+Output overflow, work limits, and cancellation remain host failures.
+
+`File.remove` accepts regular entries from one session and one observed directory.
+It rejects duplicate basenames, foreign observations, and other file kinds.
+Hardlinks are valid, including selected names with the same native identity.
+An empty typed list constructs a valid empty effect.
+Commit authorizes and revalidates the whole batch before mutation, then revalidates each entry immediately before removal.
+It compares identity, size, modification time, and file kind.
+A failed batch stops its suffix and preserves confirmed progress.
+
+| Lo error kind | Condition |
+| --- | --- |
+| `File.DirectoryAbsent` | Granted listing directory is absent. |
+| `File.ListFailed` | Discovery cannot obtain complete metadata. |
+| `File.InvalidName` | A directory entry has an invalid UTF-8 name. |
+| `File.OpenFilesFailed` | The probe cannot supply a valid observation. |
+| `File.InvalidSelection` | Removal construction receives an invalid selection. |
+| `File.EntryChanged` | A selected entry changed or disappeared before removal. |
+| `File.RemoveFailed` | Another metadata or removal failure occurs. |
+
+The [File design](docs/file-adapter-design.md) specifies limits, progress records, and concurrency boundaries.
+The [Gateway log example](docs/examples/gateway-log-cleanup.lo) uses pure selection and `Flow.fold` with singleton commits.
+It handles only changed or absent candidates as skips.
+Its preview and cleanup results distinguish an absent directory from an empty one.
 
 ### 9.2 HTTP Adapter
 
@@ -1440,6 +1532,7 @@ Device access has a separate resource summary.
 | SGD and AdamW transitions | [24.7](#247-sgd-and-adamw) |
 | Checkpoints and training-state transfers | [24.9](#249-model-checkpoints-and-training-state-transfers) |
 
+* `File.Path.eq`
 * `Scalar.eq`
 * `String.concat`
 * `String.upper`
@@ -1476,6 +1569,8 @@ Device access has a separate resource summary.
 ### 18.3 Fallible Constructors and Processors
 
 Section 24 defines numeric, tensor, autodiff, gradient, optimizer, and device failures.
+Section 9.1 defines `File.list`, `File.open_paths`, `File.remove`, and their failure kinds.
+Section 8.8 defines callback failure propagation for `Flow.fold`.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
@@ -1518,6 +1613,7 @@ commit aborts activation and the host reports the Error diagnostic.
 
 ### 18.4 Committable Targets
 
+* `File.remove`
 * `File.append`
 * `File.write`
 * `HTTP.Server.new`
@@ -1725,7 +1821,7 @@ These labels do not declare variables.
 ### 22.2 Transitive Effects
 
 A flow is effectful when its evaluated body can activate a commit directly or through an invoked flow.
-List callbacks and match predicates participate in the same analysis.
+List callbacks, `Flow.fold` callbacks, and match predicates participate in the same analysis.
 An unused nested definition does not make its enclosing flow effectful.
 Construction of an adapter does not activate its handlers.
 The verifier checks all flow bodies, including unused flows.
@@ -1954,6 +2050,12 @@ Both operations create the target file if it does not exist.
 They do not create missing parent directories.
 A failed activation uses the error kind specified in section 18.3.
 Its input record contains `file_path` and `file_content`.
+
+`File.remove` follows the batch contract in section 9.1.
+Removal diagnostics retain ordered entry snapshots and a progress record with counts, observed bytes, failed index, and stage.
+The host fields are `removal_entries` and `removal_progress`.
+`Flow.fold` adds cumulative state as specified in section 8.8.
+CLI runs preserve this state through session and grant cleanup failures.
 
 A later failure does not reverse a completed file effect.
 A failed write can leave partial contents.
