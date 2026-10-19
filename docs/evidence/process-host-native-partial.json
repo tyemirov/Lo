@@ -1,0 +1,679 @@
+{
+  "status": "partial-suite-test-expectation-error",
+  "standard_host_execution_enabled": false,
+  "manifest_sha256": "13548fde5b282da1750ae7c8f81f245edc5d620d601a0a0de19b89277b56cf7d",
+  "result_sha256": "b490eeba0255d816dc23e66fa655b9561564a338e32ba599c490c3e23dac9763",
+  "controller_sha256": "9a2229c4a8f307f489f8623e5d479b3fd6e59f3fae617240db8e79cd5c4b919d",
+  "manifest": {
+    "artifacts": {
+      "_scratch/adapter-implementation-x921/host-native/fixture_paths.h": {
+        "path": "_scratch/adapter-implementation-x921/host-native/fixture_paths.h",
+        "sha256": "2ce71a604ed30eb82f8c5b85659a1246c3789a462968af8b972a972f31acd882"
+      },
+      "_scratch/adapter-implementation-x921/host-native/native-tests": {
+        "path": "_scratch/adapter-implementation-x921/host-native/native-tests",
+        "sha256": "271a39d1ca450fd3d01390410d0bd95c63c2688cd34c24947ee5694b7a56aeb6"
+      },
+      "_scratch/adapter-implementation-x921/host-native/protected-command-alias": {
+        "path": "_scratch/adapter-implementation-x921/host-native/protected-command-alias",
+        "sha256": "1c4fd4fc2e8d9851a2b3496d07216bf2dbd1acec0b86f24dbef3664e6da83083"
+      },
+      "_scratch/adapter-implementation-x921/host-native/protected-helper-alias": {
+        "path": "_scratch/adapter-implementation-x921/host-native/protected-helper-alias",
+        "sha256": "ed153dd84e20a3d97212bbe06b02f6c5f236c43eed00a37543f1f0d6988e6caa"
+      },
+      "_scratch/adapter-implementation-x921/host-native/target": {
+        "path": "_scratch/adapter-implementation-x921/host-native/target",
+        "sha256": "1c4fd4fc2e8d9851a2b3496d07216bf2dbd1acec0b86f24dbef3664e6da83083"
+      },
+      "bin/lo-process-launcher": {
+        "path": "bin/lo-process-launcher",
+        "sha256": "ed153dd84e20a3d97212bbe06b02f6c5f236c43eed00a37543f1f0d6988e6caa"
+      },
+      "experiments/process-host/native/target.c": {
+        "path": "experiments/process-host/native/target.c",
+        "sha256": "9bd0847372e6ade50300cf82ebc8d96627687e645bc9ff93b7811bde500c7783"
+      },
+      "experiments/process-host/native_test.go": {
+        "path": "experiments/process-host/native_test.go",
+        "sha256": "18f635b2612ade723dbac892c1835e6da8aaf5befeabfd217e2dbcc50f46354a"
+      },
+      "experiments/process-host/probe.mk": {
+        "path": "experiments/process-host/probe.mk",
+        "sha256": "e8dbe5fff7fbd8755eaabf1a5e0ea50fd611d9c199f98085ca7e08f8164aead3"
+      },
+      "experiments/process-host/probe.py": {
+        "path": "experiments/process-host/probe.py",
+        "sha256": "ac82728f3b4150facca6e0f16fb70214c0aef7817fbccea1385d6cb6197d81e1"
+      },
+      "go.mod": {
+        "path": "go.mod",
+        "sha256": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd"
+      },
+      "go.sum": {
+        "path": "go.sum",
+        "sha256": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03"
+      },
+      "internal/adapter/file_entries.go": {
+        "path": "internal/adapter/file_entries.go",
+        "sha256": "7a6eecd66ca88ead60bac7d0c5cb5c54855d1cdd07f5cd2dc3265edf77b0238d"
+      },
+      "internal/adapter/file_identity_darwin.go": {
+        "path": "internal/adapter/file_identity_darwin.go",
+        "sha256": "608e95213015c63690120676a452e04e0de1607a6f5ab123bdd853f06a09d3be"
+      },
+      "internal/adapter/file_identity_linux.go": {
+        "path": "internal/adapter/file_identity_linux.go",
+        "sha256": "608e95213015c63690120676a452e04e0de1607a6f5ab123bdd853f06a09d3be"
+      },
+      "internal/adapter/file_io.go": {
+        "path": "internal/adapter/file_io.go",
+        "sha256": "01a5a1c66aa6f998c6c7ec336b20b2026c1f23ff2042b6b5494dc4dc29dd8fae"
+      },
+      "internal/adapter/file_open_paths.go": {
+        "path": "internal/adapter/file_open_paths.go",
+        "sha256": "5c764e2dda990ca68c3b5bec4628b9c117a4524c604679c2793bd2ac77458a93"
+      },
+      "internal/adapter/file_probe_process.go": {
+        "path": "internal/adapter/file_probe_process.go",
+        "sha256": "41257b97f18c903f2844e05e215845dcac2e44580e8e780a4ff4a455ca7a8e2f"
+      },
+      "internal/adapter/file_remove.go": {
+        "path": "internal/adapter/file_remove.go",
+        "sha256": "9e4704aa3ef3e407df4e5b3ae6610870ba791d280fc73281ecac3057ecd58ab8"
+      },
+      "internal/adapter/files.go": {
+        "path": "internal/adapter/files.go",
+        "sha256": "6aae7d5c3afb089f330ee1319de073a8fe36e54db36888cbbf878601845b8acc"
+      },
+      "internal/adapter/http.go": {
+        "path": "internal/adapter/http.go",
+        "sha256": "a25babdae307e8828be2e4c3d046fac28793e18f92c9f2e1403b75833e682aad"
+      },
+      "internal/adapter/http_client.go": {
+        "path": "internal/adapter/http_client.go",
+        "sha256": "101150bda2905e28fc50d204c07e67d78b9798bf891eada3c46d429b37a0f42f"
+      },
+      "internal/adapter/http_policy.go": {
+        "path": "internal/adapter/http_policy.go",
+        "sha256": "de2a5d4f167aee5d987c130ae58011fb6a60fb2b059bc00d91a4abf4d48a78d8"
+      },
+      "internal/adapter/process.go": {
+        "path": "internal/adapter/process.go",
+        "sha256": "40594780a97982550a1d69c10b0b90f979ad28304c85b1f2a45cf85fda24ba48"
+      },
+      "internal/adapter/process_failure.go": {
+        "path": "internal/adapter/process_failure.go",
+        "sha256": "a8c3235b0037e7eb626a261770e1de9b8a6c1f2d30a9b7d61935b100b06ebed4"
+      },
+      "internal/adapter/process_lifecycle.go": {
+        "path": "internal/adapter/process_lifecycle.go",
+        "sha256": "775138a8f71b4f91e025de1f5efbd213e83b26ece662e68c897048667ac4ff41"
+      },
+      "internal/adapter/process_policy.go": {
+        "path": "internal/adapter/process_policy.go",
+        "sha256": "bdd933cd382ca3e7ad7888eee31fa087cc889900df862e40cee25d9af94b0356"
+      },
+      "internal/adapter/process_registry.go": {
+        "path": "internal/adapter/process_registry.go",
+        "sha256": "9d68c3c814773e5c4804d7ecfd8ac00a24e5366936cff468a6259d7367bc60bc"
+      },
+      "internal/adapter/process_registry_files.go": {
+        "path": "internal/adapter/process_registry_files.go",
+        "sha256": "5e785ac3bffd1a60368684413eb03c99641ec08b6053503199a8ee2083d55392"
+      },
+      "internal/adapter/server.go": {
+        "path": "internal/adapter/server.go",
+        "sha256": "8dc86981b545bf8395bc60fa24e1b02e5c752821f2fdf490a74b87ea112b6902"
+      },
+      "internal/autodiff/plan.go": {
+        "path": "internal/autodiff/plan.go",
+        "sha256": "5e4e5e51033e5073e174911d3bd455bc2d572bbac4484dabf4d541f7a381f777"
+      },
+      "internal/catalog/autodiff.go": {
+        "path": "internal/catalog/autodiff.go",
+        "sha256": "750fda11c969fd188d6dddf497ed76253813dac9806859eeb0ee8856c2164b65"
+      },
+      "internal/catalog/catalog.go": {
+        "path": "internal/catalog/catalog.go",
+        "sha256": "8e15a66586965ecbe2890bcb39770df0944d140105378fed2e3552ca1df162ca"
+      },
+      "internal/catalog/checkpoint.go": {
+        "path": "internal/catalog/checkpoint.go",
+        "sha256": "18ff7cbd4fdd22b11c971572b0737a7721e04fce600b718bd611c04e8f41440a"
+      },
+      "internal/catalog/optimizer.go": {
+        "path": "internal/catalog/optimizer.go",
+        "sha256": "e86ef0da21332d37bcd120450df99c75d241ea1e27aadc421a2a5650f9fa5dbe"
+      },
+      "internal/catalog/parameters.go": {
+        "path": "internal/catalog/parameters.go",
+        "sha256": "00f38b5260ecf015aa318a209fd6568d2a659e83e1b9bfc4cca39e002f1185e6"
+      },
+      "internal/catalog/tensor.go": {
+        "path": "internal/catalog/tensor.go",
+        "sha256": "e6be8c898d76c6eeba8ac33c2b5a7173ad130e13741bddfecc73beae2d3acb36"
+      },
+      "internal/check/autodiff.go": {
+        "path": "internal/check/autodiff.go",
+        "sha256": "5a85270b627bfad3f1d253cb3957353694c5cb6605aa8e499cb0d367e01609fe"
+      },
+      "internal/check/call.go": {
+        "path": "internal/check/call.go",
+        "sha256": "2ffb343a556528d14f68ca8164d41bc1bc1e437ecffc90fb4197e4abfa21c54c"
+      },
+      "internal/check/check.go": {
+        "path": "internal/check/check.go",
+        "sha256": "0e704fb242f9d3bf234387d137b743d9e3389d16942e31f04990d472a27712be"
+      },
+      "internal/check/checkpoint.go": {
+        "path": "internal/check/checkpoint.go",
+        "sha256": "89760844818292c3a33751ac5125407bd9d549718b2ed147822ed3982526f8d1"
+      },
+      "internal/check/collections.go": {
+        "path": "internal/check/collections.go",
+        "sha256": "f8777520c658b01d30ba81ff109b80bd4bace22856c75503dd700465dfe3caae"
+      },
+      "internal/check/expression.go": {
+        "path": "internal/check/expression.go",
+        "sha256": "3c27d322f4b997b580e30cc9591b77e5908511d68e0145634b81fa43be435b04"
+      },
+      "internal/check/match.go": {
+        "path": "internal/check/match.go",
+        "sha256": "9a5551b25fcb5deef07d35c1aeeb66573e2e701b51d7deb970727b4fb6387449"
+      },
+      "internal/check/optimizer.go": {
+        "path": "internal/check/optimizer.go",
+        "sha256": "75de8def75a753e60092bb6abd6a346c5036ed89b63f57ab655198e4be2641e4"
+      },
+      "internal/check/parameters.go": {
+        "path": "internal/check/parameters.go",
+        "sha256": "b6afd937389bafebd0d9568a6aeb2729166322a5d134f9a6ef865ac05e63441a"
+      },
+      "internal/check/type.go": {
+        "path": "internal/check/type.go",
+        "sha256": "ef6079d876eea30c67d281231ae8f380db01bc12c8dabe685e575a02eb40f39a"
+      },
+      "internal/codegen/arguments.go": {
+        "path": "internal/codegen/arguments.go",
+        "sha256": "f30d3be1ed910d37f9a2237b3608f0ddfd4c7142c9971331c55845049423238a"
+      },
+      "internal/codegen/expression.go": {
+        "path": "internal/codegen/expression.go",
+        "sha256": "217c04f86e2af94f356b5b5f3f36a140a16fdaa811906edf98cc0abc28475b8e"
+      },
+      "internal/codegen/generate.go": {
+        "path": "internal/codegen/generate.go",
+        "sha256": "36c40ce506ae28b9418a4d16309ad2aca5e2214b3df7b1c3e9b279e212cb5d4c"
+      },
+      "internal/codegen/gradient.go": {
+        "path": "internal/codegen/gradient.go",
+        "sha256": "f32d6c157ae057eeeda9164c9fbf0ef789dddcfd1a02d36251753fa19adf665e"
+      },
+      "internal/codegen/list.go": {
+        "path": "internal/codegen/list.go",
+        "sha256": "5f907fd21afa3a9fd4699d69ebba1a024c3a8dd59eec38a0b0d6f72fc5356b59"
+      },
+      "internal/codegen/operations.go": {
+        "path": "internal/codegen/operations.go",
+        "sha256": "f661552dd8b02c00990298ad5fa589a83bb1f61a1b46a46ad7d9d824065a71d6"
+      },
+      "internal/compiler/compiler.go": {
+        "path": "internal/compiler/compiler.go",
+        "sha256": "a37489303ed387f8ada4cc977c643c96517bad47cd1a4843464fdf80b8178380"
+      },
+      "internal/derivative/vjp.go": {
+        "path": "internal/derivative/vjp.go",
+        "sha256": "e12a6e750d368af4565b27ed736cfcecb595beeea48b4c6e5ab614bbea0167dd"
+      },
+      "internal/device/build.go": {
+        "path": "internal/device/build.go",
+        "sha256": "713dad1e5cab521f6da6d3ac44c1e59c63dc764b9b12d45532e5c5317b805972"
+      },
+      "internal/device/compute.go": {
+        "path": "internal/device/compute.go",
+        "sha256": "6753afc97e6d1cfa8103845e2a45b1bb10a564d6f8f50759c50bff59e47ea989"
+      },
+      "internal/device/device.go": {
+        "path": "internal/device/device.go",
+        "sha256": "b7d141e6debf1db8cfc936a39c12e567a04105c7cb51b518d1393a157af3029f"
+      },
+      "internal/device/metal_darwin.go": {
+        "path": "internal/device/metal_darwin.go",
+        "sha256": "feafecd54b00946646cc73a9c32460b72f0ada46ce7eba83f17712a2c22c45a4"
+      },
+      "internal/device/metal_disabled.go": {
+        "path": "internal/device/metal_disabled.go",
+        "sha256": "ddccb1685eb958264a91ca3e3cd9d86808f7f81aace289e5951fac4981586d65"
+      },
+      "internal/diagnostic/diagnostic.go": {
+        "path": "internal/diagnostic/diagnostic.go",
+        "sha256": "4b56533f7cae515ce2e423d64116d419a31e9079b9b9be87544a6591618fda69"
+      },
+      "internal/eval/autodiff.go": {
+        "path": "internal/eval/autodiff.go",
+        "sha256": "598443afb24f8fe11051224e6113347a4ee32c58662564ee4e61a9715ae9a0b3"
+      },
+      "internal/eval/builtin.go": {
+        "path": "internal/eval/builtin.go",
+        "sha256": "4028e21d9c48f5962b98db1a03c3ab10cf8b6fe75b06d4293ae5e0ae6dd5ad82"
+      },
+      "internal/eval/eval.go": {
+        "path": "internal/eval/eval.go",
+        "sha256": "c585410b1f5f31db555dd62db13590c5527db16dd00077d96564fcb560647f6e"
+      },
+      "internal/eval/list.go": {
+        "path": "internal/eval/list.go",
+        "sha256": "6eb19d89cadc32086a21d91505a350c92bec3ef91d8ed6ddc0a44ef5532ac221"
+      },
+      "internal/execution/activation_progress.go": {
+        "path": "internal/execution/activation_progress.go",
+        "sha256": "e0db8b7c5aac92fa500b87488c84ac78878a9beb206e8e5c993b371d4e350f40"
+      },
+      "internal/execution/contract.go": {
+        "path": "internal/execution/contract.go",
+        "sha256": "cc6811d5cea04469cfec2a3b7ec37978a10cab7bb55da9adb8ce03a7a01b5162"
+      },
+      "internal/execution/failure_capture.go": {
+        "path": "internal/execution/failure_capture.go",
+        "sha256": "2134f4f3ca2fb84529dd80ec1bff063359df7c4911b648901d03509d8f8e2c12"
+      },
+      "internal/execution/file.go": {
+        "path": "internal/execution/file.go",
+        "sha256": "19caf10a701384b4e7540b9ce16925f3aa8e20f7910583eb852f8efe63deaab7"
+      },
+      "internal/execution/file_write_progress.go": {
+        "path": "internal/execution/file_write_progress.go",
+        "sha256": "675892824dcca6ae77d0e5cda97f541b2e862e27c74f9ac4ca5cda37fbf02b99"
+      },
+      "internal/execution/flow_progress.go": {
+        "path": "internal/execution/flow_progress.go",
+        "sha256": "b914f748f7a5c5da4a991088c762b8296e0a94e54619db915d58e7da701ca4cc"
+      },
+      "internal/execution/http_progress.go": {
+        "path": "internal/execution/http_progress.go",
+        "sha256": "95e320a22d4f6f9008b072f0524fd8d2961cf51c2eef385c0c0aaffead585a0a"
+      },
+      "internal/execution/operation_cleanup.go": {
+        "path": "internal/execution/operation_cleanup.go",
+        "sha256": "ac774842566e7c3ea97f28e580f1b3a33d50c6073fb17abf1c276a75145a54bc"
+      },
+      "internal/execution/process_progress.go": {
+        "path": "internal/execution/process_progress.go",
+        "sha256": "c4919a2e1f8660e8c620d895c637ddfcef36abd35e752405e1185b6b434ccb57"
+      },
+      "internal/execution/program.go": {
+        "path": "internal/execution/program.go",
+        "sha256": "936b6a379748469c208b8f5987def07472e078f8b84a34b571cca200542590d0"
+      },
+      "internal/execution/session.go": {
+        "path": "internal/execution/session.go",
+        "sha256": "4f98a30fd84f12b8f0bc3f14a9b28159a9b274309deada8d705f5fee5fb98570"
+      },
+      "internal/identity/flow.go": {
+        "path": "internal/identity/flow.go",
+        "sha256": "ee15f4ac26587b22dd15def1280cdf73e2b3f73ece81d93666c441bc6c6ddf39"
+      },
+      "internal/inspect/analyze.go": {
+        "path": "internal/inspect/analyze.go",
+        "sha256": "89dfa46a67fc1b257a4bc6e2db8f1fbe69e2f77b4b0131478be10cd03fd010ce"
+      },
+      "internal/inspect/autodiff.go": {
+        "path": "internal/inspect/autodiff.go",
+        "sha256": "728f882d823f526bd0af06b5c438be756fd656d7d2d184a36de8edfe5e98fce4"
+      },
+      "internal/inspect/expression.go": {
+        "path": "internal/inspect/expression.go",
+        "sha256": "95545e8e61a4b79819ac1b049cac4a166609c5ad44a5bfae4b29836dbab69a5f"
+      },
+      "internal/inspect/index.go": {
+        "path": "internal/inspect/index.go",
+        "sha256": "758754b5dedb0f0e5145818bbd27e5e5fefc2855b83298400e5c098012c0124f"
+      },
+      "internal/inspect/process.go": {
+        "path": "internal/inspect/process.go",
+        "sha256": "93f73987f722596ffe46b915b545e3e1a496075dee47a8fa59f1fc0edec6a247"
+      },
+      "internal/inspect/report.go": {
+        "path": "internal/inspect/report.go",
+        "sha256": "e0881b1658b129de96a1d45cb4acfdf3d2246d16da128218427f10995863eace"
+      },
+      "internal/ir/ir.go": {
+        "path": "internal/ir/ir.go",
+        "sha256": "28e554a3c1ebfa6fe155869dae9c165404cd26c19b4819c15c7265821b71faff"
+      },
+      "internal/metalconfig/config.go": {
+        "path": "internal/metalconfig/config.go",
+        "sha256": "de4297ef13cb86faa5259e9270ffe5a76679b0ecb54600d231eafb5f247828e2"
+      },
+      "internal/nativebuild/build.go": {
+        "path": "internal/nativebuild/build.go",
+        "sha256": "bf8a75dcf6502d152d987df1316e319437d6af6b68375380a15d06758bb630d5"
+      },
+      "internal/nativebuild/metal.go": {
+        "path": "internal/nativebuild/metal.go",
+        "sha256": "0b44e166912b5faabf69526b891f7299e5f1ff732d62bc9b460f8c6ea0a0c907"
+      },
+      "internal/nativebuild/paths.go": {
+        "path": "internal/nativebuild/paths.go",
+        "sha256": "a9727d5a7d468afc4f41d6ef0c0395b2a47db8824e7b30feff39f34f2734442d"
+      },
+      "internal/nativebuild/qualification.go": {
+        "path": "internal/nativebuild/qualification.go",
+        "sha256": "738cf76e0273a075ce71d13eff4c4ae82cea3564133f3f82382c25f042a5291e"
+      },
+      "internal/processhost/helper_identity.go": {
+        "path": "internal/processhost/helper_identity.go",
+        "sha256": "e86336237116d709ddedd9b554fd323a98ae4f5daee0ce47b0a01589a399bf75"
+      },
+      "internal/processhost/native/launcher.c": {
+        "path": "internal/processhost/native/launcher.c",
+        "sha256": "0b4d0247b0436f085a02bebbea052d36b31dbd9e5d3079f1ec69c4b390726722"
+      },
+      "internal/processhost/native/normalization.c": {
+        "path": "internal/processhost/native/normalization.c",
+        "sha256": "bca34b235eae64168f7fc4bcf6a25c32ccac65cc357b451fc6414317a0a8ce1e"
+      },
+      "internal/processhost/native/protocol.h": {
+        "path": "internal/processhost/native/protocol.h",
+        "sha256": "d91353f6b15d4810d844f33bd16ed6127fae3942b0c6b801a82842a64c642e08"
+      },
+      "internal/processhost/native_config_darwin.go": {
+        "path": "internal/processhost/native_config_darwin.go",
+        "sha256": "3cbfdc25cd758a7ae3e5562dec03c8cf23b916e8501cad98e4fcaa1d67ee21f3"
+      },
+      "internal/processhost/native_darwin.go": {
+        "path": "internal/processhost/native_darwin.go",
+        "sha256": "8a7be52c5ed2eeafbb6f4ed092570d74491b7ef80d5af0d2a88e086e7c7a69dc"
+      },
+      "internal/processhost/native_other.go": {
+        "path": "internal/processhost/native_other.go",
+        "sha256": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16"
+      },
+      "internal/processhost/native_ownership_darwin_test.go": {
+        "path": "internal/processhost/native_ownership_darwin_test.go",
+        "sha256": "98dcad178c35b9b540237c874d00b8348b6b1786ba25cd142c8bc826bc24063e"
+      },
+      "internal/processhost/pending.go": {
+        "path": "internal/processhost/pending.go",
+        "sha256": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64"
+      },
+      "internal/processhost/session.go": {
+        "path": "internal/processhost/session.go",
+        "sha256": "1b7a7ba7b7ac98ba3d7d04e65fa5f48fe95a61833a7918ca065e322b540edd88"
+      },
+      "internal/processhost/startup.go": {
+        "path": "internal/processhost/startup.go",
+        "sha256": "029e0f4dbd048ef277115bd17128c113e33791c372a416a9c2866d580ce1f50f"
+      },
+      "internal/resolve/scope.go": {
+        "path": "internal/resolve/scope.go",
+        "sha256": "59ee6ebda753d154d1c511edf669ef5d0b01566e711716f229596871df8ce742"
+      },
+      "internal/runner/command.go": {
+        "path": "internal/runner/command.go",
+        "sha256": "1d985339d62475e893850ac329c530a75f43bc873f54c2072ba3c7a563bc7b07"
+      },
+      "internal/runner/execute.go": {
+        "path": "internal/runner/execute.go",
+        "sha256": "03c5e1d4d4c0e5f16e87d99cae9e60000cbdd53b5f1540acda398dc62067db90"
+      },
+      "internal/runtimebundle/bundle.go": {
+        "path": "internal/runtimebundle/bundle.go",
+        "sha256": "a12b0daf9b274a0632ed9c817db64a964870428f7b51d8e20d6118efd89f6ce2"
+      },
+      "internal/runtimebundle/metal_disabled.go": {
+        "path": "internal/runtimebundle/metal_disabled.go",
+        "sha256": "e0881071954e468c75d9ebfd54770ac592acc21c366c5672b2b20ec50e143733"
+      },
+      "internal/runtimebundle/metal_enabled.go": {
+        "path": "internal/runtimebundle/metal_enabled.go",
+        "sha256": "223ee4acaebc9ea7e696a8009e24e59282c5087e359fb7c51de716e7775139fc"
+      },
+      "internal/runtimeops/arithmetic.go": {
+        "path": "internal/runtimeops/arithmetic.go",
+        "sha256": "05fd5c8ceecafddfab7563b3af0f4fbd04ffd7b138f25858b17abece5c44d169"
+      },
+      "internal/runtimeops/builtin.go": {
+        "path": "internal/runtimeops/builtin.go",
+        "sha256": "d36cae4fb77a491bc5f782b6517aa4a4c1f686ced5ff1618fa8b5baba03bf54b"
+      },
+      "internal/runtimeops/checkpoint.go": {
+        "path": "internal/runtimeops/checkpoint.go",
+        "sha256": "5e6e0b3c3caac5533119299f0d056579da24397e02c2e71f9c416566394fe0a7"
+      },
+      "internal/runtimeops/control.go": {
+        "path": "internal/runtimeops/control.go",
+        "sha256": "490271cfe61153ea2262a980f2159d7e76f47ea43195932be2a01d3bd5ea34c0"
+      },
+      "internal/runtimeops/derivative.go": {
+        "path": "internal/runtimeops/derivative.go",
+        "sha256": "65d78ba3447b9ad81de66ce688de1a8e8973ba5ec2d770d2e5bd39b7a8625a0a"
+      },
+      "internal/runtimeops/float.go": {
+        "path": "internal/runtimeops/float.go",
+        "sha256": "646fef81daf610e10288ba0e5dc07ecc0eb2cbb78cbf0d33a5061ee6ea5d9aba"
+      },
+      "internal/runtimeops/helpers.go": {
+        "path": "internal/runtimeops/helpers.go",
+        "sha256": "39bf9655b671604400c014628a21d98a607e1e05a9f49a84a3f5a4841ab96662"
+      },
+      "internal/runtimeops/http_client.go": {
+        "path": "internal/runtimeops/http_client.go",
+        "sha256": "8eb796d5b11cf94cc40448b61f4ce33eee79275fff85a94ea5608744c8e4dbee"
+      },
+      "internal/runtimeops/optimizer.go": {
+        "path": "internal/runtimeops/optimizer.go",
+        "sha256": "5a2f07557ea7b9674d3e9d63e01872c5c014b8e98a770ea3387d5d67f3e14782"
+      },
+      "internal/runtimeops/parameters.go": {
+        "path": "internal/runtimeops/parameters.go",
+        "sha256": "40cd6e052b4dfc639ad0f03731f193173e2dac456715a4c75e735060b648b4ee"
+      },
+      "internal/runtimeops/process.go": {
+        "path": "internal/runtimeops/process.go",
+        "sha256": "8ca7d996116471da1bbdf79e789e1032fa20af9a2541b9fe4323121273aa7e3b"
+      },
+      "internal/runtimeops/runtime.go": {
+        "path": "internal/runtimeops/runtime.go",
+        "sha256": "abd865024be4f874797db19772fac82e78a26628c0204cba4b4e7e14ed7659b5"
+      },
+      "internal/runtimeops/tensor.go": {
+        "path": "internal/runtimeops/tensor.go",
+        "sha256": "30c64760f69cf0d4949ffc62d238319829ee63f543e2b9c8d550adaca6d3e318"
+      },
+      "internal/source/source.go": {
+        "path": "internal/source/source.go",
+        "sha256": "6612c2bad62638c79aad2f1ecc61a7faa8887382452e299488250dd5b9dc3521"
+      },
+      "internal/syntax/ast.go": {
+        "path": "internal/syntax/ast.go",
+        "sha256": "ed1002b6508bf1834e0ab53c0816afb31d3d53e750db256e2275a68f97e2fe40"
+      },
+      "internal/syntax/lexer.go": {
+        "path": "internal/syntax/lexer.go",
+        "sha256": "c1213cae056971402d9fc1f1a91e81a96ffb5e830f9945bc73ea3f79fe886038"
+      },
+      "internal/syntax/parser.go": {
+        "path": "internal/syntax/parser.go",
+        "sha256": "d6f1f4d0ed72cffe4df618a99036f6af3b67054b09cbe026db773ea173c89880"
+      },
+      "internal/tensor/compute.go": {
+        "path": "internal/tensor/compute.go",
+        "sha256": "63379f95df09dc89eaf3fac409c41138d71705eb16346f1edc254d036752b0e4"
+      },
+      "internal/tensor/cpu.go": {
+        "path": "internal/tensor/cpu.go",
+        "sha256": "a82c9542f91b43d71e1b0bae70c8721647f6154bec08fda08136aeef336de00f"
+      },
+      "internal/tensor/device.go": {
+        "path": "internal/tensor/device.go",
+        "sha256": "e9c7f1fdfc18f596773f4bb45f59148ec45382939467d201d140c70a67c628d6"
+      },
+      "internal/tensor/shape.go": {
+        "path": "internal/tensor/shape.go",
+        "sha256": "15aefdc0b82cc111063ac03234c5a5064c9a773e6dadd1dc63c51a3d247fd649"
+      },
+      "internal/tensorfacts/analyze.go": {
+        "path": "internal/tensorfacts/analyze.go",
+        "sha256": "f4271c9425af0bdad0dedbb5ec584ccb08c81275af5f1a0eb5b10db82e2ddedc"
+      },
+      "internal/tensorfacts/scope.go": {
+        "path": "internal/tensorfacts/scope.go",
+        "sha256": "3bd17cd566ad2bf775296a38e2a185278d2131fa1b41e9b08cb0d686cc443788"
+      },
+      "internal/types/training.go": {
+        "path": "internal/types/training.go",
+        "sha256": "8f67e2579f1b6572a6a870c062a120785831c5ef3dad117502e5266274ccd598"
+      },
+      "internal/types/types.go": {
+        "path": "internal/types/types.go",
+        "sha256": "fec5acb35c8a13710b67e8fb2bc655f2e2b06a95e1c98d59e6fc764d7cc9cfbb"
+      },
+      "internal/value/error.go": {
+        "path": "internal/value/error.go",
+        "sha256": "4b82a69f188761a757ddef8bcd8853fd6bb6575aeaef058ec9e9c82d87e51c69"
+      },
+      "internal/value/file.go": {
+        "path": "internal/value/file.go",
+        "sha256": "2e0e08cebc6c4c12250f51160015d770e01d2f16891e2220b43d173fef0d826c"
+      },
+      "internal/value/headers.go": {
+        "path": "internal/value/headers.go",
+        "sha256": "04b3263cfa0cd56bd838af116190e8290a0d8840b6cde6a092e517eb677eb236"
+      },
+      "internal/value/http_client.go": {
+        "path": "internal/value/http_client.go",
+        "sha256": "3f04db38d0d767f0b54eef416ddc54a0f1ff4f3701fd9f43ae4b494088366a06"
+      },
+      "internal/value/optimizer.go": {
+        "path": "internal/value/optimizer.go",
+        "sha256": "65ba9f205caf5db47b9b94d84b1b7017f890837dabed8fcff78964ffbc5c974a"
+      },
+      "internal/value/parameters.go": {
+        "path": "internal/value/parameters.go",
+        "sha256": "dd1470ba363ba43d308bdc9d387a3b18b81fb9546bd1bd24aa026870f8665283"
+      },
+      "internal/value/process.go": {
+        "path": "internal/value/process.go",
+        "sha256": "0e87bf9b830f8c74c8f55fc3f3b9a2fb139fea84f06d98369697d58dea796b07"
+      },
+      "internal/value/process_result.go": {
+        "path": "internal/value/process_result.go",
+        "sha256": "cf9bcddc214dc2189cd0d935b24914a35567824d014042e444273f1440fcbc66"
+      },
+      "internal/value/receipt.go": {
+        "path": "internal/value/receipt.go",
+        "sha256": "3c90f7426a5569d625d5e738c4f0193c27fbac704bc4e3486ceade18980946c8"
+      },
+      "internal/value/resources.go": {
+        "path": "internal/value/resources.go",
+        "sha256": "41987b556b83a55a4d1cc1907c7ce5d6a52248c9a3ed7032eaa2ac81accb9471"
+      },
+      "internal/value/snapshot_weight.go": {
+        "path": "internal/value/snapshot_weight.go",
+        "sha256": "56d4156a18cb5318a659876c083591707df657e16a983f6ae88bd4571efb7e1d"
+      },
+      "internal/value/target.go": {
+        "path": "internal/value/target.go",
+        "sha256": "4d983b7fcbd26a170bb32a3f3709828e5bf3ba0b3d499087aa2b8a4145fa0652"
+      },
+      "internal/value/tensor.go": {
+        "path": "internal/value/tensor.go",
+        "sha256": "d343bd2a2ff5875a6bb14f0aec6d78e7bcb5e72c7da2082aa3d11e6e63f80492"
+      },
+      "internal/value/value.go": {
+        "path": "internal/value/value.go",
+        "sha256": "60716ec790c7a990038e4c9125fd499810e44b061b2caad7b26d8c62ea8e6e95"
+      }
+    },
+    "cases": [
+      "normal",
+      "nonzero",
+      "signaled",
+      "output-to-file",
+      "output-limit",
+      "wall-timeout",
+      "denied-command",
+      "denied-cwd",
+      "protected-command-alias",
+      "protected-helper-alias",
+      "helper-alias-as-command",
+      "helper-mismatch",
+      "digest-mismatch"
+    ],
+    "directory": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/host-native",
+    "launcher": "/Users/tyemirov/Development/Research/Lo/bin/lo-process-launcher",
+    "result": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/host-native/result.json",
+    "run_token": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/host-native/run-token",
+    "target": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/host-native/target"
+  },
+  "result": {
+    "cases": {
+      "nonzero": "passed",
+      "normal": "passed",
+      "output-limit": "passed",
+      "output-to-file": "passed",
+      "signaled": "passed",
+      "wall-timeout": "failed"
+    },
+    "cleanup_complete": true,
+    "lifetimes": {
+      "nonzero": {
+        "maximum_parallelism": 18,
+        "admission_through_release_seconds": 0.014196625,
+        "conditional_cpu_time_upper_bound_seconds": 0.25553925,
+        "cleanup_complete": true
+      },
+      "normal": {
+        "maximum_parallelism": 18,
+        "admission_through_release_seconds": 0.165895292,
+        "conditional_cpu_time_upper_bound_seconds": 2.986115256,
+        "cleanup_complete": true
+      },
+      "output-limit": {
+        "maximum_parallelism": 18,
+        "admission_through_release_seconds": 0.013831167,
+        "conditional_cpu_time_upper_bound_seconds": 0.248961006,
+        "cleanup_complete": true
+      },
+      "output-to-file": {
+        "maximum_parallelism": 18,
+        "admission_through_release_seconds": 0.013663208,
+        "conditional_cpu_time_upper_bound_seconds": 0.24593774399999999,
+        "cleanup_complete": true
+      },
+      "signaled": {
+        "maximum_parallelism": 18,
+        "admission_through_release_seconds": 0.012458791,
+        "conditional_cpu_time_upper_bound_seconds": 0.224258238,
+        "cleanup_complete": true
+      },
+      "wall-timeout": {
+        "maximum_parallelism": 18,
+        "admission_through_release_seconds": 5.00111875,
+        "conditional_cpu_time_upper_bound_seconds": 90.0201375,
+        "cleanup_complete": true
+      }
+    },
+    "qualified_process_backend": false,
+    "reviewed_artifacts_unchanged": true,
+    "reviewed_manifest_sha256": "13548fde5b282da1750ae7c8f81f245edc5d620d601a0a0de19b89277b56cf7d"
+  },
+  "controller": {
+    "reviewed_manifest_sha256": "13548fde5b282da1750ae7c8f81f245edc5d620d601a0a0de19b89277b56cf7d",
+    "exit_code": 1,
+    "elapsed_seconds": 5.523733000038192,
+    "output_saturated": false,
+    "deadline_exceeded": false,
+    "emergency_group_signal": false,
+    "explicit_cleanup_complete": true,
+    "controller_joined": true,
+    "qualified_process_backend": false
+  },
+  "limits": [
+    "The work bound assumes a responsive OS and completed resource release.",
+    "Execution timeout produces host cancellation. Output overflow produces host limit failure.",
+    "Public CLI and generated-native acceptance are separate checks."
+  ]
+}

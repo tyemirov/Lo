@@ -1,17 +1,12 @@
 # Adapter Implementation Plan
 
-Status: stages 1–3 and the pure Process phase passed current-stack CI.
-The pure Process phase also passed focused interpreter and native checks.
-Independent review approved the implemented pure Process checkpoint.
-Independent source review closed the current shared-contract and HTTP findings.
-HTTP-to-File composition passes in both execution backends.
-Process-dependent composition remains incomplete.
-The latest current-stack CI includes pure Process construction, inspection, and unavailable rejection.
-The earlier independent checkpoint review approved stages 1–3 without a remaining source finding.
-
-Process qualification failed source review.
-No backend is qualified.
-The current candidate could not demonstrate a runnable helper, and probes stopped after independent review.
+Status: shared purity, File/HTTP behavior, Process results, executable registration, and the native host are implemented.
+The selected Darwin 27 arm64 profile passed [native qualification](evidence/process-host-native.json).
+Canonical public acceptance passed all 24 interpreter/generated-native cases, including server callbacks and Process-to-File composition.
+Final stack CI and independent completion review passed.
+The [final validation record](evidence/process-enabled-validation.json) preserves the CI log and review outcome.
+Earlier injected lifecycle and registry checkpoints passed CI and independent review.
+Implementation and final stack CI passed. Independent completion review passed.
 
 The [adapter design](adapter-design.md) owns the selected language and domain rules.
 The [language reference](../specification.md) describes the current implementation until each stage qualifies.
@@ -36,7 +31,7 @@ Gateway identifies one log category in a repository fixture.
 It does not identify a dependency checkout or an external acceptance target.
 The [mac-cleanup plan](mac-cleanup-plan.md) remains an application plan that depends on this contract.
 
-This document records stages 1–3 and plans the remaining code changes.
+This document records implemented adapter contracts and qualification evidence.
 The stage status below separates implemented contracts from selected future work.
 This plan does not authorize operations outside Lo.
 No compatibility aliases, alternate legacy schemas, or unrestricted Process mode belong in the implementation.
@@ -59,6 +54,16 @@ Review shared type and catalog changes before parallel implementation.
 Keep independent architecture review at the contract and final acceptance boundaries.
 
 ## Implementation Sequence
+
+The section numbers identify work areas, not a strict dependency chain.
+Process core work and native qualification are separate tracks.
+
+| Track | Prerequisite | Current state |
+| --- | --- | --- |
+| Commands, results, injected lifecycle, and injected composition | Shared types, purity, and activation contracts | Implemented and race tested without native qualification. |
+| Native profile qualification | Supported enforcement mechanisms and separately reviewed probes | Selected Darwin 27 arm64 profile passed. Other backends remain unavailable. |
+| Native OS driver and standard-host activation | Qualified profile plus shared lifecycle contract | Native driver implemented. All 24 canonical public cases passed. |
+| Native composition acceptance | Qualified native driver | Public interpreter and generated-native Process-to-File cases passed. |
 
 ### 1. Contract Fixtures and Purity
 
@@ -116,90 +121,61 @@ HTTP-to-File composition also passes in both execution backends.
 Acceptance depends on full response publication and explicit evidence when the remote outcome is unknown.
 No request executes during construction, inspection, or compilation.
 
-### 4. Process Profile Qualification
+### 4. Native Process Profile Qualification
 
-Status: qualification failed at independent source review.
-No backend is qualified, and no general Process adapter launch occurred.
-Executable replacement, filesystem/IPC access, and work/resource controls lack the necessary enforcement evidence.
-The macOS Seatbelt default-deny and fork controls are not qualified.
+The selected Darwin 27 arm64 profile passed [native host qualification](evidence/process-host-native.json).
+The [design ledger](adapter-design.md#qualification-status) links current qualification and earlier bounded mechanism evidence.
+Startup, local Mach-slot normalization, identity integration, denial checks, and cleanup passed their selected suites.
+The conditional `P × completed lifetime` work bound assumes a responsive OS. It is not a hard CPU quota.
+No result establishes platform impossibility, and SDK deprecation is not automatic disqualification.
+Canonical public acceptance passed all 24 interpreter/generated-native cases. Final stack CI and independent completion review passed.
 
-The scratch helper build passed.
-The main candidate and unchanged-profile immediate-return child each terminated with `SIGABRT` and exit code `-6`.
-Both runs had empty output and no helper observations.
-The exact profile did not demonstrate a runnable helper, and probes stopped after independent review.
-No external file-read allowance or profile broadening was added.
-The evidence does not establish sandbox denial or platform-wide impossibility.
+Existing installed OS and runtime dependencies can serve as read-only execution infrastructure.
+This allowance excludes other repositories, external task data, and external writes.
+All added sources, fixtures, caches, and output remain inside Lo.
 
-The first run had no core-dump limit guard.
-The launch-only run applied a zero core-dump limit before child execution.
-It also applied a 64 KiB limit per output file and a ten-second parent timeout.
-These guards do not qualify the Process resource contract.
+1. Select a supported native execution path and enforceable profile.
+2. Keep the fixed launcher environment separate from command environment variables.
+3. Install confinement before receipt of command environment variables, and close the bounded control channel before target execution.
+4. Establish executable identity and filesystem, network, IPC, descendant, and resource restrictions.
+5. Verify denied operations and cleanup through repository-contained fixtures.
+6. Confirm no surviving descendants and successful resource release before result publication.
+7. Obtain independent review before native launch acceptance.
 
-Static Mach-O inspection read only the scratch helper bytes.
-The helper SHA-256 is `dd6ec36820a69a59bd3ab5220b5856738b39f8e9ac8bd78f450d635d78a55b88`, with CPU `CpuArm64`.
-It names loader `/usr/lib/dyld` and libraries `/usr/lib/libSystem.B.dylib` and `/usr/lib/libresolv.9.dylib`.
-It has no rpaths.
-The inspection opened none of those referenced paths and did not launch the helper.
-These names are absent from the candidate's explicit read grants.
-This fact proves no runtime access, abort cause, denial, or platform impossibility.
-No new probe or profile broadening occurred.
+The [registry phase](adapter-design.md#executable-registry-phase) is implemented, with focused public checks passed in 0.804 seconds.
+Post-correction Process, File, and Gateway fixture race checks passed in 13.547 seconds.
+Independent source/test review closed the nested-ownership and quarantine-test findings.
+Final current-stack CI passed: interpreter integration 49.549 seconds and generated native integration 574.835 seconds.
+Runtime bundle verification, formatting, Go vet, all Go tests, native integration, and build passed.
+Independent final review approved the registry checkpoint with both findings closed.
+Validation uses byte fixtures, real Lo File operations, and injected lifecycle drivers without native Process execution.
+The registry checks an exact digest and path and protects against participating Lo File writes, including aliases.
+Selected native child filesystem protection passed the separate profile qualification.
+Immutable registered protection and admission/ownership leases cover the full operation and verified release.
+No coordinator lock remains held through child execution or injected callbacks.
+Registry temporary-file creation requires a stable namespace and matching parent pathname/retained-parent device and inode before creation.
+Root-relative link publication and cleanup follow that check.
+This registry-only rule does not weaken standalone File behavior or claim hostile host concurrency protection.
+Any identity mismatch must fail closed.
+Descriptor execution was unavailable through both tested SDK compile interfaces.
+This result establishes no OS impossibility.
 
-A later build-only experiment constructed an arm64 `_start: brk #0` artifact without headers or standard libraries.
-It used Clang target `arm64-apple-macos11` with `-nostdlib -Wl,-static -Wl,-e,_start`.
-The build passed.
-Artifact inspection reported `Exec`, `CpuArm64`, and `LC_UNIXTHREAD`.
-The SHA-256 is `f2709f3d825a8ef1ee0c5b2f7f4cf1021cc3350a7de8f945513cbd417537a3a2`.
-The artifact has no load-dylinker, dylib, rpath, or undefined symbol.
-The inspector parses the same bytes used for the SHA-256.
-The `_start` symbol and ARM64 UnixThread PC both identify `0x1000002e8` (`4294968040`).
-The instruction bytes are `000020d4`.
-Independent local artifact decoding with `otool` also identifies `BRK #0`.
-No helper launch, external referenced-path access, or profile change occurred.
-This evidence establishes construction feasibility only.
-It does not validate the entry ABI, startup, sandbox, executable identity, or lifetime and resource guarantees.
-Independent review accepted these bounded construction claims.
-
-Independent review rejected the proposed intentional-crash launch before execution.
-A zero `RLIMIT_CORE` does not establish suppression or redirection of host crash reports.
-Child IPC denial does not establish confinement of host crash-reporter output.
-No launch occurred.
-The primary agent removed the proposed launcher, profile, and launch Make target.
-Static source, artifact, and inspection evidence remain.
-Local helper disassembly shows that `runtime.exit` uses `libcCall` and a trampoline.
-Syscall number constants do not establish the raw Darwin/arm64 exit ABI.
-Current local evidence does not support a non-crashing fixture launch.
-Independent final review confirmed a blocked qualification operation under the available repository evidence.
-No concrete supported implementation or launch action remains.
-The missing prerequisite is an evidenced non-crashing repository-contained execution path or demonstrated task-local control of intentional-crash reports.
-Neither prerequisite is present.
-Executable identity, confinement, descendants, and resource guarantees also remain unqualified.
-These limits do not establish platform impossibility.
-The approved static-construction evidence and unchanged-source CI remain valid.
-Existing full CI remains valid for unchanged product source.
-No backend is qualified, and the full adapter goal remains incomplete.
-
-
-1. Specify enforceable profiles for each selected host backend.
-2. Identify mechanisms for executable identity, filesystem access, network access, descendants, and resource release.
-3. Add confined adversarial helpers with all attempted filesystem targets inside Lo.
-4. Verify that denied operations fail before their external effects occur.
-5. Verify that descendants cannot escape the profile or survive successful completion.
-6. Verify rejection of unsupported profiles before executable resolution or launch.
-7. Obtain independent review of the enforcement evidence before Process execution acceptance.
-
-This stage is a prerequisite for general Process execution.
-An unavailable mechanism leaves Process unavailable on that backend.
-Do not replace this gate with executable allowlisting or well-behaved fixture results.
-File and HTTP work can complete independently of this gate.
+Registry integration requires exact grants, continuous path/inode/ancestor protection, shared File adapters, and whole-execution ownership.
+The public registry tests passed after expected missing-API reds.
+The earlier injected lifecycle phase did not itself supply a native launcher.
+Qualification remains a prerequisite for native execution, not host-independent core validation.
+Qualification applies per selected backend/profile, without a simultaneous macOS and Linux requirement.
 
 ### 5. Process Commands and Results
 
-Status: the pure phase is implemented, and focused interpreter validation passed.
-Execution and runtime results remain dependent on profile qualification.
-General Process execution is not implemented.
+Status: results and the injected lifecycle core are implemented.
+Focused and race checks passed, including Process-to-File composition and error recovery.
+Native execution remains dependent on profile qualification.
+The host-independent result and lifecycle core uses an injected OS boundary.
+The selected native driver is implemented. Canonical public activation acceptance passed all 24 cases.
 
 The plan now permits pure construction, inspection, and unavailable rejection before qualification.
-This revision does not permit a launch or execution acceptance.
+This dependency rule keeps pure construction independent from native qualification.
 
 ### Pure Process Phase
 
@@ -217,10 +193,12 @@ Arguments and environment values must contain no NUL.
 Environment names must be nonempty and contain neither NUL nor `=`.
 Construction keeps exact lexical data without access, path resolution, shell expansion, or environment inheritance.
 
-Command activation declares metadata capability `Process.run` and opaque static success type `Process.Result`.
+Command activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
-This phase provides no result constructor, result accessor, or result runtime value.
-CLI `run` and `serve` reject activation with host diagnostic `runtime.process-unavailable` before any executable access.
+The earlier pure checkpoint provided no result runtime values or accessors.
+The implemented host-independent core now provides results and termination accessors through trusted Go injection.
+Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
 Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
 Explicit program output keeps those values.
@@ -229,47 +207,132 @@ The inspector adds an optional `process` object to command targets and capabilit
 It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
 It also contains `execution_profile: {required: true, status: "unavailable"}`.
-This profile status describes the current standard host, not arbitrary injected boundaries.
+Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
 Executable descriptions trace the supplied `File.Path`.
 Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
 
-The standard runner installs `adapter.WithProcess` for `run`, `serve`, and server callbacks.
-This wrapper rejects command activation before delegation or executable access.
+The standard runner opens one canonical `processhost.Session` for `run`, `serve`, and server callbacks.
+The session owns native policy, the executable registry, participating File adapters, and retained shutdown.
+`Close(ctx)` closes admission and starts one shutdown owner. Its context bounds only the caller wait.
+`WaitRetained()` joins that same owner without a cleanup retry. A caller timeout does not release ownership.
 Custom Go boundaries are trusted host implementations and must enforce qualification.
 Generic commit execution validates the result type without a universal host qualification gate.
-An HTTP request-handler commit returns `runtime.process-unavailable` and aborts the server.
+HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
 HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
 
-Qualification remains mandatory before any launch or execution acceptance.
-Executable results, Process-dependent composition, and full-plan acceptance remain pending.
+Qualification remains mandatory before standard-host native Process activation acceptance.
+Bounded repository-contained qualification probes have a separate review gate.
+This phase authorizes no new probe launch.
+This earlier pure checkpoint did not establish native execution. Current canonical public acceptance passed. Final stack CI and independent completion review passed.
 The earlier File/HTTP CI remains valid for its recorded scope.
 Final focused interpreter validation passed in 2.934 seconds.
 Final focused native Process validation passed in 14.086 seconds.
 Current-stack CI passed, including the pure Process phase.
 Independent review approved the implemented pure Process checkpoint.
 
-### Qualified Execution Phase
+### Host-Independent Results and Lifecycle Core
 
-1. Add failing CLI fixtures for inert commands and typed completion results under a qualified profile.
-2. Add constructor-failure fixtures for relative paths, NUL inputs, and invalid environment names.
-3. Implement executable, arguments, environment, directory, stdin, and the specified `argv[0]` rule.
-4. Implement exit and signal variants without nullable fields or irrelevant sentinel values.
-5. Verify simultaneous bounded stdout and stderr capture without deadlock.
-6. Verify launch failure, early input closure, output overflow, cancellation, and descendant cleanup.
-7. Keep available output and execution progress on failure.
-8. Verify interpreter and native result equivalence.
+Status: the host-independent result and lifecycle core is implemented.
+The [lifecycle evidence](evidence/process-start-lifecycle.json) records focused checks, race checks, and current-stack CI.
+Current-stack CI passed with interpreter integration in 39.879 seconds and generated-native integration in 462.176 seconds.
+Independent final review approved the pending-start correction without a remaining finding.
+This core can precede native execution profile qualification.
+It uses an injected OS boundary without an OS launcher or CLI execution opt-in.
+`NewProcessLifecycle` and `WithProcessLifecycle` are trusted Go embedding APIs only.
+Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session open before program evaluation.
 
-Acceptance depends on successful resource release as well as child termination.
-Command policy remains in named Lo flows.
+The selected result shape is `{termination: Process.Termination, stdout: Bytes, stderr: Bytes}`.
+`Process.Termination.kind` is `exited` or `signaled`.
+Fallible `Process.Termination.exit_code` and `Process.Termination.signal` accessors select the matching variant.
+Neither type has a Lo constructor.
+The core derives an immutable invocation from the exact executable, `argv[0]`, environment, directory, and stdin.
+Every nonnil child returned by `Start` transfers ownership, including a child returned with an error.
+An owned launch can still wait for OS process creation.
+The mandatory `StartConfirmed()` query and `start_confirmed` progress field separate creation evidence from ownership.
+The [lifecycle contract](adapter-design.md#host-independent-results-and-lifecycle-core) defines the query and settled-release guarantees.
+The core closes each pipe exactly once.
+Pipe `Close` must return promptly and unblock I/O even when it reports an error.
+One `Wait` continues after request cancellation through a fresh bounded cleanup context.
+`Stop` covers descendants.
+Successful `Release` means creation is finished and no owned primary, descendant, or private resource is left.
+With successful release and no creation evidence, cancellation does not require a termination value.
+Unresolved creation keeps ownership and registry quarantine.
+Returned progress does not change after a later creation observation.
+
+Success requires complete stdin delivery, stdout and stderr EOF, known termination, joined I/O, and successful `Release`.
+Early stdin closure produces ordinary `Process.ExecutionFailed`.
+Nonzero exit and signal termination remain completed-process data.
+Cancellation and limits remain host failures.
+Missing termination after known creation, or unresolved containment, produces host cleanup failure and overrides an ordinary failure.
+Safe evidence preserves the original failure class and stage.
+
+Trusted Go `ProcessFailure` keeps bounded partial stdout and stderr bytes.
+Lo errors and automatic diagnostics keep counts and status only, without raw partial bytes.
+Before result charging, a completion summary keeps termination and byte counts without payloads.
+`MaxProcessOutputBytes` is 1 MiB per stream.
+`DefaultProcessLimits` uses a five-second execution timeout and a one-second cleanup timeout.
+Configured durations must be positive, and each stream limit must be from one byte through 1 MiB.
+
+Pipe-close cleanup errors remain host failures with `cleanup_complete: false`.
+A failed `Release` followed by successful `Stop` and a second successful `Release` remains a host failure.
+That recovered cleanup records `cleanup_complete: true`, without an unresolved-containment claim.
+Execution timeout and cancellation produce host cancellation.
+Output overflow produces a host limit failure.
+Ordinary activation errors use catalog kind `Process.ExecutionFailed`.
+
+1. Add public integration fixtures for the approved result and lifecycle contract.
+2. Confirm the expected failures before production changes.
+3. Implement the host-independent core through an injected OS boundary.
+4. Verify the core and unchanged standard-host rejection in interpreter and native paths.
+5. Run final stack CI and obtain independent checkpoint review.
+
+These checks do not qualify a native launcher or its confinement.
+Native launch remains dependent on qualification.
+
+### Qualified Native Execution Phase
+
+The selected native driver and profile passed [thirteen host cases](evidence/process-host-native.json).
+The [startup suite](evidence/process-startup-native.json) passed eight cases with affirmative permits and completed cleanup.
+The [local IPC suite](evidence/process-ipc-local-probe.json) passed selected-slot normalization with positive local controls.
+These results do not prove named IPC denial or arbitrary inherited endpoint removal.
+The initial inherited-endpoint control remains inconclusive.
+
+The canonical session checks the pinned helper, command registry, read roots, and selected backend before admission.
+Apply the [selected native admission limits](adapter-design.md#selected-native-admission-limits) without restricting pure constructor validation.
+The fixed launcher installs confinement before command input receipt.
+It requires a separate affirmative permit before target execution. EOF without that permit aborts startup.
+Command environment values do not enter the launcher environment.
+The child cannot write files, use the network, or create descendants under the selected profile.
+Only selected data read roots and the declared command channels are available.
+
+One session owns Process and participating File adapters through interpreter, generated-native, and server execution.
+`Close(ctx)` closes admission and starts one shutdown owner.
+`WaitRetained()` joins that same owner without a cleanup retry.
+A bounded caller return does not prove termination or release.
+If cleanup remains unresolved, keep the host alive with its owner and quarantined admission.
+
+The closed-gate behavioral red preceded canonical `Open` activation.
+The [public acceptance lane](evidence/process-public-native.json) then passed all 24 cases through interpreter and generated-native entry points.
+The cases include normal, nonzero, and signal results, raw bytes, policy denials, wall timeout, server callbacks, and File composition.
+Cleanup completed, sealed artifacts stayed unchanged, and the controller needed no emergency signal.
+Final stack CI and independent completion review passed.
+
+Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session open before program evaluation.
+Qualification applies to the selected backend/profile, without a simultaneous macOS and Linux requirement.
+There is no unrestricted execution option.
 
 ### 6. Composition and Documentation
 
-Status: stages 1–3 documentation is updated.
+Status: references include results and injected lifecycle behavior.
 HTTP-to-File composition passes in both execution backends.
 Current-stack CI and final stages 1–3 checkpoint review passed.
-Process-dependent composition, future Process validation, and full-plan review remain pending.
+Injected Process-to-File composition and recovery passed the race selection.
+Injected lifecycle stack CI passed.
+Canonical native Process composition acceptance passed. Final stack CI and independent completion review passed.
 
 1. Verify a file transformation with explicit decode, pure transformation, encoding, activation, and receipt use.
 2. Verify an HTTP exchange followed by a conditional File action.
@@ -309,7 +372,7 @@ Serialize checks that regenerate or share the runtime bundle.
 The validated stages 1–3 checkpoint precedes the approved pure Process phase.
 Run `CI=1 make ci </dev/null` once for all current source changes.
 This CI result does not complete the full adapter plan.
-New pure Process work and later qualified execution each require final stack validation.
+The new native integration passed public acceptance and final stack validation.
 Use focused checks for corrections, then repeat final CI after the last correction.
 Review corrected findings and final evidence before completion.
 
@@ -381,8 +444,9 @@ Full interpreter integration took 54.454 seconds, and full native integration to
 Runtime bundle checks, formatting, Go vet, the build, and whitespace checks passed.
 The earlier independent checkpoint review approved stages 1–3 without a remaining source finding.
 The reviewer examined source and evidence without execution of tests.
-Process implementation and Process-dependent composition remain incomplete.
-New pure Process work and later qualified execution each require final stack validation.
+The injected Process core and composition are implemented.
+The selected native implementation passed qualification and canonical public composition acceptance. Final stack CI and independent completion review passed.
+The new native integration passed public acceptance and still requires final stack validation.
 
 ## Deferred Work
 
@@ -391,8 +455,16 @@ Before implementation, specify each addition through the shared operation contra
 Higher-order adapter functions remain available for justified domain semantics.
 The full mac-cleanup workflow also depends on the other inputs and policies in its application plan.
 
-The latest pure Process checkpoint passed `CI=1 make ci </dev/null` with exit status `0`.
+The earlier pure Process checkpoint passed `CI=1 make ci </dev/null` with exit status `0`.
 Full interpreter integration took 43.391 seconds, and full native integration took 522.053 seconds.
 Runtime bundle verification, formatting, Go vet, tests, and the final build passed.
 The source finding is closed, and independent review approved the pure Process checkpoint.
-Process execution is unqualified, and the full adapter plan remains incomplete.
+This earlier checkpoint did not qualify native execution. Current implementation and final stack CI passed. Independent completion review passed.
+
+The latest lifecycle checkpoint passed `CI=1 make ci </dev/null` with exit status `0`.
+Interpreter integration took 44.126 seconds, and full native integration took 481.452 seconds.
+Runtime bundle verification, formatting, Go vet, all tests, and the build passed.
+The Process race selection passed in 5.162 seconds, including injected composition and recovery.
+Bounded source review approved the cleanup corrections.
+Independent final review approved the host-independent results and lifecycle checkpoint without blocking findings.
+This earlier checkpoint covered injected execution. Native qualification and public composition have since passed. Final stack CI and independent completion review passed.

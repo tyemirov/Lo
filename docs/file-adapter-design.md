@@ -7,7 +7,7 @@ The [implementation plan](file-adapter-plan.md) records acceptance.
 The [mac-cleanup plan](mac-cleanup-plan.md) defines the remaining complete-script requirements.
 This document describes the current implementation.
 The [shared adapter design](adapter-design.md#file) defines nominal File actions and typed receipts.
-The HTTP client and general Process stages remain pending.
+The [shared implementation plan](adapter-plan.md) records HTTP client and qualified native Process support.
 
 ## Contents
 

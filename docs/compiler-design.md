@@ -45,15 +45,19 @@ The compiler includes the shared purity rules, nominal File targets, typed recei
 HTTP headers, client actions, and automatic trace summaries pass focused interpreter and native qualification.
 Independent source review closed the current findings.
 
-The approved pure Process phase is implemented, and focused interpreter and native validation passed.
-Current-stack CI passed, including the pure Process phase.
-Independent review approved the implemented pure Process checkpoint.
-It permits constructors, inspection, and host unavailable rejection before execution profile qualification.
-The [adapter design](adapter-design.md#pure-process-phase) owns this phase contract.
-The catalog declares metadata capability `Process.run` and opaque static success type `Process.Result`.
+Process constructors, results, lifecycle, executable registration, and the selected Darwin 27 arm64 native host are implemented.
+The selected [native profile](evidence/process-host-native.json) passed qualification.
+Canonical public acceptance passed all 24 interpreter/generated-native cases, including server callbacks and Process-to-File composition.
+Final stack CI and independent completion review passed.
+Earlier injected checkpoints passed CI and independent review.
+The [adapter design](adapter-design.md#process) owns the complete Process contract.
+The catalog declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
-No result constructor, accessor, or runtime value belongs to this phase.
-CLI activation must return host diagnostic `runtime.process-unavailable` before executable access.
+Results and termination accessors use the shared lifecycle in injected and selected native execution.
+Neither result nor termination has a Lo constructor.
+The [selected native admission limits](adapter-design.md#selected-native-admission-limits) apply separately from pure constructor validation.
+Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
 Constructor diagnostics and nominal snapshots must omit argument, environment, and stdin payloads.
 Explicit program output keeps those values.
@@ -61,20 +65,22 @@ The inspector adds an optional `process` object to command targets and capabilit
 It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
 It also contains `execution_profile: {required: true, status: "unavailable"}`.
-This profile status describes the current standard host, not arbitrary injected boundaries.
+Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
 Executable descriptions trace the supplied `File.Path`.
 Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
 
-The standard runner installs `adapter.WithProcess` for `run`, `serve`, and server callbacks.
-This wrapper rejects command activation before delegation or executable access.
+The standard runner opens one canonical `processhost.Session` for `run`, `serve`, and server callbacks.
+The session owns native policy, the executable registry, participating File adapters, and retained shutdown.
+`Close(ctx)` closes admission and starts one shutdown owner. Its context bounds only the caller wait.
+`WaitRetained()` joins that same owner without a cleanup retry. A caller timeout does not release ownership.
 Custom Go boundaries are trusted host implementations and must enforce qualification.
 Generic commit execution validates the result type without a universal host qualification gate.
-An HTTP request-handler commit returns `runtime.process-unavailable` and aborts the server.
+HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
 HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
-Qualification remains mandatory before any launch or execution acceptance.
-New pure Process source changes require new final stack validation.
+Qualification remains mandatory before standard-host native activation acceptance. Reviewed qualification probes have a separate execution gate.
+The native integration passed public acceptance and still requires final stack validation.
 
 Specification sections 22 and 23 define the verifier and runtime contracts.
 The [Open Decisions](#open-decisions) section identifies the final contract status.
@@ -1576,3 +1582,42 @@ It also records the unresolved CPU profile attribution limit.
 Changed prose received Part 1 and Part 2 review against the verified ASD-STE100 Issue 9 reference.
 The language check found no new mechanical findings and 46 unchanged findings.
 The Governor check retained eight existing template differences.
+
+### Process Output Pipeline
+
+This flow requires Process grants and a separate repository-local File write grant.
+It can use a trusted injected lifecycle or the selected native host. Canonical public acceptance passed.
+The earlier integration fixture used an in-memory child and real repository-local File writes.
+A zero exit saves exact stdout bytes, while a nonzero exit selects no write.
+Signals make the exit-code accessor fail before any File activation.
+
+```lo
+flow EmptyResults() -> List<Process.Result> {
+    return List.new()
+}
+flow SaveOutput(path: File.Path, total: Int, result: Process.Result) -> Int! {
+    target = File.Write.new(path, result.stdout)
+    receipt = commit target
+    return Math.add(total, receipt.bytes_written)
+}
+flow Capture(command: Process.Command, path: File.Path) -> Int! {
+    result = commit command
+    code = Process.Termination.exit_code(result.termination)
+    selected = Match.new(code, 0: List.new(result), _: EmptyResults())
+    return Flow.fold(selected, 0, path, SaveOutput)
+}
+```
+
+`NewProcessLifecycle` and `WithProcessLifecycle` supply the trusted Go embedding path.
+Canonical runners use one session for the native driver, executable registry, File adapters, and shutdown.
+The output limit is 1 MiB per stream, with five-second execution and one-second cleanup defaults.
+Custom durations must be positive, and the output limit must be from one byte through 1 MiB.
+The core requires full stdin delivery, both output EOFs, known termination, joined I/O, and successful resource release.
+Lo errors and automatic diagnostics expose counts and status without raw partial output.
+Only trusted Go `ProcessFailure` retains bounded partial bytes.
+The completion summary records termination and byte counts before result charging.
+
+The guide pipeline passed `lo check` after unchanged extraction to a repository-local task file.
+Its composition and recovery fixtures passed the Process race selection in 5.162 seconds.
+Full CI passed interpreter integration in 44.126 seconds and native integration in 481.452 seconds.
+Generated/native Lo validation does not qualify a real native OS Process driver.

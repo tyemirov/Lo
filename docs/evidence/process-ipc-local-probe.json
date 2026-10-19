@@ -1,0 +1,740 @@
+{
+  "status": "selected-slot-normalization-passed",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "manifest_sha256": "e844094ee88101a8a5542a86b867138c0fbdeb32f13f016c9b442342646e6aa1",
+  "result_sha256": "7257e1ffb8280afcd38c68275d76a532b781d475b579eebd0c78b9e50bff95ec",
+  "manifest": {
+    "artifacts": {
+      "_scratch/adapter-implementation-x921/ipc-local-native/candidate.sb": "4aaa1f107a6626dbc642ac9608adb079b44d5d45e6fc9e95ea8bcbc2fefdff49",
+      "_scratch/adapter-implementation-x921/ipc-local-native/controller": "caebc6ca1a8e1045562061b6eb9e0bc6f0da55c905613f42e3b520152e442600",
+      "_scratch/adapter-implementation-x921/ipc-local-native/fixture_paths.h": "b8ec6800bf03a7ceb30a04f7ea2c5c83f1df2a841641d63049ce98a95dfc4d85",
+      "_scratch/adapter-implementation-x921/ipc-local-native/launcher": "896ae13c467cb029d42de22b1cd1eaf18afde61488ce95253b9e15d51a817630",
+      "_scratch/adapter-implementation-x921/ipc-local-native/target": "59c41b5cc4104bfaf7fb08c558c9a2b3c71255df1658508cd7709014720a2e8d",
+      "experiments/process-ipc-local/contract.c": "6af7f75a1ed2c7b0d9336ac2a45f3b101e677886df45c09801109edcaca5842c",
+      "experiments/process-ipc-local/controller.c": "132628fb00cfa877135f6fa997e428a48b9a992f67fc5d628835c58556f0a29c",
+      "experiments/process-ipc-local/fixture.c": "18ab66ecb5e73e51dfe99792dec12cdd2ab39264bedd8ba75375969c738294ef",
+      "experiments/process-ipc-local/inventory.c": "0619d2f161919bc0a5f53f3dd0ffa89436f897a3f891b58150ad9da89cfeb15f",
+      "experiments/process-ipc-local/ipc.h": "e41a736ecd2f9bf8bc0378b7e7700534ff6faa8948e88cc432d81caf59ec183f",
+      "experiments/process-ipc-local/launcher.c": "9dd3ccea105908ae719b10532622255e8ba9faba74bbd690aab20ad55341dfd3",
+      "experiments/process-ipc-local/normalization.c": "6b20fe8a72d949d762c4546bf67ff915c7f40d0804be1ee5a95932d678661f97",
+      "experiments/process-ipc-local/probe.mk": "c9d577b6a9e98c872cf4927249bd0676020e65a87840b05a7bb2b6af6fe12583",
+      "experiments/process-ipc-local/probe.py": "276342dafe5e5c783179145e204646b31da580de12bfb290cb7cfdf1be8e9656",
+      "experiments/process-ipc-local/target.c": "105cbe6ac8445972799cae740328f7d9db4715102648809e1052cbe165e63ae7",
+      "experiments/process-ipc-local/test_probe.py": "cb87d06d20cad0873e301c7b30246a171f08768dd3eff8ec897e3f49d5251211",
+      "experiments/process-ipc/normalization.c": "3dd52f0055b5fac69a7bc4cdcf4996d4cf7d486b21f896513d9300b50f342483"
+    },
+    "plan": {
+      "automatic_retry": false,
+      "channels": [
+        "registered_application_ports",
+        "bootstrap_special_port",
+        "task_exception_ports",
+        "initial_thread_exception_ports"
+      ],
+      "duplicate_aliases": true,
+      "exception_triggering": false,
+      "global_registration": false,
+      "inherited_prestate": "inventory_without_send_then_generic_normalization",
+      "invocations": 3,
+      "limits": {
+        "cleanup_seconds": 2,
+        "execution_seconds": 5,
+        "file_descriptors": 64,
+        "output_bytes_per_stream": 65536
+      },
+      "local_canary": "same_process_receive_plus_send_held_live",
+      "named_ipc_denial_proven": false,
+      "native_run_requires": [
+        "exact_source_and_binary_manifest",
+        "independent_reviewed_sha256",
+        "one_use_token"
+      ],
+      "normalizer": "byte_identical_reviewed_generic_routine",
+      "parent_inheritance_proven": false,
+      "positive_control": "each_slot_getter_matches_known_local_endpoint_and_send_receive_succeeds",
+      "post_normalization_send_check": "query_through_still_live_receive_name",
+      "qualified_process_backend": false,
+      "receive_destroyed_before_exec": true,
+      "unknown_endpoint_messages": false,
+      "variants": [
+        {
+          "confine": false,
+          "execute_target": false,
+          "name": "local-control",
+          "normalization": "cleanup_after_positive_measurement"
+        },
+        {
+          "confine": false,
+          "execute_target": true,
+          "name": "normalized-control",
+          "normalization": "measured_before_exec"
+        },
+        {
+          "confine": true,
+          "execute_target": true,
+          "name": "normalized-confined",
+          "normalization": "measured_before_exec"
+        }
+      ]
+    },
+    "schema": "process-ipc-local-v1"
+  },
+  "result": {
+    "artifacts_unchanged": true,
+    "named_ipc_denial_proven": false,
+    "parent_inheritance_proven": false,
+    "qualified_process_backend": false,
+    "reviewed_manifest_sha256": "e844094ee88101a8a5542a86b867138c0fbdeb32f13f016c9b442342646e6aa1",
+    "runs": [
+      {
+        "cancel_requested": false,
+        "cleanup_complete": true,
+        "controller_joined": true,
+        "elapsed_seconds": 0.19430399988777936,
+        "emergency_group_signal": false,
+        "exit_code": 0,
+        "measurement_passed": true,
+        "output_saturated": false,
+        "reports": [
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": false,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              1,
+              1,
+              1,
+              0
+            ],
+            "phase": "inherited-prestate-no-send",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "local-control"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "inherited-normalized",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "local-control"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": false,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "matches_known_local": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "nonempty_slots": [
+              3,
+              1,
+              1,
+              1
+            ],
+            "phase": "local-positive-control",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "local-control"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "local-normalized",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "local-control"
+          },
+          {
+            "cleanup_complete": true,
+            "inherited_normalized": true,
+            "kind": "local_fixture",
+            "normalization_complete": true,
+            "positive_controls": true,
+            "receive_destroyed": true,
+            "send_removed_through_live_receive": true,
+            "setup_complete": true,
+            "variant": "local-control"
+          },
+          {
+            "cancelled": false,
+            "child_created": true,
+            "child_joined": true,
+            "cleanup_complete": true,
+            "cleanup_deadline_exceeded": false,
+            "elapsed_seconds": 0.087845,
+            "exit_code": 0,
+            "exited": true,
+            "kind": "controller",
+            "signal": 0,
+            "signal_attempted": false,
+            "signal_errno": 0,
+            "timed_out": false,
+            "variant": "local-control"
+          }
+        ],
+        "stderr_empty": true,
+        "variant": "local-control"
+      },
+      {
+        "cancel_requested": false,
+        "cleanup_complete": true,
+        "controller_joined": true,
+        "elapsed_seconds": 0.11196866608224809,
+        "emergency_group_signal": false,
+        "exit_code": 0,
+        "measurement_passed": true,
+        "output_saturated": false,
+        "reports": [
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": false,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              1,
+              1,
+              1,
+              0
+            ],
+            "phase": "inherited-prestate-no-send",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-control"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "inherited-normalized",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-control"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": false,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "matches_known_local": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "nonempty_slots": [
+              3,
+              1,
+              1,
+              1
+            ],
+            "phase": "local-positive-control",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-control"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "local-normalized",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-control"
+          },
+          {
+            "cleanup_complete": true,
+            "inherited_normalized": true,
+            "kind": "local_fixture",
+            "normalization_complete": true,
+            "positive_controls": true,
+            "receive_destroyed": true,
+            "send_removed_through_live_receive": true,
+            "setup_complete": true,
+            "variant": "normalized-control"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "post-exec",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-control"
+          },
+          {
+            "cancelled": false,
+            "child_created": true,
+            "child_joined": true,
+            "cleanup_complete": true,
+            "cleanup_deadline_exceeded": false,
+            "elapsed_seconds": 0.090108,
+            "exit_code": 0,
+            "exited": true,
+            "kind": "controller",
+            "signal": 0,
+            "signal_attempted": false,
+            "signal_errno": 0,
+            "timed_out": false,
+            "variant": "normalized-control"
+          }
+        ],
+        "stderr_empty": true,
+        "variant": "normalized-control"
+      },
+      {
+        "cancel_requested": false,
+        "cleanup_complete": true,
+        "controller_joined": true,
+        "elapsed_seconds": 0.059152124915272,
+        "emergency_group_signal": false,
+        "exit_code": 0,
+        "measurement_passed": true,
+        "output_saturated": false,
+        "reports": [
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": false,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              1,
+              1,
+              1,
+              0
+            ],
+            "phase": "inherited-prestate-no-send",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-confined"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "inherited-normalized",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-confined"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": false,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "matches_known_local": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "nonempty_slots": [
+              3,
+              1,
+              1,
+              1
+            ],
+            "phase": "local-positive-control",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-confined"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "local-normalized",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-confined"
+          },
+          {
+            "cleanup_complete": true,
+            "inherited_normalized": true,
+            "kind": "local_fixture",
+            "normalization_complete": true,
+            "positive_controls": true,
+            "receive_destroyed": true,
+            "send_removed_through_live_receive": true,
+            "setup_complete": true,
+            "variant": "normalized-confined"
+          },
+          {
+            "api_status": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "bootstrap_cache_empty": true,
+            "copy_cleanup_complete": true,
+            "kind": "inventory",
+            "local_deliveries": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "matches_known_local": [
+              false,
+              false,
+              false,
+              false
+            ],
+            "nonempty_slots": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "phase": "post-exec",
+            "requirements_met": true,
+            "runtime_valid": [
+              true,
+              true,
+              true
+            ],
+            "variant": "normalized-confined"
+          },
+          {
+            "cancelled": false,
+            "child_created": true,
+            "child_joined": true,
+            "cleanup_complete": true,
+            "cleanup_deadline_exceeded": false,
+            "elapsed_seconds": 0.032546,
+            "exit_code": 0,
+            "exited": true,
+            "kind": "controller",
+            "signal": 0,
+            "signal_attempted": false,
+            "signal_errno": 0,
+            "timed_out": false,
+            "variant": "normalized-confined"
+          }
+        ],
+        "stderr_empty": true,
+        "variant": "normalized-confined"
+      }
+    ],
+    "selected_slot_normalization_measured": true
+  },
+  "limits": [
+    "All four local controls established endpoint identity and delivery.",
+    "Normalization removed selected SEND rights through a live RECEIVE reference.",
+    "The fixture destroyed the RECEIVE right before target execution.",
+    "These results do not prove parent inheritance or named IPC denial."
+  ]
+}

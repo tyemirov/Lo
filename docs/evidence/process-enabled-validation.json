@@ -1,0 +1,43 @@
+{
+  "command": "CI=1 make -j1 ci </dev/null",
+  "exit_status": 0,
+  "interpreter_integration_seconds": 57.143,
+  "native_integration_seconds": 592.778,
+  "passed_checks": [
+    "runtime bundle verification",
+    "Go formatting",
+    "Go vet",
+    "all Go tests",
+    "generated-native integration suite",
+    "final CLI build"
+  ],
+  "log_sha256": "3ec7b116600ef971d816dc03225a90547eae51507bb8671e8f602d505b95ff95",
+  "log": "mkdir -p \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache\" </dev/null\ngo run ./tools/runtimebundle --check </dev/null\ngo fmt ./... </dev/null\ngo vet ./... </dev/null\npython3 -B tools/processbuild/identity.py build bin/lo-process-launcher internal/processhost/helper_identity.go </dev/null\n/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:122:9: warning: 'sandbox_init' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]\n  122 |     if (sandbox_init(profile, 0, &sandbox_error) != 0) {\n      |         ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sandbox.h:49:5: note: 'sandbox_init' has been explicitly marked deprecated here\n   49 | int sandbox_init(const char *profile, uint64_t flags, char **errorbuf);\n      |     ^\n/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:123:36: warning: 'sandbox_free_error' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]\n  123 |         if (sandbox_error != NULL) sandbox_free_error(sandbox_error);\n      |                                    ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sandbox.h:68:6: note: 'sandbox_free_error' has been explicitly marked deprecated here\n   68 | void sandbox_free_error(char *errorbuf);\n      |      ^\n2 warnings generated.\ngo run ./tools/runtimebundle </dev/null\ngo test ./...  </dev/null\n?   \tgithub.com/MarcoPoloResearchLab/Lo/cmd/lo\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/adapter\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/autodiff\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/catalog\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/check\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/codegen\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/compiler\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/derivative\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/device\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/diagnostic\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/eval\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/execution\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/identity\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/inspect\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/ir\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/metalconfig\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/nativebuild\t[no test files]\nok  \tgithub.com/MarcoPoloResearchLab/Lo/internal/processhost\t0.212s\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/resolve\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/runner\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/runtimebundle\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/runtimeops\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/source\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/syntax\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/tensor\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/tensorfacts\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/types\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/internal/value\t[no test files]\nok  \tgithub.com/MarcoPoloResearchLab/Lo/tests/benchmark\t(cached) [no tests to run]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/tests/corpus\t[no test files]\nok  \tgithub.com/MarcoPoloResearchLab/Lo/tests/integration\t57.143s\n?   \tgithub.com/MarcoPoloResearchLab/Lo/tools/metalbuild\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/tools/nativebench\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/tools/nativecache\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/tools/nativecorpus\t[no test files]\n?   \tgithub.com/MarcoPoloResearchLab/Lo/tools/runtimebundle\t[no test files]\nLO_TEST_BACKEND=native go test ./tests/integration  </dev/null\nok  \tgithub.com/MarcoPoloResearchLab/Lo/tests/integration\t592.778s\ngo build -o bin/lo ./cmd/lo </dev/null\n",
+  "profile": "Darwin 27 arm64",
+  "separate_public_acceptance": "docs/evidence/process-public-native.json",
+  "public_cases": 24,
+  "independent_completion_review": {
+    "status": "approved",
+    "findings": "No remaining source or correctness finding.",
+    "role": "mpr-architect",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "high",
+    "actual_assignment": "Native role metadata specifies gpt-6-astra/high. Separate execution telemetry is unavailable.",
+    "method": "Independent source, documentation, manifest, and validation evidence review.",
+    "scope": "Qualified Darwin 27 arm64 profile with documented confinement and conditional work/lifetime limits."
+  },
+  "documentation_checks": {
+    "changed_local_links": 72,
+    "mechanical_observations": 0,
+    "link_failures": 0,
+    "git_diff_check": "passed",
+    "review_scope": "Changed prose only. Cached official STE Issue 9 reference and repository terminology reviewed. External shared checker was excluded by the repository boundary."
+  },
+  "sealed_public_artifacts_after_ci": "All 77 artifacts in each of the two public phase snapshots remain unchanged.",
+  "task_cleanup": {
+    "owned_scratch_removed": "_scratch/adapter-implementation-x921",
+    "temporary_plan_removed": ".mprlab/X921-PLAN.md",
+    "shared_build_state_preserved": true,
+    "maintained_evidence_preserved": true
+  }
+}

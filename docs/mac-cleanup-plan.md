@@ -6,8 +6,9 @@ The complete script is not implemented.
 This document records behavior from the earlier script review.
 Further work uses this record and fixtures inside Lo.
 The [shared adapter design](adapter-design.md) owns File, HTTP, and Process semantics.
-Nominal File targets and bound commits are implemented, with final validation pending.
-The HTTP client and general Process stages remain pending.
+Nominal File targets and bound commits passed final stack CI.
+HTTP client activation and the selected native Process profile passed public acceptance.
+The selected Process profile prohibits child writes and cannot execute the package-cache cleanup categories.
 This application plan supplies acceptance examples under that contract.
 
 ## Contents
@@ -42,7 +43,7 @@ No acceptance step runs actual package-cache or Docker cleanup.
 | Batch removal fails on changed or absent candidates. | The log example uses singleton commits through `Flow.fold` and handles only `File.EntryChanged` as a skip. |
 | The adapter rejects files with multiple links. | Generic removal now permits hardlinks. The log category has no single-link restriction. |
 | File entries omit metadata required by other categories. | Add owner identity, access time, and change time to the proposed entry contract. |
-| Command output needs a typed activation result. | Bound commits supply the syntax. Process still needs a qualified execution profile and implementation. |
+| Command output needs a typed activation result. | Bound commits and typed Process results are implemented. The selected native profile prohibits child writes. |
 | Temporary directories and caches can escape Lo. | Make and native build subprocesses now use explicit state directories inside Lo. |
 
 The [File design](file-adapter-design.md) describes the current batch contract and its limits.
@@ -163,7 +164,7 @@ Do not silently replace either format with the other.
 | Host inputs | Capture home, real/effective user IDs, clock, arguments, and selected environment values as typed inputs. |
 | Executable discovery | Distinguish an absent executable from a discovery failure. |
 | Process construction | Describe an executable, argument list, environment, closed input, and bounded output without starting a process. |
-| Process activation | Return typed exit status, stdout bytes, and stderr bytes after explicit activation. |
+| Process activation | Return `Process.Result` with typed termination, stdout bytes, and stderr bytes after explicit activation. |
 | Process failures | Keep nonzero child status inspectable. Report launch failure, cancellation, and output overflow distinctly. |
 | File observations | Expose required metadata and distinguish absence from failure at the directory and candidate boundaries. |
 | File removal | Keep generic removal separate from retention, owner, and link-count policy. Preserve confirmed progress on failure. |
@@ -174,7 +175,9 @@ Do not silently replace either format with the other.
 
 Process construction must not execute commands.
 The [bound commit contract](adapter-design.md#activation-and-results) supplies typed activation results.
-General Process execution first needs a [qualified execution profile](adapter-design.md#execution-profile-prerequisite).
+The [qualified Process profile](adapter-design.md#qualification-status) supports explicit commands with captured output.
+Package-cache and Docker cleanup require a different profile with explicitly bounded mutation authority.
+The current profile does not supply that authority.
 Output overflow must fail explicitly. It cannot appear as an empty successful result.
 Do not put cleanup-specific names, retention periods, or Docker policy in an adapter.
 
@@ -187,7 +190,7 @@ Further work follows this sequence:
 2. Validate the log fixture with nominal actions and typed receipts.
 3. Specify host inputs, discovery, locks, and extra metadata through the shared operation contract.
 4. Add common-policy fixtures for owner identity, timestamps, suffixes, temporary roots, and NUL-framed probes.
-5. Qualify the Process profile before general command execution.
+5. Specify and qualify bounded mutation authority before package-cache or Docker command acceptance.
 6. Add process fixtures for package commands, optional executables, environment values, and category continuation.
 7. Add Docker response fixtures and reject invalid contexts, builders, endpoints, and ambient overrides.
 8. Add the ordered workflow with startup rejection, cleanup locking, reporting, and final exit status.

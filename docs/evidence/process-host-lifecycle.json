@@ -1,0 +1,43 @@
+{
+  "status": "shared-session-and-native-ownership-regressions-passed-before-standard-enablement",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "validation": {
+    "native_ownership_race_seconds": 1.259,
+    "session_and_resource_only_race_seconds": 2.712,
+    "runner_session_seconds": 1.235,
+    "build_identity_regression_seconds": 0.54,
+    "process_policy_seconds": 0.743
+  },
+  "guarantees": [
+    "Session closes admission before resource release.",
+    "Caller deadlines preserve the retained cleanup owner.",
+    "Resource-only failures do not claim process creation.",
+    "Close failures remain in the native resource inventory.",
+    "Stop closes status, permit, frame, and configuration endpoints before the reaped fast path.",
+    "Runtime diagnostics exclude private callback payloads.",
+    "The build compiles the helper before it records the identity.",
+    "Identity verification cannot change the recorded identity."
+  ],
+  "artifacts": {
+    "internal/processhost/session.go": "1b7a7ba7b7ac98ba3d7d04e65fa5f48fe95a61833a7918ca065e322b540edd88",
+    "internal/processhost/startup.go": "029e0f4dbd048ef277115bd17128c113e33791c372a416a9c2866d580ce1f50f",
+    "internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+    "internal/processhost/native_darwin.go": "8a7be52c5ed2eeafbb6f4ed092570d74491b7ef80d5af0d2a88e086e7c7a69dc",
+    "internal/processhost/native_config_darwin.go": "3cbfdc25cd758a7ae3e5562dec03c8cf23b916e8501cad98e4fcaa1d67ee21f3",
+    "internal/processhost/native_ownership_darwin_test.go": "98dcad178c35b9b540237c874d00b8348b6b1786ba25cd142c8bc826bc24063e",
+    "internal/runner/execute.go": "03c5e1d4d4c0e5f16e87d99cae9e60000cbdd53b5f1540acda398dc62067db90",
+    "tests/integration/process_host_session_test.go": "e4eef99170779a17a43a4f8e5af81be12efc28b8b4b999c91b6f9f4634f4a6ac",
+    "tests/integration/process_resource_only_test.go": "edc5b5f87729141347a36eabb3d1ae5c33da82c0f8ab7ec878fc0007e85107e6",
+    "tools/processbuild/identity.py": "a2d8f7ac0eb2bfc24e6477c748ac8ed98feace3a05704477ea7882727d0f28b8",
+    "tools/processbuild/test_identity.py": "e0b2d2fa33a25d954648d772562f882790aa613cceb9cdb892c7c02251f1b52e"
+  },
+  "source_scope": "Final ownership correction, before the canonical Open gate change. Native artifacts match the qualified host source snapshot.",
+  "regression_logs": {
+    "process-ownership-red.txt": "2e4a53ed31a250ee1feeeb40f268c0f69a9e372bdc645b26100d974da9794f18",
+    "process-status-join-red.txt": "d6736e123f22bd5d70fee475c4479c1a3266e76aef6f3de00f486f0e396f4766",
+    "process-writer-join-red.txt": "e4bf716c06bfbee843c12ae76fa8906681f0e9343615b5149c811238da5eeb75",
+    "process-runner-session-red.txt": "4845893747df93d40046883df2a9892dc82991bdba0d7fd97c34bc734b1df827",
+    "process-lifecycle-final-green.txt": "e32173412b600fa0b5bd4ec08ea2cf10809c95a192a21488039bc253b3055234"
+  }
+}

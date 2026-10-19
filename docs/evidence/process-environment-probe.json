@@ -1,0 +1,289 @@
+{
+  "status": "selected-environment-suite-passed",
+  "qualified_process_backend": false,
+  "source_directory": "experiments/process-environment",
+  "reviewed_manifest_sha256": "4aa83a61e9fcabd98ccf0769a0459718f0881495cbc46c9bd0bb450319fbceab",
+  "reference_manifest_sha256": "495ca0fc1d3fd53db5318e70b72e217e37b334c0f457ed7b3c63ef8bcdab7ad0",
+  "result_sha256": "2031b1463b62cd4e1095d50afc7969a6389fb64ae91a87025eb2e0d7c43ccb7e",
+  "artifact_hashes": {
+    "build": "26b61504f54046f78a1a4684ff7cd7d157d585338c50c84d6ce528e111f5c853",
+    "constructor_binary": "e971eab27f1caeb2febfe97f2bd5f75a76f3d641a9693c9a2f2c28f382d416d5",
+    "constructor_source": "f1534edcea5f8644868e26329fb5efd82455255a254fa1b0fa6bca5035b68a2e",
+    "expected_directory": "567bd6ebc3edab4ce10e0489d878d6bc7eb0c5e45352c7e0463efeaa4ca42862",
+    "harness": "cc9c5eefb670d9b94d4167dca39bb62011b198dc27a5e8268e47ef5c18dfebc5",
+    "header": "c348aa6ffb96f31da12af75a9779c201f93a243ff34cc3803158d67726cc2c1a",
+    "launcher_binary": "2e20d08cb26d0be500bf56d82ed264362ce73edae2ebff12975fc2b041bd71d5",
+    "launcher_source": "ab2ad5cd1cd161c70187ff96beac56529e518d42863ae84d5eb9431c6a911b1c",
+    "profile": "78f0703034b8d8e1a6d08f9fc0525a8f706ce4b5afae4fd1a2f18e0a180a9501",
+    "reference_manifest": "495ca0fc1d3fd53db5318e70b72e217e37b334c0f457ed7b3c63ef8bcdab7ad0",
+    "reference_profile": "c65c56c290d49c55a4bb667ed0cfe0a62910a96bb5d46f614f0c6522ce547e40",
+    "target_binary": "67d992c78bf861a370930123c73f5c384ecaf08909d8776fa2a10d86d3bf8ec9",
+    "target_source": "0a14b952924f4d63d18840f6dba59171d93132d55656173c31b7a3cb080713ee",
+    "verification_test": "65dc4da30f6ba48dc9218985089593b21676958d89737e23f2994369d17b2b51"
+  },
+  "profile_change": "Relocate the reviewed directory-identity profile to this fixture. Add one exact read grant for constructor.dylib.",
+  "established": [
+    "The launcher used only its fixed CI and TMPDIR entries. Command variables arrived through a separate bounded anonymous channel after confinement.",
+    "The injected constructor ran after sandbox installation and the before-exec marker. Its file-open attempt returned -1 with EPERM.",
+    "The loaded, empty, and edge-value environments matched the specified entries and order. Each target reported three open descriptors.",
+    "All 13 malformed frames stopped before constructor or target entry with status 65.",
+    "The complete held-open frame reached the EOF read. The deadline caused SIGKILL, and the parent reaped the owned child.",
+    "All 17 cases passed. Every owned child was reaped. Fixtures and sealed artifacts remained unchanged."
+  ],
+  "bounds": {
+    "execution_timeout_seconds": 5.0,
+    "hold_open_timeout_seconds": 0.5,
+    "cleanup_timeout_seconds": 2.0,
+    "core_dump_limit": 0,
+    "file_descriptor_limit": 64,
+    "output_limit_per_stream": 65536,
+    "protocol_limits": {
+      "body_bytes": 4096,
+      "entries": 16,
+      "entry_bytes": 1024,
+      "write_chunk_bytes": 7
+    }
+  },
+  "cases": [
+    {
+      "case": "loaded",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_seconds": 0.33,
+      "timeout": false,
+      "payload_bytes": 309,
+      "payload_bytes_written": 309,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "empty",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_seconds": 0.027,
+      "timeout": false,
+      "payload_bytes": 12,
+      "payload_bytes_written": 12,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "values",
+      "passed": true,
+      "exit_code": 0,
+      "elapsed_seconds": 0.014,
+      "timeout": false,
+      "payload_bytes": 71,
+      "payload_bytes_written": 71,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "truncated-header",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 6,
+      "payload_bytes_written": 6,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "truncated-body",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 22,
+      "payload_bytes_written": 22,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "oversize-body",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 12,
+      "payload_bytes_written": 12,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "oversize-count",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 12,
+      "payload_bytes_written": 12,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "oversize-entry",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 1041,
+      "payload_bytes_written": 1041,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "missing-equals",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 20,
+      "payload_bytes_written": 20,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "empty-name",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.012,
+      "timeout": false,
+      "payload_bytes": 22,
+      "payload_bytes_written": 22,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "nul",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.012,
+      "timeout": false,
+      "payload_bytes": 25,
+      "payload_bytes_written": 25,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "invalid-utf8",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 19,
+      "payload_bytes_written": 19,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "duplicate",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 30,
+      "payload_bytes_written": 30,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "trailing",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 24,
+      "payload_bytes_written": 24,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "count-mismatch",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.012,
+      "timeout": false,
+      "payload_bytes": 30,
+      "payload_bytes_written": 30,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "zero-length",
+      "passed": true,
+      "exit_code": 65,
+      "elapsed_seconds": 0.013,
+      "timeout": false,
+      "payload_bytes": 16,
+      "payload_bytes_written": 16,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    },
+    {
+      "case": "hold-open-eof",
+      "passed": true,
+      "exit_code": -9,
+      "elapsed_seconds": 0.515,
+      "timeout": true,
+      "payload_bytes": 12,
+      "payload_bytes_written": 12,
+      "owned_child_joined": true,
+      "fixtures_unchanged": true,
+      "artifacts_unchanged": true
+    }
+  ],
+  "constructor_evidence": {
+    "stderr": "LO_PHASE launcher.entered\nLO_PHASE launcher.environment-exact\nLO_PHASE launcher.before-sandbox-init\nLO_PHASE launcher.after-sandbox-init\nLO_PHASE launcher.before-environment-eof\nLO_PHASE launcher.environment-received\nLO_PHASE launcher.control-closed\nLO_PHASE launcher.before-execve\nLO_PHASE constructor.entered\nLO_CONSTRUCTOR denied_write_result=-1 errno=1\nLO_PHASE target.entered\nLO_PHASE target.complete\n",
+    "target_observations": {
+      "arguments_exact": true,
+      "directory_exact": true,
+      "environment_exact": true,
+      "open_fds": 3,
+      "target_started": true
+    }
+  },
+  "held_open_evidence": {
+    "phase_markers": [
+      "launcher.entered",
+      "launcher.environment-exact",
+      "launcher.before-sandbox-init",
+      "launcher.after-sandbox-init",
+      "launcher.before-environment-eof"
+    ],
+    "stdout": ""
+  },
+  "scope_limits": [
+    "Fixed trusted environment-transport and constructor-denial cases only; this does not qualify arbitrary Process execution or enable the standard host.",
+    "Owned primary/group while unreaped; the reviewed helper sources create no descendants.",
+    "A monotonic deadline starts before synchronous Popen and bounds transfer and wait after it returns. Popen creation is not independently interruptible. This probe does not qualify bounded native Start.",
+    "The descriptor scan covers 0 through 63. Parent close_fds passes only the control read descriptor.",
+    "Native IPC, process creation, resource enforcement, executable protection, OS driver behavior, and actual Process composition remain unqualified.",
+    "The constructor fixture has an explicit library read grant. This result does not authorize implicit library grants."
+  ],
+  "validation": {
+    "cli_gate_red": "Four failures before the harness existed, in 0.07 seconds.",
+    "cli_gate_green": "Four checks passed in 0.10 seconds after the review corrections.",
+    "build": "Three native artifacts compiled with -Wall -Wextra -Werror.",
+    "prelaunch_review": "Independent review approved one sealed 17-case suite.",
+    "postrun_review": "Independent review approved this bounded checkpoint without a remaining correctness finding. Full native qualification remains incomplete.",
+    "product_ci": "No product source changed after the passed registry stack CI. No repeat product CI was required."
+  }
+}

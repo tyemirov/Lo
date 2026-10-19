@@ -1,0 +1,214 @@
+{
+  "status": "native-startup-suite-passed-complete-profile-unqualified",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "manifest_sha256": "7132d5e5a758cfd499420a07c516cc6600b7b766c212bc0dc4360e396ea4d494",
+  "result_sha256": "70e7cae86e4bce8b3a8f60d5656e48f23a0775cd9e768b317240398da55f6aac",
+  "controller_sha256": "2af9ac93e1d31f96a5ca9cd4ee451cc864f0febfe6866924d71ffcbafadbda18",
+  "artifacts": {
+    "_scratch/adapter-implementation-x921/startup-native/candidate.sb": {
+      "path": "_scratch/adapter-implementation-x921/startup-native/candidate.sb",
+      "sha256": "c831eeea4ccffe992003615a5488fc1f9357b1715708291d6f53b97a52fd2d9a"
+    },
+    "_scratch/adapter-implementation-x921/startup-native/fixture_paths.h": {
+      "path": "_scratch/adapter-implementation-x921/startup-native/fixture_paths.h",
+      "sha256": "8daece20ede410fdcac95aeba80aacf9e61da1e05f0bc96836a2572752865f6b"
+    },
+    "_scratch/adapter-implementation-x921/startup-native/launcher": {
+      "path": "_scratch/adapter-implementation-x921/startup-native/launcher",
+      "sha256": "e0bfaa41d67cf473ae00fb80f2bb43c2727206715372e440e86d358475958647"
+    },
+    "_scratch/adapter-implementation-x921/startup-native/native-tests": {
+      "path": "_scratch/adapter-implementation-x921/startup-native/native-tests",
+      "sha256": "3a30d87c751ae4c05f8895d6e81ed8e5ad78bba3f536a801deb6c3f564af8e6a"
+    },
+    "_scratch/adapter-implementation-x921/startup-native/target": {
+      "path": "_scratch/adapter-implementation-x921/startup-native/target",
+      "sha256": "3bab6158ebf33e60cd21acf4d13b8c9aa522a2b7bfbedfc183d5ba0fd7c63841"
+    },
+    "experiments/process-startup/native/launcher.c": {
+      "path": "experiments/process-startup/native/launcher.c",
+      "sha256": "bfcfa0a25f11c2530ed7cb0e783b133fb810a046ea14e35beca73909647bfab1"
+    },
+    "experiments/process-startup/native/target.c": {
+      "path": "experiments/process-startup/native/target.c",
+      "sha256": "4995b98592b185c8615411f0fe91a4bfe4f179e9ec6d8e2412d1bf89a8cb8619"
+    },
+    "experiments/process-startup/native_darwin.go": {
+      "path": "experiments/process-startup/native_darwin.go",
+      "sha256": "fe8f3dd136ba9a67ae8f36d79c7c1aed3c749b8bf80549eb6b4607523a740f49"
+    },
+    "experiments/process-startup/native_probe.mk": {
+      "path": "experiments/process-startup/native_probe.mk",
+      "sha256": "1dbd4f4c7b181996936d67da2bf0587bdac9fc50a163e8c1c1a729f1547e335c"
+    },
+    "experiments/process-startup/native_probe.py": {
+      "path": "experiments/process-startup/native_probe.py",
+      "sha256": "faa88b9418d304500738b8ba65bfa6ead186dceb90c98f156d46f69d0ac4cf39"
+    },
+    "experiments/process-startup/native_test.go": {
+      "path": "experiments/process-startup/native_test.go",
+      "sha256": "45906ddfaa270c32bf340dd5cae4e4cdd300c3ac01f5fdcb2b808e584172538c"
+    },
+    "experiments/process-startup/pending.go": {
+      "path": "experiments/process-startup/pending.go",
+      "sha256": "1a883ea361b63af870aefcb75cd1caf0713f6de4a7b44cb6a130a8942119f9d0"
+    },
+    "experiments/process-startup/startup.go": {
+      "path": "experiments/process-startup/startup.go",
+      "sha256": "bbe37a11b984114b55200ceff3f9e12d92a61d5405570371bce47834aa7a85aa"
+    },
+    "experiments/process-startup/startup_test.go": {
+      "path": "experiments/process-startup/startup_test.go",
+      "sha256": "00bcd1dd7caade01d13085017affc768ae22bb0191b4dcc8703ba10d9a5df60c"
+    },
+    "go.mod": {
+      "path": "go.mod",
+      "sha256": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd"
+    },
+    "go.sum": {
+      "path": "go.sum",
+      "sha256": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03"
+    }
+  },
+  "cases": {
+    "cancel-after-permit": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": true,
+      "permit_succeeded": true,
+      "eof_termination_observed_before_stop": false,
+      "executed_observed": true,
+      "termination": "signaled",
+      "cleanup_complete": true,
+      "stop_signal_attempted": true,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 7856958,
+      "admission_to_release_ns": 7882833
+    },
+    "cancel-before-permit": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": false,
+      "permit_succeeded": false,
+      "eof_termination_observed_before_stop": false,
+      "executed_observed": false,
+      "termination": "exited",
+      "cleanup_complete": true,
+      "stop_signal_attempted": true,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 7435791,
+      "admission_to_release_ns": 7460125
+    },
+    "eof-without-permit": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": false,
+      "permit_succeeded": false,
+      "eof_termination_observed_before_stop": true,
+      "executed_observed": false,
+      "termination": "exited",
+      "cleanup_complete": true,
+      "stop_signal_attempted": false,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 7971375,
+      "admission_to_release_ns": 8011500
+    },
+    "immediate-nonzero": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": true,
+      "permit_succeeded": true,
+      "eof_termination_observed_before_stop": false,
+      "executed_observed": true,
+      "termination": "exited",
+      "cleanup_complete": true,
+      "stop_signal_attempted": false,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 13680333,
+      "admission_to_release_ns": 13751416
+    },
+    "immediate-zero": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": true,
+      "permit_succeeded": true,
+      "eof_termination_observed_before_stop": false,
+      "executed_observed": true,
+      "termination": "exited",
+      "cleanup_complete": true,
+      "stop_signal_attempted": false,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 18989416,
+      "admission_to_release_ns": 19047375
+    },
+    "launcher-input-rejection": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": false,
+      "permit_succeeded": false,
+      "eof_termination_observed_before_stop": false,
+      "executed_observed": false,
+      "termination": "exited",
+      "cleanup_complete": true,
+      "stop_signal_attempted": true,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 9406208,
+      "admission_to_release_ns": 9461083
+    },
+    "normal": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": true,
+      "permit_succeeded": true,
+      "eof_termination_observed_before_stop": false,
+      "executed_observed": true,
+      "termination": "exited",
+      "cleanup_complete": true,
+      "stop_signal_attempted": false,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 202181334,
+      "admission_to_release_ns": 202358125
+    },
+    "rapid-exit": {
+      "status": "passed",
+      "primary_created": true,
+      "permit_published": true,
+      "permit_succeeded": true,
+      "eof_termination_observed_before_stop": false,
+      "executed_observed": true,
+      "termination": "exited",
+      "cleanup_complete": true,
+      "stop_signal_attempted": false,
+      "stop_signal_failed": false,
+      "admission_to_termination_ns": 8786459,
+      "admission_to_release_ns": 8820875
+    }
+  },
+  "controller": {
+    "reviewed_manifest_sha256": "7132d5e5a758cfd499420a07c516cc6600b7b766c212bc0dc4360e396ea4d494",
+    "exit_code": 0,
+    "elapsed_seconds": 0.5795844999374822,
+    "output_saturated": false,
+    "deadline_exceeded": false,
+    "emergency_group_signal": false,
+    "explicit_cleanup_complete": true,
+    "controller_joined": true,
+    "qualified_process_backend": false
+  },
+  "reviewed_artifacts_unchanged": true,
+  "validation": {
+    "compile_only_red": "NewDarwinCreator was absent.",
+    "build_passed": true,
+    "native_cases_passed": 8,
+    "native_test_seconds": 0.29
+  },
+  "review": "Independent prelaunch and postrun reviews approved this exact finite suite without a remaining finding.",
+  "scope": [
+    "The suite used the same supervisor as the deterministic lifecycle tests.",
+    "Readiness, permit publication, execution evidence, and termination remained separate.",
+    "EOF without a permit caused launcher termination before Stop or the deadline.",
+    "All cases confirmed cleanup. The outer controller needed no emergency signal.",
+    "The suite does not qualify remaining IPC channels, general native identity integration, or the complete resource contract."
+  ]
+}

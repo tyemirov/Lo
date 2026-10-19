@@ -5,7 +5,7 @@ The [design](file-adapter-design.md) defines their current contracts.
 The [mac-cleanup plan](mac-cleanup-plan.md) covers the remaining complete-script work.
 The [shared adapter plan](adapter-plan.md) controls future adapter changes.
 The completed stages below record the earlier File workflow acceptance.
-The nominal target and receipt update has separate validation pending.
+The nominal target and receipt update passed final stack CI.
 
 ## Contents
 
@@ -123,16 +123,17 @@ The [receipt tests](../tests/integration/adapter_receipts_test.go) cover nominal
 Focused interpreter and native validation passed.
 Independent source review closed the stage 1–2 findings.
 The [implementation review](evidence/adapter-implementation-review.json) records commands, results, and review limits.
-Final stack CI remains pending.
-HTTP client activation and general Process execution remain pending.
+Final stack CI passed.
+HTTP client activation and the selected native Process profile passed public acceptance.
 
 ## Remaining Scope
 
 The Gateway log category is the first complete File workflow.
-The complete mac-cleanup script still needs typed host inputs, general process results, category continuation, cleanup locking, and additional file metadata.
+The complete mac-cleanup script still needs typed host inputs, category continuation, cleanup locking, and additional file metadata.
+Typed Process results are implemented. The selected native profile prohibits child writes and cannot run cache-cleanup commands.
 Implement shared adapter semantics before further application-specific extensions.
 The [File stage](adapter-plan.md#2-bound-activation-and-file-targets) adds nominal actions and typed receipts.
 Its implementation uses `File.Write.new`, `File.Append.new`, and `File.Remove.new`.
 Bound commits publish operation-specific receipts after activation success.
-The stage still requires its final validation checkpoint.
+The stage passed its final stack validation checkpoint.
 Those requirements do not authorize access outside Lo.
