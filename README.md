@@ -562,12 +562,25 @@ Client source uses explicit `--http-allow METHOD,ORIGIN,ADDRESS` grants.
 Combined client interpreter cases passed, including protocol and composition.
 Matching focused native qualification passed.
 
-Pure Process constructors, inspection, and standard-host rejection are implemented, and focused interpreter and native validation passed.
-Current-stack CI passed, including the pure Process phase.
-Independent review approved the implemented pure Process checkpoint.
-The [pure Process contract](specification.md#95-process-adapter) describes this phase.
-Command activation returns host diagnostic `runtime.process-unavailable` before executable access.
-Qualified Process execution and runtime results remain pending.
+Process constructors, inspection, nominal results, termination accessors, and bounded execution share one [Process contract](specification.md#95-process-adapter).
+The selected Darwin 27 arm64 profile passed [native qualification](docs/evidence/process-host-native.json).
+Canonical public acceptance passed all 24 interpreter/generated-native cases. Final stack CI and independent completion review passed.
+The selected host denies child writes, network access, and descendants, and clears the specified inherited Mach slots.
+Commands use exact arguments, explicit environment values, and stdin bytes without a shell or inherited environment.
+The conditional work bound uses host parallelism and completed lifetime. It is not a hard CPU quota.
+
+Configure `run` or `serve` with `--process-allow SHA256,ABSOLUTE_PATH`, `--process-launcher ABSOLUTE_PATH`, and `--process-read-root ABSOLUTE_PATH`.
+The selected backend verifies the pinned launcher and registered command identities.
+These grants do not grant parent File access.
+The [native admission limits](docs/adapter-design.md#selected-native-admission-limits) apply separately from pure constructor validation.
+Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session open before program evaluation.
+Source inspection without host configuration also reports the execution profile as unavailable.
+
+One canonical session owns Process, participating File adapters, and shutdown for interpreter, generated-native, and server execution.
+`Close(ctx)` starts one shutdown owner. `WaitRetained()` joins it when the caller deadline expires.
+Trusted Go embeddings can supply a driver through the [lifecycle and registry APIs](docs/adapter-design.md#executable-registry-phase).
+The [implementation evidence](docs/evidence/adapter-implementation-review.json) keeps earlier CI and injected execution results separate from current public acceptance.
 
 The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
 The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, interpreter tests, and native tests.
@@ -580,7 +593,7 @@ The [Lo Language Reference](specification.md) defines the implemented v0.3 core 
 It includes a contents list, operation signatures, examples, and current backend limits.
 
 - [File adapter and cleanup example](specification.md#91-file-adapter)
-- [Pure Process values, inspection, and host gate](specification.md#95-process-adapter)
+- [Process values, execution, and host policy](specification.md#95-process-adapter)
 - [Sequential activation with Flow.fold](specification.md#88-sequential-flow-processor)
 - [Quick start](specification.md#quick-start)
 - [Autodiff and backpropagation](specification.md#245-reverse-mode-autodiff-and-backpropagation)
