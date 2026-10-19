@@ -45,12 +45,20 @@ func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout
 	if err != nil {
 		return ReportRuntime(stderr, inv.format, err)
 	}
+	boundaries, err := adapter.WithHTTP(files, inv.httpPolicy)
+	if err != nil {
+		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
+	}
+	boundaries, err = adapter.WithProcess(boundaries)
+	if err != nil {
+		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
+	}
 	if inv.command == RunCommand {
 		ctx, capture, err := execution.CaptureFailure(ctx)
 		if err != nil {
 			return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
 		}
-		output, runErr := p.Run(ctx, files, inv.budget, inv.devices)
+		output, runErr := p.Run(ctx, boundaries, inv.budget, inv.devices)
 		if err := capture.Preserve(runtimeCleanup(runErr, files.Close())); err != nil {
 			return ReportRuntime(stderr, inv.format, err)
 		}
@@ -59,7 +67,7 @@ func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout
 		}
 		return ExitSuccess
 	}
-	servers, err := adapter.NewServers(p, files, inv.listenPolicy, inv.budget, inv.devices)
+	servers, err := adapter.NewServers(p, boundaries, inv.listenPolicy, inv.budget, inv.devices)
 	if err != nil {
 		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
 	}

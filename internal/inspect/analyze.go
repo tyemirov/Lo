@@ -189,6 +189,9 @@ func (a *analyzer) body(c *context, body []ir.Statement) abstract {
 			node := a.graph.statements[s.Span().Start().Offset]
 			a.activate(c, node, value)
 			c.conditions = mergeConditions(c.conditions, []condition{{Kind: commitCondition, Node: node, Context: c.id}})
+			if s.ID() != "" {
+				c.values[s.ID()] = withConditions(a.unknown(node, s.ResultType()), c.conditions)
+			}
 		}
 	}
 	return out
@@ -368,19 +371,21 @@ func (a *analyzer) activate(c *context, node nodeID, value abstract) {
 	}
 	targets := withConditions(value, c.conditions).targets
 	if len(targets) == 0 {
-		operations := []string{catalog.FileAppend, catalog.FileWrite, catalog.FileRemove}
-		if value.typ.Kind() == types.ServerKind {
-			operations = []string{catalog.ServerNew}
-		}
-		for _, name := range operations {
-			op, _ := catalog.Lookup(name)
-			targetType := types.Path()
-			if op.Boundary() == catalog.Server {
-				targetType = types.Int()
-			}
+		if op, ok := catalog.ActivationOperation(value.typ); ok {
+			name := op.Name()
+			targetType := op.Parameters()[op.TargetPosition()].Type
 			unknown := a.unknown(value.node, targetType)
 			unknown.dependencies = value.dependencies
 			r := a.resource(c, name, value.node, unknown)
+			if name == catalog.ClientRequestNew {
+				method := a.unknown(value.node, types.Method())
+				method.dependencies = value.dependencies
+				description := a.describe(method)
+				r.Method = &description
+			}
+			if name == catalog.ProcessCommandNew {
+				r.Process = a.dynamicProcessInputs(value, op)
+			}
 			r.Origin = "dynamic-target"
 			r.ID = fmt.Sprintf("t%d", len(a.data.Targets)+1)
 			a.data.Targets = append(a.data.Targets, r)

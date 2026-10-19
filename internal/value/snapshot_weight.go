@@ -10,6 +10,25 @@ import (
 // SnapshotWeight calculates diagnostic value weight before snapshot allocation.
 func SnapshotWeight(v Value) uint64 {
 	switch x := v.(type) {
+	case ProcessCommand:
+		return addWeight(64, addWeight(x.Executable().Weight(), x.Directory().Weight()))
+	case URL:
+		return uint64(16 + len(x.Origin()) + 1)
+	case ClientRequest:
+		weight := addWeight(16, x.Method().Weight())
+		weight = addWeight(weight, uint64(16+len(x.URL().Origin())+1))
+		weight = addWeight(weight, SnapshotWeight(x.Headers()))
+		return addWeight(weight, 16)
+	case Headers:
+		weight := uint64(32)
+		for _, entry := range x.Entries().Items() {
+			weight = addWeight(weight, 41+entry.(Record).Field("name").Weight())
+		}
+		return weight
+	case HTTPValue:
+		return addWeight(16, SnapshotWeight(x.Fields()))
+	case Receipt:
+		return addWeight(16, SnapshotWeight(x.FieldsRecord()))
 	case FileEntry:
 		return addWeight(16, x.FieldsRecord().Weight())
 	case RemovalEffect:

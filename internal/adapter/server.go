@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
@@ -63,7 +64,7 @@ type activeServer struct {
 }
 type servers struct {
 	program        execution.Program
-	files          Files
+	files          execution.Boundary
 	policy         ListenPolicy
 	devices        device.Config
 	budget         execution.Budget
@@ -83,7 +84,7 @@ type servers struct {
 }
 
 func (*servers) servers() {}
-func NewServers(p execution.Program, files Files, policy ListenPolicy, budget execution.Budget, devices device.Config) (Servers, error) {
+func NewServers(p execution.Program, files execution.Boundary, policy ListenPolicy, budget execution.Budget, devices device.Config) (Servers, error) {
 	if p == nil || files == nil || policy == nil || budget == nil || devices == nil {
 		return nil, fmt.Errorf("servers require a checked program, files, policy, and budget")
 	}
@@ -121,31 +122,42 @@ func (s *servers) List(ctx context.Context, path value.Text) (value.List, error)
 func (s *servers) OpenPaths(ctx context.Context, path value.Text) (value.List, error) {
 	return s.files.OpenPaths(ctx, path)
 }
-func (s *servers) Commit(ctx context.Context, target value.Target) error {
+func (s *servers) Commit(ctx context.Context, target value.Target) (value.Value, error) {
 	t, ok := target.(value.Server)
 	if !ok {
 		return s.files.Commit(ctx, target)
 	}
 	n := t.Port().Big()
 	if !n.IsUint64() || n.Uint64() > 65535 {
-		return fmt.Errorf("%s: invalid port %s", catalog.HTTPListen, n)
+		return nil, fmt.Errorf("%s: invalid port %s", catalog.HTTPListen, n)
 	}
 	port := uint16(n.Uint64())
 	address := net.JoinHostPort(LoopbackHost, strconv.Itoa(int(port)))
 	if !s.policy.Allows(port) {
-		return execution.Denied(catalog.HTTPListen, address)
+		return nil, execution.Denied(catalog.HTTPListen, address)
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.stopping {
-		return context.Canceled
+		return nil, context.Canceled
 	}
 	if len(s.active) == MaxServers {
-		return execution.Limit("active HTTP servers")
+		return nil, execution.Limit("active HTTP servers")
 	}
 	listener, err := (&net.ListenConfig{}).Listen(ctx, "tcp", address)
 	if err != nil {
-		return fmt.Errorf("%s %s: %w", catalog.HTTPListen, address, err)
+		return nil, fmt.Errorf("%s %s: %w", catalog.HTTPListen, address, err)
+	}
+	fields, err := value.NewRecord([]value.Field{
+		{Name: "address", Value: must(value.NewText(types.String(), listener.Addr().String()))},
+		{Name: "port", Value: value.Int64(int64(listener.Addr().(*net.TCPAddr).Port))},
+	})
+	if err != nil {
+		return nil, execution.HostFailure("HTTP server receipt", address, errors.Join(err, listener.Close()))
+	}
+	receipt, err := value.NewReceipt(types.ServerReceipt(), fields)
+	if err != nil {
+		return nil, execution.HostFailure("HTTP server receipt", address, errors.Join(err, listener.Close()))
 	}
 	server := &http.Server{
 		ReadHeaderTimeout: IOTimeout, ReadTimeout: IOTimeout, WriteTimeout: IOTimeout, IdleTimeout: IdleTimeout, MaxHeaderBytes: MaxHeaderBytes,
@@ -161,7 +173,7 @@ func (s *servers) Commit(ctx context.Context, target value.Target) error {
 			s.fail(execution.HostFailure(catalog.HTTPListen, address, err))
 		}
 	}()
-	return nil
+	return receipt, nil
 }
 func (s *servers) Snapshot() []ServerInfo {
 	s.mu.Lock()

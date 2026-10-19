@@ -47,7 +47,11 @@ func (g *generator) list(call ir.BuiltinCall, metadata string, callback identity
 	}
 	b.line("v,err:=%s", b.invoke(callback, cbargs, call.Span()))
 	b.check()
-	b.line("if wrapped,ok:=v.(value.Fallible);ok{var cause value.Error;v,cause=wrapped.Outcome();if cause!=nil{return runtimeops.CallbackFailure(%s,cause,%q,index,%s,state),nil}}", metadata, flowName, element)
+	b.line("if wrapped,ok:=v.(value.Fallible);ok{var cause value.Error;v,cause=wrapped.Outcome();if cause!=nil{")
+	if op == catalog.FlowFold {
+		b.line("cause=value.WithFlowProgress(cause,progress.Record())")
+	}
+	b.line("return runtimeops.CallbackFailure(%s,cause,%q,index,%s,state),nil}}", metadata, flowName, element)
 	switch op {
 	case catalog.ListMap:
 		b.line("output=append(output,v)")

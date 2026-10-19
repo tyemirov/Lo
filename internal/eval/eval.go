@@ -74,8 +74,12 @@ func (m *machine) body(body []ir.Statement, f frame) (output value.Value, result
 			if err != nil {
 				return nil, err
 			}
-			if err := runtimeops.Commit(m.Session, v.(value.Target), x.Span()); err != nil {
+			receipt, err := runtimeops.Commit(m.Session, v.(value.Target), x.Span())
+			if err != nil {
 				return nil, err
+			}
+			if x.ID() != "" {
+				f.bindings[x.ID()] = receipt
 			}
 
 		default:

@@ -126,7 +126,14 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		a.data.Reads = append(a.data.Reads, r)
 		a.capability(r, op.Capability())
 	case catalog.Effect, catalog.Server:
-		r := a.resource(c, op.Name(), node, values[0])
+		r := a.resource(c, op.Name(), node, values[op.TargetPosition()])
+		if op.Name() == catalog.ClientRequestNew {
+			method := a.describe(values[0])
+			r.Method = &method
+		}
+		if op.Name() == catalog.ProcessCommandNew {
+			r.Process = a.processInputs(values)
+		}
 		if op.Name() == catalog.FileRemove {
 			r.Target.Kind = "calculated"
 		}
@@ -213,7 +220,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	switch op.Name() {
 	case catalog.FileList:
 		out.fileRoot = values[0].known
-	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew, catalog.ScalarNew, catalog.PathNew:
+	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew, catalog.ScalarNew, catalog.PathNew, catalog.URLNew, catalog.MethodNew, catalog.ProcessExecutableNew:
 		out = values[0]
 	case catalog.Concat:
 		var b strings.Builder

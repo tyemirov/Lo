@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
+	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
@@ -14,6 +15,7 @@ type Session interface {
 	FileSession() value.FileSession
 	ReserveFile(uint64, uint64) error
 	RecordRemoval(value.List, value.Record)
+	RecordActivation(string, source.Span, value.Value) error
 	RecordFlowProgress(int, int, value.Value) (FlowProgress, error)
 	OnClose(func() error) error
 	Close() error
@@ -42,6 +44,7 @@ type session struct {
 	removalEntries    value.List
 	removalProgress   value.Record
 	flowProgress      FlowProgress
+	lastActivation    ActivationProgress
 }
 
 func (*session) session() {}
@@ -77,10 +80,10 @@ func (s *session) Step() error {
 func (s *session) ChargeValue(v value.Value) error {
 	weight := v.Weight()
 	if weight > MaxValueWeight {
-		return Limit("expanded value bytes")
+		return preserveValueFlowProgress(Limit("expanded value bytes"), v)
 	}
 	if weight > MaxEvaluationWeight-s.weight {
-		return Limit("evaluation value bytes")
+		return preserveValueFlowProgress(Limit("evaluation value bytes"), v)
 	}
 	s.weight += weight
 	return nil
@@ -192,7 +195,7 @@ func (s *session) Close() error {
 		if s.removalProgress != nil {
 			err = WithRemovalProgress(err, s.removalEntries, s.removalProgress)
 		}
-		return WithFlowProgress(err, s.flowProgress)
+		return WithActivationProgress(WithFlowProgress(err, s.flowProgress), s.lastActivation)
 	}
 	return err
 }
@@ -203,7 +206,13 @@ func (s *session) RecordRemoval(entries value.List, progress value.Record) {
 }
 
 func (s *session) preserveFailure(err error) error {
-	if err == nil || BoundaryHostError(err) == nil {
+	if err == nil {
+		return err
+	}
+	if ActivationDetails(err) == nil {
+		err = WithActivationProgress(err, s.lastActivation)
+	}
+	if BoundaryHostError(err) == nil {
 		return err
 	}
 	if _, _, ok := RemovalDetails(err); !ok && s.removalProgress != nil {

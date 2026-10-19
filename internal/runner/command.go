@@ -8,6 +8,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 	"io"
 	"os"
@@ -25,6 +26,7 @@ const (
 	RunCommand          = "run"
 	ServeCommand        = "serve"
 	listenOption        = "--listen"
+	httpAllowOption     = "--http-allow"
 	readRootOption      = "--read-root"
 	writeRootOption     = "--write-root"
 	listRootOption      = "--list-root"
@@ -52,6 +54,7 @@ type invocation struct {
 	devices               device.Config
 	budget                execution.Budget
 	listenPolicy          adapter.ListenPolicy
+	httpPolicy            adapter.HTTPPolicy
 }
 
 func parseArgs(args []string, embedded bool) (invocation, error) {
@@ -65,8 +68,17 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	deviceSet := false
 	backendSet := false
 	var ports []uint16
+	var httpGrants []string
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
+		if arg == httpAllowOption {
+			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
+				return inv, fmt.Errorf("--http-allow requires METHOD,ORIGIN,ADDRESS with run or serve")
+			}
+			i++
+			httpGrants = append(httpGrants, args[i])
+			continue
+		}
 		if arg == deviceBackendOption {
 			if embedded || inv.command != BuildCommand || backendSet || i+1 == len(args) {
 				return inv, fmt.Errorf("--device-backend requires one software or metal value with build")
@@ -204,6 +216,10 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	if err != nil {
 		return inv, err
 	}
+	inv.httpPolicy, err = adapter.NewHTTPPolicy(httpGrants)
+	if err != nil {
+		return inv, err
+	}
 	return inv, nil
 }
 
@@ -244,10 +260,12 @@ func ReportRuntime(stderr io.Writer, format string, err error) int {
 		if format == JsonFormat {
 			type runtimeDiagnostic struct {
 				diagnostic.Data
-				Error value.Error    `json:"error"`
-				Flows []value.Record `json:"flow_progress,omitempty"`
+				Error     value.Error                  `json:"error"`
+				Flows     []value.Record               `json:"flow_progress,omitempty"`
+				Completed execution.ActivationProgress `json:"last_completed_activation,omitempty"`
+				Cleanup   []string                     `json:"cleanup_errors,omitempty"`
 			}
-			payload := runtimeDiagnostic{d.Data(), v, execution.FlowDetails(err)}
+			payload := runtimeDiagnostic{d.Data(), v, execution.FlowDetails(err), execution.ActivationDetails(err), execution.CleanupDetails(err)}
 			if err := json.NewEncoder(stderr).Encode(struct {
 				Diagnostics []runtimeDiagnostic `json:"diagnostics"`
 			}{[]runtimeDiagnostic{payload}}); err != nil {
@@ -272,14 +290,34 @@ func ReportRuntime(stderr io.Writer, format string, err error) int {
 	}
 	entries, progress, removal := execution.RemovalDetails(err)
 	flows := execution.FlowDetails(err)
-	if removal || len(flows) > 0 {
+	completed := execution.ActivationDetails(err)
+	cleanup := execution.CleanupDetails(err)
+	httpProgress, progressErr := execution.HTTPProgress(err)
+	if progressErr != nil {
+		return Report(stderr, format, diagnostic.New(diagnostic.RuntimeHost, diagnostic.Runtime, fmt.Sprintf("HTTP progress: %v; original failure: %v", progressErr, err), nil), ExitHost)
+	}
+	var writeProgress value.Record
+	if confirmed, stage, ok := execution.WriteProgress(err); ok {
+		stageValue, valueErr := value.NewText(types.String(), stage)
+		if valueErr == nil {
+			writeProgress, valueErr = value.NewRecord([]value.Field{{Name: "bytes_written", Value: value.Int64(int64(confirmed))}, {Name: "stage", Value: stageValue}})
+		}
+		if valueErr != nil {
+			return Report(stderr, format, diagnostic.New(diagnostic.RuntimeHost, diagnostic.Runtime, fmt.Sprintf("write progress: %v; original failure: %v", valueErr, err), nil), ExitHost)
+		}
+	}
+	if removal || len(flows) > 0 || writeProgress != nil || httpProgress != nil || completed != nil || len(cleanup) > 0 {
 		data := diagnostic.New(code, diagnostic.Runtime, err.Error(), nil).Data()
 		if format == JsonFormat {
 			type removalDiagnostic struct {
 				diagnostic.Data
-				Entries  value.Value    `json:"removal_entries,omitempty"`
-				Progress value.Record   `json:"removal_progress,omitempty"`
-				Flows    []value.Record `json:"flow_progress,omitempty"`
+				Entries   value.Value                  `json:"removal_entries,omitempty"`
+				Progress  value.Record                 `json:"removal_progress,omitempty"`
+				Flows     []value.Record               `json:"flow_progress,omitempty"`
+				Write     value.Record                 `json:"write_progress,omitempty"`
+				HTTP      value.Record                 `json:"http_progress,omitempty"`
+				Completed execution.ActivationProgress `json:"last_completed_activation,omitempty"`
+				Cleanup   []string                     `json:"cleanup_errors,omitempty"`
 			}
 			var snapshot value.Value
 			if entries != nil {
@@ -287,7 +325,7 @@ func ReportRuntime(stderr io.Writer, format string, err error) int {
 			}
 			payload := struct {
 				Diagnostics []removalDiagnostic `json:"diagnostics"`
-			}{[]removalDiagnostic{{data, snapshot, progress, flows}}}
+			}{[]removalDiagnostic{{data, snapshot, progress, flows, writeProgress, httpProgress, completed, cleanup}}}
 			if err := json.NewEncoder(stderr).Encode(payload); err != nil {
 				return ExitHost
 			}
@@ -296,6 +334,15 @@ func ReportRuntime(stderr io.Writer, format string, err error) int {
 		message := err.Error()
 		if removal {
 			message += fmt.Sprintf(" (completed %s removals, stage %s)", value.TextResult(progress.Field("completed_count")), value.TextResult(progress.Field("stage")))
+		}
+		if writeProgress != nil {
+			message += fmt.Sprintf(" (wrote %s bytes, stage %s)", value.TextResult(writeProgress.Field("bytes_written")), value.TextResult(writeProgress.Field("stage")))
+		}
+		if httpProgress != nil {
+			message += fmt.Sprintf(" (HTTP stage %s, request written %s, remote outcome %s)", value.TextResult(httpProgress.Field("stage")), value.TextResult(httpProgress.Field("request_written")), value.TextResult(httpProgress.Field("remote_outcome")))
+		}
+		if completed != nil {
+			message += fmt.Sprintf(" (last completed %s at %s:%d: %s)", completed.Operation(), completed.Span().File(), completed.Span().Start().Line, completed.Summary())
 		}
 		for _, flow := range flows {
 			message += fmt.Sprintf(" (Flow.fold completed %s/%s, state %s)", value.TextResult(flow.Field("completed_count")), value.TextResult(flow.Field("total_count")), value.TextResult(flow.Field("state")))

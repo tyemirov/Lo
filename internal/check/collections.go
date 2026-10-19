@@ -146,8 +146,8 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 	if d != nil {
 		return expression{}, d
 	}
-	if f.graph.Effects().Commits && op.Name() != catalog.FlowFold {
-		return expression{}, problem(diagnostic.EffectfulCallback, "list callback "+f.declaration.Name()+" can activate a commit", args[len(args)-1].Span)
+	if effects := f.graph.Effects(); (effects.Reads || effects.Commits) && op.Name() != catalog.FlowFold {
+		return expression{}, problem(diagnostic.EffectfulCallback, "list callback "+f.declaration.Name()+" can read host state or activate a commit", args[len(args)-1].Span)
 	}
 	params := f.signature.Parameters()
 	paramCount := len(args) - 1

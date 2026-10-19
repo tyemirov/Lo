@@ -57,7 +57,7 @@ func tensorBody(body []ir.Statement) bool {
 				return true
 			}
 		case ir.Commit:
-			if tensorExpression(x.Target()) {
+			if tensorExpression(x.Target()) || tensorType(x.ResultType()) {
 				return true
 			}
 		}

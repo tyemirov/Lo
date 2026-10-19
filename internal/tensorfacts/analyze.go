@@ -175,6 +175,9 @@ func (a *analyzer) body(body []ir.Statement, env map[ir.BindingID]fact) fact {
 			return a.expression(x.Value(), env)
 		case ir.Commit:
 			a.expression(x.Target(), env)
+			if x.ID() != "" {
+				env[x.ID()] = fact{}
+			}
 		}
 		if a.err != nil {
 			break

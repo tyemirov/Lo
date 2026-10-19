@@ -193,6 +193,8 @@ func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int
 		return runtimeops.ErrorNew(m.Session, call, args, flows)
 	case catalog.UTF8New:
 		return runtimeops.UTF8New(m.Session, call, args, flows)
+	case catalog.UTF8BytesNew:
+		return runtimeops.UTF8BytesNew(m.Session, call, args, flows)
 	case catalog.FileOpenPaths:
 		return runtimeops.FileOpenPaths(m.Session, call, args, flows)
 	case catalog.FilePathEqual:
@@ -209,6 +211,22 @@ func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int
 		return runtimeops.FileWrite(m.Session, call, args, flows)
 	case catalog.ServerNew:
 		return runtimeops.ServerNew(m.Session, call, args, flows)
+	case catalog.HeadersNew:
+		return runtimeops.HeadersNew(m.Session, call, args, flows)
+	case catalog.ProcessExecutableNew:
+		return runtimeops.ProcessExecutableNew(m.Session, call, args, flows)
+	case catalog.ProcessCommandNew:
+		return runtimeops.ProcessCommandNew(m.Session, call, args, flows)
+	case catalog.URLNew:
+		return runtimeops.URLNew(m.Session, call, args, flows)
+	case catalog.MethodNew:
+		return runtimeops.MethodNew(m.Session, call, args, flows)
+	case catalog.ClientRequestNew:
+		return runtimeops.ClientRequestNew(m.Session, call, args, flows)
+	case catalog.HeaderValues:
+		return runtimeops.HeaderValues(m.Session, call, args, flows)
+	case catalog.ResponseNew:
+		return runtimeops.ResponseNew(m.Session, call, args, flows)
 	case catalog.ResponseTextNew:
 		return runtimeops.ResponseTextNew(m.Session, call, args, flows)
 	case catalog.ResponseBytesNew:

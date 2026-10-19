@@ -34,6 +34,21 @@ func WithFlowProgress(err error, progress FlowProgress) error {
 	return flowError{err, progress}
 }
 
+func preserveValueFlowProgress(err error, rejected value.Value) error {
+	cause, _ := rejected.(value.Error)
+	if fallible, ok := rejected.(value.Fallible); ok {
+		_, cause = fallible.Outcome()
+	}
+	if cause == nil {
+		return err
+	}
+	progress := cause.FlowProgress()
+	for index := len(progress) - 1; index >= 0; index-- {
+		err = WithFlowProgress(err, &flowProgress{progress[index]})
+	}
+	return err
+}
+
 // FlowDetails obtains nested progress from outermost to innermost fold.
 func FlowDetails(err error) []value.Record {
 	var records []value.Record
@@ -46,6 +61,9 @@ func FlowDetails(err error) []value.Record {
 		if e, ok := err.(flowError); ok && !seen[e.progress] {
 			seen[e.progress] = true
 			records = append(records, e.progress.Record())
+		}
+		if failure, ok := err.(Failure); ok {
+			records = append(records, failure.Value().FlowProgress()...)
 		}
 		switch e := err.(type) {
 		case interface{ Unwrap() []error }:

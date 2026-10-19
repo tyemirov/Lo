@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
@@ -163,54 +164,63 @@ func (f *files) resolve(roots []grant, operation, path string) (*os.Root, string
 	}
 	return nil, "", absolute, execution.Denied(operation, absolute)
 }
-func (f *files) Commit(ctx context.Context, target value.Target) error {
+func (f *files) Commit(ctx context.Context, target value.Target) (value.Value, error) {
 	switch target := target.(type) {
 	case value.Server:
-		return execution.ServerRequiresServe()
+		return nil, execution.ServerRequiresServe()
 	case value.RemovalEffect:
 		return f.remove(ctx, target)
 	case value.ContentEffect:
-		operation := target.Operation().Name()
+		operation := target.Operation().Capability()
 		root, relative, absolute, err := f.resolve(f.writes, operation, target.Path().Text())
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if err := ctx.Err(); err != nil {
-			return execution.HostFailure(operation, absolute, err)
+			return nil, execution.WithWriteProgress(execution.HostFailure(operation, absolute, err), 0, "open")
 		}
 		var file *os.File
 		var data []byte
-		if operation == catalog.FileWrite {
+		if target.Type().Kind() == types.FileWriteKind {
 			file, err = root.Create(relative)
 			data = target.Content().(value.Bytes).Bytes()
 		} else {
 			file, err = openAppend(root, relative)
-			data = []byte(target.Content().(value.Text).Text())
+			data = target.Content().(value.Bytes).Bytes()
 		}
 		if err != nil {
-			return fmt.Errorf("%s %q: %w", operation, absolute, err)
+			return nil, execution.WithWriteProgress(fmt.Errorf("%s %q: %w", operation, absolute, err), 0, "open")
 		}
-		closeFile := cancelFile(ctx, file)
-		writeErr := writeFile(ctx, file, data)
+		closeFile := cancelFileWithClose(ctx, file, f.io.CloseFile)
+		confirmed, writeErr := f.io.Write(ctx, file, data)
 		closeErr := closeFile()
 		if writeErr != nil || closeErr != nil {
-			return fmt.Errorf("%s %q: %w", operation, absolute, errors.Join(writeErr, closeErr))
+			stage := "finalize"
+			if writeErr != nil {
+				stage = "write"
+			}
+			return nil, execution.WithWriteProgress(fmt.Errorf("%s %q: %w", operation, absolute, execution.WithOperationCleanup(writeErr, closeErr)), confirmed, stage)
 		}
 		if err := ctx.Err(); err != nil {
-			return execution.HostFailure(operation, absolute, err)
+			return nil, execution.WithWriteProgress(execution.HostFailure(operation, absolute, err), confirmed, "finalize")
 		}
-		return nil
+		resultType, _ := catalog.ActivationResult(target.Type())
+		fields := must(value.NewRecord([]value.Field{{Name: "path", Value: target.Path()}, {Name: "bytes_written", Value: value.Int64(int64(confirmed))}}))
+		return value.NewReceipt(resultType, fields)
 	default:
 		panic("unknown checked target")
 	}
 }
 
 func cancelFile(ctx context.Context, file *os.File) func() error {
+	return cancelFileWithClose(ctx, file, (*os.File).Close)
+}
+func cancelFileWithClose(ctx context.Context, file *os.File, close func(*os.File) error) func() error {
 	closed := make(chan error, 1)
-	stop := context.AfterFunc(ctx, func() { closed <- file.Close() })
+	stop := context.AfterFunc(ctx, func() { closed <- close(file) })
 	return func() error {
 		if stop() {
-			return file.Close()
+			return close(file)
 		}
 		return errors.Join(ctx.Err(), <-closed)
 	}

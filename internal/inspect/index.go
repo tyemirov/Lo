@@ -58,8 +58,11 @@ func (g *graphIndex) body(statements []ir.Statement, region string) {
 			g.report.Bindings = append(g.report.Bindings, bindingData{s.ID(), s.Name(), id, region, s.Span()})
 		case ir.Commit:
 			input := g.expression(s.Target(), region)
-			id := g.add(nodeData{Kind: "commit", Type: s.Target().Type().String(), Span: s.Span(), Region: region, Inputs: []nodeID{input}})
+			id := g.add(nodeData{Kind: "commit", Type: s.ResultType().String(), Span: s.Span(), Region: region, Inputs: []nodeID{input}})
 			g.statements[s.Span().Start().Offset] = id
+			if s.ID() != "" {
+				g.report.Bindings = append(g.report.Bindings, bindingData{s.ID(), s.Name(), id, region, s.Span()})
+			}
 		case ir.Return:
 			input := g.expression(s.Value(), region)
 			id := g.add(nodeData{Kind: "return", Type: s.Value().Type().String(), Span: s.Span(), Region: region, Inputs: []nodeID{input}})

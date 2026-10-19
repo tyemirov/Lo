@@ -39,6 +39,7 @@ const (
 	RuntimeCancelled    Code = "runtime.cancelled"
 	CapabilityDenied    Code = "runtime.capability-denied"
 	ServerRequiresServe Code = "runtime.server-requires-serve"
+	ProcessUnavailable  Code = "runtime.process-unavailable"
 	NoServer            Code = "runtime.no-server"
 	InspectionLimit     Code = "inspect.limit"
 	Invocation          Code = "cli.invalid-invocation"

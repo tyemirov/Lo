@@ -8,29 +8,45 @@ import (
 
 type Kind string
 
+// FieldFlowProgress names the explicit completed-fold evidence on Error values.
+const FieldFlowProgress = "flow_progress"
+
 const (
-	IntKind       Kind = "Int"
-	StringKind    Kind = "String"
-	BoolKind      Kind = "Bool"
-	NullKind      Kind = "Null"
-	ScalarKind    Kind = "Scalar"
-	BytesKind     Kind = "Bytes"
-	FloatKind     Kind = "Float"
-	TensorKind    Kind = "Tensor<FP32>"
-	DeviceKind    Kind = "Device"
-	ErrorKind     Kind = "Error"
-	PathKind      Kind = "File.Path"
-	FileEntryKind Kind = "File.Entry"
-	RequestKind   Kind = "HTTP.Request"
-	ResponseKind  Kind = "HTTP.Response"
-	ServerKind    Kind = "HTTP.Server"
-	EffectKind    Kind = "Effect"
-	AnyRecordKind Kind = "Record"
-	RecordKind    Kind = "ExactRecord"
-	ListKind      Kind = "List"
-	MapKind       Kind = "Map"
-	RangeKind     Kind = "Range"
-	FallibleKind  Kind = "Fallible"
+	IntKind               Kind = "Int"
+	StringKind            Kind = "String"
+	BoolKind              Kind = "Bool"
+	NullKind              Kind = "Null"
+	ScalarKind            Kind = "Scalar"
+	BytesKind             Kind = "Bytes"
+	FloatKind             Kind = "Float"
+	TensorKind            Kind = "Tensor<FP32>"
+	DeviceKind            Kind = "Device"
+	ErrorKind             Kind = "Error"
+	PathKind              Kind = "File.Path"
+	FileEntryKind         Kind = "File.Entry"
+	HeadersKind           Kind = "HTTP.Headers"
+	RequestKind           Kind = "HTTP.Request"
+	URLKind               Kind = "HTTP.URL"
+	MethodKind            Kind = "HTTP.Method"
+	ClientRequestKind     Kind = "HTTP.Client.Request"
+	ResponseKind          Kind = "HTTP.Response"
+	ServerKind            Kind = "HTTP.Server"
+	FileWriteKind         Kind = "File.Write"
+	FileAppendKind        Kind = "File.Append"
+	FileRemoveKind        Kind = "File.Remove"
+	FileWriteReceiptKind  Kind = "File.WriteReceipt"
+	FileAppendReceiptKind Kind = "File.AppendReceipt"
+	FileRemoveReceiptKind Kind = "File.RemoveReceipt"
+	ProcessExecutableKind Kind = "Process.Executable"
+	ProcessCommandKind    Kind = "Process.Command"
+	ProcessResultKind     Kind = "Process.Result"
+	ServerReceiptKind     Kind = "HTTP.ServerReceipt"
+	AnyRecordKind         Kind = "Record"
+	RecordKind            Kind = "ExactRecord"
+	ListKind              Kind = "List"
+	MapKind               Kind = "Map"
+	RangeKind             Kind = "Range"
+	FallibleKind          Kind = "Fallible"
 )
 
 type Type interface {
@@ -113,14 +129,32 @@ func Device() Type            { return atom(DeviceKind) }
 func Error() Type             { return atom(ErrorKind) }
 func Path() Type              { return atom(PathKind) }
 func FileEntry() Type         { return atom(FileEntryKind) }
+func Headers() Type           { return atom(HeadersKind) }
+func HeaderEntries() List {
+	return must(NewList(must(NewRecord([]Field{{Name: "name", Type: String()}, {Name: "value", Type: Bytes()}}))))
+}
 func Request() Type           { return atom(RequestKind) }
+func URL() Type               { return atom(URLKind) }
+func Method() Type            { return atom(MethodKind) }
+func ClientRequest() Type     { return atom(ClientRequestKind) }
 func Response() Type          { return atom(ResponseKind) }
 func Server() Type            { return atom(ServerKind) }
-func Effect() Type            { return atom(EffectKind) }
+func FileWrite() Type         { return atom(FileWriteKind) }
+func FileAppend() Type        { return atom(FileAppendKind) }
+func FileRemove() Type        { return atom(FileRemoveKind) }
+func FileWriteReceipt() Type  { return atom(FileWriteReceiptKind) }
+func FileAppendReceipt() Type { return atom(FileAppendReceiptKind) }
+func FileRemoveReceipt() Type { return atom(FileRemoveReceiptKind) }
+func ServerReceipt() Type     { return atom(ServerReceiptKind) }
+func ProcessExecutable() Type { return atom(ProcessExecutableKind) }
+func ProcessCommand() Type    { return atom(ProcessCommandKind) }
+func ProcessResult() Type     { return atom(ProcessResultKind) }
 func AnyRecord() Type         { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, RequestKind, ResponseKind, ServerKind, EffectKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
+	case URLKind, MethodKind, ClientRequestKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind:
+		return atom(name), true
+	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true
 	}
 	return nil, false
@@ -272,6 +306,25 @@ func FieldType(t Type, name string) (Type, bool) {
 		return nil, false
 	}
 	switch t.Kind() {
+	case FileWriteReceiptKind, FileAppendReceiptKind:
+		switch name {
+		case "path":
+			return Path(), true
+		case "bytes_written":
+			return Int(), true
+		}
+	case FileRemoveReceiptKind:
+		switch name {
+		case "total_count", "completed_count", "observed_bytes":
+			return Int(), true
+		}
+	case ServerReceiptKind:
+		switch name {
+		case "address":
+			return String(), true
+		case "port":
+			return Int(), true
+		}
 	case FileEntryKind:
 		switch name {
 		case "path":
@@ -281,6 +334,10 @@ func FieldType(t Type, name string) (Type, bool) {
 		case "size_bytes", "modified_unix_ns", "link_count":
 			return Int(), true
 		}
+	case HeadersKind:
+		if name == "entries" {
+			return HeaderEntries(), true
+		}
 	case RequestKind:
 		switch name {
 		case "method", "path":
@@ -288,7 +345,7 @@ func FieldType(t Type, name string) (Type, bool) {
 		case "body":
 			return Bytes(), true
 		case "headers":
-			return must(NewMap(String(), String())), true
+			return Headers(), true
 		}
 	case ResponseKind:
 		switch name {
@@ -297,7 +354,7 @@ func FieldType(t Type, name string) (Type, bool) {
 		case "body":
 			return Bytes(), true
 		case "headers":
-			return must(NewMap(String(), String())), true
+			return Headers(), true
 		}
 	case ErrorKind:
 		switch name {
@@ -307,6 +364,8 @@ func FieldType(t Type, name string) (Type, bool) {
 			return AnyRecord(), true
 		case "trace":
 			return must(NewList(must(NewRecord([]Field{{"flow", String()}, {"operation", String()}, {"input", AnyRecord()}})))), true
+		case FieldFlowProgress:
+			return must(NewList(AnyRecord())), true
 		}
 	}
 	return nil, false

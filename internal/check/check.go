@@ -2,6 +2,7 @@ package check
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
@@ -87,6 +88,12 @@ func (m *module) declare(scope resolve.Scope, body []syntax.Statement) diagnosti
 		case syntax.Binding:
 			if _, d := scope.Declare(s.Name(), resolve.Value, s.Span()); d != nil {
 				return d
+			}
+		case syntax.Commit:
+			if s.Name() != "" {
+				if _, d := scope.Declare(s.Name(), resolve.Value, s.Span()); d != nil {
+					return d
+				}
 			}
 		case syntax.Flow:
 			entry, d := scope.Declare(s.Name(), resolve.Flow, s.Span())
@@ -221,13 +228,20 @@ func (c *checker) body(statements []syntax.Statement) ([]ir.Statement, ir.Effect
 			if d != nil {
 				return nil, effects, d
 			}
-			if value.Type().Kind() != types.EffectKind && value.Type().Kind() != types.ServerKind {
-				return nil, effects, problem(diagnostic.NotCommittable, "commit requires Effect or HTTP.Server, got "+value.Type().String(), s.Span())
+			resultType, committable := catalog.ActivationResult(value.Type())
+			if !committable {
+				return nil, effects, problem(diagnostic.NotCommittable, "commit requires an adapter target, got "+value.Type().String(), s.Span())
 			}
 			if c.flow != nil && !c.canPropagate() {
 				return nil, effects, problem(diagnostic.Unhandled, "commit failure needs a fallible flow or a self-handler", s.Span())
 			}
-			body = append(body, must(ir.NewCommit(value.node, s.Span())))
+			var id ir.BindingID
+			if s.Name() != "" {
+				entry, _ := c.scope.Local(s.Name())
+				id = ir.BindingID(entry.ID())
+				c.module.bindings[id] = resultType
+			}
+			body = append(body, must(ir.NewCommit(value.node, id, s.Name(), s.Span())))
 			effects = effects.With(value.effects)
 			effects.Commits = true
 		default:
@@ -280,8 +294,8 @@ func (c *checker) flowArgument(arg syntax.Argument) (*flowWork, diagnostic.Diagn
 	return c.namedFlow(r.Name(), arg.Span)
 }
 func (c *checker) callback(f *flowWork, parameters []types.Type, output types.Type, span source.Span) diagnostic.Diagnostic {
-	if f.graph.Effects().Commits {
-		return problem(diagnostic.EffectfulCallback, "callback "+f.declaration.Name()+" can activate a commit", span)
+	if effects := f.graph.Effects(); effects.Reads || effects.Commits {
+		return problem(diagnostic.EffectfulCallback, "callback "+f.declaration.Name()+" can read host state or activate a commit", span)
 	}
 	actual := f.signature.Parameters()
 	if len(actual) != len(parameters) {

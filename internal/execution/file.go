@@ -73,5 +73,5 @@ func PreserveCleanup(cause, cleanup error) error {
 	if cause == nil {
 		return closed
 	}
-	return errors.Join(cause, closed)
+	return WithOperationCleanup(cause, closed)
 }

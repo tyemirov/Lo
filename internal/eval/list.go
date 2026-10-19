@@ -66,6 +66,9 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 			var cause value.Error
 			v, cause = fv.Outcome()
 			if cause != nil {
+				if op == catalog.FlowFold {
+					cause = value.WithFlowProgress(cause, progress.Record())
+				}
 				fields := []value.Field{{Name: "index", Value: value.Int64(int64(index))}}
 				if op != catalog.ListUnfold {
 					fields = append(fields, value.Field{Name: "element", Value: items[index]})

@@ -400,21 +400,34 @@ func NewBinding(id BindingID, name string, value Expression, s source.Span) (Bin
 type Commit interface {
 	Statement
 	Target() Expression
+	ID() BindingID
+	Name() string
+	ResultType() types.Type
 }
 type commit struct {
 	statementBase
-	target Expression
+	target     Expression
+	id         BindingID
+	name       string
+	resultType types.Type
 }
 
-func (c commit) Target() Expression { return c.target }
-func NewCommit(target Expression, s source.Span) (Commit, error) {
+func (c commit) Target() Expression     { return c.target }
+func (c commit) ID() BindingID          { return c.id }
+func (c commit) Name() string           { return c.name }
+func (c commit) ResultType() types.Type { return c.resultType }
+func NewCommit(target Expression, id BindingID, name string, s source.Span) (Commit, error) {
 	if target == nil || s == nil {
 		return nil, fmt.Errorf("incomplete commit")
 	}
-	if target.Type().Kind() != types.EffectKind && target.Type().Kind() != types.ServerKind {
+	resultType, ok := catalog.ActivationResult(target.Type())
+	if !ok {
 		return nil, fmt.Errorf("invalid commit target type %s", target.Type())
 	}
-	return commit{statementBase{s}, target}, nil
+	if (id == "") != (name == "") {
+		return nil, fmt.Errorf("incomplete commit result binding")
+	}
+	return commit{statementBase{s}, target, id, name, resultType}, nil
 }
 
 type Return interface {
@@ -548,11 +561,18 @@ func validBody(body []Statement) error {
 		if statement == nil {
 			return fmt.Errorf("absent checked statement")
 		}
-		if b, ok := statement.(Binding); ok {
-			if seen[b.ID()] {
+		var id BindingID
+		switch s := statement.(type) {
+		case Binding:
+			id = s.ID()
+		case Commit:
+			id = s.ID()
+		}
+		if id != "" {
+			if seen[id] {
 				return fmt.Errorf("duplicate checked binding")
 			}
-			seen[b.ID()] = true
+			seen[id] = true
 		}
 		if _, ok := statement.(Return); ok && i != len(body)-1 {
 			return fmt.Errorf("nonfinal checked return")

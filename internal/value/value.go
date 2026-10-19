@@ -65,6 +65,10 @@ func NewText(t types.Type, s string) (Text, error) {
 	}
 	switch t.Kind() {
 	case types.StringKind, types.PathKind:
+	case types.MethodKind:
+		if _, err := CanonicalHeaderName(s); err != nil {
+			return nil, fmt.Errorf("HTTP method must be a nonempty ASCII token")
+		}
 	case types.ScalarKind:
 		if utf8.RuneCountInString(s) != 1 {
 			return nil, fmt.Errorf("scalar requires one Unicode scalar")

@@ -20,8 +20,10 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-// FileIO is the metadata, removal, and retained-handle boundary.
+// FileIO is the file content, metadata, removal, and retained-handle boundary.
 type FileIO interface {
+	Write(context.Context, *os.File, []byte) (int, error)
+	CloseFile(*os.File) error
 	ProbeOpenFiles(context.Context, *os.Root) ([]byte, error)
 	ReadDir(*os.File, int) ([]os.DirEntry, error)
 	Lstat(*os.Root, string) (os.FileInfo, error)
@@ -29,6 +31,11 @@ type FileIO interface {
 	CloseDirectory(*os.Root) error
 }
 type nativeFileIO struct{}
+
+func (nativeFileIO) Write(ctx context.Context, file *os.File, data []byte) (int, error) {
+	return writeFile(ctx, file, data)
+}
+func (nativeFileIO) CloseFile(file *os.File) error { return file.Close() }
 
 func (nativeFileIO) ReadDir(file *os.File, count int) ([]os.DirEntry, error) {
 	return file.ReadDir(count)

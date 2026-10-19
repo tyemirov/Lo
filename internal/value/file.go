@@ -131,5 +131,5 @@ func NewRemovalEffect(session FileSession, entries List) (RemovalEffect, error) 
 		directory = observation.Directory
 		names[name] = true
 	}
-	return removalEffect{newBase(types.Effect(), addWeight(uint64(len(catalog.FileRemove)), entries.Weight())), entries, session}, nil
+	return removalEffect{newBase(types.FileRemove(), addWeight(uint64(len(catalog.FileRemove)), entries.Weight())), entries, session}, nil
 }

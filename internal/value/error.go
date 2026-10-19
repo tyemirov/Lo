@@ -15,6 +15,7 @@ type Error interface {
 	Message() string
 	Input() Record
 	Trace() []Record
+	FlowProgress() []Record
 	Operation() string
 	Span() source.Span
 }
@@ -23,24 +24,27 @@ type loError struct {
 	kind, message string
 	input         Record
 	trace         []Record
+	flowProgress  []Record
 	operation     string
 	span          source.Span
 }
 
-func (v loError) Kind() string      { return v.kind }
-func (v loError) Message() string   { return v.message }
-func (v loError) Input() Record     { return v.input }
-func (v loError) Trace() []Record   { return slices.Clone(v.trace) }
-func (v loError) Operation() string { return v.operation }
-func (v loError) Span() source.Span { return v.span }
+func (v loError) Kind() string           { return v.kind }
+func (v loError) Message() string        { return v.message }
+func (v loError) Input() Record          { return v.input }
+func (v loError) Trace() []Record        { return slices.Clone(v.trace) }
+func (v loError) FlowProgress() []Record { return slices.Clone(v.flowProgress) }
+func (v loError) Operation() string      { return v.operation }
+func (v loError) Span() source.Span      { return v.span }
 func (v loError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Type    string   `json:"type"`
-		Kind    string   `json:"kind"`
-		Message string   `json:"message"`
-		Input   Record   `json:"input"`
-		Trace   []Record `json:"trace"`
-	}{v.Type().String(), v.kind, v.message, v.input, v.trace})
+		Type         string   `json:"type"`
+		Kind         string   `json:"kind"`
+		Message      string   `json:"message"`
+		Input        Record   `json:"input"`
+		Trace        []Record `json:"trace"`
+		FlowProgress []Record `json:"flow_progress,omitempty"`
+	}{v.Type().String(), v.kind, v.message, v.input, v.trace, v.flowProgress})
 }
 func NewError(kind, message string, input Record) (Error, error) {
 	if input == nil {
@@ -53,20 +57,42 @@ func NewError(kind, message string, input Record) (Error, error) {
 	if _, err := NewText(types.String(), message); err != nil {
 		return nil, err
 	}
-	return loError{base: newBase(types.Error(), addWeight(uint64(len(kind)+len(message)), input.Weight())), kind: kind, message: message, input: RecordView(input), trace: []Record{}}, nil
+	weight := addWeight(uint64(len(kind)+len(message)), input.Weight())
+	weight = addWeight(weight, 16) // Empty flow-progress list.
+	return loError{base: newBase(types.Error(), weight), kind: kind, message: message, input: RecordView(input), trace: []Record{}}, nil
 }
 func At(e Error, operation string, span source.Span) Error {
 	out := e.(loError)
 	out.operation, out.span = operation, span
 	return out
 }
+
+// WithFlowProgress prepends an already reserved immutable fold snapshot.
+func WithFlowProgress(e Error, progress Record) Error {
+	out := e.(loError)
+	out.flowProgress = make([]Record, len(out.flowProgress)+1)
+	out.flowProgress[0] = progress
+	copy(out.flowProgress[1:], e.(loError).flowProgress)
+	out.weight = addWeight(out.weight, progress.Weight())
+	return out
+}
+
 func WithFrame(e Error, flow, operation string, input Record) Error {
-	input = Snapshot(input).(Record)
+	input = frameInput(input)
 	f := must(NewRecord([]Field{{"flow", must(NewText(types.String(), flow))}, {"operation", must(NewText(types.String(), operation))}, {"input", RecordView(input)}}))
 	out := e.(loError)
 	out.trace = append(e.Trace(), f)
 	out.weight = addWeight(out.weight, f.Weight())
 	return out
+}
+
+func frameInput(input Record) Record {
+	fields := input.Fields()
+	for index, field := range fields {
+		typeName := must(NewText(types.String(), field.Value.Type().String()))
+		fields[index].Value = must(NewRecord([]Field{{Name: "type", Value: typeName}}))
+	}
+	return must(NewRecord(fields))
 }
 
 type Fallible interface {
@@ -113,6 +139,8 @@ func Failure(t types.Fallible, e Error) (Fallible, error) {
 
 func Project(v Value, field string) Value {
 	switch x := v.(type) {
+	case Receipt:
+		return x.FieldsRecord().Field(field)
 	case OptimizerState:
 		switch field {
 		case types.FieldParameters:
@@ -137,9 +165,18 @@ func Project(v Value, field string) Value {
 				items = append(items, f)
 			}
 			return must(NewList(t.(types.List), items))
+		case types.FieldFlowProgress:
+			t, _ := types.FieldType(types.Error(), types.FieldFlowProgress)
+			items := []Value{}
+			for _, progress := range x.FlowProgress() {
+				items = append(items, RecordView(progress))
+			}
+			return must(NewList(t.(types.List), items))
 		}
 	case FileEntry:
 		return x.FieldsRecord().Field(field)
+	case Headers:
+		return x.Entries()
 	case HTTPValue:
 		return x.Fields().Field(field)
 	}

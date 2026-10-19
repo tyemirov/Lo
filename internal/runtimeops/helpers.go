@@ -113,12 +113,24 @@ func OperationFailure(call Call, args []value.Value, kind, message string) value
 	e := must(value.NewError(kind, message, must(value.NewRecord(fields))))
 	return must(value.Failure(call.Type().(types.Fallible), value.At(e, call.Operation().Name(), call.Span())))
 }
-func ActivationError(target value.Target, err error, span source.Span) value.Error {
+func ActivationError(target value.Target, err error, span source.Span) (value.Error, error) {
 	var operation, kind string
 	var input value.Record
 	switch v := target.(type) {
+	case value.ClientRequest:
+		operation, kind = catalog.HTTPExchange, catalog.HTTPExchangeFailed
+		fields := []value.Field{{Name: "method", Value: v.Method()}, {Name: "origin", Value: must(value.NewText(types.String(), v.URL().Origin()))}}
+		progress, progressErr := execution.HTTPProgress(err)
+		if progressErr != nil {
+			return nil, progressErr
+		}
+		if progress != nil {
+			fields = append(fields, value.Field{Name: "progress", Value: progress})
+		}
+		fields = activationCleanup(fields, err)
+		input = must(value.NewRecord(fields))
 	case value.RemovalEffect:
-		operation, kind = catalog.FileRemove, catalog.RemoveFailed
+		operation, kind = v.Operation().Capability(), catalog.RemoveFailed
 		fields := []value.Field{{Name: catalog.ParamEntries, Value: v.Entries()}}
 		var file execution.FileError
 		if errors.As(err, &file) {
@@ -129,14 +141,31 @@ func ActivationError(target value.Target, err error, span source.Span) value.Err
 		}
 		input = must(value.NewRecord(fields))
 	case value.ContentEffect:
-		operation = v.Operation().Name()
+		operation = v.Operation().Capability()
 		kind = v.Operation().ActivationKinds()[0]
-		input = must(value.NewRecord([]value.Field{{Name: catalog.ParamPath, Value: v.Path()}, {Name: catalog.ParamContent, Value: v.Content()}}))
+		fields := []value.Field{{Name: catalog.ParamPath, Value: v.Path()}, {Name: catalog.ParamContent, Value: v.Content()}}
+		if confirmed, stage, ok := execution.WriteProgress(err); ok {
+			progress := must(value.NewRecord([]value.Field{{Name: "bytes_written", Value: value.Int64(int64(confirmed))}, {Name: "stage", Value: must(value.NewText(types.String(), stage))}}))
+			fields = append(fields, value.Field{Name: "progress", Value: progress})
+		}
+		fields = activationCleanup(fields, err)
+		input = must(value.NewRecord(fields))
 	case value.Server:
 		operation, kind = catalog.HTTPListen, catalog.ServerStartFailed
 		input = must(value.NewRecord([]value.Field{{Name: "port", Value: v.Port()}}))
 	default:
-		panic("unknown commit target")
+		return nil, fmt.Errorf("no recoverable activation failure contract for %s", target.Type())
 	}
-	return value.At(must(value.NewError(kind, err.Error(), input)), operation, span)
+	return value.At(must(value.NewError(kind, err.Error(), input)), operation, span), nil
+}
+
+func activationCleanup(fields []value.Field, err error) []value.Field {
+	if cleanup := execution.CleanupDetails(err); len(cleanup) > 0 {
+		items := make([]value.Value, len(cleanup))
+		for i, message := range cleanup {
+			items[i] = must(value.NewText(types.String(), message))
+		}
+		fields = append(fields, value.Field{Name: "cleanup_errors", Value: must(value.NewList(must(types.NewList(types.String())), items))})
+	}
+	return fields
 }
