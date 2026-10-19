@@ -7,7 +7,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 )
 
-// processData describes source inputs and the current standard host's execution gate.
+// processData describes source inputs without a configured host profile.
 type processData struct {
 	Executable  description          `json:"executable"`
 	Arguments   description          `json:"arguments"`

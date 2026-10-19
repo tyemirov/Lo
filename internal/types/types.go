@@ -12,41 +12,42 @@ type Kind string
 const FieldFlowProgress = "flow_progress"
 
 const (
-	IntKind               Kind = "Int"
-	StringKind            Kind = "String"
-	BoolKind              Kind = "Bool"
-	NullKind              Kind = "Null"
-	ScalarKind            Kind = "Scalar"
-	BytesKind             Kind = "Bytes"
-	FloatKind             Kind = "Float"
-	TensorKind            Kind = "Tensor<FP32>"
-	DeviceKind            Kind = "Device"
-	ErrorKind             Kind = "Error"
-	PathKind              Kind = "File.Path"
-	FileEntryKind         Kind = "File.Entry"
-	HeadersKind           Kind = "HTTP.Headers"
-	RequestKind           Kind = "HTTP.Request"
-	URLKind               Kind = "HTTP.URL"
-	MethodKind            Kind = "HTTP.Method"
-	ClientRequestKind     Kind = "HTTP.Client.Request"
-	ResponseKind          Kind = "HTTP.Response"
-	ServerKind            Kind = "HTTP.Server"
-	FileWriteKind         Kind = "File.Write"
-	FileAppendKind        Kind = "File.Append"
-	FileRemoveKind        Kind = "File.Remove"
-	FileWriteReceiptKind  Kind = "File.WriteReceipt"
-	FileAppendReceiptKind Kind = "File.AppendReceipt"
-	FileRemoveReceiptKind Kind = "File.RemoveReceipt"
-	ProcessExecutableKind Kind = "Process.Executable"
-	ProcessCommandKind    Kind = "Process.Command"
-	ProcessResultKind     Kind = "Process.Result"
-	ServerReceiptKind     Kind = "HTTP.ServerReceipt"
-	AnyRecordKind         Kind = "Record"
-	RecordKind            Kind = "ExactRecord"
-	ListKind              Kind = "List"
-	MapKind               Kind = "Map"
-	RangeKind             Kind = "Range"
-	FallibleKind          Kind = "Fallible"
+	IntKind                Kind = "Int"
+	StringKind             Kind = "String"
+	BoolKind               Kind = "Bool"
+	NullKind               Kind = "Null"
+	ScalarKind             Kind = "Scalar"
+	BytesKind              Kind = "Bytes"
+	FloatKind              Kind = "Float"
+	TensorKind             Kind = "Tensor<FP32>"
+	DeviceKind             Kind = "Device"
+	ErrorKind              Kind = "Error"
+	PathKind               Kind = "File.Path"
+	FileEntryKind          Kind = "File.Entry"
+	HeadersKind            Kind = "HTTP.Headers"
+	RequestKind            Kind = "HTTP.Request"
+	URLKind                Kind = "HTTP.URL"
+	MethodKind             Kind = "HTTP.Method"
+	ClientRequestKind      Kind = "HTTP.Client.Request"
+	ResponseKind           Kind = "HTTP.Response"
+	ServerKind             Kind = "HTTP.Server"
+	FileWriteKind          Kind = "File.Write"
+	FileAppendKind         Kind = "File.Append"
+	FileRemoveKind         Kind = "File.Remove"
+	FileWriteReceiptKind   Kind = "File.WriteReceipt"
+	FileAppendReceiptKind  Kind = "File.AppendReceipt"
+	FileRemoveReceiptKind  Kind = "File.RemoveReceipt"
+	ProcessExecutableKind  Kind = "Process.Executable"
+	ProcessCommandKind     Kind = "Process.Command"
+	ProcessResultKind      Kind = "Process.Result"
+	ProcessTerminationKind Kind = "Process.Termination"
+	ServerReceiptKind      Kind = "HTTP.ServerReceipt"
+	AnyRecordKind          Kind = "Record"
+	RecordKind             Kind = "ExactRecord"
+	ListKind               Kind = "List"
+	MapKind                Kind = "Map"
+	RangeKind              Kind = "Range"
+	FallibleKind           Kind = "Fallible"
 )
 
 type Type interface {
@@ -133,26 +134,27 @@ func Headers() Type           { return atom(HeadersKind) }
 func HeaderEntries() List {
 	return must(NewList(must(NewRecord([]Field{{Name: "name", Type: String()}, {Name: "value", Type: Bytes()}}))))
 }
-func Request() Type           { return atom(RequestKind) }
-func URL() Type               { return atom(URLKind) }
-func Method() Type            { return atom(MethodKind) }
-func ClientRequest() Type     { return atom(ClientRequestKind) }
-func Response() Type          { return atom(ResponseKind) }
-func Server() Type            { return atom(ServerKind) }
-func FileWrite() Type         { return atom(FileWriteKind) }
-func FileAppend() Type        { return atom(FileAppendKind) }
-func FileRemove() Type        { return atom(FileRemoveKind) }
-func FileWriteReceipt() Type  { return atom(FileWriteReceiptKind) }
-func FileAppendReceipt() Type { return atom(FileAppendReceiptKind) }
-func FileRemoveReceipt() Type { return atom(FileRemoveReceiptKind) }
-func ServerReceipt() Type     { return atom(ServerReceiptKind) }
-func ProcessExecutable() Type { return atom(ProcessExecutableKind) }
-func ProcessCommand() Type    { return atom(ProcessCommandKind) }
-func ProcessResult() Type     { return atom(ProcessResultKind) }
-func AnyRecord() Type         { return atom(AnyRecordKind) }
+func Request() Type            { return atom(RequestKind) }
+func URL() Type                { return atom(URLKind) }
+func Method() Type             { return atom(MethodKind) }
+func ClientRequest() Type      { return atom(ClientRequestKind) }
+func Response() Type           { return atom(ResponseKind) }
+func Server() Type             { return atom(ServerKind) }
+func FileWrite() Type          { return atom(FileWriteKind) }
+func FileAppend() Type         { return atom(FileAppendKind) }
+func FileRemove() Type         { return atom(FileRemoveKind) }
+func FileWriteReceipt() Type   { return atom(FileWriteReceiptKind) }
+func FileAppendReceipt() Type  { return atom(FileAppendReceiptKind) }
+func FileRemoveReceipt() Type  { return atom(FileRemoveReceiptKind) }
+func ServerReceipt() Type      { return atom(ServerReceiptKind) }
+func ProcessExecutable() Type  { return atom(ProcessExecutableKind) }
+func ProcessCommand() Type     { return atom(ProcessCommandKind) }
+func ProcessResult() Type      { return atom(ProcessResultKind) }
+func ProcessTermination() Type { return atom(ProcessTerminationKind) }
+func AnyRecord() Type          { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case URLKind, MethodKind, ClientRequestKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind:
+	case URLKind, MethodKind, ClientRequestKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind:
 		return atom(name), true
 	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true
@@ -306,6 +308,17 @@ func FieldType(t Type, name string) (Type, bool) {
 		return nil, false
 	}
 	switch t.Kind() {
+	case ProcessResultKind:
+		switch name {
+		case "termination":
+			return ProcessTermination(), true
+		case "stdout", "stderr":
+			return Bytes(), true
+		}
+	case ProcessTerminationKind:
+		if name == "kind" {
+			return String(), true
+		}
 	case FileWriteReceiptKind, FileAppendReceiptKind:
 		switch name {
 		case "path":

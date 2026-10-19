@@ -139,6 +139,19 @@ func Failure(t types.Fallible, e Error) (Fallible, error) {
 
 func Project(v Value, field string) Value {
 	switch x := v.(type) {
+	case ProcessResult:
+		switch field {
+		case "termination":
+			return x.Termination()
+		case "stdout":
+			return x.Stdout()
+		case "stderr":
+			return x.Stderr()
+		}
+	case ProcessTermination:
+		if field == "kind" {
+			return x.Kind()
+		}
 	case Receipt:
 		return x.FieldsRecord().Field(field)
 	case OptimizerState:

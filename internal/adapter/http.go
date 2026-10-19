@@ -99,6 +99,9 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	}
 }
 func (s *servers) requestAbort(ctx context.Context, err error) {
+	if execution.ProcessProgress(err) != nil {
+		s.abort(err)
+	}
 	if progress, progressErr := execution.HTTPProgress(err); progress != nil || progressErr != nil {
 		s.abort(err)
 	}

@@ -68,6 +68,8 @@ func NewDevice(selector string) (Device, error) {
 // Snapshot removes tensor storage from diagnostic inputs, including nested data.
 func Snapshot(v Value) Value {
 	switch x := v.(type) {
+	case ProcessResult:
+		return must(NewProcessResult(x.Termination(), NewBytes(nil), NewBytes(nil)))
 	case ProcessCommand:
 		return redactedProcessCommand(x)
 	case URL:

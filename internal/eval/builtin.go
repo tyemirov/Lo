@@ -217,6 +217,10 @@ func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int
 		return runtimeops.ProcessExecutableNew(m.Session, call, args, flows)
 	case catalog.ProcessCommandNew:
 		return runtimeops.ProcessCommandNew(m.Session, call, args, flows)
+	case catalog.ProcessTerminationExitCode:
+		return runtimeops.ProcessTerminationExitCode(m.Session, call, args, flows)
+	case catalog.ProcessTerminationSignal:
+		return runtimeops.ProcessTerminationSignal(m.Session, call, args, flows)
 	case catalog.URLNew:
 		return runtimeops.URLNew(m.Session, call, args, flows)
 	case catalog.MethodNew:

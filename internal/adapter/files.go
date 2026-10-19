@@ -35,6 +35,7 @@ type files struct {
 	removes      []grant
 	openFiles    []grant
 	io           FileIO
+	protection   *processRegistry
 	mu           sync.Mutex
 	sessions     map[value.FileSession]*fileRegistry
 	lastEntries  value.List
@@ -181,7 +182,10 @@ func (f *files) Commit(ctx context.Context, target value.Target) (value.Value, e
 		}
 		var file *os.File
 		var data []byte
-		if target.Type().Kind() == types.FileWriteKind {
+		if f.protection != nil {
+			file, err = f.protectedContent(root, relative, absolute, target.Type().Kind() == types.FileAppendKind)
+			data = target.Content().(value.Bytes).Bytes()
+		} else if target.Type().Kind() == types.FileWriteKind {
 			file, err = root.Create(relative)
 			data = target.Content().(value.Bytes).Bytes()
 		} else {

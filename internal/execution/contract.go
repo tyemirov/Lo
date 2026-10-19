@@ -90,7 +90,7 @@ func ServerRequiresServe() HostError {
 
 // ProcessUnavailable reports the absence of a qualified host execution profile.
 func ProcessUnavailable() HostError {
-	return hostError{diagnostic.ProcessUnavailable, "Process activation requires a qualified host execution profile; no backend is qualified", nil}
+	return hostError{diagnostic.ProcessUnavailable, "Process activation requires a configured, qualified host execution profile", nil}
 }
 func NoServer() HostError {
 	return hostError{diagnostic.NoServer, "serve requires an activated HTTP server", nil}

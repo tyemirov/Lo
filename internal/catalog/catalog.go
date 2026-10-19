@@ -151,25 +151,29 @@ const (
 )
 
 const (
-	ProcessExecutableNew     = "Process.Executable.new"
-	ProcessCommandNew        = "Process.Command.new"
-	ProcessRun               = "Process.run"
-	ProcessInvalidExecutable = "Process.InvalidExecutable"
-	ProcessInvalidCommand    = "Process.InvalidCommand"
-	HTTPListen               = "HTTP.listen"
-	URLNew                   = "HTTP.URL.new"
-	MethodNew                = "HTTP.Method.new"
-	ClientRequestNew         = "HTTP.Client.Request.new"
-	HTTPExchange             = "HTTP.request"
-	HTTPExchangeFailed       = "HTTP.ExchangeFailed"
-	InvalidURL               = "HTTP.InvalidURL"
-	InvalidMethod            = "HTTP.InvalidMethod"
-	HTTPRequest              = "HTTP.request"
-	HTTPRespond              = "HTTP.respond"
-	RequestTooLarge          = "HTTP.RequestTooLarge"
-	InvalidRequest           = "HTTP.InvalidRequest"
-	RequestReadFailed        = "HTTP.RequestReadFailed"
-	InvalidResponse          = "HTTP.InvalidResponse"
+	ProcessExecutableNew       = "Process.Executable.new"
+	ProcessCommandNew          = "Process.Command.new"
+	ProcessRun                 = "Process.run"
+	ProcessInvalidExecutable   = "Process.InvalidExecutable"
+	ProcessInvalidCommand      = "Process.InvalidCommand"
+	ProcessExecutionFailed     = "Process.ExecutionFailed"
+	ProcessTerminationExitCode = "Process.Termination.exit_code"
+	ProcessTerminationSignal   = "Process.Termination.signal"
+	ProcessTerminationKind     = "Process.TerminationKind"
+	HTTPListen                 = "HTTP.listen"
+	URLNew                     = "HTTP.URL.new"
+	MethodNew                  = "HTTP.Method.new"
+	ClientRequestNew           = "HTTP.Client.Request.new"
+	HTTPExchange               = "HTTP.request"
+	HTTPExchangeFailed         = "HTTP.ExchangeFailed"
+	InvalidURL                 = "HTTP.InvalidURL"
+	InvalidMethod              = "HTTP.InvalidMethod"
+	HTTPRequest                = "HTTP.request"
+	HTTPRespond                = "HTTP.respond"
+	RequestTooLarge            = "HTTP.RequestTooLarge"
+	InvalidRequest             = "HTTP.InvalidRequest"
+	RequestReadFailed          = "HTTP.RequestReadFailed"
+	InvalidResponse            = "HTTP.InvalidResponse"
 )
 
 type Operation interface {
@@ -257,7 +261,14 @@ func build() map[string]Operation {
 	command := m[ProcessCommandNew].(operation)
 	command.boundary = Effect
 	command.errors = []string{ProcessInvalidCommand}
+	command.activation = []string{ProcessExecutionFailed}
 	m[ProcessCommandNew] = command
+	for _, name := range []string{ProcessTerminationExitCode, ProcessTerminationSignal} {
+		one(name, types.ProcessTermination(), must(types.NewFallible(types.Int())))
+		accessor := m[name].(operation)
+		accessor.errors = []string{ProcessTerminationKind}
+		m[name] = accessor
+	}
 	one(BytesNew, types.String(), types.Bytes())
 	fixed(URLNew, []types.Parameter{{Name: "text", Type: types.String()}}, must(types.NewFallible(types.URL())))
 	fixed(MethodNew, []types.Parameter{{Name: "text", Type: types.String()}}, must(types.NewFallible(types.Method())))

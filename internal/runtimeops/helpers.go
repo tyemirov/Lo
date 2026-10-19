@@ -117,6 +117,15 @@ func ActivationError(target value.Target, err error, span source.Span) (value.Er
 	var operation, kind string
 	var input value.Record
 	switch v := target.(type) {
+	case value.ProcessCommand:
+		progress := execution.ProcessProgress(err)
+		if progress == nil {
+			return nil, fmt.Errorf("no recoverable Process failure evidence")
+		}
+		operation, kind = catalog.ProcessRun, catalog.ProcessExecutionFailed
+		fields := []value.Field{{Name: "progress", Value: progress}}
+		fields = activationCleanup(fields, err)
+		input = must(value.NewRecord(fields))
 	case value.ClientRequest:
 		operation, kind = catalog.HTTPExchange, catalog.HTTPExchangeFailed
 		fields := []value.Field{{Name: "method", Value: v.Method()}, {Name: "origin", Value: must(value.NewText(types.String(), v.URL().Origin()))}}

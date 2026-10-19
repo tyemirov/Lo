@@ -26,6 +26,7 @@ type activationProgress struct {
 	receipt    value.Receipt
 	resultType string
 	status     value.Integer
+	process    value.Record
 }
 
 func (*activationProgress) activationProgress()      {}
@@ -36,6 +37,9 @@ func (p *activationProgress) Summary() string {
 	if p.receipt != nil {
 		return value.TextResult(p.receipt)
 	}
+	if p.process != nil {
+		return p.resultType + " " + value.TextResult(p.process)
+	}
 	return p.resultType + " status " + value.TextResult(p.status)
 }
 func (p *activationProgress) MarshalJSON() ([]byte, error) {
@@ -45,7 +49,8 @@ func (p *activationProgress) MarshalJSON() ([]byte, error) {
 		Receipt    value.Receipt `json:"receipt,omitempty"`
 		ResultType string        `json:"result_type,omitempty"`
 		Status     value.Integer `json:"status,omitempty"`
-	}{p.operation, p.span, p.receipt, p.resultType, p.status})
+		Process    value.Record  `json:"process,omitempty"`
+	}{p.operation, p.span, p.receipt, p.resultType, p.status, p.process})
 }
 
 type activationFailure struct {
@@ -83,6 +88,13 @@ func (s *session) RecordActivation(operation string, span source.Span, result va
 		}
 		progress.resultType = result.Type().String()
 		progress.status = result.Fields().Field("status").(value.Integer)
+	case value.ProcessResult:
+		progress.resultType = result.Type().String()
+		var err error
+		progress.process, err = value.NewRecord([]value.Field{{Name: "termination", Value: result.Termination()}, {Name: "stdout_bytes", Value: value.Int64(int64(len(result.Stdout().Bytes())))}, {Name: "stderr_bytes", Value: value.Int64(int64(len(result.Stderr().Bytes())))}})
+		if err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("unsupported activation completion type")
 	}
