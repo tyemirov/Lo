@@ -35,7 +35,8 @@ type files struct {
 	removes      []grant
 	openFiles    []grant
 	io           FileIO
-	protection   *processRegistry
+	protections  []*processRegistry
+	probe        *fileProbe
 	mu           sync.Mutex
 	sessions     map[value.FileSession]*fileRegistry
 	lastEntries  value.List
@@ -76,6 +77,12 @@ func OpenFiles(roots FileRoots, filesystem FileIO) (Files, error) {
 	if err != nil {
 		return nil, errors.Join(err, f.Close())
 	}
+	if len(f.openFiles) > 0 {
+		f.probe = openFileProbe()
+		if f.probe.registry != nil {
+			f.protections = append(f.protections, f.probe.registry)
+		}
+	}
 	return f, nil
 }
 func openRoots(paths []string) ([]grant, error) {
@@ -104,6 +111,9 @@ func (f *files) Close() error {
 	var failures []error
 	for _, roots := range [][]grant{f.reads, f.writes, f.lists, f.removes, f.openFiles} {
 		failures = append(failures, closeRoots(roots, f.io.CloseDirectory))
+	}
+	if f.probe != nil && f.probe.registry != nil {
+		failures = append(failures, f.probe.registry.Close())
 	}
 	err := errors.Join(failures...)
 	f.mu.Lock()
@@ -182,7 +192,7 @@ func (f *files) Commit(ctx context.Context, target value.Target) (value.Value, e
 		}
 		var file *os.File
 		var data []byte
-		if f.protection != nil {
+		if len(f.protections) > 0 {
 			file, err = f.protectedContent(root, relative, absolute, target.Type().Kind() == types.FileAppendKind)
 			data = target.Content().(value.Bytes).Bytes()
 		} else if target.Type().Kind() == types.FileWriteKind {

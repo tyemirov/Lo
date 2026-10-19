@@ -38,7 +38,11 @@ func (w *probeOutput) Write(data []byte) (int, error) {
 	return w.buffer.Write(data)
 }
 
-func (nativeFileIO) ProbeOpenFiles(ctx context.Context, root *os.Root) (output []byte, resultErr error) {
+func (nativeFileIO) ProbeOpenFiles(ctx context.Context, root *os.Root, probe FileProbeExecutable) (output []byte, resultErr error) {
+	tool, err := probe.Path()
+	if err != nil {
+		return nil, fmt.Errorf("locate open-file probe: %w", err)
+	}
 	child, cancel := context.WithCancel(ctx)
 	defer cancel()
 	directory, err := root.Open(".")
@@ -46,7 +50,7 @@ func (nativeFileIO) ProbeOpenFiles(ctx context.Context, root *os.Root) (output [
 		return nil, fmt.Errorf("open probe directory: %w", err)
 	}
 	defer func() { resultErr = errors.Join(resultErr, directory.Close()) }()
-	command, err := fileProbeCommand(child, directory)
+	command, err := fileProbeCommand(child, directory, tool)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +69,9 @@ func (nativeFileIO) ProbeOpenFiles(ctx context.Context, root *os.Root) (output [
 		if !errors.As(err, &status) || status.ExitCode() != 1 {
 			return nil, fmt.Errorf("probe open files: %w", err)
 		}
+	}
+	if !utf8.Valid(stderr.buffer.Bytes()) {
+		return nil, errors.New("open-file probe returned invalid UTF-8 on standard error")
 	}
 	if strings.TrimSpace(stderr.buffer.String()) != "" {
 		return nil, fmt.Errorf("open-file probe reported standard error: %s", stderr.buffer.String())
@@ -183,7 +190,7 @@ func (f *files) OpenPaths(ctx context.Context, path value.Text) (value.List, err
 	if err := session.ReserveFile(1, 32); err != nil {
 		return nil, err
 	}
-	output, err := f.io.ProbeOpenFiles(ctx, selected.root)
+	output, err := f.probeOpenFiles(ctx, selected.root)
 	if err == nil {
 		var result value.List
 		result, err = parseOpenPaths(session, directory.Path, output)

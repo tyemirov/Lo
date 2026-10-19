@@ -28,7 +28,7 @@ func (r *processRegistry) OpenFiles(roots FileRoots, filesystem FileIO) (Files, 
 	if err != nil {
 		return nil, err
 	}
-	base.(*files).protection = r
+	base.(*files).protections = append(base.(*files).protections, r)
 	return &processRegistryFiles{Files: base, registry: r}, nil
 }
 
@@ -169,8 +169,35 @@ func (r *processRegistry) protectRemoval(root *os.Root, path string) error {
 	return r.protectIdentity(info)
 }
 
+func (f *files) protectName(root *os.Root, path string) error {
+	for _, protection := range f.protections {
+		if err := protection.protectName(root, path); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (f *files) protectFile(file *os.File) error {
+	for _, protection := range f.protections {
+		if err := protection.protectFile(file); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (f *files) protectRemoval(root *os.Root, path string) error {
+	for _, protection := range f.protections {
+		if err := protection.protectRemoval(root, path); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (f *files) protectedContent(root *os.Root, path, absolute string, appendContent bool) (*os.File, error) {
-	if err := f.protection.protectName(root, path); err != nil {
+	if err := f.protectName(root, path); err != nil {
 		return nil, err
 	}
 	flags := os.O_WRONLY | unix.O_NONBLOCK
@@ -197,7 +224,7 @@ func (f *files) protectedContent(root *os.Root, path, absolute string, appendCon
 	if err != nil {
 		return nil, err
 	}
-	if err := f.protection.protectFile(file); err != nil {
+	if err := f.protectFile(file); err != nil {
 		return nil, execution.WithOperationCleanup(err, f.io.CloseFile(file))
 	}
 	if !appendContent {
@@ -216,9 +243,11 @@ func (f *files) protectedCreate(root *os.Root, path, absolute string) (*os.File,
 	}
 	prefix := ".lo-create-" + rand.Text() + "-"
 	// Every name CreateTemp can select must avoid the frozen protected edges.
-	for edge := range f.protection.namespace {
-		if edge.parent == parentIdentity && strings.HasPrefix(edge.name, prefix) {
-			return nil, false, registryHost("File creation", errors.New("temporary namespace prefix is protected"))
+	for _, protection := range f.protections {
+		for edge := range protection.namespace {
+			if edge.parent == parentIdentity && strings.HasPrefix(edge.name, prefix) {
+				return nil, false, registryHost("File creation", errors.New("temporary namespace prefix is protected"))
+			}
 		}
 	}
 	// CreateTemp supplies library-default exclusive creation. The verified parent
@@ -231,7 +260,7 @@ func (f *files) protectedCreate(root *os.Root, path, absolute string) (*os.File,
 	}
 	temporary := filepath.Join(filepath.Dir(path), filepath.Base(created.Name()))
 	cleanup := func() error {
-		if err := f.protection.protectRemoval(root, temporary); err != nil {
+		if err := f.protectRemoval(root, temporary); err != nil {
 			return err
 		}
 		return root.Remove(temporary)
@@ -240,13 +269,13 @@ func (f *files) protectedCreate(root *os.Root, path, absolute string) (*os.File,
 		closeErr := created.Close()
 		return nil, false, execution.WithOperationCleanup(primary, execution.WithOperationCleanup(closeErr, cleanup()))
 	}
-	if err := f.protection.protectName(root, temporary); err != nil {
+	if err := f.protectName(root, temporary); err != nil {
 		return fail(err)
 	}
-	if err := f.protection.protectFile(created); err != nil {
+	if err := f.protectFile(created); err != nil {
 		return fail(err)
 	}
-	if err := f.protection.protectName(root, path); err != nil {
+	if err := f.protectName(root, path); err != nil {
 		return fail(err)
 	}
 	// Neither participating File operations nor this link can replace an entry.

@@ -371,27 +371,7 @@ func (a *analyzer) activate(c *context, node nodeID, value abstract) {
 	}
 	targets := withConditions(value, c.conditions).targets
 	if len(targets) == 0 {
-		if op, ok := catalog.ActivationOperation(value.typ); ok {
-			name := op.Name()
-			targetType := op.Parameters()[op.TargetPosition()].Type
-			unknown := a.unknown(value.node, targetType)
-			unknown.dependencies = value.dependencies
-			r := a.resource(c, name, value.node, unknown)
-			if name == catalog.ClientRequestNew {
-				method := a.unknown(value.node, types.Method())
-				method.dependencies = value.dependencies
-				description := a.describe(method)
-				r.Method = &description
-			}
-			if name == catalog.ProcessCommandNew {
-				r.Process = a.dynamicProcessInputs(value, op)
-			}
-			r.Origin = "dynamic-target"
-			r.ID = fmt.Sprintf("t%d", len(a.data.Targets)+1)
-			a.data.Targets = append(a.data.Targets, r)
-			a.targets[targetID(r.ID)] = r
-			targets = append(targets, targetReference{targetID(r.ID), mergeConditions(nil, c.conditions)})
-		}
+		targets = a.dynamicTargets(c, value)
 	}
 	activation := activationData{ID: fmt.Sprintf("a%d", len(a.data.Activations)+1), Context: c.id, Entry: c.entry, Node: node, Conditions: mergeConditions(nil, c.conditions), Targets: targets}
 	a.data.Activations = append(a.data.Activations, activation)
@@ -411,6 +391,55 @@ func (a *analyzer) activate(c *context, node nodeID, value abstract) {
 			a.adapter(&arm, r.OnError, "", activation.ID, node, adapterErrorCondition)
 		}
 	}
+}
+
+func (a *analyzer) dynamicTargets(c *context, value abstract) []targetReference {
+	if op, ok := catalog.ActivationOperation(value.typ); ok {
+		name := op.Name()
+		targetType := op.Parameters()[op.TargetPosition()].Type
+		unknown := a.unknown(value.node, targetType)
+		unknown.dependencies = value.dependencies
+		r := a.resource(c, name, value.node, unknown)
+		if name == catalog.ClientRequestNew {
+			method := a.unknown(value.node, types.Method())
+			method.dependencies = value.dependencies
+			description := a.describe(method)
+			r.Method = &description
+		}
+		if name == catalog.ProcessCommandNew {
+			r.Process = a.dynamicProcessInputs(value, op)
+		}
+		r.Origin = "dynamic-target"
+		r.ID = fmt.Sprintf("t%d", len(a.data.Targets)+1)
+		a.data.Targets = append(a.data.Targets, r)
+		a.targets[targetID(r.ID)] = r
+		return []targetReference{{targetID(r.ID), mergeConditions(nil, c.conditions)}}
+	}
+	return nil
+}
+
+func (a *analyzer) loopState(c *context, node nodeID, typ types.Type) abstract {
+	state := a.unknown(node, typ)
+	state.targets = a.dynamicTargets(c, state)
+	switch shape := typ.(type) {
+	case types.Fallible:
+		state = a.loopState(c, node, shape.Base())
+		state.typ = typ
+	case types.Record:
+		state.fields = map[string]abstract{}
+		for _, field := range shape.Fields() {
+			child := a.loopState(c, node, field.Type)
+			state.fields[field.Name] = child
+			state.targets = appendTargets(state.targets, child.targets...)
+		}
+	case types.List:
+		child := a.loopState(c, node, shape.Element())
+		state.items = []abstract{child}
+		state.targets = child.targets
+	case types.Map:
+		state.targets = a.loopState(c, node, shape.Value()).targets
+	}
+	return state
 }
 func (a *analyzer) adapter(parent *context, flow, handler identity.FlowID, activation string, node nodeID, conditionKind string) {
 	if a.err != nil {

@@ -24,7 +24,7 @@ import (
 type FileIO interface {
 	Write(context.Context, *os.File, []byte) (int, error)
 	CloseFile(*os.File) error
-	ProbeOpenFiles(context.Context, *os.Root) ([]byte, error)
+	ProbeOpenFiles(context.Context, *os.Root, FileProbeExecutable) ([]byte, error)
 	ReadDir(*os.File, int) ([]os.DirEntry, error)
 	Lstat(*os.Root, string) (os.FileInfo, error)
 	Remove(*os.Root, string) error

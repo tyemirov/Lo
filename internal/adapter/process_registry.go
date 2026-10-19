@@ -349,7 +349,11 @@ func (r *processRegistry) validate(ctx context.Context, invocation ProcessInvoca
 	if invocation == nil {
 		return registryHost("admission", errors.New("missing invocation"))
 	}
-	registration, ok := r.registrations[invocation.Executable()]
+	return r.validateExecutable(ctx, invocation.Executable())
+}
+
+func (r *processRegistry) validateExecutable(ctx context.Context, path string) error {
+	registration, ok := r.registrations[path]
 	if !ok {
 		return registryHost("admission", errors.New("unregistered executable"))
 	}

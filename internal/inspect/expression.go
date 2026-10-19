@@ -332,8 +332,8 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 			args[len(args)-1].targets = values[0].targets
 		}
 		if name == catalog.ListFold || name == catalog.FlowFold {
-			state := a.unknown(values[1].node, flow.Parameters()[len(args)-2].Type)
-			state.targets = values[1].targets
+			stateType := flow.Parameters()[len(args)-2].Type
+			state := a.join([]abstract{values[1], a.loopState(c, values[1].node, stateType)}, values[1].node, stateType)
 			args[len(args)-2] = state
 		}
 	}

@@ -112,8 +112,8 @@ func (f *files) remove(ctx context.Context, target value.RemovalEffect) (value.V
 			return nil, receipt.failure(revalidationKind(err), index, removalStage, err)
 		}
 		name := entry.FieldsRecord().Field("name").(value.Text).Text()
-		if f.protection != nil {
-			if err := f.protection.protectRemoval(root, name); err != nil {
+		if len(f.protections) > 0 {
+			if err := f.protectRemoval(root, name); err != nil {
 				return nil, receipt.failure(catalog.RemoveFailed, index, removalStage, err)
 			}
 		}
