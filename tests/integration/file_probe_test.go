@@ -65,6 +65,8 @@ func TestFileOpenPathsResults(t *testing.T) {
 		{"empty", "", "", "1", ""},
 		{"whitespace-stderr", "", " \n\t", "1", ""},
 		{"stderr", "", "probe failed", "1", "File.OpenFilesFailed"},
+		{"invalid-stderr-success", "", string([]byte{0xff}), "0", "File.OpenFilesFailed"},
+		{"invalid-stderr-empty", "", string([]byte{0xff}), "1", "File.OpenFilesFailed"},
 		{"status", "", "", "2", "File.OpenFilesFailed"},
 		{"invalid-utf8", string([]byte{0xff}), "", "0", "File.OpenFilesFailed"},
 		{"malformed", "unrecognized probe output\n", "", "0", "File.OpenFilesFailed"},
@@ -107,6 +109,19 @@ func TestFileOpenPathsRecordedProtocol(t *testing.T) {
 	path := sourceFile(t, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root))
 	got := fileOutput(t, run(t, "run", path, "--open-files-root", root, "--format", "json"))
 	valueJSON(t, got, fmt.Sprintf(`[{"type":"File.Path","value":%q}]`, filepath.Join(root, "held.log")))
+}
+
+func TestFileOpenPathsInvalidStderrHandled(t *testing.T) {
+	installFileProbeFixture(t)
+	root := fileFixtureRoot(t)
+	t.Setenv("LO_TEST_PROBE_STDERR", string([]byte{0xff}))
+	program := sourceFile(t, fmt.Sprintf(`flow Handle(e: Error) -> String { return e.kind }; flow Main() -> String onError Handle { paths = File.open_paths(File.Path.new(%q)); return "unexpected" }; return Main()`, root))
+	for _, status := range []string{"0", "1"} {
+		t.Run(status, func(t *testing.T) {
+			t.Setenv("LO_TEST_PROBE_EXIT", status)
+			valueJSON(t, fileOutput(t, run(t, "run", program, "--open-files-root", root, "--format", "json")), `"File.OpenFilesFailed"`)
+		})
+	}
 }
 
 func TestFileOpenPathsHostProbe(t *testing.T) {

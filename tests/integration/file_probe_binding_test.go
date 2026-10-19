@@ -2,10 +2,10 @@ package integration_test
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -17,14 +17,120 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
+func TestFileOpenPathsProtectsExecutable(t *testing.T) {
+	for _, alias := range []string{"direct", "hardlink", "symlink"} {
+		for _, operation := range []string{"Write", "Append", "Remove"} {
+			t.Run(alias+"/"+operation, func(t *testing.T) {
+				record := installFileProbeFixture(t)
+				tool := filepath.Join(filepath.Dir(record), "lsof")
+				original, err := os.ReadFile(tool)
+				if err != nil {
+					t.Fatal(err)
+				}
+				root := filepath.Dir(tool)
+				if alias != "direct" {
+					root = fileFixtureRoot(t)
+					link := filepath.Join(root, "lsof")
+					if alias == "hardlink" {
+						err = os.Link(tool, link)
+					} else {
+						err = os.Symlink(tool, link)
+					}
+					if err != nil {
+						t.Fatal(err)
+					}
+					if alias == "symlink" {
+						t.Setenv("PATH", root+string(os.PathListSeparator)+os.Getenv("PATH"))
+					} else {
+						tool = link
+					}
+				}
+				if alias == "symlink" && operation == "Remove" {
+					root = filepath.Dir(record)
+				}
+				mutation := fmt.Sprintf(`target = File.%s.new(File.Path.new(%q), Bytes.new("replacement")); commit target`, operation, tool)
+				if operation == "Remove" {
+					mutation = fmt.Sprintf(`entries = File.list(File.Path.new(%q)); target = File.Remove.new(entries); commit target`, root)
+				}
+				program := sourceFile(t, fmt.Sprintf(`flow Main() -> List<File.Path>! {%s; return File.open_paths(File.Path.new(%q))}; return Main()`, mutation, root))
+				args := []string{"run", program, "--write-root", root, "--list-root", root, "--remove-root", root, "--open-files-root", root, "--format", "json"}
+				if alias == "symlink" && root != filepath.Dir(record) {
+					args = append(args, "--write-root", filepath.Dir(record))
+				}
+				got := run(t, args...)
+				if got.status != 2 || !strings.Contains(got.stderr, "protected") {
+					t.Fatalf("probe mutation was not denied: %+v", got)
+				}
+				remaining, err := os.ReadFile(tool)
+				if err != nil || sha256.Sum256(remaining) != sha256.Sum256(original) {
+					t.Fatalf("probe bytes changed: %v", err)
+				}
+				if _, err := os.Stat(record); !errors.Is(err, os.ErrNotExist) {
+					t.Fatalf("probe ran after mutation: %v", err)
+				}
+			})
+		}
+	}
+}
+
+func TestFileOpenPathsStandaloneProtection(t *testing.T) {
+	record := installFileProbeFixture(t)
+	root := filepath.Dir(record)
+	tool := filepath.Join(root, "lsof")
+	before, err := os.ReadFile(tool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	files, err := adapter.OpenFiles(adapter.FileRoots{Write: []string{root}, OpenFiles: []string{root}}, adapter.NativeFileIO())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer files.Close()
+	_, err = evaluate(t, fmt.Sprintf(`target = File.Write.new(File.Path.new(%q), Bytes.new("replacement")); commit target`, tool), files)
+	var host execution.HostError
+	if !errors.As(err, &host) || !strings.Contains(err.Error(), "protected") {
+		t.Fatalf("standalone probe mutation: %v", err)
+	}
+	after, err := os.ReadFile(tool)
+	if err != nil || sha256.Sum256(after) != sha256.Sum256(before) {
+		t.Fatalf("standalone probe bytes changed: %v", err)
+	}
+}
+
+func TestFileOpenPathsFreezesExecutableLookup(t *testing.T) {
+	for _, available := range []bool{true, false} {
+		t.Run(fmt.Sprint(available), func(t *testing.T) {
+			record := installFileProbeFixture(t)
+			toolDirectory := filepath.Dir(record)
+			root := fileFixtureRoot(t)
+			initial, later := toolDirectory, root
+			want := "ok"
+			if !available {
+				initial, later, want = root, toolDirectory, "File.OpenFilesFailed"
+			}
+			t.Setenv("PATH", initial)
+			probe := &boundFileProbe{FileIO: adapter.NativeFileIO(), before: func() { t.Setenv("PATH", later) }}
+			source := fmt.Sprintf(`flow Handle(e: Error) -> String { return e.kind }; flow Main() -> String onError Handle { paths = File.open_paths(File.Path.new(%q)); return "ok" }; return Main()`, root)
+			output, err, _ := injectedFileProgram(t, context.Background(), root, source, probe)
+			if err != nil || output.(value.Text).Text() != want {
+				t.Fatalf("probe lookup changed during evaluation: %v %v", output, err)
+			}
+			_, err = os.Stat(record)
+			if available && err != nil || !available && !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("unexpected probe activation: %v", err)
+			}
+		})
+	}
+}
+
 type boundFileProbe struct {
 	adapter.FileIO
 	before func()
 }
 
-func (probe *boundFileProbe) ProbeOpenFiles(ctx context.Context, root *os.Root) ([]byte, error) {
+func (probe *boundFileProbe) ProbeOpenFiles(ctx context.Context, root *os.Root, executable adapter.FileProbeExecutable) ([]byte, error) {
 	probe.before()
-	return probe.FileIO.ProbeOpenFiles(ctx, root)
+	return probe.FileIO.ProbeOpenFiles(ctx, root, executable)
 }
 
 func TestFileOpenPathsDescriptorBinding(t *testing.T) {
@@ -78,15 +184,14 @@ func TestFileOpenPathsProbeCancellation(t *testing.T) {
 	t.Setenv("LO_TEST_PROBE_WAIT", "1")
 	ready := filepath.Join(fileFixtureRoot(t), "ready")
 	t.Setenv("LO_TEST_PROBE_READY", ready)
-	root, err := os.OpenRoot(fileFixtureRoot(t))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer root.Close()
+	root := fileFixtureRoot(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	done := make(chan error, 1)
-	go func() { _, err := adapter.NativeFileIO().ProbeOpenFiles(ctx, root); done <- err }()
+	go func() {
+		_, err, _ := injectedFileProgram(t, ctx, root, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root), adapter.NativeFileIO())
+		done <- err
+	}()
 	deadline := time.NewTimer(3 * time.Second)
 	defer deadline.Stop()
 	ticker := time.NewTicker(5 * time.Millisecond)
@@ -163,14 +268,9 @@ func TestFileOpenPathsParsingBudget(t *testing.T) {
 
 func TestFileOpenPathsMissingExecutable(t *testing.T) {
 	t.Setenv("PATH", fileFixtureRoot(t))
-	root, err := os.OpenRoot(fileFixtureRoot(t))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer root.Close()
-	output, err := adapter.NativeFileIO().ProbeOpenFiles(context.Background(), root)
-	var status *exec.ExitError
-	if len(output) != 0 || !errors.As(err, &status) || status.ExitCode() != 127 {
-		t.Fatalf("missing lsof did not fail explicitly: %q %v", output, err)
+	root := fileFixtureRoot(t)
+	output, err, _ := injectedFileProgram(t, context.Background(), root, fmt.Sprintf(`flow Handle(e: Error) -> String { return e.kind }; flow Main() -> String onError Handle { paths = File.open_paths(File.Path.new(%q)); return "unexpected" }; return Main()`, root), adapter.NativeFileIO())
+	if err != nil || output.(value.Text).Text() != "File.OpenFilesFailed" {
+		t.Fatalf("missing lsof did not fail explicitly: %v %v", output, err)
 	}
 }

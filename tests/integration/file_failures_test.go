@@ -32,11 +32,11 @@ type scheduledFileIO struct {
 	removals  []string
 }
 
-func (f *scheduledFileIO) ProbeOpenFiles(ctx context.Context, root *os.Root) ([]byte, error) {
+func (f *scheduledFileIO) ProbeOpenFiles(ctx context.Context, root *os.Root, executable adapter.FileProbeExecutable) ([]byte, error) {
 	if f.openPaths != nil {
 		return f.openPaths(ctx, root)
 	}
-	return f.FileIO.ProbeOpenFiles(ctx, root)
+	return f.FileIO.ProbeOpenFiles(ctx, root, executable)
 }
 
 func (f *scheduledFileIO) ReadDir(file *os.File, count int) ([]os.DirEntry, error) {

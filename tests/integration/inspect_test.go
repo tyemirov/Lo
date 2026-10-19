@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -315,6 +316,64 @@ func TestInspectionLoopCarriedTargets(t *testing.T) {
 	}
 	if !found {
 		t.Fatalf("inspection omitted a target from later iterations: %+v", report.Capabilities)
+	}
+}
+
+func TestInspectionFoldCarriedActivation(t *testing.T) {
+	for _, shape := range []struct{ name, typ, seed, target, next string }{
+		{"target", "File.Write", "first", "state", "next"},
+		{"record", "Record{target: File.Write}", "Record.new(target: first)", "state.target", "Record.new(target: next)"},
+		{"fallible-record", "Record{target: File.Write!}", "Record.new(target: Fallible(first))", "state.target", "Record.new(target: Fallible(next))"},
+		{"map", "Map<String, File.Write>", `Map.new(Record.new(key: "target", value: first))`, `Map.get(state, "target")`, `Map.new(Record.new(key: "target", value: next))`},
+	} {
+		t.Run(shape.name, func(t *testing.T) {
+			root := fileFixtureRoot(t)
+			first, next := filepath.Join(root, "first"), filepath.Join(root, "next")
+			source := fmt.Sprintf(`flow Fallible(target: File.Write) -> File.Write! { return target }; flow Step(state: %s, item: Int) -> %s! { target = %s; commit target; next = File.Write.new(File.Path.new(%q), Bytes.new("next")); return %s }; first = File.Write.new(File.Path.new(%q), Bytes.new("first")); return Flow.fold(List.new(1, 2), %s, Step)`, shape.typ, shape.typ, shape.target, next, shape.next, first, shape.seed)
+			report, _, _ := inspectSource(t, source)
+			got := run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json")
+			if got.status != 0 {
+				t.Fatalf("execute fold: %+v", got)
+			}
+			for _, path := range []string{first, next} {
+				if _, err := os.Stat(path); err != nil {
+					t.Fatal(err)
+				}
+				covered := false
+				for _, capability := range report.Capabilities {
+					if capability.Operation == "File.write" && (capability.Target.Kind == "dynamic" || capability.Target.Value == path) {
+						covered = true
+					}
+				}
+				if !covered {
+					t.Fatalf("inspection omitted executed write %s: %+v", path, report.Capabilities)
+				}
+			}
+		})
+	}
+}
+
+func TestInspectionFoldCarriedResult(t *testing.T) {
+	for _, operation := range []string{"Flow.fold", "List.fold"} {
+		t.Run(operation, func(t *testing.T) {
+			root := fileFixtureRoot(t)
+			first, next := filepath.Join(root, "first"), filepath.Join(root, "next")
+			source := fmt.Sprintf(`flow Step(state: Record{previous: File.Write, next: File.Write}, item: Int) -> Record{previous: File.Write, next: File.Write} { return Record.new(previous: state.next, next: File.Write.new(File.Path.new(%q), Bytes.new("next"))) }; first = File.Write.new(File.Path.new(%q), Bytes.new("first")); result = %s(List.new(1, 2), Record.new(previous: first, next: first), Step); target = result.previous; commit target`, next, first, operation)
+			report, _, _ := inspectSource(t, source)
+			got := run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json")
+			if got.status != 0 {
+				t.Fatalf("execute fold: %+v", got)
+			}
+			if _, err := os.Stat(next); err != nil {
+				t.Fatal(err)
+			}
+			for _, capability := range report.Capabilities {
+				if capability.Operation == "File.write" && (capability.Target.Kind == "dynamic" || capability.Target.Value == next) {
+					return
+				}
+			}
+			t.Fatalf("inspection omitted fold result write: %+v", report.Capabilities)
+		})
 	}
 }
 func TestInspectionNestedAdapters(t *testing.T) {
