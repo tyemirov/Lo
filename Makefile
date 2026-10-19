@@ -31,7 +31,17 @@ NATIVE_BENCH_LANE ?= all
 
 .PHONY: build fmt lint test test-integration test-conformance test-native test-native-race runtime-bundle verify-runtime-bundle benchmark-training benchmark-training-cli benchmark-training-profile benchmark-native-baseline benchmark-native ci
 
-runtime-bundle: | tool-state
+ifeq ($(shell uname -s),Darwin)
+PROCESS_LAUNCHER := bin/lo-process-launcher
+.PHONY: process-launcher verify-process-launcher
+process-launcher: | tool-state
+	python3 -B tools/processbuild/identity.py build $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go </dev/null
+
+verify-process-launcher: | tool-state
+	python3 -B tools/processbuild/identity.py verify $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go </dev/null
+endif
+
+runtime-bundle: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
 	$(GO) run ./tools/runtimebundle </dev/null
 
 verify-runtime-bundle: | tool-state
