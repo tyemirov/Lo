@@ -9,7 +9,7 @@ Language models are good at proposing workflows, but unsafe as direct executors 
 Lo is not a replacement for Go, Python, or shell. It is an execution contract between an AI planner, a verifier, and a runtime.
 
 For language rules and training examples, start with the [Lo Language Reference](specification.md).
-The [adapter design](docs/adapter-design.md) defines the next shared contract for File, HTTP, and Process.
+The [adapter design](docs/adapter-design.md) defines the shared contract for File, HTTP, and Process.
 Its [implementation plan](docs/adapter-plan.md) separates proposed APIs from current behavior.
 
 ## Status
@@ -275,12 +275,12 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
     success_log = File.Path.new(String.new("/logs/success.log"))
     error_log = File.Path.new(String.new("/logs/error.log"))
 
-    target_effect = Match.new(status_code,
-        Int.new(200): File.append(success_log, request_data),
-        _: File.append(error_log, request_data)
+    target_action = Match.new(status_code,
+        Int.new(200): File.Append.new(success_log, UTF8.Bytes.new(request_data)),
+        _: File.Append.new(error_log, UTF8.Bytes.new(request_data))
     )
 
-    commit target_effect
+    commit target_action
 
     return HTTP.Response.Text.new(
         status: status_code,
@@ -289,7 +289,9 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
 }
 ```
 
-The branch does not perform the write. The branch constructs an effect. The write happens only when the effect is committed.
+Each branch constructs an inert `File.Append` target.
+The commit statement writes its Bytes payload.
+`receipt = commit target_action` also binds the `File.AppendReceipt` after activation success.
 
 ## Design Principles
 
@@ -469,13 +471,17 @@ The runtime implements commit activation and HTTP services.
 
 Initial support:
 
-- `Effect`
-- `File.append`
-- `File.write`
+- `File.Append` and `File.Append.new`
+- `File.Write` and `File.Write.new`
+- `File.Remove` and `File.Remove.new`
+- `File.WriteReceipt`, `File.AppendReceipt`, and `File.RemoveReceipt`
+- `HTTP.ServerReceipt`
+- `UTF8.Bytes.new`
 - `commit`
 - `HTTP.Server.new`
 - `HTTP.Request`
-- `HTTP.Response`
+- `HTTP.Response` and `HTTP.Response.new`
+- `HTTP.Headers.new` and `HTTP.Headers.values`
 - adapter-level `onError`
 
 Command:
@@ -535,7 +541,34 @@ A secure Lo runtime should:
 ## File Workflows
 
 The [File adapter](specification.md#91-file-adapter) supports directory observations, open-file probes, and committed removal.
-`Flow.fold` adds ordered activation while List callbacks remain pure.
+
+List callbacks cannot include host observations or commits, including transitive calls.
+`Flow.fold` can include both under ordinary flow fallibility rules.
+Match selectors and selected branches can include observations, while case heads and predicates must be pure.
+No Match position can activate a commit.
+Self-handlers and adapter `onError` flows must be pure and total.
+Device requirements have a separate summary.
+
+Bound commits use `result = commit target`.
+The catalog assigns each nominal target one success type.
+File activation returns its operation-specific receipt after activation success and required resource release.
+Server activation returns `HTTP.ServerReceipt` with the actual listener address and port after startup success.
+Commit failure stops the current body without a result binding.
+
+Nominal HTTP headers keep repeated byte values, with explicit lookup through `HTTP.Headers.values`.
+The general `HTTP.Response.new` constructor accepts those headers.
+Header and automatic trace behavior have focused validation.
+Client source uses explicit `--http-allow METHOD,ORIGIN,ADDRESS` grants.
+Combined client interpreter cases passed, including protocol and composition.
+Matching focused native qualification passed.
+
+Pure Process constructors, inspection, and standard-host rejection are implemented, and focused interpreter and native validation passed.
+Current-stack CI passed, including the pure Process phase.
+Independent review approved the implemented pure Process checkpoint.
+The [pure Process contract](specification.md#95-process-adapter) describes this phase.
+Command activation returns host diagnostic `runtime.process-unavailable` before executable access.
+Qualified Process execution and runtime results remain pending.
+
 The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
 The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, interpreter tests, and native tests.
 The [mac-cleanup plan](docs/mac-cleanup-plan.md) defines the remaining complete-script work.
@@ -547,6 +580,7 @@ The [Lo Language Reference](specification.md) defines the implemented v0.3 core 
 It includes a contents list, operation signatures, examples, and current backend limits.
 
 - [File adapter and cleanup example](specification.md#91-file-adapter)
+- [Pure Process values, inspection, and host gate](specification.md#95-process-adapter)
 - [Sequential activation with Flow.fold](specification.md#88-sequential-flow-processor)
 - [Quick start](specification.md#quick-start)
 - [Autodiff and backpropagation](specification.md#245-reverse-mode-autodiff-and-backpropagation)
