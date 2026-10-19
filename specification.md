@@ -459,7 +459,7 @@ A committable target may be:
 
 1. a nominal File target: `File.Write`, `File.Append`, or `File.Remove`, or
 2. an HTTP target: `HTTP.Server` or `HTTP.Client.Request`, or
-3. a `Process.Command` target, with standard-host activation unavailable.
+3. a `Process.Command` target, under the selected host execution profile.
 
 Examples:
 
@@ -481,7 +481,7 @@ A top-level failure aborts execution before later statements.
 | `File.Remove` | `File.RemoveReceipt` |
 | `HTTP.Server` | `HTTP.ServerReceipt` |
 | `HTTP.Client.Request` | `HTTP.Response` |
-| `Process.Command` | Opaque static `Process.Result`, with no standard-host runtime result |
+| `Process.Command` | `Process.Result`, under the selected host execution profile |
 
 Receipt copies do not repeat activation.
 A repeated commit of the same target makes another activation attempt.
@@ -706,8 +706,10 @@ The initial boundary-oriented built-in types are:
 * `Process.Executable`
 * `Process.Command`
 * `Process.Result`
+* `Process.Termination`
 
-`Process.Result` is an opaque static success type without runtime instances or accessors.
+`Process.Result` and `Process.Termination` are nominal runtime types supplied by trusted host activation.
+Neither type has a Lo constructor.
 These are first-class language types, but their host-language representation is implementation-defined.
 
 ### 6.5 String Model
@@ -961,7 +963,7 @@ Adapters define typed boundaries to the external world.
 This section describes the implemented contract.
 The shared purity rules and bound commits apply to the nominal File targets below.
 Server activation also returns `HTTP.ServerReceipt`.
-The [adapter design](docs/adapter-design.md) records shared domain contracts and pending Process work.
+The [adapter design](docs/adapter-design.md) records shared domain contracts and the qualified Process profile.
 
 HTTP headers, client actions, and automatic trace summaries pass focused interpreter and native qualification.
 Independent source review closed the current findings.
@@ -1196,12 +1198,26 @@ Host diagnostics expose `http_progress` without header or body payloads.
 
 ### 9.5 Process Adapter
 
-The pure Process contract is implemented.
-Final focused interpreter validation passed in 2.934 seconds.
-Final focused native Process validation passed in 14.086 seconds.
-Current-stack CI passed, including the pure Process phase.
-Independent review approved the implemented pure Process checkpoint.
-It permits pure construction and inspection before execution profile qualification.
+Pure command construction, inspection, and the trusted injected result and lifecycle core are implemented.
+The [lifecycle evidence](docs/evidence/process-start-lifecycle.json) records passed focused checks, race checks, and current-stack CI.
+The selected Darwin 27 arm64 profile passed [native qualification](docs/adapter-design.md#qualification-status).
+Canonical public acceptance passed all 24 interpreter/generated-native cases. Final stack CI and independent completion review passed.
+The runners accept [explicit Process policy inputs](docs/adapter-design.md#host-policy-inputs) without filesystem access during parsing.
+These inputs do not enable an unqualified backend or grant parent File authority.
+The [selected native admission limits](docs/adapter-design.md#selected-native-admission-limits) apply separately from pure constructor validation.
+
+A configured session requires these canonical inputs:
+
+- `--process-allow SHA256,ABSOLUTE_PATH` selects each exact command path and digest.
+- `--process-launcher ABSOLUTE_PATH` selects the pinned trusted helper.
+- `--process-read-root ABSOLUTE_PATH` selects each child data root and allowed working directory.
+
+The selected profile denies child filesystem writes, network access, and descendants.
+The launcher normalizes specified registered ports, bootstrap authority, and task/current-thread exception slots before command admission.
+This selected-slot normalization does not establish named IPC denial or arbitrary inherited endpoint removal.
+Captured output can feed a separate parent File commit under its own grants.
+The conditional work bound uses maximum host parallelism times completed lifetime under a responsive OS.
+It is not a hard CPU quota. Unresolved creation or termination leaves that bound unverified.
 
 | Operation | Result |
 | --- | --- |
@@ -1216,10 +1232,17 @@ Invalid command inputs produce recoverable `Process.InvalidCommand` errors.
 The constructors keep exact lexical data without filesystem access or path resolution.
 They add no shell expansion or environment inheritance.
 
-Activation declares metadata capability `Process.run` and opaque static success type `Process.Result`.
+Activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
-No result constructor, accessor, or runtime value belongs to this phase.
-CLI `run` and `serve` return host diagnostic `runtime.process-unavailable` before executable access.
+`Process.Result` has exact fields `termination: Process.Termination`, `stdout: Bytes`, and `stderr: Bytes`.
+`Process.Termination.kind` is `exited` or `signaled`.
+`Process.Termination.exit_code(value) -> Int!` returns the exit code only for `exited`.
+`Process.Termination.signal(value) -> Int!` returns the signal only for `signaled`.
+A mismatched accessor returns `Process.TerminationKind`.
+Neither type has a Lo constructor.
+Nonzero exit and signal termination remain result data.
+Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
 Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
 Explicit program output keeps those values.
@@ -1227,19 +1250,21 @@ The inspector adds an optional `process` object to command targets and capabilit
 It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
 It also contains `execution_profile: {required: true, status: "unavailable"}`.
-This profile status describes the current standard host, not arbitrary injected boundaries.
+Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
 Executable descriptions trace the supplied `File.Path`.
 Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
 
-The standard runner installs `adapter.WithProcess` for `run`, `serve`, and server callbacks.
-This wrapper rejects command activation before delegation or executable access.
+The standard runner opens one canonical `processhost.Session` for `run`, `serve`, and server callbacks.
+The session owns native policy, the executable registry, participating File adapters, and retained shutdown.
+`Close(ctx)` closes admission and starts one shutdown owner. Its context bounds only the caller wait.
+`WaitRetained()` joins that same owner without a cleanup retry. A caller timeout does not release ownership.
 Custom Go boundaries are trusted host implementations and must enforce qualification.
 Generic commit execution validates the result type without a universal host qualification gate.
-An HTTP request-handler commit returns `runtime.process-unavailable` and aborts the server.
+HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
 HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
-Qualification remains mandatory before any launch or execution acceptance.
+Qualification remains mandatory before standard-host native activation acceptance. Reviewed qualification probes have a separate execution gate.
 
 ---
 
@@ -1779,6 +1804,8 @@ Device access has a separate resource summary.
 | SGD and AdamW transitions | [24.7](#247-sgd-and-adamw) |
 | Checkpoints and training-state transfers | [24.9](#249-model-checkpoints-and-training-state-transfers) |
 
+* `Process.Termination.exit_code`
+* `Process.Termination.signal`
 * `File.Path.eq`
 * `Scalar.eq`
 * `String.concat`
@@ -1819,7 +1846,7 @@ Section 24 defines numeric, tensor, autodiff, gradient, optimizer, and device fa
 Section 9.1 defines `File.list`, `File.open_paths`, `File.Remove.new`, and their failure kinds.
 Section 8.8 defines callback failure propagation for `Flow.fold`.
 Sections 9.2 and 9.4 define HTTP constructor failure kinds.
-Section 9.5 defines Process construction and host unavailability.
+Section 9.5 defines Process construction, termination accessors, activation errors, and host unavailability.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
@@ -1864,8 +1891,18 @@ A failed `File.Append` commit produces `File.AppendFailed`.
 A failed `File.Write` commit produces `File.WriteFailed`.
 A failed `HTTP.Server` startup produces `HTTP.ServerStartFailed`.
 At top level, these errors abort activation and produce an Error diagnostic.
+`Process.ExecutionFailed` is an ordinary activation error from the trusted injected lifecycle.
+Host cancellation, timeout, output limits, and cleanup failures remain outside Lo fallibility and handlers.
+Lo errors and automatic diagnostics keep Process counts and status without raw partial stdout or stderr.
+Trusted Go `ProcessFailure` retains bounded partial bytes.
+Failure progress includes `start_confirmed`, which records known primary creation through the trusted lifecycle.
+It does not show target execution.
+An owned pending launch can have unknown creation status.
+Cancellation before creation has complete cleanup only when release guarantees no future child or owned resource.
+Unresolved ownership causes a host cleanup failure.
+Progress records stay immutable after return.
 Host diagnostics remain outside Lo fallibility and handlers.
-In particular, standard-host Process activation returns `runtime.process-unavailable` and cannot be recovered by Lo code.
+Unsupported or unconfigured Process activation returns `runtime.process-unavailable` and cannot be recovered by Lo code.
 
 ### 18.4 Committable Targets
 
