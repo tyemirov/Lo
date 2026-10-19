@@ -266,6 +266,7 @@ The [native Metal contract](docs/native-metal.md) defines build selection.
 - [7. Constructors](#7-constructors)
 - [8. Processors](#8-processors)
 - [9. Adapters](#9-adapters)
+- [9.5 Process Adapter](#95-process-adapter)
 - [10. Flow Definitions](#10-flow-definitions)
 - [11. Match](#11-match)
 - [12. Error Handling](#12-error-handling)
@@ -373,8 +374,11 @@ A flow may be:
 
 A flow may also be:
 
-* pure, if it has no direct or indirect commit activation, or
-* effectful, if it activates a target directly or through a flow call.
+* pure, if it has no direct or indirect host observations or commit activation, or
+* effectful, if it reads external state or activates a target.
+
+Host observations and commit activation have separate summaries.
+Only commit activation requires a fallible output or a self-handler.
 
 Only pure named flows may be passed to pure data processors.
 
@@ -392,7 +396,7 @@ Some adapter operations produce committable targets.
 
 Examples:
 
-* `File.append(...) -> Effect`
+* `File.Append.new(...) -> File.Append`
 * `HTTP.Server.new(...) -> HTTP.Server`
 
 A committable target is activated only by commit.
@@ -443,6 +447,8 @@ Examples:
 * `Range.new(...)`
 * `Match.new(...)`
 
+A Match with a possible host observation is not pure.
+
 ### 5.2 Commit
 
 commit is the only activation keyword in Lo.
@@ -451,17 +457,34 @@ A commit statement activates a previously bound committable target.
 
 A committable target may be:
 
-1. an Effect, such as a file write or append operation, or
-2. an activatable adapter instance, such as HTTP.Server.
+1. a nominal File target: `File.Write`, `File.Append`, or `File.Remove`, or
+2. an HTTP target: `HTTP.Server` or `HTTP.Client.Request`, or
+3. a `Process.Command` target, with standard-host activation unavailable.
 
 Examples:
 
 ```text
-write_effect = File.append(file_path, content_string)
-commit write_effect
+write_action = File.Append.new(file_path, UTF8.Bytes.new(content_string))
+receipt = commit write_action
 target_server = HTTP.Server.new(port: Int.new(8080), handler: HelloHandler, onError: HelloError)
 commit target_server
 ```
+
+Each evaluated commit statement makes one activation attempt.
+The bound form publishes the catalog-defined success type after the operation releases its required resources.
+Failure stops the current body without a result binding.
+A top-level failure aborts execution before later statements.
+| Target | Activation success type |
+| --- | --- |
+| `File.Write` | `File.WriteReceipt` |
+| `File.Append` | `File.AppendReceipt` |
+| `File.Remove` | `File.RemoveReceipt` |
+| `HTTP.Server` | `HTTP.ServerReceipt` |
+| `HTTP.Client.Request` | `HTTP.Response` |
+| `Process.Command` | Opaque static `Process.Result`, with no standard-host runtime result |
+
+Receipt copies do not repeat activation.
+A repeated commit of the same target makes another activation attempt.
 
 ### 5.3 Fallible Execution and Bubbling
 
@@ -514,12 +537,11 @@ committable target; it does not introduce mutable storage.
 The runtime may evaluate pure graph nodes eagerly, lazily, incrementally, or in
 parallel, provided the observable result is identical to an evaluation that
 respects data dependencies and the rules in this specification. Evaluation
-strategy is not observable to a Lo program except through explicit commit
-activation and Error bubbling.
+strategy must keep host observations, selected branches, commit order, and Error bubbling.
 
 Side effects occur only through evaluated commit statements. Each evaluated
 commit statement activates its target exactly once. Reusing the same bound
-Effect or activatable adapter in multiple commit statements is allowed only as
+nominal target in multiple commit statements is allowed only as
 multiple explicit activations, one per evaluated commit statement.
 
 Top-level commit statements execute in source order after top-level binding and
@@ -568,7 +590,7 @@ Composite values such as `List<T>`, `Map<K, V>`, Record{...}, `Range<T>`, Error,
 boundary values are immutable after construction. Passing such a value to a flow
 or processor does not copy it semantically and does not transfer ownership.
 
-Committable targets such as Effect and HTTP.Server are first-class immutable
+Committable targets such as `File.Write`, `File.Append`, `File.Remove`, and `HTTP.Server` are first-class immutable
 activation descriptions. Passing them around does not activate them. Only commit
 activates them, and each evaluated commit statement activates its target exactly
 once.
@@ -606,7 +628,7 @@ Bool has exactly two values, true and false.
 Null is its own atomic type. The null literal is spelled null and has type Null.
 Other types do not inherit from Null. Null is not an implicit inhabitant of
 String, Bytes, Int, Float, Bool, records, maps, lists, ranges, Error, File.Path, File.Entry,
-HTTP.Request, HTTP.Response, HTTP.Server, or Effect.
+HTTP.Request, HTTP.Response, HTTP.Server, File actions, or activation results.
 
 The type name Null is not a value expression. Passing either the null literal or
 an unresolved identifier named Null where another type is required is a type
@@ -670,8 +692,22 @@ The initial boundary-oriented built-in types are:
 * `HTTP.Request`
 * `HTTP.Response`
 * `HTTP.Server`
-* `Effect`
+* `File.Write`
+* `File.Append`
+* `File.Remove`
+* `File.WriteReceipt`
+* `File.AppendReceipt`
+* `File.RemoveReceipt`
+* `HTTP.ServerReceipt`
+* `HTTP.Headers`
+* `HTTP.URL`
+* `HTTP.Method`
+* `HTTP.Client.Request`
+* `Process.Executable`
+* `Process.Command`
+* `Process.Result`
 
+`Process.Result` is an opaque static success type without runtime instances or accessors.
 These are first-class language types, but their host-language representation is implementation-defined.
 
 ### 6.5 String Model
@@ -709,12 +745,13 @@ Error is a built-in nominal composite value with the following required fields:
 * `message: String`
 * `input: Record`
 * `trace: List<Record{ flow: String, operation: String, input: Record }>`
+* `flow_progress: List<Record>`
 
 Notes:
 
 1. input describes the immediate input that caused the failure.
 2. trace accumulates flow and operation context as the error bubbles outward.
-3. Error.new(kind: ..., message: ..., input: ...) constructs an error value with an implicit empty trace.
+3. Error.new(kind: ..., message: ..., input: ...) constructs an error with empty trace and fold progress metadata.
 4. Error.kind values are stable strings. Implementations may add more specific
    kind strings, but must preserve the minimum required kind strings listed in
    section 18.3 for the corresponding recoverable failures.
@@ -746,6 +783,7 @@ This list contains the core constructors.
 * `HTTP.Response.Bytes.new(status: ..., body: ...)`
 * `Error.new(kind: ..., message: ..., input: ...)`
 * `UTF8.String.new(bytes) -> String!`
+* `UTF8.Bytes.new(text: String) -> Bytes`
 * `String.FromScalars.new(scalar_list)`
 
 ### 7.2 Constructor Rules
@@ -880,17 +918,40 @@ It also accepts strings as sequences of scalars.
 
 The signature follows `List.fold`, including its context and type rules.
 The result is fallible when the callback is fallible.
-Unlike List callbacks, this callback can activate commits.
-Transitive effect analysis still requires a fallible or self-handling enclosing flow.
-Match branches and pure callbacks cannot hide an effectful fold.
+This callback can read external state and activate commits.
+List callbacks cannot include either behavior.
+Transitive commit activation requires a fallible or self-handling enclosing flow.
+Pure callbacks cannot hide observations or commits inside a fold.
+Match selectors and branches cannot hide commit activation inside a fold.
 
 An unhandled callback failure stops the remaining iterations.
 A self-handler can return an explicit skip state and permit continuation.
-Lo error traces include the fold operation, failed index, and completed accumulator.
-Host diagnostics retain completed fold prefixes in `flow_progress`, plus any in-flight `removal_progress`.
-Each fold receipt has `operation`, `total_count`, `completed_count`, `next_index`, and `state`.
-Nested receipts appear from outermost to innermost.
+Lo error traces identify the fold operation.
+Automatic callback input fields summarize the index, element, and state types without their payloads.
+Explicit progress records keep the actual completed accumulator and next index.
+Recoverable callback failures carry these records in `Error.flow_progress`.
+Each failing fold prepends its reserved progress record to that error.
+Nested records appear from outermost to innermost, including records with equal contents.
+Host diagnostics retain the same fold prefixes, plus any in-flight `removal_progress`.
+Each progress record has `operation`, `total_count`, `completed_count`, `next_index`, and `state`.
 A callback's successful commit does not imply that the callback itself completed.
+
+`Error.flow_progress` defaults to an empty list.
+A pure handler that returns the original error keeps its progress metadata.
+A fresh `Error.new` clears that metadata.
+A handled fold does not add stale progress to a later unrelated error.
+
+The records use already reserved snapshots without retained tensor storage or executable authority.
+Progress state remains explicit program data under its ordinary snapshot rules.
+Automatic trace argument summaries do not change that state.
+Error JSON omits `flow_progress` when the list is empty.
+A nonempty list serializes as typed records.
+CLI diagnostics also expose recoverable carrier records in top-level `flow_progress`.
+
+If a value budget rejects an Error or failed fallible value, the host diagnostic keeps its reserved progress records.
+The records keep their outer-to-inner order.
+The host limit does not publish the rejected value.
+This preservation reuses reserved snapshots.
 
 ---
 
@@ -898,8 +959,12 @@ A callback's successful commit does not imply that the callback itself completed
 
 Adapters define typed boundaries to the external world.
 This section describes the implemented contract.
-The [next adapter design](docs/adapter-design.md) proposes stricter purity, bound commit results, and coordinated File, HTTP, and Process contracts.
-Its proposed syntax and types are not yet implemented.
+The shared purity rules and bound commits apply to the nominal File targets below.
+Server activation also returns `HTTP.ServerReceipt`.
+The [adapter design](docs/adapter-design.md) records shared domain contracts and pending Process work.
+
+HTTP headers, client actions, and automatic trace summaries pass focused interpreter and native qualification.
+Independent source review closed the current findings.
 
 ### 9.1 File Adapter
 
@@ -910,13 +975,15 @@ Its proposed syntax and types are not yet implemented.
 | `File.read(file_path: File.Path)` | `Bytes!` |
 | `File.list(root: File.Path)` | `List<File.Entry>!` |
 | `File.open_paths(root: File.Path)` | `List<File.Path>!` |
-| `File.remove(entries: List<File.Entry>)` | `Effect!` |
-| `File.append(file_path: File.Path, file_content: String)` | `Effect` |
-| `File.write(file_path: File.Path, file_content: Bytes)` | `Effect` |
+| `File.Remove.new(entries: List<File.Entry>)` | `File.Remove!` |
+| `File.Append.new(file_path: File.Path, file_content: Bytes)` | `File.Append` |
+| `File.Write.new(file_path: File.Path, file_content: Bytes)` | `File.Write` |
 
 `File` has no `IO` parent type.
 Boundary reads return values directly.
-Effect construction performs no file access, and only `commit` activates an effect.
+Target construction performs no file access.
+Only `commit` activates a target.
+Write and append require Bytes, with explicit `UTF8.Bytes.new` for text.
 Path equality compares text without normalization or access.
 It does not add path ordering or make paths valid Match selectors or map keys.
 
@@ -953,10 +1020,10 @@ Each stream is bounded to 8 MiB, and the result to 10,000 paths.
 Invalid output or launch failure produces `File.OpenFilesFailed`.
 Output overflow, work limits, and cancellation remain host failures.
 
-`File.remove` accepts regular entries from one session and one observed directory.
+`File.Remove.new` accepts regular entries from one session and one observed directory.
 It rejects duplicate basenames, foreign observations, and other file kinds.
 Hardlinks are valid, including selected names with the same native identity.
-An empty typed list constructs a valid empty effect.
+An empty typed list constructs a valid empty `File.Remove`.
 Commit authorizes and revalidates the whole batch before mutation, then revalidates each entry immediately before removal.
 It compares identity, size, modification time, and file kind.
 A failed batch stops its suffix and preserves confirmed progress.
@@ -971,6 +1038,22 @@ A failed batch stops its suffix and preserves confirmed progress.
 | `File.EntryChanged` | A selected entry changed or disappeared before removal. |
 | `File.RemoveFailed` | Another metadata or removal failure occurs. |
 
+Each nominal target has one receipt type:
+
+| Target | Success type | Exact public fields |
+| --- | --- | --- |
+| `File.Write` | `File.WriteReceipt` | `path: File.Path`, `bytes_written: Int` |
+| `File.Append` | `File.AppendReceipt` | `path: File.Path`, `bytes_written: Int` |
+| `File.Remove` | `File.RemoveReceipt` | `total_count: Int`, `completed_count: Int`, `observed_bytes: Int` |
+
+Receipt values have no public constructors.
+After removal success, the total and completed counts are equal.
+`observed_bytes` sums selected file observations and does not measure reclaimed storage.
+Write and append failures keep confirmed byte counts without a bound receipt.
+Operation success includes necessary resource release.
+Retained directory handles stay open until session cleanup.
+A later cleanup failure keeps confirmed progress.
+
 The [File design](docs/file-adapter-design.md) specifies limits, progress records, and concurrency boundaries.
 The [Gateway log example](docs/examples/gateway-log-cleanup.lo) uses pure selection and `Flow.fold` with singleton commits.
 It handles only changed or absent candidates as skips.
@@ -978,18 +1061,37 @@ Its preview and cleanup results distinguish an absent directory from an empty on
 
 ### 9.2 HTTP Adapter
 
-* `HTTP.Server.new(port: Int, handler: FlowName, onError: FlowName) -> HTTP.Server`
-* `HTTP.Response.Text.new(status: Int, body: String) -> HTTP.Response`
-* `HTTP.Response.Bytes.new(status: Int, body: Bytes) -> HTTP.Response`
+| Operation | Result |
+| --- | --- |
+| `HTTP.Headers.new(entries: List<Record{name: String, value: Bytes}>)` | `HTTP.Headers!` |
+| `HTTP.Headers.values(headers: HTTP.Headers, name: String)` | `List<Bytes>!` |
+| `HTTP.Response.new(status: Int, headers: HTTP.Headers, body: Bytes)` | `HTTP.Response` |
+| `HTTP.Response.Text.new(status: Int, body: String)` | `HTTP.Response` |
+| `HTTP.Response.Bytes.new(status: Int, body: Bytes)` | `HTTP.Response` |
+| `HTTP.Server.new(port: Int, handler: FlowName, onError: FlowName)` | `HTTP.Server` |
 
-HTTP.Response.Text.new encodes body as UTF-8 bytes and constructs a response
-with an empty headers map. HTTP.Response.Bytes.new uses the supplied bytes as
-the body and constructs a response with an empty headers map.
+`HTTP.Headers` keeps repeated values as Bytes.
+The constructor validates ASCII token names and converts names to lowercase.
+It sorts distinct names lexically and keeps the supplied order for repeated values.
+Values can contain opaque bytes and horizontal tabs.
+Other control bytes and DEL are invalid.
 
-handler must reference a named flow with one of these signatures:
+The `entries` projection returns the canonical `List<Record{name: String, value: Bytes}>`.
+Lookup validates its name and compares without case sensitivity.
+An absent valid name returns an empty typed list.
+Invalid names or values produce `HTTP.InvalidHeaders`.
+No implicit map conversion or comma joining occurs.
+Diagnostic snapshots of nominal headers keep names and replace value payloads with empty Bytes.
 
-* `(HTTP.Request) -> HTTP.Response`
-* `(HTTP.Request) -> HTTP.Response!`
+The general response constructor is total and performs no network access.
+The Text convenience constructor explicitly encodes its body as UTF-8.
+The Bytes convenience constructor keeps its supplied bytes.
+Both convenience constructors use empty nominal headers.
+All constructors use the same `HTTP.Response` representation.
+The server validates response status and body constraints at emission.
+
+The request handler must have signature `(HTTP.Request) -> HTTP.Response` or `(HTTP.Request) -> HTTP.Response!`.
+Its declared signature controls ordinary failure propagation.
 
 onError must reference a pure total named flow with signature:
 
@@ -997,19 +1099,25 @@ onError must reference a pure total named flow with signature:
 
 onError is mandatory. It guarantees that uncaught handler errors and ordinary request-processing boundary errors are translated at the adapter boundary.
 
+Server activation returns `HTTP.ServerReceipt` after listener startup success.
+Its exact public fields are `address: String` and `port: Int`.
+The port identifies the actual listener, including a port selected from `0`.
+The receipt has no public constructor and does not control server lifetime.
+The host session owns server shutdown.
+
 ### 9.3 HTTP Request and Response Shape
 
 HTTP.Request is a structured semantic value with at least these fields:
 
 * `method: String`
 * `path: String`
-* `headers: Map<String, String>`
+* `headers: HTTP.Headers`
 * `body: Bytes`
 
 HTTP.Response is a structured semantic value with at least these fields:
 
 * `status: Int`
-* `headers: Map<String, String>`
+* `headers: HTTP.Headers`
 * `body: Bytes`
 
 The adapter is responsible for parsing incoming bytes into HTTP.Request and serializing HTTP.Response back to bytes.
@@ -1019,6 +1127,119 @@ v0.3 programs may project only these listed fields unless a later adapter
 revision specifies additional fields. Optional or extension data must be modeled
 through maps and accessed with Map.has_key or Map.get rather than nullable
 fields.
+
+---
+
+### 9.4 HTTP Client
+
+Client source is implemented.
+Focused interpreter and native qualification passed.
+Independent source review closed the current findings.
+The following contract defines its public surface.
+
+| Operation | Result |
+| --- | --- |
+| `HTTP.URL.new(text: String)` | `HTTP.URL!` |
+| `HTTP.Method.new(text: String)` | `HTTP.Method!` |
+| `HTTP.Client.Request.new(method: HTTP.Method, url: HTTP.URL, headers: HTTP.Headers, body: Bytes)` | `HTTP.Client.Request!` |
+| Bound commit of `HTTP.Client.Request` | `HTTP.Response` |
+
+URL construction validates an absolute HTTP or HTTPS URL without DNS or network access.
+It rejects credentials, fragments, whitespace, invalid hosts, and invalid ports.
+It canonicalizes scheme and host case and makes the default port explicit.
+Method construction validates an ASCII token and keeps its case.
+Constructor errors use `HTTP.InvalidURL`, `HTTP.InvalidMethod`, or `HTTP.InvalidRequest`.
+
+Request construction is inert.
+It rejects CONNECT and headers that control authority or protocol framing.
+These headers are `host`, `connection`, `upgrade`, `content-length`, `transfer-encoding`, `trailer`, `te`, and `keep-alive`.
+The restriction also includes `proxy-connection`, `proxy-authorization`, and `expect`.
+Every outgoing method requires explicit commit activation, including GET and HEAD.
+
+The repeatable runtime grant is `--http-allow METHOD,ORIGIN,ADDRESS`.
+It is available to `run`, `serve`, and native runtime entry points.
+Each grant requires one exact case-sensitive method, one HTTP or HTTPS origin, and one numeric IP address.
+The grant must contain no whitespace.
+The origin must have no credentials, query, fragment, or non-root path.
+
+Activation checks the method and canonical origin before DNS access.
+It compares resolved addresses with the explicit address grants before connection.
+It selects one authorized address and makes one connection attempt.
+Ambient proxies cannot expand authority.
+No redirect, automatic retry, tunnel, or protocol upgrade is supported.
+The client requires HTTP/1.1 for every response section.
+
+Request and response bodies each have a 1 MiB limit.
+Response headers have a 64 KiB limit.
+Outgoing request headers use ordinary value budgets.
+A separate request-header byte limit is not specified.
+At most eight informational responses can precede the final response.
+Their combined header bytes have a 64 KiB limit.
+The exchange has a five-second deadline and ordinary execution limits.
+
+The bound result appears only after the complete response body and required resource release.
+Valid final statuses from `200` through `599` remain response data, including error statuses and redirects.
+HEAD and bodyless statuses follow their protocol body rules.
+Transport and response failures produce `HTTP.ExchangeFailed`.
+Host denial, cancellation, and limits keep their host diagnostic classes.
+
+Diagnostic request snapshots keep the method, origin, root path, and header names.
+They remove original path and query text, body payloads, and header value payloads.
+Standalone URL diagnostic snapshots also replace the path with `/` and remove the query.
+These type-specific rules do not scrub arbitrary raw program data in explicit errors or progress state.
+
+Failure evidence keeps `stage: String`, `request_written: Bool`, and `remote_outcome: String`.
+The outcome is `not_started` or `unknown`.
+A transmitted request without a complete response can have an unknown remote outcome.
+Recoverable errors keep this evidence in `Error.input.progress`.
+Host diagnostics expose `http_progress` without header or body payloads.
+
+### 9.5 Process Adapter
+
+The pure Process contract is implemented.
+Final focused interpreter validation passed in 2.934 seconds.
+Final focused native Process validation passed in 14.086 seconds.
+Current-stack CI passed, including the pure Process phase.
+Independent review approved the implemented pure Process checkpoint.
+It permits pure construction and inspection before execution profile qualification.
+
+| Operation | Result |
+| --- | --- |
+| `Process.Executable.new(path: File.Path)` | `Process.Executable!` |
+| `Process.Command.new(executable: Process.Executable, arguments: List<String>, environment: Map<String, String>, directory: File.Path, stdin: Bytes)` | `Process.Command!` |
+
+Executable and directory paths must be absolute and contain no NUL.
+Arguments and environment values must contain no NUL.
+Environment names must be nonempty and contain neither NUL nor `=`.
+Invalid executable paths produce recoverable `Process.InvalidExecutable` errors.
+Invalid command inputs produce recoverable `Process.InvalidCommand` errors.
+The constructors keep exact lexical data without filesystem access or path resolution.
+They add no shell expansion or environment inheritance.
+
+Activation declares metadata capability `Process.run` and opaque static success type `Process.Result`.
+`Process.run` is not a callable builtin.
+No result constructor, accessor, or runtime value belongs to this phase.
+CLI `run` and `serve` return host diagnostic `runtime.process-unavailable` before executable access.
+Lo `onError` cannot handle this host diagnostic.
+Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
+Explicit program output keeps those values.
+The inspector adds an optional `process` object to command targets and capabilities.
+It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
+Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
+It also contains `execution_profile: {required: true, status: "unavailable"}`.
+This profile status describes the current standard host, not arbitrary injected boundaries.
+Executable descriptions trace the supplied `File.Path`.
+Dynamic command descriptions retain whole-command dependencies.
+Text inspection shows `execution_profile=required/unavailable` and the named inputs.
+Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
+
+The standard runner installs `adapter.WithProcess` for `run`, `serve`, and server callbacks.
+This wrapper rejects command activation before delegation or executable access.
+Custom Go boundaries are trusted host implementations and must enforce qualification.
+Generic commit execution validates the result type without a universal host qualification gate.
+An HTTP request-handler commit returns `runtime.process-unavailable` and aborts the server.
+HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
+Qualification remains mandatory before any launch or execution acceptance.
 
 ---
 
@@ -1047,7 +1268,7 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onEr
 3. A flow has exactly one return statement, and that return statement must be
    the final statement in the flow body.
 4. A flow body may contain bindings, nested flow definitions, commit statements, and a return statement.
-5. A pure flow has no direct or indirect commit activation. Section 22 specifies the transitive rule.
+5. A pure flow has no direct or indirect host observations or commit activation. Section 22 specifies the transitive rule.
 6. Only pure named flows may be passed to pure data processors.
 7. Adapter boundary parameters may accept effectful flows as defined by the adapter signature.
 8. Lo does not support anonymous functions or lambdas in v0.3.
@@ -1056,7 +1277,7 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onEr
 11. A fallible flow (-> T!) automatically propagates unresolved fallible expressions via error bubbling.
 12. A self-handling flow (-> T onError ErrorHandler) executes like a fallible flow internally, but resolves any bubbled error through ErrorHandler before publishing its result.
 13. ErrorHandler in a self-handling flow must be a pure total named flow with signature (Error) -> T.
-14. An effectful flow must declare either -> T! or -> T onError ErrorHandler.
+14. A flow with commit activation must declare either -> T! or -> T onError ErrorHandler.
 
 ### 10.3 Automatic Propagation in Fallible Flows
 
@@ -1075,7 +1296,7 @@ In a self-handling flow, the nearest handler boundary is the flow signature’s 
 
 Branching is expression-based, not statement-based.
 
-Lo uses a single pure match constructor:
+Lo uses one conditional match constructor:
 
 ```text
 Match.new(selector_value,
@@ -1101,7 +1322,10 @@ Match rules:
 3. _ is required in v0.3.
 4. All branch expressions must unify to one output type.
 5. Only the selected branch is evaluated.
-6. If a branch must trigger a side effect, the branch must evaluate to a committable target value, which must then be explicitly activated by a commit statement in the outer scope.
+6. Case heads and predicates must be pure and total.
+7. Selectors and selected branches can read external state but cannot activate commits.
+8. To select a later activation, construct a target in the chosen branch.
+9. Activate that target with a commit statement in the outer scope.
 
 ---
 
@@ -1143,16 +1367,19 @@ This guarantees that uncaught bubbled errors are translated at the boundary.
 
 ### 12.5 Error Trace Enrichment
 
-Whenever an Error bubbles across a flow boundary, the runtime appends a trace frame containing the current flow name, the current operation name if available, and the current input record if available.
+Each automatic trace frame contains the current flow name, operation name, and an input summary.
+The summary keeps input field names.
+Each field contains `Record{type: String}` with the value type name and no argument payload.
+This rule also applies to raw header-entry lists before `HTTP.Headers.new` constructs nominal headers.
 
-Trace frames are appended before invoking a self-handling flow handler or an
-adapter-level onError handler. The Error value passed to the handler includes
-all frames accumulated up to that boundary.
+The runtime appends frames before entry into a self-handler or adapter `onError`.
+The handler receives all frames accumulated before that boundary.
+List callback frames identify their processor.
+Their `index`, `element`, and `state` input fields use the same type-only summaries.
 
-For fallible list processor invocations, an Error produced by the referenced
-flow bubbles through the list processor. The runtime appends operation context
-for the list processor, including the processor name and element index when that
-index is available, before the Error crosses the enclosing flow boundary.
+Explicit `Error.input` and program-authored `Error.new` content keep their ordinary data semantics and type-specific snapshot rules.
+Explicit `Flow.fold` progress state also keeps its program data.
+Automatic trace summaries do not remove secret text from arbitrary program-authored error data or progress state.
 
 ### 12.6 Recoverable Failure Contract
 
@@ -1195,9 +1422,14 @@ flow FlowName(target_param: ParamType) -> OutputType { ... }
 
 ```text
 commit target_name
+result_name = commit target_name
 ```
 
-target_name must resolve to a previously bound committable target.
+`target_name` must resolve to a previously bound nominal target.
+The bound form introduces `result_name` only after activation success.
+Its type is the catalog-defined success type, without `!`.
+The unbound form discards the activation result.
+Commit has no expression form inside arguments, pipes, or Match branches.
 
 ### 13.4 Return
 
@@ -1283,7 +1515,7 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 * A plain total flow (-> T) may not contain unresolved expressions of type U!.
 * A fallible flow (-> T!) may contain unresolved expressions of type U!, which auto-propagate on failure.
 * A self-handling flow (-> T onError ErrorHandler) may contain unresolved expressions of type U!, which bubble to the flow-level handler.
-* Any effectful flow must declare either -> T! or -> T onError ErrorHandler.
+* A flow with commit activation must declare either -> T! or -> T onError ErrorHandler.
 
 ### 15.4 Match Rules
 
@@ -1294,10 +1526,13 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 * A predicate flow case head must use when FlowName syntax and must reference a
   pure total flow with signature (T) -> Bool.
 * All branch expressions must unify to one type.
+* Different nominal target types do not unify, even when their success types have the same fields.
+* Case heads must be pure and total.
+* Selectors and selected branches can read external state but cannot activate commits.
 
 ### 15.5 Commit Rules
 
-* commit may target only a bound value of type Effect or another activatable adapter type such as HTTP.Server.
+* Commit accepts bound nominal File targets, `HTTP.Server`, `HTTP.Client.Request`, and `Process.Command`.
 * A committed target activates exactly once per commit statement evaluation.
 
 ### 15.6 Null, Absence, and Record Rules
@@ -1361,7 +1596,7 @@ Program                  = Separator*, TopLevelBody?, Separator* ;
 TopLevelBody             = TopLevelStatement, (Separator+, TopLevelStatement)* ;
 TopLevelStatement        = BindingStatement | FlowDefinition | CommitStatement | ReturnStatement ;
 BindingStatement         = Identifier, "=", Expression ;
-CommitStatement          = "commit", Identifier ;
+CommitStatement          = [ Identifier, "=" ], "commit", Identifier ;
 ReturnStatement          = "return", Expression ;
 FlowDefinition           = "flow", Identifier, "(", ParameterList?, ")", "->", FlowReturnSignature, Block ;
 FlowReturnSignature      = TypeExpression | NonFallibleTypeExpression, "onError", Identifier ;
@@ -1410,6 +1645,9 @@ Separator                = Newline | ";" ;
 ```
 
 Disambiguation rules:
+
+A binding with `commit` after `=` is a bound commit statement.
+It is not an expression binding.
 
 1. Pipe expressions are left associative and have lower precedence than calls,
    projections, references, literals, parenthesized expressions, and Match.new.
@@ -1502,7 +1740,16 @@ Whitespace can occur between the components of a qualified name and before its c
 * `Error.new`
 * `File.Path.new`
 * `UTF8.String.new`
+* `UTF8.Bytes.new`
 * `HTTP.Server.new`
+* `HTTP.Headers.new`
+* `HTTP.Headers.values`
+* `HTTP.URL.new`
+* `HTTP.Method.new`
+* `HTTP.Client.Request.new`
+* `Process.Executable.new`
+* `Process.Command.new`
+* `HTTP.Response.new`
 * `HTTP.Response.Text.new`
 * `HTTP.Response.Bytes.new`
 * `String.FromScalars.new`
@@ -1517,7 +1764,7 @@ Whitespace can occur between the components of a qualified name and before its c
 
 ### 18.2 Pure Processors
 
-Purity excludes commit activation.
+Purity excludes host observations and commit activation, including transitive calls.
 A pure operation can still be fallible.
 The numeric and training operations in section 24 are also pure.
 Device access has a separate resource summary.
@@ -1569,8 +1816,10 @@ Device access has a separate resource summary.
 ### 18.3 Fallible Constructors and Processors
 
 Section 24 defines numeric, tensor, autodiff, gradient, optimizer, and device failures.
-Section 9.1 defines `File.list`, `File.open_paths`, `File.remove`, and their failure kinds.
+Section 9.1 defines `File.list`, `File.open_paths`, `File.Remove.new`, and their failure kinds.
 Section 8.8 defines callback failure propagation for `Flow.fold`.
+Sections 9.2 and 9.4 define HTTP constructor failure kinds.
+Section 9.5 defines Process construction and host unavailability.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
@@ -1598,25 +1847,34 @@ include additional fields in Error.input when useful.
   * Failure: the host cannot read the path as bytes, including not-found,
     permission-denied, and non-file cases.
   * Required Error.kind: String.new("File.ReadFailed")
+* `Process.Executable.new(path) -> Process.Executable!`
+  * Failure: the path is relative or contains NUL.
+  * Required Error.kind: String.new("Process.InvalidExecutable")
+* `Process.Command.new(executable, arguments, environment, directory, stdin) -> Process.Command!`
+  * Failure: the directory, arguments, or environment violate section 9.5.
+  * Required Error.kind: String.new("Process.InvalidCommand")
 * Any list processor invocation whose referenced pure flow is fallible.
   * Failure: the referenced flow returns Error for an element.
   * Required Error.kind: the original Error.kind returned by the referenced
     flow. The Error trace must add list processor context as described in
     section 12.5.
 
-Commit activation failures are recoverable inside fallible and self-handling
-flows. A failed File.append commit must produce Error.kind
-String.new("File.AppendFailed"). A failed File.write commit must produce
-Error.kind String.new("File.WriteFailed"). A failed HTTP.Server commit must
-produce Error.kind String.new("HTTP.ServerStartFailed"). At top level, a failed
-commit aborts activation and the host reports the Error diagnostic.
+Ordinary adapter activation errors are recoverable inside fallible and self-handling flows.
+A failed `File.Append` commit produces `File.AppendFailed`.
+A failed `File.Write` commit produces `File.WriteFailed`.
+A failed `HTTP.Server` startup produces `HTTP.ServerStartFailed`.
+At top level, these errors abort activation and produce an Error diagnostic.
+Host diagnostics remain outside Lo fallibility and handlers.
+In particular, standard-host Process activation returns `runtime.process-unavailable` and cannot be recovered by Lo code.
 
 ### 18.4 Committable Targets
 
-* `File.remove`
-* `File.append`
-* `File.write`
+* `File.Remove.new`
+* `File.Append.new`
+* `File.Write.new`
 * `HTTP.Server.new`
+* `HTTP.Client.Request.new`
+* `Process.Command.new`
 
 ---
 
@@ -1659,11 +1917,11 @@ flow ExtractVowels(input_text: String) -> String {
 flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
     success_log = File.Path.new(String.new("/logs/success.log"))
     error_log = File.Path.new(String.new("/logs/error.log"))
-    target_effect = Match.new(status_code,
-        Int.new(200): File.append(success_log, request_data),
-        _: File.append(error_log, request_data)
+    target_action = Match.new(status_code,
+        Int.new(200): File.Append.new(success_log, UTF8.Bytes.new(request_data)),
+        _: File.Append.new(error_log, UTF8.Bytes.new(request_data))
     )
-    commit target_effect
+    commit target_action
     return HTTP.Response.Text.new(
         status: status_code,
         body: String.new("Status processed")
@@ -1767,9 +2025,9 @@ rejection for syntactically valid programs that violate semantic rules.
 | Record exactness | `Record.new(limit: Int.new(10))` satisfies `Record{ limit: Int }`. | A value checked against `Record{ limit: Int }` that omits limit, adds another field, or sets `limit: null`. |
 | Map construction | `Map.new(Record.new(key: String.new("a"), value: Int.new(1)))` satisfies `Map<String, Int>`. | `Map.new(Record.new(name: String.new("a"), value: Int.new(1)))` because the entry field must be named key. |
 | Comparable domains | `Range.new(start: Int.new(1), end: Int.new(3), include_start: true, include_end: true)` and `Map<String, Int>`. | `Range<Bytes>` or `Map<List<Int>, String>` because those key/endpoint types are not comparable in v0.3. |
-| Map absence | `Map.has_key(headers, key)` is total and `Map.get(headers, key)` is fallible. | Treating a missing map value as a nullable successful value. |
+| Map absence | `Map.has_key(values, key)` is total and `Map.get(values, key)` is fallible. | Treating a missing map value as a nullable successful value. |
 | List flow references | `List.filter(numbers, IsPositive)` where IsPositive is pure and `(Int) -> Bool`. | Passing an anonymous function, an effectful flow, or a flow with the wrong parameter order to a list processor. |
-| Commit activation | `effect = File.append(path, text)` followed by `commit effect` in a fallible or self-handling flow. | `commit text` where text has type String, or any commit inside a plain total flow. |
+| Commit activation | `action = File.Append.new(path, UTF8.Bytes.new(text))` followed by `receipt = commit action` in a fallible or self-handling flow. | `commit text` where text has type String, or any commit inside a plain total flow. |
 | Predeclared name shadowing | `flow UserHandler(request: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(status: Int.new(200), body: String.new("ok")) }` | `flow String(value: Int) -> Int { return value }` or `HTTP = String.new("x")`. |
 | Grammar examples | Every example in section 19 parses under section 17 and type-checks under section 15. | Any section 19 example relying on an undeclared non-standard processor or undocumented precedence rule. |
 
@@ -1781,7 +2039,7 @@ Lo v0.3 is a typed declarative dataflow language with:
 2. pure processors,
 3. named flows only,
 4. typed adapters such as File and HTTP,
-5. a single pure Match.new(...) construct for branching,
+5. one conditional Match.new(...) construct,
 6. a first-argument threading operator |>,
 7. a pragmatic Math namespace,
 8. general-purpose `List<T>` sequences and dense `Tensor<FP32>` arrays,
@@ -1820,18 +2078,30 @@ These labels do not declare variables.
 
 ### 22.2 Transitive Effects
 
-A flow is effectful when its evaluated body can activate a commit directly or through an invoked flow.
-List callbacks, `Flow.fold` callbacks, and match predicates participate in the same analysis.
-An unused nested definition does not make its enclosing flow effectful.
-Construction of an adapter does not activate its handlers.
+A pure flow has no host observations or commit activation, directly or through invoked flows.
+The summaries keep `reads`, `commits`, and `devices` separate.
+Device requirements alone do not make a callback impure.
+
+List callbacks, `Flow.fold` callbacks, and Match predicates participate in the same transitive analysis.
+An unused nested definition does not change the enclosing flow summary.
+Adapter construction keeps handler requirements without executing the handlers.
 The verifier checks all flow bodies, including unused flows.
 
-Every effectful flow must have a fallible output or a self-handler.
-A pure callback must not invoke an effectful flow indirectly.
-Match selectors, case heads, and branches must not invoke effectful flows.
-A branch can construct a committable target for an outer commit.
-Boundary reads have a separate summary and do not constitute commit activation.
-The runtime must not speculate boundary reads.
+| Position | Rule |
+| --- | --- |
+| List callback | Pure named flow. |
+| Match predicate | Pure total named flow. |
+| Match case head | Pure total value calculation. |
+| Match selector or selected branch | Host observations permitted. Commit activation prohibited. |
+| Flow self-handler or adapter `onError` | Pure total named flow. |
+| `Flow.fold` callback | Host observations and commits permitted under ordinary fallibility rules. |
+| HTTP request handler | Host observations and commits permitted under its declared signature. |
+
+A flow with commit activation must have a fallible output or a self-handler.
+An observation alone does not require that declaration.
+A branch can construct a target for a later commit.
+The runtime must keep observation order, invocation count, failure order, and selected branches.
+It must not repeat, cache, or speculate host observations as pure calculations.
 
 ### 22.3 Fallible Values
 
@@ -1993,19 +2263,22 @@ Failure tags inside returned containers remain data.
 
 An operation error retains its required kind and immediate input record.
 Fixed operation inputs use the canonical parameter names from the built-in catalog.
-An explicit `Error.new` keeps its supplied input record and starts with an empty trace.
+An explicit `Error.new` keeps its supplied input record and starts with empty trace and fold progress metadata.
 Stored errors retain their trace until propagation adds a frame.
 
 A flow boundary adds one frame before invocation of its self-handler.
 A fallible flow also adds one frame before publication of a failed result.
-The frame contains the flow name, the recorded failure operation, and the flow's named input values.
+The frame contains the flow name, failure operation, and named input type summaries.
+Each automatic input field contains only `Record{type: String}`.
 A caller records the failed callee as its operation.
 The input record can be empty for a flow without parameters.
 
 A failed list callback adds its flow frame before the list processor frame.
-The processor frame contains the enclosing flow name, processor name, and zero-based index.
-Its input also contains `element` when the processor has an input list.
-A fold or unfold frame also contains `state`.
+The processor frame contains the enclosing flow name and processor name.
+Its input contains an `index` type summary.
+It also contains an `element` type summary when the processor has an input list.
+A fold or unfold frame also contains a `state` type summary.
+
 The processor frame precedes the enclosing flow boundary frame.
 At top level, the processor frame uses an empty flow name.
 
@@ -2037,27 +2310,41 @@ An exceeded limit aborts execution with a host diagnostic.
 
 ### 23.6 File and Server Activation
 
-File effect construction does not access a file.
+File target construction does not access a file.
 An evaluated commit activates its target once.
 Two evaluated commits of the same target cause two activations.
 Commits execute in source order within their invocation.
 A failed commit stops the current body before later statements execute.
 An applicable self-handler can return a result to the caller, as specified in section 23.4.
 
-`File.append` appends the UTF-8 bytes of its text input.
-`File.write` replaces the file contents with its byte input.
+`File.Append.new` constructs an append target from Bytes.
+`UTF8.Bytes.new(text)` explicitly encodes text as UTF-8.
+`File.Write.new` constructs a replacement target from Bytes.
+Activation writes the supplied bytes.
 Both operations create the target file if it does not exist.
 They do not create missing parent directories.
 A failed activation uses the error kind specified in section 18.3.
 Its input record contains `file_path` and `file_content`.
 
-`File.remove` follows the batch contract in section 9.1.
+`File.Remove.new` follows the batch contract in section 9.1.
 Removal diagnostics retain ordered entry snapshots and a progress record with counts, observed bytes, failed index, and stage.
 The host fields are `removal_entries` and `removal_progress`.
+
+Write and append host failures expose `write_progress` with `bytes_written: Int` and `stage: String`.
+A host failure can expose `last_completed_activation` with `operation`, `span`, and `receipt`.
+This record identifies the latest completed activation in the invocation.
+It does not describe the current partial operation.
+The invocation keeps only its latest completed activation record.
+Diagnostic evidence does not create a result binding.
+
+Cleanup cancellation must keep the original operation failure class.
+Recoverable write errors keep `cleanup_errors: List<String>` in `Error.input`.
+Host diagnostics expose `cleanup_errors` as a JSON array.
+
 `Flow.fold` adds cumulative state as specified in section 8.8.
 CLI runs preserve this state through session and grant cleanup failures.
 
-A later failure does not reverse a completed file effect.
+A later failure does not reverse a completed File activation.
 A failed write can leave partial contents.
 Commit sequences have no transaction and no automatic retry.
 Each HTTP request has its own invocation order.
@@ -2079,10 +2366,10 @@ The adapter validates request text as UTF-8 before handler entry.
 The path contains the decoded URL path without the query.
 The body contains bytes without implicit text decoding.
 
-The header map starts with the `Host` entry.
-Other entries use canonical HTTP header names in sorted order.
-Repeated header values use `, ` as their separator.
-Repeated `Cookie` values use `; ` as their separator.
+Incoming headers use nominal `HTTP.Headers`, including a byte-valued `host` entry.
+Names use lowercase lexical order.
+Repeated values keep their protocol order without comma joining.
+Opaque header bytes do not require UTF-8 decoding.
 
 | Boundary condition | Error kind |
 | --- | --- |
@@ -2096,7 +2383,8 @@ Response errors contain the response fields in `Error.input`.
 An uncaught Lo error from the request handler keeps its original kind and trace.
 Each of these errors enters the mandatory adapter `onError` handler.
 
-Before `onError` entry, the adapter adds one trace frame with an empty flow name and an input record that contains `port`.
+Before `onError` entry, the adapter adds one trace frame with an empty flow name.
+Its input field `port` contains the type summary `Record{type: String}` with value `"Int"`.
 Request errors and propagated handler errors use operation `HTTP.request`.
 Response validation errors use operation `HTTP.respond`.
 An error from a self-handling flow reaches the adapter only if that flow does not return a successful response.
@@ -2104,7 +2392,7 @@ An error from a self-handling flow reaches the adapter only if that flow does no
 Response status codes are integers from `200` through `599`.
 Responses with status codes `204`, `205`, and `304` must have an empty body.
 The response to `HEAD` omits body bytes on the connection.
-Section 9.2 specifies the empty headers in constructed responses.
+Section 9.2 specifies explicit headers and the empty headers in convenience responses.
 The HTTP transport can add protocol headers.
 
 An invalid response from `onError` is a fatal host failure.
@@ -2123,7 +2411,7 @@ The compiler design specifies request limits, cancellation, startup, and shutdow
 F002 through F007 implement Float arithmetic, CPU tensors, reverse-mode autodiff, Parameters, gradients, and optimizers.
 F001 implements these operations in native executables.
 The reference interpreter and native artifacts use the same numeric and runtime contracts.
-All operations in this section are pure under the rule that prohibits commit activation.
+All operations in this section have neither host observations nor commit activation.
 Device resource boundaries have a separate transitive effect summary.
 F008 adds device resources and explicit transfers.
 F013 and F014 implement Metal arithmetic and native Metal artifacts.
@@ -2548,6 +2836,7 @@ Encoded bytes have the existing 16 MiB value limit.
 All operations consume the current execution and resource budgets.
 
 The checkpoint operations do not access files.
-Use `File.read` to obtain bytes and an explicit `File.write` commit to persist them.
+Use `File.read` to obtain bytes.
+Construct a `File.Write` target and commit it to persist those bytes.
 The codec operations are pure, fallible, and outside the differentiable subset.
 An unresolved failure prevents later observable effects.
