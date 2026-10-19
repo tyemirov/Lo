@@ -1,0 +1,29 @@
+{
+  "status": "validated-pure-policy-native-profile-unqualified",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "source_sha256": {
+    "internal/adapter/process_policy.go": "bdd933cd382ca3e7ad7888eee31fa087cc889900df862e40cee25d9af94b0356",
+    "internal/runner/command.go": "1d985339d62475e893850ac329c530a75f43bc873f54c2072ba3c7a563bc7b07",
+    "tests/integration/adapter_process_policy_test.go": "37c8c54c56e46cd20e2a041b197212d1a8e2eaf8ae2fe17350b4564523cba6b6"
+  },
+  "validation": {
+    "red": {
+      "expected_failure": true,
+      "seconds": 0.758,
+      "reason": "The parser rejected the new Process flags as unknown options."
+    },
+    "focused": {
+      "command": "CI=1 make -j1 fmt test-integration TEST_ARGS='-run TestAdapterProcessPolicy -count=1' </dev/null",
+      "passed": true,
+      "seconds": 0.707
+    },
+    "regression": {
+      "command": "CI=1 make -j1 test-integration TEST_ARGS=\"-run 'TestAdapterProcess|TestCLI' -count=1\" </dev/null",
+      "passed": true,
+      "seconds": 3.615
+    }
+  },
+  "review": "Independent architect review found no remaining source finding. Focused and regression checks then passed.",
+  "scope": "Compiler and embedded runner argument parsing, immutable policy values, unavailable activation, and separation from parent File authority. These checks perform no native Process launch."
+}

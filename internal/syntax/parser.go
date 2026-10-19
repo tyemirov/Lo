@@ -122,6 +122,10 @@ func (p *parser) statement() Statement {
 	switch t.kind {
 	case tIdentifier:
 		p.expect(tEqual, "=")
+		if p.accept(tCommit) {
+			target := p.expect(tIdentifier, "commit target")
+			return commit{statementBase{base{p.span(t.start)}}, target.text, t.text}
+		}
 		value := p.expression()
 		return binding{statementBase{base{p.span(t.start)}}, t.text, value}
 	case tReturn:
@@ -129,7 +133,7 @@ func (p *parser) statement() Statement {
 		return returnNode{statementBase{base{p.span(t.start)}}, value}
 	case tCommit:
 		name := p.expect(tIdentifier, "commit target")
-		return commit{statementBase{base{p.span(t.start)}}, name.text}
+		return commit{statementBase{base{p.span(t.start)}}, name.text, ""}
 	case tFlow:
 		return p.flow(t.start)
 	default:

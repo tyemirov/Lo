@@ -215,7 +215,7 @@ func metalNumericFailures(t *testing.T, factory func() device.Factory) {
 			}
 			dir := t.TempDir()
 			path := filepath.Join(dir, "must-not-exist")
-			text := fmt.Sprintf(`flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(%s),List.new(%d)),Device.new("metal:0"));b=Tensor.to(Tensor.new(List.new(%s),List.new(%d)),Device.new("metal:0"));result=%s;effect=File.write(File.Path.new(%q),Bytes.new("bad"));commit effect;return Tensor.to(result,Device.new("cpu"))};return Main()`, tc.a, count, tc.b, count, tc.expression, path)
+			text := fmt.Sprintf(`flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(%s),List.new(%d)),Device.new("metal:0"));b=Tensor.to(Tensor.new(List.new(%s),List.new(%d)),Device.new("metal:0"));result=%s;effect=File.Write.new(File.Path.new(%q),Bytes.new("bad"));commit effect;return Tensor.to(result,Device.new("cpu"))};return Main()`, tc.a, count, tc.b, count, tc.expression, path)
 			got, receipts := runWithDevices(t, context.Background(), text, factory(), "--allow-device", "metal:0", "--write-root", dir)
 			if got.status != 1 || !strings.Contains(got.stderr, tc.kind) || got.stdout != "" {
 				t.Fatalf("numeric failure: %+v", got)
@@ -264,7 +264,7 @@ func TestMetalComputeControlledFailures(t *testing.T) {
 			}
 			dir := t.TempDir()
 			path := filepath.Join(dir, "must-not-exist")
-			text := fmt.Sprintf(`flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(2.0),List.new()),Device.new("metal:0"));b=Tensor.mul(a,a);effect=File.write(File.Path.new(%q),Bytes.new("bad"));commit effect;return Tensor.to(b,Device.new("cpu"))};return Main()`, path)
+			text := fmt.Sprintf(`flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(2.0),List.new()),Device.new("metal:0"));b=Tensor.mul(a,a);effect=File.Write.new(File.Path.new(%q),Bytes.new("bad"));commit effect;return Tensor.to(b,Device.new("cpu"))};return Main()`, path)
 			got, receipts := runWithDevices(t, ctx, text, model, "--allow-device", "metal:0", "--write-root", dir)
 			if got.status != tc.status || !strings.Contains(got.stderr, tc.kind) || got.stdout != "" {
 				t.Fatalf("compute failure: %+v", got)

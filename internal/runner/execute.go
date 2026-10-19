@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/processhost"
 	"io"
 	"os"
 	"os/signal"
@@ -41,29 +42,50 @@ func RunContext(ctx context.Context, options Options, p execution.Program, facto
 }
 
 func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout, stderr io.Writer) int {
-	files, err := adapter.OpenFiles(inv.readRoots, inv.writeRoots)
+	limits := adapter.DefaultProcessLimits()
+	configuration, err := processhost.NewConfig(inv.processPolicy, limits)
 	if err != nil {
 		return ReportRuntime(stderr, inv.format, err)
 	}
+	hostSession, err := processhost.Open(ctx, configuration, adapter.FileRoots{Read: inv.readRoots, Write: inv.writeRoots, List: inv.listRoots, Remove: inv.removeRoots, OpenFiles: inv.openFilesRoots})
+	if err != nil {
+		return ReportRuntime(stderr, inv.format, err)
+	}
+	closeHost := func() error {
+		cleanup, cancel := context.WithTimeout(context.Background(), limits.CleanupTimeout())
+		defer cancel()
+		return hostSession.Close(cleanup)
+	}
+	// Report a bounded Close failure before joining its retained owner. This
+	// function cannot return to an os.Exit caller while ownership is unresolved.
+	defer func() { _ = hostSession.WaitRetained() }()
+	boundaries, err := adapter.WithHTTP(hostSession.Boundary(), inv.httpPolicy)
+	if err != nil {
+		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, closeHost()))
+	}
 	if inv.command == RunCommand {
-		output, runErr := p.Run(ctx, files, inv.budget, inv.devices)
-		if err := runtimeCleanup(runErr, files.Close()); err != nil {
+		ctx, capture, err := execution.CaptureFailure(ctx)
+		if err != nil {
+			return ReportRuntime(stderr, inv.format, runtimeCleanup(err, closeHost()))
+		}
+		output, runErr := p.Run(ctx, boundaries, inv.budget, inv.devices)
+		if err := capture.Preserve(runtimeCleanup(runErr, closeHost())); err != nil {
 			return ReportRuntime(stderr, inv.format, err)
 		}
 		if err := writeExecution(stdout, inv.format, executionResult{Command: RunCommand, Status: "ok", Result: output}); err != nil {
-			return ReportRuntime(stderr, inv.format, execution.HostFailure("write command result", inv.path, err))
+			return ReportRuntime(stderr, inv.format, capture.Preserve(execution.HostFailure("write command result", inv.path, err)))
 		}
 		return ExitSuccess
 	}
-	servers, err := adapter.NewServers(p, files, inv.listenPolicy, inv.budget, inv.devices)
+	servers, err := adapter.NewServers(p, boundaries, inv.listenPolicy, inv.budget, inv.devices)
 	if err != nil {
-		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, files.Close()))
+		return ReportRuntime(stderr, inv.format, runtimeCleanup(err, closeHost()))
 	}
 	cleanup := func(cause error) error {
 		shutdown, cancel := context.WithTimeout(context.Background(), adapter.ShutdownTimeout)
 		defer cancel()
 		serverErr := servers.Shutdown(shutdown)
-		return runtimeCleanup(cause, errors.Join(serverErr, files.Close()))
+		return runtimeCleanup(cause, errors.Join(serverErr, closeHost()))
 	}
 	output, err := servers.Start(ctx)
 	if err != nil {
@@ -97,10 +119,7 @@ func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout
 	return ExitSuccess
 }
 func runtimeCleanup(cause, cleanup error) error {
-	if cleanup != nil {
-		return execution.HostFailure("close runtime resources", "program", errors.Join(cause, cleanup))
-	}
-	return cause
+	return execution.PreserveCleanup(cause, cleanup)
 }
 func writeExecution(w io.Writer, format string, result executionResult) error {
 	if format == JsonFormat {

@@ -2,6 +2,7 @@ package runtimeops
 
 import (
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
@@ -16,14 +17,30 @@ func ParseInt(text string) (value.Value, error) {
 	}
 	return Integer(n)
 }
-func Commit(s execution.Session, target value.Target, span source.Span) error {
-	if err := s.Boundary().Commit(s.Context(), target); err != nil {
+func Commit(s execution.Session, target value.Target, span source.Span) (value.Value, error) {
+	result, err := s.Boundary().Commit(s.Context(), target)
+	if err != nil {
 		if host := execution.BoundaryHostError(err); host != nil {
-			return host
+			return nil, host
 		}
-		return execution.Failed(ActivationError(target, err, span))
+		cause, causeErr := ActivationError(target, err, span)
+		if causeErr != nil {
+			return nil, execution.HostFailure("commit failure", target.Type().String(), causeErr)
+		}
+		return nil, execution.Failed(cause)
 	}
-	return nil
+	resultType, ok := catalog.ActivationResult(target.Type())
+	if !ok || result == nil || !types.Equal(result.Type(), resultType) {
+		return nil, execution.HostFailure("commit result", target.Type().String(), fmt.Errorf("invalid adapter result"))
+	}
+	operation, _ := catalog.ActivationOperation(target.Type())
+	if err := s.RecordActivation(operation.Capability(), span, result); err != nil {
+		return nil, execution.HostFailure("commit completion", target.Type().String(), err)
+	}
+	if err := s.ChargeValue(result); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 func Propagate(v value.Value) (value.Value, error) {
 	result, cause := v.(value.Fallible).Outcome()

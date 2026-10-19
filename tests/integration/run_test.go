@@ -170,7 +170,7 @@ func TestRunRecoverableErrors(t *testing.T) {
 	if err := json.Unmarshal(frame["input"].Value, &input); err != nil {
 		t.Fatal(err)
 	}
-	valueJSON(t, input["index"], `"1"`)
+	valueJSON(t, input["index"], `{"type":{"type":"String","value":"Int"}}`)
 	got := run(t, "run", sourceFile(t, `flow Divide(x: Int) -> Int! { return Math.div(8, x) }; return Divide(0)`))
 	if got.status != 1 || !strings.Contains(got.stderr, "Divide") || !strings.Contains(got.stderr, "Math.div") {
 		t.Fatalf("text trace: %+v", got)

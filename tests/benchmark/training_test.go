@@ -21,8 +21,14 @@ type noBoundaries struct{}
 func (noBoundaries) Read(context.Context, value.Text) (value.Bytes, error) {
 	return nil, execution.Denied("File.read", "training benchmark")
 }
-func (noBoundaries) Commit(context.Context, value.Target) error {
-	return execution.Denied("commit", "training benchmark")
+func (noBoundaries) List(context.Context, value.Text) (value.List, error) {
+	return nil, execution.Denied("File.list", "training benchmark")
+}
+func (noBoundaries) OpenPaths(context.Context, value.Text) (value.List, error) {
+	return nil, execution.Denied("File.open_paths", "training benchmark")
+}
+func (noBoundaries) Commit(context.Context, value.Target) (value.Value, error) {
+	return nil, execution.Denied("commit", "training benchmark")
 }
 
 var programSink ir.Program

@@ -1,0 +1,753 @@
+{
+  "status": "canonical-process-execution-enabled-and-public-acceptance-passed",
+  "profile": "Darwin 27 arm64",
+  "standard_host_execution_enabled": true,
+  "review": "Exact source and artifact manifests independently approved before one run per phase.",
+  "progress_fields_scope": "Start and cleanup fields from diagnostics describe failures. Successful typed results prove activation without a process_progress diagnostic.",
+  "validation": {
+    "gate-red": {
+      "manifest_sha256": "bb57f9c0eba56711ffd651528d614666dd307db291e23b1ca7ca718fa2f2302c",
+      "manifest": {
+        "artifacts": {
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/fixture_paths.h": "8263c7e4d9731334311bea186f17deb640841c963fa762b38e33ea753f3d8ed5",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/helper": "ed153dd84e20a3d97212bbe06b02f6c5f236c43eed00a37543f1f0d6988e6caa",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/invalid-helper": "ed82f7400c19e6e4d46b979fd68cecb7f81e9ad8e32951a0fb3fe5214dbc4e80",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/target": "d788a8ca84ee54fb25d6d62c22cef9af43bff98d3e353bd27d86a9fc6322d47f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/ungranted-target": "d788a8ca84ee54fb25d6d62c22cef9af43bff98d3e353bd27d86a9fc6322d47f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/helper_identity.go": "e86336237116d709ddedd9b554fd323a98ae4f5daee0ce47b0a01589a399bf75",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/lo": "bf7e68c4ff1871a4296abb83f593d435a562d4f75f4cf4c9e2e3b5976c2f0eec",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-command.lo": "ea76d92f88c77f7fe5ec28edcc71e4654083d425b1fe28e9153e9086d05eade7",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-command.native": "b4de5ab828233a08f5892935ba9f61800577d3e0154f90bb0d00f27764b9a9b1",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-cwd.lo": "88d438ada86a393b1bc39bca9910a4f7a9895ef1f2f62a19216cc3c9f5955c6f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-cwd.native": "180f852eddc1efdd2d770e93317d7007a0863e99eccc74afc11ead6435841444",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/helper-identity.lo": "ee26f7ef5ccfac576635bfaee533ee59dc465ec573d566df1ad9dadb8d15ed7d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/helper-identity.native": "cf2f4bfaeddfea55090e2c6caced1755438f8bee977d56fff5f7715d751d3361",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/nonzero.lo": "2c0d0b9ad0ef0c49f53913444dca5f51b8ae193817d9d90cc268fe89a74a23bd",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/nonzero.native": "12d7319183c7ae7be797b04fa583293f6d138e60362ffe98895a83efe8429cdd",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/normal.lo": "ee26f7ef5ccfac576635bfaee533ee59dc465ec573d566df1ad9dadb8d15ed7d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/normal.native": "d776baaa4465e79e0ccc6c4924f946994103ba04ff26fbd52384df982700f9ae",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-read.lo": "a7262beb2c6d8a59f353a1eed1bf1f03ae47a683190b802e72f2af6661ffc9d6",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-read.native": "a0b042a6e9e08b5429d9c17926d29b79dcdef2ca959978712d163431a803a910",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-write.lo": "74018c825d8e17ff459e93cacbad94b5e4927d66338c410701ee707f595d8051",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-write.native": "6f8695e7f02cd757c0810559d4cb0631f925d068ad5dbf7cd3b110d0514dbc6d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-nonzero.lo": "08e4ce0b6cc5a1c37caa8408b250031eea4bbb98cb7570d77cb30ec6d8702a21",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-nonzero.native": "a03b56aa259180be23ad6176ec06f27e030857d6f2e7f78f7b4ace57b7da8f2f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-zero.lo": "c23ce78aff2f6e2364a91a47ce7840f43c273126765b679fc09718b8c0108b0a",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-zero.native": "7655b32b69e93ae38eda0c724d3d616a0ff6b643ad4dddcd76c7aa9a5f8052d4",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/server-callback.lo": "0bc57fedc61730d6f4bbb783f2a9f62450b9ebdf58ae3d5d8f6040f08c00546f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/server-callback.native": "5ac0da01ae3d223b72f0c896f7d684f539e8bfda57902aa4431a410113bfd2fd",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/signaled.lo": "4d914f04b77329be0d2256c9f550528f87b28b9bc80ec75e10598ba3b280765c",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/signaled.native": "492ab97a0e7f0c133b016de4c86fc074df090ef602fa2d6adae883ba848c5ee8",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/wall-timeout.lo": "d1e13927df97068d4e68394c9ce0fcc7179fc47dea116ce6d02a0f8d9e3ab2a3",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/wall-timeout.native": "aad00026c142b658c7c1685da0ae0c9c6eaa62a2a44ea587bfbf569ad66f14a2",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-command.lo": "ea76d92f88c77f7fe5ec28edcc71e4654083d425b1fe28e9153e9086d05eade7",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-command.native": "72e684f23966f83c030bf401c586b00ace91ae442c6c79d8dc80914d88e6459a",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-cwd.lo": "88d438ada86a393b1bc39bca9910a4f7a9895ef1f2f62a19216cc3c9f5955c6f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-cwd.native": "81131cc3d45b695caeb313a1705303bd7ae9d7e3abb977dba158a143ba32f9ec",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/helper-identity.lo": "ee26f7ef5ccfac576635bfaee533ee59dc465ec573d566df1ad9dadb8d15ed7d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/helper-identity.native": "084fc070ab913e4200fecef1e4eec90636d41190ef9defa37184f1105d463c2e",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/nonzero.lo": "2c0d0b9ad0ef0c49f53913444dca5f51b8ae193817d9d90cc268fe89a74a23bd",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/nonzero.native": "3e53e3ba45dc493cd7bb1ff169b4f27c57e6f69ff88cb2e096eed444f7b4ebdb",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/normal.lo": "ee26f7ef5ccfac576635bfaee533ee59dc465ec573d566df1ad9dadb8d15ed7d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/normal.native": "844852073ed8117f5f38176e84d2609f1101f6b4f307115109d4486380a45822",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-read.lo": "a7262beb2c6d8a59f353a1eed1bf1f03ae47a683190b802e72f2af6661ffc9d6",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-read.native": "1cc3457692c4ed6a277074ef192dfead10d7794ee0716e7c697d4d729ba4a6da",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-write.lo": "4ae840643b8e5eda929eec61f081ee320565b6757e8dd98033a4aa8b4c793244",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-write.native": "f94f4dc175e63afc75d628e48425e9e6ee6ead31dae636410fde3f4818318106",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-nonzero.lo": "c09cb3136d503a7c711b3e120fd0cb497078f30257a0182df9f8fe457db67611",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-nonzero.native": "63d153f7eee0902b5979f29bcbd7656a99c7a773485e1f7eb87c34fa74415b92",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-zero.lo": "6b9b35a7884161d30abdc483538a486d37add7855ee8439133af8892314228cc",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-zero.native": "41eb45ade3f523b199f9ac959cbb8dd5e7b21b80d936456428abad4869943b8f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/server-callback.lo": "0bc57fedc61730d6f4bbb783f2a9f62450b9ebdf58ae3d5d8f6040f08c00546f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/server-callback.native": "83e326aae58607fa7a9a4a7e0af4f946e179ea350e621c9c828e03db1d22e359",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/signaled.lo": "4d914f04b77329be0d2256c9f550528f87b28b9bc80ec75e10598ba3b280765c",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/signaled.native": "7682cc097abfa12bbe4cde0f86bf4d4ea207955d8fe65342d2648c64a1da202f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/wall-timeout.lo": "d1e13927df97068d4e68394c9ce0fcc7179fc47dea116ce6d02a0f8d9e3ab2a3",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/wall-timeout.native": "2a4021754154c956a1e6d78b319011903a43a05eab6af8298c7203ef14ede781",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/public-tests": "2568a512fe8224f2964e1723b2220c961e44f47cab407ac136a6709d2053376f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/experiments/process-public/native/target.c": "427ef469a376e9225a84b7ed5369d50a6cc0aa25ef337aeba0c328e4c5d4658c",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/experiments/process-public/probe.mk": "56281bb17508d8bf961a14b38ebac6d2ecf918f07013608dafa408adae0d6b9d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/experiments/process-public/probe.py": "76b0b8f66545d614b3bcf6d5bd540c7eb98f2adeaadd0d24a907d8237a247009",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/experiments/process-public/public_test.go": "22ba510270dca8bdc2a25fab33565796b65c712efafccb2757f7a30ebc99a5f4",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/experiments/process-public/test_probe.py": "e6c22b7d57c6e48f5b310fdbd3d85511a248edc7d28ed67b2a3cfe1d46d7a8de",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/helper_identity.go": "e86336237116d709ddedd9b554fd323a98ae4f5daee0ce47b0a01589a399bf75",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/native/launcher.c": "0b4d0247b0436f085a02bebbea052d36b31dbd9e5d3079f1ec69c4b390726722",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/native/normalization.c": "bca34b235eae64168f7fc4bcf6a25c32ccac65cc357b451fc6414317a0a8ce1e",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/native/protocol.h": "d91353f6b15d4810d844f33bd16ed6127fae3942b0c6b801a82842a64c642e08",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/native_config_darwin.go": "3cbfdc25cd758a7ae3e5562dec03c8cf23b916e8501cad98e4fcaa1d67ee21f3",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/native_darwin.go": "8a7be52c5ed2eeafbb6f4ed092570d74491b7ef80d5af0d2a88e086e7c7a69dc",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/native_other.go": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/native_ownership_darwin_test.go": "98dcad178c35b9b540237c874d00b8348b6b1786ba25cd142c8bc826bc24063e",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/session.go": "1b7a7ba7b7ac98ba3d7d04e65fa5f48fe95a61833a7918ca065e322b540edd88",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/processhost/startup.go": "029e0f4dbd048ef277115bd17128c113e33791c372a416a9c2866d580ce1f50f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/runner/command.go": "1d985339d62475e893850ac329c530a75f43bc873f54c2072ba3c7a563bc7b07",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/internal/runner/execute.go": "03c5e1d4d4c0e5f16e87d99cae9e60000cbdd53b5f1540acda398dc62067db90",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot/tools/processbuild/identity.py": "a2d8f7ac0eb2bfc24e6477c748ac8ed98feace3a05704477ea7882727d0f28b8"
+        },
+        "bad_helper": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/invalid-helper",
+        "cli": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/lo",
+        "helper": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/helper",
+        "phase": "gate-red",
+        "programs": {
+          "interpreter": {
+            "denied-command": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-command.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-command.lo"
+            },
+            "denied-cwd": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-cwd.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/denied-cwd.lo"
+            },
+            "helper-identity": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/helper-identity.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/helper-identity.lo"
+            },
+            "nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/nonzero.lo"
+            },
+            "normal": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/normal.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/normal.lo"
+            },
+            "parent-read": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-read.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-read.lo"
+            },
+            "parent-write": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-write.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/parent-write.lo"
+            },
+            "pipeline-nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-nonzero.lo"
+            },
+            "pipeline-zero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-zero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/pipeline-zero.lo"
+            },
+            "server-callback": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/server-callback.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/server-callback.lo"
+            },
+            "signaled": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/signaled.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/signaled.lo"
+            },
+            "wall-timeout": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/wall-timeout.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/interpreter/wall-timeout.lo"
+            }
+          },
+          "native": {
+            "denied-command": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-command.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-command.lo"
+            },
+            "denied-cwd": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-cwd.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/denied-cwd.lo"
+            },
+            "helper-identity": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/helper-identity.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/helper-identity.lo"
+            },
+            "nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/nonzero.lo"
+            },
+            "normal": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/normal.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/normal.lo"
+            },
+            "parent-read": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-read.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-read.lo"
+            },
+            "parent-write": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-write.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/parent-write.lo"
+            },
+            "pipeline-nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-nonzero.lo"
+            },
+            "pipeline-zero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-zero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/pipeline-zero.lo"
+            },
+            "server-callback": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/server-callback.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/server-callback.lo"
+            },
+            "signaled": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/signaled.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/signaled.lo"
+            },
+            "wall-timeout": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/wall-timeout.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/programs/native/wall-timeout.lo"
+            }
+          }
+        },
+        "read_root": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture",
+        "result": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/result.json",
+        "sources_root": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/source-snapshot",
+        "target": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/target",
+        "token": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/run-token",
+        "write_root": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/outputs"
+      },
+      "result_sha256": "3a2501bcf84c7d98af00c58bc959236317293ecd00b530f6751c9c9a835969e4",
+      "result": {
+        "reviewed_manifest_sha256": "bb57f9c0eba56711ffd651528d614666dd307db291e23b1ca7ca718fa2f2302c",
+        "phase": "gate-red",
+        "cases": [
+          {
+            "backend": "interpreter",
+            "case": "normal",
+            "passed": false,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.process-unavailable",
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 8776875
+          }
+        ],
+        "artifacts_unchanged": true,
+        "cleanup_complete": true,
+        "acceptance_passed": false
+      },
+      "controller_sha256": "f8f10dd1462117900726f9ee99da35a748a2bc97714f62ae401e6babeae0e388",
+      "controller": {
+        "artifacts_unchanged": true,
+        "cancel_requested": false,
+        "controller_joined": true,
+        "elapsed_seconds": 0.43969941698014736,
+        "emergency_group_signal": false,
+        "exit_code": 1,
+        "explicit_cleanup_complete": true,
+        "output_saturated": false,
+        "reviewed_manifest_sha256": "bb57f9c0eba56711ffd651528d614666dd307db291e23b1ca7ca718fa2f2302c"
+      }
+    },
+    "qualified": {
+      "manifest_sha256": "03f3b82f4a6ed07c440f795b9a58f4cd20d11e9a68b026a8c5b149fb0e9a0dda",
+      "manifest": {
+        "artifacts": {
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/fixture_paths.h": "a6f475856552aa86e702903d97d423da254487740f0321e70196b67ca61ff58f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/helper": "ed153dd84e20a3d97212bbe06b02f6c5f236c43eed00a37543f1f0d6988e6caa",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/invalid-helper": "ed82f7400c19e6e4d46b979fd68cecb7f81e9ad8e32951a0fb3fe5214dbc4e80",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/target": "7bd0d99392e0027134e603afb3a901b9e7daccd293ed4eb596eb5bdc85a4b569",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/ungranted-target": "7bd0d99392e0027134e603afb3a901b9e7daccd293ed4eb596eb5bdc85a4b569",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/helper_identity.go": "e86336237116d709ddedd9b554fd323a98ae4f5daee0ce47b0a01589a399bf75",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/lo": "1b526a183380b3db95f964e87c6f622b9906554dcf3bf67d0ebbd56e2cd67299",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-command.lo": "07b7fec73af910423efe0d2440dfcf0436e5b452a1e77f53622498964196666f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-command.native": "5341cb9ba3d2668dce72974c200168ecf82d2c2bb2f512c3b982c1d5557f85b0",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-cwd.lo": "8ddf9c2e461342ad5a7aef7cb6082b92d298f9897020ed483130e73dad7e2138",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-cwd.native": "fa14adbb8e636ae7ba62acba9d71e24bdd8201e3efb6df01711527a79d9da456",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/helper-identity.lo": "3cc546a33400729aad02664b9daaa7bb7341b38eb8fa28326076438f4d0d3bcb",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/helper-identity.native": "70b5dcde9a6d408b804ab32ea556405bbe3b4044e80656e0792df5a8088650f5",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/nonzero.lo": "00099528e693201ffbfddf67a98ed2522fdf2bb77067cc9384047160f08722c2",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/nonzero.native": "d93b1f685eec3928e4140896e9186fbebf523e44ce4942aa973f6752e3cefe3e",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/normal.lo": "3cc546a33400729aad02664b9daaa7bb7341b38eb8fa28326076438f4d0d3bcb",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/normal.native": "41d0bc44285d5701c86cc6189eae2d5ee93232d444c1cc50e97ad242fa248190",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-read.lo": "7f98d3c9c182177745261a13b33b794fffd64c463d182e26f235129f301a1205",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-read.native": "e41f76ebe7212121ae00f9410ccdbf03505dafe717c0778517ffc312c76cb35b",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-write.lo": "06c42595d9605301a4948871ae320a7ca40865ef7f25afe9d37484b541c7f86f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-write.native": "a47c16320a62970f2c0ffdc6cccc0234010a763453c31ff4bddd49c7de57194c",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-nonzero.lo": "11a2ff51c0d90395d54ada2f75b32a0cf6bc16b11cd5c920589fb988d858504a",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-nonzero.native": "afc5cb7b26e92f69c8b4a0832078a831dfb06200b34ce9132b95127d86f0deb9",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-zero.lo": "1b9918ab0f687337625511b28e62b46a760810de29c31ab2c10298cbcdd3634d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-zero.native": "b9cf090dec47ce7c72451f298c23cbba8b92eb359e6bd47d2a9cd9a5a745a0de",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/server-callback.lo": "a6c1fdc4cc92339e1571be0e9801be9a5bca3f4552d5708340a2787db7bce096",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/server-callback.native": "27edef759dc2c2399613f7249e97e4721ae10486793ae526f1ef4b1148a97f11",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/signaled.lo": "639d83527900e096971b410314e5964fef5bbb3462d7940bdf39cb234e8e2a68",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/signaled.native": "c3e71eebba26e493d91e6e81b61446744f8b959a92e8d5d81b389fc9df85d67b",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/wall-timeout.lo": "527200af20c63f3bd4d7507d956cc523594aeaca0456cacc8d0a9ad031d65e9d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/wall-timeout.native": "f180c2aa429cdf270b02e017d1875b17891998c78c52cea894eb60d8306b5ab5",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-command.lo": "07b7fec73af910423efe0d2440dfcf0436e5b452a1e77f53622498964196666f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-command.native": "d94301992424e411e2f4fbfd43addfb80aaa99e389ce338843a36281e27b9c4a",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-cwd.lo": "8ddf9c2e461342ad5a7aef7cb6082b92d298f9897020ed483130e73dad7e2138",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-cwd.native": "b2cffb8b536b36f6a001dd06a3c18a4343e18ea0fe7e29027440167311cd3966",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/helper-identity.lo": "3cc546a33400729aad02664b9daaa7bb7341b38eb8fa28326076438f4d0d3bcb",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/helper-identity.native": "a8dea20aa877fb53fe5a3a43254892145625711f6549e24d8dcb1895e1d5e7c8",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/nonzero.lo": "00099528e693201ffbfddf67a98ed2522fdf2bb77067cc9384047160f08722c2",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/nonzero.native": "c42a846fed684dc5d7d93ce60471ef87f94db3b747748f7f91c3b6129b3effcb",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/normal.lo": "3cc546a33400729aad02664b9daaa7bb7341b38eb8fa28326076438f4d0d3bcb",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/normal.native": "676f13e182de7b4ba2734c6bdc47f201c080b7bca1192f37848d1f6096565b9e",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-read.lo": "7f98d3c9c182177745261a13b33b794fffd64c463d182e26f235129f301a1205",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-read.native": "e4a618d3d0da92f03ab4f5e56c322c106e03c5f9b900801a976406e1cb7d01ec",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-write.lo": "7f49791adc62792357aea409fe0c5a226e6d279bf2f3591afb95e450829b58e3",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-write.native": "c8096ba2c02b9811b77495fc991b807935630875c063fbb1a771fdf46e1190ba",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-nonzero.lo": "6455dd179540b2e8d385b4443d576e979d6e667b4b0a9c9e0f528c94fa8840c0",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-nonzero.native": "d0d70eaaa267b4dca6ba915c239194500095965e7a251e0fc827259e4334dffc",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-zero.lo": "4dd3ba08ac543a2464d470ba6f00848b466aa43c56384ae660420d7215f8ea7d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-zero.native": "7195961152d6cd7b9dd7c398f7ec68cea8e96ff58fe281e5ec21019fe6f040dd",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/server-callback.lo": "a6c1fdc4cc92339e1571be0e9801be9a5bca3f4552d5708340a2787db7bce096",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/server-callback.native": "835515a47fbaf0adb4d2eb98475d0881250f31163c813527bfcbd5aa7d6d0758",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/signaled.lo": "639d83527900e096971b410314e5964fef5bbb3462d7940bdf39cb234e8e2a68",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/signaled.native": "59a7125140ef88de8c3b0733b6d82dd935b12b2f4c1ae9d289f3ae7229d1e931",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/wall-timeout.lo": "527200af20c63f3bd4d7507d956cc523594aeaca0456cacc8d0a9ad031d65e9d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/wall-timeout.native": "b7abf0c7f729cce3ca36b7e49a3e00ea1f737891ed2930e0f9998d478a69aaef",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/public-tests": "2568a512fe8224f2964e1723b2220c961e44f47cab407ac136a6709d2053376f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/experiments/process-public/native/target.c": "427ef469a376e9225a84b7ed5369d50a6cc0aa25ef337aeba0c328e4c5d4658c",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/experiments/process-public/probe.mk": "56281bb17508d8bf961a14b38ebac6d2ecf918f07013608dafa408adae0d6b9d",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/experiments/process-public/probe.py": "76b0b8f66545d614b3bcf6d5bd540c7eb98f2adeaadd0d24a907d8237a247009",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/experiments/process-public/public_test.go": "22ba510270dca8bdc2a25fab33565796b65c712efafccb2757f7a30ebc99a5f4",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/experiments/process-public/test_probe.py": "e6c22b7d57c6e48f5b310fdbd3d85511a248edc7d28ed67b2a3cfe1d46d7a8de",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/helper_identity.go": "e86336237116d709ddedd9b554fd323a98ae4f5daee0ce47b0a01589a399bf75",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/native/launcher.c": "0b4d0247b0436f085a02bebbea052d36b31dbd9e5d3079f1ec69c4b390726722",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/native/normalization.c": "bca34b235eae64168f7fc4bcf6a25c32ccac65cc357b451fc6414317a0a8ce1e",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/native/protocol.h": "d91353f6b15d4810d844f33bd16ed6127fae3942b0c6b801a82842a64c642e08",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/native_config_darwin.go": "affb8ed9303ef6d0fe2f4205d4296cda636b49f4efd41569f664321f2c8914a5",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/native_darwin.go": "8a7be52c5ed2eeafbb6f4ed092570d74491b7ef80d5af0d2a88e086e7c7a69dc",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/native_other.go": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/native_ownership_darwin_test.go": "98dcad178c35b9b540237c874d00b8348b6b1786ba25cd142c8bc826bc24063e",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/session.go": "c5b17ae16b8e2de5c3d59e7f2cf364af3b4aef6f86a1ebf32f646809e64a0ab7",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/processhost/startup.go": "029e0f4dbd048ef277115bd17128c113e33791c372a416a9c2866d580ce1f50f",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/runner/command.go": "1d985339d62475e893850ac329c530a75f43bc873f54c2072ba3c7a563bc7b07",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/internal/runner/execute.go": "03c5e1d4d4c0e5f16e87d99cae9e60000cbdd53b5f1540acda398dc62067db90",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot/tools/processbuild/identity.py": "a2d8f7ac0eb2bfc24e6477c748ac8ed98feace3a05704477ea7882727d0f28b8"
+        },
+        "bad_helper": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/invalid-helper",
+        "cli": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/lo",
+        "helper": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/helper",
+        "phase": "qualified",
+        "programs": {
+          "interpreter": {
+            "denied-command": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-command.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-command.lo"
+            },
+            "denied-cwd": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-cwd.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/denied-cwd.lo"
+            },
+            "helper-identity": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/helper-identity.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/helper-identity.lo"
+            },
+            "nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/nonzero.lo"
+            },
+            "normal": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/normal.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/normal.lo"
+            },
+            "parent-read": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-read.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-read.lo"
+            },
+            "parent-write": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-write.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/parent-write.lo"
+            },
+            "pipeline-nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-nonzero.lo"
+            },
+            "pipeline-zero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-zero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/pipeline-zero.lo"
+            },
+            "server-callback": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/server-callback.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/server-callback.lo"
+            },
+            "signaled": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/signaled.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/signaled.lo"
+            },
+            "wall-timeout": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/wall-timeout.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/interpreter/wall-timeout.lo"
+            }
+          },
+          "native": {
+            "denied-command": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-command.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-command.lo"
+            },
+            "denied-cwd": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-cwd.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/denied-cwd.lo"
+            },
+            "helper-identity": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/helper-identity.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/helper-identity.lo"
+            },
+            "nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/nonzero.lo"
+            },
+            "normal": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/normal.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/normal.lo"
+            },
+            "parent-read": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-read.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-read.lo"
+            },
+            "parent-write": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-write.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/parent-write.lo"
+            },
+            "pipeline-nonzero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-nonzero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-nonzero.lo"
+            },
+            "pipeline-zero": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-zero.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/pipeline-zero.lo"
+            },
+            "server-callback": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/server-callback.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/server-callback.lo"
+            },
+            "signaled": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/signaled.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/signaled.lo"
+            },
+            "wall-timeout": {
+              "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/wall-timeout.native",
+              "source": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/programs/native/wall-timeout.lo"
+            }
+          }
+        },
+        "read_root": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture",
+        "result": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/result.json",
+        "sources_root": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/source-snapshot",
+        "target": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/fixture/target",
+        "token": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/run-token",
+        "write_root": "/Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-qualified/outputs"
+      },
+      "result_sha256": "6c5332f4aa1dcfc692fed0c5041f8e19c6619a5749bf100789143eac0201f5a6",
+      "result": {
+        "reviewed_manifest_sha256": "03f3b82f4a6ed07c440f795b9a58f4cd20d11e9a68b026a8c5b149fb0e9a0dda",
+        "phase": "qualified",
+        "cases": [
+          {
+            "backend": "interpreter",
+            "case": "normal",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 179824459
+          },
+          {
+            "backend": "interpreter",
+            "case": "nonzero",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 17878750
+          },
+          {
+            "backend": "interpreter",
+            "case": "signaled",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 20469875
+          },
+          {
+            "backend": "interpreter",
+            "case": "pipeline-zero",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 18215500
+          },
+          {
+            "backend": "interpreter",
+            "case": "pipeline-nonzero",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 21326375
+          },
+          {
+            "backend": "interpreter",
+            "case": "denied-command",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.host-failure",
+            "process_progress_present": true,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 9520958
+          },
+          {
+            "backend": "interpreter",
+            "case": "denied-cwd",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.capability-denied",
+            "process_progress_present": true,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 10444541
+          },
+          {
+            "backend": "interpreter",
+            "case": "helper-identity",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.host-failure",
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 7126500
+          },
+          {
+            "backend": "interpreter",
+            "case": "parent-read",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.capability-denied",
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 8858791
+          },
+          {
+            "backend": "interpreter",
+            "case": "parent-write",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.capability-denied",
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 7798791
+          },
+          {
+            "backend": "interpreter",
+            "case": "wall-timeout",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.cancelled",
+            "process_progress_present": true,
+            "start_confirmed": true,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 5009549792
+          },
+          {
+            "backend": "interpreter",
+            "case": "server-callback",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 16711250
+          },
+          {
+            "backend": "native",
+            "case": "normal",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 170563583
+          },
+          {
+            "backend": "native",
+            "case": "nonzero",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 153810083
+          },
+          {
+            "backend": "native",
+            "case": "signaled",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 160748833
+          },
+          {
+            "backend": "native",
+            "case": "pipeline-zero",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 160271084
+          },
+          {
+            "backend": "native",
+            "case": "pipeline-nonzero",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 181614041
+          },
+          {
+            "backend": "native",
+            "case": "denied-command",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.host-failure",
+            "process_progress_present": true,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 145978250
+          },
+          {
+            "backend": "native",
+            "case": "denied-cwd",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.capability-denied",
+            "process_progress_present": true,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 150053541
+          },
+          {
+            "backend": "native",
+            "case": "helper-identity",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.host-failure",
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 147659500
+          },
+          {
+            "backend": "native",
+            "case": "parent-read",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.capability-denied",
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 146402083
+          },
+          {
+            "backend": "native",
+            "case": "parent-write",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.capability-denied",
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 157102875
+          },
+          {
+            "backend": "native",
+            "case": "wall-timeout",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 2,
+            "diagnostic_code": "runtime.cancelled",
+            "process_progress_present": true,
+            "start_confirmed": true,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 5328865750
+          },
+          {
+            "backend": "native",
+            "case": "server-callback",
+            "passed": true,
+            "cli_joined": true,
+            "exit_code": 0,
+            "process_progress_present": false,
+            "start_confirmed": false,
+            "cleanup_confirmed": true,
+            "elapsed_ns": 371128292
+          }
+        ],
+        "artifacts_unchanged": true,
+        "cleanup_complete": true,
+        "acceptance_passed": true
+      },
+      "controller_sha256": "8d51f598fffd49c74663d1329244d4442ecd4ce89495d76bca0564e170584b05",
+      "controller": {
+        "artifacts_unchanged": true,
+        "cancel_requested": false,
+        "controller_joined": true,
+        "elapsed_seconds": 13.017452624975704,
+        "emergency_group_signal": false,
+        "exit_code": 0,
+        "explicit_cleanup_complete": true,
+        "output_saturated": false,
+        "reviewed_manifest_sha256": "03f3b82f4a6ed07c440f795b9a58f4cd20d11e9a68b026a8c5b149fb0e9a0dda"
+      }
+    }
+  },
+  "limits": [
+    "Other host profiles remain unavailable.",
+    "Commands require explicit path and SHA-256 grants.",
+    "No shell, inherited environment, child writes, network, or descendants.",
+    "Selected Mach slots normalize before exec. This is not a general parent-inheritance claim.",
+    "CPU work bound is conditional on completed lifetime and a responsive OS. It is not a hard CPU quota."
+  ],
+  "preparation_correction": {
+    "status": "Identity mismatch rejected before native execution or sealing.",
+    "cause": "Compilation at the snapshot path produced different helper bytes from the build-pinned product image.",
+    "resolution": "Snapshot the verified product helper through a repo-local hardlink and copy the matching identity source. Verify the snapshot digest before sealing.",
+    "product_pin_changed": false,
+    "rejected_artifacts": {
+      "public-native-gate-red/fixture/rejected-path-build": "6514b1bcb26322283de54d99f895d10114b185447eee6e7cc5973bef097c929e",
+      "public-native-gate-red/rejected-path-build-identity.go": "288a4249b3ddbcc50248eba25333667f9b998c9f0f2d66c20b31c10b6d63d9f7"
+    },
+    "failure_log": "mkdir -p \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang\" \"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache\" </dev/null\npython3 -B tools/processbuild/identity.py verify bin/lo-process-launcher internal/processhost/helper_identity.go </dev/null\npython3 -B experiments/process-public/probe.py prepare gate-red </dev/null\npython3 -B tools/processbuild/identity.py build /Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/fixture/helper /Users/tyemirov/Development/Research/Lo/_scratch/adapter-implementation-x921/public-native-gate-red/helper_identity.go </dev/null\n/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:122:9: warning: 'sandbox_init' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]\n  122 |     if (sandbox_init(profile, 0, &sandbox_error) != 0) {\n      |         ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sandbox.h:49:5: note: 'sandbox_init' has been explicitly marked deprecated here\n   49 | int sandbox_init(const char *profile, uint64_t flags, char **errorbuf);\n      |     ^\n/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:123:36: warning: 'sandbox_free_error' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]\n  123 |         if (sandbox_error != NULL) sandbox_free_error(sandbox_error);\n      |                                    ^\n/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sandbox.h:68:6: note: 'sandbox_free_error' has been explicitly marked deprecated here\n   68 | void sandbox_free_error(char *errorbuf);\n      |      ^\n2 warnings generated.\npython3 -B experiments/process-public/probe.py helper-identity gate-red </dev/null\n{\"error\": \"snapshot helper differs from product pin; no product pin update authorized\"}\nmake: *** [process-public-build] Error 1\n",
+    "snapshot_inode_before_ci": "The product helper path was renamed before CI rebuilt it. Both public snapshots remained unchanged."
+  },
+  "postrun_review": "Independent architect verified all 24 cases, cleanup, artifacts, and enabled Session behavior. No source finding remained."
+}

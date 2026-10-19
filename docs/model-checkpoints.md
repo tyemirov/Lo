@@ -176,9 +176,9 @@ The training loops contain no host transfers.
 Native artifacts use the same operations and execution grants:
 
 ```bash
-./bin/lo build examples/xor_infer_cpu.lo --output ./bin/xor-infer
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_infer_cpu.lo --output ./bin/xor-infer
 ./bin/xor-infer run --read-root ./bin --format json
-./bin/lo-metal build examples/xor_infer_metal.lo --device-backend metal --output ./bin/xor-infer-metal
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/xor_infer_metal.lo --device-backend metal --output ./bin/xor-infer-metal
 ./bin/xor-infer-metal run --allow-device metal:0 --read-root ./bin --format json
 ```
 

@@ -26,7 +26,7 @@ func checkpointSetup(kind string) (string, string) {
 
 func checkpointWriteSource(kind, path string) string {
 	setup, typ := checkpointSetup(kind)
-	return fmt.Sprintf(`flow Run() -> %s! { %s data=Checkpoint.encode(original); effect=File.write(File.Path.new(%q),data); commit effect; return original }; return Run()`, typ, setup, path)
+	return fmt.Sprintf(`flow Run() -> %s! { %s data=Checkpoint.encode(original); effect=File.Write.new(File.Path.new(%q),data); commit effect; return original }; return Run()`, typ, setup, path)
 }
 
 func TestCheckpointFreshProcess(t *testing.T) {
@@ -90,7 +90,7 @@ func TestCheckpointRejectsInvalidData(t *testing.T) {
 				t.Fatal("invalid-data fixture did not change")
 			}
 			setup, typ := checkpointSetup("Parameters")
-			source := fmt.Sprintf(`flow Run() -> %s! { %s restored=Checkpoint.decode(Bytes.new(%q),original); effect=File.write(File.Path.new("never"),Bytes.new("bad")); commit effect; return restored }; return Run()`, typ, setup, tc.data)
+			source := fmt.Sprintf(`flow Run() -> %s! { %s restored=Checkpoint.decode(Bytes.new(%q),original); effect=File.Write.new(File.Path.new("never"),Bytes.new("bad")); commit effect; return restored }; return Run()`, typ, setup, tc.data)
 			boundary := &observedBoundary{}
 			_, err := evaluate(t, source, boundary)
 			if err == nil || !strings.Contains(err.Error(), tc.kind) || boundary.commits != 0 {

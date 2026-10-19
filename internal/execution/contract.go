@@ -17,11 +17,15 @@ const (
 	MaxDepth                   = 256
 	MaxValueWeight      uint64 = 16 << 20
 	MaxEvaluationWeight uint64 = 64 << 20
+	MaxFileEntries             = 10_000
+	MaxFileDirectories         = 128
 )
 
 type Boundary interface {
 	Read(context.Context, value.Text) (value.Bytes, error)
-	Commit(context.Context, value.Target) error
+	List(context.Context, value.Text) (value.List, error)
+	OpenPaths(context.Context, value.Text) (value.List, error)
+	Commit(context.Context, value.Target) (value.Value, error)
 }
 type Budget interface {
 	Steps() uint64
@@ -83,19 +87,25 @@ func HostFailure(operation, subject string, cause error) HostError {
 func ServerRequiresServe() HostError {
 	return hostError{diagnostic.ServerRequiresServe, "HTTP server activation requires lo serve", nil}
 }
+
+// ProcessUnavailable reports the absence of a qualified host execution profile.
+func ProcessUnavailable() HostError {
+	return hostError{diagnostic.ProcessUnavailable, "Process activation requires a configured, qualified host execution profile", nil}
+}
 func NoServer() HostError {
 	return hostError{diagnostic.NoServer, "serve requires an activated HTTP server", nil}
 }
 func BoundaryHostError(err error) HostError {
+	primary := primaryBoundaryFailure(err)
 	var budget device.BudgetError
-	if errors.As(err, &budget) {
-		return Limit(budget.Error())
+	if errors.As(primary, &budget) {
+		return hostError{diagnostic.RuntimeLimit, budget.Error(), err}
 	}
-	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+	if errors.Is(primary, context.Canceled) || errors.Is(primary, context.DeadlineExceeded) {
 		return hostError{diagnostic.RuntimeCancelled, "execution cancelled", err}
 	}
 	var host HostError
-	if errors.As(err, &host) {
+	if errors.As(primary, &host) {
 		return hostError{host.Code(), "boundary operation failed", err}
 	}
 	return nil

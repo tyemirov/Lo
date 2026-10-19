@@ -71,7 +71,7 @@ import("context";"os";"testing";"github.com/MarcoPoloResearchLab/Lo/internal/com
 "github.com/MarcoPoloResearchLab/Lo/internal/device";"github.com/MarcoPoloResearchLab/Lo/internal/source";"github.com/MarcoPoloResearchLab/Lo/internal/value")
 type boundary struct{}
 func(boundary)Read(context.Context,value.Text)(value.Bytes,error){return nil,execution.Denied("read","benchmark")}
-func(boundary)Commit(context.Context,value.Target)error{return execution.Denied("commit","benchmark")}
+func(boundary)Commit(context.Context,value.Target)(value.Value,error){return nil,execution.Denied("commit","benchmark")}
 var sink value.Value
 func BenchmarkExecution(b *testing.B){
  file,err:=source.New(%q,%q);if err!=nil{b.Fatal(err)};p,d:=compiler.Check(file);if d!=nil{b.Fatal(d)}

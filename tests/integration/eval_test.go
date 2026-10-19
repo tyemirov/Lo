@@ -28,9 +28,15 @@ func (b *observedBoundary) Read(_ context.Context, path value.Text) (value.Bytes
 	b.reads = append(b.reads, path.Text())
 	return b.read(path.Text(), len(b.reads))
 }
-func (b *observedBoundary) Commit(_ context.Context, _ value.Target) error {
+func (b *observedBoundary) List(context.Context, value.Text) (value.List, error) {
+	return nil, errors.New("unexpected file listing")
+}
+func (b *observedBoundary) OpenPaths(context.Context, value.Text) (value.List, error) {
+	return nil, errors.New("unexpected open-file observation")
+}
+func (b *observedBoundary) Commit(_ context.Context, _ value.Target) (value.Value, error) {
 	b.commits++
-	return errors.New("injected activation failure")
+	return nil, errors.New("injected activation failure")
 }
 func evaluate(t *testing.T, text string, b execution.Boundary) (value.Value, error) {
 	t.Helper()
@@ -77,15 +83,15 @@ func TestEvaluatorMatchRegions(t *testing.T) {
 flow Handle(error: Error) -> String { return "failed" }
 flow Read(path: String) -> String onError Handle { bytes = File.read(File.Path.new(path)); return UTF8.String.new(bytes) }
 return Match.new(Read("selector"),
-  Read("miss"): Read("unselected"),
-  Read("selector"): Read("selected"),
-  Read("unreached"): Read("unreached-body"),
+  "miss": Read("unselected"),
+  "selector": Read("selected"),
+  "unreached": Read("unreached-body"),
   _: Read("default")
 )`, b)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if value.TextResult(v) != "selected" || !reflect.DeepEqual(b.reads, []string{"selector", "miss", "selector", "selected"}) {
+	if value.TextResult(v) != "selected" || !reflect.DeepEqual(b.reads, []string{"selector", "selected"}) {
 		t.Fatalf("regions: %v, %s", b.reads, value.TextResult(v))
 	}
 }
@@ -181,7 +187,7 @@ func FuzzRuntimeSource(f *testing.F) {
 		`flow H(e: Error) -> Error { return e }; flow F() -> Error onError H { unused = Math.div(1, 0); return Error.new("missed", "", Record.new()) }; return F()`,
 		`flow F() -> List<Int!> { return List.new(1, Math.div(1, 0)) }; return F()`,
 		`return Match.new(1, Range.new(1, 3, false, false): 2, _: 3)`,
-		`e = File.write(File.Path.new("fuzz"), Bytes.new("data")); commit e`,
+		`e = File.Write.new(File.Path.new("fuzz"), Bytes.new("data")); commit e`,
 	} {
 		f.Add(text)
 	}

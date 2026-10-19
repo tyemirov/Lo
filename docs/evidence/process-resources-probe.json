@@ -1,0 +1,891 @@
+{
+  "status": "selected-resource-checks-passed-full-profile-unqualified",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "source_directories": [
+    "experiments/process-resources",
+    "experiments/process-resources-tail",
+    "experiments/process-resources-controller",
+    "experiments/process-stop-completion"
+  ],
+  "initial_run": {
+    "manifest_sha256": "8c160bb31491d18b2da5daf5a4a1b633ac5ed198e880446c6ff1def0f44e7354",
+    "result_sha256": "1d6960bc2dab9422a49e9504e36ce5034fa3f283ecf1ab654ba846613edeb3b2",
+    "suite_passed": false,
+    "artifact_hashes": {
+      "build": "9d93afbc80192154593a7b2e801ce9006d0abf7cfe153b818e50b0c5d48410d2",
+      "harness": "8f9be709e04f6610f183a51dab41a7593aa0254ce052971bb9cdd682ff495e9b",
+      "header": "2578cf87b1b7280e54815a717a20f3fd872ad3a62d25eea0186e8947b4e92402",
+      "launcher_binary": "ea01eaaef9c404dd85ed5a1b299f02b7043245de2228e638905ae0445139fb0b",
+      "launcher_source": "ab2ad5cd1cd161c70187ff96beac56529e518d42863ae84d5eb9431c6a911b1c",
+      "profile": "0221098dbc829944d693f3df52daa62b40180140116fca66b30417e26a06b140",
+      "reference_manifest": "4aa83a61e9fcabd98ccf0769a0459718f0881495cbc46c9bd0bb450319fbceab",
+      "reference_profile": "78f0703034b8d8e1a6d08f9fc0525a8f706ce4b5afae4fd1a2f18e0a180a9501",
+      "target_binary": "81af88f86e1b4fa9f8284e8f4ca5dd08f94d13198140cc12e2a2c3872aae4811",
+      "target_source": "8a78116e7fe6fb3b28a6a916f5eb7732af565ba101460f5acb65bb7e6518bb54",
+      "test": "e8a089fa94990a61ae1c5b6dd4459bee289e9426b1750dbc58ae7e9fd1f45c6b"
+    },
+    "cases": [
+      {
+        "case": "control-fork",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.003914,
+        "elapsed_seconds": 0.13866266596596688,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": {
+          "api": "fork",
+          "child_created": true,
+          "child_reaped": true,
+          "error": 0
+        },
+        "streams": {
+          "stderr": {
+            "captured_bytes": 27,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 27,
+            "sha256": "c6711779e74141a3b3a2cdf6830473bf45c191928b807464ba002139f476eefd"
+          },
+          "stdout": {
+            "captured_bytes": 66,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 66,
+            "sha256": "865c5179fe02c40ecb08a201d5c32a69410d7677c5990ba3184daa6e6d08742e"
+          }
+        }
+      },
+      {
+        "case": "control-vfork",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.0034729999999999995,
+        "elapsed_seconds": 0.006237333989702165,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": {
+          "api": "vfork",
+          "child_created": true,
+          "child_reaped": true,
+          "error": 0
+        },
+        "streams": {
+          "stderr": {
+            "captured_bytes": 27,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 27,
+            "sha256": "c6711779e74141a3b3a2cdf6830473bf45c191928b807464ba002139f476eefd"
+          },
+          "stdout": {
+            "captured_bytes": 67,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 67,
+            "sha256": "08bcd0b1b3ae01f13043d32bc65aae31c880319b6ec2f3d56692e679ed8157fc"
+          }
+        }
+      },
+      {
+        "case": "control-spawn",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.003511000000000001,
+        "elapsed_seconds": 0.0057221249444410205,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": {
+          "api": "spawn",
+          "child_created": true,
+          "child_reaped": true,
+          "error": 0
+        },
+        "streams": {
+          "stderr": {
+            "captured_bytes": 27,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 27,
+            "sha256": "c6711779e74141a3b3a2cdf6830473bf45c191928b807464ba002139f476eefd"
+          },
+          "stdout": {
+            "captured_bytes": 67,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 67,
+            "sha256": "060db46b5bf1de6f86921c86a237806795aaba2529cb0764502a28c65b8bcaae"
+          }
+        }
+      },
+      {
+        "case": "fork",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.011960999999999996,
+        "elapsed_seconds": 0.09567366598639637,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": {
+          "api": "fork",
+          "child_created": false,
+          "child_reaped": false,
+          "error": 1
+        },
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 68,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 68,
+            "sha256": "606bea1c0f2605b6fb451938acf1e2ad52567c53075cb4e612a5853805f27b89"
+          }
+        }
+      },
+      {
+        "case": "vfork",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.009619,
+        "elapsed_seconds": 0.012447332963347435,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": {
+          "api": "vfork",
+          "child_created": false,
+          "child_reaped": false,
+          "error": 1
+        },
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 69,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 69,
+            "sha256": "273c11181d713c051352d0686a8e1db82c81ab3fd580466e41093d5342d1b342"
+          }
+        }
+      },
+      {
+        "case": "spawn",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.007976999999999998,
+        "elapsed_seconds": 0.010214500012807548,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": {
+          "api": "spawn",
+          "child_created": false,
+          "child_reaped": false,
+          "error": 1
+        },
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 69,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 69,
+            "sha256": "64d2dd01c783d84083b4df3c7e439ff288ff9cd9fa8d649c7f395e25bbd8851c"
+          }
+        }
+      },
+      {
+        "case": "cpu-soft",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 1.010589,
+        "elapsed_seconds": 1.01365941693075,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": {
+          "cpu_soft_observed": true
+        },
+        "streams": {
+          "stderr": {
+            "captured_bytes": 330,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 330,
+            "sha256": "4e494ea7a2157f315db71503f48ade6dd678eee44ff0c90f56b84ec4565e1150"
+          },
+          "stdout": {
+            "captured_bytes": 27,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 27,
+            "sha256": "a6b0e2cf456e0001c42334402118106ce8a0b94365e95c5515c23e793d5dcba4"
+          }
+        }
+      },
+      {
+        "case": "cpu-hard",
+        "passed": false,
+        "stop_suite": true,
+        "cpu_seconds": 4.995,
+        "elapsed_seconds": 5.00161629205104,
+        "exit_code": -9,
+        "timeout": true,
+        "output_limit": false,
+        "host_kill": true,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 336,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 336,
+            "sha256": "c05352fd631a8e73a4c80ace1130ca6698dbab960b1d05218972cdda95c13d63"
+          },
+          "stdout": {
+            "captured_bytes": 0,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    ]
+  },
+  "tail_run": {
+    "manifest_sha256": "b685686be2a722eade4f8511f77e615bef72089272bbd2e563b8e7451ff9be75",
+    "result_sha256": "30fcb7d270cb5b191eb2a5920d4c604c58f0f1c18bea0363dfff16c705bd0a6e",
+    "tail_cases_passed": false,
+    "artifact_hashes": {
+      "build": "f9e3d67b62aa7fd871cc7438130519d8abd4abc5eab0a23da349aa499860b6b3",
+      "harness": "013f74fe3c3bbacdefc6be0b945ab0528b6640ee3bb4648208bb653f44b3c3e5",
+      "original_harness": "8f9be709e04f6610f183a51dab41a7593aa0254ce052971bb9cdd682ff495e9b",
+      "original_manifest": "8c160bb31491d18b2da5daf5a4a1b633ac5ed198e880446c6ff1def0f44e7354",
+      "original_result": "1d6960bc2dab9422a49e9504e36ce5034fa3f283ecf1ab654ba846613edeb3b2",
+      "test": "1110c98d4b3e7614b7060bcf49c639ef4914deb927910f92e40551a94cb9ec0a"
+    },
+    "cases": [
+      {
+        "case": "wall",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.0069299999999999995,
+        "elapsed_seconds": 0.5036472919164225,
+        "exit_code": -9,
+        "timeout": true,
+        "output_limit": false,
+        "host_kill": true,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 332,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 332,
+            "sha256": "aa60cde3976de234c97f166c09032b8ba44c5f1d361bb665088326ff5b5e58e4"
+          },
+          "stdout": {
+            "captured_bytes": 0,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      {
+        "case": "stdout-exact",
+        "passed": true,
+        "stop_suite": false,
+        "cpu_seconds": 0.009695,
+        "elapsed_seconds": 0.013451249920763075,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": false,
+        "host_kill": false,
+        "cleanup_errors": [],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 65536,
+            "sha256": "18ad4583c128272de84c0c243ba2179f86d23972b4b1fffade4b44f675c0b075"
+          }
+        }
+      },
+      {
+        "case": "stdout-overflow",
+        "passed": false,
+        "stop_suite": true,
+        "cpu_seconds": 0.007238999999999996,
+        "elapsed_seconds": 0.009820583974942565,
+        "exit_code": 0,
+        "timeout": false,
+        "output_limit": true,
+        "host_kill": false,
+        "cleanup_errors": [
+          {
+            "errno": 1,
+            "operation": "kill-owned-group"
+          }
+        ],
+        "owned_child_joined": true,
+        "artifacts_unchanged": true,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 65537,
+            "sha256": "18ad4583c128272de84c0c243ba2179f86d23972b4b1fffade4b44f675c0b075"
+          }
+        }
+      }
+    ]
+  },
+  "limits": {
+    "capture_bytes_per_stream": 65536,
+    "cleanup_seconds": 2.0,
+    "core": [
+      0,
+      0
+    ],
+    "cpu": [
+      1,
+      2
+    ],
+    "execution_seconds": 5.0,
+    "fsize": [
+      65536,
+      65536
+    ],
+    "nofile": [
+      64,
+      64
+    ],
+    "wall_seconds": 0.5
+  },
+  "established": [
+    "Unconfined fork, vfork, and self-target posix_spawn controls created and reaped a child. Confined counterparts returned EPERM without a child.",
+    "The CPU soft-limit handler ran at 1.010589 CPU seconds and the target exited normally.",
+    "The CPU hard-limit case consumed 4.995 CPU seconds. The parent wall deadline, rather than the selected two-second hard CPU limit, stopped it.",
+    "Wall-time cleanup terminated and reaped the child after 0.503647 seconds. Exact stdout capture retained 65536 bytes.",
+    "The stdout overflow case observed 65537 bytes and retained 65536. The group signal returned EPERM; the child ultimately exited with status zero.",
+    "Every observed child was reaped. All observed streams reached EOF and closed. All sealed artifacts and fixture contents remained unchanged.",
+    "The final six-case completion suite passed with unchanged native helpers, profile, and limits.",
+    "One-byte stdout and stderr overflows retained EPERM signal-attempt evidence. Both children exited and completed cleanup within the original deadline.",
+    "Simultaneous stdout/stderr pressure caused a successful host kill and reaping. Each stream retained at most 65536 bytes.",
+    "The descriptor case reached EMFILE after 61 duplicates and closed them. Limit readback and denied hard-limit increases matched the selected assertions."
+  ],
+  "unresolved": [
+    "The independent two-second hard CPU assertion remains failed. The first profile now selects a derived work bound; its parallelism and complete lifetime assumptions remain unqualified.",
+    "The exact cause and kernel timing of EPERM are not established. Completion semantics no longer depend on that causal claim.",
+    "Synchronous startup, bounded admission, complete lifetime enforcement, native IPC, executable protection, the OS driver, and actual Process composition remain unqualified.",
+    "The current profile still has exact fixture write grants. It does not qualify the selected first profile that denies child filesystem writes."
+  ],
+  "approved_controller_correction": [
+    "Record each signal error. Do not equate an immediate nonterminal poll with continued execution or failed bounded stopping.",
+    "Keep the stop operation pending until verified completion within the original cleanup deadline.",
+    "Require termination and reaping, EOF and closed pipes, and established absence of descendants.",
+    "Preserve output overflow as a host limit failure. Successful cleanup does not produce a successful Process result.",
+    "A deadline failure remains a failure even when later cleanup completes. Unknown ownership or incomplete cleanup remains a host cleanup failure."
+  ],
+  "scope_limits": [
+    "Fixed helpers and the current host only. No native Process backend qualification or standard-host activation.",
+    "Synchronous Popen cannot be independently interrupted. The deadline starts before it.",
+    "The profile retains inherited exact write grants for three fixture paths. This is not a no-filesystem-write profile.",
+    "The helpers use immediate-exit child controls. The confined target has no surviving descendants under the observed creation denials.",
+    "Captured diagnostic bytes count toward each 65536-byte stream limit.",
+    "A compile-only SDK check established proc_pid_rusage declarations and return semantics. CPU field units remain unverified. No CPU monitor was built or run."
+  ],
+  "validation": {
+    "initial_cli_gate": "Four expected failures before implementation, then four passes in 0.10 seconds.",
+    "native_build": "Strict clang build passed with -Wall -Wextra -Werror.",
+    "initial_review": "Independent review approved the sealed 16-case run. It stopped after the eighth case failed.",
+    "tail_cli_gate": "Four expected failures before implementation, then four passes in 0.07 seconds.",
+    "tail_review": "Independent review approved the sealed eight-case continuation. It stopped at the third case after a signal error.",
+    "controller_test_red": "Five missing-controller errors and four missing-CLI failures in 0.09 seconds.",
+    "product_ci": "No product source changed after the passed registry stack CI. No repeated product CI was required.",
+    "controller_candidate": "Ten deterministic and CLI checks passed in 0.11 seconds. Independent review approved one sealed run; it stopped after the first case.",
+    "controller_contract_review": "Independent review corrected its earlier immediate-poll latch recommendation. The public Stop contract requires bounded completion, not successful signaling.",
+    "completion_test_red": "Four missing-CLI failures and nine missing-controller errors in 0.10 seconds.",
+    "completion_test_green": "Thirteen deterministic and CLI checks passed in 0.12 seconds after the reporting correction.",
+    "completion_prelaunch_review": "Independent review approved one exact six-case run for the final sealed manifest.",
+    "completion_native_run": "All six cases passed. Every owned child was reaped; pipes reached EOF and closed. Artifacts and fixture contents remained unchanged.",
+    "completion_review_correction": "Replaced an incorrect activation_outcome field with primary_trigger. The primary trigger cannot claim a final classification over cleanup failure.",
+    "postrun_review": "Independent review approved this bounded checkpoint without a remaining correctness or documentation finding. Full native qualification remains incomplete."
+  },
+  "controller_attempt": {
+    "manifest_sha256": "68909a6ffb6e17ed319eed9a9670f776bc60301c5072f9f93b75b7a81fcac04a",
+    "result_sha256": "2cd93f9ccf4a8d8b7297363645d532b58e1048c815a66e59b2809bd51e796882",
+    "candidate_cases_passed": false,
+    "cases": [
+      {
+        "artifacts_unchanged": true,
+        "case": "stdout-overflow",
+        "cleanup_complete": true,
+        "cleanup_errors": [],
+        "control_bytes_written": 48,
+        "controller": {
+          "cleanup_complete": true,
+          "host_kill": false,
+          "poll_errors": [],
+          "signal_errors": [
+            {
+              "errno": 1
+            }
+          ],
+          "stop_failed": true,
+          "stop_reason": "output_limit",
+          "terminal_confirmed": true,
+          "wait_errors": []
+        },
+        "cpu_seconds": 0.006749999999999999,
+        "elapsed_seconds": 0.009117541019804776,
+        "exit_code": 0,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "output_limit": true,
+        "passed": false,
+        "stop_suite": true,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "preview": "LO_PHASE launcher.entered\nLO_PHASE launcher.environment-exact\nLO_PHASE launcher.before-sandbox-init\nLO_PHASE launcher.after-sandbox-init\nLO_PHASE launcher.before-environment-eof\nLO_PHASE launcher.environment-received\nLO_PHASE launcher.control-closed\nLO_PHASE launcher.before-execve\nLO_RESOURCE target-entered\n",
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 65537,
+            "preview": "oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
+            "sha256": "18ad4583c128272de84c0c243ba2179f86d23972b4b1fffade4b44f675c0b075"
+          }
+        },
+        "timeout": false
+      }
+    ],
+    "artifact_hashes": {
+      "build": "9ad14b4b61be3d89393be5d3b5f713901063a2a9a519c8909a2fe2a37a9584e5",
+      "harness": "0613a0a9ef1259c7a549b085ed9beec6e55583dd1ea21e9dd1f2487eea672abc",
+      "tail_harness": "013f74fe3c3bbacdefc6be0b945ab0528b6640ee3bb4648208bb653f44b3c3e5",
+      "tail_manifest": "b685686be2a722eade4f8511f77e615bef72089272bbd2e563b8e7451ff9be75",
+      "tail_result": "30fcb7d270cb5b191eb2a5920d4c604c58f0f1c18bea0363dfff16c705bd0a6e",
+      "test": "c9decae3929ec2c375e95e9a93698e4f59a24b172b6a394ca4ba0d8319e172eb"
+    },
+    "qualification": false
+  },
+  "first_profile_work_contract": "The selected first profile will derive a conservative CPU-time bound from maximum host parallelism and total child lifetime. Those assumptions remain unqualified. An independent CPU quota is not selected.",
+  "completion_run": {
+    "manifest_sha256": "408d900247e3df594a307ccfba15571329b5a63b8e3ed438d0b5441f7331d65c",
+    "result_sha256": "d5720a7ff999bcec45a6d07cbe1689e864dcce99aaa618bf373922dc09ff6c11",
+    "candidate_cases_passed": true,
+    "cases": [
+      {
+        "artifacts_unchanged": true,
+        "case": "stdout-overflow",
+        "cleanup_complete": true,
+        "cleanup_errors": [],
+        "control_bytes_written": 48,
+        "controller": {
+          "cleanup_complete": true,
+          "deadline": 968418.287422708,
+          "deadline_failed": false,
+          "descendants_complete": true,
+          "host_kill": false,
+          "poll_errors": [],
+          "signal_errors": [
+            {
+              "errno": 1
+            }
+          ],
+          "stop_failed": false,
+          "stop_reason": "output_limit",
+          "terminal_confirmed": true,
+          "wait_errors": []
+        },
+        "cpu_seconds": 0.006660999999999999,
+        "elapsed_seconds": 0.009219125029630959,
+        "exit_code": 0,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "output_limit": true,
+        "passed": true,
+        "primary_trigger": "output_limit",
+        "stop_suite": false,
+        "timeout": false,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 65537,
+            "sha256": "18ad4583c128272de84c0c243ba2179f86d23972b4b1fffade4b44f675c0b075"
+          }
+        }
+      },
+      {
+        "artifacts_unchanged": true,
+        "case": "stderr-exact",
+        "cleanup_complete": true,
+        "cleanup_errors": [],
+        "control_bytes_written": 45,
+        "controller": {
+          "cleanup_complete": true,
+          "deadline": 968418.304862458,
+          "deadline_failed": false,
+          "descendants_complete": true,
+          "host_kill": false,
+          "poll_errors": [],
+          "signal_errors": [],
+          "stop_failed": false,
+          "stop_reason": null,
+          "terminal_confirmed": true,
+          "wait_errors": []
+        },
+        "cpu_seconds": 0.006185,
+        "elapsed_seconds": 0.008206666097976267,
+        "exit_code": 0,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "output_limit": false,
+        "passed": true,
+        "primary_trigger": null,
+        "stop_suite": false,
+        "timeout": false,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 65536,
+            "sha256": "bcdeb232efab1a390754fec568a2b06c979efe76b02f412459ff0658fedf1021"
+          },
+          "stdout": {
+            "captured_bytes": 0,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      {
+        "artifacts_unchanged": true,
+        "case": "stderr-overflow",
+        "cleanup_complete": true,
+        "cleanup_errors": [],
+        "control_bytes_written": 48,
+        "controller": {
+          "cleanup_complete": true,
+          "deadline": 968418.321079083,
+          "deadline_failed": false,
+          "descendants_complete": true,
+          "host_kill": false,
+          "poll_errors": [],
+          "signal_errors": [
+            {
+              "errno": 1
+            }
+          ],
+          "stop_failed": false,
+          "stop_reason": "output_limit",
+          "terminal_confirmed": true,
+          "wait_errors": []
+        },
+        "cpu_seconds": 0.005989000000000001,
+        "elapsed_seconds": 0.007889541913755238,
+        "exit_code": 0,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "output_limit": true,
+        "passed": true,
+        "primary_trigger": "output_limit",
+        "stop_suite": false,
+        "timeout": false,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 65537,
+            "sha256": "bcdeb232efab1a390754fec568a2b06c979efe76b02f412459ff0658fedf1021"
+          },
+          "stdout": {
+            "captured_bytes": 0,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      {
+        "artifacts_unchanged": true,
+        "case": "dual-pressure",
+        "cleanup_complete": true,
+        "cleanup_errors": [],
+        "control_bytes_written": 46,
+        "controller": {
+          "cleanup_complete": true,
+          "deadline": 968418.337900791,
+          "deadline_failed": false,
+          "descendants_complete": true,
+          "host_kill": true,
+          "poll_errors": [],
+          "signal_errors": [],
+          "stop_failed": false,
+          "stop_reason": "output_limit",
+          "terminal_confirmed": true,
+          "wait_errors": []
+        },
+        "cpu_seconds": 0.0063040000000000014,
+        "elapsed_seconds": 0.008333042031154037,
+        "exit_code": -9,
+        "fixtures_unchanged": true,
+        "observations": null,
+        "output_limit": true,
+        "passed": true,
+        "primary_trigger": "output_limit",
+        "stop_suite": false,
+        "timeout": false,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 127285,
+            "sha256": "bcdeb232efab1a390754fec568a2b06c979efe76b02f412459ff0658fedf1021"
+          },
+          "stdout": {
+            "captured_bytes": 65536,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 126976,
+            "sha256": "18ad4583c128272de84c0c243ba2179f86d23972b4b1fffade4b44f675c0b075"
+          }
+        }
+      },
+      {
+        "artifacts_unchanged": true,
+        "case": "fd",
+        "cleanup_complete": true,
+        "cleanup_errors": [],
+        "control_bytes_written": 35,
+        "controller": {
+          "cleanup_complete": true,
+          "deadline": 968418.3548615,
+          "deadline_failed": false,
+          "descendants_complete": true,
+          "host_kill": false,
+          "poll_errors": [],
+          "signal_errors": [],
+          "stop_failed": false,
+          "stop_reason": null,
+          "terminal_confirmed": true,
+          "wait_errors": []
+        },
+        "cpu_seconds": 0.005993999999999998,
+        "elapsed_seconds": 0.00802970805671066,
+        "exit_code": 0,
+        "fixtures_unchanged": true,
+        "observations": {
+          "closed": true,
+          "duplicates": 61,
+          "error": 24
+        },
+        "output_limit": false,
+        "passed": true,
+        "primary_trigger": null,
+        "stop_suite": false,
+        "timeout": false,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 43,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 43,
+            "sha256": "b6e74f4fff49e85648ad2a2594538f563e5d66eec9105970fa877c943a45f995"
+          }
+        }
+      },
+      {
+        "artifacts_unchanged": true,
+        "case": "limits",
+        "cleanup_complete": true,
+        "cleanup_errors": [],
+        "control_bytes_written": 39,
+        "controller": {
+          "cleanup_complete": true,
+          "deadline": 968418.37163375,
+          "deadline_failed": false,
+          "descendants_complete": true,
+          "host_kill": false,
+          "poll_errors": [],
+          "signal_errors": [],
+          "stop_failed": false,
+          "stop_reason": null,
+          "terminal_confirmed": true,
+          "wait_errors": []
+        },
+        "cpu_seconds": 0.005974999999999998,
+        "elapsed_seconds": 0.008017332991585135,
+        "exit_code": 0,
+        "fixtures_unchanged": true,
+        "observations": {
+          "hard_raises_denied": true,
+          "limits_exact": true
+        },
+        "output_limit": false,
+        "passed": true,
+        "primary_trigger": null,
+        "stop_suite": false,
+        "timeout": false,
+        "streams": {
+          "stderr": {
+            "captured_bytes": 309,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 309,
+            "sha256": "15e73ac642d169d950f609d7c2993f7e2807d75c7137fd59126f4eebc71a6724"
+          },
+          "stdout": {
+            "captured_bytes": 48,
+            "closed": true,
+            "eof": true,
+            "observed_bytes": 48,
+            "sha256": "a1da1df70d073b6afdb8d25b38d84e0ec96751484c96b50ca2ae846783ba22c5"
+          }
+        }
+      }
+    ],
+    "artifact_hashes": {
+      "build": "c389237d018eb2976c196b789a2aca69fc039bc71ef7b60c0a628372a17de5f4",
+      "harness": "5d4a77fb34f54ee91e5c05ea865f63999b06860dfc91a7adb728276ef00df16d",
+      "previous_harness": "0613a0a9ef1259c7a549b085ed9beec6e55583dd1ea21e9dd1f2487eea672abc",
+      "previous_manifest": "68909a6ffb6e17ed319eed9a9670f776bc60301c5072f9f93b75b7a81fcac04a",
+      "previous_result": "2cd93f9ccf4a8d8b7297363645d532b58e1048c815a66e59b2809bd51e796882",
+      "test": "302562139422f36e92cd381e1336ee9889f8c0e84736b07ff14ebc8d32ae52b4"
+    },
+    "fixture_inputs": {
+      "allowed-read": "35419ce719a96a7edc8486a0f1e77f876bf73ca8eccb1b7be99b4068165c32f0",
+      "allowed-write": "0e9017237fe7a6e0510b2fc8543fbfd698f5f35e00ef3387b150dde95e7b42ad",
+      "denied-read": "66fb158d25f8139220714fa84b36443961f355f22d1d3f114c686e4a39daccd2",
+      "denied-write": "b78dfad7554815ffaab50f7078b6b3d1f6e8e2fab880a4d9ee0d0078e3e4ea4c"
+    },
+    "fixture_outputs": {
+      "allowed-read": "35419ce719a96a7edc8486a0f1e77f876bf73ca8eccb1b7be99b4068165c32f0",
+      "allowed-write": "0e9017237fe7a6e0510b2fc8543fbfd698f5f35e00ef3387b150dde95e7b42ad",
+      "denied-read": "66fb158d25f8139220714fa84b36443961f355f22d1d3f114c686e4a39daccd2",
+      "denied-write": "b78dfad7554815ffaab50f7078b6b3d1f6e8e2fab880a4d9ee0d0078e3e4ea4c"
+    },
+    "qualified_process_backend": false
+  }
+}

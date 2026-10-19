@@ -91,7 +91,7 @@ func TestCheckedGraphContracts(t *testing.T) {
 		}
 	})
 	t.Run("commit-sites", func(t *testing.T) {
-		p := checked(t, `e = File.append(File.Path.new("unused"), "x"); commit e; commit e`)
+		p := checked(t, `e = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit e; commit e`)
 		first := p.Body()[1].(ir.Commit)
 		second := p.Body()[2].(ir.Commit)
 		if first.Target().(ir.Reference).Binding() != second.Target().(ir.Reference).Binding() {
@@ -102,7 +102,7 @@ func TestCheckedGraphContracts(t *testing.T) {
 		}
 	})
 	t.Run("effect-summaries-and-adapter-construction", func(t *testing.T) {
-		p := checked(t, `flow F(p: File.Path) -> Bytes! { return File.read(p) }; flow G(p: File.Path) -> Bytes! { return F(p) }; flow H(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; flow W(r: HTTP.Request) -> HTTP.Response onError H { e = File.append(File.Path.new("unused"), "x"); commit e; return HTTP.Response.Text.new(200, "ok") }; flow S() -> HTTP.Server { return HTTP.Server.new(8080, W, H) }`)
+		p := checked(t, `flow F(p: File.Path) -> Bytes! { return File.read(p) }; flow G(p: File.Path) -> Bytes! { return F(p) }; flow H(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; flow W(r: HTTP.Request) -> HTTP.Response onError H { e = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit e; return HTTP.Response.Text.new(200, "ok") }; flow S() -> HTTP.Server { return HTTP.Server.new(8080, W, H) }`)
 		g := flowNamed(t, p, "G")
 		if !g.Effects().Reads || g.Effects().Commits {
 			t.Fatal("read summary was lost or became activation")
@@ -152,7 +152,7 @@ func TestCheckedGraphContracts(t *testing.T) {
 func TestVerifierDoesNotExecuteBoundaries(t *testing.T) {
 	existing := sourceFile(t, "original")
 	absent := existing + ".missing"
-	text := fmt.Sprintf(`data = File.read(File.Path.new(%q)); e = File.write(File.Path.new(%q), Bytes.new("replacement")); commit e; return data`, absent, existing)
+	text := fmt.Sprintf(`data = File.read(File.Path.new(%q)); e = File.Write.new(File.Path.new(%q), Bytes.new("replacement")); commit e; return data`, absent, existing)
 	result := run(t, "check", sourceFile(t, text), "--format", "json")
 	if result.status != 0 || result.stderr != "" {
 		t.Fatalf("verification executed a boundary: %+v", result)
@@ -197,7 +197,7 @@ func FuzzCompilerSource(f *testing.F) {
 func FuzzInspectionSource(f *testing.F) {
 	for _, seed := range []string{
 		`return 1`,
-		`flow F(x: String) -> Effect { return File.append(File.Path.new(x), "data") }; e = F("output"); commit e`,
+		`flow F(x: String) -> File.Append { return File.Append.new(File.Path.new(x), UTF8.Bytes.new("data")) }; e = F("output"); commit e`,
 		`flow H(e: Error) -> Int { return 0 }; flow F(p: File.Path) -> Int onError H { bytes = File.read(p); return 1 }; return F(File.Path.new("input"))`,
 		`return Match.new(1, 1: "a", _: "b")`,
 		`flow F(state: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: state, next_state: Math.add(state, 1)) }; return List.unfold(0, 3, F)`,

@@ -2,7 +2,6 @@ package execution
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
@@ -61,10 +60,11 @@ func (p *program) Run(ctx context.Context, b Boundary, budget Budget, config dev
 		return nil, err
 	}
 	defer func() {
-		if err := s.Resources().Close(); err != nil {
+		if err := s.Close(); err != nil {
 			output = nil
-			resultErr = HostFailure("close device resources", "program", errors.Join(resultErr, err))
+			resultErr = PreserveCleanup(resultErr, err)
 		}
+		resultErr = s.preserveFailure(resultErr)
 	}()
 	v, err := p.body(s)
 	if err != nil {
@@ -91,7 +91,8 @@ func (p *program) NewInvocation(ctx context.Context, b Boundary, budget Budget, 
 	}
 	return &invocation{s, p}, nil
 }
-func (i *invocation) Invoke(id identity.FlowID, args []value.Value) (value.Value, error) {
+func (i *invocation) Invoke(id identity.FlowID, args []value.Value) (output value.Value, resultErr error) {
+	defer func() { resultErr = i.session.preserveFailure(resultErr) }()
 	h, ok := i.program.handlers[id]
 	if !ok || len(args) != len(h.Parameters) {
 		return nil, fmt.Errorf("invalid adapter flow invocation %q", id)
@@ -108,4 +109,4 @@ func (i *invocation) Invoke(id identity.FlowID, args []value.Value) (value.Value
 	return Published(v)
 }
 
-func (i *invocation) Close() error { return i.session.Resources().Close() }
+func (i *invocation) Close() error { return i.session.Close() }

@@ -321,7 +321,7 @@ func TestMetalTrainingFailurePreventsEffects(t *testing.T) {
 			}}
 			dir := t.TempDir()
 			path := filepath.Join(dir, "must-not-exist")
-			text := strings.Replace(metalTrainingSource(t), "  final_values =", fmt.Sprintf("  effect = File.write(File.Path.new(%q), Bytes.new(\"unexpected\"))\n  commit effect\n  final_values =", path), 1)
+			text := strings.Replace(metalTrainingSource(t), "  final_values =", fmt.Sprintf("  effect = File.Write.new(File.Path.new(%q), Bytes.new(\"unexpected\"))\n  commit effect\n  final_values =", path), 1)
 			got, receipts := runWithDevices(t, ctx, text, model, "--allow-device", "metal:0", "--write-root", dir)
 			if got.status != tc.status || got.stdout != "" || !strings.Contains(got.stderr, tc.kind) || steps != 101 {
 				t.Fatalf("training failure: %+v steps=%d", got, steps)

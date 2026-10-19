@@ -1,0 +1,718 @@
+{
+  "status": "selected-no-write-checks-passed-full-profile-unqualified",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "source_directory": "experiments/process-no-write",
+  "manifest_sha256": "dc1a4d338d775b2d8c8d00efd0d57f9fb503df15f0d716c1ddb8e150a5270a9a",
+  "result_sha256": "55d547504692a7e356f033807f61d1799284f6bf1dd30b73d47ce0d3a8c11095",
+  "artifact_hashes": {
+    "baselines": "bbba303e7446d60a47a633f3aec6441fb7b42abeeea2cf6a548847172c1fb0d7",
+    "build": "0234daefdf3f531c3344231928f3f2137d08c4c9fc2bf91b94a5778f505eb305",
+    "controller_source": "5d4a77fb34f54ee91e5c05ea865f63999b06860dfc91a7adb728276ef00df16d",
+    "harness": "2036e06559d66765e776c1b258ec327a8d8e5eeb67f453296f2de3596826d89c",
+    "header": "fddf15399c97ae080e0a9c48c1e4ff94e8d1231185630ec3fe1d8768ccdbf502",
+    "launcher_binary": "437966211cf220e9f1a4fdc8f583afe5d9931aa03eed5902da2049117cb106ff",
+    "launcher_source": "ab2ad5cd1cd161c70187ff96beac56529e518d42863ae84d5eb9431c6a911b1c",
+    "profile": "e2494c5bee16c6c6efd78fd806a9583338576c8b988d711f513dd2639f6622f8",
+    "reference_image": "81af88f86e1b4fa9f8284e8f4ca5dd08f94d13198140cc12e2a2c3872aae4811",
+    "reference_manifest": "8c160bb31491d18b2da5daf5a4a1b633ac5ed198e880446c6ff1def0f44e7354",
+    "reference_profile": "0221098dbc829944d693f3df52daa62b40180140116fca66b30417e26a06b140",
+    "target_binary": "ad1aa31b7e43ab43c93b2e886c62d1361e50cf355f21e580825bbe00473a22d7",
+    "target_source": "c833f045b7d801dbef9bf3a30f660e28971066debd13bcaa9d29123f9dc59430",
+    "test": "a693da4e034aca0c6225f5714f2fd92c960ae5fdc7b90486146d200bd393faaa"
+  },
+  "plan": {
+    "descriptor_canary_high": 97,
+    "groups": [
+      "write",
+      "namespace",
+      "unix",
+      "descriptors"
+    ],
+    "invocations": [
+      "control-write",
+      "confined-write",
+      "control-namespace",
+      "confined-namespace",
+      "control-unix",
+      "confined-unix",
+      "control-descriptors",
+      "confined-descriptors"
+    ],
+    "limits": {
+      "cleanup_seconds": 2.0,
+      "execution_seconds": 5.0,
+      "file_descriptors": 64,
+      "output_bytes_per_stream": 65536
+    },
+    "qualified_process_backend": false,
+    "shared_mmap_after_denied_readwrite_open": "unreachable"
+  },
+  "cases": [
+    {
+      "case": "control-write",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.14356100000441074,
+      "exit_code": 0,
+      "accepted_connections": 0,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "mapfile": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          },
+          "readwrite": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          },
+          "shared-mmap": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          },
+          "truncate": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          },
+          "truncopen": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          },
+          "writeonly": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.258208333,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 55,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 55,
+          "sha256": "c561b82c15e80650e2422902fe4e457c9789f113fce4ad795454703f8f3eed3e"
+        },
+        "stdout": {
+          "captured_bytes": 472,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 472,
+          "sha256": "50cd60307173363db23df4be221c2460ec185863265ca61749e9c68ee643acd8"
+        }
+      }
+    },
+    {
+      "case": "confined-write",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.09893724997527897,
+      "exit_code": 0,
+      "accepted_connections": 0,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "mapfile": {
+            "errno": 1,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": false
+          },
+          "readwrite": {
+            "errno": 1,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": false
+          },
+          "shared-mmap": {
+            "errno": 0,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": true
+          },
+          "truncate": {
+            "errno": 1,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": false
+          },
+          "truncopen": {
+            "errno": 1,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": false
+          },
+          "writeonly": {
+            "errno": 1,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.363566166,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 337,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 337,
+          "sha256": "7742aadb71d07ba8320d3ab59ab1b27323277449be200b0211b15c0270df6915"
+        },
+        "stdout": {
+          "captured_bytes": 477,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 477,
+          "sha256": "98dd5bae443c888e06b5c397c89984eeccbb70db53390dabf8d8f6121fb267d3"
+        }
+      }
+    },
+    {
+      "case": "control-namespace",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.005564082995988429,
+      "exit_code": 0,
+      "accepted_connections": 0,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "hard-alias": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          },
+          "link": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 0,
+            "unreachable": false
+          },
+          "mkstemp": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 0,
+            "unreachable": false
+          },
+          "rename": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 0,
+            "unreachable": false
+          },
+          "symlink": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 0,
+            "unreachable": false
+          },
+          "symlink-alias": {
+            "errno": 0,
+            "read_exact": true,
+            "result": 0,
+            "unreachable": false
+          },
+          "unlink": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 0,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.375366375,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 55,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 55,
+          "sha256": "c561b82c15e80650e2422902fe4e457c9789f113fce4ad795454703f8f3eed3e"
+        },
+        "stdout": {
+          "captured_bytes": 541,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 541,
+          "sha256": "62e2ee576a6089b3d86867b5a02ebad6a6c75940ae54f20006d74a787f36dcb2"
+        }
+      }
+    },
+    {
+      "case": "confined-namespace",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.012193042086437345,
+      "exit_code": 0,
+      "accepted_connections": 0,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "hard-alias": {
+            "errno": 1,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": false
+          },
+          "link": {
+            "errno": 1,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "mkstemp": {
+            "errno": 1,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "rename": {
+            "errno": 1,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "symlink": {
+            "errno": 1,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "symlink-alias": {
+            "errno": 1,
+            "read_exact": true,
+            "result": -1,
+            "unreachable": false
+          },
+          "unlink": {
+            "errno": 1,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.393557291,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 337,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 337,
+          "sha256": "7742aadb71d07ba8320d3ab59ab1b27323277449be200b0211b15c0270df6915"
+        },
+        "stdout": {
+          "captured_bytes": 548,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 548,
+          "sha256": "f4f16fe482bbb6732feb5c698aaafb753921a77257aab0b26e1944ca3d8dcd38"
+        }
+      }
+    },
+    {
+      "case": "control-unix",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.0037954169092699885,
+      "exit_code": 0,
+      "accepted_connections": 1,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "unix-connect": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 0,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.402122791,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 55,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 55,
+          "sha256": "c561b82c15e80650e2422902fe4e457c9789f113fce4ad795454703f8f3eed3e"
+        },
+        "stdout": {
+          "captured_bytes": 112,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 112,
+          "sha256": "e22bac3eb2a51703af9ccb26cd2d1cfbe7fdd6e4726680a35dd54d4a2b023c66"
+        }
+      }
+    },
+    {
+      "case": "confined-unix",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.009752584039233625,
+      "exit_code": 0,
+      "accepted_connections": 0,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "unix-connect": {
+            "errno": 1,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.4156035,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 337,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 337,
+          "sha256": "7742aadb71d07ba8320d3ab59ab1b27323277449be200b0211b15c0270df6915"
+        },
+        "stdout": {
+          "captured_bytes": 113,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 113,
+          "sha256": "c8807dd8e9596e3739c4fd34e8ff94e74acc8fc61b2991fd7b32ae3cba87bc21"
+        }
+      }
+    },
+    {
+      "case": "control-descriptors",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.003470833064056933,
+      "exit_code": 0,
+      "accepted_connections": 0,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "fd-4": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-5": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-6": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-7": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-8": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-97": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "standard-fds": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 3,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.422868458,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 55,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 55,
+          "sha256": "c561b82c15e80650e2422902fe4e457c9789f113fce4ad795454703f8f3eed3e"
+        },
+        "stdout": {
+          "captured_bytes": 533,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 533,
+          "sha256": "8ea503d19d7149af3511d3cbf90291ff0c4bca7c1a54aa800fc77d58d84f91f0"
+        }
+      },
+      "canary_descriptors": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        97
+      ]
+    },
+    {
+      "case": "confined-descriptors",
+      "passed": true,
+      "cleanup_complete": true,
+      "elapsed_seconds": 0.008715749951079488,
+      "exit_code": 0,
+      "accepted_connections": 0,
+      "observations": {
+        "cleanup_ok": true,
+        "operations": {
+          "fd-4": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-5": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-6": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-7": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-8": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "fd-97": {
+            "errno": 9,
+            "read_exact": false,
+            "result": -1,
+            "unreachable": false
+          },
+          "standard-fds": {
+            "errno": 0,
+            "read_exact": false,
+            "result": 3,
+            "unreachable": false
+          }
+        }
+      },
+      "fixtures_expected": true,
+      "artifacts_unchanged": true,
+      "canary_unchanged": true,
+      "controller": {
+        "cleanup_complete": true,
+        "deadline": 969598.435100458,
+        "deadline_failed": false,
+        "descendants_complete": true,
+        "host_kill": false,
+        "poll_errors": [],
+        "signal_errors": [],
+        "stop_failed": false,
+        "stop_reason": null,
+        "terminal_confirmed": true,
+        "wait_errors": []
+      },
+      "timeout": false,
+      "output_limit": false,
+      "errors": [],
+      "streams": {
+        "stderr": {
+          "captured_bytes": 337,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 337,
+          "sha256": "7742aadb71d07ba8320d3ab59ab1b27323277449be200b0211b15c0270df6915"
+        },
+        "stdout": {
+          "captured_bytes": 533,
+          "closed": true,
+          "eof": true,
+          "observed_bytes": 533,
+          "sha256": "8ea503d19d7149af3511d3cbf90291ff0c4bca7c1a54aa800fc77d58d84f91f0"
+        }
+      },
+      "canary_descriptors": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        97
+      ]
+    }
+  ],
+  "limits": [
+    "These are eight fixed fixture invocations, not full native Process qualification.",
+    "Shared mapping is unreachable after denied O_RDWR acquisition. Its denial was not tested independently.",
+    "Descriptor cases test exclusion of inheritable file, socket, and pipe canaries, including descriptor 97. They do not demonstrate positive inheritance.",
+    "The Unix-socket test covers one repository-owned AF_UNIX listener. Other IPC channels and Mach rights remain unqualified.",
+    "Synchronous Popen is not independently interruptible. It does not qualify startup cancellation or the total lifetime bound.",
+    "Descendant completion follows from fixed target source without process creation. This is not a general OS descendant query.",
+    "Existing hard CPU-limit evidence remains failed. No independent CPU quota is qualified."
+  ],
+  "review": {
+    "prelaunch": "Independent architect review approved one batch for the exact manifest.",
+    "postrun": "Independent architect review verified all eight cases, capture hashes, cleanup evidence, and artifact hashes. No finding remains."
+  }
+}

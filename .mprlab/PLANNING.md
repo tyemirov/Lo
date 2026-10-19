@@ -4,6 +4,9 @@ Use this file as the durable planning contract for the repository.
 
 ## Planning Rules
 
+- Apply the [Lo repository boundary](POLICY.md#lo-repository-boundary) to every task, without exceptions.
+- Keep every plan step, task input, fixture, and output inside Lo.
+- Reject plan steps that require another repository or changes outside Lo.
 - Read `AGENTS.md`, `.mprlab/POLICY.md`, relevant `.mprlab/AGENTS.*.md` guides, and current issue context before editing.
 - Plan one concrete change at a time.
 - Keep plans forward-only: choose the current canonical contract instead of preserving legacy paths.

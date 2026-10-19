@@ -1,0 +1,141 @@
+{
+  "date": "2026-10-19",
+  "recorded_reviewed_launches": 2,
+  "runs": [
+    {
+      "allowed_write_changed": false,
+      "core_dump_limit": 0,
+      "denied_write_unchanged": true,
+      "exit_code": -6,
+      "file_descriptor_limit": 64,
+      "loopback_connection_observed": false,
+      "mechanism_probe_passed": false,
+      "observations": null,
+      "output_limit_per_stream": 65536,
+      "output_within_limit": true,
+      "post_run_artifacts": {
+        "build": "e207ae881571ff5f48a7ba8ec0c8002cf8474000c95d0062a4fb2ab0dc39b004",
+        "harness": "57072034eb0141276aed21eef05c5afdcf937e45978fa2124a3eaf5e14f0d066",
+        "header": "9c2c310a293287472a11a0ee60c2e943bbc035a0b136698fb10f9e3bb0654721",
+        "launcher_binary": "ca2afc4df8b82eda99285e10e64e8a631dd2a36ef7a312dbfcc2fa9f99866014",
+        "launcher_source": "da1ad82dc51ffd18e03d4481c16cadfa3723a466151212adabf6c578bfbb881a",
+        "profile": "d3915c911b10c6767d083cb084f376b67c2fcb0730e850895c92313e89a7ed4d",
+        "target_binary": "76fc58e9ab7dc612c08a1fa7e1316487b01656bf05a165ea16d8b692ca1f62f6",
+        "target_source": "edd4e3211ca7c482273f7cf50900af90ca849bb6f21ccd35e55fe1ffb18a8dcd",
+        "verification_test": "c4f891943041cecd9cf5df07c56e6764b86339d0c32dbcd2a83180e321892749"
+      },
+      "qualified_process_backend": false,
+      "read_fixtures_unchanged": true,
+      "reviewed_artifacts": {
+        "build": "e207ae881571ff5f48a7ba8ec0c8002cf8474000c95d0062a4fb2ab0dc39b004",
+        "harness": "57072034eb0141276aed21eef05c5afdcf937e45978fa2124a3eaf5e14f0d066",
+        "header": "9c2c310a293287472a11a0ee60c2e943bbc035a0b136698fb10f9e3bb0654721",
+        "launcher_binary": "ca2afc4df8b82eda99285e10e64e8a631dd2a36ef7a312dbfcc2fa9f99866014",
+        "launcher_source": "da1ad82dc51ffd18e03d4481c16cadfa3723a466151212adabf6c578bfbb881a",
+        "profile": "d3915c911b10c6767d083cb084f376b67c2fcb0730e850895c92313e89a7ed4d",
+        "target_binary": "76fc58e9ab7dc612c08a1fa7e1316487b01656bf05a165ea16d8b692ca1f62f6",
+        "target_source": "edd4e3211ca7c482273f7cf50900af90ca849bb6f21ccd35e55fe1ffb18a8dcd",
+        "verification_test": "c4f891943041cecd9cf5df07c56e6764b86339d0c32dbcd2a83180e321892749"
+      },
+      "reviewed_artifacts_unchanged": true,
+      "reviewed_manifest_sha256": "0dd39753525660cc3c3b8c755712fa2dedc5788ae0fbc32f963300531124b433",
+      "runtime_read_allowances": [
+        "/usr/lib",
+        "/System/Library"
+      ],
+      "scope": "Trusted fixed target under launcher-installed pre-exec confinement.",
+      "stderr": "",
+      "stdout": "",
+      "timeout": false,
+      "timeout_seconds": 5,
+      "termination_signal": "SIGABRT",
+      "run": 1
+    },
+    {
+      "allowed_write_changed": false,
+      "core_dump_limit": 0,
+      "denied_write_unchanged": true,
+      "exit_code": -6,
+      "file_descriptor_limit": 64,
+      "loopback_connection_observed": false,
+      "mechanism_probe_passed": false,
+      "observations": null,
+      "output_limit_per_stream": 65536,
+      "output_within_limit": true,
+      "phase_markers": [
+        "launcher.entered",
+        "launcher.before-sandbox-init",
+        "launcher.after-sandbox-init",
+        "launcher.before-execve"
+      ],
+      "post_run_artifacts": {
+        "build": "e207ae881571ff5f48a7ba8ec0c8002cf8474000c95d0062a4fb2ab0dc39b004",
+        "harness": "3b7ae1955be4f16758a58af68735efd3bf3693b28f9796cb2e373de1090d2cc9",
+        "header": "9c2c310a293287472a11a0ee60c2e943bbc035a0b136698fb10f9e3bb0654721",
+        "launcher_binary": "d865e30c3469aa3ee62acf33e34351e6edc3ccd2b75c5598bd2be229edbea28b",
+        "launcher_source": "bffbd0bb83affd7eefcf7b1deb7ff6bde83a6457e076af416c5e58c3d045afe4",
+        "profile": "d3915c911b10c6767d083cb084f376b67c2fcb0730e850895c92313e89a7ed4d",
+        "target_binary": "6d1df03741e71bcef7a722f01ab46aa443386a4ce53f93e52ec5255102208d1b",
+        "target_source": "c3cae00ed3f9e87ecdc1c1a8f24c0762f90d9e136d556cef2459022f385fca78",
+        "verification_test": "c4f891943041cecd9cf5df07c56e6764b86339d0c32dbcd2a83180e321892749"
+      },
+      "qualified_process_backend": false,
+      "read_fixtures_unchanged": true,
+      "reviewed_artifacts": {
+        "build": "e207ae881571ff5f48a7ba8ec0c8002cf8474000c95d0062a4fb2ab0dc39b004",
+        "harness": "3b7ae1955be4f16758a58af68735efd3bf3693b28f9796cb2e373de1090d2cc9",
+        "header": "9c2c310a293287472a11a0ee60c2e943bbc035a0b136698fb10f9e3bb0654721",
+        "launcher_binary": "d865e30c3469aa3ee62acf33e34351e6edc3ccd2b75c5598bd2be229edbea28b",
+        "launcher_source": "bffbd0bb83affd7eefcf7b1deb7ff6bde83a6457e076af416c5e58c3d045afe4",
+        "profile": "d3915c911b10c6767d083cb084f376b67c2fcb0730e850895c92313e89a7ed4d",
+        "target_binary": "6d1df03741e71bcef7a722f01ab46aa443386a4ce53f93e52ec5255102208d1b",
+        "target_source": "c3cae00ed3f9e87ecdc1c1a8f24c0762f90d9e136d556cef2459022f385fca78",
+        "verification_test": "c4f891943041cecd9cf5df07c56e6764b86339d0c32dbcd2a83180e321892749"
+      },
+      "reviewed_artifacts_unchanged": true,
+      "reviewed_manifest_sha256": "72d4e0db509f94a3097c29fdcbd5d73ab9b5c9ae09aa598ac6716c40d37eaa9b",
+      "runtime_read_allowances": [
+        "/usr/lib",
+        "/System/Library"
+      ],
+      "scope": "Trusted fixed target under launcher-installed pre-exec confinement.",
+      "stderr": "LO_PHASE launcher.entered\nLO_PHASE launcher.before-sandbox-init\nLO_PHASE launcher.after-sandbox-init\nLO_PHASE launcher.before-execve\n",
+      "stdout": "",
+      "timeout": false,
+      "timeout_seconds": 5,
+      "run": 2,
+      "change_scope": "Reviewed instrumentation-only change; current source differs from first build. First inputs preserved separately inside the task directory.",
+      "termination_signal": "SIGABRT"
+    }
+  ],
+  "unchanged_between_runs": [
+    "Profile",
+    "Header",
+    "Grants",
+    "Environment",
+    "Limits"
+  ],
+  "instrumentation_result": {
+    "checked_markers": [
+      "launcher.entered",
+      "launcher.before-sandbox-init",
+      "launcher.after-sandbox-init",
+      "launcher.before-execve"
+    ],
+    "target_entered_observed": false,
+    "returned_exec_errno_observed": false,
+    "stdout_observation": false,
+    "failure_interval": "Exec/startup interval after launcher.before-execve.",
+    "interpretation": "Markers narrow the interval only. No specific denied operation or cause is identified."
+  },
+  "qualified_process_backend": false,
+  "standard_host_activation_enabled": false,
+  "current_status": "Across-exec confinement remains undemonstrated. Primary is investigating the next supported mechanism.",
+  "interpretation_limits": [
+    "Per-run fixture and artifact hashes were unchanged. Instrumented sources and binaries differ between reviewed builds.",
+    "Neither run timed out or produced a listener connection.",
+    "No platform impossibility claim.",
+    "Successful self-confining mechanism evidence remains valid."
+  ],
+  "product_ci_scope": "Prior core final CI remains applicable; no new product changes."
+}

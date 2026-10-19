@@ -65,6 +65,10 @@ func NewText(t types.Type, s string) (Text, error) {
 	}
 	switch t.Kind() {
 	case types.StringKind, types.PathKind:
+	case types.MethodKind:
+		if _, err := CanonicalHeaderName(s); err != nil {
+			return nil, fmt.Errorf("HTTP method must be a nonempty ASCII token")
+		}
 	case types.ScalarKind:
 		if utf8.RuneCountInString(s) != 1 {
 			return nil, fmt.Errorf("scalar requires one Unicode scalar")
@@ -134,12 +138,14 @@ func NewBytes(data []byte) Bytes {
 type List interface {
 	Value
 	Items() []Value
+	Len() int
 }
 type list struct {
 	base
 	items []Value
 }
 
+func (v list) Len() int                     { return len(v.items) }
 func (v list) Items() []Value               { return slices.Clone(v.items) }
 func (v list) MarshalJSON() ([]byte, error) { return encode(v, v.items) }
 func NewList(t types.List, items []Value) (List, error) {

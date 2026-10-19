@@ -52,7 +52,7 @@ flow Main() -> Record{initial_loss: Float, loss: Float, predictions: Tensor<FP32
   loss = Tensor.to_float(Tensor.to(Loss(inputs, targets, final_values), cpu))
   host_state = Optimizer.SGD.State.to(final_state, cpu)
   encoded = Checkpoint.encode(host_state.parameters)
-  effect = File.write(File.Path.new("bin/xor-parameters.json"), encoded)
+  effect = File.Write.new(File.Path.new("bin/xor-parameters.json"), encoded)
   commit effect
   return Record.new(initial_loss: initial_loss, loss: loss, predictions: predictions, steps: host_state.step, parameters: Parameters.values(host_state.parameters))
 }

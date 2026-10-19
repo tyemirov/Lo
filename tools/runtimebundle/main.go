@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-var packages = []string{"adapter", "catalog", "derivative", "device", "diagnostic", "execution", "identity", "runner", "runtimeops", "source", "tensor", "types", "value"}
+var packages = []string{"adapter", "catalog", "derivative", "device", "diagnostic", "execution", "identity", "processhost", "runner", "runtimeops", "source", "tensor", "types", "value"}
 
 func main() {
 	check := flag.Bool("check", false, "verify the bundle against canonical sources")

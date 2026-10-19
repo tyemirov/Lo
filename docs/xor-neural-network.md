@@ -57,7 +57,7 @@ make build
 For a standalone CPU executable, use these commands:
 
 ```bash
-./bin/lo build examples/xor_cpu.lo --output ./bin/xor-cpu
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_cpu.lo --output ./bin/xor-cpu
 ./bin/xor-cpu run --format json
 ```
 
@@ -68,7 +68,7 @@ Use the [selected Metal toolchain](metal-transfers.md) for local Metal execution
 ```bash
 make build-metal
 ./bin/lo-metal run examples/xor_metal.lo --allow-device metal:0 --format json
-./bin/lo-metal build examples/xor_metal.lo --device-backend metal --output ./bin/xor-metal
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/xor_metal.lo --device-backend metal --output ./bin/xor-metal
 ./bin/xor-metal run --allow-device metal:0 --format json
 ```
 

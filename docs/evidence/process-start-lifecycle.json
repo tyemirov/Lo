@@ -1,0 +1,58 @@
+{
+  "status": "validated-injected-lifecycle-checkpoint-native-profile-unqualified",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "contract": [
+    "ProcessChild.StartConfirmed is mandatory, prompt, safe for concurrent calls, monotonic, and valid after Release.",
+    "Public start_confirmed combines positive query evidence with valid primary termination.",
+    "Ownership alone does not confirm OS creation. Creation evidence does not confirm target execution or an execution permit.",
+    "Successful Release settles pending creation and prevents any future owned child.",
+    "Settled cancellation before creation can omit termination. Confirmed creation without termination remains a host cleanup failure.",
+    "Failed Release retains ownership and registry quarantine. Returned progress remains immutable."
+  ],
+  "source_sha256": {
+    "internal/adapter/process_lifecycle.go": "775138a8f71b4f91e025de1f5efbd213e83b26ece662e68c897048667ac4ff41",
+    "internal/adapter/process_failure.go": "a8c3235b0037e7eb626a261770e1de9b8a6c1f2d30a9b7d61935b100b06ebed4",
+    "tests/integration/adapter_process_start_test.go": "221ba3c34b10b9bf37f76382ee28cd849108e15a3cf2e111572cd5b0f0d81796",
+    "tests/integration/adapter_process_lifecycle_test.go": "c417d504dc9e379a5fffc9bd89372ef2ff1989abd23b0d182b0fb28068e29230"
+  },
+  "validation": {
+    "red": {
+      "command": "CI=1 make -j1 test-integration TEST_ARGS='-run TestAdapterProcessStart -count=1' </dev/null",
+      "passed": false,
+      "expected_failure": true,
+      "seconds": 0.67,
+      "reason": "Public tests found the obsolete started field and missing nested registry getter."
+    },
+    "focused": {
+      "command": "CI=1 make -j1 fmt test-integration TEST_ARGS='-run TestAdapterProcess -count=1' </dev/null",
+      "passed": true,
+      "seconds": 3.701
+    },
+    "race": {
+      "command": "CI=1 make -j1 test-integration TEST_ARGS='-race -run TestAdapterProcess -count=1' </dev/null",
+      "passed": true,
+      "seconds": 4.881
+    },
+    "ci": {
+      "command": "CI=1 make -j1 ci </dev/null",
+      "passed": true,
+      "exit_status": 0,
+      "interpreter_integration_seconds": 39.879,
+      "generated_native_integration_seconds": 462.176,
+      "checks": [
+        "runtime bundle verification",
+        "formatting",
+        "Go vet",
+        "all Go tests",
+        "generated-native integration",
+        "build"
+      ]
+    }
+  },
+  "review": {
+    "source": "Independent architect review found no remaining lifecycle source finding.",
+    "final": "Independent architect review approved source hashes, current-stack CI, documentation, and scope without a remaining finding."
+  },
+  "scope": "Public Lo execution and registry integration use injected drivers. These checks do not qualify a native OS launcher."
+}

@@ -1,6 +1,7 @@
 package runtimeops
 
 import (
+	"errors"
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
@@ -746,7 +747,7 @@ func ResponseTextNew(session execution.Session, call Call, args []value.Value, f
 	if op == catalog.ResponseTextNew {
 		body = value.NewBytes([]byte(args[1].(value.Text).Text()))
 	}
-	headers := must(value.NewMap(must(types.NewMap(types.String(), types.String())), nil))
+	headers := must(value.NewHeaders(must(value.NewList(types.HeaderEntries(), nil))))
 	fields := must(value.NewRecord([]value.Field{{Name: "status", Value: args[0]}, {Name: "headers", Value: headers}, {Name: "body", Value: body}}))
 	return must(value.NewHTTP(types.Response(), fields)), nil
 }
@@ -759,11 +760,88 @@ func ResponseBytesNew(session execution.Session, call Call, args []value.Value, 
 	if op == catalog.ResponseTextNew {
 		body = value.NewBytes([]byte(args[1].(value.Text).Text()))
 	}
-	headers := must(value.NewMap(must(types.NewMap(types.String(), types.String())), nil))
+	headers := must(value.NewHeaders(must(value.NewList(types.HeaderEntries(), nil))))
 	fields := must(value.NewRecord([]value.Field{{Name: "status", Value: args[0]}, {Name: "headers", Value: headers}, {Name: "body", Value: body}}))
 	return must(value.NewHTTP(types.Response(), fields)), nil
 }
 
 func TensorTo(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
 	return (&machine{session}).tensorOperation(call, args)
+}
+
+func FileList(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	entries, err := session.Boundary().List(session.Context(), args[0].(value.Text))
+	if err != nil {
+		if host := execution.BoundaryHostError(err); host != nil {
+			return nil, host
+		}
+		kind := catalog.ListFailed
+		var file execution.FileError
+		if errors.As(err, &file) {
+			kind = file.Kind()
+		}
+		return OperationFailure(call, args, kind, err.Error()), nil
+	}
+	return Success(call.Type(), entries), nil
+}
+func FileRemove(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	entries := args[0].(value.List)
+	count := entries.Len()
+	if count > execution.MaxFileEntries {
+		return nil, execution.Limit("file removal entries")
+	}
+	weight := entries.Weight() + 32 + uint64(len(catalog.FileRemove))
+	if err := session.ReserveFile(uint64(count), weight); err != nil {
+		return nil, err
+	}
+	effect, err := value.NewRemovalEffect(session.FileSession(), entries)
+	if err != nil {
+		return OperationFailure(call, args, catalog.InvalidSelection, err.Error()), nil
+	}
+	return Success(call.Type(), effect), nil
+}
+
+func FileOpenPaths(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	paths, err := session.Boundary().OpenPaths(session.Context(), args[0].(value.Text))
+	if err != nil {
+		if host := execution.BoundaryHostError(err); host != nil {
+			return nil, host
+		}
+		return OperationFailure(call, args, catalog.OpenFilesFailed, err.Error()), nil
+	}
+	return Success(call.Type(), paths), nil
+}
+
+func PathEqual(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	return value.Bool(args[0].(value.Text).Text() == args[1].(value.Text).Text()), nil
+}
+
+func UTF8BytesNew(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	return value.NewBytes([]byte(args[0].(value.Text).Text())), nil
+}
+
+func HeadersNew(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	headers, err := value.NewHeaders(args[0].(value.List))
+	if err != nil {
+		return OperationFailure(call, nil, catalog.InvalidHeaders, err.Error()), nil
+	}
+	return Success(call.Type(), headers), nil
+}
+func HeaderValues(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	name, err := value.CanonicalHeaderName(args[1].(value.Text).Text())
+	if err != nil {
+		return OperationFailure(call, nil, catalog.InvalidHeaders, err.Error()), nil
+	}
+	matches := []value.Value{}
+	for _, entry := range args[0].(value.Headers).Entries().Items() {
+		fields := entry.(value.Record)
+		if fields.Field("name").(value.Text).Text() == name {
+			matches = append(matches, fields.Field("value"))
+		}
+	}
+	return Success(call.Type(), must(value.NewList(must(types.NewList(types.Bytes())), matches))), nil
+}
+func ResponseNew(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
+	fields := must(value.NewRecord([]value.Field{{Name: "status", Value: args[0]}, {Name: "headers", Value: args[1]}, {Name: "body", Value: args[2]}}))
+	return value.NewHTTP(types.Response(), fields)
 }

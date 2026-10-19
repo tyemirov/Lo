@@ -45,6 +45,7 @@ type Flow interface {
 type Commit interface {
 	Statement
 	Target() string
+	Name() string
 }
 type Return interface {
 	Statement
@@ -218,14 +219,17 @@ func (f flow) MarshalJSON() ([]byte, error) {
 type commit struct {
 	statementBase
 	target string
+	name   string
 }
 
 func (c commit) Target() string { return c.target }
+func (c commit) Name() string   { return c.name }
 func (c commit) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		header
 		Target string `json:"target"`
-	}{header{"commit", c.span}, c.target})
+		Name   string `json:"name,omitempty"`
+	}{header{"commit", c.span}, c.target, c.name})
 }
 
 type returnNode struct {

@@ -10,15 +10,16 @@ Preserve code, commands, paths, identifiers, URLs, quotations, proper names, leg
 
 ## Official Reference Gate
 
-Before prose edits, run the Governor `prepare-ste-reference --json` command.
+Before prose edits, run the Governor `prepare-ste-reference --cache-dir <task-directory>/ste-reference --json` command.
 It retrieves the official [ASD-STE100 Issue 9](https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf) PDF and verifies its pinned SHA-256.
-The cache stays outside the target repository.
+Use an ignored task directory under Lo's `_scratch/` for the reference cache and tool output.
+Apply the [Lo repository boundary](POLICY.md#lo-repository-boundary) to reference preparation and all document checks.
 
 Use Part 1 for writing rules and Part 2 for the controlled dictionary.
 If retrieval or verification fails, stop prose edits and report the source blocker.
 Read-only analysis can continue.
 Use only the verified official reference.
-Keep the PDF and its dictionary outside generated files, commits, and redistributed artifacts.
+Exclude the PDF and its dictionary from commits, product output, and redistributed artifacts.
 
 The producing agent owns the rule and dictionary review.
 Do not assign retrieval, review, or compliance decisions to the end user.

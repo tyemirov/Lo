@@ -9,6 +9,8 @@ Language models are good at proposing workflows, but unsafe as direct executors 
 Lo is not a replacement for Go, Python, or shell. It is an execution contract between an AI planner, a verifier, and a runtime.
 
 For language rules and training examples, start with the [Lo Language Reference](specification.md).
+The [adapter design](docs/adapter-design.md) defines the shared contract for File, HTTP, and Process.
+Its [implementation plan](docs/adapter-plan.md) separates proposed APIs from current behavior.
 
 ## Status
 
@@ -63,7 +65,8 @@ The [standalone compiler plan](docs/standalone-compiler-plan.md) defines the pro
 The [backend experiment](docs/native-backend-experiment.md) records LLVM and Cranelift probe results separately from compiler acceptance.
 The current native build still requires the Go toolchain below.
 
-The Makefile selects Go 1.27.1.
+The Makefile requires installed Go 1.27.1 and keeps tool state under `_scratch/build-state/`.
+Native build commands require `LO_BUILD_ROOT` to name that existing absolute directory.
 The qualified platforms are macOS on arm64 and Linux on arm64.
 
 ```bash
@@ -72,7 +75,7 @@ make build
 ./bin/lo check examples/list_sum.lo
 ./bin/lo inspect examples/agent_file_workflow.lo --format json
 ./bin/lo run examples/list_sum.lo
-./bin/lo build examples/list_sum.lo --output ./bin/list-sum
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo --output ./bin/list-sum
 ./bin/list-sum run
 ./bin/lo run examples/tensor_forward.lo
 ./bin/lo run examples/training_cpu.lo --format json
@@ -85,7 +88,7 @@ make ci
 ```
 
 The conformance suite runs 83 static and runtime fixtures.
-The catalog tests verify all 101 built-in operations.
+The catalog tests verify all 111 built-in operations.
 The integration suite also tests built-in signatures, runtime values, evaluation order, error traces, and adapter authorization.
 The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.
@@ -93,6 +96,7 @@ The [adapter examples](docs/compiler-design.md#executable-adapter-examples) spec
 
 Native builds require Go 1.27.1 on the build host.
 Artifacts need no Go installation, Lo installation, source file, or repository checkout during execution.
+Programs that use `File.open_paths` require `lsof` on the execution host.
 Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact target.
 The build uses the host target when this option is absent.
 Supply file, listen, and device grants when you execute the artifact.
@@ -106,7 +110,7 @@ make build-metal
 ./bin/lo-metal check examples/training_metal.lo --format json
 ./bin/lo-metal inspect examples/training_metal.lo --format json
 ./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
-./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
 ./bin/metal-training run --allow-device metal:0 --format json
 ./bin/metal-training metadata
 ```
@@ -271,12 +275,12 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
     success_log = File.Path.new(String.new("/logs/success.log"))
     error_log = File.Path.new(String.new("/logs/error.log"))
 
-    target_effect = Match.new(status_code,
-        Int.new(200): File.append(success_log, request_data),
-        _: File.append(error_log, request_data)
+    target_action = Match.new(status_code,
+        Int.new(200): File.Append.new(success_log, UTF8.Bytes.new(request_data)),
+        _: File.Append.new(error_log, UTF8.Bytes.new(request_data))
     )
 
-    commit target_effect
+    commit target_action
 
     return HTTP.Response.Text.new(
         status: status_code,
@@ -285,7 +289,9 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
 }
 ```
 
-The branch does not perform the write. The branch constructs an effect. The write happens only when the effect is committed.
+Each branch constructs an inert `File.Append` target.
+The commit statement writes its Bytes payload.
+`receipt = commit target_action` also binds the `File.AppendReceipt` after activation success.
 
 ## Design Principles
 
@@ -465,13 +471,17 @@ The runtime implements commit activation and HTTP services.
 
 Initial support:
 
-- `Effect`
-- `File.append`
-- `File.write`
+- `File.Append` and `File.Append.new`
+- `File.Write` and `File.Write.new`
+- `File.Remove` and `File.Remove.new`
+- `File.WriteReceipt`, `File.AppendReceipt`, and `File.RemoveReceipt`
+- `HTTP.ServerReceipt`
+- `UTF8.Bytes.new`
 - `commit`
 - `HTTP.Server.new`
 - `HTTP.Request`
-- `HTTP.Response`
+- `HTTP.Response` and `HTTP.Response.new`
+- `HTTP.Headers.new` and `HTTP.Headers.values`
 - adapter-level `onError`
 
 Command:
@@ -528,17 +538,63 @@ A secure Lo runtime should:
 - log all commit activations
 - preserve structured error traces
 
-## Planned File Workflows
+## File Workflows
 
-The [File adapter design](docs/file-adapter-design.md) proposes directory discovery and committed batch removal.
-The [implementation plan](docs/file-adapter-plan.md) uses Gateway log cleanup as its first complete workflow.
-These operations are planned additions to Lo.
+The [File adapter](specification.md#91-file-adapter) supports directory observations, open-file probes, and committed removal.
+
+List callbacks cannot include host observations or commits, including transitive calls.
+`Flow.fold` can include both under ordinary flow fallibility rules.
+Match selectors and selected branches can include observations, while case heads and predicates must be pure.
+No Match position can activate a commit.
+Self-handlers and adapter `onError` flows must be pure and total.
+Device requirements have a separate summary.
+
+Bound commits use `result = commit target`.
+The catalog assigns each nominal target one success type.
+File activation returns its operation-specific receipt after activation success and required resource release.
+Server activation returns `HTTP.ServerReceipt` with the actual listener address and port after startup success.
+Commit failure stops the current body without a result binding.
+
+Nominal HTTP headers keep repeated byte values, with explicit lookup through `HTTP.Headers.values`.
+The general `HTTP.Response.new` constructor accepts those headers.
+Header and automatic trace behavior have focused validation.
+Client source uses explicit `--http-allow METHOD,ORIGIN,ADDRESS` grants.
+Combined client interpreter cases passed, including protocol and composition.
+Matching focused native qualification passed.
+
+Process constructors, inspection, nominal results, termination accessors, and bounded execution share one [Process contract](specification.md#95-process-adapter).
+The selected Darwin 27 arm64 profile passed [native qualification](docs/evidence/process-host-native.json).
+Canonical public acceptance passed all 24 interpreter/generated-native cases. Final stack CI and independent completion review passed.
+The selected host denies child writes, network access, and descendants, and clears the specified inherited Mach slots.
+Commands use exact arguments, explicit environment values, and stdin bytes without a shell or inherited environment.
+The conditional work bound uses host parallelism and completed lifetime. It is not a hard CPU quota.
+
+Configure `run` or `serve` with `--process-allow SHA256,ABSOLUTE_PATH`, `--process-launcher ABSOLUTE_PATH`, and `--process-read-root ABSOLUTE_PATH`.
+The selected backend verifies the pinned launcher and registered command identities.
+These grants do not grant parent File access.
+The [native admission limits](docs/adapter-design.md#selected-native-admission-limits) apply separately from pure constructor validation.
+Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session open before program evaluation.
+Source inspection without host configuration also reports the execution profile as unavailable.
+
+One canonical session owns Process, participating File adapters, and shutdown for interpreter, generated-native, and server execution.
+`Close(ctx)` starts one shutdown owner. `WaitRetained()` joins it when the caller deadline expires.
+Trusted Go embeddings can supply a driver through the [lifecycle and registry APIs](docs/adapter-design.md#executable-registry-phase).
+The [implementation evidence](docs/evidence/adapter-implementation-review.json) keeps earlier CI and injected execution results separate from current public acceptance.
+
+The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
+The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, interpreter tests, and native tests.
+The [mac-cleanup plan](docs/mac-cleanup-plan.md) defines the remaining complete-script work.
+All work and fixtures obey the [Lo repository boundary](.mprlab/POLICY.md#lo-repository-boundary).
 
 ## Language Reference
 
 The [Lo Language Reference](specification.md) defines the implemented v0.3 core and tensor training contracts.
 It includes a contents list, operation signatures, examples, and current backend limits.
 
+- [File adapter and cleanup example](specification.md#91-file-adapter)
+- [Process values, execution, and host policy](specification.md#95-process-adapter)
+- [Sequential activation with Flow.fold](specification.md#88-sequential-flow-processor)
 - [Quick start](specification.md#quick-start)
 - [Autodiff and backpropagation](specification.md#245-reverse-mode-autodiff-and-backpropagation)
 - [Parameters and gradients](specification.md#246-parameters-and-gradient-lifecycle)

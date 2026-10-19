@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-19",
+  "status": "One exact reviewed mechanism probe passed on the current host. No qualified Process backend.",
+  "scope": "Trusted self-confining fixture installs its profile before test operations. This is not arbitrary executable confinement or standard Process activation.",
+  "sources": [
+    "experiments/process-profile/fixture.c",
+    "experiments/process-profile/probe.py",
+    "experiments/process-profile/probe.mk"
+  ],
+  "recorded_runs": 1,
+  "reviewed_manifest_sha256": "9f13d872d336a5ccdf710bac0a2b5cac63a816927b7b2d0adf3af3962844da10",
+  "reviewed_artifacts": {
+    "source": "0eb14be80ff8f02a472eabf3fb33c6e52973573af47ae74e7487411f2b205252",
+    "launcher": "d8caa8b2a0ae126ca05333e5acfd0f4a1004bcc8b280cfc8bb5d82bbce9396ac",
+    "build": "1d9664a7df3e37ca3d42ccc5cbed5a8557a3dc386aa85f64bc417ff5ca7a5e5b",
+    "profile": "dfd17fa7325ebea918d4f01940b06b09521cb65f7e6a672934221add6a354604",
+    "header": "e58c009a360786194affea53ac784bdcfbc6b43052b180e1b5f6481b9c9b5c82",
+    "executable": "148e5335f3e4371544e5dd554f0258eb4d7d8907f8c437e90aadc6070d5093d7"
+  },
+  "reviewed_artifacts_unchanged": true,
+  "exit_code": 0,
+  "stderr": "",
+  "bounds": {
+    "output_bytes": 65536,
+    "timeout_seconds": 5
+  },
+  "observations": {
+    "installed": true,
+    "allowed_read": [
+      0,
+      0
+    ],
+    "denied_read": [
+      -1,
+      1
+    ],
+    "allowed_write": [
+      0,
+      0
+    ],
+    "denied_write": [
+      -1,
+      1
+    ],
+    "network": [
+      -1,
+      1
+    ],
+    "fork": [
+      -1,
+      1
+    ]
+  },
+  "observation_encoding": "Each operation pair is [result, errno]. Allowed operations returned [0,0]; denied operations returned [-1,1], with errno 1 (EPERM).",
+  "allowed_write_changed": true,
+  "denied_write_unchanged": true,
+  "loopback_connection_observed": false,
+  "mechanism_probe_passed": true,
+  "qualified_process_backend": false,
+  "standard_host_activation_enabled": false,
+  "api_limit": "Installed SDK declares sandbox_init deprecated and no longer supported. The build and exact reviewed probe passed. This is a limitation, not automatic disqualification.",
+  "qualification_remaining": [
+    "Untrusted executable startup",
+    "Executable identity and replacement resistance",
+    "IPC confinement",
+    "Work, lifetime, and resource enforcement",
+    "Native driver and actual native composition acceptance"
+  ],
+  "interpretation_limits": [
+    "Current-host result only.",
+    "Trusted fixture confines itself after startup; this does not establish confinement before arbitrary executable code.",
+    "No full native qualification or standard-host activation claim.",
+    "Earlier SIGABRT and abandoned trap evidence do not establish platform impossibility."
+  ],
+  "ci_scope": "Prior full product-source CI remains applicable to unchanged product source. This mechanism evidence does not replace native qualification.",
+  "pending_identity_notes": {
+    "descriptor_compile": {
+      "source": "experiments/process-identity/descriptor.c",
+      "scope": "Compile-only source includes unistd.h and calls fexecve.",
+      "language_option": "clang -std=c11",
+      "result": "Compilation failed: fexecve undeclared.",
+      "binary_produced": false,
+      "launched": false,
+      "interpretation": "This result does not prove OS impossibility or final API absence.",
+      "next_review": "The tested SDK interfaces did not provide descriptor execution; no OS impossibility claim."
+    },
+    "darwin_descriptor_compile": {
+      "source": "experiments/process-identity/descriptor.c",
+      "build_target": "process-identity-darwin-build in experiments/process-identity/probe.mk",
+      "compiler_options": "Default dialect, -D_DARWIN_C_SOURCE, fatal implicit declarations.",
+      "result": "Compilation also failed: fexecve undeclared.",
+      "binary_produced": false,
+      "launched": false
+    },
+    "current_scope": "Descriptor execution is unavailable through the tested SDK interfaces. Neither compile attempt produced a launched binary. No OS impossibility claim.",
+    "proposed_identity_candidate": {
+      "status": "Architecture-reviewed candidate; not implemented or qualified.",
+      "mechanism": "Trusted host registry.",
+      "requirements": [
+        "Exact digest and path.",
+        "Protection from child and Lo File writes, including aliases.",
+        "Shared mutation/activation lock held through the whole execution.",
+        "Fail closed on mismatch."
+      ]
+    }
+  }
+}

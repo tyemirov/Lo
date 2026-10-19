@@ -56,7 +56,7 @@ func TestCheckpointTransferFailureCleanup(t *testing.T) {
  state=Optimizer.AdamW.State.new(p,Optimizer.AdamW.Config.new(0.01,0.9,0.999,1e-8,0.1));
  moved=Optimizer.AdamW.State.to(state,Device.new("metal:0"));
  restored=Optimizer.AdamW.State.to(moved,Device.new("cpu"));
- data=Checkpoint.encode(restored); effect=File.write(File.Path.new("never"),data); commit effect; return data
+ data=Checkpoint.encode(restored); effect=File.Write.new(File.Path.new("never"),data); commit effect; return data
  }; return Main()`
 	for _, tc := range []struct {
 		name, kind string

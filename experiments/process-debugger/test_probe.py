@@ -1,0 +1,22 @@
+"""Exercise the debugger diagnostic review gate without launching tools."""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import subprocess
+import sys
+import pytest
+
+REPOSITORY = Path(__file__).resolve().parents[2]
+
+
+@pytest.mark.parametrize("arguments", [["run"], ["verify"], ["run", "unreviewed"], ["verify", "unreviewed"]])
+def test_run_requires_reviewed_manifest_before_access(arguments: list[str]) -> None:
+    result = subprocess.run(
+        [sys.executable, "-B", str(REPOSITORY / "experiments/process-debugger/probe.py"), *arguments],
+        cwd=REPOSITORY, stdin=subprocess.DEVNULL, capture_output=True,
+        timeout=5, check=False,
+    )
+    assert result.returncode == 2
+    assert result.stdout == b""
+    assert json.loads(result.stderr) == {"error": "reviewed manifest SHA256 is required"}

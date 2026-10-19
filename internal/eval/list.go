@@ -30,11 +30,22 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 	} else {
 		items = args[0].(value.List).Items()
 		count = len(items)
-		if op == catalog.ListFold {
+		if op == catalog.ListFold || op == catalog.FlowFold {
 			contextStart, state = 2, args[1]
 		}
 	}
 	context := args[contextStart : len(args)-1]
+	var progress execution.FlowProgress
+	if op == catalog.FlowFold {
+		var err error
+		progress, err = m.RecordFlowProgress(count, 0, state)
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			resultErr = execution.WithFlowProgress(resultErr, progress)
+		}()
+	}
 	output := []value.Value{}
 	for index := 0; index < count; index++ {
 		if err := m.Step(); err != nil {
@@ -55,6 +66,9 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 			var cause value.Error
 			v, cause = fv.Outcome()
 			if cause != nil {
+				if op == catalog.FlowFold {
+					cause = value.WithFlowProgress(cause, progress.Record())
+				}
 				fields := []value.Field{{Name: "index", Value: value.Int64(int64(index))}}
 				if op != catalog.ListUnfold {
 					fields = append(fields, value.Field{Name: "element", Value: items[index]})
@@ -73,7 +87,7 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 			if v.(value.Boolean).Bool() {
 				output = append(output, items[index])
 			}
-		case catalog.ListFold:
+		case catalog.ListFold, catalog.FlowFold:
 			state = v
 		case catalog.ListFlatMap:
 			extra := v.(value.List).Items()
@@ -87,11 +101,18 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 			scope.Retain(r.Field("value"))
 			state = r.Field("next_state")
 		}
-		if op == catalog.ListFold || op == catalog.ListUnfold {
+		if op == catalog.ListFold || op == catalog.FlowFold || op == catalog.ListUnfold {
 			scope.Keep(state)
 		}
+		if op == catalog.FlowFold {
+			next, err := m.RecordFlowProgress(count, index+1, state)
+			if err != nil {
+				return nil, err
+			}
+			progress = next
+		}
 	}
-	if op == catalog.ListFold {
+	if op == catalog.ListFold || op == catalog.FlowFold {
 		return runtimeops.Success(call.Type(), state), nil
 	}
 	outType := call.Type()

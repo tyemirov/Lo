@@ -121,7 +121,7 @@ func (g *generator) typeOf(t types.Type) string {
 	if name, ok := g.types[t.String()]; ok {
 		return name
 	}
-	atoms := map[types.Kind]string{types.IntKind: "Int", types.StringKind: "String", types.BoolKind: "Bool", types.NullKind: "Null", types.ScalarKind: "Scalar", types.BytesKind: "Bytes", types.FloatKind: "Float", types.TensorKind: "Tensor", types.DeviceKind: "Device", types.ErrorKind: "Error", types.PathKind: "Path", types.RequestKind: "Request", types.ResponseKind: "Response", types.ServerKind: "Server", types.EffectKind: "Effect", types.AnyRecordKind: "AnyRecord", types.SGDConfigKind: "SGDConfig", types.AdamWConfigKind: "AdamWConfig"}
+	atoms := map[types.Kind]string{types.ProcessExecutableKind: "ProcessExecutable", types.ProcessCommandKind: "ProcessCommand", types.ProcessResultKind: "ProcessResult", types.ProcessTerminationKind: "ProcessTermination", types.IntKind: "Int", types.StringKind: "String", types.BoolKind: "Bool", types.NullKind: "Null", types.ScalarKind: "Scalar", types.BytesKind: "Bytes", types.FloatKind: "Float", types.TensorKind: "Tensor", types.DeviceKind: "Device", types.ErrorKind: "Error", types.PathKind: "Path", types.FileEntryKind: "FileEntry", types.HeadersKind: "Headers", types.URLKind: "URL", types.MethodKind: "Method", types.ClientRequestKind: "ClientRequest", types.RequestKind: "Request", types.ResponseKind: "Response", types.ServerKind: "Server", types.FileWriteKind: "FileWrite", types.FileAppendKind: "FileAppend", types.FileRemoveKind: "FileRemove", types.FileWriteReceiptKind: "FileWriteReceipt", types.FileAppendReceiptKind: "FileAppendReceipt", types.FileRemoveReceiptKind: "FileRemoveReceipt", types.ServerReceiptKind: "ServerReceipt", types.AnyRecordKind: "AnyRecord", types.SGDConfigKind: "SGDConfig", types.AdamWConfigKind: "AdamWConfig"}
 	if atom, ok := atoms[t.Kind()]; ok {
 		return "types." + atom + "()"
 	}
@@ -212,7 +212,13 @@ func (b *block) body(statements []ir.Statement) {
 			returned = true
 		case ir.Commit:
 			v := b.expression(s.Target())
-			b.line("if err=runtimeops.Commit(s,%s.(value.Target),%s);err!=nil{return nil,err}", v, b.g.span(s.Span()))
+			receipt := b.g.fresh()
+			b.line("%s,err:=runtimeops.Commit(s,%s.(value.Target),%s)", receipt, v, b.g.span(s.Span()))
+			b.check()
+			b.line("_ = %s", receipt)
+			if s.ID() != "" {
+				b.bindings[s.ID()] = receipt
+			}
 		default:
 			b.g.err = fmt.Errorf("unknown checked statement %T", s)
 		}

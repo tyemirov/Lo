@@ -11,9 +11,16 @@ import (
 )
 
 func TestRunBuiltinCatalog(t *testing.T) {
+	executablePath := repository + "/testdata/inert-process/executable"
+	directoryPath := repository + "/testdata/inert-process/directory"
+	executableJSON := fmt.Sprintf(`{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":%q}}}`, executablePath)
 	want := map[string]string{
-		catalog.AutodiffGrad: `{"type":"Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}","value":{"gradients":{"type":"Record{x: Tensor<FP32>}","value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}},"value":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}}`,
-		catalog.FloatAdd:     `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
+		catalog.ProcessExecutableNew:       executableJSON,
+		catalog.ProcessTerminationExitCode: `"0"`,
+		catalog.ProcessTerminationSignal:   `"0"`,
+		catalog.ProcessCommandNew:          fmt.Sprintf(`{"type":"Process.Command","value":{"executable":%s,"arguments":{"type":"List<String>","value":[{"type":"String","value":"argument"}]},"environment":{"type":"Map<String, String>","value":[{"key":{"type":"String","value":"TOKEN"},"value":{"type":"String","value":"value"}}]},"directory":{"type":"File.Path","value":%q},"stdin":{"type":"Bytes","value":"c3RkaW4="}}}`, executableJSON, directoryPath),
+		catalog.AutodiffGrad:               `{"type":"Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}","value":{"gradients":{"type":"Record{x: Tensor<FP32>}","value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}},"value":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}}`,
+		catalog.FloatAdd:                   `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
 		catalog.FloatMul: `{"type":"Float","value":"2.5"}`, catalog.FloatDiv: `{"type":"Float","value":"1.5"}`,
 		catalog.FloatSqrt: `{"type":"Float","value":"1.5"}`, catalog.IntToFloat: `{"type":"Float","value":"7"}`,
 		catalog.FloatEqual: `true`, catalog.FloatLT: `true`, catalog.FloatLTE: `true`, catalog.FloatGT: `false`, catalog.FloatGTE: `true`,
@@ -24,8 +31,15 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.RecordNew: `{"x":{"type":"Int","value":"1"},"y":{"type":"String","value":"a"}}`,
 		catalog.RangeNew:  `{"start":{"type":"String","value":"a"},"end":{"type":"String","value":"z"},"include_start":true,"include_end":false}`,
 		catalog.ErrorNew:  "", catalog.PathNew: `"unread"`, catalog.ServerNew: "",
-		catalog.ResponseTextNew:  `{"status":{"type":"Int","value":"200"},"headers":{"type":"Map<String, String>","value":[]},"body":{"type":"Bytes","value":"b2s="}}`,
-		catalog.ResponseBytesNew: `{"status":{"type":"Int","value":"200"},"headers":{"type":"Map<String, String>","value":[]},"body":{"type":"Bytes","value":"b2s="}}`,
+		catalog.URLNew:           `{"type":"HTTP.URL","value":"http://127.0.0.1:80/resource"}`,
+		catalog.MethodNew:        `{"type":"HTTP.Method","value":"GET"}`,
+		catalog.ClientRequestNew: `{"type":"HTTP.Client.Request","value":{"method":{"type":"HTTP.Method","value":"GET"},"url":{"type":"HTTP.URL","value":"http://127.0.0.1:80/resource"},"headers":{"type":"HTTP.Headers","value":{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[]}}},"body":{"type":"Bytes","value":""}}}`,
+		catalog.HeadersNew:       `{"type":"HTTP.Headers","value":{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[]}}}`,
+		catalog.HeaderValues:     `{"type":"List<Bytes>","value":[]}`,
+		catalog.ResponseNew:      `{"type":"HTTP.Response","value":{"status":{"type":"Int","value":"200"},"headers":{"type":"HTTP.Headers","value":{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[]}}},"body":{"type":"Bytes","value":"b2s="}}}`,
+		catalog.ResponseTextNew:  `{"status":{"type":"Int","value":"200"},"headers":{"type":"HTTP.Headers","value":{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[]}}},"body":{"type":"Bytes","value":"b2s="}}`,
+		catalog.ResponseBytesNew: `{"status":{"type":"Int","value":"200"},"headers":{"type":"HTTP.Headers","value":{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[]}}},"body":{"type":"Bytes","value":"b2s="}}`,
+		catalog.UTF8BytesNew:     `"b2s="`,
 		catalog.UTF8New:          `{"type":"String","value":"ok"}`, catalog.FromScalarsNew: `"a"`, catalog.Concat: `"ab"`, catalog.Upper: `"A"`, catalog.Lower: `"a"`, catalog.StringLength: `"1"`, catalog.StringEqual: `false`, catalog.ScalarEqual: `false`, catalog.IntToString: `"1"`,
 		catalog.MathAdd: `"3"`, catalog.MathSub: `"-1"`, catalog.MathMul: `"2"`, catalog.MathDiv: catalog.DivideByZero, catalog.MathMod: catalog.ModuloByZero,
 		catalog.MathLT: `true`, catalog.MathLTE: `true`, catalog.MathGT: `false`, catalog.MathGTE: `false`, catalog.MathEqual: `false`, catalog.MathSum: `"3"`, catalog.MathProduct: `"1"`, catalog.MathMin: catalog.EmptyList, catalog.MathMax: catalog.EmptyList,
@@ -34,8 +48,12 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.ListMap: `[{"type":"String","value":"1"}]`, catalog.ListFilter: `[{"type":"Scalar","value":"a"},{"type":"Scalar","value":"b"},{"type":"Scalar","value":"c"}]`, catalog.ListFold: `"1"`,
 		catalog.ListFlatMap: `{"type":"List<Int>","value":[{"type":"Int","value":"1"}]}`,
 		catalog.ListUnfold:  `{"type":"List<String>","value":[{"type":"String","value":"0"},{"type":"String","value":"1"}]}`, catalog.Length: `"5"`, catalog.FileRead: `{"type":"Bytes","value":"eA=="}`,
-		catalog.FileAppend: `{"operation":"File.append","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"String","value":"data"}}`,
-		catalog.FileWrite:  `{"operation":"File.write","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
+		catalog.FileAppend:    `{"operation":"File.Append.new","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
+		catalog.FileWrite:     `{"operation":"File.Write.new","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
+		catalog.FilePathEqual: `true`, catalog.FlowFold: `"1"`,
+		catalog.FileList:      `{"type":"List<File.Entry>","value":[]}`,
+		catalog.FileOpenPaths: `{"type":"List<File.Path>","value":[]}`,
+		catalog.FileRemove:    `{"type":"File.Remove","value":{"operation":"File.Remove.new","entries":{"type":"List<File.Entry>","value":[]}}}`,
 	}
 	for name, expected := range map[string]string{
 		catalog.DeviceNew:     `{"type":"Device","value":"cpu"}`,
@@ -101,6 +119,16 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				return
 			}
 			var args []string
+			if tc.name == catalog.FileList || tc.name == catalog.FileOpenPaths {
+				root := fileFixtureRoot(t)
+				flag := "--list-root"
+				if tc.name == catalog.FileOpenPaths {
+					installFileProbeFixture(t)
+					flag = "--open-files-root"
+				}
+				tc.source = fmt.Sprintf("return %s(File.Path.new(%q))", tc.name, root)
+				args = []string{flag, root}
+			}
 			if tc.name == catalog.FileRead {
 				dir := t.TempDir()
 				file, err := os.Create(filepath.Join(dir, "data"))

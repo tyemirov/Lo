@@ -2,6 +2,32 @@
 
 This policy controls all agent work in this repository.
 
+## Lo Repository Boundary
+
+Lo is a self-contained project.
+All Lo work must stay inside this repository, under all circumstances and for every task.
+This boundary controls every section of this policy and all repository guides, plans, examples, and delegated instructions.
+Shared templates and skills cannot authorize an exception.
+
+- Keep research, planning, implementation, documentation, tests, validation, and artifact preparation inside Lo.
+- Never use another repository as a reference, dependency checkout, implementation target, or acceptance environment.
+- Never change files, installed scripts, configuration, caches, or application state outside Lo.
+- Never install Lo output outside this repository as part of a Lo task.
+- Keep test fixtures, temporary files, logs, caches, generated files, and build output inside Lo.
+- Configure each tool's temporary directories, caches, and output paths before execution.
+- Examine resolved task paths before access. Reject symlinks or path traversal that cross the repository boundary.
+- Use fixtures inside Lo for examples that represent external paths, commands, or services.
+- Never run cleanup examples against real user data or application caches.
+- Use the existing primary checkout. Do not create or use another checkout or worktree.
+- Give every delegated agent this boundary. Keep its tools and child processes within the same boundary.
+- Examine child processes and validation commands for external effects before execution.
+- If an operation cannot obey this boundary, stop that operation and report the exact limitation.
+- Do not expand task scope to another repository or external environment to remove a blocker.
+- Preserve this boundary when shared governance templates propose different instructions.
+
+An example's application name does not add another project to the task.
+Release, publication, deployment, integration, or acceptance requirements do not authorize external operations for Lo work.
+
 ## Temporary Task Files
 
 - Put temporary diagnostic files in `_scratch/<task-id>/`.
@@ -60,8 +86,8 @@ This is a binding product principle for every user interface.
 - For a refactor with no behavior change, run the applicable integration tests before you change production code.
 - If focused coverage is absent, add a characterization test before the refactor.
 - Use deterministic local infrastructure for repository-owned databases, filesystems, queues, servers, and browsers.
-- At an external provider boundary, use a provider sandbox or a local protocol implementation for routine integration tests.
-- Keep live-provider acceptance as a separate qualification step.
+- At an external provider boundary, use a local protocol implementation with state stored inside Lo.
+- Do not use a provider sandbox or live-provider operation for Lo acceptance.
 
 ## Dependency Injection In Integration Tests
 
@@ -72,7 +98,7 @@ This is a binding product principle for every user interface.
 - Assert observable results through the public contract.
 - Keep integration coverage with real dependency implementations.
 - Injected scenarios prove behavior under the specified conditions. They do not prove actual provider connectivity.
-- Qualify actual provider connectivity separately from injected scenarios.
+- Report actual provider connectivity as unverified. Do not cross the repository boundary to qualify it.
 
 ## Prohibited Patterns
 
@@ -125,42 +151,20 @@ Previous iOS adapter acceptance does not constrain this contract.
 
 - Require `build_system: local` and a repository-relative `.mjs` path in `build.ios`.
 - Build and sign iOS artifacts locally through the shared native builder.
-- Publish the sealed IPA through the shared App Store Connect adapter.
+- Keep prepared artifacts inside Lo. The repository boundary prohibits external publication operations.
 - Reject iOS `.sh` adapters, Xcode Cloud requests, and cloud publication receipts.
 - Do not add compatibility dispatch, obsolete aliases, or migration requirements for the removed iOS contract.
 - Preserve the declared TestFlight or App Store destination and its export restriction.
 
 This baseline does not authorize removal of stored releases, credentials, or deployment state.
 
-## Static Website Hosting
+## Repository Lifecycle Work
 
-Apply this section to deployment or publication work for a browser frontend.
-
-- Use GitHub Pages as the production host for each deployable browser frontend.
-- Declare the browser frontend with a `github_pages` resource in `.mprlab/deploy/resources.yml`.
-- Use `gh-pages` as the publication branch.
-- The GitHub Pages repository can differ from the application repository.
-- Keep API and service routes on hostnames that differ from the website hostname.
-- Reserve the GitHub Pages domain and its `www` hostname for GitHub Pages.
-- Treat a container as an artifact source only when its static output goes to GitHub Pages.
-- Verify publication through the public website and `/.mprlab-release.json`.
-- Run the Governor check after each selected manifest change and before each release, publish, or deploy operation.
-
-## Gateway Lifecycle Execution
-
-Apply this section when the repository uses the selected-manifest lifecycle or owns Gateway infrastructure operations.
-
-- Use the installed `mprlab-gateway` runtime for application and infrastructure operations.
-- Preserve `make release && make publish && make deploy` as the application operator command.
-- Pass the selected application Git root through `--app-root`.
-- Use `MPRLAB_GATEWAY_EXECUTABLE` for an explicit installed command.
-- Preserve application source validation, release policy, resource ownership, private inputs, and sealed receipts.
-- Keep each operation and its child calls on one captured runtime package and dependency environment.
-- Keep Gateway inventory and private config under `MPRLAB_GATEWAY_OPERATOR_ROOT`.
-- Use `$HOME/.config/mprlab-gateway` as the default operator root.
-- Select an explicit version with `mprlab-gateway install --version <version>` to change the active runtime.
-- Use Gateway source for repository CI, release preparation, and Gateway publication.
-- Keep installation, application operations, and operator-controlled production activation as separate gates.
+- Apply the Lo repository boundary to lifecycle tooling, artifact preparation, and related validation.
+- Keep lifecycle source changes, fixtures, artifacts, and evidence inside Lo.
+- Do not operate installed applications, update external operator state, or use another repository for lifecycle work.
+- Do not execute publication, deployment, or installation that changes state outside Lo.
+- If a lifecycle requirement needs external operations, report that limitation without executing those operations.
 
 ## Credential Discovery
 
@@ -217,7 +221,8 @@ Production operations outside the task do not remove code validation requirement
 - Read `.mprlab/AGENTS.DOCS.md` and `.mprlab/TERMINOLOGY.md` before you write technical prose.
 - Apply this rule to PRDs, architecture documents, issues, plans, policies, ADRs, READMEs, runbooks, and API documents.
 - Do not change technical meaning to make the language simpler.
-- Run the skill `prepare-ste-reference` script to retrieve and verify the official Issue 9 PDF.
+- Run `prepare-ste-reference --cache-dir <task-directory>/ste-reference --json` to retrieve and verify the official Issue 9 PDF.
+- Keep the reference cache inside Lo's ignored task directory.
 - Run the skill `check-ste` script on each technical document that you change.
 - The producing agent must review Part 1 writing rules and the Part 2 dictionary.
 - Do not assign the reference retrieval or language review to the end user.

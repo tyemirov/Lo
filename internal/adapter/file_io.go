@@ -33,38 +33,40 @@ func (r contextReader) Read(data []byte) (int, error) {
 		}
 	}
 }
-func writeFile(ctx context.Context, file *os.File, data []byte) error {
+func writeFile(ctx context.Context, file *os.File, data []byte) (int, error) {
+	confirmed := 0
 	raw, err := file.SyscallConn()
 	if err != nil {
-		return err
+		return confirmed, err
 	}
 	var flagErr error
 	if err := raw.Control(func(fd uintptr) { flagErr = unix.SetNonblock(int(fd), true) }); err != nil {
-		return err
+		return confirmed, err
 	}
 	if flagErr != nil {
-		return flagErr
+		return confirmed, flagErr
 	}
 	for len(data) > 0 {
 		if err := ctx.Err(); err != nil {
-			return err
+			return confirmed, err
 		}
 		n, err := file.Write(data)
+		confirmed += n
 		data = data[n:]
 		if errors.Is(err, unix.EAGAIN) || errors.Is(err, unix.EWOULDBLOCK) {
 			if err := waitFile(ctx, file, unix.POLLOUT); err != nil {
-				return err
+				return confirmed, err
 			}
 			continue
 		}
 		if err != nil {
-			return err
+			return confirmed, err
 		}
 		if n == 0 {
-			return io.ErrShortWrite
+			return confirmed, io.ErrShortWrite
 		}
 	}
-	return nil
+	return confirmed, nil
 }
 func waitFile(ctx context.Context, file *os.File, event int16) error {
 	raw, err := file.SyscallConn()

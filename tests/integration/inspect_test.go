@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -87,8 +88,8 @@ func TestInspectionResources(t *testing.T) {
 	absent := existing + ".missing"
 	text := fmt.Sprintf(`flow Never() -> Int! { unused = File.read(File.Path.new("unused-resource")); return 1 }
  input = File.read(File.Path.new(%q))
- pending = File.append(File.Path.new("uncommitted"), "unused")
- output = File.write(File.Path.new(%q), Bytes.new("changed"))
+ pending = File.Append.new(File.Path.new("uncommitted"), UTF8.Bytes.new("unused"))
+ output = File.Write.new(File.Path.new(%q), Bytes.new("changed"))
  commit output
  commit output`, absent, existing)
 	report, path, first := inspectSource(t, text)
@@ -139,8 +140,8 @@ func TestInspectionResources(t *testing.T) {
 	}
 }
 func TestInspectionBranchesAndCallbacks(t *testing.T) {
-	report, _, _ := inspectSource(t, `flow Build(path: String, flag: Bool) -> Effect {
-   return Match.new(flag, true: File.append(File.Path.new(path), "a"), _: File.write(File.Path.new("other"), Bytes.new("b")))
+	report, _, _ := inspectSource(t, `flow Build(path: String, flag: Bool) -> File.Append {
+   return Match.new(flag, true: File.Append.new(File.Path.new(path), UTF8.Bytes.new("a")), _: File.Append.new(File.Path.new("other"), Bytes.new("b")))
  }
  flow Handle(request: HTTP.Request) -> HTTP.Response! {
    target = Build(request.path, String.eq(request.method, "POST"))
@@ -156,7 +157,7 @@ func TestInspectionBranchesAndCallbacks(t *testing.T) {
 	for _, cap := range report.Capabilities {
 		ops[cap.Operation]++
 		if cap.Operation == "File.append" {
-			dynamic = cap.Target.Kind == "dynamic" && len(cap.Target.Dependencies) > 0 && cap.Target.Expression != ""
+			dynamic = dynamic || cap.Target.Kind == "dynamic" && len(cap.Target.Dependencies) > 0 && cap.Target.Expression != ""
 		}
 		if cap.Operation == "File.append" || cap.Operation == "File.write" {
 			for _, condition := range cap.Conditions {
@@ -166,7 +167,7 @@ func TestInspectionBranchesAndCallbacks(t *testing.T) {
 			}
 		}
 	}
-	if ops["HTTP.listen"] != 1 || ops["File.append"] != 1 || ops["File.write"] != 1 || !dynamic || conditional != 2 {
+	if ops["HTTP.listen"] != 1 || ops["File.append"] != 2 || !dynamic || conditional != 2 {
 		t.Fatalf("capabilities: %+v", report.Capabilities)
 	}
 	if len(report.EntryPoints) != 3 || len(report.UnusedFlows) != 0 {
@@ -183,9 +184,9 @@ func TestInspectionBranchesAndCallbacks(t *testing.T) {
 	}
 }
 func TestInspectionReturnedTargetsAndErrors(t *testing.T) {
-	report, _, _ := inspectSource(t, `flow Make(path: String) -> Effect { return File.append(File.Path.new(path), "x") }
- flow H(e: Error) -> Effect { return Make("handled") }
- flow Select(kind: String) -> Effect onError H { n = Math.div(1, 0); detail = Error.new(kind, "custom", Record.new()); return Make("normal") }
+	report, _, _ := inspectSource(t, `flow Make(path: String) -> File.Append { return File.Append.new(File.Path.new(path), UTF8.Bytes.new("x")) }
+ flow H(e: Error) -> File.Append { return Make("handled") }
+ flow Select(kind: String) -> File.Append onError H { n = Math.div(1, 0); detail = Error.new(kind, "custom", Record.new()); return Make("normal") }
  flow Dynamic(r: HTTP.Request) -> Error { return Error.new(r.path, "custom", Record.new()) }
  e = Select("My.Error")
  commit e`)
@@ -281,13 +282,13 @@ server = HTTP.Server.new(0, H, E)
 	}
 }
 func TestInspectionListContext(t *testing.T) {
-	report, _, _ := inspectSource(t, `flow Read(path: String) -> Bytes! { return File.read(File.Path.new(path)) }; return List.map(List.new("one", "two"), Read)`)
+	report, _, _ := inspectSource(t, `flow Read(count: Int, path: String) -> Int! { bytes = File.read(File.Path.new(path)); return Math.add(count, 1) }; return Flow.fold(List.new("one", "two"), 0, Read)`)
 	if len(report.Capabilities) != 1 || report.Capabilities[0].Operation != "File.read" {
 		t.Fatalf("missing callback read: %+v", report.Capabilities)
 	}
 	found := false
 	for _, condition := range report.Capabilities[0].Conditions {
-		if condition.Kind == "list-iteration" {
+		if condition.Kind == "flow-iteration" {
 			found = true
 		}
 	}
@@ -306,7 +307,7 @@ func TestInspectionRejectsInvalidSource(t *testing.T) {
 }
 
 func TestInspectionLoopCarriedTargets(t *testing.T) {
-	report, _, _ := inspectSource(t, `flow Step(state: Effect) -> Record{value: Effect, next_state: Effect} { return Record.new(value: state, next_state: File.write(File.Path.new("next"), Bytes.new("x"))) }; flow Last(state: Effect, value: Effect) -> Effect { return value }; first = File.append(File.Path.new("first"), "x"); effects = List.unfold(first, 2, Step); last = List.fold(effects, first, Last); commit last`)
+	report, _, _ := inspectSource(t, `flow Step(state: File.Write) -> Record{value: File.Write, next_state: File.Write} { return Record.new(value: state, next_state: File.Write.new(File.Path.new("next"), Bytes.new("x"))) }; flow Last(state: File.Write, value: File.Write) -> File.Write { return value }; first = File.Write.new(File.Path.new("first"), UTF8.Bytes.new("x")); effects = List.unfold(first, 2, Step); last = List.fold(effects, first, Last); commit last`)
 	found := false
 	for _, cap := range report.Capabilities {
 		if cap.Operation == "File.write" && cap.Target.Value == "next" {
@@ -315,6 +316,64 @@ func TestInspectionLoopCarriedTargets(t *testing.T) {
 	}
 	if !found {
 		t.Fatalf("inspection omitted a target from later iterations: %+v", report.Capabilities)
+	}
+}
+
+func TestInspectionFoldCarriedActivation(t *testing.T) {
+	for _, shape := range []struct{ name, typ, seed, target, next string }{
+		{"target", "File.Write", "first", "state", "next"},
+		{"record", "Record{target: File.Write}", "Record.new(target: first)", "state.target", "Record.new(target: next)"},
+		{"fallible-record", "Record{target: File.Write!}", "Record.new(target: Fallible(first))", "state.target", "Record.new(target: Fallible(next))"},
+		{"map", "Map<String, File.Write>", `Map.new(Record.new(key: "target", value: first))`, `Map.get(state, "target")`, `Map.new(Record.new(key: "target", value: next))`},
+	} {
+		t.Run(shape.name, func(t *testing.T) {
+			root := fileFixtureRoot(t)
+			first, next := filepath.Join(root, "first"), filepath.Join(root, "next")
+			source := fmt.Sprintf(`flow Fallible(target: File.Write) -> File.Write! { return target }; flow Step(state: %s, item: Int) -> %s! { target = %s; commit target; next = File.Write.new(File.Path.new(%q), Bytes.new("next")); return %s }; first = File.Write.new(File.Path.new(%q), Bytes.new("first")); return Flow.fold(List.new(1, 2), %s, Step)`, shape.typ, shape.typ, shape.target, next, shape.next, first, shape.seed)
+			report, _, _ := inspectSource(t, source)
+			got := run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json")
+			if got.status != 0 {
+				t.Fatalf("execute fold: %+v", got)
+			}
+			for _, path := range []string{first, next} {
+				if _, err := os.Stat(path); err != nil {
+					t.Fatal(err)
+				}
+				covered := false
+				for _, capability := range report.Capabilities {
+					if capability.Operation == "File.write" && (capability.Target.Kind == "dynamic" || capability.Target.Value == path) {
+						covered = true
+					}
+				}
+				if !covered {
+					t.Fatalf("inspection omitted executed write %s: %+v", path, report.Capabilities)
+				}
+			}
+		})
+	}
+}
+
+func TestInspectionFoldCarriedResult(t *testing.T) {
+	for _, operation := range []string{"Flow.fold", "List.fold"} {
+		t.Run(operation, func(t *testing.T) {
+			root := fileFixtureRoot(t)
+			first, next := filepath.Join(root, "first"), filepath.Join(root, "next")
+			source := fmt.Sprintf(`flow Step(state: Record{previous: File.Write, next: File.Write}, item: Int) -> Record{previous: File.Write, next: File.Write} { return Record.new(previous: state.next, next: File.Write.new(File.Path.new(%q), Bytes.new("next"))) }; first = File.Write.new(File.Path.new(%q), Bytes.new("first")); result = %s(List.new(1, 2), Record.new(previous: first, next: first), Step); target = result.previous; commit target`, next, first, operation)
+			report, _, _ := inspectSource(t, source)
+			got := run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json")
+			if got.status != 0 {
+				t.Fatalf("execute fold: %+v", got)
+			}
+			if _, err := os.Stat(next); err != nil {
+				t.Fatal(err)
+			}
+			for _, capability := range report.Capabilities {
+				if capability.Operation == "File.write" && (capability.Target.Kind == "dynamic" || capability.Target.Value == next) {
+					return
+				}
+			}
+			t.Fatalf("inspection omitted fold result write: %+v", report.Capabilities)
+		})
 	}
 }
 func TestInspectionNestedAdapters(t *testing.T) {
@@ -332,21 +391,10 @@ func TestInspectionNestedAdapters(t *testing.T) {
 }
 
 func TestInspectionCaseHeadReads(t *testing.T) {
-	report, _, _ := inspectSource(t, `flow H(e: Error) -> Int { return 0 }; flow Head() -> Int onError H { data = File.read(File.Path.new("head-input")); return 1 }; return Match.new(0, Head(): "match", _: "default")`)
-	if len(report.Capabilities) != 1 {
-		t.Fatalf("head capabilities: %+v", report.Capabilities)
-	}
-	tested := false
-	for _, c := range report.Capabilities[0].Conditions {
-		if c.Kind == "match-case" {
-			t.Fatal("a case-head read depends on selection of its body")
-		}
-		if c.Kind == "match-test" {
-			tested = true
-		}
-	}
-	if !tested {
-		t.Fatalf("head evaluation condition is absent: %+v", report.Capabilities[0])
+	source := `flow H(e: Error) -> Int { return 0 }; flow Head() -> Int onError H { data = File.read(File.Path.new("head-input")); return 1 }; return Match.new(0, Head(): "match", _: "default")`
+	got := run(t, "inspect", sourceFile(t, source), "--format", "json")
+	if got.status != 1 || diagnostics(t, got.stderr).Diagnostics[0].Code != "check.effectful-match" {
+		t.Fatalf("observing case head accepted: %+v", got)
 	}
 }
 
@@ -442,7 +490,7 @@ func validateInspectionReferences(t *testing.T, report inspectionReport) {
 		for _, n := range d.Dependencies {
 			need(nodes, n)
 		}
-		if d.Kind != "known" && d.Kind != "dynamic" {
+		if d.Kind != "known" && d.Kind != "dynamic" && d.Kind != "calculated" {
 			t.Fatalf("unknown target kind %s", d.Kind)
 		}
 	}
@@ -489,7 +537,7 @@ func TestInspectionExample(t *testing.T) {
 	}
 	report := envelope.Report
 	validateInspectionReferences(t, report)
-	if report.ResultType != "Int!" || len(report.Reads) != 1 || len(report.Targets) != 2 || len(report.Activations) != 1 || len(report.Capabilities) != 3 {
+	if report.ResultType != "Int!" || len(report.Reads) != 1 || len(report.Targets) != 2 || len(report.Activations) != 2 || len(report.Capabilities) != 3 {
 		t.Fatalf("incomplete file workflow report: %+v", report)
 	}
 	expected := map[string]string{"File.read": "input.txt", "File.append": "summary.log", "File.write": "empty.txt"}
@@ -516,7 +564,7 @@ func TestInspectionContextLimit(t *testing.T) {
 }
 
 func TestInspectionRecordTargetSelection(t *testing.T) {
-	report, _, _ := inspectSource(t, `record = Record.new(active: File.append(File.Path.new("active"), "x"), inactive: File.write(File.Path.new("inactive"), Bytes.new("x"))); selected = record.active; commit selected`)
+	report, _, _ := inspectSource(t, `record = Record.new(active: File.Append.new(File.Path.new("active"), UTF8.Bytes.new("x")), inactive: File.Write.new(File.Path.new("inactive"), Bytes.new("x"))); selected = record.active; commit selected`)
 	if len(report.Targets) != 2 || len(report.Capabilities) != 1 || report.Capabilities[0].Target.Value != "active" {
 		t.Fatalf("uncommitted record field became an activation: %+v", report.Capabilities)
 	}
@@ -524,7 +572,7 @@ func TestInspectionRecordTargetSelection(t *testing.T) {
 
 func TestInspectionCalculatedTextLimit(t *testing.T) {
 	literal := strings.Repeat("x", 66000)
-	program := fmt.Sprintf(`known = File.append(File.Path.new(%q), "x"); calculated = File.append(File.Path.new(String.concat(%q, %q)), "x"); commit known; commit calculated`, literal, literal[:33000], literal[33000:])
+	program := fmt.Sprintf(`known = File.Append.new(File.Path.new(%q), UTF8.Bytes.new("x")); calculated = File.Append.new(File.Path.new(String.concat(%q, %q)), UTF8.Bytes.new("x")); commit known; commit calculated`, literal, literal[:33000], literal[33000:])
 	report, _, _ := inspectSource(t, program)
 	if len(report.Capabilities) != 2 {
 		t.Fatalf("capability count: %d", len(report.Capabilities))

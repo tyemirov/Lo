@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"slices"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
@@ -48,7 +47,7 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	}
 	defer func() {
 		if closeErr := invocation.Close(); closeErr != nil {
-			s.abort(execution.HostFailure("close device resources", "request", closeErr))
+			s.abort(execution.PreserveCleanup(err, closeErr))
 		}
 	}()
 	var output value.Value
@@ -85,10 +84,12 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 		}
 	}
 	if closeErr := invocation.Close(); closeErr != nil {
-		s.abort(execution.HostFailure("close device resources", "request", closeErr))
+		s.abort(execution.PreserveCleanup(nil, closeErr))
 	}
-	for name, v := range response.headers {
-		w.Header().Set(name, v)
+	for name, values := range response.headers {
+		for _, content := range values {
+			w.Header().Add(name, content)
+		}
 	}
 	w.WriteHeader(response.status)
 	if r.Method != http.MethodHead && len(response.body) > 0 {
@@ -98,6 +99,21 @@ func (s *servers) request(target value.Server, w http.ResponseWriter, r *http.Re
 	}
 }
 func (s *servers) requestAbort(ctx context.Context, err error) {
+	if execution.ProcessProgress(err) != nil {
+		s.abort(err)
+	}
+	if progress, progressErr := execution.HTTPProgress(err); progress != nil || progressErr != nil {
+		s.abort(err)
+	}
+	if _, _, ok := execution.WriteProgress(err); ok {
+		s.abort(err)
+	}
+	if execution.ActivationDetails(err) != nil {
+		s.abort(err)
+	}
+	if _, _, ok := execution.RemovalDetails(err); ok {
+		s.abort(err)
+	}
 	s.mu.Lock()
 	stopping := s.stopping
 	s.mu.Unlock()
@@ -113,30 +129,28 @@ func readRequest(w http.ResponseWriter, r *http.Request) (value.HTTPValue, value
 	bad := func(kind, message string) (value.HTTPValue, value.Error) {
 		return nil, must(value.NewError(kind, message, input))
 	}
-	if !utf8.ValidString(r.Method) || !utf8.ValidString(r.URL.Path) || !utf8.ValidString(r.Host) {
+	if !utf8.ValidString(r.Method) || !utf8.ValidString(r.URL.Path) {
 		return bad(catalog.InvalidRequest, "request text is not valid UTF-8")
 	}
 	if r.ContentLength > MaxRequestBytes {
 		return bad(catalog.RequestTooLarge, "request body exceeds its byte limit")
 	}
-	entries := []value.Entry{{Key: text("Host"), Value: text(r.Host)}}
+	entries := []value.Value{must(value.NewRecord([]value.Field{{Name: "name", Value: text("host")}, {Name: "value", Value: value.NewBytes([]byte(r.Host))}}))}
 	names := make([]string, 0, len(r.Header))
 	for name := range r.Header {
 		names = append(names, name)
 	}
 	slices.Sort(names)
 	for _, name := range names {
-		values := r.Header[name]
-		separator := ", "
-		if name == "Cookie" {
-			separator = "; "
+		for _, content := range r.Header[name] {
+			entries = append(entries, must(value.NewRecord([]value.Field{{Name: "name", Value: text(name)}, {Name: "value", Value: value.NewBytes([]byte(content))}})))
 		}
-		joined := strings.Join(values, separator)
-		if !utf8.ValidString(name) || !utf8.ValidString(joined) {
-			return bad(catalog.InvalidRequest, "request header is not valid UTF-8")
-		}
-		entries = append(entries, value.Entry{Key: text(http.CanonicalHeaderKey(name)), Value: text(joined)})
 	}
+	headers, headerErr := value.NewHeaders(must(value.NewList(types.HeaderEntries(), entries)))
+	if headerErr != nil {
+		return bad(catalog.InvalidRequest, headerErr.Error())
+	}
+
 	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, MaxRequestBytes))
 	if err != nil {
 		var large *http.MaxBytesError
@@ -145,14 +159,13 @@ func readRequest(w http.ResponseWriter, r *http.Request) (value.HTTPValue, value
 		}
 		return bad(catalog.RequestReadFailed, fmt.Sprintf("read request body: %v", err))
 	}
-	headers := must(value.NewMap(must(types.NewMap(types.String(), types.String())), entries))
 	fields := must(value.NewRecord([]value.Field{{Name: "method", Value: text(r.Method)}, {Name: "path", Value: text(r.URL.Path)}, {Name: "headers", Value: headers}, {Name: "body", Value: value.NewBytes(body)}}))
 	return must(value.NewHTTP(types.Request(), fields)), nil
 }
 
 type responseData struct {
 	status  int
-	headers map[string]string
+	headers http.Header
 	body    []byte
 }
 
@@ -177,14 +190,14 @@ func responseValue(v value.Value) (responseData, value.Error) {
 	if (status == http.StatusNoContent || status == http.StatusResetContent || status == http.StatusNotModified) && len(body) != 0 {
 		return bad("response status prohibits a body")
 	}
-	headers := map[string]string{}
-	for _, entry := range fields.Field("headers").(value.Map).Entries() {
-		name, text := entry.Key.(value.Text).Text(), entry.Value.(value.Text).Text()
-		if strings.ContainsAny(name+text, "\r\n") || name == "" {
-			return bad("invalid response header")
-		}
-		headers[name] = text
+	headers := http.Header{}
+	for _, entry := range fields.Field("headers").(value.Headers).Entries().Items() {
+		fields := entry.(value.Record)
+		name := fields.Field("name").(value.Text).Text()
+		content := fields.Field("value").(value.Bytes).Bytes()
+		headers.Add(name, string(content))
 	}
+
 	return responseData{status, headers, body}, nil
 }
 func text(s string) value.Text { return must(value.NewText(types.String(), s)) }

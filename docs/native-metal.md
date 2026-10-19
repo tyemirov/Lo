@@ -10,7 +10,7 @@ The [arithmetic contract](metal-arithmetic.md) defines its numeric behavior.
 2. Build the artifact with the explicit backend option:
 
    ```bash
-   ./bin/lo-metal build examples/metal_arithmetic.lo --device-backend metal --output ./bin/metal-example
+   LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/metal_arithmetic.lo --device-backend metal --output ./bin/metal-example
    ```
 
 3. Execute the artifact with its device grant:

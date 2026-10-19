@@ -93,9 +93,34 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `HTTP origin`: The canonical scheme, hostname, and effective port of an HTTP destination.
+- `IP literal`: An explicit IPv4 or IPv6 address without a hostname lookup.
+- `DNS`: The system that resolves a hostname to network addresses.
+- `SNI`: The TLS extension that supplies the requested server hostname.
+- `TLS`: The protocol that authenticates and encrypts a transport connection.
+- `host observation`: An operation that obtains external state during program evaluation and publishes an immutable value.
+- `bound commit`: A Lo statement that creates a result binding after target activation success.
+- `File receipt`: A nominal value with the confirmed result of File activation success.
+- `server receipt`: A nominal value with the actual address and port after server startup success.
+- `activation success`: The selected operation reaches its completion event without an operation error.
+- `activation result`: The typed value published when an activated target reaches its specified completion event.
+- `completion event`: The operation-specific condition necessary for successful activation result publication.
+- `higher-order operation`: An operation that accepts a named flow and defines when that flow executes.
+- `callback phase`: The construction, evaluation, activation, or external event stage that invokes a stored flow.
+- `execution profile`: Host-enforced restrictions on a child program, its descendants, external access, channels, and lifetime.
+- `confinement`: Enforcement that prevents a process and its descendants from access outside their execution profile.
+- `termination variant`: One nominal representation of normal process exit or signal termination.
+- `request header`: One named HTTP field value supplied with a request.
+- `response header`: One named HTTP field value supplied with a response.
+- `byte framing`: Rules that separate records or fields within a byte sequence.
 - `file observation`: Immutable metadata obtained for one directory entry during a listing operation.
+- `file descriptor`: An integer that identifies an open file or directory within one process.
+- `hardlink`: A filesystem name that refers to the same native file identity as another name.
+- `open-file probe`: The fixed host command that observes open paths under an authorized directory.
+- `flow receipt`: A diagnostic record of the completed prefix and accumulator state of a sequential fold.
+- `singleton removal`: A committed removal target that contains exactly one file entry.
 - `entry provenance`: Private runtime data that connects a file observation to its execution session and directory.
-- `removal batch`: An ordered collection of selected file observations in one removal effect.
+- `removal batch`: An ordered collection of selected file observations in one removal target.
 - `cooperative lock`: A host lock protocol followed by every process within its stated concurrency guarantee.
 - `shared lock`: A lock that permits concurrent participating readers or lifecycle owners and excludes an exclusive lock.
 - `exclusive lock`: A lock that excludes all other participating shared and exclusive holders.
@@ -249,7 +274,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `data dependency`: A graph relation that supplies a value to another node.
 - `declaration`: A source construct that introduces a name and its meaning.
 - `diagnostic`: A structured report of a source or execution failure.
-- `effect summary`: Static information about possible activation through a flow or operation.
+- `effect summary`: Static information about possible host observations, commit activation, and device requirements through a flow or operation.
 - `evaluation order`: The sequence in which Lo evaluates expressions and activates targets.
 - `evaluation region`: Graph nodes that share a branch, invocation, or handler boundary.
 - `exact record`: A record type that requires a specified set of fields and field types.
@@ -277,7 +302,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `pipe`: The Lo `|>` expression that supplies its left value as the first call argument.
 - `processor`: A built-in Lo operation that transforms values.
 - `projection`: An expression that obtains a named field from a typed value.
-- `pure flow`: A Lo flow classified as free of commit activation under the language purity rules.
+- `pure flow`: A Lo flow with no direct or indirect host observations or commit activation.
 - `recursion`: Invocation that returns to an active flow through a cycle of flow calls.
 - `resolver`: The compiler component that connects references to declarations.
 - `scalar`: One Unicode scalar value.
@@ -297,7 +322,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `authenticate`: Confirm the identity of a client or user.
 - `authorize`: Confirm that an identity can do an operation on a resource.
 - `build`: Convert source code into an executable or generated artifact.
-- `cache`: Store a verified reference outside a target repository for repeated use.
+- `cache`: Store data in a designated directory for repeated use.
 - `commit`: Record a Git change in repository history.
 - `configure`: Set source-controlled values that control system behavior.
 - `deploy`: Change a runtime environment to use a specified artifact and configuration.

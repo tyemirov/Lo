@@ -2,11 +2,13 @@ package runner
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 	"io"
 	"os"
@@ -14,26 +16,33 @@ import (
 )
 
 const (
-	BuildCommand        = "build"
-	outputOption        = "--output"
-	targetOption        = "--target"
-	deviceBackendOption = "--device-backend"
-	ParseCommand        = "parse"
-	CheckCommand        = "check"
-	InspectCommand      = "inspect"
-	RunCommand          = "run"
-	ServeCommand        = "serve"
-	listenOption        = "--listen"
-	readRootOption      = "--read-root"
-	writeRootOption     = "--write-root"
-	allowDeviceOption   = "--allow-device"
-	maxStepsOption      = "--max-steps"
-	formatOption        = "--format"
-	TextFormat          = "text"
-	JsonFormat          = "json"
-	ExitSuccess         = 0
-	ExitRejected        = 1
-	ExitHost            = 2
+	BuildCommand          = "build"
+	outputOption          = "--output"
+	targetOption          = "--target"
+	deviceBackendOption   = "--device-backend"
+	ParseCommand          = "parse"
+	CheckCommand          = "check"
+	InspectCommand        = "inspect"
+	RunCommand            = "run"
+	ServeCommand          = "serve"
+	listenOption          = "--listen"
+	httpAllowOption       = "--http-allow"
+	processAllowOption    = "--process-allow"
+	processLauncherOption = "--process-launcher"
+	processReadRootOption = "--process-read-root"
+	readRootOption        = "--read-root"
+	writeRootOption       = "--write-root"
+	listRootOption        = "--list-root"
+	removeRootOption      = "--remove-root"
+	openFilesRootOption   = "--open-files-root"
+	allowDeviceOption     = "--allow-device"
+	maxStepsOption        = "--max-steps"
+	formatOption          = "--format"
+	TextFormat            = "text"
+	JsonFormat            = "json"
+	ExitSuccess           = 0
+	ExitRejected          = 1
+	ExitHost              = 2
 )
 
 type invocation struct {
@@ -42,9 +51,14 @@ type invocation struct {
 	deviceBackend         device.BuildBackend
 	readRoots             []string
 	writeRoots            []string
+	listRoots             []string
+	removeRoots           []string
+	openFilesRoots        []string
 	devices               device.Config
 	budget                execution.Budget
 	listenPolicy          adapter.ListenPolicy
+	httpPolicy            adapter.HTTPPolicy
+	processPolicy         adapter.ProcessPolicy
 }
 
 func parseArgs(args []string, embedded bool) (invocation, error) {
@@ -58,8 +72,41 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	deviceSet := false
 	backendSet := false
 	var ports []uint16
+	var httpGrants []string
+	var processGrants, processReadRoots []string
+	var processLauncher string
+	processLauncherSet := false
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
+		if arg == processAllowOption || arg == processLauncherOption || arg == processReadRootOption {
+			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
+				return inv, fmt.Errorf("%s requires a value with run or serve", arg)
+			}
+			i++
+			if args[i] == "" {
+				return inv, fmt.Errorf("%s requires a nonempty value", arg)
+			}
+			switch arg {
+			case processAllowOption:
+				processGrants = append(processGrants, args[i])
+			case processLauncherOption:
+				if processLauncherSet {
+					return inv, fmt.Errorf("duplicate --process-launcher")
+				}
+				processLauncherSet, processLauncher = true, args[i]
+			case processReadRootOption:
+				processReadRoots = append(processReadRoots, args[i])
+			}
+			continue
+		}
+		if arg == httpAllowOption {
+			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
+				return inv, fmt.Errorf("--http-allow requires METHOD,ORIGIN,ADDRESS with run or serve")
+			}
+			i++
+			httpGrants = append(httpGrants, args[i])
+			continue
+		}
 		if arg == deviceBackendOption {
 			if embedded || inv.command != BuildCommand || backendSet || i+1 == len(args) {
 				return inv, fmt.Errorf("--device-backend requires one software or metal value with build")
@@ -123,19 +170,26 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 			ports = append(ports, uint16(port))
 			continue
 		}
-		if arg == readRootOption || arg == writeRootOption || arg == maxStepsOption {
+		if arg == readRootOption || arg == writeRootOption || arg == listRootOption || arg == removeRootOption || arg == openFilesRootOption || arg == maxStepsOption {
 			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
 				return inv, fmt.Errorf("%s requires a value with run or serve", arg)
 			}
 			i++
-			if arg == readRootOption || arg == writeRootOption {
+			if arg != maxStepsOption {
 				if args[i] == "" {
 					return inv, fmt.Errorf("empty adapter root")
 				}
-				if arg == readRootOption {
+				switch arg {
+				case readRootOption:
 					inv.readRoots = append(inv.readRoots, args[i])
-				} else {
+				case writeRootOption:
 					inv.writeRoots = append(inv.writeRoots, args[i])
+				case listRootOption:
+					inv.listRoots = append(inv.listRoots, args[i])
+				case removeRootOption:
+					inv.removeRoots = append(inv.removeRoots, args[i])
+				case openFilesRootOption:
+					inv.openFilesRoots = append(inv.openFilesRoots, args[i])
 				}
 			} else {
 				if stepsSet {
@@ -190,6 +244,14 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	if err != nil {
 		return inv, err
 	}
+	inv.httpPolicy, err = adapter.NewHTTPPolicy(httpGrants)
+	if err != nil {
+		return inv, err
+	}
+	inv.processPolicy, err = adapter.NewProcessPolicy(processGrants, processLauncher, processReadRoots)
+	if err != nil {
+		return inv, err
+	}
 	return inv, nil
 }
 
@@ -209,6 +271,9 @@ func (inv invocation) Path() string                { return inv.path }
 func (inv invocation) Format() string              { return inv.format }
 func ParseCompiler(args []string) (Options, error) { return parseArgs(args, false) }
 func Execute(program execution.Program, args []string, stdout, stderr io.Writer) int {
+	if adapter.HandleFileProbe(args) {
+		return ExitSuccess
+	}
 	inv, err := parseArgs(args, true)
 	if err != nil {
 		return Report(stderr, inv.format, diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), ExitHost)
@@ -220,15 +285,19 @@ func Run(inv Options, program execution.Program, stdout, stderr io.Writer) int {
 }
 func Main(program execution.Program) { os.Exit(Execute(program, os.Args[1:], os.Stdout, os.Stderr)) }
 func ReportRuntime(stderr io.Writer, format string, err error) int {
-	if failure, ok := err.(execution.Failure); ok {
+	var failure execution.Failure
+	if errors.As(err, &failure) {
 		v := failure.Value()
 		d := diagnostic.New(diagnostic.RuntimeUnhandled, diagnostic.Runtime, err.Error(), v.Span())
 		if format == JsonFormat {
 			type runtimeDiagnostic struct {
 				diagnostic.Data
-				Error value.Error `json:"error"`
+				Error     value.Error                  `json:"error"`
+				Flows     []value.Record               `json:"flow_progress,omitempty"`
+				Completed execution.ActivationProgress `json:"last_completed_activation,omitempty"`
+				Cleanup   []string                     `json:"cleanup_errors,omitempty"`
 			}
-			payload := runtimeDiagnostic{d.Data(), v}
+			payload := runtimeDiagnostic{d.Data(), v, execution.FlowDetails(err), execution.ActivationDetails(err), execution.CleanupDetails(err)}
 			if err := json.NewEncoder(stderr).Encode(struct {
 				Diagnostics []runtimeDiagnostic `json:"diagnostics"`
 			}{[]runtimeDiagnostic{payload}}); err != nil {
@@ -247,8 +316,75 @@ func ReportRuntime(stderr io.Writer, format string, err error) int {
 		return ExitRejected
 	}
 	code := diagnostic.RuntimeHost
-	if host, ok := err.(execution.HostError); ok {
+	var host execution.HostError
+	if errors.As(err, &host) {
 		code = host.Code()
+	}
+	entries, progress, removal := execution.RemovalDetails(err)
+	flows := execution.FlowDetails(err)
+	completed := execution.ActivationDetails(err)
+	cleanup := execution.CleanupDetails(err)
+	httpProgress, progressErr := execution.HTTPProgress(err)
+	processProgress := execution.ProcessProgress(err)
+	if progressErr != nil {
+		return Report(stderr, format, diagnostic.New(diagnostic.RuntimeHost, diagnostic.Runtime, fmt.Sprintf("HTTP progress: %v; original failure: %v", progressErr, err), nil), ExitHost)
+	}
+	var writeProgress value.Record
+	if confirmed, stage, ok := execution.WriteProgress(err); ok {
+		stageValue, valueErr := value.NewText(types.String(), stage)
+		if valueErr == nil {
+			writeProgress, valueErr = value.NewRecord([]value.Field{{Name: "bytes_written", Value: value.Int64(int64(confirmed))}, {Name: "stage", Value: stageValue}})
+		}
+		if valueErr != nil {
+			return Report(stderr, format, diagnostic.New(diagnostic.RuntimeHost, diagnostic.Runtime, fmt.Sprintf("write progress: %v; original failure: %v", valueErr, err), nil), ExitHost)
+		}
+	}
+	if removal || len(flows) > 0 || writeProgress != nil || httpProgress != nil || processProgress != nil || completed != nil || len(cleanup) > 0 {
+		data := diagnostic.New(code, diagnostic.Runtime, err.Error(), nil).Data()
+		if format == JsonFormat {
+			type removalDiagnostic struct {
+				diagnostic.Data
+				Entries   value.Value                  `json:"removal_entries,omitempty"`
+				Progress  value.Record                 `json:"removal_progress,omitempty"`
+				Flows     []value.Record               `json:"flow_progress,omitempty"`
+				Write     value.Record                 `json:"write_progress,omitempty"`
+				HTTP      value.Record                 `json:"http_progress,omitempty"`
+				Process   value.Record                 `json:"process_progress,omitempty"`
+				Completed execution.ActivationProgress `json:"last_completed_activation,omitempty"`
+				Cleanup   []string                     `json:"cleanup_errors,omitempty"`
+			}
+			var snapshot value.Value
+			if entries != nil {
+				snapshot = value.Snapshot(entries)
+			}
+			payload := struct {
+				Diagnostics []removalDiagnostic `json:"diagnostics"`
+			}{[]removalDiagnostic{{data, snapshot, progress, flows, writeProgress, httpProgress, processProgress, completed, cleanup}}}
+			if err := json.NewEncoder(stderr).Encode(payload); err != nil {
+				return ExitHost
+			}
+			return ExitHost
+		}
+		message := err.Error()
+		if removal {
+			message += fmt.Sprintf(" (completed %s removals, stage %s)", value.TextResult(progress.Field("completed_count")), value.TextResult(progress.Field("stage")))
+		}
+		if writeProgress != nil {
+			message += fmt.Sprintf(" (wrote %s bytes, stage %s)", value.TextResult(writeProgress.Field("bytes_written")), value.TextResult(writeProgress.Field("stage")))
+		}
+		if httpProgress != nil {
+			message += fmt.Sprintf(" (HTTP stage %s, request written %s, remote outcome %s)", value.TextResult(httpProgress.Field("stage")), value.TextResult(httpProgress.Field("request_written")), value.TextResult(httpProgress.Field("remote_outcome")))
+		}
+		if processProgress != nil {
+			message += " (Process progress " + value.TextResult(processProgress) + ")"
+		}
+		if completed != nil {
+			message += fmt.Sprintf(" (last completed %s at %s:%d: %s)", completed.Operation(), completed.Span().File(), completed.Span().Start().Line, completed.Summary())
+		}
+		for _, flow := range flows {
+			message += fmt.Sprintf(" (Flow.fold completed %s/%s, state %s)", value.TextResult(flow.Field("completed_count")), value.TextResult(flow.Field("total_count")), value.TextResult(flow.Field("state")))
+		}
+		return Report(stderr, format, diagnostic.New(code, diagnostic.Runtime, message, nil), ExitHost)
 	}
 	return Report(stderr, format, diagnostic.New(code, diagnostic.Runtime, err.Error(), nil), ExitHost)
 }

@@ -1,0 +1,416 @@
+{
+  "date": "2026-10-19",
+  "reviewed_diagnostic_runs": 1,
+  "reviewed_manifest_sha256": "b69c1cf55005a034363bd29723e3e04278928f4546e98a25fa96ef21e50cf113",
+  "reviewed_artifacts": {
+    "build": "86b261d37a6cdc965be520495a7912e7021cc8d542cb57528ace3b0429e414d4",
+    "configuration": "22cf3ee85e61d7efdbab69479d99d8ad1591771e75d13c7ee3ead9dee6753dea",
+    "configuration_template": "f3ff798cc9229738e8e06e40a8d4ee63ac34fde32b66aed4684cb0b8440df39d",
+    "controller": "de54c1239432e5e8f1c96bb63adecc99c66ada7541cf34e322e88e1976768cf9",
+    "harness": "a713dff06c9e92e666e5d3c4501dba0c6f8a1300f660a7f9f53ad0f3ee004199",
+    "preexec_build": "e207ae881571ff5f48a7ba8ec0c8002cf8474000c95d0062a4fb2ab0dc39b004",
+    "preexec_harness": "3b7ae1955be4f16758a58af68735efd3bf3693b28f9796cb2e373de1090d2cc9",
+    "preexec_header": "9c2c310a293287472a11a0ee60c2e943bbc035a0b136698fb10f9e3bb0654721",
+    "preexec_launcher_binary": "d865e30c3469aa3ee62acf33e34351e6edc3ccd2b75c5598bd2be229edbea28b",
+    "preexec_launcher_source": "bffbd0bb83affd7eefcf7b1deb7ff6bde83a6457e076af416c5e58c3d045afe4",
+    "preexec_manifest": "72d4e0db509f94a3097c29fdcbd5d73ab9b5c9ae09aa598ac6716c40d37eaa9b",
+    "preexec_profile": "d3915c911b10c6767d083cb084f376b67c2fcb0730e850895c92313e89a7ed4d",
+    "preexec_target_binary": "6d1df03741e71bcef7a722f01ab46aa443386a4ce53f93e52ec5255102208d1b",
+    "preexec_target_source": "c3cae00ed3f9e87ecdc1c1a8f24c0762f90d9e136d556cef2459022f385fca78",
+    "preexec_verification_test": "c4f891943041cecd9cf5df07c56e6764b86339d0c32dbcd2a83180e321892749",
+    "verification_test": "58c272c3d6e372bfc6233ce947a9c70b9d139e87b06e7cd47c40be94700801f9",
+    "wrapper_binary": "5ad876ee699c57184d832ce1d247bb7400a20bd829dace954bca7e71ec8c5cc9",
+    "wrapper_source": "a071b66f6b1cb0ef94af11ba5b1c39a2c214dd7f6ef19a8127d6f07da19e3579"
+  },
+  "result": {
+    "cleanup_signal_errors": [],
+    "cleanup_wait_errors": [],
+    "diagnostic_completed": false,
+    "elapsed_seconds": 3.112,
+    "error": "owned debugserver listener deadline exceeded",
+    "fixture_inputs": {
+      "allowed-read": "35419ce719a96a7edc8486a0f1e77f876bf73ca8eccb1b7be99b4068165c32f0",
+      "allowed-write": "0e9017237fe7a6e0510b2fc8543fbfd698f5f35e00ef3387b150dde95e7b42ad",
+      "denied-read": "66fb158d25f8139220714fa84b36443961f355f22d1d3f114c686e4a39daccd2",
+      "denied-write": "b78dfad7554815ffaab50f7078b6b3d1f6e8e2fab880a4d9ee0d0078e3e4ea4c"
+    },
+    "fixture_outputs": {
+      "allowed-read": "35419ce719a96a7edc8486a0f1e77f876bf73ca8eccb1b7be99b4068165c32f0",
+      "allowed-write": "0e9017237fe7a6e0510b2fc8543fbfd698f5f35e00ef3387b150dde95e7b42ad",
+      "denied-read": "66fb158d25f8139220714fa84b36443961f355f22d1d3f114c686e4a39daccd2",
+      "denied-write": "b78dfad7554815ffaab50f7078b6b3d1f6e8e2fab880a4d9ee0d0078e3e4ea4c"
+    },
+    "nonwriting_fixtures_unchanged": true,
+    "owned_children_joined": true,
+    "owned_exit_codes": [
+      {
+        "exit_code": -9,
+        "pid": 32015
+      },
+      {
+        "exit_code": -9,
+        "pid": 32033
+      },
+      {
+        "exit_code": 1,
+        "pid": 32034
+      },
+      {
+        "exit_code": 1,
+        "pid": 32045
+      },
+      {
+        "exit_code": 1,
+        "pid": 32054
+      },
+      {
+        "exit_code": 1,
+        "pid": 32062
+      },
+      {
+        "exit_code": 1,
+        "pid": 32071
+      },
+      {
+        "exit_code": 1,
+        "pid": 32079
+      },
+      {
+        "exit_code": 1,
+        "pid": 32088
+      },
+      {
+        "exit_code": 1,
+        "pid": 32100
+      },
+      {
+        "exit_code": 1,
+        "pid": 32111
+      },
+      {
+        "exit_code": 1,
+        "pid": 32121
+      },
+      {
+        "exit_code": 1,
+        "pid": 32129
+      },
+      {
+        "exit_code": 1,
+        "pid": 32140
+      },
+      {
+        "exit_code": 1,
+        "pid": 32148
+      },
+      {
+        "exit_code": 1,
+        "pid": 32157
+      },
+      {
+        "exit_code": 1,
+        "pid": 32169
+      },
+      {
+        "exit_code": 1,
+        "pid": 32177
+      },
+      {
+        "exit_code": 1,
+        "pid": 32190
+      },
+      {
+        "exit_code": 1,
+        "pid": 32218
+      },
+      {
+        "exit_code": 1,
+        "pid": 32225
+      },
+      {
+        "exit_code": 1,
+        "pid": 32237
+      },
+      {
+        "exit_code": 1,
+        "pid": 32272
+      },
+      {
+        "exit_code": 1,
+        "pid": 32286
+      },
+      {
+        "exit_code": 1,
+        "pid": 32296
+      },
+      {
+        "exit_code": 1,
+        "pid": 32304
+      },
+      {
+        "exit_code": 1,
+        "pid": 32313
+      },
+      {
+        "exit_code": 1,
+        "pid": 32323
+      },
+      {
+        "exit_code": 1,
+        "pid": 32332
+      },
+      {
+        "exit_code": 1,
+        "pid": 32343
+      },
+      {
+        "exit_code": 1,
+        "pid": 32350
+      },
+      {
+        "exit_code": 1,
+        "pid": 32358
+      },
+      {
+        "exit_code": 1,
+        "pid": 32364
+      },
+      {
+        "exit_code": 1,
+        "pid": 32375
+      },
+      {
+        "exit_code": 1,
+        "pid": 32385
+      },
+      {
+        "exit_code": 1,
+        "pid": 32398
+      },
+      {
+        "exit_code": 1,
+        "pid": 32406
+      },
+      {
+        "exit_code": 1,
+        "pid": 32416
+      },
+      {
+        "exit_code": 1,
+        "pid": 32427
+      },
+      {
+        "exit_code": 1,
+        "pid": 32441
+      },
+      {
+        "exit_code": 1,
+        "pid": 32451
+      },
+      {
+        "exit_code": 1,
+        "pid": 32462
+      },
+      {
+        "exit_code": 1,
+        "pid": 32472
+      },
+      {
+        "exit_code": 1,
+        "pid": 32486
+      },
+      {
+        "exit_code": 1,
+        "pid": 32503
+      },
+      {
+        "exit_code": 1,
+        "pid": 32522
+      },
+      {
+        "exit_code": 1,
+        "pid": 32542
+      },
+      {
+        "exit_code": 1,
+        "pid": 32557
+      },
+      {
+        "exit_code": 1,
+        "pid": 32570
+      },
+      {
+        "exit_code": 1,
+        "pid": 32581
+      },
+      {
+        "exit_code": 1,
+        "pid": 32590
+      },
+      {
+        "exit_code": 1,
+        "pid": 32597
+      },
+      {
+        "exit_code": 1,
+        "pid": 32604
+      },
+      {
+        "exit_code": 1,
+        "pid": 32610
+      },
+      {
+        "exit_code": 1,
+        "pid": 32616
+      },
+      {
+        "exit_code": 1,
+        "pid": 32627
+      },
+      {
+        "exit_code": 1,
+        "pid": 32635
+      },
+      {
+        "exit_code": 1,
+        "pid": 32643
+      },
+      {
+        "exit_code": 1,
+        "pid": 32652
+      },
+      {
+        "exit_code": 1,
+        "pid": 32661
+      },
+      {
+        "exit_code": 1,
+        "pid": 32671
+      },
+      {
+        "exit_code": 1,
+        "pid": 32678
+      },
+      {
+        "exit_code": 1,
+        "pid": 32690
+      },
+      {
+        "exit_code": 1,
+        "pid": 32701
+      },
+      {
+        "exit_code": 1,
+        "pid": 32716
+      },
+      {
+        "exit_code": 1,
+        "pid": 32729
+      },
+      {
+        "exit_code": 1,
+        "pid": 32739
+      },
+      {
+        "exit_code": 1,
+        "pid": 32751
+      },
+      {
+        "exit_code": 1,
+        "pid": 32763
+      },
+      {
+        "exit_code": 1,
+        "pid": 32774
+      },
+      {
+        "exit_code": 1,
+        "pid": 32786
+      },
+      {
+        "exit_code": 1,
+        "pid": 32797
+      },
+      {
+        "exit_code": 1,
+        "pid": 32805
+      },
+      {
+        "exit_code": 1,
+        "pid": 32811
+      },
+      {
+        "exit_code": 1,
+        "pid": 32821
+      }
+    ],
+    "phase_markers": [
+      "LO_DEBUG_READY"
+    ],
+    "post_run_artifacts": {
+      "build": "86b261d37a6cdc965be520495a7912e7021cc8d542cb57528ace3b0429e414d4",
+      "configuration": "22cf3ee85e61d7efdbab69479d99d8ad1591771e75d13c7ee3ead9dee6753dea",
+      "configuration_template": "f3ff798cc9229738e8e06e40a8d4ee63ac34fde32b66aed4684cb0b8440df39d",
+      "controller": "de54c1239432e5e8f1c96bb63adecc99c66ada7541cf34e322e88e1976768cf9",
+      "harness": "a713dff06c9e92e666e5d3c4501dba0c6f8a1300f660a7f9f53ad0f3ee004199",
+      "preexec_build": "e207ae881571ff5f48a7ba8ec0c8002cf8474000c95d0062a4fb2ab0dc39b004",
+      "preexec_harness": "3b7ae1955be4f16758a58af68735efd3bf3693b28f9796cb2e373de1090d2cc9",
+      "preexec_header": "9c2c310a293287472a11a0ee60c2e943bbc035a0b136698fb10f9e3bb0654721",
+      "preexec_launcher_binary": "d865e30c3469aa3ee62acf33e34351e6edc3ccd2b75c5598bd2be229edbea28b",
+      "preexec_launcher_source": "bffbd0bb83affd7eefcf7b1deb7ff6bde83a6457e076af416c5e58c3d045afe4",
+      "preexec_manifest": "72d4e0db509f94a3097c29fdcbd5d73ab9b5c9ae09aa598ac6716c40d37eaa9b",
+      "preexec_profile": "d3915c911b10c6767d083cb084f376b67c2fcb0730e850895c92313e89a7ed4d",
+      "preexec_target_binary": "6d1df03741e71bcef7a722f01ab46aa443386a4ce53f93e52ec5255102208d1b",
+      "preexec_target_source": "c3cae00ed3f9e87ecdc1c1a8f24c0762f90d9e136d556cef2459022f385fca78",
+      "preexec_verification_test": "c4f891943041cecd9cf5df07c56e6764b86339d0c32dbcd2a83180e321892749",
+      "verification_test": "58c272c3d6e372bfc6233ce947a9c70b9d139e87b06e7cd47c40be94700801f9",
+      "wrapper_binary": "5ad876ee699c57184d832ce1d247bb7400a20bd829dace954bca7e71ec8c5cc9",
+      "wrapper_source": "a071b66f6b1cb0ef94af11ba5b1c39a2c214dd7f6ef19a8127d6f07da19e3579"
+    },
+    "qualified_process_backend": false,
+    "ready_stopped": true,
+    "reviewed_artifacts_unchanged": true,
+    "reviewed_manifest_sha256": "b69c1cf55005a034363bd29723e3e04278928f4546e98a25fa96ef21e50cf113",
+    "scope": "Debugger capture only; diagnostic_completed does not establish SIGABRT reproduction or Process qualification.",
+    "target_limits": {
+      "core_dump_limit": 0,
+      "cpu_limit_modified": false,
+      "file_descriptor_limit": 64,
+      "output_limit_per_stream": 65536
+    },
+    "target_stderr": "LO_DEBUG_READY\n",
+    "target_stdout": "",
+    "timeout_seconds": 15,
+    "tool_limits": {
+      "core_dump_limit": 0,
+      "cpu_limit_seconds": 5,
+      "file_descriptor_limit": 64,
+      "output_limit_per_stream": 65536
+    },
+    "unjoined_owned_pids": [],
+    "wrapper_pid": 32015
+  },
+  "raw_debugserver_log": "debugserver-@(#)PROGRAM:LLDB  PROJECT:lldb-2103.0.34.103\n for arm64.\n\nAttaching to process 32015...\n\n1 +0.000000 sec [7d21/0103]: RNBRunLoopLaunchAttaching Attaching to pid 32015...\n2 +0.000441 sec [7d21/0103]: MachProcess::MachProcess()\n3 +0.000013 sec [7d21/0103]: (DebugNub) attaching to pid 32015...\n4 +0.000110 sec [7d21/0103]: MachProcess::SetState(Unloaded) ignoring redundant state change...\n5 +0.000023 sec [7d21/0103]: MachProcess::SetState(Attaching) upating state (previous state was Unloaded), event_mask = 0x00000001\n6 +0.000012 sec [7d21/0103]: MachTask::StartExceptionThread ( )\n[LaunchAttach] (32033) about to task_for_pid(32015)\n",
+  "validation": {
+    "public_gate_tests_passed": 4,
+    "gate_test_seconds": 0.12,
+    "target_free_settings": "passed"
+  },
+  "observed_boundary": {
+    "error": "owned debugserver listener deadline exceeded",
+    "elapsed_seconds": 3.112,
+    "last_logged_operation": "about to task_for_pid(32015)",
+    "wrapper_phase": "LO_DEBUG_READY",
+    "original_launcher_or_target_markers": false,
+    "lldb_launched": false,
+    "controller_report_present": false
+  },
+  "cleanup": "All owned processes reaped. No cleanup signal or wait errors. Fixtures and reviewed artifacts unchanged.",
+  "interpretation_limits": [
+    "No confirmed OS denial, developer-mode requirement, or exact waiting cause.",
+    "No reproduction of the startup abort.",
+    "Debugger diagnostic only; no Process backend qualification."
+  ],
+  "followup": "No retry or increased timeout approved. Task files retained because the full goal remains incomplete.",
+  "product_ci_scope": "Prior core CI remains valid for unchanged product source."
+}

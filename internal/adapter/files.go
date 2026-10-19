@@ -11,8 +11,10 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sync"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
@@ -26,32 +28,66 @@ type grant struct {
 	root *os.Root
 }
 type files struct {
-	base   string
-	reads  []grant
-	writes []grant
+	base         string
+	reads        []grant
+	writes       []grant
+	lists        []grant
+	removes      []grant
+	openFiles    []grant
+	io           FileIO
+	protections  []*processRegistry
+	probe        *fileProbe
+	mu           sync.Mutex
+	sessions     map[value.FileSession]*fileRegistry
+	lastEntries  value.List
+	lastProgress value.Record
 }
 
 func (*files) files() {}
 
-func OpenFiles(readRoots, writeRoots []string) (Files, error) {
+// FileRoots separates content access from exact-directory discovery and removal.
+type FileRoots struct{ Read, Write, List, Remove, OpenFiles []string }
+
+func OpenFiles(roots FileRoots, filesystem FileIO) (Files, error) {
+	if filesystem == nil {
+		return nil, fmt.Errorf("file adapter requires filesystem operations")
+	}
 	base, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("resolve execution directory: %w", err)
 	}
-	f := &files{base: base}
-	f.reads, err = openRoots(readRoots)
+	f := &files{base: base, io: filesystem, sessions: map[value.FileSession]*fileRegistry{}}
+	f.reads, err = openRoots(roots.Read)
 	if err != nil {
 		return nil, err
 	}
-	f.writes, err = openRoots(writeRoots)
+	f.writes, err = openRoots(roots.Write)
 	if err != nil {
 		return nil, errors.Join(err, f.Close())
+	}
+	f.lists, err = openExactRoots(roots.List)
+	if err != nil {
+		return nil, errors.Join(err, f.Close())
+	}
+	f.removes, err = openExactRoots(roots.Remove)
+	if err != nil {
+		return nil, errors.Join(err, f.Close())
+	}
+	f.openFiles, err = openExactRoots(roots.OpenFiles)
+	if err != nil {
+		return nil, errors.Join(err, f.Close())
+	}
+	if len(f.openFiles) > 0 {
+		f.probe = openFileProbe()
+		if f.probe.registry != nil {
+			f.protections = append(f.protections, f.probe.registry)
+		}
 	}
 	return f, nil
 }
 func openRoots(paths []string) ([]grant, error) {
 	roots := []grant{}
-	fail := func(err error) ([]grant, error) { return nil, errors.Join(err, closeRoots(roots)) }
+	fail := func(err error) ([]grant, error) { return nil, errors.Join(err, closeRoots(roots, (*os.Root).Close)) }
 	seen := map[string]bool{}
 	for _, path := range paths {
 		absolute, err := filepath.Abs(path)
@@ -72,12 +108,28 @@ func openRoots(paths []string) ([]grant, error) {
 	return roots, nil
 }
 func (f *files) Close() error {
-	return errors.Join(closeRoots(f.reads), closeRoots(f.writes))
+	var failures []error
+	for _, roots := range [][]grant{f.reads, f.writes, f.lists, f.removes, f.openFiles} {
+		failures = append(failures, closeRoots(roots, f.io.CloseDirectory))
+	}
+	if f.probe != nil && f.probe.registry != nil {
+		failures = append(failures, f.probe.registry.Close())
+	}
+	err := errors.Join(failures...)
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if err != nil && f.lastProgress != nil {
+		return execution.WithRemovalProgress(err, f.lastEntries, f.lastProgress)
+	}
+	return err
 }
-func closeRoots(roots []grant) error {
+func closeRoots(roots []grant, close func(*os.Root) error) error {
 	var result error
 	for _, g := range roots {
-		if err := g.root.Close(); err != nil {
+		if g.root == nil {
+			continue
+		}
+		if err := close(g.root); err != nil {
 			result = errors.Join(result, fmt.Errorf("close adapter root %q: %w", g.path, err))
 		}
 	}
@@ -123,52 +175,66 @@ func (f *files) resolve(roots []grant, operation, path string) (*os.Root, string
 	}
 	return nil, "", absolute, execution.Denied(operation, absolute)
 }
-func (f *files) Commit(ctx context.Context, target value.Target) error {
+func (f *files) Commit(ctx context.Context, target value.Target) (value.Value, error) {
 	switch target := target.(type) {
 	case value.Server:
-		return execution.ServerRequiresServe()
-	case value.Effect:
-		operation := target.Operation().Name()
+		return nil, execution.ServerRequiresServe()
+	case value.RemovalEffect:
+		return f.remove(ctx, target)
+	case value.ContentEffect:
+		operation := target.Operation().Capability()
 		root, relative, absolute, err := f.resolve(f.writes, operation, target.Path().Text())
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if err := ctx.Err(); err != nil {
-			return execution.HostFailure(operation, absolute, err)
+			return nil, execution.WithWriteProgress(execution.HostFailure(operation, absolute, err), 0, "open")
 		}
 		var file *os.File
 		var data []byte
-		if operation == catalog.FileWrite {
+		if len(f.protections) > 0 {
+			file, err = f.protectedContent(root, relative, absolute, target.Type().Kind() == types.FileAppendKind)
+			data = target.Content().(value.Bytes).Bytes()
+		} else if target.Type().Kind() == types.FileWriteKind {
 			file, err = root.Create(relative)
 			data = target.Content().(value.Bytes).Bytes()
 		} else {
 			file, err = openAppend(root, relative)
-			data = []byte(target.Content().(value.Text).Text())
+			data = target.Content().(value.Bytes).Bytes()
 		}
 		if err != nil {
-			return fmt.Errorf("%s %q: %w", operation, absolute, err)
+			return nil, execution.WithWriteProgress(fmt.Errorf("%s %q: %w", operation, absolute, err), 0, "open")
 		}
-		closeFile := cancelFile(ctx, file)
-		writeErr := writeFile(ctx, file, data)
+		closeFile := cancelFileWithClose(ctx, file, f.io.CloseFile)
+		confirmed, writeErr := f.io.Write(ctx, file, data)
 		closeErr := closeFile()
 		if writeErr != nil || closeErr != nil {
-			return fmt.Errorf("%s %q: %w", operation, absolute, errors.Join(writeErr, closeErr))
+			stage := "finalize"
+			if writeErr != nil {
+				stage = "write"
+			}
+			return nil, execution.WithWriteProgress(fmt.Errorf("%s %q: %w", operation, absolute, execution.WithOperationCleanup(writeErr, closeErr)), confirmed, stage)
 		}
 		if err := ctx.Err(); err != nil {
-			return execution.HostFailure(operation, absolute, err)
+			return nil, execution.WithWriteProgress(execution.HostFailure(operation, absolute, err), confirmed, "finalize")
 		}
-		return nil
+		resultType, _ := catalog.ActivationResult(target.Type())
+		fields := must(value.NewRecord([]value.Field{{Name: "path", Value: target.Path()}, {Name: "bytes_written", Value: value.Int64(int64(confirmed))}}))
+		return value.NewReceipt(resultType, fields)
 	default:
 		panic("unknown checked target")
 	}
 }
 
 func cancelFile(ctx context.Context, file *os.File) func() error {
+	return cancelFileWithClose(ctx, file, (*os.File).Close)
+}
+func cancelFileWithClose(ctx context.Context, file *os.File, close func(*os.File) error) func() error {
 	closed := make(chan error, 1)
-	stop := context.AfterFunc(ctx, func() { closed <- file.Close() })
+	stop := context.AfterFunc(ctx, func() { closed <- close(file) })
 	return func() error {
 		if stop() {
-			return file.Close()
+			return close(file)
 		}
 		return errors.Join(ctx.Err(), <-closed)
 	}

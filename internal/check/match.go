@@ -50,8 +50,8 @@ func (c *checker) match(e syntax.Match, expected types.Type) (expression, diagno
 			if head.Type().Kind() == types.FallibleKind || head.propagates {
 				return expression{}, problem(diagnostic.FallibleCase, "match case heads must be total", a.Head().Span())
 			}
-			if head.effects.Commits {
-				return expression{}, problem(diagnostic.EffectfulMatch, "match case heads must not activate a commit", a.Head().Span())
+			if head.effects.Reads || head.effects.Commits {
+				return expression{}, problem(diagnostic.EffectfulMatch, "match case heads must not read host state or activate a commit", a.Head().Span())
 			}
 			if r, ok := head.Type().(types.Range); ok {
 				if !types.Equal(r.Element(), selector.Type()) {

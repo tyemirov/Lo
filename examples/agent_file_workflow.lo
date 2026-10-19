@@ -1,12 +1,21 @@
+flow EmptyTexts() -> List<String> { return List.new() }
+flow WriteEmpty(path: File.Path, count: Int, content: String) -> Int! {
+    target = File.Write.new(path, UTF8.Bytes.new(content))
+    commit target
+    return count
+}
+flow AppendText(path: File.Path, count: Int, content: String) -> Int! {
+    target = File.Append.new(path, UTF8.Bytes.new(content))
+    commit target
+    return Math.add(count, String.length(content))
+}
 flow ProcessFile(input_path: File.Path, log_path: File.Path, empty_path: File.Path) -> Int! {
     file_bytes = File.read(input_path)
     file_text = UTF8.String.new(file_bytes)
-    target = Match.new(String.length(file_text),
-        0: File.write(empty_path, Bytes.new("empty input")),
-        _: File.append(log_path, file_text)
-    )
-    commit target
-    return String.length(file_text)
+    empty = Match.new(String.length(file_text), 0: List.new("empty input"), _: EmptyTexts())
+    nonempty = Match.new(String.length(file_text), 0: EmptyTexts(), _: List.new(file_text))
+    count = Flow.fold(empty, 0, empty_path, WriteEmpty)
+    return Flow.fold(nonempty, count, log_path, AppendText)
 }
 return ProcessFile(
     File.Path.new("input.txt"),

@@ -135,6 +135,8 @@ type resourceData struct {
 	Entry      string          `json:"entry,omitempty"`
 	Node       nodeID          `json:"node"`
 	Target     description     `json:"target"`
+	Method     *description    `json:"method,omitempty"`
+	Process    *processData    `json:"process,omitempty"`
 	Conditions []condition     `json:"conditions"`
 	Handler    identity.FlowID `json:"handler,omitempty"`
 	OnError    identity.FlowID `json:"on_error,omitempty"`
@@ -199,6 +201,16 @@ func (r *report) Text() string {
 			fmt.Fprintf(&b, "  %s %s %s %s context=%s node=%s when=%s", r.ID, r.Operation, r.Target.Kind, target, r.Context, r.Node, conditionsText(r.Conditions))
 			if r.Origin != "" {
 				fmt.Fprintf(&b, " origin=%s", r.Origin)
+			}
+			if r.Method != nil {
+				method := r.Method.Expression
+				if r.Method.Value != nil {
+					method = *r.Method.Value
+				}
+				fmt.Fprintf(&b, " method=%q", method)
+			}
+			if r.Process != nil {
+				r.Process.writeText(&b)
 			}
 			if r.Handler != "" {
 				fmt.Fprintf(&b, " handler=%s onError=%s", r.Handler, r.OnError)

@@ -34,7 +34,7 @@ func TestFileReadCancellation(t *testing.T) {
 	if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
 		t.Fatalf("create local pipe: %v, %s", err, output)
 	}
-	files, err := adapter.OpenFiles([]string{dir}, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{Read: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestFileWriteCancellation(t *testing.T) {
 			if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
 				t.Fatalf("create local pipe: %v, %s", err, output)
 			}
-			files, err := adapter.OpenFiles(nil, []string{dir})
+			files, err := adapter.OpenFiles(adapter.FileRoots{Write: []string{dir}}, adapter.NativeFileIO())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -98,12 +98,7 @@ func TestFileWriteCancellation(t *testing.T) {
 				t.Fatal(err)
 			}
 			var content value.Value = value.NewBytes([]byte(strings.Repeat("x", 1<<20)))
-			if operation == catalog.FileAppend {
-				content, err = value.NewText(types.String(), strings.Repeat("x", 1<<20))
-				if err != nil {
-					t.Fatal(err)
-				}
-			}
+
 			op, _ := catalog.Lookup(operation)
 			target, err := value.NewEffect(op, path, content)
 			if err != nil {
@@ -112,7 +107,7 @@ func TestFileWriteCancellation(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			done := make(chan error, 1)
-			go func() { done <- files.Commit(ctx, target) }()
+			go func() { _, err := files.Commit(ctx, target); done <- err }()
 			var first [1]byte
 			if _, err := reader.Read(first[:]); err != nil {
 				t.Fatal(err)
@@ -133,7 +128,7 @@ func TestFileWriteCancellation(t *testing.T) {
 func TestFileConcurrentAppendCreation(t *testing.T) {
 	dir := t.TempDir()
 	name := filepath.Join(dir, "output")
-	files, err := adapter.OpenFiles(nil, []string{dir})
+	files, err := adapter.OpenFiles(adapter.FileRoots{Write: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,10 +141,7 @@ func TestFileConcurrentAppendCreation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	content, err := value.NewText(types.String(), "one\n")
-	if err != nil {
-		t.Fatal(err)
-	}
+	content := value.NewBytes([]byte("one\n"))
 	op, _ := catalog.Lookup(catalog.FileAppend)
 	target, err := value.NewEffect(op, path, content)
 	if err != nil {
@@ -160,7 +152,7 @@ func TestFileConcurrentAppendCreation(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := files.Commit(context.Background(), target); err != nil {
+			if _, err := files.Commit(context.Background(), target); err != nil {
 				t.Error(err)
 			}
 		}()
@@ -185,7 +177,7 @@ func TestFileOpenDoesNotWaitForPipePeer(t *testing.T) {
 	if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
 		t.Fatalf("create local pipe: %v, %s", err, output)
 	}
-	files, err := adapter.OpenFiles([]string{dir}, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{Read: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +222,7 @@ func TestServerPartialStartupCleanup(t *testing.T) {
 	if d != nil {
 		t.Fatal(d)
 	}
-	files, err := adapter.OpenFiles(nil, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +261,7 @@ func startAdapter(t *testing.T, text string) adapter.Servers {
 	if d != nil {
 		t.Fatal(d)
 	}
-	files, err := adapter.OpenFiles(nil, nil)
+	files, err := adapter.OpenFiles(adapter.FileRoots{}, adapter.NativeFileIO())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -51,6 +51,18 @@ Report inconclusive results when uncertainty overlaps a gate.
 
 ## Artifact Construction
 
+Native builds require `LO_BUILD_ROOT` to name an existing absolute directory without symlink traversal.
+Invalid input produces `build.output` before build state is created.
+The build places temporary modules, compiler caches, dependency state, and tool caches under that directory.
+It does not use a user cache or the system temporary directory.
+`make build` creates the repository workflow root at `_scratch/build-state/`.
+
+```bash
+make build
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo --output ./bin/list-sum
+```
+
+
 Use an embedded source bundle with an explicit package list and vendored dependencies.
 Exclude compiler packages, interpreter packages, tests, and private files from that bundle.
 Build in a temporary module with downloads disabled and controlled Go environment variables.
@@ -58,6 +70,10 @@ Publish the complete artifact through a rename within the output directory.
 Preserve the previous artifact on failure or cancellation.
 Include source and bundle digests, source identity, target, and toolchain in artifact metadata.
 Exclude timestamps, temporary paths, and resource grants from metadata.
+
+The File open-path operation requires `lsof` on the execution host.
+The artifact contains its descriptor-bound probe launcher and parser.
+Other File operations do not require this tool.
 
 ## Device Backend Selection
 

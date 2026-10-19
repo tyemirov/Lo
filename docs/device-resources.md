@@ -26,7 +26,7 @@ make build
 ./bin/lo check examples/device_transfer.lo
 ./bin/lo inspect examples/device_transfer.lo --format json
 ./bin/lo run examples/device_transfer.lo --allow-device cuda-sim:0 --format json
-./bin/lo build examples/device_transfer.lo --output ./bin/device-transfer
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/device_transfer.lo --output ./bin/device-transfer
 ./bin/device-transfer run --allow-device cuda-sim:0 --format json
 ```
 

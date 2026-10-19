@@ -74,12 +74,14 @@ func (m *machine) body(body []ir.Statement, f frame) (output value.Value, result
 			if err != nil {
 				return nil, err
 			}
-			if err := m.Boundary().Commit(m.Context(), v.(value.Target)); err != nil {
-				if host := execution.BoundaryHostError(err); host != nil {
-					return nil, host
-				}
-				return nil, execution.Failed(runtimeops.ActivationError(v.(value.Target), err, x.Span()))
+			receipt, err := runtimeops.Commit(m.Session, v.(value.Target), x.Span())
+			if err != nil {
+				return nil, err
 			}
+			if x.ID() != "" {
+				f.bindings[x.ID()] = receipt
+			}
+
 		default:
 			panic("unknown checked statement")
 		}

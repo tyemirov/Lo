@@ -1,0 +1,383 @@
+{
+  "date": "2026-10-19",
+  "recorded_reviewed_runs": 2,
+  "runs": [
+    {
+      "baseline_mapping_established": false,
+      "conclusion": "inconclusive",
+      "core_dump_limit": 0,
+      "exit_code": 1,
+      "file_descriptor_limit": 64,
+      "fixture_unchanged": true,
+      "mapped_bytes_accessed": false,
+      "mechanism_probe_passed": false,
+      "observations": {
+        "baseline_executable": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            -1,
+            1
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": false
+        },
+        "baseline_read": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            0,
+            0
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": true
+        },
+        "confined_executable": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            -1,
+            1
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": false
+        },
+        "confined_read": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            0,
+            0
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": true
+        },
+        "sandbox_attempted": true,
+        "sandbox_installed": true
+      },
+      "output_limit_per_stream": 65536,
+      "output_within_limit": true,
+      "phase_markers": [
+        "entered",
+        "before-baseline-read",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-munmap",
+        "after-munmap",
+        "before-close",
+        "after-close",
+        "after-baseline-read",
+        "before-baseline-executable",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-close",
+        "after-close",
+        "after-baseline-executable",
+        "before-sandbox-init",
+        "after-sandbox-init",
+        "before-confined-read",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-munmap",
+        "after-munmap",
+        "before-close",
+        "after-close",
+        "after-confined-read",
+        "before-confined-executable",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-close",
+        "after-close",
+        "after-confined-executable",
+        "before-report",
+        "after-report"
+      ],
+      "post_run_artifacts": {
+        "binary": "bc66fa49970c574f4aff31064e1f7c40db1ab761b06ba2de84701ffb7dd55941",
+        "build": "68100e68f8a7541032c501555514a472257c58baa6e5ccbbc4e68192a597aa3a",
+        "fixture": "f5cf06ed3e906f5b45a1a6f75360b2eb03e402dec250af3111e60b1e2cffd83e",
+        "harness": "ecc4dae7e19edc65b2446f291ab0f99db80d90da29f3661c13b1f0ff571de970",
+        "header": "b54214edafd7b535d2ea0a33bfd12c3ab3d5209c91e1d95721f91b340a15ccb8",
+        "profile": "deac5e145f054c82900d669d4082a7c5c5fea40b51a72b006766fc6063b6150b",
+        "source": "9f5ec3c2174783c5dad6c3220e576dfcf4d2b82b8f7535b64a4018570e71f903",
+        "verification_test": "441090d9405519845f16b8df28e3225d7c53df722e1c4a5953261fc61dc4e79a"
+      },
+      "qualified_process_backend": false,
+      "reviewed_artifacts": {
+        "binary": "bc66fa49970c574f4aff31064e1f7c40db1ab761b06ba2de84701ffb7dd55941",
+        "build": "68100e68f8a7541032c501555514a472257c58baa6e5ccbbc4e68192a597aa3a",
+        "fixture": "f5cf06ed3e906f5b45a1a6f75360b2eb03e402dec250af3111e60b1e2cffd83e",
+        "harness": "ecc4dae7e19edc65b2446f291ab0f99db80d90da29f3661c13b1f0ff571de970",
+        "header": "b54214edafd7b535d2ea0a33bfd12c3ab3d5209c91e1d95721f91b340a15ccb8",
+        "profile": "deac5e145f054c82900d669d4082a7c5c5fea40b51a72b006766fc6063b6150b",
+        "source": "9f5ec3c2174783c5dad6c3220e576dfcf4d2b82b8f7535b64a4018570e71f903",
+        "verification_test": "441090d9405519845f16b8df28e3225d7c53df722e1c4a5953261fc61dc4e79a"
+      },
+      "reviewed_artifacts_unchanged": true,
+      "reviewed_manifest_sha256": "c650240a43f92fb8948fa1f40f8dcae5132dbac851f0fe50be226c13f77e98c1",
+      "stderr": "LO_MAP_PHASE entered\nLO_MAP_PHASE before-baseline-read\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-munmap\nLO_MAP_PHASE after-munmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-baseline-read\nLO_MAP_PHASE before-baseline-executable\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-baseline-executable\nLO_MAP_PHASE before-sandbox-init\nLO_MAP_PHASE after-sandbox-init\nLO_MAP_PHASE before-confined-read\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-munmap\nLO_MAP_PHASE after-munmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-confined-read\nLO_MAP_PHASE before-confined-executable\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-confined-executable\nLO_MAP_PHASE before-report\nLO_MAP_PHASE after-report\n",
+      "stdout": "{\"sandbox_attempted\":true,\"sandbox_installed\":true,\"baseline_read\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[0,0],\"unmap_attempted\":true,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]},\"baseline_executable\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[-1,1],\"unmap_attempted\":false,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]},\"confined_read\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[0,0],\"unmap_attempted\":true,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]},\"confined_executable\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[-1,1],\"unmap_attempted\":false,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]}}\n",
+      "timeout": false,
+      "timeout_seconds": 5,
+      "termination": "Normal exit 1.",
+      "run": 1,
+      "fixture_kind": "Initial data fixture",
+      "mapping_length": 27
+    },
+    {
+      "baseline_mapping_established": false,
+      "conclusion": "inconclusive",
+      "core_dump_limit": 0,
+      "exit_code": 1,
+      "file_descriptor_limit": 64,
+      "fixture_size": 16848,
+      "fixture_unchanged": true,
+      "mapped_bytes_accessed": false,
+      "mapping_length": 27,
+      "mechanism_probe_passed": false,
+      "observations": {
+        "baseline_executable": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            -1,
+            1
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": false
+        },
+        "baseline_read": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            0,
+            0
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": true
+        },
+        "confined_executable": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            -1,
+            1
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": false
+        },
+        "confined_read": {
+          "attempted": true,
+          "close": [
+            0,
+            0
+          ],
+          "close_attempted": true,
+          "map_attempted": true,
+          "mmap": [
+            0,
+            0
+          ],
+          "munmap": [
+            0,
+            0
+          ],
+          "open": [
+            3,
+            0
+          ],
+          "unmap_attempted": true
+        },
+        "sandbox_attempted": true,
+        "sandbox_installed": true
+      },
+      "output_limit_per_stream": 65536,
+      "output_within_limit": true,
+      "phase_markers": [
+        "entered",
+        "before-baseline-read",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-munmap",
+        "after-munmap",
+        "before-close",
+        "after-close",
+        "after-baseline-read",
+        "before-baseline-executable",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-close",
+        "after-close",
+        "after-baseline-executable",
+        "before-sandbox-init",
+        "after-sandbox-init",
+        "before-confined-read",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-munmap",
+        "after-munmap",
+        "before-close",
+        "after-close",
+        "after-confined-read",
+        "before-confined-executable",
+        "before-open",
+        "after-open",
+        "before-mmap",
+        "after-mmap",
+        "before-close",
+        "after-close",
+        "after-confined-executable",
+        "before-report",
+        "after-report"
+      ],
+      "post_run_artifacts": {
+        "binary": "bc66fa49970c574f4aff31064e1f7c40db1ab761b06ba2de84701ffb7dd55941",
+        "build": "ba65bacdc7f402c914af0fdcb2b2704e38c7c8fd2756835326ac6ec22a92bf14",
+        "fixture": "da71bf057aafee604b654685232cb58536e21002e07d3167b17271b59c6fa735",
+        "harness": "0f112864c58911f4f194bcd90fb843b6341c3b3aa43404542eb9e319276e17c5",
+        "header": "b54214edafd7b535d2ea0a33bfd12c3ab3d5209c91e1d95721f91b340a15ccb8",
+        "image_source": "bed58c3270e7a5e1443697d65704ae6b42fe3a94c0cdc0a97d6db2769ad7138e",
+        "profile": "deac5e145f054c82900d669d4082a7c5c5fea40b51a72b006766fc6063b6150b",
+        "source": "9f5ec3c2174783c5dad6c3220e576dfcf4d2b82b8f7535b64a4018570e71f903",
+        "verification_test": "441090d9405519845f16b8df28e3225d7c53df722e1c4a5953261fc61dc4e79a"
+      },
+      "qualified_process_backend": false,
+      "reviewed_artifacts": {
+        "binary": "bc66fa49970c574f4aff31064e1f7c40db1ab761b06ba2de84701ffb7dd55941",
+        "build": "ba65bacdc7f402c914af0fdcb2b2704e38c7c8fd2756835326ac6ec22a92bf14",
+        "fixture": "da71bf057aafee604b654685232cb58536e21002e07d3167b17271b59c6fa735",
+        "harness": "0f112864c58911f4f194bcd90fb843b6341c3b3aa43404542eb9e319276e17c5",
+        "header": "b54214edafd7b535d2ea0a33bfd12c3ab3d5209c91e1d95721f91b340a15ccb8",
+        "image_source": "bed58c3270e7a5e1443697d65704ae6b42fe3a94c0cdc0a97d6db2769ad7138e",
+        "profile": "deac5e145f054c82900d669d4082a7c5c5fea40b51a72b006766fc6063b6150b",
+        "source": "9f5ec3c2174783c5dad6c3220e576dfcf4d2b82b8f7535b64a4018570e71f903",
+        "verification_test": "441090d9405519845f16b8df28e3225d7c53df722e1c4a5953261fc61dc4e79a"
+      },
+      "reviewed_artifacts_unchanged": true,
+      "reviewed_manifest_sha256": "b778987299175d4bf78ccc13a9834d0e2d8a00f0a4c87f04ea97a62479601dd2",
+      "stderr": "LO_MAP_PHASE entered\nLO_MAP_PHASE before-baseline-read\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-munmap\nLO_MAP_PHASE after-munmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-baseline-read\nLO_MAP_PHASE before-baseline-executable\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-baseline-executable\nLO_MAP_PHASE before-sandbox-init\nLO_MAP_PHASE after-sandbox-init\nLO_MAP_PHASE before-confined-read\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-munmap\nLO_MAP_PHASE after-munmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-confined-read\nLO_MAP_PHASE before-confined-executable\nLO_MAP_PHASE before-open\nLO_MAP_PHASE after-open\nLO_MAP_PHASE before-mmap\nLO_MAP_PHASE after-mmap\nLO_MAP_PHASE before-close\nLO_MAP_PHASE after-close\nLO_MAP_PHASE after-confined-executable\nLO_MAP_PHASE before-report\nLO_MAP_PHASE after-report\n",
+      "stdout": "{\"sandbox_attempted\":true,\"sandbox_installed\":true,\"baseline_read\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[0,0],\"unmap_attempted\":true,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]},\"baseline_executable\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[-1,1],\"unmap_attempted\":false,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]},\"confined_read\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[0,0],\"unmap_attempted\":true,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]},\"confined_executable\":{\"attempted\":true,\"open\":[3,0],\"map_attempted\":true,\"mmap\":[-1,1],\"unmap_attempted\":false,\"munmap\":[0,0],\"close_attempted\":true,\"close\":[0,0]}}\n",
+      "timeout": false,
+      "timeout_seconds": 5,
+      "run": 2,
+      "fixture_kind": "Compiled Mach-O comparison"
+    }
+  ],
+  "unchanged_between_runs": [
+    "Source",
+    "Profile",
+    "Header",
+    "Mapping length 27"
+  ],
+  "diagnostic_status": "Stopped after the reviewed comparison plan. No grant expansion.",
+  "conclusion": "Inconclusive in both runs. Baseline and confined read mmap succeeded; baseline and confined RX mmap returned EPERM.",
+  "cleanup_scope": "All attempted munmap and close operations succeeded. Fixtures and reviewed hashes unchanged within each run.",
+  "mapped_inputs_executed": false,
+  "mapped_bytes_accessed": false,
+  "interpretation_limits": [
+    "Baseline RX failure prevents a sandbox-specific executable mapping inference.",
+    "No native startup cause established.",
+    "No platform impossibility claim."
+  ],
+  "qualified_process_backend": false,
+  "standard_host_activation_enabled": false,
+  "product_ci_scope": "Prior core CI remains valid. Native startup remains unresolved."
+}

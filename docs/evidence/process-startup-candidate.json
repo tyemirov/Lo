@@ -1,0 +1,53 @@
+{
+  "status": "validated-disabled-supervisor-native-profile-unqualified",
+  "qualified_process_backend": false,
+  "standard_host_execution_enabled": false,
+  "source_sha256": {
+    "experiments/process-startup/startup.go": "bbe37a11b984114b55200ceff3f9e12d92a61d5405570371bce47834aa7a85aa",
+    "experiments/process-startup/pending.go": "1a883ea361b63af870aefcb75cd1caf0713f6de4a7b44cb6a130a8942119f9d0",
+    "experiments/process-startup/startup_test.go": "00bcd1dd7caade01d13085017affc768ae22bb0191b4dcc8703ba10d9a5df60c",
+    "experiments/process-startup/probe.mk": "369ef77f0f2bfe97444e7a30c086c365cbd3e2bfb98f14b6c3e64409d9c3f770"
+  },
+  "contract": [
+    "One admission slot owns pending creation and the eventual primary through release.",
+    "Readiness, execution permit, execution evidence, and primary termination are separate events.",
+    "Direct pending endpoints preserve byte counts and errors without buffer copies.",
+    "Release closes channels and joins admitted IO before primary release.",
+    "Internal stop does not become caller cancellation.",
+    "Callback errors preserve approved host classes without private payloads.",
+    "Unresolved creation or cleanup keeps ownership and quarantine. It does not establish a child lifetime bound."
+  ],
+  "validation": {
+    "missing_implementation_red": {
+      "expected_failure": true,
+      "reason": "The candidate package had no implementation."
+    },
+    "pipe_red": {
+      "expected_failure": true,
+      "seconds": 2.224,
+      "reason": "Output errors became success, input progress counted unaccepted bytes, and channel cleanup was incomplete."
+    },
+    "internal_stop_red": {
+      "expected_failure": true,
+      "seconds": 0.146,
+      "reason": "Internal cleanup changed an ordinary input failure to caller cancellation."
+    },
+    "host_class_red": {
+      "expected_failure": true,
+      "seconds": 0.141,
+      "reason": "Creator, Wait, Arm, and Permit errors lost their host failure classes."
+    },
+    "focused": {
+      "command": "CI=1 make -j1 -f Makefile -f experiments/process-startup/probe.mk process-startup-format process-startup-test TEST_ARGS='-count=1 -timeout=45s' </dev/null",
+      "passed": true,
+      "seconds": 0.144
+    },
+    "race": {
+      "command": "CI=1 make -j1 -f Makefile -f experiments/process-startup/probe.mk process-startup-test TEST_ARGS='-race -count=1 -timeout=45s' </dev/null",
+      "passed": true,
+      "seconds": 1.232
+    }
+  },
+  "review": "Independent architect review approved the repaired deterministic candidate without a remaining finding.",
+  "scope": "These public lifecycle tests use injected primary processes. Native startup and the complete execution profile still require qualification."
+}

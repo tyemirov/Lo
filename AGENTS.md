@@ -1,5 +1,19 @@
 # AGENTS.md
 
+## Lo Repository Boundary
+
+Lo is a self-contained project.
+All Lo work must stay inside this repository, under all circumstances and for every task.
+No Lo task may use another repository, including for reference, implementation, tests, or acceptance.
+Do not change installed scripts, user configuration, external caches, or other files outside Lo.
+Keep task files, test fixtures, generated output, and tool caches inside Lo.
+Apply this boundary to tools, child processes, and all delegated work.
+If an operation cannot obey this boundary, stop that operation and report the limitation.
+Do not make an exception for a feature, example, dependency, integration, or validation requirement.
+
+The [repository boundary policy](.mprlab/POLICY.md#lo-repository-boundary) owns the detailed requirements.
+Preserve this rule during governance updates.
+
 ## Forward-Only Contract Discipline
 
 This repository follows a forward-only, confident programming paradigm. This is a binding agent contract: no fallbacks, no backward compatibility, no legacy support, and no compatibility shims. Do not spend design or implementation effort on backward compatibility considerations except for explicit one-off data migrations into the current canonical contract.

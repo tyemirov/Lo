@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
@@ -20,6 +21,9 @@ import (
 
 func main() { os.Exit(execute(os.Args[1:], os.Stdout, os.Stderr)) }
 func execute(args []string, stdout, stderr io.Writer) int {
+	if adapter.HandleFileProbe(args) {
+		return 0
+	}
 	inv, err := runner.ParseCompiler(args)
 	if err != nil {
 		return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), runner.ExitHost)
