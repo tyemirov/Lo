@@ -1,0 +1,31 @@
+settings set target.detach-on-error false
+settings set target.process.stop-on-exec false
+settings set interpreter.prompt-on-quit false
+settings set symbols.enable-external-lookup false
+settings set symbols.auto-download off
+settings set symbols.enable-lldb-index-cache false
+settings set symbols.lldb-index-cache-path "@ROOT@/index"
+settings set symbols.enable-swift-metadata-cache false
+settings set symbols.swift-metadata-cache-path "@ROOT@/swift"
+settings set symbols.clang-modules-cache-path "@ROOT@/clang"
+settings set symbols.cas-path "@ROOT@/cas"
+settings set platform.use-module-cache false
+settings set platform.module-cache-directory "@ROOT@/modules"
+settings set target.auto-import-clang-modules false
+settings clear target.auto-load-scripts-for-modules
+settings set target.load-script-from-symbol-file false
+settings set target.load-cwd-lldbinit false
+settings set target.debug-file-search-paths "@ROOT@"
+settings set stop-line-count-before 0
+settings set stop-line-count-after 0
+settings set use-external-editor false
+settings set plugin.structured-data.darwin-log.enable-on-startup false
+settings set interpreter.save-transcript false
+settings set interpreter.save-session-on-quit false
+settings set interpreter.save-session-directory "@ROOT@/sessions"
+settings set target.inherit-env false
+settings set target.process.interrupt-timeout 1
+settings set plugin.process.gdb-remote.packet-timeout 1
+settings show target.detach-on-error
+settings show target.load-script-from-symbol-file
+settings show target.load-cwd-lldbinit
