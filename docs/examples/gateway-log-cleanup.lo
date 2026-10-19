@@ -121,7 +121,7 @@ flow RemovalError(error: Error) -> Record{removed: Bool!} {
 }
 
 flow RemoveOne(entry: File.Entry) -> Record{removed: Bool!} onError RemovalError {
-    removal = File.remove(List.new(entry))
+    removal = File.Remove.new(List.new(entry))
     commit removal
     return Record.new(removed: true)
 }

@@ -4,7 +4,8 @@ The File adapter and Gateway log category are implemented in Lo.
 The [design](file-adapter-design.md) defines their current contracts.
 The [mac-cleanup plan](mac-cleanup-plan.md) covers the remaining complete-script work.
 The [shared adapter plan](adapter-plan.md) controls future adapter changes.
-The completed stages below qualify the current implementation only.
+The completed stages below record the earlier File workflow acceptance.
+The nominal target and receipt update has separate validation pending.
 
 ## Contents
 
@@ -31,8 +32,10 @@ No release, publication, installation, or real cleanup is part of this task.
 
 | Stage | Implementation |
 | --- | --- |
+| Shared purity | List callbacks, Match predicates and heads, self-handlers, and adapter `onError` exclude observations and commits. |
+| Typed activation | Nominal File targets, bound commit syntax, File receipts, and actual server startup receipts. |
 | Entry values and discovery | Nominal `File.Entry`, six projections, opaque session provenance, exact list grants, bounded sorted discovery. |
-| Removal and progress | Pure `File.remove` construction, exact removal grants, complete preflight, ordered removal, and confirmed-prefix diagnostics. |
+| Removal and progress | Pure nominal `File.Remove.new` construction, exact removal grants, complete preflight, ordered removal, and confirmed-prefix diagnostics. |
 | Open-file observations | Separate grant, descriptor-bound host probe, bounded output, explicit parsing errors, cancellation, and typed paths. |
 | Sequential activation | `Flow.fold` with named callbacks, ordered commits, first-failure termination, and cumulative state diagnostics. |
 | Workflow policy | Missing-directory status, ASCII filename predicate, strict cutoff, open-file exclusions, hardlinks, and changed-candidate skips. |
@@ -41,7 +44,7 @@ No release, publication, installation, or real cleanup is part of this task.
 
 `File` has no `IO` parent and does not convert itself into a collection.
 `File.list` returns a list of observations.
-List callbacks remain free of commits.
+List callbacks cannot include host observations or commits, including transitive calls.
 The workflow uses `Flow.fold` for explicit sequential activation.
 
 Public-entrypoint tests preceded production changes for new language behavior.
@@ -97,18 +100,39 @@ Native CLI fixtures separately exercise step-limit failure and cumulative progre
 Linux cross-compilation can validate the target source contract, but does not prove Linux execution.
 No container or external validation environment is required.
 
-Final validation status is recorded in the [reference audit](language-reference-audit.md#file-adapter-update).
+### Earlier Workflow Validation
+
+The earlier validation status is recorded in the [reference audit](language-reference-audit.md#file-adapter-update).
 Independent review findings are resolved.
-Final `make ci` passed, including the complete interpreter and native integration suites.
+The earlier File workflow `make ci` passed, including interpreter and native integration suites.
+These results do not qualify the current nominal target and bound commit changes.
 The maintained example also cross-compiled for Linux arm64 without Linux execution.
 The completion checks include document links, language checks, catalog coverage, and `git diff --check`.
 Task-owned temporary evidence is removed after useful results enter maintained tests and documents.
 The shared Make cache remains available for later repository tasks.
+
+### Current Adapter Update
+
+The current update adds the shared purity contract and nominal File targets.
+`UTF8.Bytes.new` explicitly encodes text for write and append.
+Bound commits return `File.WriteReceipt`, `File.AppendReceipt`, or `File.RemoveReceipt` after activation success.
+Server startup returns `HTTP.ServerReceipt` with the actual listener address and port.
+
+The [purity tests](../tests/integration/adapter_purity_test.go) cover observations, commits, conditional reads, and stored handlers.
+The [receipt tests](../tests/integration/adapter_receipts_test.go) cover nominal target results and failure behavior.
+Focused interpreter and native validation passed.
+Independent source review closed the stage 1–2 findings.
+The [implementation review](evidence/adapter-implementation-review.json) records commands, results, and review limits.
+Final stack CI remains pending.
+HTTP client activation and general Process execution remain pending.
 
 ## Remaining Scope
 
 The Gateway log category is the first complete File workflow.
 The complete mac-cleanup script still needs typed host inputs, general process results, category continuation, cleanup locking, and additional file metadata.
 Implement shared adapter semantics before further application-specific extensions.
-Use the [File stage](adapter-plan.md#2-bound-activation-and-file-targets) for nominal actions and typed receipts.
+The [File stage](adapter-plan.md#2-bound-activation-and-file-targets) adds nominal actions and typed receipts.
+Its implementation uses `File.Write.new`, `File.Append.new`, and `File.Remove.new`.
+Bound commits publish operation-specific receipts after activation success.
+The stage still requires its final validation checkpoint.
 Those requirements do not authorize access outside Lo.

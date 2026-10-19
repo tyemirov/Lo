@@ -38,9 +38,43 @@ The [language specification](../specification.md) owns Lo syntax and observable 
 This design owns compiler structure, internal contracts, and implementation acceptance criteria.
 The [README roadmap](../README.md#implementation-roadmap) gives the public milestone overview.
 The [repository policy](../.mprlab/POLICY.md) owns development and validation procedures.
-The [next adapter design](adapter-design.md) owns proposed shared adapter rules and domain contracts.
+The [adapter design](adapter-design.md) owns shared adapter rules and domain contracts.
 Its [implementation plan](adapter-plan.md) maps the changes to compiler components and public acceptance.
-The current compiler behavior below does not yet include those extensions.
+
+The compiler includes the shared purity rules, nominal File targets, typed receipts, and bound commits.
+HTTP headers, client actions, and automatic trace summaries pass focused interpreter and native qualification.
+Independent source review closed the current findings.
+
+The approved pure Process phase is implemented, and focused interpreter and native validation passed.
+Current-stack CI passed, including the pure Process phase.
+Independent review approved the implemented pure Process checkpoint.
+It permits constructors, inspection, and host unavailable rejection before execution profile qualification.
+The [adapter design](adapter-design.md#pure-process-phase) owns this phase contract.
+The catalog declares metadata capability `Process.run` and opaque static success type `Process.Result`.
+`Process.run` is not a callable builtin.
+No result constructor, accessor, or runtime value belongs to this phase.
+CLI activation must return host diagnostic `runtime.process-unavailable` before executable access.
+Lo `onError` cannot handle this host diagnostic.
+Constructor diagnostics and nominal snapshots must omit argument, environment, and stdin payloads.
+Explicit program output keeps those values.
+The inspector adds an optional `process` object to command targets and capabilities.
+It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
+Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
+It also contains `execution_profile: {required: true, status: "unavailable"}`.
+This profile status describes the current standard host, not arbitrary injected boundaries.
+Executable descriptions trace the supplied `File.Path`.
+Dynamic command descriptions retain whole-command dependencies.
+Text inspection shows `execution_profile=required/unavailable` and the named inputs.
+Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
+
+The standard runner installs `adapter.WithProcess` for `run`, `serve`, and server callbacks.
+This wrapper rejects command activation before delegation or executable access.
+Custom Go boundaries are trusted host implementations and must enforce qualification.
+Generic commit execution validates the result type without a universal host qualification gate.
+An HTTP request-handler commit returns `runtime.process-unavailable` and aborts the server.
+HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
+Qualification remains mandatory before any launch or execution acceptance.
+New pure Process source changes require new final stack validation.
 
 Specification sections 22 and 23 define the verifier and runtime contracts.
 The [Open Decisions](#open-decisions) section identifies the final contract status.
@@ -281,7 +315,7 @@ These rules use typed compiler functions with specified inputs and outputs.
 ### Effect Analysis
 
 Boundary reads, target construction, and commit activation have different compiler representations.
-Construction of a file effect specifies a possible write.
+Construction of a nominal File target specifies a possible operation.
 Activation occurs when an evaluated `commit` statement uses that target.
 A file read gets external data during expression evaluation.
 
@@ -290,11 +324,20 @@ A wrapper around an effectful flow cannot remove its activation behavior from in
 The analysis also includes list callbacks, match predicates, self-handlers, and adapter handlers.
 It keeps the invocation context for each relation.
 
-Specification section 22.2 defines purity through direct and indirect commit activation.
+Specification section 22.2 does not permit direct or indirect host observations or commits in pure flows.
+The `devices` summary remains independent of purity.
 After cycle detection, the compiler calculates each flow summary from its body and the summaries of invoked flows.
 An unused nested definition does not change its enclosing flow summary.
 The verifier still validates that unused definition.
 Boundary reads have different summary data because external data can change between evaluations.
+
+Pure named callbacks must have neither `reads` nor `commits`.
+This rule applies to List callbacks, Match predicates, flow self-handlers, and adapter `onError` flows.
+Match case heads must be pure and total.
+Match selectors and selected branches can read external state but cannot activate commits.
+`Flow.fold` and HTTP request callbacks retain observations and commits under their declared fallibility rules.
+Stored handler requirements belong to later callback execution.
+Server construction does not execute those handlers.
 
 ### Graph Contract
 
@@ -310,8 +353,8 @@ Private constructors enforce these guarantees before the interpreter receives th
 | Field projection | Access to a field accepted by the type checker. |
 | Match region | Ordered case tests and different branch regions. |
 | Propagation boundary | Transfer of a recoverable error to the specified handler boundary. |
-| Effect description | A typed committable target that has no activation by itself. |
-| Commit activation | An ordered operation that activates its target. |
+| Target description | A nominal committable value that has no activation by itself. |
+| Commit activation | An ordered operation that activates its target and can bind its typed result. |
 | Return | The result published by a flow or top-level program. |
 
 Data dependencies supply values.
@@ -399,10 +442,14 @@ Published JSON and error snapshots contain public metadata only.
 Grant authorization and directory identity checks precede removal.
 The same boundary implementation serves interpreted and generated programs.
 
-`Flow.fold` accepts named callbacks that can activate commits.
+`Flow.fold` accepts named callbacks that can read external state and activate commits.
 It preserves ordered state transitions without changing List purity rules.
-Lo failures retain the fold index and completed state in their trace.
-Host failures carry nested `flow_progress` records and any in-flight `removal_progress`.
+Lo callback trace frames keep input field names and type summaries.
+Explicit progress records keep the actual fold index and completed state.
+Recoverable fold failures carry reserved snapshots in `Error.flow_progress: List<Record>`.
+Each failing fold prepends one record, so nested records run from outermost to innermost.
+Equal record contents do not remove a nested invocation.
+Host failures also carry fold progress and any in-flight `removal_progress`.
 A per-invocation capture preserves CLI progress through late grant cleanup failures.
 Shared HTTP adapters do not transfer fold progress between requests.
 
@@ -501,7 +548,8 @@ The source file itself uses the CLI source-access contract.
 The host separates evaluation failures from stored fallible values.
 An outer failure in the final result produces `runtime.unhandled-error` and exit status `1`.
 Its JSON diagnostic includes an `error` field with the complete typed Lo error.
-Text diagnostics include each trace frame's flow, operation, and input record.
+Text diagnostics include each trace frame's flow, operation, and summarized input record.
+Each automatic input field contains `Record{type: String}` without its argument payload.
 Successful commands publish their result only after evaluation completes.
 
 The success envelope is:
@@ -534,13 +582,22 @@ Most values also have a `value` field.
 | `Map<K, V>` | Array of objects with typed `key` and `value` fields. |
 | Exact record or bare `Record` | Object from field names to typed values. |
 | `Range<T>` | Object with typed `start` and `end`, plus boolean `include_start` and `include_end`. |
-| `Effect` | Operation name, typed `file_path`, and typed `file_content`. |
+| `File.Write`, `File.Append` | Nominal target type, operation name, typed `file_path`, and Bytes `file_content`. |
+| `File.Remove` | Nominal removal target with ordered public entry snapshots. |
+| File receipt | Exact typed fields for the operation-specific nominal success type. |
+| `HTTP.ServerReceipt` | Typed actual `address` and `port`. |
+| `HTTP.Headers` | Canonical typed `entries` with repeated Bytes values. |
+| `HTTP.URL`, `HTTP.Method` | Validated nominal URL or method text. |
+| `HTTP.Client.Request` | Inert method, URL, nominal headers, and Bytes body. |
 | `HTTP.Server` | Typed `port` and resolved `handler` and `on_error` flow identities. |
 | HTTP request or response | Object with the nominal type's typed fields. |
 
 A fallible success has `type`, `status: "ok"`, and a typed `value`.
 A fallible failure has `type`, `status: "error"`, and a typed `error`.
 An `Error` has `type`, `kind`, `message`, typed `input`, and a `trace` array of typed records.
+Its language property `flow_progress` defaults to an empty `List<Record>`.
+Error JSON omits that field when empty and otherwise publishes an array of typed records.
+CLI top-level `flow_progress` also includes recoverable carrier records.
 Error kind and message fields are JSON strings.
 Empty collections and traces serialize as arrays.
 Empty records serialize as objects.
@@ -556,11 +613,36 @@ For example, a rank-zero tensor serializes as follows:
 {"type":"Tensor<FP32>","value":{"dtype":"fp32","shape":[],"device":"cpu","values":["1"]}}
 ```
 
-Error inputs and trace frames replace tensors with exact metadata records.
+Explicit error inputs replace tensors with exact metadata records.
 The fields are `tensor_type`, `dtype`, `shape`, and `device`.
 The same transformation applies inside records, lists, maps, and fallible values.
 A snapshot retains no tensor data buffer.
 Empty nested containers receive the transformed element type.
+
+Automatic trace arguments keep only field names and value type names.
+Flow and callback trace inputs have one canonical summary shape per field: `Record{type: String}`.
+Raw header-entry lists use this shape before nominal header construction.
+A later unrelated error cannot expose these argument payloads through its automatic frames.
+
+`NewError` and program-authored `Error.new` keep explicit input semantics under type-specific snapshot rules.
+Explicit `Flow.fold` progress state keeps its program data.
+The trace summary is not a general secret detector for explicit errors or progress state.
+
+Recoverable fold progress belongs to the error value.
+A pure handler that returns the same error keeps its progress.
+A fresh `Error.new` resets progress to an empty list.
+Handled failures do not contaminate later unrelated errors.
+
+The carrier uses already reserved progress snapshots.
+It retains neither tensor storage nor executable authority.
+Explicit progress state keeps its program-data semantics and ordinary snapshot rules.
+Type-only automatic trace arguments do not replace that state.
+
+A failing `ChargeValue` preserves progress from a rejected Error or failed fallible value.
+The session uses `preserveValueFlowProgress` only on its failing admission branches.
+The helper extracts the error carrier and wraps reserved records in reverse order.
+This keeps host diagnostic records in outer-to-inner order without new state snapshots.
+The host limit does not publish the rejected value.
 
 ### Execution Limits
 
@@ -588,8 +670,11 @@ Boolean payloads use one byte, Float payloads use eight bytes, and null has no p
 Container weight includes every contained value, including repeated references to one immutable value.
 Record weight also includes field-name bytes.
 Range weight includes its endpoint values and two inclusion bytes.
-Error weight includes kind, message, input, and trace frames.
-Effect weight includes its operation name, path, and content.
+Error weight includes kind, message, input, trace frames, and fold progress.
+The fold-progress list adds 16 bytes from error construction.
+Each attached reserved record adds its existing snapshot weight.
+The carrier reuses those snapshots.
+Target weight includes its operation name, path, and content.
 Server weight includes its port and flow identities.
 HTTP value weight includes its field record.
 Tensor weight is `16 + 4*N + 8*rank + len(dtype) + len(selector)` bytes.
@@ -629,7 +714,7 @@ The runtime does not narrow integers or silently truncate collections to meet a 
 
 ### Numeric and Tensor Analysis
 
-The current catalog defines 111 built-in operations, including checkpoints, File observations, removal, and `Flow.fold`.
+The catalog defines built-in operations for checkpoints, nominal File targets, explicit UTF-8 encoding, observations, and `Flow.fold`.
 `internal/tensor` owns validated shapes, operation plans, immutable data, and CPU kernels.
 `internal/tensorfacts` propagates static metadata through bindings, records, Match branches, and named flow calls.
 It examines every declared flow, including unused flows.
@@ -665,8 +750,8 @@ This interface keeps derivative rules independent of interpreter traversal.
 The two backends use the VJP rules in `internal/derivative`.
 
 Forward values leave the local environment after their last use unless a derivative rule requires them.
-Diagnostic frames retain metadata snapshots instead of tensor contents.
-The two backends charge cumulative value weight before they retain these snapshots.
+Automatic diagnostic frames keep field names and type summaries without tensor contents.
+The two backends include each constructed frame in the error value weight.
 The tape counts distinct storage allocations and enforces the limit in specification section 24.5.
 Every generated numeric result contributes to cumulative value weight.
 Failures retain the forward operation span and the expanded helper trace.
@@ -716,7 +801,7 @@ The report contains:
 
 - Flow names, source spans, signatures, and effect summaries.
 - Boundary reads and their target expressions.
-- Effect descriptions and their commit activation sites.
+- Nominal target descriptions and their commit activation sites.
 - Adapter instances, handler references, and activation sites.
 - Known recoverable error kinds and dynamic error sources.
 - Required capability operations and target descriptions.
@@ -805,7 +890,7 @@ This rejection does not publish a partial report.
 
 A target has `origin: "construction"` when analysis reaches its constructor.
 An unknown target supplied as data has `origin: "dynamic-target"`.
-For an unknown `Effect`, the report lists each possible File activation operation with a dynamic path.
+For an unknown nominal File target, inspection reports its operation with a dynamic path or calculated entry selection.
 An unknown `HTTP.Server` has a dynamic port description.
 
 Error sources distinguish `fallible`, `activation`, `boundary`, and `value` categories.
@@ -818,6 +903,7 @@ Handler references identify the applicable boundary if the error propagates.
 They do not assert that a stored error value invokes a handler.
 
 Capability operations are `File.read`, `File.list`, `File.open_paths`, `File.remove`, `File.append`, `File.write`, and `HTTP.listen`.
+File constructor names do not change these activation authority labels.
 Each capability identifies its read or activation site and target description.
 Uncommitted targets do not add activation capabilities.
 Unused flow analysis does not add program capabilities.
@@ -834,7 +920,8 @@ Source locations use the diagnostic line and column convention.
 Removal construction retains calculated entries without activation authority.
 A reached commit requires `File.remove` authority for the observed directory.
 `Flow.fold` adds `flow-callback` contexts with `flow-iteration` conditions.
-Inspection follows their transitive commits while List callback purity remains unchanged.
+Inspection follows their transitive observations and commits.
+List callback purity excludes both behaviors.
 Unused callbacks remain outside the program entry's capabilities.
 
 The [Gateway log acceptance](file-adapter-plan.md) checks preview and cleanup entry points separately.
@@ -847,8 +934,9 @@ The [file workflow example](../examples/agent_file_workflow.lo) reads and decode
 ```
 
 The report has one program entry point and an `Int!` result type.
-It contains one read, two constructed targets, and one commit site.
-The targets have different match conditions.
+It contains one read, two nominal target constructions, and two commit sites.
+Conditional lists select the applicable `Flow.fold` callback.
+Each callback constructs and activates one target type.
 Their capabilities are:
 
 | Operation | Known target | Condition |
@@ -996,7 +1084,7 @@ Acceptance:
 
 - Accept all section 19 examples through `lo check`.
 - Pass each static conformance case from section 20.
-- Reject a wrapper that hides commit activation from a pure callback restriction.
+- Reject a wrapper that hides host observations or commits from a pure callback restriction.
 - Reject invalid captures, handler signatures, record shapes, and null assignments.
 - Verify nested fallibility against the resolved specification rules.
 - Confirm that compiler commands do not execute program boundary operations.
@@ -1049,7 +1137,7 @@ Acceptance:
 Deliverables:
 
 - Resolve capability rules for writes and server activation.
-- Implement `File.append`, `File.write`, and ordered commit activation.
+- Implement nominal File constructors and typed commit results.
 - Implement HTTP values, server startup, and request dispatch.
 - Implement mandatory adapter handlers and response serialization.
 - Specify startup, shutdown, and cancellation behavior for `lo serve`.
@@ -1059,7 +1147,7 @@ Acceptance:
 
 - Verify one activation for each evaluated commit statement.
 - Verify two activations when two explicit commits use one target.
-- Prevent activation for an uncommitted effect.
+- Prevent activation for an uncommitted target.
 - Stop subsequent commits after an unhandled commit failure.
 - Verify that self-handlers receive commit failures with required error kinds.
 - Verify HTTP success and error responses through a local server.
@@ -1087,6 +1175,7 @@ Inspection does not grant access.
 | `--remove-root DIRECTORY` | Remove selected immediate regular entries in the exact directory. | `run`, `serve` |
 | `--open-files-root DIRECTORY` | Probe open paths under the exact directory. | `run`, `serve` |
 | `--listen PORT` | Activate servers at the specified port on `127.0.0.1`. | `serve` |
+| `--http-allow METHOD,ORIGIN,ADDRESS` | Authorize one exact method and origin at a numeric connection address. | `run`, `serve`, native execution |
 | `--allow-device SELECTOR` | Permit one exact non-CPU device selector. | `run`, `serve` |
 | No capability inputs | Deny external resource access. | `run`, `serve` |
 
@@ -1112,15 +1201,15 @@ An invalid port or an occupied authorized port produces `HTTP.ServerStartFailed`
 
 #### File Activation
 
-`File.append` and `File.write` construct immutable targets without file access.
+`File.Append.new`, `File.Write.new`, and `File.Remove.new` construct nominal targets without file access.
 Each evaluated `commit` activates its target once.
 Two commits of one target cause two activations.
 An uncommitted target causes no write.
 
 | Target | Activation behavior | Recoverable error |
 | --- | --- | --- |
-| `File.append(path, text)` | Append UTF-8 bytes, with file creation if the target does not exist. | `File.AppendFailed` |
-| `File.write(path, bytes)` | Replace the file contents, with file creation if the target does not exist. | `File.WriteFailed` |
+| `File.Append.new(path, bytes)` | Append Bytes, with file creation if the target does not exist. | `File.AppendFailed` |
+| `File.Write.new(path, bytes)` | Replace the file contents, with file creation if the target does not exist. | `File.WriteFailed` |
 
 Commits execute in source order within one invocation.
 A failed commit stops the current body before later statements execute.
@@ -1134,10 +1223,80 @@ Stage 6 provides no transaction across commits and no automatic retry.
 Each HTTP request has its own invocation order.
 The runtime does not promise a total order for commits from different requests.
 
+Bound commits use `name = commit target`.
+The catalog maps each nominal target to one success type.
+The checker, IR, interpreter, native backend, and inspector use that relation.
+The statement binds the result only after activation success.
+Failure stops the current body and publishes no result binding.
+The unbound form discards the same activation result.
+
+File write and append results contain `path` and `bytes_written`.
+Removal results contain `total_count`, `completed_count`, and `observed_bytes`.
+The nominal receipt types have no public constructors.
+Success requires necessary operation-owned resource release.
+Retained directory handles close at the later session boundary.
+
+A failure keeps confirmed bytes or removals without publishing a bound receipt.
+
+Host failures expose `write_progress` with typed `bytes_written` and `stage` fields.
+`last_completed_activation` contains `operation`, `span`, and `receipt` for the latest completed activation in the invocation.
+This record does not describe the current partial operation.
+The invocation keeps only its latest completed activation record.
+Diagnostic evidence does not create a result binding.
+
+Cleanup cancellation must keep the original operation failure class.
+Recoverable write errors keep `cleanup_errors: List<String>` in `Error.input`.
+Host diagnostics expose `cleanup_errors` as a JSON array.
+
+#### HTTP Client Activation
+
+The client source passes focused interpreter and native qualification.
+Independent source review closed the current findings.
+The [language reference](../specification.md#94-http-client) owns constructor and activation semantics.
+`HTTP.Client.Request` maps to `HTTP.Response` through the catalog activation relation.
+Construction, inspection, and compilation do not start an exchange.
+
+The repeatable grant `--http-allow METHOD,ORIGIN,ADDRESS` supplies method, origin, and numeric connection authority.
+Methods compare with exact case.
+Origins compare after URL canonicalization.
+The grant rejects whitespace, credentials, query strings, fragments, and non-root paths.
+An absent method/origin grant produces host denial before DNS access.
+
+Activation resolves the hostname and selects an explicitly authorized address before connection.
+The transport makes one connection attempt without ambient proxy use.
+It does not follow redirects, retry requests, decompress responses, create tunnels, or upgrade protocols.
+TLS uses the original hostname for certificate validation.
+The source transport uses HTTP/1.1.
+Every response section must use HTTP/1.1.
+
+Request and response bodies each have a 1 MiB limit.
+Response headers have a 64 KiB limit.
+Outgoing request headers use ordinary value budgets.
+A separate request-header byte limit is not specified.
+At most eight interim responses can consume a combined 64 KiB of headers.
+The five-second exchange deadline also covers DNS, connection, and response reads.
+The existing execution budgets still apply.
+
+A complete response is published only after body consumption and required resource release.
+Transport or protocol failure produces `HTTP.ExchangeFailed`.
+Authorization denial, cancellation, and limits keep their host classes.
+`http_progress` contains `stage`, `request_written`, and `remote_outcome` without request or response payloads.
+The remote outcome is `not_started` or `unknown`.
+
+Nominal Headers diagnostic snapshots remove header value payloads.
+Client request snapshots keep method, origin, root path, and header names.
+They omit original URL paths, query strings, body payloads, and header value payloads.
+Standalone URL snapshots also replace the path with `/` and remove the query.
+Automatic trace arguments keep only names and type summaries.
+Raw program-authored error input and explicit fold state remain program data under their ordinary snapshot rules.
+A missing complete response after transmission cannot establish that the remote action did not occur.
+
 #### HTTP Request and Response Boundary
 
 `HTTP.Server.new` stores a port and resolved handler references without a listener.
 Its commit creates the listener and starts request dispatch.
+Listener startup success returns `HTTP.ServerReceipt` with the actual `address` and `port`.
+The receipt has no public constructor and does not control the listener lifetime.
 Each request gets a new program invocation with its own execution session and budget.
 The handler and its adapter `onError` share that request's budget.
 The checked graph and immutable values can be shared across requests.
@@ -1146,12 +1305,13 @@ The checked graph and immutable values can be shared across requests.
 | --- | --- |
 | `method` | Valid UTF-8 HTTP method text. |
 | `path` | Decoded URL path without the query. |
-| `headers` | `Map<String, String>` with canonical HTTP header names and a `Host` entry. |
+| `headers` | Nominal `HTTP.Headers` with lowercase names, repeated Bytes values, and a `host` entry. |
 | `body` | Request bytes without implicit text decoding. |
 
-Repeated header values use `, ` as their separator.
-Repeated `Cookie` values use `; ` as their separator.
-The header map starts with `Host`, followed by other names in sorted order.
+Headers keep repeated byte values without comma joining.
+Distinct names use lowercase lexical order.
+Values for one name keep protocol order.
+Header values can contain opaque bytes without UTF-8 decoding.
 The adapter validates text and body limits before handler entry.
 
 | Boundary condition | Lo error kind | Handler path |
@@ -1165,7 +1325,7 @@ The adapter validates text and body limits before handler entry.
 The adapter adds its trace frame before it invokes `onError`.
 Request errors use operation `HTTP.request`.
 Response validation errors use operation `HTTP.respond`.
-The adapter frame identifies the configured server port.
+The adapter frame identifies the `port` input field and its type.
 Request errors preserve available method and path bytes in their input record.
 
 The Go HTTP parser rejects malformed protocol input before a Lo request exists.
@@ -1176,7 +1336,8 @@ A closed connection cannot guarantee delivery of that response.
 Response validation accepts status codes from `200` through `599`.
 Responses with status codes `204`, `205`, and `304` must have an empty body.
 A response to `HEAD` omits body bytes on the connection.
-The response constructors use empty headers, as specified in section 9.2.
+The general response constructor accepts explicit nominal headers.
+The Text and Bytes convenience constructors use empty nominal headers, as specified in section 9.2.
 The transport can add its own protocol headers.
 
 An invalid response from `onError` is a fatal host failure.

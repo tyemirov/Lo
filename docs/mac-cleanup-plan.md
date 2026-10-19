@@ -5,7 +5,9 @@ The remaining categories still require language and adapter work.
 The complete script is not implemented.
 This document records behavior from the earlier script review.
 Further work uses this record and fixtures inside Lo.
-The [shared adapter design](adapter-design.md) owns future File, HTTP, and Process semantics.
+The [shared adapter design](adapter-design.md) owns File, HTTP, and Process semantics.
+Nominal File targets and bound commits are implemented, with final validation pending.
+The HTTP client and general Process stages remain pending.
 This application plan supplies acceptance examples under that contract.
 
 ## Contents
@@ -40,7 +42,7 @@ No acceptance step runs actual package-cache or Docker cleanup.
 | Batch removal fails on changed or absent candidates. | The log example uses singleton commits through `Flow.fold` and handles only `File.EntryChanged` as a skip. |
 | The adapter rejects files with multiple links. | Generic removal now permits hardlinks. The log category has no single-link restriction. |
 | File entries omit metadata required by other categories. | Add owner identity, access time, and change time to the proposed entry contract. |
-| A resultless commit cannot supply command output. | Define explicit process activation with a typed completion result. |
+| Command output needs a typed activation result. | Bound commits supply the syntax. Process still needs a qualified execution profile and implementation. |
 | Temporary directories and caches can escape Lo. | Make and native build subprocesses now use explicit state directories inside Lo. |
 
 The [File design](file-adapter-design.md) describes the current batch contract and its limits.
@@ -182,7 +184,7 @@ The [File implementation record](file-adapter-plan.md) covers the completed log 
 Further work follows this sequence:
 
 1. Implement the applicable stages of the [shared adapter plan](adapter-plan.md) before new cleanup-specific capabilities.
-2. Migrate the log fixture to nominal actions and typed receipts.
+2. Validate the log fixture with nominal actions and typed receipts.
 3. Specify host inputs, discovery, locks, and extra metadata through the shared operation contract.
 4. Add common-policy fixtures for owner identity, timestamps, suffixes, temporary roots, and NUL-framed probes.
 5. Qualify the Process profile before general command execution.

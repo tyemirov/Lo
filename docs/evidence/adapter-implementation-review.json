@@ -1,0 +1,706 @@
+{
+  "date": "2026-10-18",
+  "scope": "Stages 1\u20133 and the pure Process construction, inspection, and standard-host rejection checkpoint.",
+  "status": "Implemented stages 1\u20133 and pure Process checkpoint passed current-stack CI and independent review. Process qualification operation is blocked by a reviewed evidence impasse. Full adapter goal remains incomplete.",
+  "stages": [
+    {
+      "number": 1,
+      "name": "Contract fixtures and purity",
+      "status": "implemented; focused checks passed",
+      "contracts": [
+        "Pure named callbacks exclude direct and transitive host observations and commit activation.",
+        "Device requirements stay separate from purity.",
+        "Match selectors and selected branches can read external state without commit activation.",
+        "Unused nested definitions and inert stored server handlers do not change immediate effects."
+      ],
+      "checkpoint_status": "Current-stack CI passed; independent final checkpoint review approved."
+    },
+    {
+      "number": 2,
+      "name": "Bound activation and File targets",
+      "status": "implemented; focused checks passed; independent source findings closed",
+      "contracts": [
+        "Bound and unbound commits use the catalog-defined success type.",
+        "Nominal File.Write, File.Append, and File.Remove targets publish operation-specific receipts after activation success.",
+        "UTF8.Bytes.new(text: String) explicitly encodes text.",
+        "HTTP.ServerReceipt identifies the actual listener address and port.",
+        "Commit failure stops the current body without a result binding.",
+        "Current write_progress stays separate from the latest last_completed_activation record.",
+        "Cleanup cancellation keeps the primary operation failure class."
+      ],
+      "checkpoint_status": "Current-stack CI passed; independent final checkpoint review approved."
+    },
+    {
+      "number": 3,
+      "name": "HTTP values and client actions",
+      "status": "implemented; combined interpreter and native qualification passed; independent source review closed current findings",
+      "contracts": [
+        "HTTP.Headers keeps lowercase names and repeated ordered Bytes values.",
+        "HTTP.Response.new is total and accepts nominal headers.",
+        "Automatic trace arguments keep field names and Record{type: String} summaries without payloads.",
+        "Explicit Error.new input and explicit Flow.fold progress state keep program-data semantics."
+      ],
+      "client_source_contract": {
+        "grant": "--http-allow METHOD,ORIGIN,ADDRESS",
+        "method_matching": "Exact case-sensitive method.",
+        "origin": "Canonical HTTP or HTTPS origin without credentials, query, fragment, or non-root path.",
+        "connection": "Resolve before connection; select an explicitly granted numeric address; one connection attempt.",
+        "body_limits": "1 MiB request and 1 MiB response.",
+        "response_header_limit": "64 KiB.",
+        "interim_response_limits": "At most eight interim responses and 64 KiB combined header bytes.",
+        "deadline": "Five seconds.",
+        "failure_evidence": "stage, request_written, remote_outcome; no header or body payloads.",
+        "acceptance_status": "Focused combined interpreter and native qualification passed in 22.727 and 138.832 seconds. Independent source review closed current findings.",
+        "request_header_limit": "No separate byte limit is specified. Ordinary execution value budgets apply."
+      },
+      "diagnostic_contract": {
+        "automatic_trace_arguments": "Field names and Record{type: String} summaries only.",
+        "nominal_headers": "Header names retained; header value payloads replaced with empty Bytes.",
+        "client_request_snapshot": "Method, origin, root path, and header names retained; original path, query, body, and header value payloads absent.",
+        "standalone_url_snapshot": "Path replaced with root and query removed. Covered by the combined interpreter/native public regression.",
+        "explicit_program_data": "Raw Error.new input and explicit Flow.fold progress state are not general secret scrubbing boundaries."
+      },
+      "checkpoint_status": "Current-stack CI passed; independent final checkpoint review approved."
+    },
+    {
+      "number": 4,
+      "name": "Process profile qualification",
+      "status": "unqualified; scratch build passed; exact candidate and unchanged-profile immediate-return child aborted without helper observations; probes stopped after independent review",
+      "qualification_basis": "Primary agent reported the independent source review outcome. No runtime confinement claim.",
+      "missing_evidence": [
+        "Executable replacement resistance.",
+        "macOS Seatbelt default-deny and fork-denial guarantees.",
+        "Filesystem and IPC escape prevention.",
+        "Work and resource enforcement."
+      ],
+      "general_process_adapter_launches": false,
+      "candidate_profile": "Single-process/fork-denied candidate remains unqualified. Its two launches did not demonstrate a runnable helper. No broader platform conclusion.",
+      "earlier_evidence": {
+        "path": "docs/evidence/native-backends/experiment.json",
+        "scope": "Network-denial isolation only. Does not qualify executable identity, filesystem/IPC access, descendant control, or resource enforcement.",
+        "relationship": "Historical network-denial evidence only. New candidate launch results are recorded separately and do not qualify Process."
+      },
+      "checkpoint": "Profile qualification remains mandatory before any launch or execution acceptance. Pure construction, inspection, and unavailable rejection can proceed before qualification."
+    },
+    {
+      "number": 5,
+      "name": "Process commands and results",
+      "status": "Pure phase implemented; final focused checks, full current-stack CI, and independent final checkpoint review passed. Execution remains unqualified.",
+      "pure_phase_contract": {
+        "constructors": [
+          "Process.Executable.new(File.Path) -> Process.Executable!",
+          "Process.Command.new(Process.Executable, List<String>, Map<String, String>, directory: File.Path, stdin: Bytes) -> Process.Command!"
+        ],
+        "validation": "Absolute NUL-free paths; NUL-free arguments and environment values; nonempty environment names without NUL or =. Exact lexical data, no access or resolution.",
+        "activation_capability": "Process.run is metadata only, not a callable builtin.",
+        "static_result_type": "Process.Result is an opaque static success type, without instances or accessors in this phase.",
+        "runtime_results": "No result construction, accessors, or runtime values before profile qualification.",
+        "host_rejection": "Standard runner installs adapter.WithProcess for run, serve, and server callbacks. It rejects before delegation or executable access. HTTP handler activation aborts the server with runtime.process-unavailable.",
+        "diagnostics": "Constructor diagnostics and nominal snapshots omit argument, environment, and stdin payloads. Explicit output retains program data.",
+        "inspection_schema": {
+          "location": "Optional process object on targets and capabilities.",
+          "inputs": [
+            "executable",
+            "arguments",
+            "environment",
+            "directory",
+            "stdin"
+          ],
+          "description_fields": [
+            "kind",
+            "type",
+            "node",
+            "span",
+            "dependencies",
+            "value or expression"
+          ],
+          "execution_profile": {
+            "required": true,
+            "status": "unavailable"
+          },
+          "profile_scope": "Current standard host, not arbitrary injected boundaries.",
+          "provenance": "Executable traces supplied File.Path; dynamic inputs retain whole-command dependencies.",
+          "text": "execution_profile=required/unavailable plus named inputs.",
+          "literal_policy": "Source literals remain inspection data; runtime snapshots redact sensitive payloads."
+        },
+        "launch_gate": "Qualification required before any launch or execution acceptance.",
+        "validation_status": "Final focused interpreter 2.934 seconds, native Process 14.086 seconds, and full current-stack CI passed. Independent final checkpoint review approved.",
+        "trusted_embedding_scope": "Custom Go boundaries are trusted host implementations obligated to enforce qualification. Generic Commit retains result validation only.",
+        "http_on_error": "Pure callbacks reject Process commits with check.effectful-callback at check time."
+      }
+    },
+    {
+      "number": 6,
+      "name": "Composition, final validation, and final review",
+      "status": "HTTP-to-File composition, pure Process checkpoint, current-stack CI, and independent checkpoint review passed. Process execution, dependent composition, future validation, and full-plan review remain pending."
+    }
+  ],
+  "red_evidence": [
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run TestAdapterPurity -count=1' </dev/null",
+      "exit_status": 2,
+      "observed": "Ten required observation exclusions were absent: check accepted transitive reads in pure callback and case-head positions.",
+      "fixture_note": "An initial Flow.fold fixture had a Bytes/String mismatch. The fixture was corrected before green validation; it is not evidence of missing purity behavior.",
+      "maintained_tests": [
+        "tests/integration/adapter_purity_test.go"
+      ]
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run ^TestAdapter.*Receipt -count=1' </dev/null",
+      "exit_status": 2,
+      "observed": "File and removal receipt fixtures reported syntax.unexpected-token at bound commit syntax.",
+      "elapsed_seconds": 1.513,
+      "maintained_tests": [
+        "tests/integration/adapter_receipts_test.go",
+        "tests/integration/typed_commit_test.go"
+      ]
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run ^TestAdapterReceiptWriteFailureProgress -count=1' </dev/null",
+      "exit_status": 2,
+      "observed": "Injected write and finalize failures incorrectly published File write/append receipts.",
+      "elapsed_seconds": 0.569
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"^TestAdapter(FileReceipts|Receipt(Canceled|PostCommit|Primary|InvalidBoundary))\" -count=1' </dev/null",
+      "exit_status": 2,
+      "observed": [
+        "The named encoder argument text was absent.",
+        "Canceled writes omitted public write_progress.",
+        "Post-commit budget failures omitted completed activation evidence.",
+        "Cleanup cancellation replaced the primary write failure classification."
+      ],
+      "elapsed_seconds": 0.772
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run ^TestAdapterHTTP -count=1' </dev/null",
+      "exit_status": 2,
+      "elapsed_seconds": 0.749,
+      "observed": "Header and response fixtures reported resolve.unknown-name for HTTP.Headers.new.",
+      "maintained_tests": [
+        "tests/integration/adapter_http_values_test.go"
+      ]
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run TestDiagnosticTraceArguments -count=1' </dev/null",
+      "exit_status": 2,
+      "elapsed_seconds": 0.857,
+      "observed": "Raw valid header-list flow and callback arguments exposed Base64 payloads after successful header construction and unrelated Math.div failure.",
+      "maintained_tests": [
+        "tests/integration/diagnostic_trace_test.go"
+      ]
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run ^TestAdapterHTTPClient -count=1' </dev/null",
+      "exit_status": 2,
+      "elapsed_seconds": 0.827,
+      "observed": "Client fixtures reported cli.invalid-invocation for the absent --http-allow option.",
+      "maintained_tests": [
+        "tests/integration/adapter_http_client_test.go"
+      ],
+      "qualification": "Historical checkpoint: selected interpreter cases had passed while complete client qualification was pending. Later combined interpreter/native greens supersede this status."
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"TestAdapterHTTPClient(FileComposition|InspectionMethod|DiagnosticTarget|PostCommitBudget)\" -count=1' </dev/null",
+      "exit_status": 2,
+      "elapsed_seconds": 1.003,
+      "observed": [
+        "Inspection omitted exact HTTP method evidence.",
+        "Nominal client target diagnostics exposed path/query, header, and body payloads."
+      ],
+      "fixture_note": "The initial FileComposition source also had a parser fixture error, corrected before green. PostCommitBudget did not fail in this red run."
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"^TestAdapterHTTPClient(ProtocolLimits|CancellationProgress|BodyLimit|RequestBodyLimit)\" -count=1' </dev/null",
+      "exit_status": 2,
+      "elapsed_seconds": 1.012,
+      "observed": "ProtocolLimits accepted HTTP/1.0 and bare-LF response framing. The other selected cases did not fail in this red run."
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"TestFlowFold.*ErrorProgress\" -count=1' </dev/null",
+      "exit_status": 2,
+      "elapsed_seconds": 0.958,
+      "observed": [
+        "Three direct progress cases lacked the recoverable carrier.",
+        "Handler and fresh-error projection cases reported the missing Error.flow_progress field."
+      ],
+      "consequential_failure": "The no-stale case decoder error followed a checker rejection. It is not evidence of runtime stale progress."
+    },
+    {
+      "command": "CI=1 make test-integration TEST_ARGS='-run TestFlowFoldErrorProgressValueBudget -count=1' </dev/null",
+      "exit_status": 2,
+      "elapsed_seconds": 0.984,
+      "observed": "An 8 MiB Bytes state caused runtime.limit for expanded value bytes, but the host diagnostic retained one nested progress record instead of two.",
+      "maintained_tests": [
+        "tests/integration/flow_fold_budget_progress_test.go"
+      ]
+    },
+    {
+      "elapsed_seconds": 0.967,
+      "observed": "Missing Process types and constructors.",
+      "scope_note": "Primary-reported expected red; missing Process types and constructors."
+    },
+    {
+      "elapsed_seconds": 0.631,
+      "entry_point": "Public Program.Run with an injected custom boundary.",
+      "observed": "Ordinary custom-boundary error caused a panic during activation error decoding.",
+      "scope_note": "Primary-reported process-boundary-red evidence. No launch qualification claim."
+    }
+  ],
+  "green_evidence": [
+    {
+      "backend": "interpreter",
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"TestAdapter.*Receipt|TestTypedCommit|TestAdapterPurity|TestInspectionListContext|TestInspectionCaseHeadReads|TestEvaluatorMatchRegions\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 1.423,
+      "result": "ok github.com/MarcoPoloResearchLab/Lo/tests/integration 1.423s"
+    },
+    {
+      "backend": "native",
+      "command": "CI=1 make test-native TEST_ARGS='-run \"TestAdapter.*Receipt|TestTypedCommit|TestAdapterPurity|TestInspectionListContext|TestInspectionCaseHeadReads|TestEvaluatorMatchRegions|TestFile\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 31.031,
+      "result": "ok github.com/MarcoPoloResearchLab/Lo/tests/integration 31.031s",
+      "scope_note": "Includes all TestFile cases. The interpreter selection above does not include that broad TestFile filter."
+    },
+    {
+      "backend": "interpreter",
+      "command": "CI=1 make test-integration TEST_ARGS='-run ^TestAdapterHTTP -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 0.866,
+      "scope_note": "Historical focused header/response cases. This preceded the later generic trace-summary regression and client work."
+    },
+    {
+      "backend": "interpreter",
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"TestDiagnostic|TestAdapterHTTPHeaderDiagnosticRedaction|TestRunRecoverableErrors|TestRunFallibleListVariants|TestFlowFold\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 1.11,
+      "scope_note": "Generic trace summaries, explicit error data, header diagnostic cases, and unchanged explicit Flow.fold progress state."
+    },
+    {
+      "backend": "native",
+      "command": "CI=1 make test-native TEST_ARGS='-run \"TestDiagnostic|TestAdapterHTTPHeaderDiagnosticRedaction|TestRunRecoverableErrors|TestRunFallibleListVariants|TestFlowFold\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 17.812,
+      "scope_note": "The same focused trace/progress union through generated native execution. No complete client qualification claim."
+    },
+    {
+      "backend": "interpreter",
+      "command": "CI=1 make test-integration TEST_ARGS='-run ^TestAdapterHTTPClient -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 1.831,
+      "scope_note": "Historical focused client interpreter green before the new protocol and composition regressions. Later combined interpreter/native greens supersede this checkpoint."
+    },
+    {
+      "backend": "interpreter",
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"TestAdapterHTTP|TestDiagnosticTrace|TestVerifierBuiltinContracts|TestRunBuiltinCatalog|TestTypedCommit|TestAdapter.*Receipt|TestAdapterPurity|TestFile|TestFlowFold\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 22.727,
+      "scope_note": "Combined HTTP protocols and composition, trace summaries, catalog contracts/examples, typed commits, receipts, purity, all TestFile, and all TestFlowFold. Includes URL/target snapshots, HTTP completion evidence, and cleanup error preservation/sanitization."
+    },
+    {
+      "backend": "native",
+      "command": "CI=1 make test-native TEST_ARGS='-run \"TestAdapterHTTP|TestDiagnosticTrace|TestVerifierBuiltinContracts|TestRunBuiltinCatalog|TestTypedCommit|TestAdapter.*Receipt|TestAdapterPurity|TestFile|TestFlowFold\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 138.832,
+      "scope_note": "Matching combined HTTP/shared selection. Applicable public CLI cases run compiled Lo artifacts. Injected budget and cleanup API cases use the shared Go runtime and are not separate compiled Lo entry points."
+    },
+    {
+      "backend": "interpreter",
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"TestGatewayLogCleanup|TestFlowFold|TestDiagnosticTrace|TestNativeEffectBudgetDifferential\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 6.337,
+      "scope_note": "Recoverable carrier, Gateway progress, trace summaries, and corrected native effect/budget differential. Precedes the final top-level no-stale assertion."
+    },
+    {
+      "backend": "native",
+      "command": "CI=1 make test-native TEST_ARGS='-run \"TestGatewayLogCleanup|TestFlowFold|TestDiagnosticTrace|TestNativeEffectBudgetDifferential\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 22.055,
+      "scope_note": "Matching correction selection. Applicable CLI cases compile Lo; injected API cases share the Go runtime. Precedes the final top-level no-stale assertion."
+    },
+    {
+      "backend": "interpreter",
+      "command": "CI=1 make test-integration TEST_ARGS='-run \"TestGatewayLogCleanup|TestFlowFold|TestDiagnosticTrace|TestNativeEffectBudgetDifferential\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 7.578,
+      "scope_note": "Final correction union includes the returned-error budget regression and top-level no-stale assertion."
+    },
+    {
+      "backend": "native",
+      "command": "CI=1 make test-native TEST_ARGS='-run \"TestGatewayLogCleanup|TestFlowFold|TestDiagnosticTrace|TestNativeEffectBudgetDifferential\" -count=1' </dev/null",
+      "exit_status": 0,
+      "elapsed_seconds": 37.51,
+      "scope_note": "Matching final correction union, including the budget regression and top-level no-stale assertion. Applicable CLI cases compile Lo; injected API cases share the Go runtime."
+    },
+    {
+      "backend": "current-stack CI",
+      "command": "CI=1 make ci </dev/null",
+      "exit_status": 0,
+      "full_interpreter_integration_seconds": 54.454,
+      "full_native_integration_seconds": 482.811,
+      "scope_note": "All current Lo source changes at the Process qualification gate. Runtime bundle check, formatting, Go vet, build, and both complete integration lanes passed. This does not complete Process or the full adapter plan."
+    },
+    {
+      "backend": "current-stack CI including pure Process",
+      "command": "CI=1 make ci </dev/null",
+      "exit_status": 0,
+      "interpreter_elapsed_seconds": 43.391,
+      "native_elapsed_seconds": 522.053,
+      "scope_note": "All current CI targets passed. Independent final checkpoint review approved. No Process execution qualification."
+    }
+  ],
+  "independent_review": {
+    "agent": "/root/adapter_principles_review",
+    "requested_role": "mpr-architect",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "high",
+    "actual_pair": "Native role metadata specifies gpt-6-astra/high. Separate execution metadata is unavailable.",
+    "method": "Source and test review. The reviewer did not run Make.",
+    "status": "The three findings are closed. No further blocking stage 1\u20132 finding emerged.",
+    "closed_findings": [
+      "Canceled writes keep public write_progress.",
+      "Receipt-charge and session-cleanup failures keep last_completed_activation separately from a later partial write.",
+      "Cleanup cancellation does not replace the primary File failure classification."
+    ],
+    "additional_test_review": [
+      "Nil and wrong boundary results.",
+      "Repeated activation."
+    ],
+    "next_stage_dependency": "Before stage 3, replace receipt-only activation evidence handling with explicit result-category handling. HTTP responses and Process results must not enter receipt serialization.",
+    "timing_limit": "Native and broader File results were pending in the evidence supplied to the reviewer. The primary agent subsequently recorded the green runs above.",
+    "next_stage_dependency_status": "HTTP result-category handling is implemented and passed focused stage 3 interpreter/native cases. Future Process result handling remains pending.",
+    "checkpoint": "Historical stage 1\u20132 source review."
+  },
+  "documentation_review": {
+    "reference_source": "https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf",
+    "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "reference_verification": "Retrieved directly into the Lo task directory and verified with SHA-256 before prose edits.",
+    "manual_scope": "Changed prose in the assigned references and evidence record, reviewed against Part 1 rule summaries and related Part 2 entries. No full-document compliance claim.",
+    "shared_checker_limit": "prepare-ste-reference and check-ste are unavailable inside Lo. The external shared helpers were not executed.",
+    "compliance_claim": "None. Local link and mechanical checks do not certify ASD-STE100 compliance.",
+    "local_checks": {
+      "changed_local_links_checked": 22,
+      "changed_local_link_failures": 0,
+      "changed_prose_line_mechanical_findings": 0,
+      "mechanical_scope": "Changed prose line length and semicolons outside code fences, tables, and glossary entries.",
+      "scoped_git_diff_check": "passed",
+      "evidence_json": "parsed; stage sequence and red/green exit statuses checked"
+    }
+  },
+  "repository_boundary": {
+    "checkout": "Primary Lo checkout only.",
+    "state": "Task files, fixtures, tool state, caches, generated output, and the official reference stayed inside Lo.",
+    "external_repositories_used": false,
+    "external_application_operations": false,
+    "live_provider_operations": false,
+    "physical_device_requirement": false,
+    "acceptance_environment": "Local software execution with repository-owned filesystem and process fixtures."
+  },
+  "remaining_validation": [
+    "Qualify a Process execution profile before any launch or execution acceptance.",
+    "Implement qualified execution and runtime results.",
+    "Complete Process-dependent composition.",
+    "Run future qualified Process final stack validation.",
+    "Obtain final full-plan review."
+  ],
+  "stage_3_review": {
+    "agent": "/root/adapter_principles_review",
+    "status": "Current findings closed by independent source review. Matching combined interpreter/native qualification passed.",
+    "closed_findings": [
+      "Cleanup error evidence preserves the primary class without exposing unsafe payloads.",
+      "Every response section enforces HTTP/1.1."
+    ],
+    "runtime_limit": "No actual connection-close failure was injected. A Boundary failure emulates class and data through Program.Run and ReportRuntime. Injected budget and cleanup API cases use the shared Go runtime and are not separate compiled Lo entry points.",
+    "result_category_status": "HTTP responses no longer enter receipt-only serialization. Combined post-charge completion and HTTP-to-File composition cases passed."
+  },
+  "process_probe_evidence": {
+    "helper_build": "Passed using the repository-local process-probe-build target.",
+    "profile_sha256": "5cbccacce7d9f0b3d71222fe289bb6917374847bdf02460e4d28b0b60e605c0c",
+    "external_file_read_allowances": false,
+    "profile_broadening": false,
+    "main_candidate": {
+      "exit_code": -6,
+      "termination_signal": "SIGABRT",
+      "stdout": "",
+      "stderr": "",
+      "helper_observations": null,
+      "loopback_connection_observed": false,
+      "designated_denied_write_unchanged": true,
+      "designated_allowed_write_changed": false,
+      "core_dump_limit_guard": "Absent on the first recorded run."
+    },
+    "launch_only": {
+      "child_behavior": "Immediate return without adversarial operations.",
+      "profile_changed": false,
+      "exit_code": -6,
+      "termination_signal": "SIGABRT",
+      "stdout": "",
+      "stderr": "",
+      "helper_observations": null,
+      "guards_before_child": {
+        "core_dump_limit": 0,
+        "per_output_file_bytes": 65536,
+        "parent_timeout_seconds": 10
+      }
+    },
+    "outcome": "The exact candidate did not demonstrate a runnable helper in either probe. No Process backend is qualified.",
+    "interpretation_limits": [
+      "No helper observations establish that adversarial operations ran.",
+      "Unchanged fixtures and no observed connection do not establish denial.",
+      "The evidence does not identify the abort cause.",
+      "No platform-wide impossibility conclusion.",
+      "The first main run had no core-dump limit guard; later driver edits do not change that recorded condition.",
+      "Launch-only guards do not qualify the full Process resource contract."
+    ],
+    "independent_review_action": "Stop further probes without broadening the profile or adding external file-read allowances.",
+    "repository_boundary": "Helper sources, profiles, child inputs, fixture targets, output, and records stayed inside Lo. No other repository or system logs were accessed.",
+    "retention": "This durable record summarizes observed results without transient task-directory links.",
+    "recorded_launches": 2
+  },
+  "validation_checkpoint": {
+    "command": "CI=1 make ci </dev/null",
+    "status": "passed",
+    "exit_status": 0,
+    "interpreter_integration_seconds": 43.391,
+    "native_integration_seconds": 522.053,
+    "passed_checks": [
+      "runtime bundle verification",
+      "formatting",
+      "Go vet",
+      "all tests",
+      "final build",
+      "git diff --check"
+    ],
+    "log_name": "ci-process-pure.txt",
+    "scope": "All current source including pure Process; no qualified Process execution.",
+    "review_status": "Independent final checkpoint review approved without a remaining source finding.",
+    "full_adapter_goal_complete": false
+  },
+  "recoverable_fold_progress_correction": {
+    "approved_contract": "Error.flow_progress: List<Record>, empty by default. JSON omits empty metadata.",
+    "ordering": "Each failing fold prepends its reserved record, outermost to innermost. Equal-content records remain separate.",
+    "handling": "Pure handlers returning the original error preserve progress. Fresh Error.new resets it. Handled folds do not contaminate later unrelated errors.",
+    "snapshots": "Already reserved snapshots are reused without tensor storage or executable authority. Explicit state keeps its program-data semantics.",
+    "weight": "The progress list contributes 16 bytes at error construction. Each reserved record contributes its existing snapshot weight.",
+    "diagnostics": "Nonempty Error JSON carries typed records. CLI top-level flow_progress also includes recoverable carrier records.",
+    "fixture_migration": "The native budget fixture now has pure literal Match heads, with reads in its selector and selected branch. Named-order and unused-binding fixtures are unchanged.",
+    "maintained_tests": "tests/integration/flow_fold_error_progress_test.go",
+    "review_status": "Actual-code review closed the budget finding. Both failing ChargeValue branches preserve snapshot order and failure classification. No new lifetime, weight, or source blocker was found in this correction.",
+    "validation_note": "Final focused interpreter/native unions include the budget regression and final top-level no-stale assertion.",
+    "budget_boundary_regression": "tests/integration/flow_fold_budget_progress_test.go",
+    "budget_boundary_semantics": "Failing ChargeValue admission extracts a rejected direct Error or Fallible cause and preserves reserved snapshots in outer-to-inner host diagnostic order. Successful charge paths do not attach this metadata.",
+    "budget_boundary_implementation": "internal/execution/flow_progress.go preserveValueFlowProgress, called only from failing ChargeValue branches in internal/execution/session.go.",
+    "review_method": "Independent source review without a Make run. The 37.510-second native result reached the reviewer after code review."
+  },
+  "current_checkpoint_final_review": {
+    "status": "approved",
+    "scope": "Current stack including pure Process construction, inspection, and standard-host rejection.",
+    "agent": "/root/adapter_principles_review",
+    "requested_role": "mpr-architect",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "high",
+    "actual_pair": "Native role metadata specifies gpt-6-astra/high; separate execution telemetry unavailable.",
+    "method": "Read-only source and evidence review; reviewer did not run tests.",
+    "verified_evidence": [
+      "Full current-stack CI interpreter 43.391 seconds and native 522.053 seconds.",
+      "Final focused native Process 14.086 seconds."
+    ],
+    "source_review": "Safe ActivationError finding closed; no remaining source finding.",
+    "scope_limit": "Partial pure Process checkpoint only. No Process execution qualification or full-plan completion."
+  },
+  "process_static_inspection": {
+    "helper_sha256": "dd6ec36820a69a59bd3ab5220b5856738b39f8e9ac8bd78f450d635d78a55b88",
+    "cpu": "CpuArm64",
+    "loaders": [
+      "/usr/lib/dyld"
+    ],
+    "libraries": [
+      "/usr/lib/libSystem.B.dylib",
+      "/usr/lib/libresolv.9.dylib"
+    ],
+    "rpaths": [],
+    "referenced_paths_opened": false,
+    "helper_launched": false,
+    "evidence_scope": "Static inspection of repository-local scratch helper bytes. Named paths are absent from candidate explicit read grants.",
+    "interpretation_limits": [
+      "No proof of runtime access, abort cause, denial, or platform impossibility.",
+      "No new probe or profile broadening."
+    ]
+  },
+  "plan_revision": {
+    "status": "Approved by primary-reported independent architecture review.",
+    "change": "Separate pure Process construction, inspection, and host unavailable rejection from qualified execution.",
+    "qualification_gate": "Unchanged for every launch and execution acceptance.",
+    "historical_validation": "Stages 1\u20133 checkpoint CI remains valid only for its recorded scope.",
+    "new_validation": "Focused interpreter/native and full current-stack CI passed. Independent final checkpoint review approved."
+  },
+  "pure_process_validation": {
+    "focused_interpreter_seconds": 2.934,
+    "interpreter_selection": "Process, VerifierBuiltinContracts, RunBuiltinCatalog",
+    "initial_native_seconds": 72.952,
+    "initial_native_selection": "Process and catalog before boundary-error correction.",
+    "final_native_seconds": 14.086,
+    "final_native_selection": "Process after boundary-error correction. CLI cases use native execution.",
+    "injected_boundary_scope": "Custom boundary regression invokes eval.Program in the shared Go runtime, not a compiled executable.",
+    "source_review_finding": "Closed. helpers.ActivationError returns a safe host contract error without raw payload for ordinary custom-boundary errors. Architect found no additional source blocker.",
+    "new_stack_ci": {
+      "command": "CI=1 make ci </dev/null",
+      "status": "passed",
+      "exit_status": 0,
+      "interpreter_integration_seconds": 43.391,
+      "native_integration_seconds": 522.053,
+      "passed_checks": [
+        "runtime bundle verification",
+        "formatting",
+        "Go vet",
+        "all tests",
+        "final build",
+        "git diff --check"
+      ],
+      "log_name": "ci-process-pure.txt",
+      "scope": "All current source including pure Process; no qualified Process execution.",
+      "review_status": "Independent final checkpoint review approved without a remaining source finding.",
+      "full_adapter_goal_complete": false
+    },
+    "final_checkpoint_review": "approved",
+    "historical_scope": "Earlier stages 1\u20133 CI remains valid for its recorded scope."
+  },
+  "stage_1_3_validation_checkpoint": {
+    "scope": "All current Lo source changes through stage 3, at the Process qualification gate.",
+    "command": "CI=1 make ci </dev/null",
+    "status": "passed",
+    "full_adapter_goal_complete": false,
+    "future_process_validation": "The new pure Process phase and later qualified execution each require their own final stack validation.",
+    "attempts": [
+      {
+        "command": "CI=1 make ci </dev/null",
+        "exit_status": 2,
+        "failed_target": "integration tests",
+        "integration_elapsed_seconds": 60.053,
+        "findings": [
+          "Recoverable Gateway metadata/removal failures lost completed fold state.",
+          "TestNativeEffectBudgetDifferential/match-heads used observing Match case heads under the obsolete rule."
+        ]
+      },
+      {
+        "command": "CI=1 make ci </dev/null",
+        "exit_status": 0,
+        "full_interpreter_integration_seconds": 54.454,
+        "full_native_integration_seconds": 482.811,
+        "result": "All current-stack CI targets passed after the preserved initial failure and corrections."
+      }
+    ],
+    "review_status": "Independent final checkpoint review approved stages 1\u20133. No remaining source finding.",
+    "exit_status": 0,
+    "full_interpreter_integration_seconds": 54.454,
+    "full_native_integration_seconds": 482.811,
+    "checks": [
+      "runtime bundle check",
+      "formatting",
+      "Go vet",
+      "full interpreter integration",
+      "full native integration",
+      "CLI build",
+      "git diff whitespace check"
+    ],
+    "historical_scope": "Earlier stages 1\u20133 checkpoint, before pure Process source additions."
+  },
+  "stage_1_3_final_review": {
+    "agent": "/root/adapter_principles_review",
+    "requested_role": "mpr-architect",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "high",
+    "actual_pair": "Native role metadata specifies the requested pair; separate execution metadata unavailable.",
+    "status": "Approved stages 1\u20133 current implementation checkpoint. No remaining source finding.",
+    "method": "Read-only source and evidence review; no test execution by the reviewer.",
+    "reviewed_evidence": [
+      "All final current-stack CI targets, including full interpreter 54.454s and native 482.811s integration.",
+      "Final focused native correction 37.510s.",
+      "Top-level no-stale assertion and returned-error budget carrier preservation."
+    ],
+    "scope_limit": "Process remains unqualified and stopped. Full-plan completion is not approved by this checkpoint review."
+  },
+  "process_static_construction": {
+    "status": "Build-only construction passed; independent review accepted bounded claims and applicability of existing CI to unchanged source.",
+    "source": "Arm64 assembly entry _start: brk #0.",
+    "headers_used": false,
+    "standard_libraries_used": false,
+    "clang_target": "arm64-apple-macos11",
+    "link_flags": [
+      "-nostdlib",
+      "-Wl,-static",
+      "-Wl,-e,_start"
+    ],
+    "artifact": {
+      "file_type": "Exec",
+      "cpu": "CpuArm64",
+      "sha256": "f2709f3d825a8ef1ee0c5b2f7f4cf1021cc3350a7de8f945513cbd417537a3a2",
+      "entry_load_command": "LC_UNIXTHREAD",
+      "loaders": [],
+      "libraries": [],
+      "rpaths": [],
+      "undefined_symbols": [],
+      "entry_evidence": {
+        "unixthread_pc": 4294968040,
+        "start_symbol": 4294968040,
+        "entry_hex": "0x1000002e8",
+        "start_instruction_hex": "000020d4",
+        "entry_matches_start": true,
+        "start_is_brk_zero": true,
+        "parse_hash_consistency": "Inspector parses the same bytes used for SHA-256.",
+        "independent_decode": "Local artifact otool decoding agrees BRK #0."
+      }
+    },
+    "helper_launched": false,
+    "referenced_paths_opened": false,
+    "profile_changed": false,
+    "establishes": "Construction feasibility only.",
+    "does_not_validate": [
+      "Entry ABI",
+      "Startup",
+      "Sandbox confinement",
+      "Executable identity",
+      "Lifetime and resource guarantees"
+    ],
+    "existing_ci_scope": "Prior full current-stack CI remains valid for unchanged product source.",
+    "qualification_status": "No backend qualified. Full adapter goal incomplete.",
+    "retention": "Summarized from repository-local static build, assembly source, and artifact inspection records.",
+    "launch_status": "No launch. Independent review rejected the proposed intentional-crash diagnostic launch before execution.",
+    "launch_review": {
+      "status": "rejected before execution",
+      "reason": [
+        "RLIMIT_CORE zero does not establish suppression or redirection of host crash reports.",
+        "Child IPC denial does not establish confinement of host crash-reporter output."
+      ],
+      "scope": "Proposed intentional-crash probe only. No platform impossibility claim.",
+      "cleanup": "Primary removed proposed static_launch.py, static-entry.sb, and launch Make target. Static source, artifact, and inspection remain.",
+      "non_crashing_fixture_evidence": "Local helper disassembly shows runtime.exit uses libcCall and a trampoline. Syscall number constants do not establish raw Darwin/arm64 exit ABI. No non-crashing fixture launch is supported by current local evidence.",
+      "process_qualification": "Independent final review confirmed a genuine qualification impasse under available repository evidence. Qualification operation blocked.",
+      "construction_review": "Still approved.",
+      "existing_source_ci": "Unchanged and applicable.",
+      "final_impasse_review": {
+        "status": "completed; qualification operation blocked",
+        "supported_next_action": "No concrete supported implementation or launch action under available repository evidence.",
+        "missing_prerequisite_alternatives": [
+          "Evidenced non-crashing repository-contained execution path.",
+          "Demonstrated task-local control of intentional-crash reporting."
+        ],
+        "prerequisite_evidence_present": false,
+        "other_unqualified_guarantees": [
+          "Executable identity",
+          "Confinement",
+          "Descendants",
+          "Resources"
+        ],
+        "scope_limits": [
+          "No platform impossibility claim.",
+          "No intentional-crash launch occurred.",
+          "Static construction evidence remains approved.",
+          "Unchanged product source CI remains passed.",
+          "Full adapter goal remains incomplete."
+        ]
+      }
+    }
+  }
+}

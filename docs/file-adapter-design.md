@@ -1,13 +1,13 @@
 # File Adapter Design
 
-The File adapter supports discovery, open-file observations, and committed removal.
+The File adapter supports observations, file replacement, append, and removal.
 The [Gateway log example](examples/gateway-log-cleanup.lo) combines these operations into a complete log category.
 The [language reference](../specification.md#91-file-adapter) specifies the public language contract.
 The [implementation plan](file-adapter-plan.md) records acceptance.
 The [mac-cleanup plan](mac-cleanup-plan.md) defines the remaining complete-script requirements.
 This document describes the current implementation.
-The [shared adapter design](adapter-design.md#file) selects the next File contract alongside HTTP and Process.
-Its proposed nominal actions and receipts are not yet implemented.
+The [shared adapter design](adapter-design.md#file) defines nominal File actions and typed receipts.
+The HTTP client and general Process stages remain pending.
 
 ## Contents
 
@@ -30,9 +30,11 @@ Its proposed nominal actions and receipts are not yet implemented.
 `File` is a domain adapter, with no `IO` parent or inheritance.
 `File.list` returns ordinary immutable values in `List<File.Entry>`.
 List processors select and summarize those values.
-`File.remove` constructs an effect, and only `commit` executes removal.
+`File.Remove.new` constructs a nominal `File.Remove` target.
+Only `commit` executes removal.
 `Flow.fold` permits ordered callback activation when each candidate needs a separate result.
-List callbacks retain their existing prohibition on transitive commits.
+List callbacks cannot include transitive host observations or commits.
+`Flow.fold` callbacks can include both under ordinary fallibility rules.
 
 ```mermaid
 flowchart LR
@@ -40,7 +42,7 @@ flowchart LR
     C["File.open_paths(root)"] --> D["Exclude observed open paths"]
     B --> D
     D --> E["Flow.fold(selected, counts, RemoveStep)"]
-    E --> F["File.remove(single entry), then commit"]
+    E --> F["File.Remove.new(single entry), then commit"]
 ```
 
 ## Public Operations
@@ -50,14 +52,52 @@ flowchart LR
 | `File.Path.eq(left_operand: File.Path, right_operand: File.Path) -> Bool` | Compare path text without filesystem access or normalization. |
 | `File.list(root: File.Path) -> List<File.Entry>!` | Observe direct directory children. |
 | `File.open_paths(root: File.Path) -> List<File.Path>!` | Observe open paths through a bounded host probe. |
-| `File.remove(entries: List<File.Entry>) -> Effect!` | Construct a removal selection without filesystem access. |
+| `File.Remove.new(entries: List<File.Entry>) -> File.Remove!` | Construct a removal selection without filesystem access. |
 | `File.read(file_path: File.Path) -> Bytes!` | Read file contents. |
-| `File.write(file_path: File.Path, file_content: Bytes) -> Effect` | Construct a content replacement. |
-| `File.append(file_path: File.Path, file_content: String) -> Effect` | Construct a UTF-8 append. |
+| `File.Write.new(file_path: File.Path, file_content: Bytes) -> File.Write` | Construct a content replacement. |
+| `File.Append.new(file_path: File.Path, file_content: Bytes) -> File.Append` | Construct an append from Bytes. |
 
 `File.read` does not convert bytes to a list implicitly.
 `File.Path` contains text, not authority.
 `File.Entry` has no public constructor, equality, ordering, or checkpoint encoding.
+
+Write and append require Bytes.
+`UTF8.Bytes.new(text: String) -> Bytes` explicitly encodes text as UTF-8.
+`UTF8.String.new(bytes)` remains the fallible decoder.
+
+### Activation Results
+
+| Target | Success type | Exact public fields |
+| --- | --- | --- |
+| `File.Write` | `File.WriteReceipt` | `path: File.Path`, `bytes_written: Int` |
+| `File.Append` | `File.AppendReceipt` | `path: File.Path`, `bytes_written: Int` |
+| `File.Remove` | `File.RemoveReceipt` | `total_count: Int`, `completed_count: Int`, `observed_bytes: Int` |
+
+Receipts have no public constructors.
+A bound statement uses `receipt = commit target`.
+It creates the immutable binding only after activation success.
+Write and append success require the complete write and operation-owned resource release.
+Removal success requires all selected removals and operation-owned resource release.
+
+Retained directory handles stay open until session cleanup.
+A later session cleanup failure keeps the confirmed operation progress.
+Receipt copies do not repeat activation.
+Another commit of the same target is another attempt.
+
+After removal success, the total and completed counts are equal.
+`observed_bytes` sums selected observations and does not measure reclaimed disk space.
+Write and append failures keep confirmed byte counts, including partial writes.
+No failure publishes a bound receipt.
+
+Host failures expose `write_progress` with `bytes_written: Int` and `stage: String`.
+`last_completed_activation` contains `operation`, `span`, and `receipt` for the latest completed activation in the invocation.
+This record does not describe the current partial operation.
+The invocation keeps only its latest completed activation record.
+Diagnostic evidence does not create a result binding.
+
+Cleanup cancellation keeps the original operation failure class.
+Recoverable write errors keep `cleanup_errors: List<String>` in `Error.input`.
+Host diagnostics expose `cleanup_errors` as a JSON array.
 
 ## Entry Values
 
@@ -168,7 +208,7 @@ Link-count policy belongs in the Lo predicate.
 Construction performs no filesystem access and acquires no lock.
 It reserves one step per entry and checks value weight before allocation.
 The maximum batch size is 10,000 entries.
-The existing `Effect` type has a separate internal removal payload.
+The nominal `File.Remove` target keeps its selection and opaque entry provenance.
 
 ## Commit and Failure Progress
 
@@ -183,7 +223,7 @@ A changed or absent entry produces `File.EntryChanged`.
 Other metadata or removal failures produce `File.RemoveFailed`.
 A batch stops at its first failure without retry or rollback.
 Successful earlier removals remain completed.
-An empty effect succeeds without access.
+An empty removal target succeeds without filesystem access.
 A repeated commit fails when its observations are stale.
 
 The removal progress record contains:
@@ -202,12 +242,14 @@ Preflight failure has zero completed removals.
 Lo errors retain argument snapshots, source traces, and removal progress.
 Host diagnostics expose `removal_entries` and `removal_progress`.
 Cleanup errors preserve the original failure and confirmed progress.
-A successful `commit` still returns no value.
+After activation success, a bound commit publishes its nominal receipt.
+An unbound commit discards that receipt.
+Failure publishes no result binding and stops the current body.
 
 ## Sequential Cleanup
 
 `Flow.fold(items, initial, context..., Step)` invokes `Step(context..., state, item)` in list order.
-The callback can commit effects under the existing fallibility rules.
+The callback can read external state and commit targets under ordinary fallibility rules.
 A successful result becomes the next state.
 An empty input returns the initial state.
 An unhandled error stops the suffix.
@@ -220,8 +262,8 @@ This gives the workflow explicit continuation without changing generic batch beh
 Failure traces retain the fold index and completed state.
 Host diagnostics add a `flow_progress` array from the outermost active fold to the innermost.
 Each record has `operation`, `total_count`, `completed_count`, `next_index`, and `state`.
-An in-flight singleton removal can have its own receipt before the callback completes.
-The runtime preserves both receipts instead of claiming that the callback completed.
+An in-flight singleton removal can have confirmed progress before the callback completes.
+The runtime keeps removal progress and fold progress separately.
 Late session or grant cleanup failures retain the final completed state for CLI runs.
 
 ## Concurrency Boundary
