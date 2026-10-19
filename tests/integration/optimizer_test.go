@@ -112,7 +112,7 @@ func TestOptimizerSchemasAndFailureOrder(t *testing.T) {
 			{"List.new(1)", "1.0", "Gradient.SchemaMismatch"},
 			{"List.new()", "3e38", "Numeric.NonFinite"},
 		} {
-			source := fmt.Sprintf(`flow Run() -> Optimizer.%s.State<Record{x: Tensor<FP32>}>! { x=Tensor.new(List.new(1.0),List.new()); p=Parameters.new(Record.new(x:x)); state=Optimizer.%s.State.new(p,%s); g=Tensor.new(List.new(%s),%s); gp=Parameters.new(Record.new(x:g)); gradients=Gradients.new(gp,Record.new(x:g)); next=Optimizer.%s.step(state,gradients); effect=File.write(File.Path.new("never"),Bytes.new("bad")); commit effect; return next }; return Run()`, optimizer, optimizer, config, tc.gradient, tc.shape, optimizer)
+			source := fmt.Sprintf(`flow Run() -> Optimizer.%s.State<Record{x: Tensor<FP32>}>! { x=Tensor.new(List.new(1.0),List.new()); p=Parameters.new(Record.new(x:x)); state=Optimizer.%s.State.new(p,%s); g=Tensor.new(List.new(%s),%s); gp=Parameters.new(Record.new(x:g)); gradients=Gradients.new(gp,Record.new(x:g)); next=Optimizer.%s.step(state,gradients); effect=File.Write.new(File.Path.new("never"),Bytes.new("bad")); commit effect; return next }; return Run()`, optimizer, optimizer, config, tc.gradient, tc.shape, optimizer)
 			boundary := &observedBoundary{}
 			_, err := evaluate(t, source, boundary)
 			if err == nil || !strings.Contains(err.Error(), tc.kind) || boundary.commits != 0 {

@@ -170,11 +170,13 @@ func TestServeEchoExample(t *testing.T) {
 func TestServeHTTP(t *testing.T) {
 	source := `
 flow Handle(request: HTTP.Request) -> HTTP.Response! {
-  probe = Map.get(request.headers, "X-Probe")
+  probe_values = HTTP.Headers.values(request.headers, "X-Probe")
+  probe = List.fold(probe_values, "", DecodeProbe)
   body = UTF8.String.new(request.body)
   message = String.concat(request.method, " ", request.path, " ", probe, " ", body)
   return HTTP.Response.Text.new(201, message)
 }
+flow DecodeProbe(state: String, content: Bytes) -> String! { return UTF8.String.new(content) }
 flow OnError(error: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, error.kind) }
 ` + serveSuffix
 	p := startServer(t, source)
@@ -462,7 +464,6 @@ func TestServeRequestValidation(t *testing.T) {
 	p := startServer(t, `flow Handle(r: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "entered") }; flow OnError(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(400, e.kind) }`+serveSuffix)
 	for _, request := range []string{
 		"GET /%FF HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
-		"GET / HTTP/1.1\r\nHost: localhost\r\nX-Invalid: \xff\r\nConnection: close\r\n\r\n",
 	} {
 		conn, err := net.DialTimeout("tcp", p.address, time.Second)
 		if err != nil {

@@ -117,7 +117,7 @@ flow Work() -> Int onError Handle { seed=Tensor.new(List.new(1.0),List.new()); a
 
 func TestTensorFailureStopsCommit(t *testing.T) {
 	b := &observedBoundary{}
-	_, err := evaluate(t, `flow Fail() -> Tensor<FP32>! { a=Tensor.new(List.new(-1.0),List.new()); b=Tensor.sqrt(a); target=File.write(File.Path.new("after"),Bytes.new("wrong")); commit target; return b }; return Fail()`, b)
+	_, err := evaluate(t, `flow Fail() -> Tensor<FP32>! { a=Tensor.new(List.new(-1.0),List.new()); b=Tensor.sqrt(a); target=File.Write.new(File.Path.new("after"),Bytes.new("wrong")); commit target; return b }; return Fail()`, b)
 	var failure execution.Failure
 	if !errors.As(err, &failure) || failure.Value().Kind() != "Numeric.Domain" || b.commits != 0 {
 		t.Fatalf("failure/commit order: error=%v commits=%d", err, b.commits)

@@ -148,7 +148,7 @@ func TestNativeMetalLiveFailurePreventsCommit(t *testing.T) {
 		t.Run(selector, func(t *testing.T) {
 			dir := t.TempDir()
 			path := filepath.Join(dir, "must-not-exist")
-			text := fmt.Sprintf(`flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(1.0),List.new()),Device.new(%q));b=Tensor.to(Tensor.new(List.new(1e-45),List.new()),Device.new(%q));r=Tensor.div(a,b);effect=File.write(File.Path.new(%q),Bytes.new("bad"));commit effect;return Tensor.to(r,Device.new("cpu"))};return Main()`, selector, selector, path)
+			text := fmt.Sprintf(`flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(1.0),List.new()),Device.new(%q));b=Tensor.to(Tensor.new(List.new(1e-45),List.new()),Device.new(%q));r=Tensor.div(a,b);effect=File.Write.new(File.Path.new(%q),Bytes.new("bad"));commit effect;return Tensor.to(r,Device.new("cpu"))};return Main()`, selector, selector, path)
 			source := sourceFile(t, text)
 			compiler := filepath.Join(repository, "bin", "lo-metal")
 			artifact := filepath.Join(t.TempDir(), "program")

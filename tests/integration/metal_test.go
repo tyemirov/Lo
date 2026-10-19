@@ -131,7 +131,7 @@ func TestMetalControlledFailures(t *testing.T) {
 			path := filepath.Join(dir, "output")
 			text := deviceSource("metal:0", "Tensor<FP32>", `Tensor.to(transferred,Device.new("cpu"))`)
 			// A transfer failure must prevent the following effect.
-			text = strings.Replace(text, `return Tensor.to(transferred,Device.new("cpu"))`, fmt.Sprintf(`restored=Tensor.to(transferred,Device.new("cpu"));effect=File.write(File.Path.new(%q),Bytes.new("published"));commit effect;return restored`, path), 1)
+			text = strings.Replace(text, `return Tensor.to(transferred,Device.new("cpu"))`, fmt.Sprintf(`restored=Tensor.to(transferred,Device.new("cpu"));effect=File.Write.new(File.Path.new(%q),Bytes.new("published"));commit effect;return restored`, path), 1)
 			got, receipts := runWithDevices(t, ctx, text, factory, "--allow-device", "metal:0", "--write-root", dir)
 			if got.status != tc.status || !strings.Contains(got.stderr, tc.kind) || got.stdout != "" {
 				t.Fatalf("want %s: %+v", tc.kind, got)

@@ -201,7 +201,7 @@ func TestFileRemovalFailures(t *testing.T) {
 					return errors.Join(boundary.Close(), errors.New("injected directory close failure"))
 				}
 			}
-			program := fmt.Sprintf(`flow Clean() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.remove(entries); commit removal; return 7 }; return Clean()`, root)
+			program := fmt.Sprintf(`flow Clean() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return 7 }; return Clean()`, root)
 			_, err, got := injectedFileProgram(t, ctx, root, program, filesystem)
 			if err == nil {
 				t.Fatal("expected failure")
@@ -244,7 +244,7 @@ func TestFileRemovalRevalidationBoundary(t *testing.T) {
 		}
 		return observed, nil
 	}
-	program := fmt.Sprintf(`flow Clean() -> String! { entries = File.list(File.Path.new(%q)); removal = File.remove(entries); commit removal; return "done" }; return Clean()`, root)
+	program := fmt.Sprintf(`flow Clean() -> String! { entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return "done" }; return Clean()`, root)
 	_, err, _ := injectedFileProgram(t, context.Background(), root, program, filesystem)
 	if err != nil {
 		t.Fatal(err)
@@ -264,11 +264,11 @@ func TestFileRemovalChangedAndRepeated(t *testing.T) {
 		t.Run(fmt.Sprint(repeat), func(t *testing.T) {
 			root := fileFixtureRoot(t)
 			name := fileFixture(t, root, "a", "old")
-			middle := fmt.Sprintf(`change = File.append(File.Path.new(%q),"changed"); commit change;`, name)
+			middle := fmt.Sprintf(`change = File.Append.new(File.Path.new(%q), UTF8.Bytes.new("changed")); commit change;`, name)
 			if repeat {
 				middle = "commit removal;"
 			}
-			program := fmt.Sprintf(`flow Clean() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.remove(entries); %s commit removal; return 0 }; return Clean()`, root, middle)
+			program := fmt.Sprintf(`flow Clean() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); %s commit removal; return 0 }; return Clean()`, root, middle)
 			got := run(t, "run", sourceFile(t, program), "--list-root", root, "--remove-root", root, "--write-root", root, "--format", "json")
 			if got.status != 1 {
 				t.Fatalf("expected stale observation: %+v", got)

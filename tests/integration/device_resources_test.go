@@ -184,7 +184,7 @@ func TestDeviceFailurePreventsCommit(t *testing.T) {
 	text := fmt.Sprintf(`flow Main() -> Int! {
   source=Tensor.new(List.new(1.0),List.new())
   result=Tensor.to(source,Device.new("cuda-sim:0"))
-  effect=File.write(File.Path.new(%q),Bytes.new("published"))
+  effect=File.Write.new(File.Path.new(%q),Bytes.new("published"))
   commit effect
   return 1
 };return Main()`, path)

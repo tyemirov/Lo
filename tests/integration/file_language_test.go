@@ -25,7 +25,7 @@ func TestFileLanguageInspection(t *testing.T) {
 	source := `flow Keep(entry: File.Entry) -> Bool { return String.eq(entry.kind, "regular") }
  flow Main() -> Int! { entries = File.list(File.Path.new("/fixture/logs"))
  selected = List.filter(entries, Keep)
- effect = File.remove(selected)
+ effect = File.Remove.new(selected)
  commit effect
  return List.length(selected) }; return Main()`
 	report, _, _ := inspectSource(t, source)
@@ -40,7 +40,7 @@ func TestFileLanguageInspection(t *testing.T) {
 	if !ok || removal.Target.Kind != "calculated" || removal.Target.Value != "/fixture/logs" {
 		t.Fatalf("removal target: %+v", removal)
 	}
-	preview, _, _ := inspectSource(t, `flow Main() -> Int! { entries = File.list(File.Path.new("/fixture/logs")); pending = File.remove(entries); return List.length(entries) }; return Main()`)
+	preview, _, _ := inspectSource(t, `flow Main() -> Int! { entries = File.list(File.Path.new("/fixture/logs")); pending = File.Remove.new(entries); return List.length(entries) }; return Main()`)
 	for _, capability := range preview.Capabilities {
 		if capability.Operation == "File.remove" {
 			t.Fatal("uncommitted removal requires activation capability")
@@ -52,7 +52,7 @@ func TestFileLanguageNominalAndCheckpointRejections(t *testing.T) {
 	cases := []string{
 		`flow F(entry: File.Entry) -> String { return entry.name }; return F(Record.new(path: File.Path.new("x"), name: "x", kind: "regular", size_bytes: 0, modified_unix_ns: 0, link_count: 1))`,
 		`flow Main() -> Bytes! { entries = File.list(File.Path.new("/fixture")); return Checkpoint.encode(entries) }; return Main()`,
-		`flow Main() -> Bytes! { entries = File.list(File.Path.new("/fixture")); return Checkpoint.encode(File.remove(entries)) }; return Main()`,
+		`flow Main() -> Bytes! { entries = File.list(File.Path.new("/fixture")); return Checkpoint.encode(File.Remove.new(entries)) }; return Main()`,
 		`flow F(entry: File.Entry) -> Bool { return Match.new(entry, entry: true, _: false) }; return 0`,
 	}
 	for _, source := range cases {
@@ -87,12 +87,12 @@ func TestFileLanguageSelectionValidation(t *testing.T) {
 				other := fileFixtureRoot(t)
 				extraRoot = other
 				fileFixture(t, other, "b", "two")
-				selectSource = fmt.Sprintf(`selected = List.flat_map(List.new(File.Path.new(%q),File.Path.new(%q)), Observe)`, root, other)
+				selectSource = fmt.Sprintf(`left = File.list(File.Path.new(%q)); right = File.list(File.Path.new(%q)); selected = List.flat_map(List.new(left, right), Entries)`, root, other)
 			}
 			if scenario != "duplicate" && scenario != "mixed" {
 				selectSource += `; selected = entries`
 			}
-			source := `flow Handle(e: Error) -> String {return e.kind}; flow Duplicate(entry: File.Entry) -> List<File.Entry> {return List.new(entry,entry)}; flow Observe(root: File.Path) -> List<File.Entry>! {return File.list(root)}; flow Check() -> String onError Handle {` + selectSource + `; pending = File.remove(selected); return "accepted"}; return Check()`
+			source := `flow Handle(e: Error) -> String {return e.kind}; flow Duplicate(entry: File.Entry) -> List<File.Entry> {return List.new(entry,entry)}; flow Entries(entries: List<File.Entry>) -> List<File.Entry> { return entries }; flow Check() -> String onError Handle {` + selectSource + `; pending = File.Remove.new(selected); return "accepted"}; return Check()`
 			args := []string{"run", sourceFile(t, source), "--list-root", root, "--format", "json"}
 			if extraRoot != "" {
 				args = append(args, "--list-root", extraRoot)
@@ -104,7 +104,7 @@ func TestFileLanguageSelectionValidation(t *testing.T) {
 			}
 		})
 	}
-	empty := sourceFile(t, `flow Main() -> String! {pending = File.remove(List.new()); commit pending; return "empty"}; return Main()`)
+	empty := sourceFile(t, `flow Main() -> String! {pending = File.Remove.new(List.new()); commit pending; return "empty"}; return Main()`)
 	got := fileOutput(t, run(t, "run", empty, "--format", "json"))
 	valueJSON(t, got, `"empty"`)
 }
@@ -146,7 +146,7 @@ func TestFileLanguageSessionIsolation(t *testing.T) {
 		if _, err := value.NewRemovalEffect(session.FileSession(), observed); err == nil {
 			t.Error("foreign entry accepted by construction")
 		}
-		err := files.Commit(session.Context(), empty)
+		_, err := files.Commit(session.Context(), empty)
 		var file execution.FileError
 		if !errors.As(err, &file) || file.Kind() != "File.InvalidSelection" {
 			t.Errorf("foreign empty removal: %v", err)
@@ -257,7 +257,7 @@ func TestFileLanguageLateFailureProgress(t *testing.T) {
 				if err != nil {
 					return nil, err
 				}
-				if err := files.Commit(session.Context(), effect); err != nil {
+				if _, err := files.Commit(session.Context(), effect); err != nil {
 					return nil, err
 				}
 				if kind == "value" {
@@ -304,7 +304,7 @@ func TestFileLanguageHTTPDisconnectProgress(t *testing.T) {
 		if err != nil {
 			return nil, err
 		}
-		if err := files.Commit(session.Context(), effect); err != nil {
+		if _, err := files.Commit(session.Context(), effect); err != nil {
 			return nil, err
 		}
 		close(removed)
@@ -316,7 +316,7 @@ func TestFileLanguageHTTPDisconnectProgress(t *testing.T) {
 		if err != nil {
 			return nil, err
 		}
-		return nil, session.Boundary().Commit(session.Context(), target)
+		return session.Boundary().Commit(session.Context(), target)
 	}, []execution.Handler{handler})
 	if err != nil {
 		t.Fatal(err)

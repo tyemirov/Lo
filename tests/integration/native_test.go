@@ -376,13 +376,13 @@ func TestNativeTensorBudgetDifferential(t *testing.T) {
 
 func TestNativeEffectBudgetDifferential(t *testing.T) {
 	const prelude = `flow Failed(e: Error) -> Int { return -100 }
-flow Read(label: String) -> Int onError Failed { path=File.Path.new("order"); target=File.append(path,label); commit target; text=UTF8.String.new(File.read(path)); return String.length(text) }
+flow Read(label: String) -> Int onError Failed { path=File.Path.new("order"); target=File.Append.new(path, UTF8.Bytes.new(label)); commit target; text=UTF8.String.new(File.read(path)); return String.length(text) }
 flow Head(path: String) -> Int onError Failed { text=UTF8.String.new(File.read(File.Path.new(path))); return String.length(text) }
 flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),second) }
 `
 	for _, fixture := range []struct{ name, body, output, effects string }{
 		{"named-order", `return Pair(second:Read("b"),first:Read("a"))`, "21\n", "ba"},
-		{"match-heads", `unused=Read("a"); return Match.new(1,Head("order"):7,Head("absent"):8,_:9)`, "7\n", "a"},
+		{"match-heads", `unused=Read("a"); return Match.new(Head("order"),1:Math.add(Head("order"),6),2:Head("absent"),_:9)`, "7\n", "a"},
 		{"unused-binding", `unused=Read("a"); return 7`, "7\n", "a"},
 	} {
 		t.Run(fixture.name, func(t *testing.T) {

@@ -11,6 +11,8 @@ import (
 type builtinExample struct{ name, source, kind string }
 
 func builtinExamples() []builtinExample {
+	executablePath := repository + "/testdata/inert-process/executable"
+	directoryPath := repository + "/testdata/inert-process/directory"
 	examples := []builtinExample{
 		{"Autodiff.grad", `flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.mul(p.x,p.x) }; flow Example() -> Record{value: Tensor<FP32>, gradients: Record{x: Tensor<FP32>}}! { x=Tensor.new(List.new(2.0),List.new()); return Autodiff.grad(Record.new(x:x),Loss) }; return Example()`, "Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}!"},
 		{"Int.new", `return Int.new(123456789012345678901234567890)`, "Int"},
@@ -39,9 +41,18 @@ func builtinExamples() []builtinExample {
 		{"Error.new", `return Error.new("Custom", "message", Record.new())`, "Error"},
 		{"File.Path.new", `return File.Path.new("unread")`, "File.Path"},
 		{"File.Path.eq", `return File.Path.eq(File.Path.new("a"), File.Path.new("a"))`, "Bool"},
+		{"Process.Executable.new", fmt.Sprintf(`return Process.Executable.new(File.Path.new(%q))`, executablePath), "Process.Executable!"},
+		{"Process.Command.new", fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(File.Path.new(%q)); return Process.Command.new(executable,List.new("argument"),Map.new(Record.new(key: "TOKEN",value: "value")),File.Path.new(%q),Bytes.new("stdin")) }; return Main()`, executablePath, directoryPath), "Process.Command!"},
 		{"HTTP.Server.new", `flow H(r: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow E(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; return HTTP.Server.new(8080, H, E)`, "HTTP.Server"},
+		{"HTTP.URL.new", `return HTTP.URL.new("http://127.0.0.1/resource")`, "HTTP.URL!"},
+		{"HTTP.Method.new", `return HTTP.Method.new("GET")`, "HTTP.Method!"},
+		{"HTTP.Client.Request.new", `flow Main() -> HTTP.Client.Request! { method=HTTP.Method.new("GET"); url=HTTP.URL.new("http://127.0.0.1/resource"); headers=HTTP.Headers.new(List.new()); return HTTP.Client.Request.new(method,url,headers,Bytes.new("")) }; return Main()`, "HTTP.Client.Request!"},
+		{"HTTP.Headers.new", `return HTTP.Headers.new(List.new())`, "HTTP.Headers!"},
+		{"HTTP.Headers.values", `flow Main() -> List<Bytes>! { headers = HTTP.Headers.new(List.new()); return HTTP.Headers.values(headers, "absent") }; return Main()`, "List<Bytes>!"},
+		{"HTTP.Response.new", `flow Main() -> HTTP.Response! { headers = HTTP.Headers.new(List.new()); return HTTP.Response.new(200, headers, Bytes.new("ok")) }; return Main()`, "HTTP.Response!"},
 		{"HTTP.Response.Text.new", `return HTTP.Response.Text.new(200, "ok")`, "HTTP.Response"},
 		{"HTTP.Response.Bytes.new", `return HTTP.Response.Bytes.new(200, Bytes.new("ok"))`, "HTTP.Response"},
+		{"UTF8.Bytes.new", `return UTF8.Bytes.new("ok")`, "Bytes"},
 		{"UTF8.String.new", `return UTF8.String.new(Bytes.new("ok"))`, "String!"},
 		{"String.FromScalars.new", `return String.FromScalars.new(List.new(Scalar.new("a")))`, "String"},
 		{"String.concat", `return String.concat("a", "b")`, "String"},
@@ -80,9 +91,9 @@ func builtinExamples() []builtinExample {
 		{"File.read", `return File.read(File.Path.new("missing"))`, "Bytes!"},
 		{"File.list", `return File.list(File.Path.new("fixtures"))`, "List<File.Entry>!"},
 		{"File.open_paths", `return File.open_paths(File.Path.new("fixtures"))`, "List<File.Path>!"},
-		{"File.remove", `flow Empty() -> List<File.Entry> { return List.new() }; return File.remove(Empty())`, "Effect!"},
-		{"File.append", `return File.append(File.Path.new("unwritten"), "data")`, "Effect"},
-		{"File.write", `return File.write(File.Path.new("unwritten"), Bytes.new("data"))`, "Effect"},
+		{"File.Remove.new", `flow Empty() -> List<File.Entry> { return List.new() }; return File.Remove.new(Empty())`, "File.Remove!"},
+		{"File.Append.new", `return File.Append.new(File.Path.new("unwritten"), UTF8.Bytes.new("data"))`, "File.Append"},
+		{"File.Write.new", `return File.Write.new(File.Path.new("unwritten"), Bytes.new("data"))`, "File.Write"},
 	}
 	examples = append(examples, parameterBuiltinExamples()...)
 	examples = append(examples, optimizerBuiltinExamples()...)

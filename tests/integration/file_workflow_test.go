@@ -75,7 +75,7 @@ func TestFileDiscovery(t *testing.T) {
 func TestFileRemoval(t *testing.T) {
 	root := fileFixtureRoot(t)
 	name := fileFixture(t, root, "old.log", "old")
-	construct := sourceFile(t, fmt.Sprintf(`flow Make() -> Effect! { entries = File.list(File.Path.new(%q)); return File.remove(entries) }; return Make()`, root))
+	construct := sourceFile(t, fmt.Sprintf(`flow Make() -> File.Remove! { entries = File.list(File.Path.new(%q)); return File.Remove.new(entries) }; return Make()`, root))
 	checked := run(t, "check", construct, "--format", "json")
 	if checked.status != 0 {
 		t.Fatalf("File removal must type check: %+v", checked)
@@ -84,7 +84,7 @@ func TestFileRemoval(t *testing.T) {
 	if _, err := os.Stat(name); err != nil {
 		t.Fatalf("construction changed file: %v", err)
 	}
-	commit := sourceFile(t, fmt.Sprintf(`flow Remove() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.remove(entries); commit removal; return List.length(entries) }; return Remove()`, root))
+	commit := sourceFile(t, fmt.Sprintf(`flow Remove() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return List.length(entries) }; return Remove()`, root))
 	denied := run(t, "run", commit, "--list-root", root, "--format", "json")
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("remove grant: %+v", denied)

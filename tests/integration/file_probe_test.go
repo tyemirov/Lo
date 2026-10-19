@@ -146,7 +146,7 @@ func TestFileRemovalHardlinks(t *testing.T) {
 	if err := os.Link(first, sibling); err != nil {
 		t.Fatal(err)
 	}
-	path := sourceFile(t, fmt.Sprintf(`flow Main() -> Int! {entries = File.list(File.Path.new(%q)); removal = File.remove(entries); commit removal; return List.length(entries)}; return Main()`, root))
+	path := sourceFile(t, fmt.Sprintf(`flow Main() -> Int! {entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return List.length(entries)}; return Main()`, root))
 	valueJSON(t, fileOutput(t, run(t, "run", path, "--list-root", root, "--remove-root", root, "--format", "json")), `"2"`)
 	remaining, err := os.ReadDir(root)
 	if err != nil || len(remaining) != 0 {

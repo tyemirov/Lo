@@ -150,7 +150,7 @@ func TestAutodiffLossValidation(t *testing.T) {
 func TestAutodiffTransitiveRejections(t *testing.T) {
 	for _, helper := range []string{
 		`flow Helper(x: Tensor<FP32>) -> Tensor<FP32>! { data=File.read(File.Path.new("never")); return x }`,
-		`flow Helper(x: Tensor<FP32>) -> Tensor<FP32>! { effect=File.write(File.Path.new("never"),Bytes.new("bad")); commit effect; return x }`,
+		`flow Helper(x: Tensor<FP32>) -> Tensor<FP32>! { effect=File.Write.new(File.Path.new("never"),Bytes.new("bad")); commit effect; return x }`,
 		`flow Item(x: Int) -> Int { return x }; flow Helper(x: Tensor<FP32>) -> Tensor<FP32> { ignored=List.map(List.new(1),Item); return x }`,
 		`flow Inner(p: Record{x: Tensor<FP32>}) -> Tensor<FP32> { return p.x }; flow Helper(x: Tensor<FP32>) -> Tensor<FP32>! { r=Autodiff.grad(Record.new(x:x),Inner); return r.value }`,
 		`flow Handle(e: Error) -> Int { return 0 }; flow Helper(x: Tensor<FP32>) -> Int onError Handle { root=Tensor.sqrt(x); return 0 }`,
@@ -168,7 +168,7 @@ func TestAutodiffFailureStopsCommitAndCanBeHandled(t *testing.T) {
 flow Handle(e: Error) -> String { return e.kind }
 flow Work() -> String onError Handle {
  x=Tensor.new(List.new(0.0),List.new()); r=Autodiff.grad(Record.new(x:x),Loss)
- effect=File.write(File.Path.new("after"),Bytes.new("bad")); commit effect
+ effect=File.Write.new(File.Path.new("after"),Bytes.new("bad")); commit effect
  return "unexpected"
 }; return Work()`
 	boundary := &observedBoundary{}

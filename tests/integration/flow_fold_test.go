@@ -26,7 +26,7 @@ func TestFlowFold(t *testing.T) {
 		root := fileFixtureRoot(t)
 		output := filepath.Join(root, "order")
 		source := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: String) -> Int! {
-			target = File.append(path, item); commit target; return Math.add(state, 1)
+			target = File.Append.new(path, UTF8.Bytes.new(item)); commit target; return Math.add(state, 1)
 		}; flow Run() -> Int! { return Flow.fold(List.new("a", "b", "c"), 0, File.Path.new(%q), Step) }; return Run()`, output)
 		v := fileOutput(t, run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json"))
 		valueJSON(t, v, `"3"`)
@@ -41,14 +41,14 @@ func TestFlowFold(t *testing.T) {
 		valueJSON(t, v, `"7"`)
 	})
 	t.Run("list-remains-pure", func(t *testing.T) {
-		source := `flow Step(state: Int, item: Int) -> Int! { target = File.append(File.Path.new("unused"), "x"); commit target; return state }; flow Run() -> Int! { return List.fold(List.new(1), 0, Step) }; return Run()`
+		source := `flow Step(state: Int, item: Int) -> Int! { target = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit target; return state }; flow Run() -> Int! { return List.fold(List.new(1), 0, Step) }; return Run()`
 		got := run(t, "check", sourceFile(t, source), "--format", "json")
 		if got.status != 1 || diagnostics(t, got.stderr).Diagnostics[0].Code != "check.effectful-callback" {
 			t.Fatalf("List callback purity: %+v", got)
 		}
 	})
 	t.Run("total-rejects-activation", func(t *testing.T) {
-		source := `flow Step(state: Int, item: Int) -> Int! { target = File.append(File.Path.new("unused"), "x"); commit target; return state }; flow Run() -> Int { return Flow.fold(List.new(1), 0, Step) }; return Run()`
+		source := `flow Step(state: Int, item: Int) -> Int! { target = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit target; return state }; flow Run() -> Int { return Flow.fold(List.new(1), 0, Step) }; return Run()`
 		got := run(t, "check", sourceFile(t, source), "--format", "json")
 		if got.status != 1 {
 			t.Fatalf("total effectful flow accepted: %+v", got)
@@ -57,7 +57,7 @@ func TestFlowFold(t *testing.T) {
 	t.Run("inspection", func(t *testing.T) {
 		root := fileFixtureRoot(t)
 		output := filepath.Join(root, "untouched")
-		source := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: String) -> Int! { target = File.append(path, item); commit target; return Math.add(state, 1) }; flow Run() -> Int! { return Flow.fold(List.new("a"), 0, File.Path.new(%q), Step) }; return Run()`, output)
+		source := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: String) -> Int! { target = File.Append.new(path, UTF8.Bytes.new(item)); commit target; return Math.add(state, 1) }; flow Run() -> Int! { return Flow.fold(List.new("a"), 0, File.Path.new(%q), Step) }; return Run()`, output)
 		got := run(t, "inspect", sourceFile(t, source), "--format", "json")
 		if got.status != 0 || !strings.Contains(got.stdout, `"commits":true`) || !strings.Contains(got.stdout, `File.append`) {
 			t.Fatalf("fold activation inspection: %+v", got)
@@ -74,7 +74,7 @@ func TestFlowFold(t *testing.T) {
 		root := fileFixtureRoot(t)
 		output := filepath.Join(root, "attempts")
 		program := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: Int) -> Int! {
-			target = File.append(path, "x"); commit target; return Math.add(state, Math.div(10, item))
+			target = File.Append.new(path, UTF8.Bytes.new("x")); commit target; return Math.add(state, Math.div(10, item))
 		}; flow Run() -> Int! { return Flow.fold(List.new(2, 0, 5), 0, File.Path.new(%q), Step) }; return Run()`, output)
 		got := run(t, "run", sourceFile(t, program), "--write-root", root, "--format", "json")
 		if got.status != 1 || !strings.Contains(got.stderr, "Math.DivideByZero") || !strings.Contains(got.stderr, `"value":"Flow.fold"`) {
@@ -105,7 +105,7 @@ func TestFlowFoldNestedCancellationProgress(t *testing.T) {
 		return nil
 	}
 	program := fmt.Sprintf(`flow Step(state: Int, entry: File.Entry) -> Int! {
-		target = File.remove(List.new(entry)); commit target; return Math.add(state, 1)
+		target = File.Remove.new(List.new(entry)); commit target; return Math.add(state, 1)
 	}; flow Outer(entries: List<File.Entry>, state: Int, item: Int) -> Int! {
 		return Flow.fold(entries, state, Step)
 	}; flow Clean() -> Int! {
@@ -151,7 +151,7 @@ func TestFlowFoldCleanupFailureProgress(t *testing.T) {
 		return errors.Join(directory.Close(), errors.New("injected fold cleanup failure"))
 	}
 	program := fmt.Sprintf(`flow Step(state: Int, entry: File.Entry) -> Int! {
-		target = File.remove(List.new(entry)); commit target; return Math.add(state, 1)
+		target = File.Remove.new(List.new(entry)); commit target; return Math.add(state, 1)
 	}; flow Clean() -> Int! { entries = File.list(File.Path.new(%q)); return Flow.fold(entries, 0, Step) }; return Clean()`, root)
 	_, err, got := injectedFileProgram(t, context.Background(), root, program, filesystem)
 	if err == nil || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.host-failure" {
@@ -187,7 +187,7 @@ func TestFlowFoldStepLimitProgress(t *testing.T) {
 	}; flow Delay(entry: File.Entry) -> Int {
 		return Match.new(entry.name, "c": List.length(List.unfold(0, 1000, Counter)), _: 0)
 	}; flow Step(state: Int, entry: File.Entry) -> Int! {
-		target = File.remove(List.new(entry)); commit target; delay = Delay(entry); return Math.add(state, Math.add(delay, 1))
+		target = File.Remove.new(List.new(entry)); commit target; delay = Delay(entry); return Math.add(state, Math.add(delay, 1))
 	}; flow Outer(entries: List<File.Entry>, state: Int, item: Int) -> Int! {
 		return Flow.fold(entries, state, Step)
 	}; flow Clean() -> Int! {
@@ -258,7 +258,7 @@ func TestFlowFoldGrantCloseProgress(t *testing.T) {
 				t.Fatal(err)
 			}
 			text := fmt.Sprintf(`flow Step(state: Int, entry: File.Entry) -> Int! {
-				target = File.remove(List.new(entry)); commit target; return Math.add(state, 1)
+				target = File.Remove.new(List.new(entry)); commit target; return Math.add(state, 1)
 			}; flow Clean() -> Int! { entries = File.list(File.Path.new(%q)); return Flow.fold(entries, 0, Step) }; return Clean()`, root)
 			fixture, err := source.New("grant-close.lo", text)
 			if err != nil {
