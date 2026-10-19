@@ -2,8 +2,8 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
     success_log = File.Path.new(String.new("/logs/success.log"))
     error_log = File.Path.new(String.new("/logs/error.log"))
     target_effect = Match.new(status_code,
-        Int.new(200): File.append(success_log, request_data),
-        _: File.append(error_log, request_data)
+        Int.new(200): File.Append.new(success_log, UTF8.Bytes.new(request_data)),
+        _: File.Append.new(error_log, UTF8.Bytes.new(request_data))
     )
     commit target_effect
     return HTTP.Response.Text.new(
