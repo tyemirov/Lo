@@ -42,6 +42,8 @@ func builtinExamples() []builtinExample {
 		{"File.Path.new", `return File.Path.new("unread")`, "File.Path"},
 		{"File.Path.eq", `return File.Path.eq(File.Path.new("a"), File.Path.new("a"))`, "Bool"},
 		{"Process.Executable.new", fmt.Sprintf(`return Process.Executable.new(File.Path.new(%q))`, executablePath), "Process.Executable!"},
+		{"Process.Termination.exit_code", `flow Read(value: Process.Termination) -> Int! { return Process.Termination.exit_code(value) }; return 0`, "Int"},
+		{"Process.Termination.signal", `flow Read(value: Process.Termination) -> Int! { return Process.Termination.signal(value) }; return 0`, "Int"},
 		{"Process.Command.new", fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(File.Path.new(%q)); return Process.Command.new(executable,List.new("argument"),Map.new(Record.new(key: "TOKEN",value: "value")),File.Path.new(%q),Bytes.new("stdin")) }; return Main()`, executablePath, directoryPath), "Process.Command!"},
 		{"HTTP.Server.new", `flow H(r: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow E(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; return HTTP.Server.new(8080, H, E)`, "HTTP.Server"},
 		{"HTTP.URL.new", `return HTTP.URL.new("http://127.0.0.1/resource")`, "HTTP.URL!"},

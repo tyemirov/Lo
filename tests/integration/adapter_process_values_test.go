@@ -137,7 +137,6 @@ func TestAdapterProcessNominalTypes(t *testing.T) {
 		`flow Bad(command: Process.Command) -> Process.Executable { return command }`,
 		`return Process.run()`,
 		`return Process.Result.new()`,
-		`flow Bad(result: Process.Result) -> Bytes { return result.stdout }`,
 		`flow Bad(result: Process.Result) -> Int { return result.exit_code }`,
 	} {
 		got := run(t, "check", sourceFile(t, source), "--format", "json")

@@ -15,10 +15,12 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	directoryPath := repository + "/testdata/inert-process/directory"
 	executableJSON := fmt.Sprintf(`{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":%q}}}`, executablePath)
 	want := map[string]string{
-		catalog.ProcessExecutableNew: executableJSON,
-		catalog.ProcessCommandNew:    fmt.Sprintf(`{"type":"Process.Command","value":{"executable":%s,"arguments":{"type":"List<String>","value":[{"type":"String","value":"argument"}]},"environment":{"type":"Map<String, String>","value":[{"key":{"type":"String","value":"TOKEN"},"value":{"type":"String","value":"value"}}]},"directory":{"type":"File.Path","value":%q},"stdin":{"type":"Bytes","value":"c3RkaW4="}}}`, executableJSON, directoryPath),
-		catalog.AutodiffGrad:         `{"type":"Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}","value":{"gradients":{"type":"Record{x: Tensor<FP32>}","value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}},"value":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}}`,
-		catalog.FloatAdd:             `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
+		catalog.ProcessExecutableNew:       executableJSON,
+		catalog.ProcessTerminationExitCode: `"0"`,
+		catalog.ProcessTerminationSignal:   `"0"`,
+		catalog.ProcessCommandNew:          fmt.Sprintf(`{"type":"Process.Command","value":{"executable":%s,"arguments":{"type":"List<String>","value":[{"type":"String","value":"argument"}]},"environment":{"type":"Map<String, String>","value":[{"key":{"type":"String","value":"TOKEN"},"value":{"type":"String","value":"value"}}]},"directory":{"type":"File.Path","value":%q},"stdin":{"type":"Bytes","value":"c3RkaW4="}}}`, executableJSON, directoryPath),
+		catalog.AutodiffGrad:               `{"type":"Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}","value":{"gradients":{"type":"Record{x: Tensor<FP32>}","value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}},"value":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}}`,
+		catalog.FloatAdd:                   `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
 		catalog.FloatMul: `{"type":"Float","value":"2.5"}`, catalog.FloatDiv: `{"type":"Float","value":"1.5"}`,
 		catalog.FloatSqrt: `{"type":"Float","value":"1.5"}`, catalog.IntToFloat: `{"type":"Float","value":"7"}`,
 		catalog.FloatEqual: `true`, catalog.FloatLT: `true`, catalog.FloatLTE: `true`, catalog.FloatGT: `false`, catalog.FloatGTE: `true`,
