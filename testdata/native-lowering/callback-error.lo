@@ -1,0 +1,10 @@
+flow Divide(item: Int) -> Int! {
+    return Math.div(8, item)
+}
+flow Recover(error: Error) -> Int {
+    return 23
+}
+flow Attempt() -> Int onError Recover {
+    return List.length(List.map(List.new(2, 0, 4), Divide))
+}
+return Attempt()

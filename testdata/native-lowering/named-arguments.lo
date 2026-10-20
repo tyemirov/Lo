@@ -1,0 +1,4 @@
+flow Difference(left: Int, right: Int) -> Int {
+    return Math.sub(left, right)
+}
+return Difference(right: Math.mul(2, 3), left: Math.add(10, 1))

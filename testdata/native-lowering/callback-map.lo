@@ -1,0 +1,4 @@
+flow Double(item: Int) -> Int {
+    return Math.mul(item, 2)
+}
+return List.map(List.new(1, 2), Double)

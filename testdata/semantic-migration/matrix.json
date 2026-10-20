@@ -2683,6 +2683,19 @@
       ],
       "oracle": "run_or_serve_without_source",
       "boundary": "native_cli"
+    },
+    {
+      "id": "--emit",
+      "tests": [
+        "TestLLVMLoweringBuild",
+        "TestLLVMLoweringInvocation",
+        "TestLLVMLoweringPreservesOutput",
+        "TestLLVMLoweringRejectsUnsupportedGraph",
+        "TestLLVMLoweringCancellation",
+        "TestLLVMLoweringSourceAliases"
+      ],
+      "oracle": "llvm_module_abi_source_maps_without_tool_lookup;invalid_mode_rejected;failed_build_preserves_existing_output",
+      "boundary": "compiler_cli"
     }
   ],
   "semantics": [

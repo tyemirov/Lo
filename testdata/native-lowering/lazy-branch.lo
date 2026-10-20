@@ -1,0 +1,4 @@
+flow Later(item: Int) -> Bool {
+    return Math.eq(item, 1)
+}
+return Match.new(1, 1: 7, Math.add(2, 3): 8, when Later: 9, _: 10)

@@ -1,0 +1,4 @@
+flow Add(total: Int, item: Int) -> Int {
+    return Math.add(total, item)
+}
+return Flow.fold(List.new(1, 2), 0, Add)
