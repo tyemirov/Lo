@@ -2690,11 +2690,27 @@
         "TestLLVMLoweringBuild",
         "TestLLVMLoweringInvocation",
         "TestLLVMLoweringPreservesOutput",
-        "TestLLVMLoweringRejectsUnsupportedGraph",
+        "TestLLVMLoweringDerivativePlan",
         "TestLLVMLoweringCancellation",
         "TestLLVMLoweringSourceAliases"
       ],
       "oracle": "llvm_module_abi_source_maps_without_tool_lookup;invalid_mode_rejected;failed_build_preserves_existing_output",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--codegen",
+      "tests": [
+        "TestLLVMRuntimeRequiresToolchain"
+      ],
+      "oracle": "explicit_llvm_selection;missing_distribution_is_build_toolchain_error;no_output_publication",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--toolchain",
+      "tests": [
+        "TestLLVMRuntimeRequiresToolchain"
+      ],
+      "oracle": "explicit_manifest_path;missing_distribution_is_build_toolchain_error;no_output_publication",
       "boundary": "compiler_cli"
     }
   ],
