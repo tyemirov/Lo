@@ -1,0 +1,10 @@
+--- !tapi-tbd
+tbd-version: 4
+targets: [ arm64-macos ]
+install-name: /usr/lib/libSystem.B.dylib
+current-version: 1
+compatibility-version: 1
+exports:
+  - targets: [ arm64-macos ]
+    symbols: [ ___stack_chk_fail, ___stack_chk_guard, _abort, _printf, _strlen, _memcmp, _memcpy, _memset, dyld_stub_binder ]
+...
