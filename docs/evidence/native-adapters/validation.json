@@ -1,0 +1,171 @@
+{
+  "issue": "I009",
+  "date": "2026-10-20",
+  "status": "passed",
+  "backend": "LLVM 21.1.8 + LLD 21.1.8 + precompiled Rust 1.85.1 runtime",
+  "abi": "lo-native-1",
+  "targets": [
+    "darwin/arm64",
+    "linux/arm64"
+  ],
+  "execution_environments": {
+    "darwin": "Darwin arm64 host",
+    "linux": "QEMU 11.1.2 with Linux 6.12.110 and glibc 2.36"
+  },
+  "latest_runtime_receipt": "candidate-five-build-receipt.json",
+  "latest_toolchain": "candidate-five-toolchain.json",
+  "source_identity": "source-identity.json",
+  "independent_review": "review.json",
+  "log_hashes": "logs.json",
+  "validation": {
+    "file_full": {
+      "generation": 4,
+      "tests": 66,
+      "subcases": 95,
+      "seconds": 166.059,
+      "log": "files-candidate-four-final.log.gz"
+    },
+    "http_full": {
+      "generation": 4,
+      "tests": 59,
+      "subcases": 46,
+      "seconds": 271.185,
+      "log": "http-candidate-four-final.log.gz"
+    },
+    "file_process_final": {
+      "generation": 5,
+      "tests": 25,
+      "subcases": 73,
+      "seconds": 87.692,
+      "log": "candidate-five-files-process.log.gz"
+    },
+    "http_final": {
+      "generation": 5,
+      "tests": 8,
+      "subcases": 13,
+      "seconds": 48.635,
+      "log": "http-candidate-five-final.log.gz"
+    },
+    "core_and_training": {
+      "generation": 4,
+      "tests": 19,
+      "subcases": 43,
+      "seconds": 216.207,
+      "log": "candidate-four-regression.log.gz"
+    },
+    "runtime_build_tools": {
+      "tests": 11,
+      "seconds": 7.73,
+      "log": "native-runtime-tools-final.log.gz"
+    }
+  },
+  "native_contracts": {
+    "files": [
+      "opened-root confinement and replacement rejection",
+      "ordered selection and removal",
+      "foreign observation rejection",
+      "FIFO cancellation with admission witness on both targets",
+      "prevention of later commits after cancellation",
+      "probe identity and cancellation during executable hashing",
+      "cleanup, disconnect handling, exact Unicode diagnostics"
+    ],
+    "process": [
+      "Darwin confined execution with explicit external or embedded launcher",
+      "standalone execution with empty PATH and original artifact absent",
+      "undeclared descriptor closure",
+      "eight controlled ownership scenarios on each target",
+      "no retry against reused descriptor or unwitnessed PID",
+      "configuration diagnostics and safe JSON/text progress",
+      "cancellation during admission hashing",
+      "direct and hardlink executable protection",
+      "current Linux unavailable result"
+    ],
+    "http": [
+      "authorized methods, origins, addresses and no redirect following",
+      "request isolation and startup self-request",
+      "one invocation of error callback",
+      "persistent connections and pipelined requests",
+      "shared body/callback deadline",
+      "HTTP framing, response trailers, MIME/date behavior",
+      "bounded DNS workers and retained shutdown ownership",
+      "checked socket cleanup",
+      "1000 requests per target with exact resource counters"
+    ]
+  },
+  "numerical_regression": {
+    "analytical_finite_difference_fixtures": 13,
+    "analytical_generation": 3,
+    "analytical_log": "candidate-three-regression.log.gz",
+    "training_updates": 200,
+    "xor_updates": 500,
+    "training_targets": [
+      "darwin/arm64",
+      "linux/arm64"
+    ],
+    "xor_loss": 4.251353501e-13,
+    "checkpoint_resume": "CPU resumed state matches uninterrupted state exactly; Linux checks use eight fresh guest processes",
+    "applicability": "Subsequent changes affect adapter behavior and diagnostics; numerical implementations are unchanged."
+  },
+  "tls": {
+    "dependencies": "Pinned Cargo.lock and vendored Rustls/ring sources",
+    "darwin": "SecTrust system verification, URL hostname checks, and unchanged platform intermediate-retrieval policy. Local tests reject the fixture CA and ignore SSL_CERT_FILE/SSL_CERT_DIR as the Go oracle does.",
+    "linux": "Local guest fixture verifies a trusted chain and rejects wrong-name and unknown-CA chains.",
+    "external_provider_connectivity": "not exercised"
+  },
+  "resolved_validation_failures": [
+    {
+      "log": "candidate-three-regression.log.gz",
+      "cause": "The aggregate test package reached its 10-minute limit. All 13 derivative fixtures completed successfully. A separate FIFO test also signaled before CLI initialization.",
+      "resolution": "The remaining regression group completed with an appropriate package budget. The FIFO check now signals only after a real no-reader open witness."
+    },
+    {
+      "log": "process-candidate-four-final.log.gz",
+      "cause": "Protected file mutation diagnostics omitted operation context.",
+      "resolution": "Candidate5 exact public comparison succeeds for direct paths and hardlinks."
+    },
+    {
+      "log": "http-tokens-trailer-red.log.gz",
+      "cause": "Request Connection token lists and declared response trailers differed from the Go oracle.",
+      "resolution": "Candidate5 socket comparison succeeds."
+    },
+    {
+      "log": "make-ci-link-fixture-red.log.gz",
+      "cause": "A generation diagnostic test manifest omitted the new Darwin Security and CoreFoundation inputs.",
+      "resolution": "The explicit fixture input set is current; focused generation tests succeed."
+    }
+  ],
+  "scope_limits": [
+    "The default executable compiler still generates Go source until I011.",
+    "The installed offline compiler acceptance criterion remains F017 and I011.",
+    "The development compiler host is Darwin arm64; Linux-host compiler packaging remains F017.",
+    "Process execution remains Darwin-only under the current platform contract.",
+    "Metal and device execution remain I010.",
+    "Linux runtime execution uses QEMU software emulation.",
+    "Go evaluator dependency injection proves only that evaluator boundary; native ABI and public artifact tests provide separate LLVM evidence.",
+    "External provider connectivity and Darwin external certificate-chain retrieval were not exercised."
+  ],
+  "pending": [],
+  "repository_ci": {
+    "command": "make ci TEST_ARGS='-timeout=30m -v' </dev/null",
+    "exit_code": 0,
+    "native_integration_seconds": 643.189,
+    "semantic_report_tests": 16,
+    "log": "make-ci.log.gz",
+    "includes": [
+      "runtime bundle verification",
+      "Go formatting and vet",
+      "all Go packages and integration tests",
+      "Go-generated executable integration lane",
+      "compiler build",
+      "semantic report regression tests"
+    ]
+  },
+  "documentation_language": "language-review.json",
+  "stable_distribution_matches_final_candidate": true,
+  "cleanup": {
+    "task_directory_removed": true,
+    "temporary_plan_removed": true,
+    "shared_preparation_preserved": "_scratch/native-runtime",
+    "shared_build_state_preserved": "_scratch/build-state"
+  }
+}

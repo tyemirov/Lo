@@ -7,7 +7,7 @@ The default executable build still generates Go source with Go 1.27.1.
 LLVM module emission does not change the language specification.
 The [semantic migration contract](semantic-migration.md) records current coverage and its evidence requirements.
 
-I004, I005, P005, I006, I007, and I008 passed their acceptance checks.
+I004, I005, P005, I006, I007, I008, and I009 completed their acceptance checks.
 I006 implements the [native lowering boundary](native-lowering.md) with LLVM modules for both targets.
 I007 supplies core runtime values and execution under the selected ABI.
 Core LLVM checks passed on Darwin arm64 and Linux arm64 in QEMU.
@@ -22,7 +22,18 @@ Resource lifetime, metadata admission, work charges, cancellation, and exact che
 All 13 analytical derivative and finite-difference fixtures passed through LLVM on Darwin.
 Linux checkpoint tests passed across eight separate guest processes.
 Independent review found no remaining material defect.
-The confined file operations required by these workflows precede full I009 acceptance.
+I009 implements native file, process, and HTTP execution.
+The [adapter guide](native-adapters.md) describes capability grants, confinement, resource ownership, and verification.
+Darwin arm64 supplies the current qualified process host.
+Linux arm64 keeps the current process-unavailable result.
+The embedded process launcher lets artifacts execute without a Lo installation.
+HTTP services use different request contexts and keep worker ownership until cleanup completes.
+The adapter checks include native failure injection and loopback traffic on both targets.
+I009 validation completed successfully on October 20, 2026.
+Each target completed 1,000 HTTP requests with complete request cleanup.
+Backpropagation, training, XOR, and checkpoint regression checks completed successfully.
+Final CI completed successfully.
+The [adapter receipt](evidence/native-adapters/validation.json) records the results and qualification limits.
 The [runtime development guide](native-runtime.md) gives the explicit LLVM build and verification commands.
 The [runtime receipt](evidence/native-runtime/validation.json) records source identities and validation results.
 The installed standalone compiler criterion is still open under F017 and I011.
