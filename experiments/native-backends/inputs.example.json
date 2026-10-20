@@ -1,0 +1,94 @@
+{
+  "isolation": {
+    "kind": "sandbox-exec",
+    "bundle": {
+      "path": "inputs/native-backends/isolation",
+      "sha256": "<pinned SHA-256>"
+    },
+    "tool": {
+      "path": "inputs/native-backends/isolation/bin/sandbox-exec",
+      "sha256": "<pinned SHA-256>",
+      "version": "<exact version>"
+    },
+    "probe": {
+      "path": "inputs/native-backends/isolation/bin/isolation-probe",
+      "sha256": "<pinned SHA-256>",
+      "version": "<exact version>",
+      "contract": "readonly-sentinel,state-directory"
+    }
+  },
+  "targets": {
+    "aarch64-apple-darwin": {
+      "bundle": {
+        "path": "inputs/native-backends/aarch64-apple-darwin/toolchain",
+        "sha256": "<pinned SHA-256>"
+      },
+      "sysroot": {
+        "path": "inputs/native-backends/aarch64-apple-darwin/sysroot",
+        "sha256": "<pinned SHA-256>"
+      },
+      "llvm": {
+        "path": "inputs/native-backends/aarch64-apple-darwin/toolchain/bin/llc",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "cranelift": {
+        "path": "inputs/native-backends/aarch64-apple-darwin/toolchain/bin/lo-native-probe",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "cc": {
+        "path": "inputs/native-backends/aarch64-apple-darwin/toolchain/bin/clang",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "linker": {
+        "path": "inputs/native-backends/aarch64-apple-darwin/toolchain/bin/ld64.lld",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "runner": {
+        "path": "inputs/native-backends/aarch64-apple-darwin/toolchain/bin/software-runner",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>",
+        "contract": "executable,sysroot"
+      }
+    },
+    "aarch64-unknown-linux-gnu": {
+      "bundle": {
+        "path": "inputs/native-backends/aarch64-unknown-linux-gnu/toolchain",
+        "sha256": "<pinned SHA-256>"
+      },
+      "sysroot": {
+        "path": "inputs/native-backends/aarch64-unknown-linux-gnu/sysroot",
+        "sha256": "<pinned SHA-256>"
+      },
+      "llvm": {
+        "path": "inputs/native-backends/aarch64-unknown-linux-gnu/toolchain/bin/llc",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "cranelift": {
+        "path": "inputs/native-backends/aarch64-unknown-linux-gnu/toolchain/bin/lo-native-probe",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "cc": {
+        "path": "inputs/native-backends/aarch64-unknown-linux-gnu/toolchain/bin/clang",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "linker": {
+        "path": "inputs/native-backends/aarch64-unknown-linux-gnu/toolchain/bin/ld.lld",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>"
+      },
+      "runner": {
+        "path": "inputs/native-backends/aarch64-unknown-linux-gnu/toolchain/bin/software-runner",
+        "sha256": "<pinned SHA-256>",
+        "version": "<exact version>",
+        "contract": "executable,sysroot"
+      }
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "decision": "P005",
+  "status": "selected design; distribution qualification remains F017/I011",
+  "backend": "LLVM21.1.8",
+  "linker": "LLD21.1.8",
+  "runtime_preparation": "Rust1.85.1 panic=abort",
+  "host_tools": {
+    "aarch64-apple-darwin": {
+      "archive": "llvm.tar.xz",
+      "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+      "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+      "bytes": 1503047352
+    },
+    "aarch64-unknown-linux-gnu": {
+      "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-Linux-ARM64.tar.xz",
+      "sha256": "65ce0b329514e5643407db2d02a5bd34bf33d159055dafa82825c8385bd01993",
+      "bytes": 1873847788
+    }
+  },
+  "minimum_environments": {
+    "aarch64-apple-darwin": {
+      "macos": "27.0.1",
+      "kernel": "Darwin27.0.0",
+      "link_deployment_target": "27.0",
+      "scope": "replacement distribution only"
+    },
+    "aarch64-unknown-linux-gnu": {
+      "kernel": "Linux6.12.110",
+      "libc": "glibc2.36",
+      "dynamic_loader": "/lib/ld-linux-aarch64.so.1"
+    }
+  },
+  "host_target_matrix": [
+    {
+      "host": "aarch64-apple-darwin",
+      "target": "aarch64-apple-darwin",
+      "software": true,
+      "metal": true,
+      "toolchain_probe_executed": true
+    },
+    {
+      "host": "aarch64-apple-darwin",
+      "target": "aarch64-unknown-linux-gnu",
+      "software": true,
+      "metal": false,
+      "toolchain_probe_executed": true
+    },
+    {
+      "host": "aarch64-unknown-linux-gnu",
+      "target": "aarch64-apple-darwin",
+      "software": true,
+      "metal": false,
+      "toolchain_probe_executed": false
+    },
+    {
+      "host": "aarch64-unknown-linux-gnu",
+      "target": "aarch64-unknown-linux-gnu",
+      "software": true,
+      "metal": false,
+      "toolchain_probe_executed": false
+    }
+  ],
+  "darwin_system_libraries": [
+    "/usr/lib/libSystem.B.dylib",
+    "/usr/lib/libc++.1.dylib",
+    "/usr/lib/libz.1.dylib",
+    "/usr/lib/libxml2.2.dylib"
+  ],
+  "darwin_application_libraries": [
+    "/usr/lib/libSystem.B.dylib"
+  ],
+  "darwin_metal_libraries": [
+    "/usr/lib/libobjc.A.dylib",
+    "/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation",
+    "/System/Library/Frameworks/Metal.framework/Versions/A/Metal"
+  ],
+  "linux_host_dependencies": "docs/evidence/native-runtime-abi/linux-host-dependencies.json",
+  "linux_target_inputs": {
+    "glibc": "2.36-9+deb12u14",
+    "gcc_support": "12.2.0-14+deb12u1",
+    "startup_objects": [
+      "Scrt1.o",
+      "crti.o",
+      "crtn.o"
+    ],
+    "libraries": [
+      "libc.so.6",
+      "libm.so.6",
+      "libgcc_s.so.1",
+      "ld-linux-aarch64.so.1"
+    ]
+  },
+  "authored_darwin_inputs": [
+    {
+      "path": "experiments/native-runtime-abi/Foundation.tbd",
+      "sha256": "35e29a7cbd59f2458e6c555476c53c581ef940b7f4a8382426392448aed83a80",
+      "origin": "Lo-authored required ABI symbol declarations; no SDK text copied",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "experiments/native-runtime-abi/Metal.tbd",
+      "sha256": "a273a813527a75771929ae6a9b3a88908e780ca35d4d1145a4bbcf90a787a730",
+      "origin": "Lo-authored required ABI symbol declarations; no SDK text copied",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "experiments/native-runtime-abi/libSystem.tbd",
+      "sha256": "f87e80011529904a3a79fc96185ffbf3aff7b89efa68008e39495d0c8d834bc3",
+      "origin": "Lo-authored required ABI symbol declarations; no SDK text copied",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "experiments/native-runtime-abi/libobjc.tbd",
+      "sha256": "9b0e67e99410f0d5108d7f956949bb7085b2d72cd8082c408bc6e5f8390eb01c",
+      "origin": "Lo-authored required ABI symbol declarations; no SDK text copied",
+      "license": "Apache-2.0"
+    }
+  ],
+  "preparation_only": [
+    "Rust and Cargo1.85.1",
+    "Apple clang21.0.0 and SDK27.0 for experiment helpers",
+    "locked Cranelift0.116.1 dependencies"
+  ],
+  "validation_only": [
+    "QEMU11.1.2 and its declared dylib closure",
+    "Linux6.12.110 guest kernel",
+    "isolation guard",
+    "software runner",
+    "archive helper"
+  ],
+  "license_inventories": [
+    "experiments/native-backends/notices/inventory.json",
+    "experiments/native-backends/notices/crates/inventory.json",
+    "docs/evidence/native-runtime-abi/linux-host-dependencies.json"
+  ],
+  "qualified_artifacts": [
+    "experiments/native-backends/qualification-20261019.json",
+    "docs/evidence/native-runtime-abi/experiment.json"
+  ],
+  "distribution_inputs_not_yet_implemented": [
+    "full Lo runtime archives",
+    "generated Lo objects",
+    "complete Metal adapter archive and embedded kernels",
+    "relocatable host library package",
+    "installed compiler manifest"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+    "-f",
+    "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+    "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/path-diagnostic"
+  ],
+  "exit_code": 0,
+  "stdout": "proc_pidpath: 78 errno:0 path:/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/path-diagnostic\nrealpath: null errno:1\n",
+  "stderr": "",
+  "seconds": 0.102005
+}

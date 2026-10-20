@@ -1,0 +1,68 @@
+--- !tapi-tbd
+tbd-version: 4
+targets: [ arm64-macos ]
+install-name: /usr/lib/libSystem.B.dylib
+current-version: 1
+compatibility-version: 1
+exports:
+  - targets: [ arm64-macos ]
+    symbols:
+      - __Unwind_Backtrace
+      - __Unwind_GetDataRelBase
+      - __Unwind_GetIP
+      - __Unwind_GetIPInfo
+      - __Unwind_GetLanguageSpecificData
+      - __Unwind_GetRegionStart
+      - __Unwind_GetTextRelBase
+      - __Unwind_Resume
+      - __Unwind_SetGR
+      - __Unwind_SetIP
+      - ___error
+      - __dyld_get_image_header
+      - __dyld_get_image_name
+      - __dyld_get_image_vmaddr_slide
+      - __dyld_image_count
+      - __tlv_atexit
+      - __tlv_bootstrap
+      - _abort
+      - _bzero
+      - _calloc
+      - _close
+      - _closedir
+      - _dirfd
+      - _dispatch_release
+      - _dispatch_semaphore_create
+      - _dispatch_semaphore_signal
+      - _dispatch_semaphore_wait
+      - _free
+      - _fstat
+      - _getcwd
+      - _getenv
+      - _malloc
+      - _memcmp
+      - _memcpy
+      - _memmove
+      - _mmap
+      - _munmap
+      - _open
+      - _opendir
+      - _posix_memalign
+      - _printf
+      - _pthread_create
+      - _pthread_join
+      - _pthread_mutex_destroy
+      - _pthread_mutex_init
+      - _pthread_mutex_lock
+      - _pthread_mutex_trylock
+      - _pthread_mutex_unlock
+      - _pthread_mutexattr_destroy
+      - _pthread_mutexattr_init
+      - _pthread_mutexattr_settype
+      - _readdir_r
+      - _realloc
+      - _sandbox_init
+      - _strerror_r
+      - _strlen
+      - _write
+      - dyld_stub_binder
+...

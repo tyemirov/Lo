@@ -1,0 +1,77 @@
+{
+  "scope": "generated object DWARF inspection; debugger launch and stripped/distributed companion files not qualified",
+  "objects": [
+    {
+      "backend": "llvm",
+      "target": "aarch64-apple-darwin",
+      "generated_function_source": true,
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llvm-dwarfdump",
+        "--debug-info",
+        "--debug-line",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin.o"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin.o:\tfile format Mach-O arm64\n\n.debug_info contents:\n0x00000000: Compile Unit: length = 0x00000047, format = DWARF32, version = 0x0004, abbr_offset = 0x0000, addr_size = 0x08 (next unit at 0x0000004b)\n\n0x0000000b: DW_TAG_compile_unit\n              DW_AT_producer\t(\"Lo LLVM probe\")\n              DW_AT_language\t(DW_LANG_C)\n              DW_AT_name\t(\"probe.ll\")\n              DW_AT_stmt_list\t(0x00000000)\n              DW_AT_comp_dir\t(\"experiments/native-backends\")\n              DW_AT_low_pc\t(0x0000000000000000)\n              DW_AT_high_pc\t(0x0000000000000028)\n\n0x0000002a:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x0000000000000000)\n                DW_AT_high_pc\t(0x0000000000000028)\n                DW_AT_APPLE_omit_frame_ptr\t(true)\n                DW_AT_frame_base\t(DW_OP_reg31 WSP)\n                DW_AT_name\t(\"lo_probe\")\n                DW_AT_decl_file\t(\"experiments/native-backends/probe.ll\")\n                DW_AT_decl_line\t(5)\n                DW_AT_type\t(0x00000043 \"long long\")\n                DW_AT_external\t(true)\n\n0x00000043:   DW_TAG_base_type\n                DW_AT_name\t(\"long long\")\n                DW_AT_encoding\t(DW_ATE_signed)\n                DW_AT_byte_size\t(0x08)\n\n0x0000004a:   NULL\n\n.debug_line contents:\ndebug_line[0x00000000]\nLine table prologue:\n    total_length: 0x00000050\n          format: DWARF32\n         version: 4\n prologue_length: 0x00000020\n min_inst_length: 1\nmax_ops_per_inst: 1\n default_is_stmt: 1\n       line_base: -5\n      line_range: 14\n     opcode_base: 13\nstandard_opcode_lengths[DW_LNS_copy] = 0\nstandard_opcode_lengths[DW_LNS_advance_pc] = 1\nstandard_opcode_lengths[DW_LNS_advance_line] = 1\nstandard_opcode_lengths[DW_LNS_set_file] = 1\nstandard_opcode_lengths[DW_LNS_set_column] = 1\nstandard_opcode_lengths[DW_LNS_negate_stmt] = 0\nstandard_opcode_lengths[DW_LNS_set_basic_block] = 0\nstandard_opcode_lengths[DW_LNS_const_add_pc] = 0\nstandard_opcode_lengths[DW_LNS_fixed_advance_pc] = 1\nstandard_opcode_lengths[DW_LNS_set_prologue_end] = 0\nstandard_opcode_lengths[DW_LNS_set_epilogue_begin] = 0\nstandard_opcode_lengths[DW_LNS_set_isa] = 1\nfile_names[  1]:\n           name: \"probe.ll\"\n      dir_index: 0\n       mod_time: 0x00000000\n         length: 0x00000000\n\nAddress            Line   Column File   ISA Discriminator OpIndex Flags\n------------------ ------ ------ ------ --- ------------- ------- -------------\n0x0000000000000000      7      1      1   0             0       0  is_stmt prologue_end\n0x0000000000000008     13      1      1   0             0       0  is_stmt\n0x000000000000000c     14      1      1   0             0       0  is_stmt\n0x0000000000000010     14      1      1   0             0       0  epilogue_begin\n0x0000000000000014      0      0      1   0             0       0 \n0x0000000000000020     10      1      1   0             0       0  is_stmt\n0x0000000000000024      0      0      1   0             0       0 \n0x0000000000000028      0      0      1   0             0       0  end_sequence\n\n",
+      "stderr": "",
+      "seconds": 0.311516
+    },
+    {
+      "backend": "cranelift",
+      "target": "aarch64-apple-darwin",
+      "generated_function_source": false,
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llvm-dwarfdump",
+        "--debug-info",
+        "--debug-line",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin.o"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin.o:\tfile format Mach-O arm64\n\n.debug_info contents:\n\n.debug_line contents:\n",
+      "stderr": "",
+      "seconds": 0.016095
+    },
+    {
+      "backend": "llvm",
+      "target": "aarch64-unknown-linux-gnu",
+      "generated_function_source": true,
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llvm-dwarfdump",
+        "--debug-info",
+        "--debug-line",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu.o"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu.o:\tfile format elf64-littleaarch64\n\n.debug_info contents:\n0x00000000: Compile Unit: length = 0x00000047, format = DWARF32, version = 0x0004, abbr_offset = 0x0000, addr_size = 0x08 (next unit at 0x0000004b)\n\n0x0000000b: DW_TAG_compile_unit\n              DW_AT_producer\t(\"Lo LLVM probe\")\n              DW_AT_language\t(DW_LANG_C)\n              DW_AT_name\t(\"probe.ll\")\n              DW_AT_stmt_list\t(0x00000000)\n              DW_AT_comp_dir\t(\"experiments/native-backends\")\n              DW_AT_GNU_pubnames\t(true)\n              DW_AT_low_pc\t(0x0000000000000000)\n              DW_AT_high_pc\t(0x0000000000000028)\n\n0x0000002a:   DW_TAG_subprogram\n                DW_AT_low_pc\t(0x0000000000000000)\n                DW_AT_high_pc\t(0x0000000000000028)\n                DW_AT_frame_base\t(DW_OP_reg31 WSP)\n                DW_AT_name\t(\"lo_probe\")\n                DW_AT_decl_file\t(\"experiments/native-backends/probe.ll\")\n                DW_AT_decl_line\t(5)\n                DW_AT_type\t(0x00000043 \"long long\")\n                DW_AT_external\t(true)\n\n0x00000043:   DW_TAG_base_type\n                DW_AT_name\t(\"long long\")\n                DW_AT_encoding\t(DW_ATE_signed)\n                DW_AT_byte_size\t(0x08)\n\n0x0000004a:   NULL\n\n.debug_line contents:\ndebug_line[0x00000000]\nLine table prologue:\n    total_length: 0x00000050\n          format: DWARF32\n         version: 4\n prologue_length: 0x00000020\n min_inst_length: 1\nmax_ops_per_inst: 1\n default_is_stmt: 1\n       line_base: -5\n      line_range: 14\n     opcode_base: 13\nstandard_opcode_lengths[DW_LNS_copy] = 0\nstandard_opcode_lengths[DW_LNS_advance_pc] = 1\nstandard_opcode_lengths[DW_LNS_advance_line] = 1\nstandard_opcode_lengths[DW_LNS_set_file] = 1\nstandard_opcode_lengths[DW_LNS_set_column] = 1\nstandard_opcode_lengths[DW_LNS_negate_stmt] = 0\nstandard_opcode_lengths[DW_LNS_set_basic_block] = 0\nstandard_opcode_lengths[DW_LNS_const_add_pc] = 0\nstandard_opcode_lengths[DW_LNS_fixed_advance_pc] = 1\nstandard_opcode_lengths[DW_LNS_set_prologue_end] = 0\nstandard_opcode_lengths[DW_LNS_set_epilogue_begin] = 0\nstandard_opcode_lengths[DW_LNS_set_isa] = 1\nfile_names[  1]:\n           name: \"probe.ll\"\n      dir_index: 0\n       mod_time: 0x00000000\n         length: 0x00000000\n\nAddress            Line   Column File   ISA Discriminator OpIndex Flags\n------------------ ------ ------ ------ --- ------------- ------- -------------\n0x0000000000000000      7      1      1   0             0       0  is_stmt prologue_end\n0x0000000000000008     13      1      1   0             0       0  is_stmt\n0x000000000000000c     14      1      1   0             0       0  is_stmt\n0x0000000000000010     14      1      1   0             0       0  epilogue_begin\n0x0000000000000014      0      0      1   0             0       0 \n0x0000000000000020     10      1      1   0             0       0  is_stmt\n0x0000000000000024      0      0      1   0             0       0 \n0x0000000000000028      0      0      1   0             0       0  end_sequence\n\n",
+      "stderr": "",
+      "seconds": 0.017698
+    },
+    {
+      "backend": "cranelift",
+      "target": "aarch64-unknown-linux-gnu",
+      "generated_function_source": false,
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llvm-dwarfdump",
+        "--debug-info",
+        "--debug-line",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu.o"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu.o:\tfile format elf64-littleaarch64\n\n.debug_info contents:\n\n.debug_line contents:\n",
+      "stderr": "",
+      "seconds": 0.016473
+    }
+  ]
+}

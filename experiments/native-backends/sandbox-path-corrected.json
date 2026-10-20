@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+    "-f",
+    "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rootdata-diagnostic.sb",
+    "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/path-diagnostic"
+  ],
+  "exit_code": 0,
+  "stdout": "proc_pidpath: 78 errno:0 path:/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/path-diagnostic\nrealpath: /Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/path-diagnostic errno:0\n",
+  "stderr": ""
+}
