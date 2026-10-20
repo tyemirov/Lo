@@ -75,6 +75,8 @@ func execute(args []string, stdout, stderr io.Writer) int {
 			var d diagnostic.Diagnostic
 			if inv.Emit() == runner.LLVMEmission {
 				receipt, d = nativebuild.EmitLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
+			} else if inv.Codegen() == runner.LLVMCodegen {
+				receipt, d = nativebuild.BuildLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend(), inv.Toolchain())
 			} else {
 				receipt, d = nativebuild.Build(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
 			}
