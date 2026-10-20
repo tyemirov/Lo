@@ -171,3 +171,19 @@ func TestLLVMLinuxCheckpointFileCancellation(t *testing.T) {
 		{name: "write", source: head + `data=File.read(File.Path.new("input")); pipeTarget=File.Write.new(File.Path.new("pipe"),data); commit pipeTarget;` + tail, number: 1, harness: "testdata/native-runtime/file-cancellation-linux.c"},
 	})
 }
+
+func TestLLVMFileReaderDisconnect(t *testing.T) {
+	runLLVMRuntimeScenarios(t, llvmFileReaderDisconnectScenarios())
+}
+
+func TestLLVMLinuxFileReaderDisconnect(t *testing.T) {
+	runLLVMRuntimeTargetScenarios(t, "linux/arm64", llvmFileReaderDisconnectScenarios())
+}
+
+func llvmFileReaderDisconnectScenarios() []llvmRuntimeScenario {
+	const write = `data=File.read(File.Path.new("input")); target=File.Write.new(File.Path.new("pipe"),data); commit target; return "unexpected"`
+	return []llvmRuntimeScenario{
+		{name: "unhandled", source: `flow Run()->String!{` + write + `}; return Run()`, number: 0, harness: "testdata/native-runtime/file-sigpipe.c"},
+		{name: "handled", source: `flow Handle(e:Error)->String{return e.kind}; flow Run()->String onError Handle{` + write + `}; return Run()`, number: 1, harness: "testdata/native-runtime/file-sigpipe.c"},
+	}
+}
