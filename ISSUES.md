@@ -1340,7 +1340,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [runtime receipt](docs/evidence/native-runtime/validation.json) records the complete evidence and qualification limits.
   Final CI passed.
 
-- [ ] [I009] (P1) {I007} Port confined files, processes, and HTTP execution
+- [x] [I009] (P1) {I007} Port confined files, processes, and HTTP execution
   Goal:
   Preserve adapter authority and lifecycle behavior without the Go runtime.
 
@@ -1362,6 +1362,22 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Exercise concurrent loopback requests, cancellation, shutdown, and bounded resource use.
   - Verify process execution and denied authority through public artifact commands and controlled host implementations.
   - Compare CLI outputs, errors, and lifecycle events with current behavior.
+
+  Completed on October 20, 2026.
+  Native file and HTTP checks completed successfully on Darwin arm64 and Linux arm64 under QEMU.
+  Darwin process checks verified confinement, termination, cancellation, ownership, safe diagnostics, and the embedded launcher.
+  Linux keeps the current process-unavailable result.
+  The standalone launcher check used an empty PATH after removal of the original artifact.
+  File checks verified ordered removal, observation identity, replacement rejection, blocked I/O, and prevention of later commits.
+  Each target completed 1,000 HTTP requests with complete request cleanup.
+  Native HTTP checks verified TLS, framing, trailers, request deadlines, and shutdown.
+  Regression checks verified backpropagation, 200-step training, 500-step XOR, and checkpoint resumption.
+  Independent review found no unresolved material defect.
+  Final CI completed successfully.
+  All 11 tests for the runtime build tools completed successfully.
+  The [adapter guide](docs/native-adapters.md) describes the implementation.
+  The [adapter receipt](docs/evidence/native-adapters/validation.json) records source identities, results, and qualification limits.
+  I010, F017, and I011 keep their existing scope.
 
 - [ ] [I010] (P1) {I008,I009,F014} Port device resources and Metal execution
   Goal:
