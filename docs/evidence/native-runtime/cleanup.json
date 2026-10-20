@@ -1,0 +1,10 @@
+{
+  "removed_task_directory": "_scratch/i007-i008-20261020",
+  "removed_task_plan": ".mprlab/I007-PLAN.md",
+  "task_directory_absent": true,
+  "task_plan_absent": true,
+  "shared_build_state_preserved": true,
+  "unrelated_plan_preserved": true,
+  "evidence_directory": "docs/evidence/native-runtime",
+  "elapsed_seconds": 0.553
+}

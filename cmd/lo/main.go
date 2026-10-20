@@ -71,14 +71,26 @@ func execute(args []string, stdout, stderr io.Writer) int {
 		if inv.Command() == runner.BuildCommand {
 			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 			defer stop()
-			receipt, d := nativebuild.Build(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
+			var receipt nativebuild.Receipt
+			var d diagnostic.Diagnostic
+			if inv.Emit() == runner.LLVMEmission {
+				receipt, d = nativebuild.EmitLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
+			} else if inv.Codegen() == runner.LLVMCodegen {
+				receipt, d = nativebuild.BuildLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend(), inv.Toolchain())
+			} else {
+				receipt, d = nativebuild.Build(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
+			}
 			if d != nil {
 				return runner.Report(stderr, inv.Format(), d, runner.ExitHost)
 			}
 			if inv.Format() == runner.JsonFormat {
 				err = encoder.Encode(receipt)
 			} else {
-				_, err = fmt.Fprintf(stdout, "%s: built %s\n", receipt.Artifact, receipt.Target)
+				if receipt.Emit == runner.LLVMEmission {
+					_, err = fmt.Fprintf(stdout, "%s: emitted LLVM module for %s (%s)\n", receipt.Artifact, receipt.Target, receipt.ABI)
+				} else {
+					_, err = fmt.Fprintf(stdout, "%s: built %s\n", receipt.Artifact, receipt.Target)
+				}
 			}
 			if err != nil {
 				return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), runner.ExitHost)

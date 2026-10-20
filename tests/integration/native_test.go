@@ -86,6 +86,17 @@ var nativeArtifacts = struct {
 
 func buildForTest(t *testing.T, path string) (string, result) {
 	t.Helper()
+	build := func(artifact string) result {
+		args := []string{"build", path, "--output", artifact, "--format", "json"}
+		if os.Getenv("LO_TEST_BACKEND") == "llvm" {
+			manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
+			if manifest == "" {
+				t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")
+			}
+			args = append(args, "--codegen", "llvm", "--toolchain", manifest)
+		}
+		return runExecutable(t, nativeCompiler, args...)
+	}
 	input := path
 	if !filepath.IsAbs(input) {
 		input = filepath.Join(repository, input)
@@ -93,7 +104,7 @@ func buildForTest(t *testing.T, path string) (string, result) {
 	data, err := os.ReadFile(input)
 	if err != nil {
 		artifact := filepath.Join(t.TempDir(), "program")
-		return artifact, runExecutable(t, nativeCompiler, "build", path, "--output", artifact, "--format", "json")
+		return artifact, build(artifact)
 	}
 	key := fmt.Sprintf("%x", sha256.Sum256(append([]byte(path+"\x00"), data...)))
 	nativeArtifacts.Lock()
@@ -102,7 +113,7 @@ func buildForTest(t *testing.T, path string) (string, result) {
 		return artifact, result{status: 0}
 	}
 	artifact := filepath.Join(filepath.Dir(binary), "fixture-"+key)
-	r := runExecutable(t, nativeCompiler, "build", path, "--output", artifact, "--format", "json")
+	r := build(artifact)
 	if r.status == 0 {
 		nativeArtifacts.paths[key] = artifact
 	}
@@ -121,7 +132,8 @@ func runtimeCommand(t *testing.T, args ...string) *exec.Cmd {
 }
 
 func nativeInvocation(args []string) (string, []string, bool) {
-	if os.Getenv("LO_TEST_BACKEND") != "native" || len(args) == 0 || args[0] != "run" && args[0] != "serve" {
+	backend := os.Getenv("LO_TEST_BACKEND")
+	if backend != "native" && backend != "llvm" || len(args) == 0 || args[0] != "run" && args[0] != "serve" {
 		return "", nil, false
 	}
 	inv, err := runner.ParseCompiler(args)

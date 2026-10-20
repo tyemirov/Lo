@@ -1,0 +1,43 @@
+{
+  "version": "21.1.8",
+  "archive": {
+    "archive": "llvm.tar.xz",
+    "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+    "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+    "bytes": 1503047352
+  },
+  "tools": {
+    "clang": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/clang",
+      "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+    },
+    "clang-21": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/clang-21",
+      "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+    },
+    "ld64.lld": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/ld64.lld",
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+    },
+    "llc": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/llc",
+      "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e"
+    },
+    "lld": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/lld",
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+    },
+    "llvm-dwarfdump": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/llvm-dwarfdump",
+      "sha256": "36b66049cc0995fdd7623235b260ecccd0239d87cc719488f7658f36a18fbc9b"
+    },
+    "llvm-nm": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/llvm-nm",
+      "sha256": "a011020cab7ca848ebb10948c636cde63a83cf81e81156285f96f577ea70e426"
+    },
+    "opt": {
+      "path": "_scratch/i006-20261020/backend/preparation-check/tools/bin/opt",
+      "sha256": "66e9c199539e80e7cdeb1a6dc370e5278a6e90ad3b18e984d1af746b1ede35c7"
+    }
+  }
+}

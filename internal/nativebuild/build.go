@@ -38,6 +38,10 @@ type Receipt struct {
 	Status   string `json:"status"`
 	Artifact string `json:"artifact"`
 	Target   string `json:"target"`
+	Emit     string `json:"emit,omitempty"`
+	ABI      string `json:"abi,omitempty"`
+	Codegen  string `json:"codegen,omitempty"`
+	Runtime  string `json:"runtime_sha256,omitempty"`
 }
 type Metadata struct {
 	SourceDigest  string                `json:"source_sha256"`
@@ -268,7 +272,7 @@ func build(ctx context.Context, program ir.Program, output, target string, backe
 	if err := os.Rename(staged, destination); err != nil {
 		return fail(diagnostic.BuildOutput, err)
 	}
-	return Receipt{"build", "ok", output, target}, nil
+	return Receipt{Command: "build", Status: "ok", Artifact: output, Target: target}, nil
 }
 
 func runTool(command *exec.Cmd, cancel context.CancelFunc) ([]byte, error, bool) {

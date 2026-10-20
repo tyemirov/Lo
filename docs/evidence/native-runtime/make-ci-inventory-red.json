@@ -1,0 +1,7 @@
+{
+  "command": "CI=1 make ci TEST_ARGS='-timeout=30m -v' </dev/null",
+  "exit_code": 2,
+  "elapsed_seconds": 70.275,
+  "log": "make-ci.log.gz",
+  "serial_execution": true
+}

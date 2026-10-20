@@ -1,0 +1,8 @@
+flow Recover(error: Error) -> Int {
+    return 41
+}
+flow Attempt() -> Int onError Recover {
+    first = 7
+    return Math.add(8, 9)
+}
+return Attempt()

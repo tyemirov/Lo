@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-20",
+  "scope": [
+    "README.md changed prose",
+    "docs/native-lowering.md",
+    "docs/standalone-compiler-plan.md changed prose",
+    "docs/semantic-migration.md changed prose",
+    "I006 status and completion notes"
+  ],
+  "official_reference": {
+    "url": "https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf",
+    "sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431"
+  },
+  "mechanical_changed_prose_findings": 0,
+  "preserved_findings": {
+    "ISSUES.md": 12,
+    "README.md": 9
+  },
+  "manual_review": "Changed prose reviewed against applicable Part 1 rules, Part 2 meanings, and repository technical terminology. Unchanged text was not requalified.",
+  "reference_redistributed": false
+}

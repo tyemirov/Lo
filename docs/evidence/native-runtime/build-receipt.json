@@ -1,0 +1,121 @@
+{
+  "runtime_source_sha256": "7d8b717c46fab8de581b708a094bb0a876b060b0f840f08faba3a9f47de06021",
+  "rust": {
+    "version": "1.85.1",
+    "prefix": "_scratch/i007-i008-20261020/preparation/rust-prefix",
+    "archives": [
+      {
+        "archive": "rustc.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+        "bytes": 55006972
+      },
+      {
+        "archive": "cargo.tar.xz",
+        "url": "https://static.rust-lang.org/dist/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+        "bytes": 6766048
+      },
+      {
+        "archive": "rust-std.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+        "bytes": 27522824
+      },
+      {
+        "archive": "rust-std-linux.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-unknown-linux-gnu.tar.xz",
+        "sha256": "760fa132058ed45a67d0cd7d04638fde86fd26adc563dff1a3e6d97d300446ff",
+        "bytes": 33440220
+      },
+      {
+        "archive": "rustfmt.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rustfmt-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "90adc209908355ee7e315b98c84f16e6773c8664291b0981a4ff80992bc0fb66",
+        "bytes": 1594560
+      }
+    ],
+    "prefix_sha256": "e4145ce1962bb49ba45667d082625415f007524ed0f2df0f380b16976422fe2a",
+    "rustc": {
+      "path": "_scratch/i007-i008-20261020/preparation/rust-prefix/bin/rustc",
+      "sha256": "731d78259541b7e845568083df94b541176af5669509d077ee23a88d81f27d41",
+      "identity": "rustc 1.85.1 (4eb161250 2025-03-15)"
+    },
+    "cargo": {
+      "path": "_scratch/i007-i008-20261020/preparation/rust-prefix/bin/cargo",
+      "sha256": "ca274de824f0741d809e115eab77c40208c5ad6484646c381c04f12ec49e6a79",
+      "identity": "cargo 1.85.1 (d73d2caf9 2024-12-31)"
+    }
+  },
+  "llvm": {
+    "version": "21.1.8",
+    "archive": {
+      "archive": "llvm.tar.xz",
+      "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+      "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+      "bytes": 1503047352
+    },
+    "tools": {
+      "clang": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/clang",
+        "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+      },
+      "clang-21": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/clang-21",
+        "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+      },
+      "ld.lld": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/ld.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "ld64.lld": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/ld64.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "llc": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/llc",
+        "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e"
+      },
+      "lld": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "llvm-ar": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/llvm-ar",
+        "sha256": "c2640fc0a747413fe27818531d4a22f979d91b7e299723a68225917c42574b50"
+      },
+      "llvm-dwarfdump": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/llvm-dwarfdump",
+        "sha256": "36b66049cc0995fdd7623235b260ecccd0239d87cc719488f7658f36a18fbc9b"
+      },
+      "llvm-nm": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/llvm-nm",
+        "sha256": "a011020cab7ca848ebb10948c636cde63a83cf81e81156285f96f577ea70e426"
+      },
+      "llvm-objdump": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/llvm-objdump",
+        "sha256": "f67fda63d4f65df56e76fe8ba47f03eb81e8bbfb20ef1615c18f685c7177e28c"
+      },
+      "llvm-readobj": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/llvm-readobj",
+        "sha256": "73efdbad7294e02ed570d7156d1d1c8d77ed922c2df281435a7a1f8ad90eeb30"
+      },
+      "opt": {
+        "path": "_scratch/i007-i008-20261020/preparation/tools/bin/opt",
+        "sha256": "66e9c199539e80e7cdeb1a6dc370e5278a6e90ad3b18e984d1af746b1ede35c7"
+      }
+    }
+  },
+  "cargo_environment": {
+    "CI": "1",
+    "CARGO_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/i007-i008-20261020/preparation/cargo-home",
+    "RUSTUP_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/i007-i008-20261020/preparation/rustup-home",
+    "RUSTC": "/Users/tyemirov/Development/Research/Lo/_scratch/i007-i008-20261020/preparation/rust-prefix/bin/rustc",
+    "CARGO_TARGET_DIR": "/Users/tyemirov/Development/Research/Lo/_scratch/i007-i008-20261020/preparation/cargo-target",
+    "TMPDIR": "/Users/tyemirov/Development/Research/Lo/_scratch/i007-i008-20261020/preparation",
+    "PATH": "/Users/tyemirov/Development/Research/Lo/_scratch/i007-i008-20261020/preparation/rust-prefix/bin",
+    "LC_ALL": "C",
+    "TZ": "UTC"
+  },
+  "manifest_sha256": "633e0380a4c00356da25c9558c335e693ca8631be0a95b58bc94e308b619ec89"
+}

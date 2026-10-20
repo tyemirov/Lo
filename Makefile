@@ -32,6 +32,11 @@ BENCH_TIME ?= 300ms
 NATIVE_BENCH_WORK ?= _scratch/f001-native/benchmark
 NATIVE_BENCH_LANE ?= all
 NATIVE_BACKEND_INPUTS ?= _scratch/native-backends/inputs.json
+NATIVE_LOWERING_ROOT ?= _scratch/native-lowering
+NATIVE_LOWERING_TOOLS ?= $(NATIVE_LOWERING_ROOT)/tools.json
+NATIVE_LOWERING_STATE ?= $(NATIVE_LOWERING_ROOT)/execution
+NATIVE_RUNTIME_STATE ?= _scratch/native-runtime
+LLVM_TOOLCHAIN ?= $(NATIVE_RUNTIME_STATE)/distribution/toolchain.json
 
 .DEFAULT_GOAL := build
 
@@ -84,6 +89,19 @@ test-integration: runtime-bundle | tool-state
 test-native: runtime-bundle | tool-state
 	LO_TEST_BACKEND=native $(GO) test ./tests/integration $(TEST_ARGS) </dev/null
 
+.PHONY: prepare-native-runtime build-native-runtime test-native-llvm test-native-runtime-tools
+prepare-native-runtime: | tool-state
+	python3 -B tools/nativeruntime/prepare.py --state "$(NATIVE_RUNTIME_STATE)" --download --platform </dev/null
+
+build-native-runtime: | tool-state
+	python3 -B tools/nativeruntime/build.py --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(NATIVE_RUNTIME_STATE)/distribution" </dev/null
+
+test-native-llvm: runtime-bundle | tool-state
+	LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test ./tests/integration $(TEST_ARGS) </dev/null
+
+test-native-runtime-tools: | tool-state
+	LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q tools/nativeruntime </dev/null
+
 test-native-race: runtime-bundle | tool-state
 	LO_TEST_BACKEND=native LO_TEST_NATIVE_RACE=1 GORACE=atexit_sleep_ms=0 $(GO) test -race ./tests/integration $(TEST_ARGS) </dev/null
 
@@ -127,6 +145,16 @@ test-semantic-report: | tool-state
 
 test-semantic-migration: runtime-bundle test-semantic-report | tool-state
 	python3 -B tools/semanticcoverage/run.py run --output-root "$(LO_BUILD_ROOT)" </dev/null
+
+.PHONY: prepare-native-lowering test-native-lowering test-native-lowering-tools
+prepare-native-lowering: | tool-state
+	python3 -B tools/nativelowering/prepare.py --state "$(NATIVE_LOWERING_ROOT)" --download </dev/null
+
+test-native-lowering: build | tool-state
+	python3 -B tools/nativelowering/run.py --lo bin/lo --tools "$(NATIVE_LOWERING_TOOLS)" --state "$(NATIVE_LOWERING_STATE)" </dev/null
+
+test-native-lowering-tools: | tool-state
+	UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q tools/nativelowering/test_cli.py </dev/null
 
 ci: verify-runtime-bundle fmt lint test test-native build test-semantic-report
 

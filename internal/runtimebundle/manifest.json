@@ -52,7 +52,7 @@
   "internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
   "internal/processhost/session.go": "c5b17ae16b8e2de5c3d59e7f2cf364af3b4aef6f86a1ebf32f646809e64a0ab7",
   "internal/processhost/startup.go": "029e0f4dbd048ef277115bd17128c113e33791c372a416a9c2866d580ce1f50f",
-  "internal/runner/command.go": "1d985339d62475e893850ac329c530a75f43bc873f54c2072ba3c7a563bc7b07",
+  "internal/runner/command.go": "d1bda50dad98767774b2a2d8cbbfc581c4e9bb4885662742c3b66ed18f1e4279",
   "internal/runner/execute.go": "03c5e1d4d4c0e5f16e87d99cae9e60000cbdd53b5f1540acda398dc62067db90",
   "internal/runtimeops/arithmetic.go": "05fd5c8ceecafddfab7563b3af0f4fbd04ffd7b138f25858b17abece5c44d169",
   "internal/runtimeops/builtin.go": "d36cae4fb77a491bc5f782b6517aa4a4c1f686ced5ff1618fa8b5baba03bf54b",

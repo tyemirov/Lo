@@ -1,0 +1,529 @@
+{
+  "issues": [
+    "I007",
+    "I008"
+  ],
+  "date": "2026-10-20",
+  "status": "passed",
+  "backend": "LLVM 21.1.8 + LLD 21.1.8 + precompiled Rust 1.85.1 runtime",
+  "abi": "lo-native-1",
+  "targets": [
+    "darwin/arm64",
+    "linux/arm64"
+  ],
+  "execution_environments": {
+    "darwin": "Darwin arm64 host",
+    "linux": "QEMU 11.1.2 with Linux 6.12.110 and glibc 2.36"
+  },
+  "second_runtime_receipt": "second-build-receipt.json",
+  "qualified_before_final_review_corrections": {
+    "core_retained_requests_per_target": 10240,
+    "training_updates": 200,
+    "xor_updates": 500,
+    "xor_targets": [
+      "darwin/arm64",
+      "linux/arm64"
+    ],
+    "checkpoint_resume": "CPU resume matches uninterrupted training exactly",
+    "analytical_finite_difference_fixtures": 13,
+    "compiled_work_charge_cases": 9,
+    "compiled_work_charge_artifacts": 18,
+    "work_charge_boundaries": "exact public receipts at minimum - 1, minimum, minimum + 1",
+    "numerical_resource_scenarios_per_target": 6,
+    "foreign_tensor_scenarios_per_target": 2,
+    "tape_boundary_peak_bytes": 20000004,
+    "logical_budget_dominates_tape_and_optimizer_quota": true
+  },
+  "pending": [],
+  "scope_limits": [
+    "Default executable compilation still uses Go until I011.",
+    "Installed offline distribution acceptance remains F017 and I011.",
+    "The development compiler host is Darwin arm64; Linux-host compilation remains F017.",
+    "Metal and device execution remain I010.",
+    "Full file, process and HTTP behavior remains I009.",
+    "Pipe cancellation evidence covers opened descriptors with connected peers. Waiting for a pipe reader during write open remains unqualified under I009.",
+    "Direct evaluator dependency-injection tests do not qualify LLVM execution.",
+    "The 64 MiB logical value budget prevents these public fixtures from reaching the 32 MiB tape or optimizer class quota. No quota bypass is used."
+  ],
+  "latest_runtime_receipt": "build-receipt.json",
+  "checkpoint_linux": {
+    "fresh_processes": 8,
+    "parameters": "independent canonical bytes",
+    "SGD": "complete resumed state matches uninterrupted state exactly",
+    "AdamW": "complete resumed state matches uninterrupted state exactly",
+    "log": "collections-linux-checkpoint-final.log.gz",
+    "archive_generation": "fourth; subsequent changes address malformed input admission and diagnostic field context"
+  },
+  "compiler_source_columns": {
+    "unknown_debug_column_at": 65536,
+    "runtime_columns": "preserved exactly",
+    "public_regression": "collections-source-column-final.log.gz"
+  },
+  "checkpoint_diagnostics": {
+    "json_cases": 37,
+    "long_multibyte_bytes": 1048576,
+    "per_process_timeout_seconds": 10,
+    "budget_cases": 3,
+    "evidence": "preparation-checkpoint-seventh-final.log.gz",
+    "numeric_admission": {
+      "float_cases": 56,
+      "integer_cases": 8,
+      "float_log": "preparation-checkpoint-sixth-numeric.log.gz",
+      "direct_float32_rounding_cases": 2,
+      "direct_float32_rounding_log": "preparation-checkpoint-seventh-double-round.log.gz",
+      "runtime_generation": "sixth; seventh adds Unicode field-name quoting only"
+    },
+    "unicode_quote_provenance": "checkpoint-print-provenance.json"
+  },
+  "runtime_generations": {
+    "second": {
+      "darwin/arm64": "64b661ad8df1adc68f0be6bcaba2ce134758f36c87e763183ff1b3ee376db4ec",
+      "linux/arm64": "ef276f4aeeac5712f4b4d7a581a6750d3161328205c5e385ee543a89ba656cb0"
+    },
+    "third": {
+      "evidence": "files-third-final.log.gz",
+      "scope": "final file diagnostic corrections"
+    },
+    "fourth": {
+      "darwin/arm64": "3a4a1d33d72abc2743234e8e1f731d984a1443119d0b9e96d3f447aa62c6818a",
+      "linux/arm64": "3aa1c0a51f9d5f67b6d064bc654727a24ef9c1ec184109705d4760a9017ae26f"
+    },
+    "fifth": {
+      "darwin/arm64": "80eac4a70989aca3a7d3545cc1c626d032bb95e0fdc9e9fb76299d5771c244f5",
+      "linux/arm64": "de490daa873fbacdf8d02123a0adf6634a1391db25469a4cb5591932c692f6b5"
+    },
+    "sixth": {
+      "darwin/arm64": "857eb4cf5884212bab1f6d8a0ca6e688c654775009cf39b29564d409827f715f",
+      "linux/arm64": "1b14489e9d221409098684db8a27b81a2602dafa881e07eab667c35c005fc55d"
+    },
+    "seventh": {
+      "darwin/arm64": "4a0c74573e5a16834824167bab7ce5f77613d4ce4466fe7778e6f0a16558db7e",
+      "linux/arm64": "409a82c32c938b2f4ca683de6d539111c767b7c53c7a108036e393b89de3084b"
+    }
+  },
+  "components": {
+    "core_catalog": {
+      "log": "core-catalog-green.log.gz",
+      "seconds": 115.18
+    },
+    "core_traces": {
+      "log": "core-trace-green.log.gz",
+      "seconds": 76.164
+    },
+    "core_limits": {
+      "log": "core-limits.log.gz",
+      "seconds": 9.053
+    },
+    "flow_depth": {
+      "log": "core-error-depth.log.gz"
+    },
+    "tensor_contracts": {
+      "log": "tensors-second.log.gz",
+      "seconds": 150.185,
+      "runtime_generation": "second"
+    },
+    "autodiff": {
+      "log": "collections-autodiff-final.log.gz",
+      "groups": 15,
+      "analytical_finite_difference_fixtures": 13,
+      "seconds": 503.374,
+      "target": "darwin/arm64",
+      "runtime_generation": "second"
+    },
+    "training_and_checkpoint": {
+      "log": "training-checkpoint-final.log.gz",
+      "seconds": 148.838,
+      "runtime_generation": "second"
+    },
+    "work_charges": {
+      "log": "collections-work-budget-final.log.gz",
+      "seconds": 38.222,
+      "cases": 9,
+      "artifacts": 18
+    },
+    "numerical_lifetime": {
+      "log": "core-numerical-lifetime-second.log.gz",
+      "cases": 16,
+      "runtime_generation": "second"
+    },
+    "tape_boundary": {
+      "log": "core-tape-boundary-second.log.gz",
+      "runtime_generation": "second"
+    },
+    "file_boundaries": {
+      "log": "files-third-final.log.gz",
+      "seconds": 25.806,
+      "runtime_generation": "third"
+    },
+    "optimizer_failure_boundaries": {
+      "log": "boundaries-second.log.gz",
+      "seconds": 22.632,
+      "runtime_generation": "second"
+    },
+    "standalone_and_training_smoke": {
+      "log": "final-runtime-smoke.log.gz",
+      "seconds": 37.217,
+      "runtime_generation": "fifth"
+    },
+    "toolchain_admission": {
+      "log": "toolchain-admission-green.log.gz"
+    },
+    "transactional_publication": {
+      "log": "make-ci.log.gz",
+      "tests": [
+        "TestLLVMPublicationCleanupFailure/absent",
+        "TestLLVMPublicationCleanupFailure/existing",
+        "TestLLVMPublicationSuccess",
+        "TestLLVMPublicationRenameFailure"
+      ],
+      "status": "passed",
+      "intermediate_build_failure_log": "publication-intermediate-build-failure.log.gz"
+    },
+    "immutable_input_snapshot": {
+      "log": "preparation-snapshot-final.log.gz"
+    },
+    "closed_cargo_environment": {
+      "log": "core-cargo-environment-reviewed-green.log.gz",
+      "controls": 9
+    },
+    "preparation_tools": {
+      "log": "preparation-i008-checkpoint-tools-green.log.gz",
+      "tests": 9
+    },
+    "checkpoint_json_final": {
+      "log": "preparation-checkpoint-seventh-final.log.gz",
+      "seconds": 78.566,
+      "runtime_generation": "seventh"
+    },
+    "checkpoint_rounding_final": {
+      "log": "preparation-checkpoint-seventh-double-round.log.gz",
+      "seconds": 4.293,
+      "runtime_generation": "seventh"
+    },
+    "semantic_inventory": {
+      "log": "semantic-inventory-final.log.gz",
+      "status": "passed",
+      "initial_ci_failure": "make-ci-inventory-red.json"
+    }
+  },
+  "artifact_identity_note": "Runtime and tool paths in historical receipts identify validation inputs. They are not installed distribution paths.",
+  "repository_ci": {
+    "command": "CI=1 make ci TEST_ARGS='-timeout=30m -v' </dev/null",
+    "exit_code": 0,
+    "elapsed_seconds": 616.448,
+    "log": "make-ci.log.gz",
+    "serial_execution": true,
+    "interpreter_integration_seconds": 51.57,
+    "native_integration_seconds": 553.711,
+    "semantic_reporter_tests": 16
+  },
+  "source_identity": "source-identity.json",
+  "architecture_review": "architecture-review.json",
+  "documentation_review": "documentation-review.json",
+  "document_structure": "document-structure.json",
+  "git_diff_check": "passed",
+  "cleanup": "cleanup.json",
+  "issue_status": {
+    "I007": "closed",
+    "I008": "closed"
+  },
+  "next_issue": "I009",
+  "artifacts": {
+    "architecture-review.json": {
+      "sha256": "453586b96458742952e2f65038563a85fe4c4c6c5a7639eaf4b4cb33354d728e",
+      "bytes": 2543
+    },
+    "autodiff-context-red.log.gz": {
+      "sha256": "c9a77928455570887042237f60fa10ba06d0d075a2d07d3cba3253c99ba5d55a",
+      "bytes": 1002
+    },
+    "autodiff-emission-green.log.gz": {
+      "sha256": "17d7bba3d3c15cc05c2ece66393002ba33e4f0b5b92515847f6480106c3d054b",
+      "bytes": 247
+    },
+    "boundaries-second.log.gz": {
+      "sha256": "06f2ef19189e1dcd82df28a647e9df7f9169fca652d84e936f7258b0f5b9b57c",
+      "bytes": 1110
+    },
+    "build-receipt.json": {
+      "sha256": "df93cbc038794cb21cbb845a8e8a03772412a2101080202a7e22443ec77f4a79",
+      "bytes": 5587
+    },
+    "checkpoint-budget-red.log.gz": {
+      "sha256": "9a98a227e49de31914fce9ccd373c62943944f935ee964e73169a501978cd55b",
+      "bytes": 664
+    },
+    "checkpoint-print-provenance.json": {
+      "sha256": "c513ac31ef138f9746892d937e880a843c0cd88d95775366c9dbfecc7e830f96",
+      "bytes": 562
+    },
+    "cleanup.json": {
+      "sha256": "93d1309f20d12f6e0c11243926f8a824fed837822d1ca2375df52d74e5e0e6fc",
+      "bytes": 330
+    },
+    "collections-autodiff-final.log.gz": {
+      "sha256": "5b15e510e920b0f2cd98cc325233920ec115c66a95a22ed31cec9ca1398d4e85",
+      "bytes": 1147
+    },
+    "collections-linux-checkpoint-final.log.gz": {
+      "sha256": "8a48950623ed2275869ddd822b480424d74a35c732c8187dabc87c890a31ecaa",
+      "bytes": 456
+    },
+    "collections-source-column-final.log.gz": {
+      "sha256": "892aa10e7c75fc35681e3c845222f6af3f8fcdedff505c538b8c70473b3f8179",
+      "bytes": 378
+    },
+    "collections-source-column-red.log.gz": {
+      "sha256": "0395a9b9103b2131168098a656b1330ca755b30a77b121832b34298c8e2dce83",
+      "bytes": 662
+    },
+    "collections-work-budget-final.log.gz": {
+      "sha256": "d3e2aa46c0cf3e99e5e2d05141fae218a15329cf0e6b0fe7a15a3a7aa6f8b15f",
+      "bytes": 638
+    },
+    "core-cargo-environment-reviewed-green.log.gz": {
+      "sha256": "921ff75ebb542a99f396fa19bf66ab1b684ad6115b7ff562ecbea7b430d177fe",
+      "bytes": 328
+    },
+    "core-catalog-green.log.gz": {
+      "sha256": "319227ee0a27a2c16ffeb010b15f58e5684f5169c409b24a8f228a71d7f87f8e",
+      "bytes": 1546
+    },
+    "core-error-depth.log.gz": {
+      "sha256": "69fdad1e84737c175e50e9773251daf76b71bce4fb1b6a5edd3e81e8c7fea48c",
+      "bytes": 937
+    },
+    "core-foreign-storage-red.log.gz": {
+      "sha256": "df0c304fdd4363f95ddc916db4e9a3576c5e20cca37c38215c66a4afe26f2aec",
+      "bytes": 954
+    },
+    "core-limits.log.gz": {
+      "sha256": "0d8acd6f7e213d35c70d012cfe0a3f3aacec28e41cd43bfada836de39f1e1d1d",
+      "bytes": 907
+    },
+    "core-numerical-lifetime-red.log.gz": {
+      "sha256": "ec8bf906a46f478561a7a49d056535fa0675d1e379e4f1a55796ab1b5bdfd38d",
+      "bytes": 1333
+    },
+    "core-numerical-lifetime-second.log.gz": {
+      "sha256": "df52fe94cb99330e6cabcfeb38da85d8790a79e70f36e7dcdd00c634ea084f0e",
+      "bytes": 1182
+    },
+    "core-tape-boundary-second.log.gz": {
+      "sha256": "a1d343ce4aa778b32648441f7e3c6f8126e71c4b91d00feba6bbf92b667cf41d",
+      "bytes": 441
+    },
+    "core-tape-quota-dominated.log.gz": {
+      "sha256": "6231c953482e34eec84fa1199be938b72b04852183637c69f802e6bd9180ae54",
+      "bytes": 542
+    },
+    "core-trace-green.log.gz": {
+      "sha256": "37823ded64e75834aca578ae9e872e48f607df33d77c2ec92b082565391b0063",
+      "bytes": 1486
+    },
+    "document-structure.json": {
+      "sha256": "361eddc80da5d5b5c63f8f586b4e12673fac28c660086e6399277e76ed634c48",
+      "bytes": 380
+    },
+    "documentation-review.json": {
+      "sha256": "1327f4a1a68f4e8077084436c51160ca51230194415757dd5f975440f77e7ea3",
+      "bytes": 883
+    },
+    "fifth-runtime-verification.json": {
+      "sha256": "f5e91163697ed37e337c4a615d2d71075b5bd5f349da8befc6a8b072de7e55f3",
+      "bytes": 430
+    },
+    "file-cleanup-red.log.gz": {
+      "sha256": "07b71dbd0619ec8401ecd145680920d70fa092cf8cc4640a3aba11ea3beb1cd7",
+      "bytes": 949
+    },
+    "file-contracts-red.log.gz": {
+      "sha256": "faa91f8d0b4e98139be51392217e09112108279fb0fc103eee1bbae4efe80ae1",
+      "bytes": 1501
+    },
+    "file-directory-red.log.gz": {
+      "sha256": "1c19accf1a4167482488a437459af47a6e90c60d906dff667fb365803b737ec4",
+      "bytes": 997
+    },
+    "file-write-cancel-red.log.gz": {
+      "sha256": "eb1659527dd4475fe4f10b55988f28e8ceed86f1afdfc46906ca2dccade6a90f",
+      "bytes": 854
+    },
+    "files-third-final.log.gz": {
+      "sha256": "5526ed1d2da0173a6709bb7dcfb0db35c40338be85d9fa88c274ca5e3d0412f7",
+      "bytes": 649
+    },
+    "final-runtime-smoke.log.gz": {
+      "sha256": "bf97eb5155bd992e7dbca5b42a931f128fe7cbb3032d50cdf099a275debabb4d",
+      "bytes": 735
+    },
+    "i007-source-identities.json": {
+      "sha256": "1d177bbca426ce322871308b2c7c14c8fa285b8e2fd8bccf494906c4b117fd53",
+      "bytes": 3345
+    },
+    "linux-files-red.log.gz": {
+      "sha256": "6201e5e3c31667fca123b196ba4a475385828b7014761f513225e9b09c43ff44",
+      "bytes": 1025
+    },
+    "make-ci-inventory-red.json": {
+      "sha256": "98f8ef83c258381d274e12ab9a6d2ad8a3f3ea2f6608b69837d5d27a907297de",
+      "bytes": 173
+    },
+    "make-ci-inventory-red.log.gz": {
+      "sha256": "77686befe39ec2a2e78f53e79c7fb7bcef019733a2d618230f7504ba98918c7e",
+      "bytes": 24187
+    },
+    "make-ci.json": {
+      "sha256": "3a0c3446875d4cd885a28c2308a0760ffb5c5f5fb8e5170d6eedc16c05bd983a",
+      "bytes": 292
+    },
+    "make-ci.log.gz": {
+      "sha256": "6b6cd7ba150de2bd5191060b257ab585df7a36280d892415d793a4e5a623d89b",
+      "bytes": 46754
+    },
+    "numerical-first.log.gz": {
+      "sha256": "5e66514cefd66c35ed75711b558e945e28514bbbd2689d0fb63a1d6bc83b6e80",
+      "bytes": 1228
+    },
+    "numerical-red.log.gz": {
+      "sha256": "9cfcecee92e03d122a1e3430a59054143eecca0d70283842a06fe5fb49555eca",
+      "bytes": 2004
+    },
+    "obsolete-autodiff-rejection.log.gz": {
+      "sha256": "a79262e23e126457dca7a1dc1666ed83182b0658f73be960f9012e98f98399c1",
+      "bytes": 461
+    },
+    "preparation-cargo-environment-red.log.gz": {
+      "sha256": "8589acd51982bbcb82f63f2ce1acd4a7faac28ce84da7c834534675312cbb925",
+      "bytes": 261
+    },
+    "preparation-checkpoint-fifth-final.log.gz": {
+      "sha256": "855eb069af14d78111b8c93006a4c0322466a5a12a281ad729d11e490a91a648",
+      "bytes": 860
+    },
+    "preparation-checkpoint-fourth-regression.log.gz": {
+      "sha256": "29978d5e7ef67c85cea600171b73c503d3c858f89874a2d7bc8bee5a7a48fe92",
+      "bytes": 863
+    },
+    "preparation-checkpoint-integer-red.log.gz": {
+      "sha256": "d417377ce5159df8c65fc5445b69eddde8d59dfa0197f4284f451cfda908a498",
+      "bytes": 1447
+    },
+    "preparation-checkpoint-json-boundary-fourth.log.gz": {
+      "sha256": "d3d5a3f1e6aced99ba3f8f7d75e7dfb7fe7a08a6d8e2a0e3ad5b3bea77a8b137",
+      "bytes": 1126
+    },
+    "preparation-checkpoint-json-boundary-red.log.gz": {
+      "sha256": "dfdcc269ab3ed22d52797b026a909ec97b7ad81ccd8c4d495eb6033990dccf41",
+      "bytes": 2640
+    },
+    "preparation-checkpoint-long-multibyte-green.log.gz": {
+      "sha256": "6901d28bd4ba7790e931bb786f22cc6ccdad5f9aa7e08bf443ac3d3c7a81b54e",
+      "bytes": 815
+    },
+    "preparation-checkpoint-numeric-red.log.gz": {
+      "sha256": "3b8b8acedde065f7b3f164eb2b323174becd92c05466af60a96549bb7a83cdea",
+      "bytes": 1827
+    },
+    "preparation-checkpoint-quoting-red.log.gz": {
+      "sha256": "ab8c8daf0e4fa5fdb079dc166058dec27979eebf00d00cd95aaec5a326cbb984",
+      "bytes": 1072
+    },
+    "preparation-checkpoint-seventh-double-round.log.gz": {
+      "sha256": "64aea403fa2b3db89dc5b304a415197aa934e5e0fb49c382bb1af5c6488daaa0",
+      "bytes": 392
+    },
+    "preparation-checkpoint-seventh-final.log.gz": {
+      "sha256": "fe1b5d4492482f01da4028d0a8c2cb6bc7d3681d827244f30ca9c9a748cf4715",
+      "bytes": 391
+    },
+    "preparation-checkpoint-sixth-double-round.log.gz": {
+      "sha256": "8b95129d562b592c9491a993a16735df5c2d3dee9c95f07365ab65d4a4fb821d",
+      "bytes": 393
+    },
+    "preparation-checkpoint-sixth-numeric.log.gz": {
+      "sha256": "03a873c11d67f28e5a6ec5752687efd8f34cf5f84f0278f1a7542c779aad63b9",
+      "bytes": 399
+    },
+    "preparation-i008-checkpoint-tools-green.log.gz": {
+      "sha256": "36a7803942622637f061cbba36553d11b1642c50757940c74fc162dd84fcda7c",
+      "bytes": 320
+    },
+    "preparation-snapshot-final.log.gz": {
+      "sha256": "1bc32106bbb1b1fe98b41333e38c63d6f8927bf4e10d2206026095840394ddf4",
+      "bytes": 971
+    },
+    "preparation-snapshot-red.log.gz": {
+      "sha256": "bc7dc40bf2a0aa969b43d565ed606585740a885015d8c5f289e5b4230e2cfe1e",
+      "bytes": 1072
+    },
+    "public-red.log.gz": {
+      "sha256": "2a43c1113e1093f4be8c3423cbd6df60db97c4f68119528a8baee0dd48a6fe27",
+      "bytes": 835
+    },
+    "publication-intermediate-build-failure.log.gz": {
+      "sha256": "ffbd0cc92811ce18e9aac023eada7b7e15dc23142edaa86a286110490ebc96eb",
+      "bytes": 1068
+    },
+    "publication-red.log.gz": {
+      "sha256": "498d45c7e6f4ea42f4dce4066b064dbf2a6750e7f5b95dde839e8f6c84f83895",
+      "bytes": 1115
+    },
+    "runtime-input-verification.json": {
+      "sha256": "6ff2bb0e1f4a741389208352720cf935898b2f7bb53a3614b61fff418ee27615",
+      "bytes": 430
+    },
+    "runtime-tools-final.log.gz": {
+      "sha256": "632bdcf108584d9f19715ac5683fa25797069ba36c2a240179125e36e1fa5a8e",
+      "bytes": 321
+    },
+    "second-build-receipt.json": {
+      "sha256": "3816c80f2eae995fd357efa1ae21a4656c4fd37f1ce1ef07adcd785a169acfa2",
+      "bytes": 4835
+    },
+    "second-toolchain.json": {
+      "sha256": "edd97788e201ad32ebc3ee09c3bdf229ba263f53a8f6604d9b3a38d409952ad4",
+      "bytes": 3013
+    },
+    "semantic-inventory-final.log.gz": {
+      "sha256": "dd7dce8f4ae2f574158e25678b76a3db58b9ad0efda2425f9c430e97c3ad7e50",
+      "bytes": 284
+    },
+    "sixth-runtime-verification.json": {
+      "sha256": "d230c4b52f9569c2539148bfc496a9a5fa004e32cf04c119b81b642e123f7eca",
+      "bytes": 430
+    },
+    "source-identity.json": {
+      "sha256": "45b809235f4174277b2a194fddf53b8b168d16e1c5c6f2cab8d21ea80c51c257",
+      "bytes": 115152
+    },
+    "ste-check.json": {
+      "sha256": "a8f9786317503dd648020606f8101999d5db0372435e9986dc043a77823815dd",
+      "bytes": 4898
+    },
+    "tensors-second.log.gz": {
+      "sha256": "2f069bd0a0fe38bca3250c77360be7f786a6c0f59c9fa391b99118f8c6ebdbf5",
+      "bytes": 1340
+    },
+    "toolchain-admission-green.log.gz": {
+      "sha256": "cbfa3daf371cc40de287702d6d322b3e170f5b19e1618925814052d333040f41",
+      "bytes": 776
+    },
+    "toolchain-admission-red.log.gz": {
+      "sha256": "9618f240316754d3f563e84ff89535e8eb83dcb4fe965e55b45ba9a73c82ca42",
+      "bytes": 1288
+    },
+    "toolchain.json": {
+      "sha256": "633e0380a4c00356da25c9558c335e693ca8631be0a95b58bc94e308b619ec89",
+      "bytes": 3013
+    },
+    "training-checkpoint-final.log.gz": {
+      "sha256": "3fe4395bf0132594a120945edc14a5035bebd0b90be4b2d0c080c14d479e9e87",
+      "bytes": 1236
+    },
+    "training-first.log.gz": {
+      "sha256": "db7787d3dc96c8b69646868fa71d60d221b5c09d0a47cb6dd3490b78883f9254",
+      "bytes": 1012
+    }
+  }
+}

@@ -1,0 +1,24 @@
+[package]
+name = "lo-native-runtime"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85.1"
+
+[lib]
+name = "lo_runtime"
+crate-type = ["staticlib"]
+
+[dependencies]
+num-bigint = "=0.4.6"
+num-traits = "=0.2.19"
+serde_json = "=1.0.140"
+base64 = "=0.22.1"
+
+[profile.release]
+panic = "abort"
+opt-level = 0
+lto = false
+codegen-units = 1
+
+[profile.dev]
+panic = "abort"

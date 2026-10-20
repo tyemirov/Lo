@@ -20,6 +20,11 @@ const (
 	outputOption          = "--output"
 	targetOption          = "--target"
 	deviceBackendOption   = "--device-backend"
+	emitOption            = "--emit"
+	LLVMEmission          = "llvm"
+	codegenOption         = "--codegen"
+	toolchainOption       = "--toolchain"
+	LLVMCodegen           = "llvm"
 	ParseCommand          = "parse"
 	CheckCommand          = "check"
 	InspectCommand        = "inspect"
@@ -48,6 +53,8 @@ const (
 type invocation struct {
 	command, path, format string
 	output, target        string
+	emit                  string
+	codegen, toolchain    string
 	deviceBackend         device.BuildBackend
 	readRoots             []string
 	writeRoots            []string
@@ -71,6 +78,7 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	stepsSet := false
 	deviceSet := false
 	backendSet := false
+	emitSet := false
 	var ports []uint16
 	var httpGrants []string
 	var processGrants, processReadRoots []string
@@ -78,6 +86,39 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	processLauncherSet := false
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
+		if arg == codegenOption || arg == toolchainOption {
+			if embedded || inv.command != BuildCommand || i+1 == len(args) {
+				return inv, fmt.Errorf("%s requires a value with build", arg)
+			}
+			i++
+			if args[i] == "" {
+				return inv, fmt.Errorf("%s requires a nonempty value", arg)
+			}
+			if arg == codegenOption {
+				if inv.codegen != "" || args[i] != LLVMCodegen {
+					return inv, fmt.Errorf("--codegen requires one llvm value")
+				}
+				inv.codegen = args[i]
+			} else {
+				if inv.toolchain != "" {
+					return inv, fmt.Errorf("duplicate --toolchain")
+				}
+				inv.toolchain = args[i]
+			}
+			continue
+		}
+		if arg == emitOption {
+			if embedded || inv.command != BuildCommand || emitSet || i+1 == len(args) {
+				return inv, fmt.Errorf("--emit requires one llvm value with build")
+			}
+			i++
+			emitSet = true
+			if args[i] != LLVMEmission {
+				return inv, fmt.Errorf("unsupported build emission %q", args[i])
+			}
+			inv.emit = args[i]
+			continue
+		}
 		if arg == processAllowOption || arg == processLauncherOption || arg == processReadRootOption {
 			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
 				return inv, fmt.Errorf("%s requires a value with run or serve", arg)
@@ -233,6 +274,12 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	if inv.command == BuildCommand && inv.output == "" {
 		return inv, fmt.Errorf("build requires --output")
 	}
+	if (inv.codegen == "") != (inv.toolchain == "") {
+		return inv, fmt.Errorf("--codegen llvm and --toolchain must be supplied together")
+	}
+	if inv.codegen != "" && inv.emit != "" {
+		return inv, fmt.Errorf("--codegen produces an executable and cannot be combined with --emit")
+	}
 	if !embedded && inv.path == "" {
 		return inv, fmt.Errorf("expected one source path")
 	}
@@ -261,6 +308,9 @@ type Options interface {
 	Format() string
 	Output() string
 	Target() string
+	Emit() string
+	Codegen() string
+	Toolchain() string
 	DeviceBackend() device.BuildBackend
 	options()
 }
@@ -405,4 +455,7 @@ func Report(stderr io.Writer, format string, d diagnostic.Diagnostic, status int
 
 func (inv invocation) Output() string                     { return inv.output }
 func (inv invocation) Target() string                     { return inv.target }
+func (inv invocation) Emit() string                       { return inv.emit }
+func (inv invocation) Codegen() string                    { return inv.codegen }
+func (inv invocation) Toolchain() string                  { return inv.toolchain }
 func (inv invocation) DeviceBackend() device.BuildBackend { return inv.deviceBackend }

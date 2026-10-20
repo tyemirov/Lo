@@ -1,0 +1,118 @@
+{
+  "issue": "I006",
+  "date": "2026-10-20",
+  "status": "passed",
+  "implementation": {
+    "entry_point": "lo build --emit llvm",
+    "abi": "lo-native-1",
+    "targets": [
+      "darwin/arm64",
+      "linux/arm64"
+    ],
+    "unsupported_specialized_lowering": "autodiff is rejected until I008",
+    "full_runtime": false
+  },
+  "repository_ci": {
+    "command": "CI=1 make ci TEST_ARGS='-timeout=30m' </dev/null",
+    "exit_code": 0,
+    "elapsed_seconds": 560.408,
+    "serial_execution": true,
+    "log": "make-ci.txt.gz",
+    "interpreter_integration_seconds": 48.377,
+    "native_integration_seconds": 503.683,
+    "semantic_reporter_tests": 16
+  },
+  "components": {
+    "public_build_and_inventory": "focused-final.txt.gz",
+    "lowering_and_emitter_packages": "package-tests.txt.gz",
+    "harness_cli_tests": 4,
+    "harness_types": "mypy passed for four source files",
+    "llvm_object_cells": 44,
+    "llvm_fixture_count": 11,
+    "darwin_runtime_cases": 132,
+    "invalid_status_payload_cases": 2,
+    "llvm_source_map_checks": "passed for both targets at O0 and O2",
+    "execution": "execution.json",
+    "tools": "tools.json",
+    "tool_preparation": "Pinned archive extraction and selected member digests verified; fresh extracted clang executed."
+  },
+  "source_identity": "source-identity.json",
+  "architecture_review": "architecture-review.json",
+  "documentation_review": "documentation-review.json",
+  "limits": [
+    "Test-only C runtime uses bounded integers; arbitrary-precision production values remain I007.",
+    "Linux module, object and source-map validation only; Linux execution remains downstream.",
+    "The default executable build still uses Go.",
+    "Full language/runtime parity remains I007-I011; installed offline compile-and-link acceptance remains F017/I011."
+  ],
+  "next_issue": "I007",
+  "git_diff_check": "passed",
+  "cleanup": "cleanup.json",
+  "document_structure": "document-structure.json",
+  "artifacts": {
+    "architecture-review.json": {
+      "sha256": "f36cb94db8ba6a718e16bea845b4ae16a7a2d4b0a637e0b7e2562463e9a438a7",
+      "bytes": 1073
+    },
+    "cleanup.json": {
+      "sha256": "f4ede54165d70b961375ba79037358cc44e09ba66ff0e5ff4da38591ee5b0b8b",
+      "bytes": 296
+    },
+    "document-structure.json": {
+      "sha256": "89800d6b8e1e3974640a49982ffef4593e5f027d76a344f93d1b2757f78d0e23",
+      "bytes": 307
+    },
+    "documentation-review.json": {
+      "sha256": "46c93b6f10905c6962e5c71da816374024c95e98601e038ac500568edd1feb56",
+      "bytes": 754
+    },
+    "execution.json": {
+      "sha256": "cfb79f1c19be2a4f7c238d9174dd5c9937869bc0e075a7119c8faa330edec808",
+      "bytes": 279973
+    },
+    "execution.txt.gz": {
+      "sha256": "57d06106acf0e6ec1fbad7bc9b8c1019466c7069050f0263c3924bbd67cde816",
+      "bytes": 743
+    },
+    "fallible-flow-red.json.gz": {
+      "sha256": "8a9a433ca32d9291d8a3881ef545aceba36705523483675ab27515547f16c8cb",
+      "bytes": 9390
+    },
+    "focused-final.txt.gz": {
+      "sha256": "d13fa1cbacc62a3795164a90fec9eb0549247fc1c3b16383271bb0f44396e7d1",
+      "bytes": 711
+    },
+    "harness-tests.txt.gz": {
+      "sha256": "3af101937f50c40ba595e915d9dd8910da48e1b5efb5d47857cdcf804fa57ede",
+      "bytes": 281
+    },
+    "harness-types.txt.gz": {
+      "sha256": "872f0c5ae299217fcd9ee560d6773e5624aa62ade6dd80937bc8fb7a78883caf",
+      "bytes": 63
+    },
+    "make-ci.txt.gz": {
+      "sha256": "0f9e66d34345b60badb05e0a3b8d11931d6e16657579242c276333509c13ebda",
+      "bytes": 1082
+    },
+    "package-tests.txt.gz": {
+      "sha256": "bb9b382bfd98a6b94f24569678b2056e81dafb1fc34195efca8fedfe598daccc",
+      "bytes": 256
+    },
+    "public-build-red.txt.gz": {
+      "sha256": "b7e8cb6a0bf90f23905edf7b02bb3be52ec8a8fb9be0110fe3dbf72c4d023591",
+      "bytes": 1031
+    },
+    "source-identity.json": {
+      "sha256": "8fc5c430ac3f11b4d2e3f4ddb845eee13816eeeab604779b33df8b0df935a276",
+      "bytes": 3888
+    },
+    "status-payload-red.json.gz": {
+      "sha256": "2eceb3eaebf5bab169444a9fefd7077d19ad29ac3c9dafd9fafff53a1776eda0",
+      "bytes": 2302
+    },
+    "tools.json": {
+      "sha256": "7aa60dd8e33960de5f0ab1207f617c073a032dd16ccac7621d31588482298ac5",
+      "bytes": 1832
+    }
+  }
+}
