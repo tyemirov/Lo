@@ -1,0 +1,19 @@
+{
+  "role": "mpr-architect",
+  "agent": "/root/architecture",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_assignment": "fixed native role metadata; per-run telemetry unavailable",
+  "status": "no_material_findings",
+  "verified": [
+    "385 semantic references and both mandatory gates in both execution lanes",
+    "all semantic evidence artifacts and 329 current source digests",
+    "four backend and two ABI qualification cells",
+    "platform input digests, authored TAPI digests, local documentation links",
+    "unique issue IDs, dependency existence, acyclic dependency graph",
+    "Darwin-only process availability preserved",
+    "full distribution and Linux-host execution acceptance retained in F017/I011"
+  ],
+  "ci_at_review": "initial source review pending CI; final closure review verified the completed CI receipt and log",
+  "closure_review": "accepted; no overclaim or material finding"
+}

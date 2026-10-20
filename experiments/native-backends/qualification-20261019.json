@@ -1,0 +1,709 @@
+{
+  "qualification": "passed",
+  "date": "2026-10-19",
+  "host": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "machine": "arm64"
+  },
+  "scope": "handwritten generated code, C runtime ABI, C allocation/callback/release, platform C runtime links; not Lo source frontend or complete Lo runtime",
+  "offline_isolation": {
+    "profile": "(version 1)\n(deny default (with no-log))\n(allow process-fork process-exec)\n(allow sysctl-read)\n(allow file-read* (subpath \"/Users/tyemirov/Development/Research/Lo\"))\n(allow file-read* (subpath \"/usr/lib\") (subpath \"/System/Library\"))\n(allow file-write* (subpath \"/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution\"))\n(allow file-read-metadata file-test-existence (literal \"/Users/tyemirov/Development/Research\") (literal \"/Users/tyemirov/Development\") (literal \"/Users/tyemirov\") (literal \"/Users\") (literal \"/\"))\n(allow file-read-data (literal \"/\"))\n(deny network* (with no-log))\n",
+    "guard": {
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/isolation-probe",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/readonly-sentinel",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution"
+      ],
+      "exit_code": 0,
+      "seconds": 0.021214,
+      "stderr": "",
+      "stdout": "{\"readonly_write\":\"denied\",\"network\":\"denied\",\"descendant\":\"denied\",\"writable_state\":\"allowed\"}\n"
+    },
+    "filesystem": "Lo repository and macOS OS runtime roots; exact ancestor metadata and root directory data; writable execution state only",
+    "network": "denied for all descendants"
+  },
+  "matrix": {
+    "cells": [
+      {
+        "backend": "llvm",
+        "passed": true,
+        "stages": {
+          "link": {
+            "artifact": {
+              "bytes": 34304,
+              "format": "Mach-O",
+              "kind": "executable",
+              "sha256": "72ac8f3f3100f704ae94d251c7e058e613ab7f0637380886185b3396a6602402",
+              "target": "aarch64-apple-darwin"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld64.lld",
+              "-arch",
+              "arm64",
+              "-platform_version",
+              "macos",
+              "27.0",
+              "27.0",
+              "-syslibroot",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+              "-lSystem",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin-runtime.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin.o",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin"
+            ],
+            "exit_code": 0,
+            "seconds": 0.031121,
+            "stderr": "",
+            "stdout": ""
+          },
+          "object": {
+            "artifact": {
+              "bytes": 1896,
+              "format": "Mach-O",
+              "kind": "object",
+              "sha256": "4af14ea58af6cc800bb9cf7355d262eb56f10cbea304472ed4e9993912b2b71b",
+              "target": "aarch64-apple-darwin"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llc",
+              "-mtriple=aarch64-apple-darwin",
+              "-filetype=obj",
+              "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/probe.ll",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.036758,
+            "stderr": "",
+            "stdout": ""
+          },
+          "run": {
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot"
+            ],
+            "exit_code": 0,
+            "seconds": 0.035191,
+            "stderr": "",
+            "stdout": "23 0\n0 7\nruntime_calls 1\n"
+          },
+          "runtime_object": {
+            "artifact": {
+              "bytes": 4120,
+              "format": "Mach-O",
+              "kind": "object",
+              "sha256": "ac3da357366b73198fb15d04164bddb6d64a6d4eaad74d57240db01d3a3b41cc",
+              "target": "aarch64-apple-darwin"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+              "--target=aarch64-apple-darwin",
+              "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+              "-g",
+              "-mmacosx-version-min=27.0",
+              "-c",
+              "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/runtime.c",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin-runtime.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.05259,
+            "stderr": "",
+            "stdout": ""
+          }
+        },
+        "target": "aarch64-apple-darwin"
+      },
+      {
+        "backend": "cranelift",
+        "passed": true,
+        "stages": {
+          "link": {
+            "artifact": {
+              "bytes": 34080,
+              "format": "Mach-O",
+              "kind": "executable",
+              "sha256": "d0125f1bc324366b272391da0ab552ffc1207bc6fcc3385c0a91b5400427be9f",
+              "target": "aarch64-apple-darwin"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld64.lld",
+              "-arch",
+              "arm64",
+              "-platform_version",
+              "macos",
+              "27.0",
+              "27.0",
+              "-syslibroot",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+              "-lSystem",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin-runtime.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin.o",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin"
+            ],
+            "exit_code": 0,
+            "seconds": 0.022411,
+            "stderr": "",
+            "stdout": ""
+          },
+          "object": {
+            "artifact": {
+              "bytes": 432,
+              "format": "Mach-O",
+              "kind": "object",
+              "sha256": "668c8d29885ecd33d12144616b8df971cce00350dad1bd54613f875e9b0a04a9",
+              "target": "aarch64-apple-darwin"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/lo-native-probe",
+              "aarch64-apple-darwin",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.016383,
+            "stderr": "",
+            "stdout": ""
+          },
+          "run": {
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot"
+            ],
+            "exit_code": 0,
+            "seconds": 0.036264,
+            "stderr": "",
+            "stdout": "23 0\n0 7\nruntime_calls 1\n"
+          },
+          "runtime_object": {
+            "artifact": {
+              "bytes": 4120,
+              "format": "Mach-O",
+              "kind": "object",
+              "sha256": "ac3da357366b73198fb15d04164bddb6d64a6d4eaad74d57240db01d3a3b41cc",
+              "target": "aarch64-apple-darwin"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+              "--target=aarch64-apple-darwin",
+              "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+              "-g",
+              "-mmacosx-version-min=27.0",
+              "-c",
+              "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/runtime.c",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin-runtime.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.031197,
+            "stderr": "",
+            "stdout": ""
+          }
+        },
+        "target": "aarch64-apple-darwin"
+      },
+      {
+        "backend": "llvm",
+        "passed": true,
+        "stages": {
+          "link": {
+            "artifact": {
+              "bytes": 8960,
+              "format": "ELF",
+              "kind": "executable",
+              "sha256": "275ba82218b3768d0fdc864051d749273047ddaa8282e631245234d8c2fb87a5",
+              "target": "aarch64-unknown-linux-gnu"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld.lld",
+              "-m",
+              "aarch64elf",
+              "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+              "-dynamic-linker",
+              "/lib/ld-linux-aarch64.so.1",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crt1.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crti.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu-runtime.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu.o",
+              "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu",
+              "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/lib/aarch64-linux-gnu",
+              "-lc",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crtn.o",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu"
+            ],
+            "exit_code": 0,
+            "seconds": 0.026037,
+            "stderr": "",
+            "stdout": ""
+          },
+          "object": {
+            "artifact": {
+              "bytes": 2608,
+              "format": "ELF",
+              "kind": "object",
+              "sha256": "720dced58a89c3ad33533abaf126e42e34eb17da945526c89e54e208d06f001b",
+              "target": "aarch64-unknown-linux-gnu"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llc",
+              "-mtriple=aarch64-unknown-linux-gnu",
+              "-filetype=obj",
+              "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/probe.ll",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.024208,
+            "stderr": "",
+            "stdout": ""
+          },
+          "run": {
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot"
+            ],
+            "exit_code": 0,
+            "seconds": 0.978317,
+            "stderr": "",
+            "stdout": "23 0\n0 7\nruntime_calls 1\n"
+          },
+          "runtime_object": {
+            "artifact": {
+              "bytes": 5888,
+              "format": "ELF",
+              "kind": "object",
+              "sha256": "5966a9a27f2497ae107921244fea138c023b0b32415a15412ea52dc0a73a67fa",
+              "target": "aarch64-unknown-linux-gnu"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+              "--target=aarch64-unknown-linux-gnu",
+              "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+              "-g",
+              "-c",
+              "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/runtime.c",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu-runtime.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.030954,
+            "stderr": "",
+            "stdout": ""
+          }
+        },
+        "target": "aarch64-unknown-linux-gnu"
+      },
+      {
+        "backend": "cranelift",
+        "passed": true,
+        "stages": {
+          "link": {
+            "artifact": {
+              "bytes": 8288,
+              "format": "ELF",
+              "kind": "executable",
+              "sha256": "8f60457e01d9dfb176895bbb022c70fe4ac433e86a2b4de2fccfceb994e2d349",
+              "target": "aarch64-unknown-linux-gnu"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld.lld",
+              "-m",
+              "aarch64elf",
+              "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+              "-dynamic-linker",
+              "/lib/ld-linux-aarch64.so.1",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crt1.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crti.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu-runtime.o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu.o",
+              "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu",
+              "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/lib/aarch64-linux-gnu",
+              "-lc",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crtn.o",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu"
+            ],
+            "exit_code": 0,
+            "seconds": 0.024743,
+            "stderr": "",
+            "stdout": ""
+          },
+          "object": {
+            "artifact": {
+              "bytes": 816,
+              "format": "ELF",
+              "kind": "object",
+              "sha256": "8f1d6852895bbea39c55d181fe636194e8c0a050c5398b688f07f44f8a2a7569",
+              "target": "aarch64-unknown-linux-gnu"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/lo-native-probe",
+              "aarch64-unknown-linux-gnu",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.015265,
+            "stderr": "",
+            "stdout": ""
+          },
+          "run": {
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot"
+            ],
+            "exit_code": 0,
+            "seconds": 1.026907,
+            "stderr": "",
+            "stdout": "23 0\n0 7\nruntime_calls 1\n"
+          },
+          "runtime_object": {
+            "artifact": {
+              "bytes": 5888,
+              "format": "ELF",
+              "kind": "object",
+              "sha256": "5966a9a27f2497ae107921244fea138c023b0b32415a15412ea52dc0a73a67fa",
+              "target": "aarch64-unknown-linux-gnu"
+            },
+            "command": [
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+              "-f",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+              "--target=aarch64-unknown-linux-gnu",
+              "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+              "-g",
+              "-c",
+              "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/runtime.c",
+              "-o",
+              "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu-runtime.o"
+            ],
+            "exit_code": 0,
+            "seconds": 0.032002,
+            "stderr": "",
+            "stdout": ""
+          }
+        },
+        "target": "aarch64-unknown-linux-gnu"
+      }
+    ],
+    "expected_stdout": "23 0\n0 7\nruntime_calls 1\n",
+    "historical_evidence_reused": false,
+    "inputs": {
+      "isolation_bundle_sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad",
+      "manifest_sha256": "edc1a5dc7a8e1f1f8a995c7410f17c2e983121bfc95236d1ce20f243cd5970c5",
+      "source_sha256": {
+        "cranelift/Cargo.lock": "01d5451805716dba051746a5ae77381c9ba7a37a83fd5dabd3656e9027be9d43",
+        "cranelift/Cargo.toml": "c3bae873f7bf63fd3681b49736afe4a984aed8767262130f99b8d45cc2d059cb",
+        "cranelift/src/main.rs": "eac363f33734900c2110b5083ef1b35f43120454140b3a473d1c4523c9415e92",
+        "guest_init.c": "236145390aef2a6ac8344cbf31015cf7bb637d5d676f6761be54cb6ee6663e5c",
+        "isolation_probe.c": "ae34ec421ec2717ba801a670381d672dcc246ca3dcb96656f31c924cf182c93c",
+        "probe.ll": "1e3d6aa898c4b876e0b32c448af08746a78245aa7407e54730283135e212bbdb",
+        "probe.py": "3f131e6cc2e1558f16b8b4530aab9b788f5b87a66f27637618e4e3b98f9a2b85",
+        "runner.rs": "ed3e69880248207f6835d3665b86f60b1a7d3d9e6907159cfa75b03646bf7723",
+        "runtime.c": "4f25463ce3760ff860a1004848764db5d308189ae487d414e504ff25d2f8529e"
+      },
+      "targets": {
+        "aarch64-apple-darwin": {
+          "bundle_sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad",
+          "sysroot_sha256": "c027f99bed6821a469226f9bd09428f104b3674931b4a5eae597718654fbde16"
+        },
+        "aarch64-unknown-linux-gnu": {
+          "bundle_sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad",
+          "sysroot_sha256": "6bfa870fb90204027f2578e30b0f7aa535cff377b96dd17fbdbfed5f745d4a2d"
+        }
+      }
+    },
+    "isolation_probe": {
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/isolation-probe",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/readonly-sentinel",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution"
+      ],
+      "exit_code": 0,
+      "seconds": 0.021214,
+      "stderr": "",
+      "stdout": "{\"readonly_write\":\"denied\",\"network\":\"denied\",\"descendant\":\"denied\",\"writable_state\":\"allowed\"}\n"
+    },
+    "qualification": "passed"
+  },
+  "measurements": [
+    {
+      "backend": "llvm",
+      "target": "aarch64-apple-darwin",
+      "passed": true,
+      "stage_seconds": {
+        "link": 0.031121,
+        "object": 0.036758,
+        "run": 0.035191,
+        "runtime_object": 0.05259
+      },
+      "artifact_bytes": {
+        "link": 34304,
+        "object": 1896,
+        "runtime_object": 4120
+      },
+      "peak_rss_bytes": {
+        "object": 27803648,
+        "link": 16302080
+      }
+    },
+    {
+      "backend": "cranelift",
+      "target": "aarch64-apple-darwin",
+      "passed": true,
+      "stage_seconds": {
+        "link": 0.022411,
+        "object": 0.016383,
+        "run": 0.036264,
+        "runtime_object": 0.031197
+      },
+      "artifact_bytes": {
+        "link": 34080,
+        "object": 432,
+        "runtime_object": 4120
+      },
+      "peak_rss_bytes": {
+        "object": 3686400,
+        "link": 16269312
+      }
+    },
+    {
+      "backend": "llvm",
+      "target": "aarch64-unknown-linux-gnu",
+      "passed": true,
+      "stage_seconds": {
+        "link": 0.026037,
+        "object": 0.024208,
+        "run": 0.978317,
+        "runtime_object": 0.030954
+      },
+      "artifact_bytes": {
+        "link": 8960,
+        "object": 2608,
+        "runtime_object": 5888
+      },
+      "peak_rss_bytes": {
+        "object": 28033024,
+        "link": 18137088
+      }
+    },
+    {
+      "backend": "cranelift",
+      "target": "aarch64-unknown-linux-gnu",
+      "passed": true,
+      "stage_seconds": {
+        "link": 0.024743,
+        "object": 0.015265,
+        "run": 1.026907,
+        "runtime_object": 0.032002
+      },
+      "artifact_bytes": {
+        "link": 8288,
+        "object": 816,
+        "runtime_object": 5888
+      },
+      "peak_rss_bytes": {
+        "object": 3702784,
+        "link": 17989632
+      }
+    }
+  ],
+  "tools": {
+    "tool_bytes": {
+      "bin/clang": 173534464,
+      "bin/lld": 126695856,
+      "bin/llc": 115484624,
+      "bin/llvm-objdump": 34821856,
+      "bin/isolation-probe": 34112,
+      "bin/runner": 551880,
+      "bin/sandbox-exec": 100720,
+      "bin/ld.lld": 126695856,
+      "bin/llvm-nm": 38274672,
+      "bin/lo-native-probe": 2825744,
+      "bin/llvm-ar": 37214928,
+      "bin/llvm-readobj": 7673008,
+      "bin/llvm-dwarfdump": 27397360,
+      "bin/ld64.lld": 126695856
+    },
+    "bundle_logical_bytes": 955199772,
+    "sysroot_logical_bytes": {
+      "darwin-sysroot": 274,
+      "linux-sysroot": 35454059
+    },
+    "memory": "Compiler and linker process-tree peak RSS measured; emulator memory not measured.",
+    "environment": "Darwin arm64 host; Linux arm64 QEMU TCG software guest"
+  },
+  "input_manifest": {
+    "isolation": {
+      "kind": "sandbox-exec",
+      "bundle": {
+        "path": "_scratch/i004-20261019/toolchain",
+        "sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad"
+      },
+      "tool": {
+        "path": "_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "sha256": "cb4f707a8adf5a1108c4e4a58a1463421cd5bfd615055ccdfa2fe8bdae76c0eb",
+        "version": "Apple sandbox-exec 27.0.0 (repository copy, ad-hoc signed)"
+      },
+      "probe": {
+        "path": "_scratch/i004-20261019/toolchain/bin/isolation-probe",
+        "sha256": "28c35f14c135ddf463a50b0f202fcad479c4782bf39c413cd16ffed4f4adcbe7",
+        "version": "Lo isolation probe source SHA ae34ec421ec2717ba801a670381d672dcc246ca3dcb96656f31c924cf182c93c",
+        "contract": "readonly-sentinel,state-directory"
+      }
+    },
+    "targets": {
+      "aarch64-apple-darwin": {
+        "bundle": {
+          "path": "_scratch/i004-20261019/toolchain",
+          "sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad"
+        },
+        "sysroot": {
+          "path": "_scratch/i004-20261019/darwin-sysroot",
+          "sha256": "c027f99bed6821a469226f9bd09428f104b3674931b4a5eae597718654fbde16"
+        },
+        "llvm": {
+          "path": "_scratch/i004-20261019/toolchain/bin/llc",
+          "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e",
+          "version": "LLVM21.1.8"
+        },
+        "cranelift": {
+          "path": "_scratch/i004-20261019/toolchain/bin/lo-native-probe",
+          "sha256": "a2acc31db01b9fb9c8bce5f5b278aadc1a038a2f4819276d0bee82993eba6e13",
+          "version": "Cranelift0.116.1 Rust1.85.1"
+        },
+        "cc": {
+          "path": "_scratch/i004-20261019/toolchain/bin/clang",
+          "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a",
+          "version": "Clang21.1.8"
+        },
+        "linker": {
+          "path": "_scratch/i004-20261019/toolchain/bin/ld64.lld",
+          "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+          "version": "LLD21.1.8"
+        },
+        "runner": {
+          "path": "_scratch/i004-20261019/toolchain/bin/runner",
+          "sha256": "1f95035f99950e925e77f8cc2eec82afbd8637c11e8d38e6226ead19a9388dbd",
+          "version": "Lo runner Rust1.85.1 QEMU11.1.2 TCG",
+          "contract": "executable,sysroot"
+        }
+      },
+      "aarch64-unknown-linux-gnu": {
+        "bundle": {
+          "path": "_scratch/i004-20261019/toolchain",
+          "sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad"
+        },
+        "sysroot": {
+          "path": "_scratch/i004-20261019/linux-sysroot",
+          "sha256": "6bfa870fb90204027f2578e30b0f7aa535cff377b96dd17fbdbfed5f745d4a2d"
+        },
+        "llvm": {
+          "path": "_scratch/i004-20261019/toolchain/bin/llc",
+          "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e",
+          "version": "LLVM21.1.8"
+        },
+        "cranelift": {
+          "path": "_scratch/i004-20261019/toolchain/bin/lo-native-probe",
+          "sha256": "a2acc31db01b9fb9c8bce5f5b278aadc1a038a2f4819276d0bee82993eba6e13",
+          "version": "Cranelift0.116.1 Rust1.85.1"
+        },
+        "cc": {
+          "path": "_scratch/i004-20261019/toolchain/bin/clang",
+          "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a",
+          "version": "Clang21.1.8"
+        },
+        "linker": {
+          "path": "_scratch/i004-20261019/toolchain/bin/ld.lld",
+          "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+          "version": "LLD21.1.8"
+        },
+        "runner": {
+          "path": "_scratch/i004-20261019/toolchain/bin/runner",
+          "sha256": "1f95035f99950e925e77f8cc2eec82afbd8637c11e8d38e6226ead19a9388dbd",
+          "version": "Lo runner Rust1.85.1 QEMU11.1.2 TCG",
+          "contract": "executable,sysroot"
+        }
+      }
+    }
+  },
+  "public_cli_tests": {
+    "command": "make test-native-backend-probe </dev/null",
+    "passed": 21,
+    "failed": 0
+  },
+  "limits": [
+    "Darwin arm64 host generates both targets; Linux arm64 runs in QEMU TCG software emulation. Linux-host code generation not qualified.",
+    "No installed Lo distribution or Lo-source lowering is qualified. F017 and I011 remain separate.",
+    "LLVM object DWARF source lines inspected; Cranelift object has no source DWARF in this experiment. Distributed debug companion files are not qualified.",
+    "Preparation uses the host Apple compiler and SDK to build experiment tools; isolated compile/link/execution uses repository-local inputs and OS runtime libraries only.",
+    "QEMU, its dependencies, kernel, archive helper and isolation helper are validation inputs, not selected compiler distribution payload."
+  ],
+  "repository_target_validation": {
+    "command": [
+      "make",
+      "prepare-native-backend-probe",
+      "experiment-native-backends",
+      "NATIVE_BACKEND_INPUTS=_scratch/i004-20261019/inputs.json"
+    ],
+    "exit_code": 0
+  }
+}

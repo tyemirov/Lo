@@ -1,0 +1,6 @@
+thread 2 10 0 23
+success 0 0 23
+limit 2 9 1
+error 1 7 -7
+callback 1 17 -17
+cleanup 0 callbacks 3

@@ -1,6 +1,7 @@
 .PHONY: tool-state
 GO := go
 override LO_BUILD_ROOT := $(abspath $(CURDIR)/_scratch/build-state)
+override HOME := $(LO_BUILD_ROOT)/home
 override TMPDIR := $(LO_BUILD_ROOT)/tmp
 override TMP := $(TMPDIR)
 override TEMP := $(TMPDIR)
@@ -9,8 +10,12 @@ override GOMODCACHE := $(LO_BUILD_ROOT)/modules
 override GOPATH := $(LO_BUILD_ROOT)/gopath
 override GOTOOLCHAIN := local
 override GOENV := off
+override GOWORK := off
 override GOTELEMETRY := off
 override XDG_CACHE_HOME := $(LO_BUILD_ROOT)/cache
+override XDG_CONFIG_HOME := $(LO_BUILD_ROOT)/config
+override XDG_DATA_HOME := $(LO_BUILD_ROOT)/data
+override XDG_STATE_HOME := $(LO_BUILD_ROOT)/state
 override CLANG_MODULE_CACHE_PATH := $(LO_BUILD_ROOT)/clang
 override CCACHE_DIR := $(LO_BUILD_ROOT)/ccache
 override UV_CACHE_DIR := $(LO_BUILD_ROOT)/uv-cache
@@ -20,12 +25,13 @@ override UV_TOOL_BIN_DIR := $(LO_BUILD_ROOT)/uv-bin
 override PIP_CACHE_DIR := $(LO_BUILD_ROOT)/pip-cache
 override PYTHONPYCACHEPREFIX := $(LO_BUILD_ROOT)/python-cache
 override CI := 1
-export LO_BUILD_ROOT TMPDIR TMP TEMP GOCACHE GOMODCACHE GOPATH GOTOOLCHAIN GOENV GOTELEMETRY XDG_CACHE_HOME CLANG_MODULE_CACHE_PATH CCACHE_DIR UV_CACHE_DIR UV_PYTHON_INSTALL_DIR UV_TOOL_DIR UV_TOOL_BIN_DIR PIP_CACHE_DIR PYTHONPYCACHEPREFIX CI
+export LO_BUILD_ROOT HOME TMPDIR TMP TEMP GOCACHE GOMODCACHE GOPATH GOTOOLCHAIN GOENV GOWORK GOTELEMETRY XDG_CACHE_HOME XDG_CONFIG_HOME XDG_DATA_HOME XDG_STATE_HOME CLANG_MODULE_CACHE_PATH CCACHE_DIR UV_CACHE_DIR UV_TOOL_DIR UV_TOOL_BIN_DIR UV_PYTHON_INSTALL_DIR PIP_CACHE_DIR PYTHONPYCACHEPREFIX CI
 TEST_ARGS ?=
 BENCH_COUNT ?= 10
 BENCH_TIME ?= 300ms
 NATIVE_BENCH_WORK ?= _scratch/f001-native/benchmark
 NATIVE_BENCH_LANE ?= all
+NATIVE_BACKEND_INPUTS ?= _scratch/native-backends/inputs.json
 
 .DEFAULT_GOAL := build
 
@@ -104,18 +110,25 @@ benchmark-training-profile: build | tool-state
 
 .PHONY: prepare-native-backend-probe experiment-native-backends check-native-backend-probe test-native-backend-probe
 prepare-native-backend-probe: | tool-state
-	CI=1 python3 experiments/native-backends/probe.py bootstrap </dev/null
+	python3 -B experiments/native-backends/probe.py prepare --inputs "$(NATIVE_BACKEND_INPUTS)" </dev/null
 
 experiment-native-backends: | tool-state
-	CI=1 python3 experiments/native-backends/probe.py run </dev/null
+	python3 -B experiments/native-backends/probe.py run --inputs "$(NATIVE_BACKEND_INPUTS)" </dev/null
 
 check-native-backend-probe: | tool-state
-	CI=1 python3 experiments/native-backends/probe.py check </dev/null
+	python3 -B experiments/native-backends/probe.py check </dev/null
 
 test-native-backend-probe: | tool-state
-	CI=1 uv run --with pytest==8.3.5 python -m pytest -q experiments/native-backends/test_probe.py </dev/null
+	UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q experiments/native-backends/test_probe.py </dev/null
 
-ci: verify-runtime-bundle fmt lint test test-native build
+.PHONY: test-semantic-report test-semantic-migration
+test-semantic-report: | tool-state
+	python3 -B tools/semanticcoverage/test_report.py </dev/null
+
+test-semantic-migration: runtime-bundle test-semantic-report | tool-state
+	python3 -B tools/semanticcoverage/run.py run --output-root "$(LO_BUILD_ROOT)" </dev/null
+
+ci: verify-runtime-bundle fmt lint test test-native build test-semantic-report
 
 tool-state:
-	mkdir -p "$(LO_BUILD_ROOT)" "$(TMPDIR)" "$(GOCACHE)" "$(GOMODCACHE)" "$(GOPATH)" "$(XDG_CACHE_HOME)" "$(CLANG_MODULE_CACHE_PATH)" "$(CCACHE_DIR)" </dev/null
+	mkdir -p "$(LO_BUILD_ROOT)" "$(HOME)" "$(TMPDIR)" "$(GOCACHE)" "$(GOMODCACHE)" "$(GOPATH)" "$(XDG_CACHE_HOME)" "$(XDG_CONFIG_HOME)" "$(XDG_DATA_HOME)" "$(XDG_STATE_HOME)" "$(CLANG_MODULE_CACHE_PATH)" "$(CCACHE_DIR)" </dev/null

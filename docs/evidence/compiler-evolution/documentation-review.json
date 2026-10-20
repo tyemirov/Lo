@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-19",
+  "reference_url": "https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf",
+  "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+  "reference_verified": true,
+  "review_scope": [
+    "docs/native-runtime-contract.md",
+    "docs/native-backend-experiment.md",
+    "docs/semantic-migration.md",
+    "changed prose in docs/standalone-compiler-plan.md",
+    "changed P005/I004/I005/I009 issue text",
+    "added native compiler terminology"
+  ],
+  "classification": [
+    "descriptive architecture and evidence",
+    "procedural requirements and reproduction"
+  ],
+  "producer_review": [
+    "Part 1 writing rules",
+    "Part 2 word meanings and parts of speech",
+    "technical terms",
+    "facts and evidence limits"
+  ],
+  "mechanical_findings_in_changed_prose": 0,
+  "preserved_unchanged_tracker_findings": 12,
+  "full_unchanged_tracker_compliance_claimed": false,
+  "governor_check": {
+    "exit_code": 1,
+    "preserved_unchanged_managed_files": 5,
+    "changed_glossary_findings": 0,
+    "issue_format_matches": true
+  },
+  "document_sha256": {
+    ".mprlab/TERMINOLOGY.md": "e2fcbfb5f315b4a33806d7889c9f2ce165650ddee196e394b68e308a62619508",
+    "ISSUES.md": "f11853cfe1220ef2fb2a7caf51d80b351337841f86ebfd635db77e9190647770",
+    "docs/native-backend-experiment.md": "a138476a103adfed3d19678397979c56c503eb839596af2c598b1275e7c78fce",
+    "docs/native-runtime-contract.md": "cf87e728e8de1a0b6d00bd92f441f92569f1b707f3a9eae0b085cf2ab881c0c2",
+    "docs/semantic-migration.md": "364eb073c598c7251c7045c275f59f111b1ecaeaed349c40a603d85fe36b3ba8",
+    "docs/standalone-compiler-plan.md": "ed6a298e2bad599d2d2e5af36877d5220dc7582ebb3b5208692fa09cfedd70f0"
+  }
+}

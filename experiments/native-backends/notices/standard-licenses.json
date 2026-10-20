@@ -1,0 +1,17 @@
+[
+  {
+    "path": "experiments/native-backends/notices/LLVM-LICENSE.txt",
+    "url": "https://llvm.org/LICENSE.txt",
+    "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+  },
+  {
+    "path": "experiments/native-backends/notices/GPL-2.0.txt",
+    "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
+    "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+  },
+  {
+    "path": "experiments/native-backends/notices/LGPL-2.1.txt",
+    "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt",
+    "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+  }
+]

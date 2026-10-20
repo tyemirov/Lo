@@ -1,0 +1,108 @@
+{
+  "artifact_red": {
+    "failed": 3,
+    "output": ".............FFF                                                         [100%]\n=================================== FAILURES ===================================\n__________________ test_inspect_artifact_rejects_empty_output __________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmpueddlbzb')\n\n    def test_inspect_artifact_rejects_empty_output(workspace):\n        (workspace / 'empty.o').write_bytes(b'')\n        result = invoke(workspace, 'inspect-artifact', '--path', 'empty.o', '--target', TARGETS[0], '--kind', 'object')\n>       assert result.returncode == 1\nE       assert 2 == 1\nE        +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmplz3kML/bin...} ...\\nprobe.py: error: argument action: invalid choice: 'inspect-artifact' (choose from 'check', 'prepare', 'run')\\n\").returncode\n\nexperiments/native-backends/test_probe.py:163: AssertionError\n______________ test_inspect_artifact_rejects_wrong_target_format _______________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmpr959es1f')\n\n    def test_inspect_artifact_rejects_wrong_target_format(workspace):\n        (workspace / 'wrong.o').write_bytes(b'not an arm64 object')\n        result = invoke(workspace, 'inspect-artifact', '--path', 'wrong.o', '--target', TARGETS[1], '--kind', 'object')\n>       assert result.returncode == 1\nE       assert 2 == 1\nE        +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmplz3kML/bin...} ...\\nprobe.py: error: argument action: invalid choice: 'inspect-artifact' (choose from 'check', 'prepare', 'run')\\n\").returncode\n\nexperiments/native-backends/test_probe.py:170: AssertionError\n________________ test_exit_zero_without_output_cannot_pass_run _________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp3i_wj7g4')\ndeclared_inputs = {'isolation': {'bundle': {'path': 'inputs/toolchain', 'sha256': '3bb365f83e55f5f0e941c3f128a61558d4d14fd8915752c7c50bb...tool', 'sha256': 'a901e0af0b8f4da8cfb4cb7f2108205aa6c8914199c372485efcad5a8c68fdc5', 'version': 'fixture-only'}, ...}}}\n\n    def test_exit_zero_without_output_cannot_pass_run(workspace, declared_inputs):\n        import importlib.util\n        spec = importlib.util.spec_from_file_location('contained_probe', workspace / 'experiments/native-backends/probe.py')\n        module = importlib.util.module_from_spec(spec)\n        sys.modules[spec.name] = module\n        spec.loader.exec_module(module)\n        inputs = module.Inputs.read('inputs.json')\n        module.prepare(inputs)\n        def exit_zero(*args):\n            return dict(exit_code=0, stdout='23 0\\n0 7\\n', stderr='')\n        with pytest.raises(module.InputError, match='missing artifact'):\n>           module.run(inputs, execute_command=exit_zero)\nE           TypeError: run() got an unexpected keyword argument 'execute_command'\n\nexperiments/native-backends/test_probe.py:185: TypeError\n----------------------------- Captured stdout call -----------------------------\n{\"qualification\": \"not-run\", \"prepared\": true, \"receipt\": \"_scratch/native-backend-probe/prepared.json\"}\n=========================== short test summary info ============================\nFAILED experiments/native-backends/test_probe.py::test_inspect_artifact_rejects_empty_output - assert 2 == 1\n +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmplz3kML/bin...} ...\\nprobe.py: error: argument action: invalid choice: 'inspect-artifact' (choose from 'check', 'prepare', 'run')\\n\").returncode\nFAILED experiments/native-backends/test_probe.py::test_inspect_artifact_rejects_wrong_target_format - assert 2 == 1\n +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmplz3kML/bin...} ...\\nprobe.py: error: argument action: invalid choice: 'inspect-artifact' (choose from 'check', 'prepare', 'run')\\n\").returncode\nFAILED experiments/native-backends/test_probe.py::test_exit_zero_without_output_cannot_pass_run - TypeError: run() got an unexpected keyword argument 'execute_command'\n3 failed, 13 passed in 0.84s\n",
+    "passed": 13
+  },
+  "assignment": {
+    "actual": "host role assignment; runtime telemetry unavailable",
+    "agent": "/root/backend_experiment",
+    "requested": "mpr-worker gpt-6.1-sol/medium"
+  },
+  "c_guard_syntax": {
+    "command": [
+      "/usr/bin/clang",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fsyntax-only",
+      "experiments/native-backends/isolation_probe.c"
+    ],
+    "exit_code": 0
+  },
+  "current_backend_run": {
+    "exit_code": 1,
+    "qualification": "not-run",
+    "stderr": "native backend probe: missing repository input: inputs/native-backends/isolation\n",
+    "stdout": ""
+  },
+  "final_tests": {
+    "command": "make test-native-backend-probe </dev/null",
+    "failed": 0,
+    "fixture_parent": "_scratch/build-state/tmp",
+    "fixtures": "repository-local; no LLVM or Cranelift execution",
+    "output": ".....................                                                    [100%]\n21 passed in 0.84s\n",
+    "passed": 21,
+    "provider": "offline repository-local pytest cache",
+    "subprocess_temporary_environment": [
+      "HOME",
+      "TMPDIR",
+      "TMP",
+      "TEMP"
+    ]
+  },
+  "historical_four_cell_evidence_reused": false,
+  "initial_red": {
+    "failed": 7,
+    "output": "FFFFFFF                                                                  [100%]\n=================================== FAILURES ===================================\n______________ test_check_does_not_requalify_historical_evidence _______________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp9mzc943w')\n\n    def test_check_does_not_requalify_historical_evidence(workspace):\n        result = invoke(workspace, 'check')\n>       assert result.returncode == 0, result.stderr\nE       AssertionError: native backend probe: missing source input: Dockerfile\nE         \nE       assert 1 == 0\nE        +  where 1 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...ckends/probe.py', 'check'], returncode=1, stdout='', stderr='native backend probe: missing source input: Dockerfile\\n').returncode\n\nexperiments/native-backends/test_probe.py:38: AssertionError\n___________________ test_run_requires_declared_local_inputs ____________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp8ehavxmn')\n\n    def test_run_requires_declared_local_inputs(workspace):\n        result = invoke(workspace, 'run')\n        assert result.returncode != 0\n>       assert '--inputs' in result.stderr\nE       AssertionError: assert '--inputs' in 'native backend probe: missing bootstrap input: /Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp8ehavxmn/_scratch/native-backends-20261016/bootstrap.json; run bootstrap explicitly\\n'\nE        +  where 'native backend probe: missing bootstrap input: /Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp8ehavxmn/_scratch/native-backends-20261016/bootstrap.json; run bootstrap explicitly\\n' = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...backend-containment-20261019/tmp8ehavxmn/_scratch/native-backends-20261016/bootstrap.json; run bootstrap explicitly\\n').stderr\n\nexperiments/native-backends/test_probe.py:47: AssertionError\n____________________________ test_bootstrap_removed ____________________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmpwwrbcm7s')\n\n    def test_bootstrap_removed(workspace):\n        result = invoke(workspace, 'bootstrap')\n>       assert result.returncode == 2\nE       assert 1 == 2\nE        +  where 1 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin... 'bootstrap'], returncode=1, stdout='', stderr=\"native backend probe: [Errno 2] No such file or directory: 'docker'\\n\").returncode\n\nexperiments/native-backends/test_probe.py:52: AssertionError\n___________________ test_prepare_rejects_absolute_input_path ___________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmput2uvi15')\n\n    def test_prepare_rejects_absolute_input_path(workspace):\n        result = invoke(workspace, 'prepare', '--inputs', str(workspace / 'inputs.json'))\n>       assert result.returncode == 1\nE       assert 2 == 1\nE        +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\n\nexperiments/native-backends/test_probe.py:58: AssertionError\n___________________ test_prepare_rejects_symlink_before_read ___________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmppopcj3fd')\n\n    def test_prepare_rejects_symlink_before_read(workspace):\n        (workspace / 'link.json').symlink_to(workspace / 'missing.json')\n        result = invoke(workspace, 'prepare', '--inputs', 'link.json')\n>       assert result.returncode == 1\nE       assert 2 == 1\nE        +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\n\nexperiments/native-backends/test_probe.py:65: AssertionError\n____________________ test_prepare_rejects_parent_traversal _____________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmpafdut5i9')\n\n    def test_prepare_rejects_parent_traversal(workspace):\n        result = invoke(workspace, 'prepare', '--inputs', '../inputs.json')\n>       assert result.returncode == 1\nE       assert 2 == 1\nE        +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\n\nexperiments/native-backends/test_probe.py:71: AssertionError\n______________________ test_prepare_rejects_missing_pins _______________________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp3xa74f9o')\n\n    def test_prepare_rejects_missing_pins(workspace):\n        (workspace / 'inputs.json').write_text('{}')\n        result = invoke(workspace, 'prepare', '--inputs', 'inputs.json')\n>       assert result.returncode == 1\nE       assert 2 == 1\nE        +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\n\nexperiments/native-backends/test_probe.py:78: AssertionError\n=========================== short test summary info ============================\nFAILED experiments/native-backends/test_probe.py::test_check_does_not_requalify_historical_evidence - AssertionError: native backend probe: missing source input: Dockerfile\n  \nassert 1 == 0\n +  where 1 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...ckends/probe.py', 'check'], returncode=1, stdout='', stderr='native backend probe: missing source input: Dockerfile\\n').returncode\nFAILED experiments/native-backends/test_probe.py::test_run_requires_declared_local_inputs - AssertionError: assert '--inputs' in 'native backend probe: missing bootstrap input: /Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp8ehavxmn/_scratch/native-backends-20261016/bootstrap.json; run bootstrap explicitly\\n'\n +  where 'native backend probe: missing bootstrap input: /Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmp8ehavxmn/_scratch/native-backends-20261016/bootstrap.json; run bootstrap explicitly\\n' = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...backend-containment-20261019/tmp8ehavxmn/_scratch/native-backends-20261016/bootstrap.json; run bootstrap explicitly\\n').stderr\nFAILED experiments/native-backends/test_probe.py::test_bootstrap_removed - assert 1 == 2\n +  where 1 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin... 'bootstrap'], returncode=1, stdout='', stderr=\"native backend probe: [Errno 2] No such file or directory: 'docker'\\n\").returncode\nFAILED experiments/native-backends/test_probe.py::test_prepare_rejects_absolute_input_path - assert 2 == 1\n +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\nFAILED experiments/native-backends/test_probe.py::test_prepare_rejects_symlink_before_read - assert 2 == 1\n +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\nFAILED experiments/native-backends/test_probe.py::test_prepare_rejects_parent_traversal - assert 2 == 1\n +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\nFAILED experiments/native-backends/test_probe.py::test_prepare_rejects_missing_pins - assert 2 == 1\n +  where 2 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmphQjHoX/bin...otstrap,run,check}\\nprobe.py: error: argument action: invalid choice: 'prepare' (choose from bootstrap, run, check)\\n\").returncode\n7 failed in 0.22s\n",
+    "passed": 0
+  },
+  "primitive_diagnosis": [
+    {
+      "exit_code": -6,
+      "root_literal": false,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "exit_code": 0,
+      "root_literal": true,
+      "stderr": "entry\nbefore-fork\nafter-fork\nafter-fork\n",
+      "stdout": "{\"readonly_write\":\"denied\",\"network\":\"denied\",\"descendant\":\"denied\",\"writable_state\":\"allowed\"}\n"
+    }
+  ],
+  "primitive_smoke": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/smoke/isolation.sb",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/isolation-probe",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/smoke/readonly-sentinel",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/smoke/execution"
+    ],
+    "exit_code": 0,
+    "guard_sha256": "28c35f14c135ddf463a50b0f202fcad479c4782bf39c413cd16ffed4f4adcbe7",
+    "host": "Darwin/arm64",
+    "profile_sha256": "2fddd418f487c7d3b20fbb8487782d616e5d50fc2873f9248692217208aba9da",
+    "scope": "native isolation primitive only; installed read-only OS sandbox executable; not canonical local-input backend qualification",
+    "seconds": 0.010682,
+    "sentinel_unchanged": true,
+    "stderr": "",
+    "stdout": "{\"readonly_write\":\"denied\",\"network\":\"denied\",\"descendant\":\"denied\",\"writable_state\":\"allowed\"}\n",
+    "writable_fixture_removed": true
+  },
+  "receipt_red": {
+    "deselected": 20,
+    "failed": 1,
+    "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n______________ test_nonzero_backend_stage_persists_failed_result _______________\n\nworkspace = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-containment-20261019/tmpakuen35w')\ndeclared_inputs = {'isolation': {'bundle': {'path': 'inputs/toolchain', 'sha256': '3bb365f83e55f5f0e941c3f128a61558d4d14fd8915752c7c50bb...tool', 'sha256': 'a901e0af0b8f4da8cfb4cb7f2108205aa6c8914199c372485efcad5a8c68fdc5', 'version': 'fixture-only'}, ...}}}\n\n    def test_nonzero_backend_stage_persists_failed_result(workspace: Path, declared_inputs: dict[str, Any]) -> None:\n        import importlib.util\n        spec = importlib.util.spec_from_file_location('nonzero_probe', workspace / 'experiments/native-backends/probe.py')\n        module = importlib.util.module_from_spec(spec)\n        sys.modules[spec.name] = module\n        spec.loader.exec_module(module)\n        inputs = module.Inputs.read('inputs.json')\n        module.prepare(inputs)\n        calls = []\n        def nonzero_stage(*args: Any) -> dict[str, Any]:\n            calls.append(args)\n            if len(calls) == 1:\n                (workspace / '_scratch/native-backend-probe/execution/guard-write').unlink()\n                return dict(exit_code=0, stdout=json.dumps(module.GUARD_RESULT), stderr='')\n            return dict(exit_code=17, stdout='', stderr='injected emitter failure')\n        assert module.run(inputs, execute_command=nonzero_stage) == 1\n        report = json.loads((workspace / '_scratch/native-backend-probe/result.json').read_text())\n>       assert report['qualification'] == 'failed'\nE       AssertionError: assert 'not-run' == 'failed'\nE         \nE         - failed\nE         + not-run\n\nexperiments/native-backends/test_probe.py:271: AssertionError\n----------------------------- Captured stdout call -----------------------------\n{\"qualification\": \"not-run\", \"prepared\": true, \"receipt\": \"_scratch/native-backend-probe/prepared.json\"}\n{\"qualification\": \"failed\", \"result\": \"_scratch/native-backend-probe/result.json\"}\n=========================== short test summary info ============================\nFAILED experiments/native-backends/test_probe.py::test_nonzero_backend_stage_persists_failed_result - AssertionError: assert 'not-run' == 'failed'\n  \n  - failed\n  + not-run\n1 failed, 20 deselected in 0.16s\n"
+  },
+  "remaining_inputs": [
+    "pinned local isolation bundle and native denial probe",
+    "pinned local LLVM and direct Cranelift emitters for both arm64 targets",
+    "pinned local C compiler and target linker",
+    "pinned local target sysroots",
+    "pinned local software-runner wrappers with executable,sysroot contract"
+  ],
+  "scope": "repository-containment-harness-validation",
+  "source_sha256": {
+    "cranelift/Cargo.lock": "01d5451805716dba051746a5ae77381c9ba7a37a83fd5dabd3656e9027be9d43",
+    "cranelift/Cargo.toml": "c3bae873f7bf63fd3681b49736afe4a984aed8767262130f99b8d45cc2d059cb",
+    "inputs.example.json": "079e9c594fa0d0489b8587c68d49f7952983ae6e38b3c7bd6de2c3344b2a7b04",
+    "isolation_probe.c": "ae34ec421ec2717ba801a670381d672dcc246ca3dcb96656f31c924cf182c93c",
+    "probe.ll": "795b6167358e65ec4855f1f54b266ff92f495a1dabfe8cd9cebc6465ba9e66c9",
+    "probe.py": "8de044d37918245b5769dbb5ac90f265cfe280ad757e38e0ed7232d640da168a",
+    "runtime.c": "cf8bf4107d9a049493d626a922e1f65f095065c95eecb7f4042e9ccca9b545eb",
+    "test_probe.py": "f8af364a0ce291927ef793ecee79e16cd2e73e85bc2e44939e1544782838d04e"
+  },
+  "whitespace_check": "git diff --check passed for assigned scope"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "archive_path": "LLVM-21.1.8-Linux-ARM64/include/llvm/Support/LICENSE.TXT",
+    "saved": "_scratch/p005-20261019/linux-host-tool-inspection/LICENSE.TXT",
+    "bytes": 303,
+    "sha256": "54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241"
+  },
+  {
+    "archive_path": "LLVM-21.1.8-Linux-ARM64/bin/lld",
+    "saved": "_scratch/p005-20261019/linux-host-tool-inspection/lld",
+    "bytes": 180708928,
+    "sha256": "a07f1bfbba1961e9ad0433c7b18d3739a922e5ec01f5dc5c038664d85ae76866"
+  },
+  {
+    "archive_path": "LLVM-21.1.8-Linux-ARM64/bin/llc",
+    "saved": "_scratch/p005-20261019/linux-host-tool-inspection/llc",
+    "bytes": 159737360,
+    "sha256": "7c7bdaa67e180b5cb855ebc7666324314028014cc2b9333bc1e148ce85f95039"
+  }
+]

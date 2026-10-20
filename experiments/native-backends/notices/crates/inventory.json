@@ -1,0 +1,700 @@
+[
+  {
+    "name": "allocator-api2",
+    "version": "0.2.21",
+    "sha256": "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923",
+    "source_url": "https://static.crates.io/crates/allocator-api2/allocator-api2-0.2.21.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/allocator-api2-0.2.21/LICENSE-APACHE",
+        "sha256": "20fe7b00e904ed690e3b9fd6073784d3fc428141dbd10b81c01fd143d0797f58"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/allocator-api2-0.2.21/LICENSE-MIT",
+        "sha256": "36516aefdc84c5d5a1e7485425913a22dbda69eb1930c5e84d6ae4972b5194b9"
+      }
+    ]
+  },
+  {
+    "name": "anyhow",
+    "version": "1.0.104",
+    "sha256": "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470",
+    "source_url": "https://static.crates.io/crates/anyhow/anyhow-1.0.104.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/anyhow-1.0.104/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/anyhow-1.0.104/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ]
+  },
+  {
+    "name": "arbitrary",
+    "version": "1.5.0",
+    "sha256": "3bc62ac97cc33321f50863d514c3bc38a453947a8f9e781137e47c7401020aed",
+    "source_url": "https://static.crates.io/crates/arbitrary/arbitrary-1.5.0.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/arbitrary-1.5.0/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/arbitrary-1.5.0/LICENSE-MIT",
+        "sha256": "15656cc11a8331f28c0986b8ab97220d3e76f98e60ed388b5ffad37dfac4710c"
+      }
+    ]
+  },
+  {
+    "name": "bumpalo",
+    "version": "3.20.3",
+    "sha256": "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649",
+    "source_url": "https://static.crates.io/crates/bumpalo/bumpalo-3.20.3.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/bumpalo-3.20.3/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/bumpalo-3.20.3/LICENSE-MIT",
+        "sha256": "65f94e99ddaf4f5d1782a6dae23f35d4293a9a01444a13135a6887017d353cee"
+      }
+    ]
+  },
+  {
+    "name": "cfg-if",
+    "version": "1.0.5",
+    "sha256": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600",
+    "source_url": "https://static.crates.io/crates/cfg-if/cfg-if-1.0.5.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cfg-if-1.0.5/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/cfg-if-1.0.5/LICENSE-MIT",
+        "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-bforest",
+    "version": "0.116.1",
+    "sha256": "e15d04a0ce86cb36ead88ad68cf693ffd6cda47052b9e0ac114bc47fd9cd23c4",
+    "source_url": "https://static.crates.io/crates/cranelift-bforest/cranelift-bforest-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-bforest-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-bitset",
+    "version": "0.116.1",
+    "sha256": "7c6e3969a7ce267259ce244b7867c5d3bc9e65b0a87e81039588dfdeaede9f34",
+    "source_url": "https://static.crates.io/crates/cranelift-bitset/cranelift-bitset-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": []
+  },
+  {
+    "name": "cranelift-codegen",
+    "version": "0.116.1",
+    "sha256": "2c22032c4cb42558371cf516bb47f26cdad1819d3475c133e93c49f50ebf304e",
+    "source_url": "https://static.crates.io/crates/cranelift-codegen/cranelift-codegen-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-codegen-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-codegen-meta",
+    "version": "0.116.1",
+    "sha256": "c904bc71c61b27fc57827f4a1379f29de64fe95653b620a3db77d59655eee0b8",
+    "source_url": "https://static.crates.io/crates/cranelift-codegen-meta/cranelift-codegen-meta-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-codegen-meta-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-codegen-shared",
+    "version": "0.116.1",
+    "sha256": "40180f5497572f644ce88c255480981ae2ec1d7bb4d8e0c0136a13b87a2f2ceb",
+    "source_url": "https://static.crates.io/crates/cranelift-codegen-shared/cranelift-codegen-shared-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-codegen-shared-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-control",
+    "version": "0.116.1",
+    "sha256": "26d132c6d0bd8a489563472afc171759da0707804a65ece7ceb15a8c6d7dd5ef",
+    "source_url": "https://static.crates.io/crates/cranelift-control/cranelift-control-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-control-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-entity",
+    "version": "0.116.1",
+    "sha256": "4b2d0d9618275474fbf679dd018ac6e009acbd6ae6850f6a67be33fb3b00b323",
+    "source_url": "https://static.crates.io/crates/cranelift-entity/cranelift-entity-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-entity-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-frontend",
+    "version": "0.116.1",
+    "sha256": "4fac41e16729107393174b0c9e3730fb072866100e1e64e80a1a963b2e484d57",
+    "source_url": "https://static.crates.io/crates/cranelift-frontend/cranelift-frontend-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-frontend-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-isle",
+    "version": "0.116.1",
+    "sha256": "1ca20d576e5070044d0a72a9effc2deacf4d6aa650403189d8ea50126483944d",
+    "source_url": "https://static.crates.io/crates/cranelift-isle/cranelift-isle-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": []
+  },
+  {
+    "name": "cranelift-module",
+    "version": "0.116.1",
+    "sha256": "4d55612bebcf16ff7306c8a6f5bdb6d45662b8aa1ee058ecce8807ad87db719b",
+    "source_url": "https://static.crates.io/crates/cranelift-module/cranelift-module-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-module-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "cranelift-object",
+    "version": "0.116.1",
+    "sha256": "aad5a6d3e379493c3f8b35dc61c93d0bf5f27003bbe20614e0200b0ec372ef52",
+    "source_url": "https://static.crates.io/crates/cranelift-object/cranelift-object-0.116.1.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/cranelift-object-0.116.1/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "crc32fast",
+    "version": "1.5.2",
+    "sha256": "01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78",
+    "source_url": "https://static.crates.io/crates/crc32fast/crc32fast-1.5.2.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/crc32fast-1.5.2/LICENSE-APACHE",
+        "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/crc32fast-1.5.2/LICENSE-MIT",
+        "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf"
+      }
+    ]
+  },
+  {
+    "name": "equivalent",
+    "version": "1.0.3",
+    "sha256": "00d174d5400e5e8fd687ad1049e2f578285fa914201b1af7e8b112a4546bd826",
+    "source_url": "https://static.crates.io/crates/equivalent/equivalent-1.0.3.crate",
+    "declared_license": "Apache-2.0 OR MIT",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/equivalent-1.0.3/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/equivalent-1.0.3/LICENSE-MIT",
+        "sha256": "7365cc8878a1d7ce155a58c4ca09c3d7a6be413efa5334a80ea842912b669349"
+      }
+    ]
+  },
+  {
+    "name": "fallible-iterator",
+    "version": "0.3.0",
+    "sha256": "2acce4a10f12dc2fb14a218589d4f1f62ef011b2d0cc4b3cb1bba8e94da14649",
+    "source_url": "https://static.crates.io/crates/fallible-iterator/fallible-iterator-0.3.0.crate",
+    "declared_license": "MIT/Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/fallible-iterator-0.3.0/LICENSE-APACHE",
+        "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/fallible-iterator-0.3.0/LICENSE-MIT",
+        "sha256": "0816e154b159ba255c563f7c8c7df5bbb8cc5fc96f5ab8cf9f4743b4f41fe7eb"
+      }
+    ]
+  },
+  {
+    "name": "foldhash",
+    "version": "0.1.5",
+    "sha256": "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2",
+    "source_url": "https://static.crates.io/crates/foldhash/foldhash-0.1.5.crate",
+    "declared_license": "Zlib",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/foldhash-0.1.5/LICENSE",
+        "sha256": "b1181a40b2a7b25cf66fd01481713bc1005df082c53ef73e851e55071b102744"
+      }
+    ]
+  },
+  {
+    "name": "gimli",
+    "version": "0.31.1",
+    "sha256": "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f",
+    "source_url": "https://static.crates.io/crates/gimli/gimli-0.31.1.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/gimli-0.31.1/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/gimli-0.31.1/LICENSE-MIT",
+        "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0"
+      }
+    ]
+  },
+  {
+    "name": "hashbrown",
+    "version": "0.14.5",
+    "sha256": "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1",
+    "source_url": "https://static.crates.io/crates/hashbrown/hashbrown-0.14.5.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/hashbrown-0.14.5/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/hashbrown-0.14.5/LICENSE-MIT",
+        "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2"
+      }
+    ]
+  },
+  {
+    "name": "hashbrown",
+    "version": "0.15.5",
+    "sha256": "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1",
+    "source_url": "https://static.crates.io/crates/hashbrown/hashbrown-0.15.5.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/hashbrown-0.15.5/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/hashbrown-0.15.5/LICENSE-MIT",
+        "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2"
+      }
+    ]
+  },
+  {
+    "name": "hashbrown",
+    "version": "0.17.1",
+    "sha256": "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a",
+    "source_url": "https://static.crates.io/crates/hashbrown/hashbrown-0.17.1.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/hashbrown-0.17.1/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/hashbrown-0.17.1/LICENSE-MIT",
+        "sha256": "ff8f68cb076caf8cefe7a6430d4ac086ce6af2ca8ce2c4e5a2004d4552ef52a2"
+      }
+    ]
+  },
+  {
+    "name": "indexmap",
+    "version": "2.14.2",
+    "sha256": "cc4e190f5d26ca7051642629da2c52fc03bde85a03197c99408dcd291734c855",
+    "source_url": "https://static.crates.io/crates/indexmap/indexmap-2.14.2.crate",
+    "declared_license": "Apache-2.0 OR MIT",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/indexmap-2.14.2/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/indexmap-2.14.2/LICENSE-MIT",
+        "sha256": "ecc269ef87fd38a1d98e30bfac9ba964a9dbd9315c3770fed98d4d7cb5882055"
+      }
+    ]
+  },
+  {
+    "name": "log",
+    "version": "0.4.34",
+    "sha256": "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6",
+    "source_url": "https://static.crates.io/crates/log/log-0.4.34.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/log-0.4.34/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/log-0.4.34/LICENSE-MIT",
+        "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+      }
+    ]
+  },
+  {
+    "name": "memchr",
+    "version": "2.8.3",
+    "sha256": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98",
+    "source_url": "https://static.crates.io/crates/memchr/memchr-2.8.3.crate",
+    "declared_license": "Unlicense OR MIT",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/memchr-2.8.3/COPYING",
+        "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/memchr-2.8.3/LICENSE-MIT",
+        "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
+      }
+    ]
+  },
+  {
+    "name": "object",
+    "version": "0.36.7",
+    "sha256": "62948e14d923ea95ea2c7c86c71013138b66525b86bdc08d2dcc262bdb497b87",
+    "source_url": "https://static.crates.io/crates/object/object-0.36.7.crate",
+    "declared_license": "Apache-2.0 OR MIT",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/object-0.36.7/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/object-0.36.7/LICENSE-MIT",
+        "sha256": "0b74dfa0bcee5c420c6b7f67b4b2658f9ab8388c97b8e733975f2cecbdd668a6"
+      }
+    ]
+  },
+  {
+    "name": "proc-macro2",
+    "version": "1.0.107",
+    "sha256": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9",
+    "source_url": "https://static.crates.io/crates/proc-macro2/proc-macro2-1.0.107.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/proc-macro2-1.0.107/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/proc-macro2-1.0.107/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ]
+  },
+  {
+    "name": "quote",
+    "version": "1.0.47",
+    "sha256": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001",
+    "source_url": "https://static.crates.io/crates/quote/quote-1.0.47.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/quote-1.0.47/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/quote-1.0.47/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ]
+  },
+  {
+    "name": "regalloc2",
+    "version": "0.11.2",
+    "sha256": "dc06e6b318142614e4a48bc725abbf08ff166694835c43c9dae5a9009704639a",
+    "source_url": "https://static.crates.io/crates/regalloc2/regalloc2-0.11.2.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/regalloc2-0.11.2/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "rustc-hash",
+    "version": "2.1.3",
+    "sha256": "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d",
+    "source_url": "https://static.crates.io/crates/rustc-hash/rustc-hash-2.1.3.crate",
+    "declared_license": "Apache-2.0 OR MIT",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/rustc-hash-2.1.3/LICENSE-APACHE",
+        "sha256": "95bd3988beee069fa2848f648dab43cc6e0b2add2ad6bcb17360caf749802bcc"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/rustc-hash-2.1.3/LICENSE-MIT",
+        "sha256": "30fefc3a7d6a0041541858293bcbea2dde4caa4c0a5802f996a7f7e8c0085652"
+      }
+    ]
+  },
+  {
+    "name": "serde",
+    "version": "1.0.229",
+    "sha256": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba",
+    "source_url": "https://static.crates.io/crates/serde/serde-1.0.229.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/serde-1.0.229/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/serde-1.0.229/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ]
+  },
+  {
+    "name": "serde_core",
+    "version": "1.0.229",
+    "sha256": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48",
+    "source_url": "https://static.crates.io/crates/serde_core/serde_core-1.0.229.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/serde_core-1.0.229/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/serde_core-1.0.229/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ]
+  },
+  {
+    "name": "serde_derive",
+    "version": "1.0.229",
+    "sha256": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348",
+    "source_url": "https://static.crates.io/crates/serde_derive/serde_derive-1.0.229.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/serde_derive-1.0.229/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/serde_derive-1.0.229/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ]
+  },
+  {
+    "name": "smallvec",
+    "version": "1.16.3",
+    "sha256": "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b",
+    "source_url": "https://static.crates.io/crates/smallvec/smallvec-1.16.3.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/smallvec-1.16.3/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/smallvec-1.16.3/LICENSE-MIT",
+        "sha256": "0b28172679e0009b655da42797c03fd163a3379d5cfa67ba1f1655e974a2a1a9"
+      }
+    ]
+  },
+  {
+    "name": "stable_deref_trait",
+    "version": "1.2.1",
+    "sha256": "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596",
+    "source_url": "https://static.crates.io/crates/stable_deref_trait/stable_deref_trait-1.2.1.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/stable_deref_trait-1.2.1/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/stable_deref_trait-1.2.1/LICENSE-MIT",
+        "sha256": "5e05b024f653a5ce199e77cbbbd42fb5553562ec714b819421ed0c3e552a75d7"
+      }
+    ]
+  },
+  {
+    "name": "syn",
+    "version": "3.0.9",
+    "sha256": "d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b",
+    "source_url": "https://static.crates.io/crates/syn/syn-3.0.9.crate",
+    "declared_license": "MIT OR Apache-2.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/syn-3.0.9/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/syn-3.0.9/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ]
+  },
+  {
+    "name": "target-lexicon",
+    "version": "0.13.2",
+    "sha256": "e502f78cdbb8ba4718f566c418c52bc729126ffd16baee5baa718cf25dd5a69a",
+    "source_url": "https://static.crates.io/crates/target-lexicon/target-lexicon-0.13.2.crate",
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/target-lexicon-0.13.2/LICENSE",
+        "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      }
+    ]
+  },
+  {
+    "name": "unicode-ident",
+    "version": "1.0.27",
+    "sha256": "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563",
+    "source_url": "https://static.crates.io/crates/unicode-ident/unicode-ident-1.0.27.crate",
+    "declared_license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+    "license_file": null,
+    "role": "Cargo.lock dependency; optional entries can be absent from the compiled emitter",
+    "notices": [
+      {
+        "path": "experiments/native-backends/notices/crates/unicode-ident-1.0.27/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/unicode-ident-1.0.27/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      },
+      {
+        "path": "experiments/native-backends/notices/crates/unicode-ident-1.0.27/LICENSE-UNICODE",
+        "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1"
+      }
+    ]
+  }
+]

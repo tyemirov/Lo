@@ -417,7 +417,7 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   P005 owns the final backend, ABI, and platform decisions.
   This plan does not change the current compiler or language specification.
 
-- [ ] [P005] (P1) {I004,I005} Select the native backend and runtime contract
+- [x] [P005] (P1) {I004,I005} Select the native backend and runtime contract
   Goal:
   Select one complete native toolchain before the runtime migration.
 
@@ -433,11 +433,19 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   Deliverables:
   - Add the backend decision, runtime ABI, complete input manifest, and measured comparison.
 
+  The [runtime contract](docs/native-runtime-contract.md) records the selected design and current evidence.
+  LLVM 21.1.8, LLD 21.1.8, and the precompiled Rust runtime are selected.
+
   Validation:
   - Verify complete executable links and runtime calls on both targets.
   - Verify the selected inputs without an installed SDK or undeclared compiler tools.
   - Resolve every decision needed by I006 through F017 before their implementation.
   - Record license inventory and source provenance for supplied third-party components.
+
+  Completed on October 19, 2026.
+  Both ABI targets passed callbacks, thread ownership, error status, budget failure, and cleanup.
+  SDK-free Darwin platform links and all 20 ABI harness tests passed.
+  The [final validation receipt](docs/evidence/compiler-evolution/validation.json) records successful CI and independent review.
 
 - [ ] [P006] (P2) {P004} Specify modules, user types, generics, and packages
   Goal:
@@ -1186,7 +1194,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
 
 ### Standalone compiler migration
 
-- [-] [I004] (P1) {P004} Compare offline LLVM and Cranelift compile-and-link paths
+- [x] [I004] (P1) {P004} Compare offline LLVM and Cranelift compile-and-link paths
   Goal:
   Establish complete toolchain feasibility on both current arm64 targets.
 
@@ -1213,7 +1221,12 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Record source mapping, build time, memory, artifact size, and debug feasibility where measured.
   - Keep standalone acceptance open until the full clean-environment procedure passes.
 
-- [ ] [I005] (P1) {P004} Record complete semantic migration coverage
+  Completed on October 19, 2026.
+  LLVM and Cranelift passed offline object generation, direct LLD links, and execution on both arm64 targets.
+  The [qualification receipt](experiments/native-backends/qualification-20261019.json) records all four cells and 21 passing harness tests.
+  Full compiler distribution acceptance is still open under F017 and I011.
+
+- [x] [I005] (P1) {P004} Record complete semantic migration coverage
   Goal:
   Define observable behavior independently of the replacement backend.
 
@@ -1231,6 +1244,11 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify every current catalog operation has positive and applicable negative coverage.
   - Verify resource-limit boundaries and prevention of later effects after failure.
   - Identify absent coverage before the new backend uses the corpus.
+
+  Completed on October 19, 2026, with the documented coverage limits.
+  All 385 required references passed in both lanes, with 993 successful test completions per lane.
+  The [semantic receipt](docs/evidence/semantic-migration/validation.json) records source identities, full logs, and 13 passing reporter tests.
+  The [coverage contract](docs/semantic-migration.md) assigns remaining qualification work to F017 and I011.
 
 - [ ] [I006] (P1) {P005,I005} Add a native lowering plan with explicit semantics
   Goal:
@@ -1291,23 +1309,27 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Compare uninterrupted and resumed execution exactly within the same profile.
   - Verify malformed checkpoints, resource limits, cancellation, and failure cleanup.
 
-- [ ] [I009] (P1) {I007} Port confined files and HTTP execution
+- [ ] [I009] (P1) {I007} Port confined files, processes, and HTTP execution
   Goal:
   Preserve adapter authority and lifecycle behavior without the Go runtime.
 
   Requirements:
   - Preserve opened-root path confinement and protection against path replacement races.
   - Preserve ordered commits, request isolation, listeners, cancellation, and orderly shutdown.
+  - Preserve process grants, confinement, limits, receipts, termination, and descendant cleanup.
+  - Keep current platform availability and unavailable errors for process operations.
+  - Supply required process support without a dependency on the Lo installation during artifact execution.
   - Keep capabilities absent until explicitly granted at execution.
   - Release per-request storage during service execution.
 
   Deliverables:
-  - Add native file and HTTP adapters with the selected runtime boundary.
+  - Add native file, process, and HTTP adapters with the selected runtime boundary.
 
   Validation:
   - Execute authorized and denied file operations through artifact commands.
   - Verify traversal, symlink replacement, failed writes, and prevention of later commits.
   - Exercise concurrent loopback requests, cancellation, shutdown, and bounded resource use.
+  - Verify process execution and denied authority through public artifact commands and controlled host implementations.
   - Compare CLI outputs, errors, and lifecycle events with current behavior.
 
 - [ ] [I010] (P1) {I008,I009,F014} Port device resources and Metal execution

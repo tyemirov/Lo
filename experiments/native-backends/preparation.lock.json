@@ -1,0 +1,292 @@
+{
+  "host": "aarch64-apple-darwin",
+  "preparation_network": "permitted",
+  "qualification_network": "denied",
+  "third_party_artifacts": [
+    {
+      "archive": "llvm.tar.xz",
+      "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+      "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+      "bytes": 1503047352
+    },
+    {
+      "archive": "rustc.tar.xz",
+      "url": "https://static.rust-lang.org/dist/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+      "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+      "bytes": 55006972
+    },
+    {
+      "archive": "cargo.tar.xz",
+      "url": "https://static.rust-lang.org/dist/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+      "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+      "bytes": 6766048
+    },
+    {
+      "archive": "rust-std.tar.xz",
+      "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+      "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+      "bytes": 27522824
+    },
+    {
+      "archive": "libc6.deb",
+      "url": "https://deb.debian.org/debian/pool/main/g/glibc/libc6_2.36-9+deb12u14_arm64.deb",
+      "sha256": "01f4330719fd4f65580e16ea5a0527f372fca750e8f588d26deaf09f2d3b1cf4",
+      "bytes": 2324660
+    },
+    {
+      "archive": "libc6-dev.deb",
+      "url": "https://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.36-9+deb12u14_arm64.deb",
+      "sha256": "8bc395bf2ee9939f1a6ae395f974cffdcf541d98f99adfe89ce7e4bef36d159e",
+      "bytes": 1435692
+    },
+    {
+      "archive": "vmlinuz-virt",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/aarch64/netboot/vmlinuz-virt",
+      "sha256": "dd37c4460f933ec909ff022c34944ff7e1a5300aff99750e3bdc02cd4074c332",
+      "bytes": 9630208
+    },
+    {
+      "archive": "qemu.tbz2",
+      "url": "https://packages.macports.org/qemu/qemu-11.1.2_0+cocoa+curses+spice+spice_protocol+target_arm+target_i386+target_x86_64+usb+vnc.darwin_25.arm64.tbz2",
+      "sha256": "b828e5a59e6931548474e2997a0ffab3811c1a22af582566a73e4803c2c75780",
+      "bytes": 50057453
+    },
+    {
+      "archive": "glib2.tbz2",
+      "url": "https://packages.macports.org/glib2/glib2-2.88.3_2+dbus+x11.darwin_21.arm64.tbz2",
+      "sha256": "f0c03d37c0836fd71d3ba34a0d7a6bccacfe70498f11bb821d3d167a44c9ea16",
+      "bytes": 12897066
+    },
+    {
+      "archive": "gnutls.tbz2",
+      "url": "https://packages.macports.org/gnutls/gnutls-3.8.13_1.darwin_20.arm64.tbz2",
+      "sha256": "569ae917518981a0b79a9396c9d0e2946789fbcda89547b05614fb9768f89c68",
+      "bytes": 1328567
+    },
+    {
+      "archive": "libpixman.tbz2",
+      "url": "https://packages.macports.org/libpixman/libpixman-0.46.0_0.darwin_20.arm64.tbz2",
+      "sha256": "fce769e15bfec438201ac6837a8eb3668a4aa041695a2a62c6e528279137dc00",
+      "bytes": 223741
+    },
+    {
+      "archive": "bzip2.tbz2",
+      "url": "https://packages.macports.org/bzip2/bzip2-1.0.8_1.darwin_21.arm64.tbz2",
+      "sha256": "49bea02066a1cd1c11aac087ec17082b79dc75d3d439820c85ac50498b0e0e55",
+      "bytes": 150039
+    },
+    {
+      "archive": "libslirp.tbz2",
+      "url": "https://packages.macports.org/libslirp/libslirp-4.9.1_0.darwin_20.arm64.tbz2",
+      "sha256": "b7305fb9abbc03121af04d1cd618f664cf6b7b0183f6446756b31821cf3b1f68",
+      "bytes": 71595
+    },
+    {
+      "archive": "lzfse.tbz2",
+      "url": "https://packages.macports.org/lzfse/lzfse-1.0_0.darwin_20.arm64.tbz2",
+      "sha256": "576dc08435848445cfd3c424af5d0ac0e9e8269635d33f7d9342bc7465ccf062",
+      "bytes": 19594
+    },
+    {
+      "archive": "lzo2.tbz2",
+      "url": "https://packages.macports.org/lzo2/lzo2-2.10_0.darwin_20.arm64.tbz2",
+      "sha256": "8b36441e91e6f4be689e1fc6d5faf975c9b4ff33b26d81c9da04795bc3da9dee",
+      "bytes": 104538
+    },
+    {
+      "archive": "snappy.tbz2",
+      "url": "https://packages.macports.org/snappy/snappy-1.2.2_2.darwin_27.arm64.tbz2",
+      "sha256": "89e6347874412db28dd189886d88c360c251d23a961be5555b223df626497e6c",
+      "bytes": 27691
+    },
+    {
+      "archive": "zlib.tbz2",
+      "url": "https://packages.macports.org/zlib/zlib-1.3.2_0.darwin_20.arm64.tbz2",
+      "sha256": "b79cd24e296514e17859c48cc7cf7969bc772b968e64aeff3a1673898b636d94",
+      "bytes": 197125
+    },
+    {
+      "archive": "zstd.tbz2",
+      "url": "https://packages.macports.org/zstd/zstd-1.5.7_0.darwin_20.arm64.tbz2",
+      "sha256": "82d5bc821d27517b77ba87667d8e22ef61bf6326d4cc49baa6d6dda4b4f68647",
+      "bytes": 935947
+    },
+    {
+      "archive": "dtc.tbz2",
+      "url": "https://packages.macports.org/dtc/dtc-1.8.1_0.darwin_21.arm64.tbz2",
+      "sha256": "e8e03f18d7ee68849c3524db7c8e748c3d0b1216a08e39cc52b123a9729c83c3",
+      "bytes": 194685
+    },
+    {
+      "archive": "ncurses.tbz2",
+      "url": "https://packages.macports.org/ncurses/ncurses-6.6_0.darwin_20.arm64.tbz2",
+      "sha256": "48ec6b573ecef9c5fe1d94b6627f1ef0068a658f34a3284e62e69c8b27f59b7c",
+      "bytes": 1472696
+    },
+    {
+      "archive": "libiconv.tbz2",
+      "url": "https://packages.macports.org/libiconv/libiconv-1.19_0.darwin_20.arm64.tbz2",
+      "sha256": "bf0de8b4cb4662833502f751f295a52875ef74c3fcde83ddabdd17f31a3a11a2",
+      "bytes": 1593888
+    },
+    {
+      "archive": "libusb.tbz2",
+      "url": "https://packages.macports.org/libusb/libusb-1.0.30_0.darwin_20.arm64.tbz2",
+      "sha256": "5b298f915f838917e37019c1ff681dede09521f640abb11030fd533523207f16",
+      "bytes": 129139
+    },
+    {
+      "archive": "usbredir.tbz2",
+      "url": "https://packages.macports.org/usbredir/usbredir-0.15.0_0.darwin_20.arm64.tbz2",
+      "sha256": "3a8c09a1521800ca6de3b5b8e1d118968b111c74badb2b4c11b6eac3dfd79d59",
+      "bytes": 43966
+    },
+    {
+      "archive": "cyrus-sasl2.tbz2",
+      "url": "https://packages.macports.org/cyrus-sasl2/cyrus-sasl2-2.1.28_1+kerberos.darwin_20.arm64.tbz2",
+      "sha256": "d38fe1868f7740adba9bd6e513ffc590eda2d431fbd798cf8b08686302bae5bf",
+      "bytes": 1482526
+    },
+    {
+      "archive": "libjpeg-turbo.tbz2",
+      "url": "https://packages.macports.org/libjpeg-turbo/libjpeg-turbo-3.2.0_0.darwin_20.arm64.tbz2",
+      "sha256": "dc5db6b425e38f4f58a3630d53b26011c1e0286c4b53689624427c873d104482",
+      "bytes": 1211170
+    },
+    {
+      "archive": "libpng.tbz2",
+      "url": "https://packages.macports.org/libpng/libpng-1.6.58_0.darwin_20.arm64.tbz2",
+      "sha256": "2f72b79724ae37da704a19f5d565c0427dcd5ea715ebfcebec6e68327d4594a3",
+      "bytes": 400193
+    },
+    {
+      "archive": "spice-server.tbz2",
+      "url": "https://packages.macports.org/spice-server/spice-server-0.16.0_0.darwin_20.arm64.tbz2",
+      "sha256": "8236a71d2c24183a0aba064972eb83df02a9e0cac3a5163b025ac1dcd00e5056",
+      "bytes": 365193
+    },
+    {
+      "archive": "gettext-runtime.tbz2",
+      "url": "https://packages.macports.org/gettext-runtime/gettext-runtime-1.0_0.darwin_20.arm64.tbz2",
+      "sha256": "1853b5234d916ceb84f8fd65ad919cd40228f660c003adc574fbe642f6cb256a",
+      "bytes": 200961
+    },
+    {
+      "archive": "libelf.tbz2",
+      "url": "https://packages.macports.org/libelf/libelf-0.8.13_6.darwin_20.arm64.tbz2",
+      "sha256": "f9e832509eff168d591002de5f72db13f767eb4612d5a2e50862589977486992",
+      "bytes": 62278
+    },
+    {
+      "archive": "libffi.tbz2",
+      "url": "https://packages.macports.org/libffi/libffi-3.4.8_0.darwin_20.arm64.tbz2",
+      "sha256": "db877cbef74f4ff0cc7df421c0fedbd589ec76d4541797c559147f624d61269b",
+      "bytes": 33651
+    },
+    {
+      "archive": "pcre2.tbz2",
+      "url": "https://packages.macports.org/pcre2/pcre2-10.48_0.darwin_21.arm64.tbz2",
+      "sha256": "0a5d1ccbb56d22ac4210d925f965e3be34540c5928a483677491b28d57aa7e90",
+      "bytes": 2079022
+    },
+    {
+      "archive": "dbus.tbz2",
+      "url": "https://packages.macports.org/dbus/dbus-1.16.2_0.darwin_20.arm64.tbz2",
+      "sha256": "b938d571141a68d727b59921519e367020e6561ba9051bd2662c10828d2cded7",
+      "bytes": 394796
+    },
+    {
+      "archive": "brotli.tbz2",
+      "url": "https://packages.macports.org/brotli/brotli-1.2.0_0.darwin_20.arm64.tbz2",
+      "sha256": "50bc7c54e0e8d10aeeb594237cdce4ed67e83c78256a9b453f0ca4ffeec2e37f",
+      "bytes": 418325
+    },
+    {
+      "archive": "gmp.tbz2",
+      "url": "https://packages.macports.org/gmp/gmp-6.3.0_0.darwin_20.arm64.tbz2",
+      "sha256": "6311f00a0c54bc63666f2cb21b6078856f86bce04072fa96e1cb122ca16d8cbc",
+      "bytes": 564994
+    },
+    {
+      "archive": "libidn2.tbz2",
+      "url": "https://packages.macports.org/libidn2/libidn2-2.3.8_0.darwin_20.arm64.tbz2",
+      "sha256": "2de5c6b99012e6705cfe66c49866f692587425377efc75fd4d62f9dcdaff2002",
+      "bytes": 253718
+    },
+    {
+      "archive": "libtasn1.tbz2",
+      "url": "https://packages.macports.org/libtasn1/libtasn1-4.21.0_0.darwin_20.arm64.tbz2",
+      "sha256": "6704c01c19db27c2b2cad0bb84253bc5ed7d0f6af357ca4f002ff5b62c0f2e94",
+      "bytes": 146431
+    },
+    {
+      "archive": "libunistring.tbz2",
+      "url": "https://packages.macports.org/libunistring/libunistring-1.4.2_0.darwin_20.arm64.tbz2",
+      "sha256": "dac313d06d96eb09f1f94651f7611fde17328a800d23b831b349a8bd24423883",
+      "bytes": 1596851
+    },
+    {
+      "archive": "p11-kit.tbz2",
+      "url": "https://packages.macports.org/p11-kit/p11-kit-0.26.5_1.darwin_21.arm64.tbz2",
+      "sha256": "e9f8cc4256a85e415c5bc95327dc157395d6f428672fe2304a54466846eb01e1",
+      "bytes": 1187767
+    },
+    {
+      "archive": "nettle.tbz2",
+      "url": "https://packages.macports.org/nettle/nettle-3.10.2_0.darwin_20.arm64.tbz2",
+      "sha256": "fcef4b3f61ad8acd7fd5f7f0f8b9dc02e3c95377224a0627b6ae93e73d3ee4e0",
+      "bytes": 1248971
+    },
+    {
+      "archive": "lz4.tbz2",
+      "url": "https://packages.macports.org/lz4/lz4-1.10.0_0.darwin_20.arm64.tbz2",
+      "sha256": "f476495a9daac711f7aff5872f0b3555e03d0e95f7d4b628f7ddf533b61ef167",
+      "bytes": 182040
+    },
+    {
+      "archive": "xz.tbz2",
+      "url": "https://packages.macports.org/xz/xz-5.8.4_0.darwin_21.arm64.tbz2",
+      "sha256": "52035af2290eb70f6f37f3439d0018d863703283ad34686b5fd2bf5a619974b5",
+      "bytes": 711689
+    },
+    {
+      "archive": "openssl3.tbz2",
+      "url": "https://packages.macports.org/openssl3/openssl3-3.6.5_0.darwin_21.arm64.tbz2",
+      "sha256": "9f4b0935f776045e82b2a7c82a28576a1117796654297992453a3fccebeb4923",
+      "bytes": 9401843
+    },
+    {
+      "archive": "gstreamer1-gst-plugins-base-1.28.8_0+ogg+x11.darwin_25.arm64.tbz2",
+      "url": "https://packages.macports.org/gstreamer1-gst-plugins-base/gstreamer1-gst-plugins-base-1.28.8_0+ogg+x11.darwin_25.arm64.tbz2",
+      "sha256": "2e82c03f03a82268522f372a4d53aca200cd1acecf6c2dfaf8ad3dd9e7bb7489",
+      "bytes": 2531859
+    },
+    {
+      "archive": "gstreamer1-1.28.8_0.darwin_25.arm64.tbz2",
+      "url": "https://packages.macports.org/gstreamer1/gstreamer1-1.28.8_0.darwin_25.arm64.tbz2",
+      "sha256": "13c4349d3fdf47fa312b00b360761389df2d03d79c84347e090a58a393f8e52a",
+      "bytes": 2312521
+    },
+    {
+      "archive": "orc-0.4.44_0.darwin_25.arm64.tbz2",
+      "url": "https://packages.macports.org/orc/orc-0.4.44_0.darwin_25.arm64.tbz2",
+      "sha256": "8130cafb41933aac182d129abf3c7925ba6690d02e9b1851e1563ea5cc3cb7d4",
+      "bytes": 409468
+    },
+    {
+      "archive": "libopus-1.6.1_0.darwin_25.arm64.tbz2",
+      "url": "https://packages.macports.org/libopus/libopus-1.6.1_0.darwin_25.arm64.tbz2",
+      "sha256": "9a6446ece5eb0f50e0b8f693ba7fbb21c7ef2dbff13dc3cbe6142057420c4e27",
+      "bytes": 343597
+    }
+  ],
+  "host_preparation_tools": {
+    "clang": "/usr/bin/clang",
+    "codesign": "/usr/bin/codesign",
+    "tar": "/usr/bin/tar",
+    "sandbox-exec": "/usr/bin/sandbox-exec"
+  },
+  "crate_dependencies": "cranelift/Cargo.lock",
+  "qualification_manifest": "_scratch/i004-20261019/inputs.json",
+  "sdk_input": "Lo-authored platform/darwin/libSystem.tbd; no SDK files in qualification sysroot"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "LLVM-21.1.8-Linux-ARM64.tar.xz",
+  "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-Linux-ARM64.tar.xz",
+  "size": 1873847788,
+  "digest": "sha256:65ce0b329514e5643407db2d02a5bd34bf33d159055dafa82825c8385bd01993",
+  "received_bytes": 1873847788
+}

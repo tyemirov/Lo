@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-19",
+  "issues_closed": [
+    "I004",
+    "I005",
+    "P005"
+  ],
+  "status": "passed",
+  "repository_ci": {
+    "command": "CI=1 make ci TEST_ARGS='-timeout=30m' </dev/null",
+    "exit_code": 0,
+    "interpreter_integration_seconds": 71.757,
+    "native_integration_seconds": 539.144,
+    "reporter_tests": 13,
+    "package_timeout_seconds": 1800,
+    "per_artifact_build_limits_changed": false,
+    "serial_execution": true,
+    "log": "make-ci.txt.gz"
+  },
+  "components": {
+    "I004": {
+      "receipt": "../../../experiments/native-backends/qualification-20261019.json",
+      "offline_backend_target_cells": 4,
+      "harness_tests": 21
+    },
+    "I005": {
+      "receipt": "../semantic-migration/validation.json",
+      "source_files": 329,
+      "source_sha256": "a9462098f1449a640b8c5b18164addd65b326f32f5b3bab137e68d9bc768de63",
+      "required_references_per_lane": 385,
+      "successful_completions_per_lane": 993,
+      "reporter_tests": 13,
+      "source_identity_after_ci": "unchanged"
+    },
+    "P005": {
+      "receipt": "../native-runtime-abi/experiment.json",
+      "harness_receipt": "../native-runtime-abi/validation.json",
+      "target_cells": 2,
+      "harness_tests": 20
+    }
+  },
+  "architecture_review": "architecture-review.json",
+  "prior_ci_attempts": {
+    "ci-capacity-failure.txt.gz": "Failed due to concurrent validation disk exhaustion. Task-owned abandoned output cleanup and serial validation corrected the condition.",
+    "ci-before-final-correction.txt.gz": "Interrupted before final correction checkpoint; not acceptance evidence."
+  },
+  "open_acceptance": [
+    "I006 native lowering",
+    "I007-I010 runtime and adapters",
+    "F017 complete installed offline distributions on both hosts",
+    "I011 full parity and removal of Go generation"
+  ],
+  "artifacts": {
+    "make-ci.txt.gz": {
+      "sha256": "713a112c117c8c72ad35678ea5ba0f9747e50a19d59fb2e408d1b63ad58b261f",
+      "content_sha256": "47c8cd5c2c1c3bc9e78cf7f763f3cb3e65d9ff67ba98c8c122f11a1fdd2bd401",
+      "bytes": 1059,
+      "content_bytes": 5313
+    },
+    "ci-capacity-failure.txt.gz": {
+      "sha256": "a19be3b442582bda90b155d21e6d0ffc6eec3f4105db3972123d5e781efa73ed",
+      "content_sha256": "9d37f5f0b2da2812d17b818797b68f1835f8345215baf0b85896a26445d2e5bc",
+      "bytes": 9957,
+      "content_bytes": 96302
+    },
+    "ci-before-final-correction.txt.gz": {
+      "sha256": "3ae0c6842e0d093907c060c226077d94f70fb3d10aa71c1e028834b4526f9b8b",
+      "content_sha256": "7395909d6250e1b6cd07cb118345378ae5f038e8ea6b386a3a35e62289c26e6c",
+      "bytes": 1005,
+      "content_bytes": 5074
+    }
+  },
+  "documentation": {
+    "review": "documentation-review.json",
+    "structure": "document-structure-check.json",
+    "changed_prose_findings": 0,
+    "preserved_tracker_findings": 12,
+    "preserved_governance_differences": 5
+  },
+  "git_diff_check": "passed",
+  "cleanup": "cleanup.json"
+}

@@ -1,0 +1,62 @@
+{
+  "expected_stdout": "23 0\n0 7\nruntime_calls 1\n",
+  "commands": [
+    {
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/llvm/LLVM-21.1.8-macOS-ARM64/bin/llc",
+        "-mtriple=aarch64-apple-darwin",
+        "-filetype=obj",
+        "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/probe.ll",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/red.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/llvm/LLVM-21.1.8-macOS-ARM64/bin/clang",
+        "--target=aarch64-apple-darwin",
+        "-g",
+        "-c",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/runtime-candidate.c",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/red-runtime.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/llvm/LLVM-21.1.8-macOS-ARM64/bin/ld64.lld",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "macos",
+        "27.0",
+        "27.0",
+        "-syslibroot",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+        "-lSystem",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/red-runtime.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/red.o",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/red"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "ld64.lld: warning: /Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/red-runtime.o has version 28.0.0, which is newer than target minimum of 27.0\n"
+    },
+    {
+      "command": [
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/red"
+      ],
+      "exit_code": 0,
+      "stdout": "23 0\n0 7\nruntime_calls 0\n",
+      "stderr": ""
+    }
+  ],
+  "observed_mismatch": true
+}

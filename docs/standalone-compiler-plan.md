@@ -1,10 +1,15 @@
 # Standalone Compiler And Language Evolution
 
 P004 records this plan on October 16, 2026.
-I004 starts the backend experiment.
-LLVM with LLD is the proposed backend, subject to P005 selection after the experiment.
+I004 completed the backend experiment on October 19, 2026.
+The [runtime contract](native-runtime-contract.md) selects LLVM 21.1.8 with LLD 21.1.8 for the replacement design.
 The current compiler still generates Go source and requires Go 1.27.1 for native builds.
 This plan does not change that implementation or the language specification.
+The [semantic migration contract](semantic-migration.md) records current coverage and its evidence requirements.
+
+I004, I005, and P005 passed their acceptance checks.
+I006 is the next compiler implementation step.
+The installed standalone compiler criterion is still open under F017 and I011.
 
 ## Required Outcome
 
@@ -12,7 +17,7 @@ The user selected this acceptance criterion:
 
 > On a supported clean machine with no Go installation, an installed Lo distribution can compile and link a representative program offline, and the resulting executable runs without Lo installed.
 
-The proposed distribution supplies its compiler backend, linker, runtime libraries, and required platform link inputs.
+The replacement distribution supplies its compiler backend, linker, runtime libraries, and required platform link inputs.
 It needs no separate Go, Rust, Clang, or developer SDK installation.
 The executable can use the declared operating-system libraries.
 It needs no Lo installation, source checkout, source file, or separate Lo runtime library.
@@ -29,6 +34,7 @@ The [builder](../internal/nativebuild/build.go) locates Go and compiles an embed
 Native artifacts already execute without Go or Lo installed.
 
 The migration covers the current catalog, including F015, F016, and I003.
+It also covers current File receipts, process execution, and sequential fold behavior.
 The [checkpoint contract](model-checkpoints.md) defines canonical bytes, typed imports, explicit container transfers, and complete optimizer resumption.
 The proposed backend must preserve those operations.
 Pending NVIDIA extensions remain separate work.
@@ -40,8 +46,8 @@ These assessments describe engineering tradeoffs, not measured Lo performance.
 | Option | Benefit | Required work | Decision |
 | --- | --- | --- | --- |
 | Bundled Go | Reuse the existing runtime and generator. | Package the complete toolchain and additional Metal inputs. | Meets the narrow installation requirement, but retains Go compilation. |
-| LLVM and LLD | Native optimization, object generation, and debug information. | Port the runtime and supply complete platform link inputs. | Preferred candidate for P005. |
-| Cranelift and a linker | Fast code generation and a direct object API. | Port the same runtime and qualify debug and numeric behavior. | Compare with LLVM in I004. |
+| LLVM and LLD | Native optimization, object generation, and debug information. | Port the runtime and supply complete platform link inputs. | Selected replacement design. |
+| Cranelift and a linker | Fast code generation and a direct object API. | Port the same runtime and qualify debug and numeric behavior. | Four experiment cells passed. No production route selected. |
 | Generated C with Clang and LLD | Readable generated code and conventional library calls. | Port the runtime and prevent C semantic changes. | Defer. |
 | QBE with assembler and linker | Small implementation and simple IR. | Supply more toolchain components and qualify target support. | Defer. |
 | WebAssembly with an embedded runtime | Portable execution representation. | Package an execution engine and define device integration. | Consider as a later target. |
@@ -53,7 +59,7 @@ Its [object module](https://docs.rs/cranelift-object/latest/cranelift_object/) e
 [LLD](https://lld.llvm.org/) supplies ELF and Mach-O linkers.
 A complete [toolchain](https://clang.llvm.org/docs/Toolchain.html) also needs runtime libraries and platform inputs.
 
-## Proposed Architecture
+## Selected Architecture
 
 ```text
 Lo source and local dependencies
@@ -72,12 +78,12 @@ The lowering plan makes control flow, error branches, logical charges, cleanup, 
 It retains Lo semantics before conversion to the selected backend IR.
 The inspector continues to use the checked graph.
 
-A Rust runtime with a narrow C ABI is the proposed implementation.
+A Rust runtime with a narrow C ABI is the selected implementation.
 The distribution contains a precompiled static runtime for each supported target.
 [Rust static libraries](https://doc.rust-lang.org/reference/linkage.html) can supply this boundary without an installed Rust compiler.
 System-library dependencies still require explicit link inputs.
 
-P005 defines the following ABI requirements before runtime implementation:
+The runtime contract resolves these P005 requirements before implementation:
 
 - Specify value representations, type identities, and opaque handles.
 - Specify ownership, retention, release, and callback lifetimes.
@@ -119,12 +125,12 @@ Disable reassociation and fused operations where they change the required result
 
 | Target | Initial execution environment | Platform decision |
 | --- | --- | --- |
-| `darwin/arm64` | macOS VM or the available local host | Select the minimum OS and complete Mach-O link inputs in P005. |
-| `linux/arm64` | Linux arm64 container or VM | Select the minimum kernel and libc contract in P005. |
+| `darwin/arm64` | macOS 27.0.1, Darwin 27.0.0 | Original TAPI descriptions, libSystem, and explicit framework inputs. |
+| `linux/arm64` | Linux 6.12.110, glibc 2.36 | Pinned Debian startup objects and runtime libraries. |
 
 The current native qualification covers both targets.
 The replacement must preserve the current documented cross-target software builds.
-P005 records the exact host-to-target matrix and tool availability for each cell.
+The runtime contract records both hosts, both software targets, exact tools, and the narrower replacement macOS floor.
 Metal remains an explicit local `darwin/arm64` build configuration under its existing contract.
 
 The following distribution contents are required:
@@ -139,9 +145,9 @@ The following distribution contents are required:
 - Preserve atomic output replacement and cancellation cleanup.
 - Support installation relocation without source or build-machine paths.
 
-macOS platform inputs remain a feasibility decision.
-An installed Apple SDK can support an experiment, but it cannot prove SDK-free compilation.
-P005 must establish distributable link inputs before the runtime migration starts.
+The current experiments establish SDK-free macOS linking with original Lo-authored symbol descriptions.
+They also establish Foundation, Objective-C, Metal, and process-sandbox symbol links.
+F017 must supply the complete inputs for the implemented runtime.
 Precompiled Metal kernels need no new MSL compilation during a user build.
 They do not remove native framework linkage requirements.
 
@@ -158,7 +164,7 @@ The validation requirements in each issue are its acceptance criteria.
 | Add native lowering | I006 | Verified control, cost, error, and cleanup representation. |
 | Port core values | I007 | Core runtime and generated calls pass public fixtures. |
 | Port numeric execution | I008 | Tensors, autodiff, optimizers, and checkpoints pass their contracts. |
-| Port adapters | I009 | Files and HTTP pass confinement and lifecycle tests. |
+| Port adapters | I009 | Files, processes, and HTTP pass confinement and lifecycle tests. |
 | Port devices | I010 | Transfers, Metal profiles, and resource cleanup pass software acceptance. |
 | Supply the distribution | F017 | Complete relocatable offline compiler package. |
 | Qualify and replace | I011 | Full parity, clean-environment acceptance, and removal of obsolete Go build code. |
@@ -172,6 +178,7 @@ Its representative runtime fixtures do not require the complete Lo runtime.
 I006 supplies a minimal ABI test runtime before I007 implements core Lo values.
 A suggested two-week effort budget limits investigation.
 It is not a compiler delivery estimate.
+
 Correctness and complete linking decide feasibility before performance comparisons.
 Measurements cover distribution size, compile time, peak memory, artifact size, debug behavior, and execution time.
 The current 180-second, 2-GiB, and 64-MiB build limits remain applicable until an explicit contract decision changes them.
@@ -224,15 +231,15 @@ Recursion, closures, concurrency, and foreign-function access need separate prop
 They change termination, inspection, ownership, or authority.
 New operating systems, new architectures, and self-hosting remain outside this sequence.
 
-## Open Decisions
+## Decision Owners
 
 | Decision | Owner | Required evidence |
 | --- | --- | --- |
-| LLVM or Cranelift | P005 | I004 results and explicit correctness and distribution tradeoffs. |
-| Runtime implementation and ownership | P005 | ABI, cycle audit, callback lifetimes, and resource-release design. |
-| Minimum OS and system libraries | P005 | Complete target-specific links and execution on the selected minimum environments. |
-| macOS link-input distribution | P005 | SDK-free link proof and recorded distribution authority for every supplied input. |
-| Debug information and optimization | P005 | Source-location probe and unchanged semantic fixtures. |
+| LLVM with LLD | P005 | Four current experiment cells passed. LLVM generated source locations were verified. |
+| Rust runtime and reference counting | P005 | Two-target ABI fixture, cycle audit, callback rules, and explicit resource release. |
+| Minimum OS and system libraries | P005 | Selected baseline execution and pinned host and target input inventories. |
+| macOS link-input distribution | P005 | Original repository-authored descriptions and SDK-free platform links. |
+| DWARF and strict numeric lowering | P005 | Generated location probe and required I005 parity before optimization. |
 | Modules, types, and package rules | P006 | Reviewed specifications and examples before implementation. |
 
 The [experiment report](native-backend-experiment.md) records observed results separately from these requirements.

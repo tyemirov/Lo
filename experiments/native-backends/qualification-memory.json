@@ -1,0 +1,252 @@
+{
+  "measurement_tool": "/usr/bin/time -l (host instrumentation only)",
+  "scope": "sandbox-exec plus measured compiler/linker child process tree",
+  "commands": [
+    {
+      "target": "aarch64-apple-darwin",
+      "backend": "llvm",
+      "stage": "object",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llc",
+        "-mtriple=aarch64-apple-darwin",
+        "-filetype=obj",
+        "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/probe.ll",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.02 real         0.01 user         0.01 sys\n            27803648  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                2127  page reclaims\n                 174  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   0  voluntary context switches\n                  64  involuntary context switches\n           165799306  instructions retired\n            86498356  cycles elapsed\n             5161488  peak memory footprint\n",
+      "peak_rss_bytes": 27803648,
+      "timing": {
+        "real_seconds": 0.02,
+        "user_seconds": 0.01,
+        "system_seconds": 0.01
+      }
+    },
+    {
+      "target": "aarch64-apple-darwin",
+      "backend": "llvm",
+      "stage": "link",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld64.lld",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "macos",
+        "27.0",
+        "27.0",
+        "-syslibroot",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+        "-lSystem",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin-runtime.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin.o",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-apple-darwin"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.02 real         0.01 user         0.00 sys\n            16302080  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                1517  page reclaims\n                  93  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   1  voluntary context switches\n                 147  involuntary context switches\n           159313603  instructions retired\n            76436644  cycles elapsed\n             3818000  peak memory footprint\n",
+      "peak_rss_bytes": 16302080,
+      "timing": {
+        "real_seconds": 0.02,
+        "user_seconds": 0.01,
+        "system_seconds": 0.0
+      }
+    },
+    {
+      "target": "aarch64-apple-darwin",
+      "backend": "cranelift",
+      "stage": "object",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/lo-native-probe",
+        "aarch64-apple-darwin",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.01 real         0.00 user         0.00 sys\n             3686400  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                 798  page reclaims\n                  39  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   0  voluntary context switches\n                  54  involuntary context switches\n            94693798  instructions retired\n            46861658  cycles elapsed\n             1704344  peak memory footprint\n",
+      "peak_rss_bytes": 3686400,
+      "timing": {
+        "real_seconds": 0.01,
+        "user_seconds": 0.0,
+        "system_seconds": 0.0
+      }
+    },
+    {
+      "target": "aarch64-apple-darwin",
+      "backend": "cranelift",
+      "stage": "link",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld64.lld",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "macos",
+        "27.0",
+        "27.0",
+        "-syslibroot",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+        "-lSystem",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin-runtime.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin.o",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-apple-darwin"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.02 real         0.01 user         0.00 sys\n            16269312  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                1515  page reclaims\n                  93  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   1  voluntary context switches\n                 163  involuntary context switches\n           156173681  instructions retired\n            68796660  cycles elapsed\n             3801616  peak memory footprint\n",
+      "peak_rss_bytes": 16269312,
+      "timing": {
+        "real_seconds": 0.02,
+        "user_seconds": 0.01,
+        "system_seconds": 0.0
+      }
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "backend": "llvm",
+      "stage": "object",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/llc",
+        "-mtriple=aarch64-unknown-linux-gnu",
+        "-filetype=obj",
+        "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/probe.ll",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.02 real         0.01 user         0.00 sys\n            28033024  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                2228  page reclaims\n                  88  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   0  voluntary context switches\n                  79  involuntary context switches\n           157062321  instructions retired\n            76615584  cycles elapsed\n             5210616  peak memory footprint\n",
+      "peak_rss_bytes": 28033024,
+      "timing": {
+        "real_seconds": 0.02,
+        "user_seconds": 0.01,
+        "system_seconds": 0.0
+      }
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "backend": "llvm",
+      "stage": "link",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld.lld",
+        "-m",
+        "aarch64elf",
+        "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+        "-dynamic-linker",
+        "/lib/ld-linux-aarch64.so.1",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crt1.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crti.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu-runtime.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu.o",
+        "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu",
+        "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/lib/aarch64-linux-gnu",
+        "-lc",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crtn.o",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/llvm-aarch64-unknown-linux-gnu"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.02 real         0.01 user         0.01 sys\n            18137088  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                1634  page reclaims\n                  90  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   0  voluntary context switches\n                 272  involuntary context switches\n           174875162  instructions retired\n            86490394  cycles elapsed\n             4932136  peak memory footprint\n",
+      "peak_rss_bytes": 18137088,
+      "timing": {
+        "real_seconds": 0.02,
+        "user_seconds": 0.01,
+        "system_seconds": 0.01
+      }
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "backend": "cranelift",
+      "stage": "object",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/lo-native-probe",
+        "aarch64-unknown-linux-gnu",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.01 real         0.00 user         0.00 sys\n             3702784  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                 798  page reclaims\n                  39  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   0  voluntary context switches\n                  49  involuntary context switches\n           100373249  instructions retired\n            42570251  cycles elapsed\n             1704344  peak memory footprint\n",
+      "peak_rss_bytes": 3702784,
+      "timing": {
+        "real_seconds": 0.01,
+        "user_seconds": 0.0,
+        "system_seconds": 0.0
+      }
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "backend": "cranelift",
+      "stage": "link",
+      "command": [
+        "/usr/bin/time",
+        "-l",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+        "-f",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/isolation.sb",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld.lld",
+        "-m",
+        "aarch64elf",
+        "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+        "-dynamic-linker",
+        "/lib/ld-linux-aarch64.so.1",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crt1.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crti.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu-runtime.o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu.o",
+        "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu",
+        "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/lib/aarch64-linux-gnu",
+        "-lc",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crtn.o",
+        "-o",
+        "/Users/tyemirov/Development/Research/Lo/_scratch/native-backend-probe/execution/cranelift-aarch64-unknown-linux-gnu"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "        0.02 real         0.01 user         0.00 sys\n            17989632  maximum resident set size\n                   0  average shared memory size\n                   0  average unshared data size\n                   0  average unshared stack size\n                1619  page reclaims\n                  90  page faults\n                   0  swaps\n                   0  block input operations\n                   0  block output operations\n                   0  messages sent\n                   0  messages received\n                   0  signals received\n                   0  voluntary context switches\n                 258  involuntary context switches\n           168664857  instructions retired\n            77475127  cycles elapsed\n             4784656  peak memory footprint\n",
+      "peak_rss_bytes": 17989632,
+      "timing": {
+        "real_seconds": 0.02,
+        "user_seconds": 0.01,
+        "system_seconds": 0.0
+      }
+    }
+  ]
+}

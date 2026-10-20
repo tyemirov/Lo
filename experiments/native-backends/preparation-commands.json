@@ -1,0 +1,274 @@
+{
+  "bootstrap_commands": [
+    [
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rust-prefix/bin/cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/cranelift/Cargo.toml"
+    ],
+    [
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rust-prefix/bin/rustc",
+      "-C",
+      "linker=/usr/bin/clang",
+      "-O",
+      "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/runner.rs",
+      "-o",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner"
+    ],
+    [
+      "/usr/bin/clang",
+      "-mmacosx-version-min=27.0",
+      "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/isolation_probe.c",
+      "-o",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/isolation-probe"
+    ],
+    [
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+      "--target=aarch64-unknown-linux-gnu",
+      "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+      "-c",
+      "/Users/tyemirov/Development/Research/Lo/experiments/native-backends/guest_init.c",
+      "-o",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/guest-init.o"
+    ],
+    [
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld.lld",
+      "-m",
+      "aarch64elf",
+      "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot",
+      "-dynamic-linker",
+      "/lib/ld-linux-aarch64.so.1",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crt1.o",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crti.o",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/guest-init.o",
+      "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu",
+      "-L/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/lib/aarch64-linux-gnu",
+      "-lc",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crtn.o",
+      "-o",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/emulation/guest-init"
+    ]
+  ],
+  "source_sha256": {
+    "cranelift/Cargo.lock": "01d5451805716dba051746a5ae77381c9ba7a37a83fd5dabd3656e9027be9d43",
+    "cranelift/Cargo.toml": "c3bae873f7bf63fd3681b49736afe4a984aed8767262130f99b8d45cc2d059cb",
+    "cranelift/src/main.rs": "eac363f33734900c2110b5083ef1b35f43120454140b3a473d1c4523c9415e92",
+    "guest_init.c": "236145390aef2a6ac8344cbf31015cf7bb637d5d676f6761be54cb6ee6663e5c",
+    "isolation_probe.c": "ae34ec421ec2717ba801a670381d672dcc246ca3dcb96656f31c924cf182c93c",
+    "probe.ll": "1e3d6aa898c4b876e0b32c448af08746a78245aa7407e54730283135e212bbdb",
+    "probe.py": "3f131e6cc2e1558f16b8b4530aab9b788f5b87a66f27637618e4e3b98f9a2b85",
+    "runner.rs": "ed3e69880248207f6835d3665b86f60b1a7d3d9e6907159cfa75b03646bf7723",
+    "runtime.c": "4f25463ce3760ff860a1004848764db5d308189ae487d414e504ff25d2f8529e"
+  },
+  "host_tool_sha256": {
+    "clang": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+    "codesign": "d517c9be608ffd266ec106c685e880cda71abc94001450e36d2476016406dd1e",
+    "tar": "ad4e73ac2e00b3d69969b2e8da466f08c7968a51f424380ecb4d9ff6779b28b9",
+    "sandbox-exec": "58839ef01b4eef8aac0d2aa8f9d1c074ae45aafe3533965b030672450064acc8"
+  },
+  "local_tool_sha256": {
+    "clang": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a",
+    "llc": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e",
+    "ld.lld": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+    "ld64.lld": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+    "runner": "1f95035f99950e925e77f8cc2eec82afbd8637c11e8d38e6226ead19a9388dbd",
+    "lo-native-probe": "a2acc31db01b9fb9c8bce5f5b278aadc1a038a2f4819276d0bee82993eba6e13",
+    "sandbox-exec": "cb4f707a8adf5a1108c4e4a58a1463421cd5bfd615055ccdfa2fe8bdae76c0eb",
+    "isolation-probe": "28c35f14c135ddf463a50b0f202fcad479c4782bf39c413cd16ffed4f4adcbe7"
+  },
+  "notes": [
+    "Apple host compiler and SDK are bootstrap inputs only.",
+    "Final compiler/linker/runtime fixture qualification runs with declared local bundles and denied network.",
+    "Copied archive and sandbox helpers were ad hoc signed locally after relocation."
+  ],
+  "bootstrap_environment": {
+    "CI": "1",
+    "HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019",
+    "TMPDIR": "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019",
+    "CLANG_MODULE_CACHE_PATH": "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/clang-cache",
+    "CARGO_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/cargo-home",
+    "RUSTUP_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rustup",
+    "RUSTC": "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rust-prefix/bin/rustc",
+    "RUSTFLAGS": "-C linker=/usr/bin/clang",
+    "CARGO_TARGET_DIR": "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/cranelift-build"
+  },
+  "bootstrap_sdk_observations": [
+    {
+      "command": [
+        "/usr/bin/clang",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/xcrun",
+        "--no-cache",
+        "--sdk",
+        "macosx",
+        "--show-sdk-path"
+      ],
+      "exit_code": 0,
+      "stdout": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/xcrun",
+        "--no-cache",
+        "--sdk",
+        "macosx",
+        "--show-sdk-version"
+      ],
+      "exit_code": 0,
+      "stdout": "27.0\n",
+      "stderr": ""
+    }
+  ],
+  "assembly": [
+    {
+      "operation": "download",
+      "inputs": "preparation.lock.json",
+      "destination": "_scratch/i004-20261019",
+      "verification": "SHA-256 for every archive; LLVM/Rust published hashes checked before extraction"
+    },
+    {
+      "operation": "extract_llvm",
+      "archive": "llvm.tar.xz",
+      "format": "tar.xz",
+      "selected_members": [
+        "bin/llc",
+        "bin/clang",
+        "bin/clang-21",
+        "bin/lld",
+        "bin/ld.lld",
+        "bin/ld64.lld",
+        "bin/llvm-dwarfdump",
+        "bin/llvm-readobj",
+        "bin/llvm-nm",
+        "bin/llvm-ar",
+        "bin/llvm-objdump",
+        "lib/*"
+      ],
+      "path_validation": "Reject absolute paths and parent traversal; tarfile data filter"
+    },
+    {
+      "operation": "extract_rust",
+      "archives": [
+        "rustc.tar.xz",
+        "cargo.tar.xz",
+        "rust-std.tar.xz"
+      ],
+      "prefix": "_scratch/i004-20261019/rust-prefix",
+      "assembly": "Merge component trees through repository-internal hard links; resolve archive links only within Lo"
+    },
+    {
+      "operation": "extract_linux_sysroot",
+      "archives": [
+        "libc6.deb",
+        "libc6-dev.deb"
+      ],
+      "format": "ar data.tar.xz",
+      "destination": "_scratch/i004-20261019/linux-sysroot",
+      "assembly": "Extract regular files and directories; materialize archive links through internal hard links to canonical extracted files"
+    },
+    {
+      "operation": "guest_loader",
+      "source": "linux-sysroot/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+      "destination": "linux-sysroot/lib/ld-linux-aarch64.so.1",
+      "assembly": "Repository-internal hard link; no permission metadata inspection or change"
+    },
+    {
+      "operation": "extract_emulator",
+      "archives": "MacPorts artifacts in preparation.lock.json",
+      "destination": "_scratch/i004-20261019/toolchain/emulation",
+      "assembly": "Extract qemu-system-aarch64 and materialize dylib files from each archive; archive link targets resolve only within the same archive"
+    },
+    {
+      "operation": "dylib_resolution",
+      "rewritten_install_names": false,
+      "environment": "DYLD_LIBRARY_PATH=<bundle>/emulation/lib",
+      "scope": "QEMU child only",
+      "system_runtime_paths": [
+        "/usr/lib",
+        "/System/Library"
+      ]
+    },
+    {
+      "operation": "copy_host_helpers",
+      "commands": [
+        [
+          "/bin/cp",
+          "-X",
+          "/usr/bin/tar",
+          "<bundle>/emulation/tar"
+        ],
+        [
+          "/bin/cp",
+          "-X",
+          "/usr/bin/sandbox-exec",
+          "<bundle>/bin/sandbox-exec"
+        ]
+      ],
+      "ad_hoc_sign_commands": [
+        [
+          "/usr/bin/codesign",
+          "--force",
+          "--sign",
+          "-",
+          "<bundle>/emulation/tar"
+        ],
+        [
+          "/usr/bin/codesign",
+          "--force",
+          "--sign",
+          "-",
+          "<bundle>/bin/sandbox-exec"
+        ]
+      ],
+      "scope": "Local validation helper copies only; installed files unchanged"
+    },
+    {
+      "operation": "build",
+      "commands": "bootstrap_commands",
+      "compiler_scope": "Host Apple compiler and SDK build Cranelift emitter, Rust runner, and isolation guard. Local LLVM builds Linux guest-init with the declared sysroot."
+    },
+    {
+      "operation": "cargo_preparation",
+      "network_enabled_command": [
+        "<rust-prefix>/bin/cargo",
+        "build",
+        "--locked",
+        "--release",
+        "--manifest-path",
+        "experiments/native-backends/cranelift/Cargo.toml"
+      ],
+      "subsequent_build": "--offline --locked --release",
+      "dependency_contract": "Cargo.lock; notices/crates/inventory.json"
+    },
+    {
+      "operation": "assemble_bundle",
+      "assembly": "Materialize LLVM linker aliases and emitter through repository-internal hard links; copy kernel; no symlinks in pinned bundle"
+    },
+    {
+      "operation": "declare_inputs",
+      "output": "_scratch/i004-20261019/inputs.json",
+      "identity": "probe.py tree_sha256 for bundles/sysroots; SHA-256 and exact version for each tool"
+    },
+    {
+      "operation": "qualify_offline",
+      "command": [
+        "make",
+        "prepare-native-backend-probe",
+        "experiment-native-backends",
+        "NATIVE_BACKEND_INPUTS=_scratch/i004-20261019/inputs.json"
+      ],
+      "scope": "Qualification denies SDK and undeclared tool paths; only declared local inputs and OS runtime roots are readable"
+    }
+  ]
+}

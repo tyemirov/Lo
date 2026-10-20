@@ -1,0 +1,26 @@
+{
+  "command": "make -f Makefile -f experiments/native-runtime-abi/probe.mk test-runtime-abi-probe </dev/null",
+  "red": {
+    "passed": 5,
+    "failed": 15,
+    "observed_defects": [
+      "Result input deleted before overlap validation",
+      "Guard symlink targets overwritten before rejection",
+      "Platform stale outputs accepted after zero-exit commands emitted no new artifacts",
+      "Prepare output overlaps and derived symlinks reached mutation or execution",
+      "Compiler and sysroot changes accepted into successful preparation receipt",
+      "Malformed provenance hash types escaped as TypeError tracebacks"
+    ]
+  },
+  "green": {
+    "passed": 20,
+    "failed": 0,
+    "seconds": 0.91
+  },
+  "source_sha256": {
+    "probe.py": "b9bbffe3dd8cb8ffb7ef5b5e04b180ce6841283da705bb2029a0519d22c8200a",
+    "prepare.py": "68cd679ee57618d0a3118b4e8c691116f187497784007e15afa9d1d4f543d5c5",
+    "test_probe.py": "7c379e269f67ca9b501b8de0410f2be484291ff56cd61273b1b0765066d649d7"
+  },
+  "scope": "Public CLI regression checks; controlled compiler/executor injection tests receipt mutation and missing-output boundaries. Actual target execution is qualified separately."
+}

@@ -1,0 +1,1117 @@
+[
+  {
+    "archive": "llvm.tar.xz",
+    "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+    "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+    "bytes": 1503047352,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/llvm/include/llvm/Support/LICENSE.TXT",
+        "archive_member": "LLVM-21.1.8-macOS-ARM64/include/llvm/Support/LICENSE.TXT",
+        "sha256": "54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241"
+      },
+      {
+        "path": "experiments/native-backends/notices/LLVM-LICENSE.txt",
+        "url": "https://llvm.org/LICENSE.txt",
+        "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+      }
+    ],
+    "declared_license": "Apache-2.0 WITH LLVM-exception",
+    "upstream_homepage": "https://llvm.org",
+    "role": "selected compiler/linker candidate"
+  },
+  {
+    "archive": "rustc.tar.xz",
+    "url": "https://static.rust-lang.org/dist/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+    "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+    "bytes": 55006972,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/rust/rustc/LICENSE-APACHE",
+        "archive_member": "rustc-1.85.1-aarch64-apple-darwin/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/rustc/rustc/share/doc/rust/LICENSE-APACHE",
+        "archive_member": "rustc-1.85.1-aarch64-apple-darwin/rustc/share/doc/rust/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/rustc/COPYRIGHT",
+        "archive_member": "rustc-1.85.1-aarch64-apple-darwin/COPYRIGHT",
+        "sha256": "252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/rustc/rustc/share/doc/rust/COPYRIGHT",
+        "archive_member": "rustc-1.85.1-aarch64-apple-darwin/rustc/share/doc/rust/COPYRIGHT",
+        "sha256": "252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/rustc/LICENSE-MIT",
+        "archive_member": "rustc-1.85.1-aarch64-apple-darwin/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/rustc/rustc/share/doc/rust/LICENSE-MIT",
+        "archive_member": "rustc-1.85.1-aarch64-apple-darwin/rustc/share/doc/rust/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ],
+    "declared_license": "MIT OR Apache-2.0",
+    "upstream_homepage": "https://www.rust-lang.org",
+    "role": "preparation-only Rust toolchain"
+  },
+  {
+    "archive": "cargo.tar.xz",
+    "url": "https://static.rust-lang.org/dist/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+    "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+    "bytes": 6766048,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/rust/cargo/LICENSE-APACHE",
+        "archive_member": "cargo-1.85.1-aarch64-apple-darwin/LICENSE-APACHE",
+        "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/cargo/cargo/share/doc/cargo/LICENSE-APACHE",
+        "archive_member": "cargo-1.85.1-aarch64-apple-darwin/cargo/share/doc/cargo/LICENSE-APACHE",
+        "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/cargo/LICENSE-MIT",
+        "archive_member": "cargo-1.85.1-aarch64-apple-darwin/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/cargo/cargo/share/doc/cargo/LICENSE-MIT",
+        "archive_member": "cargo-1.85.1-aarch64-apple-darwin/cargo/share/doc/cargo/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/cargo/LICENSE-THIRD-PARTY",
+        "archive_member": "cargo-1.85.1-aarch64-apple-darwin/LICENSE-THIRD-PARTY",
+        "sha256": "cbc759b1f17a2ac38fe3eb9e9563b1a08ba0f900611c49faaf68b46907b6d898"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/cargo/cargo/share/doc/cargo/LICENSE-THIRD-PARTY",
+        "archive_member": "cargo-1.85.1-aarch64-apple-darwin/cargo/share/doc/cargo/LICENSE-THIRD-PARTY",
+        "sha256": "cbc759b1f17a2ac38fe3eb9e9563b1a08ba0f900611c49faaf68b46907b6d898"
+      }
+    ],
+    "declared_license": "MIT OR Apache-2.0",
+    "upstream_homepage": "https://www.rust-lang.org",
+    "role": "preparation-only Rust toolchain"
+  },
+  {
+    "archive": "rust-std.tar.xz",
+    "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+    "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+    "bytes": 27522824,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/rust/rust-std/LICENSE-APACHE",
+        "archive_member": "rust-std-1.85.1-aarch64-apple-darwin/LICENSE-APACHE",
+        "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/rust-std/COPYRIGHT",
+        "archive_member": "rust-std-1.85.1-aarch64-apple-darwin/COPYRIGHT",
+        "sha256": "252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292"
+      },
+      {
+        "path": "experiments/native-backends/notices/rust/rust-std/LICENSE-MIT",
+        "archive_member": "rust-std-1.85.1-aarch64-apple-darwin/LICENSE-MIT",
+        "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    ],
+    "declared_license": "MIT OR Apache-2.0",
+    "upstream_homepage": "https://www.rust-lang.org",
+    "role": "preparation-only Rust toolchain"
+  },
+  {
+    "archive": "libc6.deb",
+    "url": "https://deb.debian.org/debian/pool/main/g/glibc/libc6_2.36-9+deb12u14_arm64.deb",
+    "sha256": "01f4330719fd4f65580e16ea5a0527f372fca750e8f588d26deaf09f2d3b1cf4",
+    "bytes": 2324660,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/glibc/libc6-copyright",
+        "archive_member": "./usr/share/doc/libc6/copyright",
+        "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987"
+      },
+      {
+        "path": "experiments/native-backends/notices/GPL-2.0.txt",
+        "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
+        "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+      },
+      {
+        "path": "experiments/native-backends/notices/LGPL-2.1.txt",
+        "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt",
+        "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+      }
+    ],
+    "declared_license": "LGPL-2.1-or-later AND LGPL-2.1-or-later WITH linking-exception",
+    "upstream_homepage": "https://www.gnu.org/software/libc/",
+    "role": "Linux target C runtime/link inputs",
+    "source_package": "https://deb.debian.org/debian/pool/main/g/glibc/glibc_2.36.orig.tar.xz"
+  },
+  {
+    "archive": "libc6-dev.deb",
+    "url": "https://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.36-9+deb12u14_arm64.deb",
+    "sha256": "8bc395bf2ee9939f1a6ae395f974cffdcf541d98f99adfe89ce7e4bef36d159e",
+    "bytes": 1435692,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/glibc/libc6-dev-copyright",
+        "archive_member": "./usr/share/doc/libc6-dev/copyright",
+        "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987"
+      },
+      {
+        "path": "experiments/native-backends/notices/GPL-2.0.txt",
+        "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
+        "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+      },
+      {
+        "path": "experiments/native-backends/notices/LGPL-2.1.txt",
+        "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt",
+        "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+      }
+    ],
+    "declared_license": "LGPL-2.1-or-later AND LGPL-2.1-or-later WITH linking-exception",
+    "upstream_homepage": "https://www.gnu.org/software/libc/",
+    "role": "Linux target C runtime/link inputs",
+    "source_package": "https://deb.debian.org/debian/pool/main/g/glibc/glibc_2.36.orig.tar.xz"
+  },
+  {
+    "archive": "vmlinuz-virt",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/aarch64/netboot/vmlinuz-virt",
+    "sha256": "dd37c4460f933ec909ff022c34944ff7e1a5300aff99750e3bdc02cd4074c332",
+    "bytes": 9630208,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/GPL-2.0.txt",
+        "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
+        "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+      }
+    ],
+    "declared_license": "GPL-2.0-only",
+    "upstream_homepage": "https://kernel.org",
+    "role": "validation-only Linux kernel",
+    "kernel_release": "6.12.110-0-virt #1-Alpine (guest boot log)",
+    "source_distribution_index": "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/aarch64/"
+  },
+  {
+    "archive": "qemu.tbz2",
+    "url": "https://packages.macports.org/qemu/qemu-11.1.2_0+cocoa+curses+spice+spice_protocol+target_arm+target_i386+target_x86_64+usb+vnc.darwin_25.arm64.tbz2",
+    "sha256": "b828e5a59e6931548474e2997a0ffab3811c1a22af582566a73e4803c2c75780",
+    "bytes": 50057453,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/qemu/license.html",
+        "archive_member": "./opt/local/share/doc/qemu/about/license.html",
+        "sha256": "040ca3c0c9fcac78faa63409063d8cacef3a8578ccac2933b37c565a95ba5838"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/qemu/",
+    "upstream_homepage": "https://www.qemu.org",
+    "declared_license": "GPL-2+",
+    "metadata_version": "11.1.2",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "qemu",
+      "portversion": "11.1.2",
+      "portrevision": "0",
+      "os.version": "25.6.0",
+      "xcodecltversion": "26.6.0.0.1781586589",
+      "ports_commit": "5338c88bb176bba40a623753df4e38b29c818580",
+      "source_date_epoch": "1790961156"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/qemu/"
+  },
+  {
+    "archive": "glib2.tbz2",
+    "url": "https://packages.macports.org/glib2/glib2-2.88.3_2+dbus+x11.darwin_21.arm64.tbz2",
+    "sha256": "f0c03d37c0836fd71d3ba34a0d7a6bccacfe70498f11bb821d3d167a44c9ea16",
+    "bytes": 12897066,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/glib2/COPYING",
+        "archive_member": "./opt/local/share/doc/glib/COPYING",
+        "sha256": "fa6f36630bb1e0c571d34b2bbdf188d08495c9dbf58f28cac112f303fc1f58fb"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/glib2/",
+    "upstream_homepage": "https://wiki.gnome.org/Projects/GLib",
+    "declared_license": "LGPL-2+",
+    "metadata_version": "2.88.3",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "glib2",
+      "portversion": "2.88.3",
+      "portrevision": "2",
+      "os.version": "25.6.0",
+      "xcodecltversion": "26.6.0.0.1781586589",
+      "ports_commit": "a702f9b726d2a48092eed32bec5191d4499c74ff",
+      "source_date_epoch": "1789244332"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/glib2/"
+  },
+  {
+    "archive": "gnutls.tbz2",
+    "url": "https://packages.macports.org/gnutls/gnutls-3.8.13_1.darwin_20.arm64.tbz2",
+    "sha256": "569ae917518981a0b79a9396c9d0e2946789fbcda89547b05614fb9768f89c68",
+    "bytes": 1328567,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/gnutls/",
+    "upstream_homepage": "http://www.gnutls.org/",
+    "declared_license": "LGPL-2.1+ and GPL-3+",
+    "metadata_version": "3.8.13",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "gnutls",
+      "portversion": "3.8.13",
+      "portrevision": "1",
+      "os.version": "25.4.0",
+      "xcodecltversion": "26.4.0.0.1774242506",
+      "ports_commit": "6937bf5fd889fe6086f77ce2e0e2b14180d6a9ca",
+      "source_date_epoch": "1777705462"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/gnutls/"
+  },
+  {
+    "archive": "libpixman.tbz2",
+    "url": "https://packages.macports.org/libpixman/libpixman-0.46.0_0.darwin_20.arm64.tbz2",
+    "sha256": "fce769e15bfec438201ac6837a8eb3668a4aa041695a2a62c6e528279137dc00",
+    "bytes": 223741,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/libpixman/COPYING",
+        "archive_member": "./opt/local/share/doc/libpixman/COPYING",
+        "sha256": "fac9270f0987b96ff4533fca3548c633e02083cbba4a0172a3b149b2e4019793"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libpixman/",
+    "upstream_homepage": "http://www.pixman.org",
+    "declared_license": "X11",
+    "metadata_version": "0.46.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libpixman",
+      "portversion": "0.46.0",
+      "portrevision": "0",
+      "os.version": "25.0.0",
+      "xcodecltversion": "26.0.0.0.1.1756965055",
+      "ports_commit": "5750c933b44f0d003759f8a72d30f6e1178677cd",
+      "source_date_epoch": "1754924827"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libpixman/"
+  },
+  {
+    "archive": "bzip2.tbz2",
+    "url": "https://packages.macports.org/bzip2/bzip2-1.0.8_1.darwin_21.arm64.tbz2",
+    "sha256": "49bea02066a1cd1c11aac087ec17082b79dc75d3d439820c85ac50498b0e0e55",
+    "bytes": 150039,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/bzip2/",
+    "upstream_homepage": "https://sourceware.org/bzip2/",
+    "declared_license": "BSD",
+    "metadata_version": "1.0.8",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "bzip2",
+      "portversion": "1.0.8",
+      "portrevision": "1",
+      "os.version": "25.6.0",
+      "xcodecltversion": "26.6.0.0.1781586589",
+      "ports_commit": "2a5756bcc4c97db98d47a1e43c93cf13f9d0eff8",
+      "source_date_epoch": "1790739972"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/bzip2/"
+  },
+  {
+    "archive": "libslirp.tbz2",
+    "url": "https://packages.macports.org/libslirp/libslirp-4.9.1_0.darwin_20.arm64.tbz2",
+    "sha256": "b7305fb9abbc03121af04d1cd618f664cf6b7b0183f6446756b31821cf3b1f68",
+    "bytes": 71595,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libslirp/",
+    "upstream_homepage": "https://gitlab.freedesktop.org/slirp/libslirp",
+    "declared_license": "BSD",
+    "metadata_version": "4.9.1",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libslirp",
+      "portversion": "4.9.1",
+      "portrevision": "0",
+      "os.version": "25.4.0",
+      "xcodecltversion": "26.4.0.0.1774242506",
+      "ports_commit": "d3393dca265126a5e76884eabdab1a78112e2932",
+      "source_date_epoch": "1777637572"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libslirp/"
+  },
+  {
+    "archive": "lzfse.tbz2",
+    "url": "https://packages.macports.org/lzfse/lzfse-1.0_0.darwin_20.arm64.tbz2",
+    "sha256": "576dc08435848445cfd3c424af5d0ac0e9e8269635d33f7d9342bc7465ccf062",
+    "bytes": 19594,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/lzfse/",
+    "upstream_homepage": "https://github.com/lzfse/lzfse",
+    "declared_license": "BSD",
+    "metadata_version": "1.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "lzfse",
+      "portversion": "1.0",
+      "portrevision": "0",
+      "os.version": "25.0.0",
+      "xcodecltversion": "26.0.0.0.1.1756965055",
+      "ports_commit": "b3b562e0aadab18016c9d672bed8417fe3462740",
+      "source_date_epoch": "1738805618"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/lzfse/"
+  },
+  {
+    "archive": "lzo2.tbz2",
+    "url": "https://packages.macports.org/lzo2/lzo2-2.10_0.darwin_20.arm64.tbz2",
+    "sha256": "8b36441e91e6f4be689e1fc6d5faf975c9b4ff33b26d81c9da04795bc3da9dee",
+    "bytes": 104538,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/lzo2/COPYING",
+        "archive_member": "./opt/local/share/doc/lzo2/COPYING",
+        "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/lzo2/",
+    "upstream_homepage": "http://www.oberhumer.com/opensource/lzo/",
+    "declared_license": "GPL-2+",
+    "metadata_version": "2.10",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "lzo2",
+      "portversion": "2.10",
+      "portrevision": "0",
+      "os.version": "25.0.0",
+      "xcodecltversion": "26.0.0.0.1.1756965055",
+      "ports_commit": "5750c933b44f0d003759f8a72d30f6e1178677cd",
+      "source_date_epoch": "1756485684"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/lzo2/"
+  },
+  {
+    "archive": "snappy.tbz2",
+    "url": "https://packages.macports.org/snappy/snappy-1.2.2_2.darwin_27.arm64.tbz2",
+    "sha256": "89e6347874412db28dd189886d88c360c251d23a961be5555b223df626497e6c",
+    "bytes": 27691,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/snappy/",
+    "upstream_homepage": "https://google.github.io/snappy/",
+    "declared_license": "BSD",
+    "metadata_version": "1.3.1",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "snappy",
+      "portversion": "1.2.2",
+      "portrevision": "2",
+      "os.version": "27.0.0",
+      "xcodecltversion": "27.0.0.0.1788430756",
+      "ports_commit": "1a43a39ca19448b8904bb750a9a06f0d3eb30185",
+      "source_date_epoch": "1779027720"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/snappy/"
+  },
+  {
+    "archive": "zlib.tbz2",
+    "url": "https://packages.macports.org/zlib/zlib-1.3.2_0.darwin_20.arm64.tbz2",
+    "sha256": "b79cd24e296514e17859c48cc7cf7969bc772b968e64aeff3a1673898b636d94",
+    "bytes": 197125,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/zlib/",
+    "upstream_homepage": "https://www.zlib.net/",
+    "declared_license": "zlib",
+    "metadata_version": "1.3.2",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "zlib",
+      "portversion": "1.3.2",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "b8313e5e974c6c6843ff6151c1602165bad8c7b2",
+      "source_date_epoch": "1772978860"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/zlib/"
+  },
+  {
+    "archive": "zstd.tbz2",
+    "url": "https://packages.macports.org/zstd/zstd-1.5.7_0.darwin_20.arm64.tbz2",
+    "sha256": "82d5bc821d27517b77ba87667d8e22ef61bf6326d4cc49baa6d6dda4b4f68647",
+    "bytes": 935947,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/zstd/",
+    "upstream_homepage": "https://github.com/facebook/zstd",
+    "declared_license": "(BSD or GPL-2)",
+    "metadata_version": "1.5.7",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "zstd",
+      "portversion": "1.5.7",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "19313340b76e85012f6f9e2ac86aea72c2ec9512",
+      "source_date_epoch": "1753254395"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/zstd/"
+  },
+  {
+    "archive": "dtc.tbz2",
+    "url": "https://packages.macports.org/dtc/dtc-1.8.1_0.darwin_21.arm64.tbz2",
+    "sha256": "e8e03f18d7ee68849c3524db7c8e748c3d0b1216a08e39cc52b123a9729c83c3",
+    "bytes": 194685,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/dtc/",
+    "upstream_homepage": "https://git.kernel.org/pub/scm/utils/dtc/dtc.git",
+    "declared_license": "GPL-2+",
+    "metadata_version": "1.8.1",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "dtc",
+      "portversion": "1.8.1",
+      "portrevision": "0",
+      "os.version": "21.6.0",
+      "xcodecltversion": "14.2.0.0.1.1668646533",
+      "ports_commit": "db55acb08820d794be9be13df861db831ee022b6",
+      "source_date_epoch": "1790530112"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/dtc/"
+  },
+  {
+    "archive": "ncurses.tbz2",
+    "url": "https://packages.macports.org/ncurses/ncurses-6.6_0.darwin_20.arm64.tbz2",
+    "sha256": "48ec6b573ecef9c5fe1d94b6627f1ef0068a658f34a3284e62e69c8b27f59b7c",
+    "bytes": 1472696,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/ncurses/",
+    "upstream_homepage": "https://invisible-island.net/ncurses/",
+    "declared_license": "MIT",
+    "metadata_version": "6.6",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "ncurses",
+      "portversion": "6.6",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "127c979274f93fd322bfe639871143caf3cfedd5",
+      "source_date_epoch": "1767443394"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/ncurses/"
+  },
+  {
+    "archive": "libiconv.tbz2",
+    "url": "https://packages.macports.org/libiconv/libiconv-1.19_0.darwin_20.arm64.tbz2",
+    "sha256": "bf0de8b4cb4662833502f751f295a52875ef74c3fcde83ddabdd17f31a3a11a2",
+    "bytes": 1593888,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libiconv/",
+    "upstream_homepage": "https://www.gnu.org/software/libiconv/",
+    "declared_license": "(LGPL-2+ or GPL-3+)",
+    "metadata_version": "1.19",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libiconv",
+      "portversion": "1.19",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "f6386029ba349db6aa9534a8a361936ab77022bf",
+      "source_date_epoch": "1785601986"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libiconv/"
+  },
+  {
+    "archive": "libusb.tbz2",
+    "url": "https://packages.macports.org/libusb/libusb-1.0.30_0.darwin_20.arm64.tbz2",
+    "sha256": "5b298f915f838917e37019c1ff681dede09521f640abb11030fd533523207f16",
+    "bytes": 129139,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libusb/",
+    "upstream_homepage": "https://libusb.info/",
+    "declared_license": "LGPL-2.1+",
+    "metadata_version": "1.0.30",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libusb",
+      "portversion": "1.0.30",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "578383b5b39697d1002002afdf00af884377782f",
+      "source_date_epoch": "1784007562"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libusb/"
+  },
+  {
+    "archive": "usbredir.tbz2",
+    "url": "https://packages.macports.org/usbredir/usbredir-0.15.0_0.darwin_20.arm64.tbz2",
+    "sha256": "3a8c09a1521800ca6de3b5b8e1d118968b111c74badb2b4c11b6eac3dfd79d59",
+    "bytes": 43966,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/usbredir/",
+    "upstream_homepage": "https://www.spice-space.org/usbredir.html",
+    "declared_license": "BSD",
+    "metadata_version": "0.15.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "usbredir",
+      "portversion": "0.15.0",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "32edf1952deb434ae9d33d3e14396f5bbc58c368",
+      "source_date_epoch": "1758738611"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/usbredir/"
+  },
+  {
+    "archive": "cyrus-sasl2.tbz2",
+    "url": "https://packages.macports.org/cyrus-sasl2/cyrus-sasl2-2.1.28_1+kerberos.darwin_20.arm64.tbz2",
+    "sha256": "d38fe1868f7740adba9bd6e513ffc590eda2d431fbd798cf8b08686302bae5bf",
+    "bytes": 1482526,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/cyrus-sasl2/",
+    "upstream_homepage": "https://www.cyrusimap.org",
+    "declared_license": "Permissive",
+    "metadata_version": "2.1.28",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "cyrus-sasl2",
+      "portversion": "2.1.28",
+      "portrevision": "1"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/cyrus-sasl2/"
+  },
+  {
+    "archive": "libjpeg-turbo.tbz2",
+    "url": "https://packages.macports.org/libjpeg-turbo/libjpeg-turbo-3.2.0_0.darwin_20.arm64.tbz2",
+    "sha256": "dc5db6b425e38f4f58a3630d53b26011c1e0286c4b53689624427c873d104482",
+    "bytes": 1211170,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/libjpeg-turbo/LICENSE.md",
+        "archive_member": "./opt/local/share/doc/libjpeg-turbo/LICENSE.md",
+        "sha256": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libjpeg-turbo/",
+    "upstream_homepage": "https://www.libjpeg-turbo.org",
+    "declared_license": "BSD",
+    "metadata_version": "3.2.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libjpeg-turbo",
+      "portversion": "3.2.0",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "67bd23e9d3f2fd1aa99bebf2be9998718fc1226d",
+      "source_date_epoch": "1783153969"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libjpeg-turbo/"
+  },
+  {
+    "archive": "libpng.tbz2",
+    "url": "https://packages.macports.org/libpng/libpng-1.6.58_0.darwin_20.arm64.tbz2",
+    "sha256": "2f72b79724ae37da704a19f5d565c0427dcd5ea715ebfcebec6e68327d4594a3",
+    "bytes": 400193,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/libpng/LICENSE",
+        "archive_member": "./opt/local/share/doc/libpng/LICENSE",
+        "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libpng/",
+    "upstream_homepage": "https://www.libpng.org/pub/png/libpng.html",
+    "declared_license": "zlib",
+    "metadata_version": "1.6.58",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libpng",
+      "portversion": "1.6.58",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "c732cfc32b46fbd0aab3f7f95c1f61f073871bcc",
+      "source_date_epoch": "1777059375"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libpng/"
+  },
+  {
+    "archive": "spice-server.tbz2",
+    "url": "https://packages.macports.org/spice-server/spice-server-0.16.0_0.darwin_20.arm64.tbz2",
+    "sha256": "8236a71d2c24183a0aba064972eb83df02a9e0cac3a5163b025ac1dcd00e5056",
+    "bytes": 365193,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/spice-server/",
+    "upstream_homepage": "https://www.spice-space.org/",
+    "declared_license": "BSD",
+    "metadata_version": "0.16.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "spice-server",
+      "portversion": "0.16.0",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "46251a38a25a41a29a76151f8b320ac19a9dfb68",
+      "source_date_epoch": "1748513281"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/spice-server/"
+  },
+  {
+    "archive": "gettext-runtime.tbz2",
+    "url": "https://packages.macports.org/gettext-runtime/gettext-runtime-1.0_0.darwin_20.arm64.tbz2",
+    "sha256": "1853b5234d916ceb84f8fd65ad919cd40228f660c003adc574fbe642f6cb256a",
+    "bytes": 200961,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/gettext-runtime/",
+    "upstream_homepage": "https://www.gnu.org/software/gettext/",
+    "declared_license": "(LGPL-2.1+ or GPL-3+)",
+    "metadata_version": "1.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "gettext-runtime",
+      "portversion": "1.0",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "b8313e5e974c6c6843ff6151c1602165bad8c7b2",
+      "source_date_epoch": "1772876445"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/gettext-runtime/"
+  },
+  {
+    "archive": "libelf.tbz2",
+    "url": "https://packages.macports.org/libelf/libelf-0.8.13_6.darwin_20.arm64.tbz2",
+    "sha256": "f9e832509eff168d591002de5f72db13f767eb4612d5a2e50862589977486992",
+    "bytes": 62278,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libelf/",
+    "upstream_homepage": "https://web.archive.org/web/20190223180146/http://www.mr511.de/software/english.html",
+    "declared_license": "LGPL-2+",
+    "metadata_version": "0.8.13",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libelf",
+      "portversion": "0.8.13",
+      "portrevision": "6",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "10b212dfe43a2806d632cdf5ee3db37eeaa3d246",
+      "source_date_epoch": "1777704282"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libelf/"
+  },
+  {
+    "archive": "libffi.tbz2",
+    "url": "https://packages.macports.org/libffi/libffi-3.4.8_0.darwin_20.arm64.tbz2",
+    "sha256": "db877cbef74f4ff0cc7df421c0fedbd589ec76d4541797c559147f624d61269b",
+    "bytes": 33651,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libffi/",
+    "upstream_homepage": "https://www.sourceware.org/libffi/",
+    "declared_license": "MIT",
+    "metadata_version": "3.4.8",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libffi",
+      "portversion": "3.4.8",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "19313340b76e85012f6f9e2ac86aea72c2ec9512",
+      "source_date_epoch": "1744941652"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libffi/"
+  },
+  {
+    "archive": "pcre2.tbz2",
+    "url": "https://packages.macports.org/pcre2/pcre2-10.48_0.darwin_21.arm64.tbz2",
+    "sha256": "0a5d1ccbb56d22ac4210d925f965e3be34540c5928a483677491b28d57aa7e90",
+    "bytes": 2079022,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/pcre2/COPYING",
+        "archive_member": "./opt/local/share/doc/pcre2/COPYING",
+        "sha256": "99272c55f3dcfa07a8a7e15a5c1a33096e4727de74241d65fa049fccfdd59507"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/pcre2/",
+    "upstream_homepage": "https://www.pcre.org",
+    "declared_license": "BSD",
+    "metadata_version": "10.48",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "pcre2",
+      "portversion": "10.48",
+      "portrevision": "0",
+      "os.version": "21.6.0",
+      "xcodecltversion": "14.2.0.0.1.1668646533",
+      "ports_commit": "a47c98901a0a2aa52976957f94cff46bae5809a9",
+      "source_date_epoch": "1788520333"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/pcre2/"
+  },
+  {
+    "archive": "dbus.tbz2",
+    "url": "https://packages.macports.org/dbus/dbus-1.16.2_0.darwin_20.arm64.tbz2",
+    "sha256": "b938d571141a68d727b59921519e367020e6561ba9051bd2662c10828d2cded7",
+    "bytes": 394796,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/dbus/",
+    "upstream_homepage": "https://www.freedesktop.org/wiki/Software/dbus/",
+    "declared_license": "(AFL-2.1 or GPL-2+)",
+    "metadata_version": "1.16.2",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "dbus",
+      "portversion": "1.16.2",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "325507a983277fc7fa29f7350b30621304fe8683",
+      "source_date_epoch": "1776875700"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/dbus/"
+  },
+  {
+    "archive": "brotli.tbz2",
+    "url": "https://packages.macports.org/brotli/brotli-1.2.0_0.darwin_20.arm64.tbz2",
+    "sha256": "50bc7c54e0e8d10aeeb594237cdce4ed67e83c78256a9b453f0ca4ffeec2e37f",
+    "bytes": 418325,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/brotli/",
+    "upstream_homepage": "https://github.com/google/brotli",
+    "declared_license": "MIT",
+    "metadata_version": "1.2.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "brotli",
+      "portversion": "1.2.0",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "4a1bfe3a8d99e40d85557146af684000d48a535e",
+      "source_date_epoch": "1764071507"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/brotli/"
+  },
+  {
+    "archive": "gmp.tbz2",
+    "url": "https://packages.macports.org/gmp/gmp-6.3.0_0.darwin_20.arm64.tbz2",
+    "sha256": "6311f00a0c54bc63666f2cb21b6078856f86bce04072fa96e1cb122ca16d8cbc",
+    "bytes": 564994,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/gmp/",
+    "upstream_homepage": "https://gmplib.org/",
+    "declared_license": "LGPL-3+",
+    "metadata_version": "6.3.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "gmp",
+      "portversion": "6.3.0",
+      "portrevision": "0"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/gmp/"
+  },
+  {
+    "archive": "libidn2.tbz2",
+    "url": "https://packages.macports.org/libidn2/libidn2-2.3.8_0.darwin_20.arm64.tbz2",
+    "sha256": "2de5c6b99012e6705cfe66c49866f692587425377efc75fd4d62f9dcdaff2002",
+    "bytes": 253718,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libidn2/",
+    "upstream_homepage": "https://www.gnu.org/software/libidn/#libidn2",
+    "declared_license": "(LGPL-2.1+ or GPL-3+)",
+    "metadata_version": "2.3.8",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libidn2",
+      "portversion": "2.3.8",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "19313340b76e85012f6f9e2ac86aea72c2ec9512",
+      "source_date_epoch": "1741635213"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libidn2/"
+  },
+  {
+    "archive": "libtasn1.tbz2",
+    "url": "https://packages.macports.org/libtasn1/libtasn1-4.21.0_0.darwin_20.arm64.tbz2",
+    "sha256": "6704c01c19db27c2b2cad0bb84253bc5ed7d0f6af357ca4f002ff5b62c0f2e94",
+    "bytes": 146431,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libtasn1/",
+    "upstream_homepage": "https://www.gnu.org/software/libtasn1/",
+    "declared_license": "(LGPL-2.1+ or GPL-3+)",
+    "metadata_version": "4.21.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libtasn1",
+      "portversion": "4.21.0",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "c6f3ced93822bf4776f9ae2c4487480a97079cbd",
+      "source_date_epoch": "1767900519"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libtasn1/"
+  },
+  {
+    "archive": "libunistring.tbz2",
+    "url": "https://packages.macports.org/libunistring/libunistring-1.4.2_0.darwin_20.arm64.tbz2",
+    "sha256": "dac313d06d96eb09f1f94651f7611fde17328a800d23b831b349a8bd24423883",
+    "bytes": 1596851,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libunistring/",
+    "upstream_homepage": "https://www.gnu.org/software/libunistring/",
+    "declared_license": "(LGPL-3+ or GPL-2+)",
+    "metadata_version": "1.5",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libunistring",
+      "portversion": "1.4.2",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "183100a5d75a341623e261db8f69a2cd6775e2f1",
+      "source_date_epoch": "1772045128"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libunistring/"
+  },
+  {
+    "archive": "p11-kit.tbz2",
+    "url": "https://packages.macports.org/p11-kit/p11-kit-0.26.5_1.darwin_21.arm64.tbz2",
+    "sha256": "e9f8cc4256a85e415c5bc95327dc157395d6f428672fe2304a54466846eb01e1",
+    "bytes": 1187767,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/p11-kit/",
+    "upstream_homepage": "https://github.com/p11-glue/p11-kit",
+    "declared_license": "Permissive",
+    "metadata_version": "0.26.5",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "p11-kit",
+      "portversion": "0.26.5",
+      "portrevision": "1",
+      "os.version": "21.6.0",
+      "xcodecltversion": "13.4.0.0.1.1651278267",
+      "ports_commit": "5ee4de8be72e3ca4cc070061edbb339f44672b0e",
+      "source_date_epoch": "1786273774"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/p11-kit/"
+  },
+  {
+    "archive": "nettle.tbz2",
+    "url": "https://packages.macports.org/nettle/nettle-3.10.2_0.darwin_20.arm64.tbz2",
+    "sha256": "fcef4b3f61ad8acd7fd5f7f0f8b9dc02e3c95377224a0627b6ae93e73d3ee4e0",
+    "bytes": 1248971,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/nettle/",
+    "upstream_homepage": "https://www.lysator.liu.se/~nisse/nettle/",
+    "declared_license": "LGPL-2.1+",
+    "metadata_version": "3.10.2",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "nettle",
+      "portversion": "3.10.2",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "bf85ac63645fdd48d9a17754923616c6b24c99f9",
+      "source_date_epoch": "1769714439"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/nettle/"
+  },
+  {
+    "archive": "lz4.tbz2",
+    "url": "https://packages.macports.org/lz4/lz4-1.10.0_0.darwin_20.arm64.tbz2",
+    "sha256": "f476495a9daac711f7aff5872f0b3555e03d0e95f7d4b628f7ddf533b61ef167",
+    "bytes": 182040,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/lz4/",
+    "upstream_homepage": "http://www.lz4.org/",
+    "declared_license": "BSD and GPL-2+",
+    "metadata_version": "1.10.0",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "lz4",
+      "portversion": "1.10.0",
+      "portrevision": "0",
+      "os.version": "20.6.0",
+      "xcodecltversion": "13.0.0.0.1.1630607135",
+      "ports_commit": "19313340b76e85012f6f9e2ac86aea72c2ec9512",
+      "source_date_epoch": "1741635213"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/lz4/"
+  },
+  {
+    "archive": "xz.tbz2",
+    "url": "https://packages.macports.org/xz/xz-5.8.4_0.darwin_21.arm64.tbz2",
+    "sha256": "52035af2290eb70f6f37f3439d0018d863703283ad34686b5fd2bf5a619974b5",
+    "bytes": 711689,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/xz/COPYING.GPLv2",
+        "archive_member": "./opt/local/share/doc/xz/COPYING.GPLv2",
+        "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+      },
+      {
+        "path": "experiments/native-backends/notices/xz/COPYING.0BSD",
+        "archive_member": "./opt/local/share/doc/xz/COPYING.0BSD",
+        "sha256": "0b01625d853911cd0e2e088dcfb743261034a091bb379246cb25a14cc4c74bf1"
+      },
+      {
+        "path": "experiments/native-backends/notices/xz/COPYING",
+        "archive_member": "./opt/local/share/doc/xz/COPYING",
+        "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/xz/",
+    "upstream_homepage": "https://tukaani.org/xz/",
+    "declared_license": "(public-domain or GPL-2+)",
+    "metadata_version": "5.8.4",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "xz",
+      "portversion": "5.8.4",
+      "portrevision": "0",
+      "os.version": "21.6.0",
+      "xcodecltversion": "14.2.0.0.1.1668646533",
+      "ports_commit": "6277cb76790334b9ec6bda49b0a21a21b5be0167",
+      "source_date_epoch": "1792024786"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/xz/"
+  },
+  {
+    "archive": "openssl3.tbz2",
+    "url": "https://packages.macports.org/openssl3/openssl3-3.6.5_0.darwin_21.arm64.tbz2",
+    "sha256": "9f4b0935f776045e82b2a7c82a28576a1117796654297992453a3fccebeb4923",
+    "bytes": 9401843,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/openssl3/",
+    "upstream_homepage": "https://www.openssl-library.org",
+    "declared_license": "Apache-2",
+    "metadata_version": "3.6.5",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "openssl3",
+      "portversion": "3.6.5",
+      "portrevision": "0",
+      "os.version": "21.6.0",
+      "xcodecltversion": "14.2.0.0.1.1668646533",
+      "ports_commit": "4d7baad794134021d11910a50ef8a29062dcf754",
+      "source_date_epoch": "1790750164"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/openssl3/"
+  },
+  {
+    "archive": "gstreamer1-gst-plugins-base-1.28.8_0+ogg+x11.darwin_25.arm64.tbz2",
+    "url": "https://packages.macports.org/gstreamer1-gst-plugins-base/gstreamer1-gst-plugins-base-1.28.8_0+ogg+x11.darwin_25.arm64.tbz2",
+    "sha256": "2e82c03f03a82268522f372a4d53aca200cd1acecf6c2dfaf8ad3dd9e7bb7489",
+    "bytes": 2531859,
+    "notice_files": [
+      {
+        "path": "experiments/native-backends/notices/gstreamer1-gst-plugins-base/license-translations.dict",
+        "archive_member": "./opt/local/share/gst-plugins-base/1.0/license-translations.dict",
+        "sha256": "25ebb771dd2bc53bedf66e1b4bee7e6169bd5c0eee84621e7c4ac2d91f9826c2"
+      }
+    ],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/gstreamer1-gst-plugins-base/",
+    "upstream_homepage": "https://gstreamer.freedesktop.org/modules/gst-plugins-base.html",
+    "declared_license": "LGPL-2+",
+    "metadata_version": "1.28.8",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "gstreamer1-gst-plugins-base",
+      "portversion": "1.28.8",
+      "portrevision": "0",
+      "os.version": "25.6.0",
+      "xcodecltversion": "26.6.0.0.1781586589",
+      "ports_commit": "7c89599d39d60090101059526cba26de702200c6",
+      "source_date_epoch": "1791530513"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/gstreamer1-gst-plugins-base/"
+  },
+  {
+    "archive": "gstreamer1-1.28.8_0.darwin_25.arm64.tbz2",
+    "url": "https://packages.macports.org/gstreamer1/gstreamer1-1.28.8_0.darwin_25.arm64.tbz2",
+    "sha256": "13c4349d3fdf47fa312b00b360761389df2d03d79c84347e090a58a393f8e52a",
+    "bytes": 2312521,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/gstreamer1/",
+    "upstream_homepage": "https://gstreamer.freedesktop.org/",
+    "declared_license": "LGPL-2+",
+    "metadata_version": "1.28.8",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "gstreamer1",
+      "portversion": "1.28.8",
+      "portrevision": "0",
+      "os.version": "25.6.0",
+      "xcodecltversion": "26.6.0.0.1781586589",
+      "ports_commit": "7c89599d39d60090101059526cba26de702200c6",
+      "source_date_epoch": "1791530513"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/gstreamer1/"
+  },
+  {
+    "archive": "orc-0.4.44_0.darwin_25.arm64.tbz2",
+    "url": "https://packages.macports.org/orc/orc-0.4.44_0.darwin_25.arm64.tbz2",
+    "sha256": "8130cafb41933aac182d129abf3c7925ba6690d02e9b1851e1563ea5cc3cb7d4",
+    "bytes": 409468,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/orc/",
+    "upstream_homepage": "https://gstreamer.freedesktop.org/modules/orc.html",
+    "declared_license": "BSD",
+    "metadata_version": "0.4.44",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "orc",
+      "portversion": "0.4.44",
+      "portrevision": "0",
+      "os.version": "25.6.0",
+      "xcodecltversion": "26.6.0.0.1781586589",
+      "ports_commit": "f276a19fb8b99417a4d50853ae848d2f1a329de5",
+      "source_date_epoch": "1790029884"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/orc/"
+  },
+  {
+    "archive": "libopus-1.6.1_0.darwin_25.arm64.tbz2",
+    "url": "https://packages.macports.org/libopus/libopus-1.6.1_0.darwin_25.arm64.tbz2",
+    "sha256": "9a6446ece5eb0f50e0b8f693ba7fbb21c7ef2dbff13dc3cbe6142057420c4e27",
+    "bytes": 343597,
+    "notice_files": [],
+    "metadata_url": "https://ports.macports.org/api/v1/ports/libopus/",
+    "upstream_homepage": "https://www.opus-codec.org",
+    "declared_license": "BSD",
+    "metadata_version": "1.6.1",
+    "role": "validation-only emulator or emulator dependency; not selected compiler distribution input",
+    "build_metadata": {
+      "portname": "libopus",
+      "portversion": "1.6.1",
+      "portrevision": "0",
+      "os.version": "25.2.0",
+      "xcodecltversion": "26.2.0.0.1.1764812424",
+      "ports_commit": "cf5b3b7df7a01b813fcc0ca792a1aa1d2ab80bdf",
+      "source_date_epoch": "1769832785"
+    },
+    "source_distribution_index": "https://distfiles.macports.org/libopus/"
+  }
+]
