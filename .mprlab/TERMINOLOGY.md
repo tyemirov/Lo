@@ -144,6 +144,17 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `offline build`: Compilation and linking without external network access.
 - `smoke probe`: A small executable test that establishes a limited toolchain capability.
 - `clean environment`: A declared base operating system without undeclared compiler tools, SDKs, caches, or repository files.
+- `DWARF`: Debug information that connects machine instructions with source locations and values.
+- `TAPI`: A text format that declares dynamic-library symbols for a linker.
+- `Mach-O`: The object and executable format used by macOS.
+- `ELF`: The object and executable format used by the selected Linux target.
+- `TCG`: The QEMU software engine that translates guest instructions into host instructions.
+- `position-independent code`: Machine code that permits its loader to select its memory address.
+- `strong reference`: An owned reference that keeps its target value alive.
+- `borrowed reference`: A reference whose lifetime cannot exceed its owner's lifetime.
+- `independent expectation`: A specified test result calculated without the implementation under examination.
+- `source identity`: A digest of the source files and fixtures used by one validation run.
+- `archive`: One file that contains a collection of files or compiled object members.
 
 - `checkpoint`: Canonical bytes that keep typed Parameters or complete optimizer state for later execution.
 - `checkpoint template`: A CPU value that supplies the expected checkpoint type, field names, and tensor shapes.
@@ -373,4 +384,6 @@ Use the simple present, simple past, simple future, imperative, or infinitive fo
 - `propagate`: Transfer a Lo error or semantic property across graph boundaries. Forms: propagate, propagates, propagated.
 - `resolve`: Associate a Lo name with its declaration. Forms: resolve, resolves, resolved.
 - `return`: Transfer a result from a compiler operation or a Lo flow to its caller. Forms: return, returns, returned.
+- `retain`: Add an owned reference to a runtime value. Forms: retain, retains, retained.
+- `pin`: Select one dependency version and its content digest. Forms: pin, pins, pinned.
 - `unify`: Derive a common Lo type under the language rules. Forms: unify, unifies, unified.
