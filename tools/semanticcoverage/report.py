@@ -72,7 +72,7 @@ def digest(path: Path) -> str:
 
 def source_identity() -> tuple[dict[str, str], str]:
     sources = {}
-    for folder in ("internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"):
+    for folder in ("cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"):
         for path in sorted((ROOT / folder).rglob("*")):
             if path.suffix not in {".go", ".py", ".c", ".h", ".m", ".mm", ".metal", ".lo", ".json", ".txt"}:
                 continue

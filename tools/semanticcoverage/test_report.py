@@ -2,9 +2,11 @@ import json
 import hashlib
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
+from typing import Any
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,13 +31,14 @@ class ReportCLI(unittest.TestCase):
         for path in self.logs:
             self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"})
 
-    def events(self, path, tests, gates=None):
+    def events(self, path: Path, tests: dict[str, str], gates: dict[str, str] | None = None,
+               root: Path = ROOT) -> None:
         package = "github.com/MarcoPoloResearchLab/Lo/tests/integration"
         paths = []
-        for folder in ("internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"):
-            paths.extend(p for p in (ROOT / folder).rglob("*") if p.suffix in {".go", ".py", ".c", ".h", ".m", ".mm", ".metal", ".lo", ".json", ".txt"} and p.is_file())
-        paths.extend(ROOT / name for name in ("go.mod", "go.sum", "Makefile", "docs/evidence/training-reference-results.json"))
-        identity_text = "".join(str(p.relative_to(ROOT)) + "\0" + hashlib.sha256(p.read_bytes()).hexdigest() + "\n" for p in sorted(paths))
+        for folder in ("cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"):
+            paths.extend(p for p in (root / folder).rglob("*") if p.suffix in {".go", ".py", ".c", ".h", ".m", ".mm", ".metal", ".lo", ".json", ".txt"} and p.is_file())
+        paths.extend(root / name for name in ("go.mod", "go.sum", "Makefile", "docs/evidence/training-reference-results.json"))
+        identity_text = "".join(str(p.relative_to(root)) + "\0" + hashlib.sha256(p.read_bytes()).hexdigest() + "\n" for p in sorted(paths))
         identity = {"backend": "interpreter" if path.name.startswith("interpreter") else "native",
                     "source_sha256": hashlib.sha256(identity_text.encode()).hexdigest(),
                     "matrix_sha256": hashlib.sha256(self.matrix.read_bytes()).hexdigest()}
@@ -50,9 +53,9 @@ class ReportCLI(unittest.TestCase):
         events.append({"Action": "pass", "Package": package})
         path.write_text("".join(json.dumps(event) + "\n" for event in events))
 
-    def run_report(self, output=None):
+    def run_report(self, output: Path | None = None, script: Path = SCRIPT) -> subprocess.CompletedProcess[str]:
         target = output or self.directory / "report.json"
-        command = [sys.executable, "-B", str(SCRIPT), "--matrix", str(self.matrix),
+        command = [sys.executable, "-B", str(script), "--matrix", str(self.matrix),
                    "--interpreter", str(self.logs[0]), "--native", str(self.logs[1]),
                    "--output", str(target)]
         return subprocess.run(command, cwd=ROOT, stdin=subprocess.DEVNULL,
@@ -101,6 +104,30 @@ class ReportCLI(unittest.TestCase):
         result = self.run_report()
         self.assertEqual(result.returncode, 1)
         self.assertIn("identity mismatch", result.stderr)
+
+    def test_cli_source_changes_invalidate_evidence(self) -> None:
+        script = self.directory / "tools/semanticcoverage/report.py"
+        script.parent.mkdir(parents=True)
+        shutil.copyfile(SCRIPT, script)
+        for name in ("cmd/lo/main.go", "go.mod", "go.sum", "Makefile",
+                     "docs/evidence/training-reference-results.json"):
+            path = self.directory / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("fixture\n")
+        for path in self.logs:
+            self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"},
+                        root=self.directory)
+        result = self.run_report(script=script)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        cli = self.directory / "cmd/lo/main.go"
+        report = json.loads((self.directory / "report.json").read_text())
+        self.assertEqual(report["source_sha256"]["cmd/lo/main.go"],
+                         hashlib.sha256(cli.read_bytes()).hexdigest())
+        cli.write_text("changed CLI\n")
+        result = self.run_report(script=script)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("identity mismatch", result.stderr)
+        self.assertFalse((self.directory / "report.json").exists())
 
     def test_recorded_gap_blocks_qualification(self):
         matrix = json.loads(self.matrix.read_text())
@@ -194,6 +221,44 @@ class ReportCLI(unittest.TestCase):
                 self.assertEqual(matrix.read_text(), contents, "runner replaced its input matrix")
                 self.assertEqual(result.returncode, 1, result.stderr)
                 self.assertIn("overlaps matrix", result.stderr)
+
+    def alternate_matrix(self) -> dict[str, Any]:
+        matrix = json.loads((ROOT / "testdata/semantic-migration/matrix.json").read_text())
+        for row in matrix["operations"]:
+            for axis in ("positive", "negative", "runtime_negative"):
+                row[axis] = ["TestSemanticCoverageInventory"]
+        for section in ("cli", "semantics", "profiles"):
+            for row in matrix[section]:
+                row["tests"] = ["TestSemanticCoverageInventory"]
+        return matrix
+
+    def run_alternate_matrix(self, matrix: dict[str, Any]) -> subprocess.CompletedProcess[str]:
+        self.matrix.write_text(json.dumps(matrix))
+        return subprocess.run(
+            [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
+             "run", "--matrix", str(self.matrix.relative_to(ROOT)),
+             "--output-root", str(self.directory)],
+            cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True,
+            env={**os.environ, "LO_SEMANTIC_MATRIX": "missing-inherited-matrix.json"})
+
+    def test_runner_uses_selected_matrix_in_both_lanes(self) -> None:
+        result = self.run_alternate_matrix(self.alternate_matrix())
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        report = json.loads((self.directory / "semantic-coverage.json").read_text())
+        self.assertEqual(report["matrix_sha256"], hashlib.sha256(self.matrix.read_bytes()).hexdigest())
+        self.assertEqual(report["source_sha256"]["cmd/lo/main.go"],
+                         hashlib.sha256((ROOT / "cmd/lo/main.go").read_bytes()).hexdigest())
+        for lane in ("interpreter", "native"):
+            self.assertEqual(set(report["coverage_gates"][lane].values()), {"pass"})
+
+    def test_runner_validates_selected_matrix_inventory(self) -> None:
+        matrix = self.alternate_matrix()
+        removed = matrix["operations"].pop()["operation"]
+        result = self.run_alternate_matrix(matrix)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        log = (self.directory / "semantic-interpreter.jsonl").read_text()
+        self.assertIn("missing operation " + removed, log)
+        self.assertFalse((self.directory / "semantic-coverage.json").exists())
 
 
 if __name__ == "__main__":

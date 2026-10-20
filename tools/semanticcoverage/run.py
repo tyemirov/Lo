@@ -46,6 +46,7 @@ def run(matrix: Path, output_root: Path, pattern: str) -> int:
     command = ["go", "test", "-json", "-count=1", "-run", pattern, "./tests/integration"]
     for lane, path in zip(("interpreter", "native"), logs):
         environment = dict(os.environ)
+        environment["LO_SEMANTIC_MATRIX"] = str(matrix)
         environment.pop("LO_TEST_BACKEND", None)
         if lane == "native":
             environment["LO_TEST_BACKEND"] = lane
