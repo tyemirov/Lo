@@ -91,7 +91,7 @@ test-native: runtime-bundle | tool-state
 
 .PHONY: prepare-native-runtime build-native-runtime test-native-llvm test-native-runtime-tools
 prepare-native-runtime: | tool-state
-	python3 -B tools/nativeruntime/prepare.py --state "$(NATIVE_RUNTIME_STATE)" --download </dev/null
+	python3 -B tools/nativeruntime/prepare.py --state "$(NATIVE_RUNTIME_STATE)" --download --platform </dev/null
 
 build-native-runtime: | tool-state
 	python3 -B tools/nativeruntime/build.py --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(NATIVE_RUNTIME_STATE)/distribution" </dev/null
