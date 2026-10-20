@@ -63,10 +63,13 @@ This repository is public early so the design can be evaluated as an AI-agent ex
 
 The [standalone compiler plan](docs/standalone-compiler-plan.md) defines the proposed native backend migration and language extensions.
 The [backend experiment](docs/native-backend-experiment.md) records LLVM and Cranelift probe results separately from compiler acceptance.
-The current native build still requires the Go toolchain below.
+The current executable build uses the Go toolchain below.
+The [native lowering path](docs/native-lowering.md) adds `lo build --emit llvm` for LLVM modules.
+Module emission uses no external compiler tools.
+Complete native executable linking is part of the migration.
 
 The Makefile requires installed Go 1.27.1 and keeps tool state under `_scratch/build-state/`.
-Native build commands require `LO_BUILD_ROOT` to name that existing absolute directory.
+For executable builds, set `LO_BUILD_ROOT` to that absolute directory.
 The qualified platforms are macOS on arm64 and Linux on arm64.
 
 ```bash
@@ -94,7 +97,7 @@ The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.
 The [adapter examples](docs/compiler-design.md#executable-adapter-examples) specify file grants, listen grants, and expected results.
 
-Native builds require Go 1.27.1 on the build host.
+Go 1.27.1 is necessary on the host for executable builds.
 Artifacts need no Go installation, Lo installation, source file, or repository checkout during execution.
 Programs that use `File.open_paths` require `lsof` on the execution host.
 Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact target.
