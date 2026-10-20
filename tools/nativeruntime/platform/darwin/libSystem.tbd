@@ -7,7 +7,6 @@ compatibility-version: 1
 exports:
   - targets: [ arm64-macos ]
     symbols:
-      - dyld_stub_binder
       - _CCRandomGenerateBytes
       - __NSGetArgc
       - __NSGetArgv
@@ -22,12 +21,14 @@ exports:
       - __Unwind_GetLanguageSpecificData
       - __Unwind_GetRegionStart
       - __Unwind_GetTextRelBase
-      - __Unwind_Resume
       - __Unwind_RaiseException
+      - __Unwind_Resume
       - __Unwind_SetGR
       - __Unwind_SetIP
       - ___assert_rtn
       - ___error
+      - ___stack_chk_fail
+      - ___stack_chk_guard
       - __dyld_get_image_header
       - __dyld_get_image_name
       - __dyld_get_image_vmaddr_slide
@@ -36,9 +37,10 @@ exports:
       - __tlv_atexit
       - __tlv_bootstrap
       - _abort
-      - _alarm
       - _accept
+      - _alarm
       - _bind
+      - _bootstrap_port
       - _bzero
       - _calloc
       - _cbrt
@@ -62,25 +64,30 @@ exports:
       - _dispatch_time
       - _dlsym
       - _dup2
+      - _execve
       - _execvp
       - _exit
       - _exp
+      - _fchdir
       - _fchmod
       - _fchown
       - _fclonefileat
       - _fcntl
       - _fcopyfile
       - _fdopendir
+      - _fileno
       - _flock
       - _fork
       - _free
       - _freeaddrinfo
       - _fsetattrlist
       - _fstat
+      - _fstatat
       - _ftruncate
       - _gai_strerror
       - _getaddrinfo
       - _getcwd
+      - _getentropy
       - _getenv
       - _getpeereid
       - _getpeername
@@ -91,7 +98,9 @@ exports:
       - _getsockopt
       - _getuid
       - _ioctl
+      - _kevent
       - _kill
+      - _kqueue
       - _lchown
       - _linkat
       - _listen
@@ -99,14 +108,22 @@ exports:
       - _log2
       - _lseek
       - _lstat
+      - _mach_host_self
+      - _mach_port_deallocate
+      - _mach_port_get_refs
+      - _mach_port_mod_refs
+      - _mach_ports_lookup
+      - _mach_ports_register
+      - _mach_task_self_
+      - _mach_thread_self
       - _malloc
       - _memcmp
       - _memcpy
       - _memmove
       - _memset
       - _mkdir
-      - _mmap
       - _mkfifo
+      - _mmap
       - _mprotect
       - _munmap
       - _nanosleep
@@ -116,6 +133,8 @@ exports:
       - _pipe
       - _poll
       - _posix_memalign
+      - _posix_spawn
+      - _posix_spawn_file_actions_addchdir_np
       - _posix_spawn_file_actions_adddup2
       - _posix_spawn_file_actions_destroy
       - _posix_spawn_file_actions_init
@@ -151,6 +170,7 @@ exports:
       - _pthread_setname_np
       - _pwrite
       - _read
+      - _readdir
       - _readdir_r
       - _readlink
       - _readlinkat
@@ -161,6 +181,8 @@ exports:
       - _recvfrom
       - _rename
       - _rmdir
+      - _sandbox_free_error
+      - _sandbox_init
       - _sched_yield
       - _send
       - _sendto
@@ -168,6 +190,7 @@ exports:
       - _setgid
       - _setgroups
       - _setpgid
+      - _setrlimit
       - _setsockopt
       - _setuid
       - _shutdown
@@ -179,15 +202,26 @@ exports:
       - _socket
       - _socketpair
       - _stat
+      - _strchr
+      - _strcmp
+      - _strcpy
       - _strerror
       - _strerror_r
       - _strlen
+      - _strncmp
       - _symlink
       - _sysconf
       - _sysctlbyname
+      - _task_get_exception_ports
+      - _task_get_special_port
+      - _task_set_exception_ports
+      - _task_set_special_port
+      - _thread_get_exception_ports
+      - _thread_set_exception_ports
       - _unlink
       - _unlinkat
       - _unsetenv
+      - _vm_deallocate
       - _waitpid
       - _write
       - _writev

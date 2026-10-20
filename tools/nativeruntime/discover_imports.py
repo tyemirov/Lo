@@ -8,8 +8,20 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 
 from prepare import ROOT, digest, local
+
+FRAMEWORKS = {'Security': '/System/Library/Frameworks/Security.framework/Versions/A/Security',
+              'CoreFoundation': '/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation'}
+
+class DynamicSymbol(ctypes.Structure):
+    _fields_ = [('image', ctypes.c_char_p), ('base', ctypes.c_void_p),
+                ('symbol', ctypes.c_char_p), ('address', ctypes.c_void_p)]
+
+BUILD_AND_FIXTURE_SYMBOLS = frozenset({
+    '__Unwind_DeleteException', '__Unwind_RaiseException', '_alarm', '_mkfifo',
+})
 
 PROGRAM_SYMBOLS = frozenset({'_lo_entry', '_lo_program_flow_count', '_lo_program_flows',
                              '_lo_program_metadata', '_lo_program_metadata_size'})
@@ -26,29 +38,64 @@ def discover(nm: Path, archive: Path) -> dict[str, object]:
     program = undefined & PROGRAM_SYMBOLS
     if program != PROGRAM_SYMBOLS:
         raise ValueError(f'runtime program imports differ from contract: {sorted(program)}')
-    system = undefined - PROGRAM_SYMBOLS
+    system = (undefined - PROGRAM_SYMBOLS) | BUILD_AND_FIXTURE_SYMBOLS
+    libraries = {name: ctypes.CDLL(path) for name, path in FRAMEWORKS.items()}
     library = ctypes.CDLL(None)
+    locate = library.dladdr
+    locate.argtypes = [ctypes.c_void_p, ctypes.POINTER(DynamicSymbol)]
+    locate.restype = ctypes.c_int
+    frameworks: dict[str, list[str]] = {name: [] for name in FRAMEWORKS}
     for symbol in sorted(system):
-        try:
-            getattr(library, symbol[1:] if symbol.startswith('_') else symbol)
-        except AttributeError as error:
-            raise ValueError(f'native runtime import is absent from the host system: {symbol}') from error
+        name = symbol[1:] if symbol.startswith('_') else symbol
+        resolved = None
+        for candidate in (library, *libraries.values()):
+            try:
+                resolved = getattr(candidate, name)
+                break
+            except AttributeError:
+                continue
+        if resolved is None:
+            raise ValueError(f'native runtime import is absent from the host system: {symbol}')
+        location = DynamicSymbol()
+        if not locate(ctypes.cast(resolved, ctypes.c_void_p), ctypes.byref(location)):
+            raise ValueError(f'native runtime import has no image: {symbol}')
+        image = location.image.decode()
+        for framework in frameworks:
+            if '/' + framework + '.framework/' in image:
+                frameworks[framework].append(symbol)
+                break
     return {'method': 'LLVM native archive externals (--no-llvm-bc for both undefined and defined scans), verified by host dynamic symbol lookup',
             'rust': '1.85.1', 'llvm': '21.1.8', 'archive_sha256': digest(archive),
-            'symbols': sorted(system), 'program_symbols': sorted(program)}
+            'symbols': sorted(system - {symbol for values in frameworks.values() for symbol in values}),
+            'framework_symbols': frameworks, 'program_symbols': sorted(program)}
 
 
 def write_description(directory: Path, record: dict[str, object]) -> None:
     directory.mkdir(parents=True, exist_ok=True)
+    def replace(name: str, text: str) -> None:
+        with tempfile.NamedTemporaryFile(dir=directory, delete=False) as output:
+            temporary = Path(output.name)
+            output.write(text.encode())
+        try:
+            temporary.replace(directory / name)
+        finally:
+            temporary.unlink(missing_ok=True)
+
     symbols = record['symbols']
     if not isinstance(symbols, list):
         raise ValueError('system symbols must be a list')
-    (directory / 'libSystem.tbd').write_text(
+    replace('libSystem.tbd',
         '--- !tapi-tbd\ntbd-version: 4\ntargets: [ arm64-macos ]\n'
         'install-name: /usr/lib/libSystem.B.dylib\ncurrent-version: 1\ncompatibility-version: 1\n'
         'exports:\n  - targets: [ arm64-macos ]\n    symbols:\n'
         + ''.join('      - ' + str(symbol) + '\n' for symbol in symbols) + '...\n')
-    (directory / 'symbols.json').write_text(json.dumps(record, indent=2) + '\n')
+    for name, symbols in record['framework_symbols'].items():
+        replace(name + '.tbd',
+            '--- !tapi-tbd\ntbd-version: 4\ntargets: [ arm64-macos ]\n'
+            + 'install-name: ' + FRAMEWORKS[name] + '\ncurrent-version: 1\ncompatibility-version: 1\n'
+            + 'exports:\n  - targets: [ arm64-macos ]\n    symbols:\n'
+            + ''.join('      - ' + symbol + '\n' for symbol in symbols) + '...\n')
+    replace('symbols.json', json.dumps(record, indent=2) + '\n')
 
 
 def main() -> int:
