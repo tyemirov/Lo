@@ -1250,7 +1250,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [semantic receipt](docs/evidence/semantic-migration/validation.json) records source identities, full logs, and 13 passing reporter tests.
   The [coverage contract](docs/semantic-migration.md) assigns remaining qualification work to F017 and I011.
 
-- [ ] [I006] (P1) {P005,I005} Add a native lowering plan with explicit semantics
+- [x] [I006] (P1) {P005,I005} Add a native lowering plan with explicit semantics
   Goal:
   Represent native control flow without dependence on Go source generation.
 
@@ -1270,6 +1270,13 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Compare optimized and unoptimized test-runtime execution at exact budget boundaries.
   - Keep complete Lo runtime execution acceptance in I007 and I011.
   - Reject unsupported lowering without automatic fallback.
+
+  Completed on October 20, 2026.
+  The [native lowering implementation](docs/native-lowering.md) adds verified control flow, LLVM emission, source maps, and a bounded ABI runtime.
+  All 44 object cells passed at O0 and O2 across both targets.
+  Darwin execution passed 132 budget and cancellation cases plus two invalid-status cases.
+  The [validation receipt](docs/evidence/native-lowering/validation.json) records successful CI, source identities, and independent review.
+  Linux executable qualification and the full runtime port are downstream acceptance work.
 
 - [ ] [I007] (P1) {I006} Port core values and execution to the native runtime
   Goal:
