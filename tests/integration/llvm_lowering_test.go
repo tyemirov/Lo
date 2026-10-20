@@ -131,7 +131,7 @@ func TestLLVMLoweringPreservesOutput(t *testing.T) {
 	}
 }
 
-func TestLLVMLoweringRejectsUnsupportedGraph(t *testing.T) {
+func TestLLVMLoweringDerivativePlan(t *testing.T) {
 	input := sourceFile(t, `
 flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.sum(p.x,List.new(0)) }
 flow Run() -> Tensor<FP32>! {
@@ -145,32 +145,24 @@ return Run()
 	if inspected.status != 0 {
 		t.Fatalf("inspection must remain independent of native lowering: %+v", inspected)
 	}
-	output := filepath.Join(t.TempDir(), "unsupported.ll")
+	output := filepath.Join(t.TempDir(), "derivative.ll")
 	result := runExecutable(t, binary, "build", input, "--format", "json", "--emit", "llvm", "--output", output)
-	if result.status != 2 || diagnostics(t, result.stderr).Diagnostics[0].Code != "build.generation" ||
-		!strings.Contains(strings.ToLower(result.stderr), "autodiff") {
-		t.Fatalf("unsupported specialized lowering must fail explicitly: %+v", result)
+	if result.status != 0 {
+		t.Fatalf("lower checked derivative plan: %+v", result)
 	}
-	if _, err := os.Stat(output); !os.IsNotExist(err) {
-		t.Fatalf("unsupported lowering published output: %v", err)
-	}
-	file, err := os.Create(output)
+	module, err := os.ReadFile(output)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := file.WriteString("original artifact\n"); err != nil {
-		t.Fatal(err)
-	}
-	if err := file.Close(); err != nil {
-		t.Fatal(err)
-	}
-	result = runExecutable(t, binary, "build", input, "--format", "json", "--emit", "llvm", "--output", output)
-	if result.status != 2 || diagnostics(t, result.stderr).Diagnostics[0].Code != "build.generation" {
-		t.Fatalf("unsupported lowering with existing output: %+v", result)
-	}
-	got, err := os.ReadFile(output)
-	if err != nil || string(got) != "original artifact\n" {
-		t.Fatalf("unsupported lowering changed output: %q %v", got, err)
+	for _, instruction := range []string{
+		"define void @lo_derivative_",
+		"call void @lo_derivative_enter(",
+		"call void @lo_derivative_reverse(",
+		"call void @lo_derivative_leave(",
+	} {
+		if !strings.Contains(string(module), instruction) {
+			t.Fatalf("derivative module lacks %q", instruction)
+		}
 	}
 }
 

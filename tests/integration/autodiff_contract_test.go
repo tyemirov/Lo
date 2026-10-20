@@ -244,6 +244,6 @@ flow Loss(context: List<Int>, p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { v0=
 	source.WriteString(`return v200 }; flow Run() -> Tensor<FP32>! { context=List.unfold(0,20000,Counter); x=Tensor.new(List.new(1.0),List.new()); r=Autodiff.grad(Record.new(x:x),context,Loss); return r.value }; return Run()`)
 	got := run(t, "run", sourceFile(t, source.String()), "--format", "json", "--max-steps", "10000000")
 	if got.status != 2 || !strings.Contains(got.stderr, "evaluation value bytes") || got.stdout != "" {
-		t.Fatalf("unbounded derivative context: status=%d, stdout bytes=%d, stderr bytes=%d", got.status, len(got.stdout), len(got.stderr))
+		t.Fatalf("unbounded derivative context: status=%d, stdout bytes=%d, stderr=%s", got.status, len(got.stdout), got.stderr)
 	}
 }
