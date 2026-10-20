@@ -1,0 +1,20 @@
+{
+  "local_links_checked": 131,
+  "missing_links": [],
+  "issue_count": 49,
+  "unique_issue_ids": true,
+  "I006": {
+    "status": "x",
+    "dependencies": [
+      "P005",
+      "I005"
+    ]
+  },
+  "I007": {
+    "status": " ",
+    "dependencies": [
+      "I006"
+    ]
+  },
+  "dependencies_satisfied": true
+}

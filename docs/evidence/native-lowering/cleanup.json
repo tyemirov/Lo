@@ -1,0 +1,9 @@
+{
+  "owned_task_directory": "_scratch/i006-20261020",
+  "task_directory_absent": true,
+  "owned_plan": ".mprlab/I006-PLAN.md",
+  "plan_absent": true,
+  "other_scratch_entries_preserved": true,
+  "shared_tool_state": "_scratch/build-state",
+  "durable_evidence": "docs/evidence/native-lowering"
+}

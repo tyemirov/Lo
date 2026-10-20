@@ -1,0 +1,27 @@
+{
+  "role": "mpr-architect",
+  "model": "gpt-6-astra",
+  "effort": "high",
+  "agent": "/root/architecture",
+  "assignment_evidence": "fixed native role metadata; per-run telemetry unavailable",
+  "source_review": "accepted",
+  "final_evidence_review": "accepted",
+  "resolved_findings": [
+    "Status-gated result payload adoption with invalid-pointer execution regression.",
+    "Verifier checks for status, helper identities, and cleanup ownership.",
+    "Ordinary fallible-flow return normalization without additional logical charges.",
+    "Terminal cleanup block shape prevents stale owned operands."
+  ],
+  "scope_limits": [
+    "Bounded C ABI fixture, not the production Rust runtime.",
+    "Darwin execution; both target objects and source maps.",
+    "Full runtime and installed offline compiler acceptance remain downstream."
+  ],
+  "final_verification": {
+    "changed_source_digests": 33,
+    "execution_source_digests": 51,
+    "compiler_digest": "matches execution and source-identity receipts",
+    "ci": "passed",
+    "remaining_material_findings": 0
+  }
+}

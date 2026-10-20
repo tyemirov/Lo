@@ -3,12 +3,14 @@
 P004 records this plan on October 16, 2026.
 I004 completed the backend experiment on October 19, 2026.
 The [runtime contract](native-runtime-contract.md) selects LLVM 21.1.8 with LLD 21.1.8 for the replacement design.
-The current compiler still generates Go source and requires Go 1.27.1 for native builds.
-This plan does not change that implementation or the language specification.
+The default executable build still generates Go source with Go 1.27.1.
+LLVM module emission does not change the language specification.
 The [semantic migration contract](semantic-migration.md) records current coverage and its evidence requirements.
 
-I004, I005, and P005 passed their acceptance checks.
-I006 is the next compiler implementation step.
+I004, I005, P005, and I006 passed their acceptance checks.
+I006 implements the [native lowering boundary](native-lowering.md) with LLVM modules for both targets.
+I007 is the next implementation step.
+It supplies core runtime values and execution under the selected ABI.
 The installed standalone compiler criterion is still open under F017 and I011.
 
 ## Required Outcome
@@ -161,7 +163,7 @@ The validation requirements in each issue are its acceptance criteria.
 | Document the migration | P004 | Reviewed plan and dependency graph. |
 | Compare complete toolchains | I004, P005 | Four-cell experiment and one selected backend, ABI, and platform contract. |
 | Record semantic coverage | I005 | Full current-language corpus with independent expectations. |
-| Add native lowering | I006 | Verified control, cost, error, and cleanup representation. |
+| Add native lowering | I006 | Completed: verified control, cost, error, cleanup, LLVM emission, and bounded runtime execution. |
 | Port core values | I007 | Core runtime and generated calls pass public fixtures. |
 | Port numeric execution | I008 | Tensors, autodiff, optimizers, and checkpoints pass their contracts. |
 | Port adapters | I009 | Files, processes, and HTTP pass confinement and lifecycle tests. |

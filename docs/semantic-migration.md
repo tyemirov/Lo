@@ -3,7 +3,7 @@
 I005 defines the observable behavior that the replacement compiler must keep.
 The [matrix](../testdata/semantic-migration/matrix.json) records each current operation and public CLI contract.
 It also records evaluation order, effects, failures, execution limits, cleanup, and numeric profiles.
-The current compiler still generates Go source.
+The default executable build still generates Go source.
 These tests do not verify standalone compiler acceptance.
 
 ## Coverage Contract
@@ -78,3 +78,7 @@ The [coverage report](evidence/semantic-migration/report.json) records each requ
 Compressed full logs and the matrix snapshot are in the same evidence directory.
 The [final repository validation](evidence/compiler-evolution/validation.json) also passed.
 I005 passed its acceptance checks with the stated coverage limits.
+
+I006 adds LLVM module emission tests to the current matrix.
+The October 19 receipt remains the I005 acceptance snapshot.
+The [native lowering receipt](evidence/native-lowering/validation.json) records the I006 checks and their execution limits.
