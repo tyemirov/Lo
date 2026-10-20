@@ -161,6 +161,12 @@ pub unsafe fn call(
             if crate::checkpoint::SUPPORTED.contains(&op) {
                 return crate::checkpoint::execute(&mut *c, &s, &a);
             }
+            if crate::process::SUPPORTED.contains(&op) {
+                return crate::process::execute(&mut *c, &s, &a);
+            }
+            if crate::http::SUPPORTED.contains(&op) {
+                return crate::http::execute(&mut *c, &s, &a);
+            }
             if crate::files::SUPPORTED.contains(&op) {
                 return crate::files::execute(&mut *c, &s, &a);
             }
@@ -213,6 +219,10 @@ fn validate_helper(symbol: &str, s: &Site, a: &[Handle]) -> Result<(), Fault> {
             let typ = match &a[0].data {
                 Data::Record(fields) => fields.get(field).map(|v| v.typ.clone()),
                 Data::Wrapped(v) => v.fields().get(field).map(|v| v.typ.clone()),
+                Data::Adapter(v) => v
+                    .fields()
+                    .and_then(|fields| fields.get(field))
+                    .map(|v| v.typ.clone()),
                 Data::Error(_) => match field {
                     "kind" | "message" => Some(atom("String")),
                     "input" => Some(atom("Record")),
@@ -401,7 +411,7 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
         } else {
             equal(&a[0], &a[1])
         })),
-        "commit" => crate::files::commit(c, s, &a[0]),
+        "commit" => crate::adapters::commit(c, s, &a[0]),
         _ => Err(host(format!("invalid runtime action {action}"))),
     }
 }

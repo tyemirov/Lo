@@ -1,12 +1,14 @@
+pub use crate::adapters::Session;
 use crate::{action::Action, value::*};
 use serde_json::Value as Json;
 use std::{
     cell::Cell,
     sync::{
-        atomic::{AtomicU64, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
         Arc,
     },
     thread::{self, ThreadId},
+    time::Instant,
 };
 pub static LIVE_CONTEXTS: AtomicU64 = AtomicU64::new(0);
 pub const MAX_BYTES: usize = 16 << 20;
@@ -15,14 +17,127 @@ pub const MAX_BITS: u64 = 1_048_576;
 pub type Outcome = Result<Handle, Fault>;
 #[derive(Clone)]
 pub enum Fault {
+    Boundary {
+        primary: Box<Fault>,
+        details: Box<BoundaryDetails>,
+    },
     RawCancellation,
-    Budget { primary: String, message: String },
+    Budget {
+        primary: String,
+        message: String,
+    },
     Numeric(&'static str, String),
     Recoverable(Handle),
     Host(&'static str, String),
 }
+#[derive(Clone, Default)]
+pub struct BoundaryDetails {
+    pub process_progress: Option<Json>,
+    pub http_progress: Option<Json>,
+    pub write_progress: Option<Json>,
+    pub removal_progress: Option<Json>,
+    pub removal_entries: Option<Json>,
+    pub last_completed_activation: Option<Json>,
+    pub flow_progress: Vec<Handle>,
+    pub cleanup_errors: Vec<String>,
+    pub cleanup_messages: Vec<String>,
+}
+impl BoundaryDetails {
+    pub fn merge(&mut self, other: Self) {
+        if other.process_progress.is_some() {
+            self.process_progress = other.process_progress;
+        }
+        if other.http_progress.is_some() {
+            self.http_progress = other.http_progress;
+        }
+        if other.write_progress.is_some() {
+            self.write_progress = other.write_progress;
+        }
+        if other.removal_entries.is_some() {
+            self.removal_entries = other.removal_entries;
+        }
+        if other.removal_progress.is_some() {
+            self.removal_progress = other.removal_progress;
+        }
+        if other.last_completed_activation.is_some() {
+            self.last_completed_activation = other.last_completed_activation;
+        }
+        if !other.flow_progress.is_empty() {
+            self.flow_progress = other.flow_progress;
+        }
+        self.cleanup_errors.extend(other.cleanup_errors);
+        self.cleanup_messages.extend(other.cleanup_messages);
+    }
+}
+impl Fault {
+    pub fn primary(&self) -> &Self {
+        match self {
+            Self::Boundary { primary, .. } => primary.primary(),
+            other => other,
+        }
+    }
+    pub fn with_details(self, extra: BoundaryDetails) -> Self {
+        match self {
+            Self::Boundary {
+                primary,
+                mut details,
+            } => {
+                details.merge(extra);
+                Self::Boundary { primary, details }
+            }
+            primary => Self::Boundary {
+                primary: Box::new(primary),
+                details: Box::new(extra),
+            },
+        }
+    }
+    pub fn message(&self) -> String {
+        match self {
+            Self::RawCancellation => "execution cancelled: context canceled".into(),
+            Self::Budget { message, .. } | Self::Numeric(_, message) | Self::Host(_, message) => {
+                message.clone()
+            }
+            Self::Recoverable(e) => match &e.data {
+                Data::Error(e) => format!("{}: {}", e.kind, e.message),
+                _ => std::process::abort(),
+            },
+            Self::Boundary { primary, details } => {
+                let mut message = primary.message();
+                for cleanup in &details.cleanup_messages {
+                    message.push_str("; cleanup: ");
+                    message.push_str(cleanup);
+                }
+                message
+            }
+        }
+    }
+}
+pub fn combine_cleanup(primary: Option<Fault>, cleanup: Option<Fault>) -> Option<Fault> {
+    match (primary, cleanup) {
+        (None, other) | (other, None) => other,
+        (Some(primary), Some(cleanup)) => {
+            let message = cleanup.message();
+            let (primary, original) = match primary {
+                Fault::Boundary { primary, details } => (*primary, *details),
+                other => (other, BoundaryDetails::default()),
+            };
+            let mut details = match cleanup {
+                Fault::Boundary { details, .. } => *details,
+                _ => BoundaryDetails::default(),
+            };
+            details.cleanup_messages.clear();
+            details.merge(original);
+            details.cleanup_errors.push(message.clone());
+            details.cleanup_messages.push(message);
+            Some(primary.with_details(details))
+        }
+    }
+}
 pub fn boundary_host_fault(fault: Fault) -> Fault {
     match fault {
+        Fault::Boundary { primary, details } => {
+            boundary_host_fault(*primary).with_details(*details)
+        }
         Fault::RawCancellation => Fault::Host(
             "runtime.cancelled",
             "execution cancelled: context canceled".into(),
@@ -69,6 +184,7 @@ pub struct Site {
 }
 #[derive(Clone)]
 pub struct Flow {
+    pub identity: String,
     pub handler: Option<usize>,
     pub name: String,
     pub parameters: Vec<(String, Type)>,
@@ -81,6 +197,10 @@ pub struct Program {
     pub has_result: bool,
 }
 pub struct Context {
+    pub session: Arc<Session>,
+    pub cancellation: Arc<AtomicBool>,
+    pub deadline: Option<Instant>,
+    pub observe_cli_cancel: bool,
     pub files: crate::files::Files,
     pub last_activation: Option<Json>,
     pub resources: crate::resources::Ledger,
@@ -247,6 +367,7 @@ impl Program {
                 return Err("invalid flow handler".into());
             }
             flows.push(Flow {
+                identity: string(f, "identity")?,
                 handler: f["handler"].as_u64().map(|h| h as usize),
                 name: string(f, "name")?,
                 parameters,
@@ -338,6 +459,9 @@ impl Program {
             }
             if site.action == Action::Operation {
                 crate::operations::admit(site)?;
+                if site.operation == "HTTP.Server.new" {
+                    crate::http::admit_callbacks(site, &flows)?;
+                }
                 if matches!(
                     site.operation.as_str(),
                     "List.map"
@@ -365,6 +489,10 @@ impl Context {
     pub fn new(program: Arc<Program>, steps: u64) -> Self {
         LIVE_CONTEXTS.fetch_add(1, Ordering::Relaxed);
         Self {
+            session: Session::empty(program.clone(), steps),
+            cancellation: Arc::new(AtomicBool::new(false)),
+            deadline: None,
+            observe_cli_cancel: true,
             files: crate::files::empty(),
             last_activation: None,
             resources: crate::resources::Ledger::new(),
@@ -383,6 +511,62 @@ impl Context {
             flow_progress: vec![],
             flow_fault_progress: false,
         }
+    }
+    pub fn request(session: Arc<Session>) -> Result<Self, Fault> {
+        let files = session.files.lock().unwrap().fork().map_err(host)?;
+        let mut context = Self::new(session.program.clone(), session.steps);
+        context.files = files;
+        context.session = session;
+        context.observe_cli_cancel = false;
+        Ok(context)
+    }
+    pub fn invoke(&mut self, flow: usize, args: &[Handle]) -> Outcome {
+        unsafe { crate::exports::invoke(self, flow, args, 0) }
+    }
+    pub fn close(&mut self) -> Result<(), Fault> {
+        self.files
+            .close()
+            .map_err(|message| host(format!("close runtime resources \"program\": {message}")))
+    }
+    pub fn capture_fault(&self, fault: Fault) -> Fault {
+        if matches!(fault.primary(), Fault::Recoverable(_)) {
+            return fault;
+        }
+        let removal = self.files.last_removal();
+        let mut details = BoundaryDetails {
+            last_completed_activation: self.last_activation.clone(),
+            flow_progress: self.flow_progress.clone(),
+            removal_entries: removal.as_ref().map(|(entries, _)| entries.json()),
+            removal_progress: removal.as_ref().map(|(_, progress)| progress.json()),
+            ..Default::default()
+        };
+        match fault {
+            Fault::Boundary {
+                primary,
+                details: precise,
+            } => {
+                details.merge(*precise);
+                primary.with_details(details)
+            }
+            fault => fault.with_details(details),
+        }
+    }
+    pub fn reserve_file(&mut self, steps: u64, weight: u64) -> Result<(), Fault> {
+        self.check_cancel()?;
+        if weight > MAX_BYTES as u64 {
+            return Err(limit("expanded file value bytes"));
+        }
+        if weight > (64u64 << 20).saturating_sub(self.weight) {
+            return Err(limit("evaluation file value bytes"));
+        }
+        if steps > self.remaining {
+            return Err(limit("file work steps"));
+        }
+        self.remaining -= steps;
+        Ok(())
+    }
+    pub fn add_file_weight(&mut self, weight: u64) {
+        self.weight += weight;
     }
     pub fn entry(&self) -> Result<(), Fault> {
         if self.owner != thread::current().id() {
@@ -406,7 +590,11 @@ impl Context {
         let polls = self.cancel_polls.get().saturating_add(1);
         self.cancel_polls.set(polls);
         if self.cancelled
-            || crate::cli::cancelled()
+            || self.cancellation.load(Ordering::Relaxed)
+            || self
+                .deadline
+                .is_some_and(|deadline| Instant::now() >= deadline)
+            || (self.observe_cli_cancel && crate::cli::cancelled())
             || self.cancel_after_polls.is_some_and(|limit| polls >= limit)
         {
             Err(Fault::Host(

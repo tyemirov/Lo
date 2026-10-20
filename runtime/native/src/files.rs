@@ -1,17 +1,35 @@
 use crate::{context::*, value::*};
 use std::{
-    collections::VecDeque,
+    collections::{BTreeMap, BTreeSet, VecDeque},
     ffi::{CStr, CString, OsString},
     fs::File,
     io::{self, Read, Write},
     os::{
         fd::{AsRawFd, FromRawFd, IntoRawFd},
-        unix::ffi::{OsStrExt, OsStringExt},
+        unix::{
+            ffi::{OsStrExt, OsStringExt},
+            fs::MetadataExt,
+        },
     },
     path::{Component, Path, PathBuf},
 };
 
-pub const SUPPORTED: &[&str] = &["File.read", "File.Write.new"];
+#[path = "file_entries.rs"]
+mod entries;
+#[path = "file_probe.rs"]
+mod probe;
+pub use entries::Value;
+pub const SUPPORTED: &[&str] = &[
+    "File.read",
+    "File.Write.new",
+    "File.Append.new",
+    "File.list",
+    "File.open_paths",
+    "File.Remove.new",
+];
+const MAX_FILE_ENTRIES: usize = 10_000;
+const MAX_FILE_DIRECTORIES: usize = 128;
+static SESSION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 pub fn admit(site: &Site) -> Result<(), String> {
     let args: Vec<_> = site
         .arguments
@@ -28,8 +46,21 @@ pub fn admit(site: &Site) -> Result<(), String> {
         "File.read" => {
             args == [atom("File.Path")] && site.typ == Type::Fallible(Box::new(atom("Bytes")))
         }
-        "File.Write.new" => {
-            args == [atom("File.Path"), atom("Bytes")] && site.typ == atom("File.Write")
+        "File.Write.new" | "File.Append.new" => {
+            args == [atom("File.Path"), atom("Bytes")]
+                && site.typ == atom(site.operation.trim_end_matches(".new"))
+        }
+        "File.list" => {
+            args == [atom("File.Path")]
+                && site.typ == Type::Fallible(Box::new(Type::List(Box::new(atom("File.Entry")))))
+        }
+        "File.open_paths" => {
+            args == [atom("File.Path")]
+                && site.typ == Type::Fallible(Box::new(Type::List(Box::new(atom("File.Path")))))
+        }
+        "File.Remove.new" => {
+            args == [Type::List(Box::new(atom("File.Entry")))]
+                && site.typ == Type::Fallible(Box::new(atom("File.Remove")))
         }
         _ => false,
     };
@@ -105,17 +136,42 @@ fn nonblocking(file: &File) -> io::Result<()> {
 struct Grant {
     path: PathBuf,
     directory: File,
+    inert: bool,
 }
 pub struct Files {
     base: PathBuf,
     reads: Vec<Grant>,
     writes: Vec<Grant>,
+    lists: Vec<Grant>,
+    removes: Vec<Grant>,
+    open_files: Vec<Grant>,
+    observed: BTreeMap<entries::Directory, File>,
+    session: u64,
+    probe: Option<probe::Probe>,
+    last_removal: Option<(Handle, Handle)>,
+    write_progress: std::cell::RefCell<Option<Handle>>,
+}
+#[derive(Default)]
+pub struct Options {
+    pub reads: Vec<String>,
+    pub writes: Vec<String>,
+    pub lists: Vec<String>,
+    pub removes: Vec<String>,
+    pub open_files: Vec<String>,
 }
 pub fn empty() -> Files {
     Files {
         base: PathBuf::new(),
         reads: vec![],
         writes: vec![],
+        lists: vec![],
+        removes: vec![],
+        open_files: vec![],
+        observed: BTreeMap::new(),
+        session: SESSION.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+        probe: None,
+        last_removal: None,
+        write_progress: std::cell::RefCell::new(None),
     }
 }
 
@@ -133,7 +189,7 @@ fn clean(path: &Path) -> PathBuf {
     result
 }
 fn quote(path: &Path) -> String {
-    serde_json::to_string(&path.to_string_lossy()).unwrap()
+    crate::checkpoint_print::quote(&path.to_string_lossy())
 }
 fn system_error(error: &io::Error) -> String {
     match error.raw_os_error() {
@@ -184,6 +240,13 @@ fn cleanup_failure(primary: Fault, cleanup: io::Error) -> Fault {
             Fault::Recoverable(new(atom("Error"), Data::Error(cause)))
         }
         Fault::Numeric(kind, primary) => Fault::Numeric(kind, format!("{primary}\n{message}")),
+        Fault::Boundary {
+            primary,
+            mut details,
+        } => {
+            details.cleanup_errors.push(message);
+            Fault::Boundary { primary, details }
+        }
     }
 }
 fn open_roots(base: &Path, roots: &[String]) -> Result<Vec<Grant>, String> {
@@ -201,20 +264,89 @@ fn open_roots(base: &Path, roots: &[String]) -> Result<Vec<Grant>, String> {
                 quote(&path)
             ));
         }
-        grants.push(Grant { path, directory });
+        grants.push(Grant {
+            path,
+            directory,
+            inert: false,
+        });
     }
     grants.sort_by_key(|grant| std::cmp::Reverse(grant.path.as_os_str().len()));
     Ok(grants)
 }
-pub fn configure(reads: &[String], writes: &[String]) -> Result<Files, String> {
+pub fn configure_options(options: &Options) -> Result<Files, String> {
     let base = std::env::current_dir().map_err(|e| format!("resolve execution directory: {e}"))?;
-    Ok(Files {
-        reads: open_roots(&base, reads)?,
-        writes: open_roots(&base, writes)?,
-        base,
-    })
+    let mut files = empty();
+    files.base = base;
+    let configured = (|| {
+        files.reads = open_roots(&files.base, &options.reads)?;
+        files.writes = open_roots(&files.base, &options.writes)?;
+        files.lists = entries::open_exact_roots(&files.base, &options.lists)?;
+        files.removes = entries::open_exact_roots(&files.base, &options.removes)?;
+        files.open_files = entries::open_exact_roots(&files.base, &options.open_files)?;
+        if !files.open_files.is_empty() {
+            files.probe = Some(probe::Probe::bind());
+        }
+        Ok::<_, String>(())
+    })();
+    if let Err(mut error) = configured {
+        if let Err(cleanup) = files.close() {
+            error.push('\n');
+            error.push_str(&cleanup)
+        }
+        return Err(error);
+    }
+    Ok(files)
 }
 impl Files {
+    pub fn last_removal(&self) -> Option<(Handle, Handle)> {
+        self.last_removal.clone()
+    }
+
+    pub fn fork(&self) -> Result<Self, String> {
+        fn roots(source: &[Grant]) -> Result<Vec<Grant>, String> {
+            let mut result = Vec::new();
+            for grant in source {
+                match grant.directory.try_clone() {
+                    Ok(directory) => result.push(Grant {
+                        path: grant.path.clone(),
+                        directory,
+                        inert: grant.inert,
+                    }),
+                    Err(error) => {
+                        let mut message = error.to_string();
+                        for grant in result {
+                            if let Err(cleanup) = close_file(grant.directory) {
+                                message.push('\n');
+                                message.push_str(&system_error(&cleanup));
+                            }
+                        }
+                        return Err(message);
+                    }
+                }
+            }
+            Ok(result)
+        }
+        let mut fork = empty();
+        fork.base = self.base.clone();
+        let result = (|| {
+            fork.reads = roots(&self.reads)?;
+            fork.writes = roots(&self.writes)?;
+            fork.lists = roots(&self.lists)?;
+            fork.removes = roots(&self.removes)?;
+            fork.open_files = roots(&self.open_files)?;
+            fork.probe = self.probe.as_ref().map(probe::Probe::fork).transpose()?;
+            Ok::<_, String>(())
+        })();
+        if let Err(mut message) = result {
+            if let Err(cleanup) = fork.close() {
+                message.push('\n');
+                message.push_str(&cleanup)
+            }
+            return Err(message);
+        }
+        Ok(fork)
+    }
+
     fn resolve(
         &self,
         write: bool,
@@ -239,13 +371,34 @@ impl Files {
     }
     pub fn close(&mut self) -> Result<(), String> {
         let mut errors = vec![];
-        for grant in self.reads.drain(..).chain(self.writes.drain(..)) {
+        for grant in self
+            .reads
+            .drain(..)
+            .chain(self.writes.drain(..))
+            .chain(self.lists.drain(..))
+            .chain(self.removes.drain(..))
+            .chain(self.open_files.drain(..))
+        {
             if let Err(error) = close_file(grant.directory) {
                 errors.push(format!(
                     "close adapter root {}: {}",
                     quote(&grant.path),
                     system_error(&error)
                 ));
+            }
+        }
+        for (directory, file) in std::mem::take(&mut self.observed) {
+            if let Err(error) = close_file(file) {
+                errors.push(format!(
+                    "close observed directory {}: {}",
+                    quote(&directory.path),
+                    system_error(&error)
+                ));
+            }
+        }
+        if let Some(probe) = self.probe.take() {
+            if let Err(error) = probe.close() {
+                errors.push(error)
             }
         }
         if errors.is_empty() {
@@ -259,7 +412,18 @@ impl Files {
 // Every traversed directory remains open. Relative symlinks can only walk within
 // that descriptor stack; replacement of a pathname cannot redirect a held root.
 fn open_confined(grant: &Grant, relative: &Path, write: bool) -> io::Result<File> {
-    let [nofollow, directory, cloexec, nonblock, create, truncate] = FLAGS;
+    open_confined_flags(
+        grant,
+        relative,
+        if write {
+            1 | FLAGS[4] | FLAGS[5] | FLAGS[3]
+        } else {
+            FLAGS[3]
+        },
+    )
+}
+fn open_confined_flags(grant: &Grant, relative: &Path, final_flags: i32) -> io::Result<File> {
+    let [nofollow, directory, cloexec, _, _, _] = FLAGS;
     let mut stack = vec![grant.directory.try_clone()?];
     let mut pending: VecDeque<OsString> = relative
         .components()
@@ -283,17 +447,7 @@ fn open_confined(grant: &Grant, relative: &Path, write: bool) -> io::Result<File
         let name =
             CString::new(part.as_bytes()).map_err(|_| io::Error::other("invalid argument"))?;
         let last = pending.is_empty();
-        let flags = nofollow
-            | cloexec
-            | if last {
-                if write {
-                    1 | create | truncate
-                } else {
-                    nonblock
-                }
-            } else {
-                directory
-            };
+        let flags = nofollow | cloexec | if last { final_flags } else { directory };
         let parent = stack.last().unwrap().as_raw_fd();
         let fd = unsafe { openat(parent, name.as_ptr(), flags, 0o666u32) };
         if fd >= 0 {
@@ -345,14 +499,21 @@ fn read_failure(site: &Site, path: &Handle, message: &str) -> Fault {
     ))
 }
 pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
-    if site.operation == "File.Write.new" {
-        return Ok(new(
-            atom("File.Write"),
-            Data::FileWrite {
-                path: args[0].clone(),
-                content: args[1].clone(),
-            },
-        ));
+    match site.operation.as_str() {
+        "File.Write.new" | "File.Append.new" => {
+            return Ok(new(
+                atom(site.operation.trim_end_matches(".new")),
+                Data::Adapter(crate::adapters::AdapterValue::File(Value::Content {
+                    append: site.operation == "File.Append.new",
+                    path: args[0].clone(),
+                    content: args[1].clone(),
+                })),
+            ))
+        }
+        "File.list" => return entries::list(context, site, &args[0]),
+        "File.open_paths" => return probe::open_paths(context, site, &args[0]),
+        "File.Remove.new" => return entries::selection(context, site, &args[0]),
+        _ => (),
     }
     context.check_cancel()?;
     let (grant, relative, absolute) =
@@ -449,15 +610,24 @@ fn write_failure(
     message: &str,
 ) -> Fault {
     let mut activation = site.clone();
-    activation.operation = "File.write".into();
+    let operation = if site.operation == "File.append" {
+        "File.append"
+    } else {
+        "File.write"
+    };
+    activation.operation = operation.into();
     let progress = record([
         ("bytes_written".into(), int(confirmed)),
         ("stage".into(), text(stage)),
     ]);
     Fault::Recoverable(error(
         &activation,
-        "File.WriteFailed",
-        &format!("File.write {}: {message}", quote(absolute)),
+        if operation == "File.append" {
+            "File.AppendFailed"
+        } else {
+            "File.WriteFailed"
+        },
+        &format!("{operation} {}: {message}", quote(absolute)),
         record([
             ("file_path".into(), path.clone()),
             ("file_content".into(), content.clone()),
@@ -465,14 +635,79 @@ fn write_failure(
         ]),
     ))
 }
+fn mutation_failure(fault: Fault, operation: &str, path: &Path) -> Fault {
+    match fault {
+        Fault::Boundary { primary, details } => Fault::Boundary {
+            primary: Box::new(mutation_failure(*primary, operation, path)),
+            details,
+        },
+        Fault::Host(code, message) => Fault::Host(
+            code,
+            format!(
+                "boundary operation failed: {operation} {}: {message}",
+                quote(path)
+            ),
+        ),
+        other => other,
+    }
+}
 pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
-    let Data::FileWrite { path, content } = &target.data else {
+    let removal = matches!(
+        &target.data,
+        Data::Adapter(crate::adapters::AdapterValue::File(Value::Remove { .. }))
+    );
+    if !removal {
+        *context.files.write_progress.borrow_mut() = Some(record([
+            ("bytes_written".into(), int(0)),
+            ("stage".into(), text("open")),
+        ]));
+    }
+    let result = commit_inner(context, site, target);
+    if removal {
+        return result;
+    }
+    let progress = context.files.write_progress.borrow_mut().take();
+    result.map_err(|fault| {
+        if matches!(fault.primary(), Fault::Recoverable(_)) {
+            fault
+        } else {
+            fault.with_details(BoundaryDetails {
+                write_progress: progress.map(|progress| progress.json()),
+                ..Default::default()
+            })
+        }
+    })
+}
+fn commit_inner(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
+    let Data::Adapter(crate::adapters::AdapterValue::File(target)) = &target.data else {
         return Err(host("unsupported native commit target"));
     };
+    if let Value::Remove { .. } = target {
+        return entries::remove(context, site, target);
+    }
+    let Value::Content {
+        path,
+        content,
+        append,
+    } = target
+    else {
+        return Err(host("unsupported native commit target"));
+    };
+    let operation = if *append { "File.append" } else { "File.write" };
+    let mut activation = site.clone();
+    activation.operation = operation.into();
+    let site = &activation;
     context.check_cancel()?;
-    let (grant, relative, absolute) = context.files.resolve(true, "File.write", path.string())?;
+    let (grant, relative, absolute) = context.files.resolve(true, operation, path.string())?;
     let opened_name = format!("{}/{}", grant.path.display(), relative.display());
-    let mut file = open_confined(grant, &relative, true).map_err(|e| {
+    let parent_relative = relative
+        .parent()
+        .filter(|path| !path.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+    let name = relative
+        .file_name()
+        .unwrap_or_else(|| std::ffi::OsStr::new("."));
+    let parent = open_confined_flags(grant, parent_relative, FLAGS[1]).map_err(|error| {
         write_failure(
             site,
             path,
@@ -480,13 +715,122 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
             &absolute,
             0,
             "open",
-            &format!("openat {}: {}", relative.display(), system_error(&e)),
+            &format!("openat {}: {}", relative.display(), system_error(&error)),
         )
     })?;
+    let opened = (|| {
+        context
+            .session
+            .processes
+            .protect_name(&parent, &name.to_string_lossy())
+            .map_err(|fault| mutation_failure(fault, operation, &absolute))?;
+        if let Some(probe) = &context.files.probe {
+            probe
+                .protect_name(&parent, &name.to_string_lossy())
+                .map_err(|fault| mutation_failure(fault, operation, &absolute))?;
+        }
+        let flags = 1 | FLAGS[3] | if *append { append_flag() } else { 0 };
+        let file = loop {
+            context.check_cancel()?;
+            match open_confined_flags(grant, &relative, flags) {
+                Ok(file) => break file,
+                Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                    match open_confined_flags(grant, &relative, flags | FLAGS[4] | exclusive_flag())
+                    {
+                        Ok(file) => break file,
+                        Err(error) if error.kind() == io::ErrorKind::AlreadyExists && *append => {
+                            continue
+                        }
+                        Err(error) => {
+                            return Err(write_failure(
+                                site,
+                                path,
+                                content,
+                                &absolute,
+                                0,
+                                "open",
+                                &format!("openat {}: {}", relative.display(), system_error(&error)),
+                            ))
+                        }
+                    }
+                }
+                Err(error) if error.raw_os_error() == Some(6) => {
+                    std::thread::sleep(std::time::Duration::from_millis(10));
+                    continue;
+                }
+                Err(error) => {
+                    return Err(write_failure(
+                        site,
+                        path,
+                        content,
+                        &absolute,
+                        0,
+                        "open",
+                        &format!("openat {}: {}", relative.display(), system_error(&error)),
+                    ))
+                }
+            }
+        };
+        let mutation = (|| {
+            context
+                .session
+                .processes
+                .protect_file(&file)
+                .map_err(|fault| mutation_failure(fault, operation, &absolute))?;
+            if let Some(probe) = &context.files.probe {
+                probe
+                    .protect_file(&file)
+                    .map_err(|fault| mutation_failure(fault, operation, &absolute))?;
+            }
+            if !*append
+                && file
+                    .metadata()
+                    .map_err(|error| host(error.to_string()))?
+                    .file_type()
+                    .is_file()
+            {
+                file.set_len(0).map_err(|error| {
+                    write_failure(
+                        site,
+                        path,
+                        content,
+                        &absolute,
+                        0,
+                        "open",
+                        &system_error(&error),
+                    )
+                })?;
+            }
+            Ok::<_, Fault>(())
+        })();
+        if let Err(primary) = mutation {
+            return match close_file(file) {
+                Ok(()) => Err(primary),
+                Err(cleanup) => Err(cleanup_failure(primary, cleanup)),
+            };
+        }
+        Ok(file)
+    })();
+    let mut file = match (opened, close_file(parent)) {
+        (Err(primary), Err(cleanup)) => return Err(cleanup_failure(primary, cleanup)),
+        (Err(primary), Ok(())) => return Err(primary),
+        (Ok(file), Err(cleanup)) => {
+            let primary = host(system_error(&cleanup));
+            return match close_file(file) {
+                Ok(()) => Err(primary),
+                Err(cleanup) => Err(cleanup_failure(primary, cleanup)),
+            };
+        }
+        (Ok(file), Ok(())) => file,
+    };
     let Data::Bytes(data) = &content.data else {
         return Err(host("invalid File.Write content"));
     };
     let mut confirmed = 0;
+    *context.files.write_progress.borrow_mut() = Some(record([
+        ("bytes_written".into(), int(0)),
+        ("stage".into(), text("write")),
+    ]));
     let result: Result<(), Fault> = (|| {
         nonblocking(&file).map_err(|e| {
             write_failure(
@@ -542,9 +886,19 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
                 ));
             }
             confirmed += count;
+            *context.files.write_progress.borrow_mut() = Some(record([
+                ("bytes_written".into(), int(confirmed)),
+                ("stage".into(), text("write")),
+            ]));
         }
         Ok(())
     })();
+    if result.is_ok() {
+        *context.files.write_progress.borrow_mut() = Some(record([
+            ("bytes_written".into(), int(confirmed)),
+            ("stage".into(), text("finalize")),
+        ]));
+    }
     let closed = close_file(file);
     match (result, closed) {
         (Err(primary), Err(cleanup)) => return Err(cleanup_failure(primary, cleanup)),
@@ -564,17 +918,39 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     }
     context.check_cancel()?;
     let receipt = new(
-        atom("File.WriteReceipt"),
+        atom(if *append {
+            "File.AppendReceipt"
+        } else {
+            "File.WriteReceipt"
+        }),
         Data::Wrapped(record([
             ("path".into(), path.clone()),
             ("bytes_written".into(), int(confirmed)),
         ])),
     );
     context.last_activation = Some(serde_json::json!({
-        "operation": "File.write",
+        "operation": operation,
         "span": {"file":site.raw["file"],"start":site.raw["start"],"end":site.raw["end"]},
         "receipt":receipt.json()
     }));
     context.charge(&receipt)?;
     Ok(receipt)
+}
+
+#[cfg(target_os = "macos")]
+fn append_flag() -> i32 {
+    8
+}
+#[cfg(target_os = "linux")]
+fn append_flag() -> i32 {
+    0x400
+}
+
+#[cfg(target_os = "macos")]
+fn exclusive_flag() -> i32 {
+    0x800
+}
+#[cfg(target_os = "linux")]
+fn exclusive_flag() -> i32 {
+    0x80
 }

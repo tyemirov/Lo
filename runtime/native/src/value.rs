@@ -133,6 +133,23 @@ impl Type {
                 | "Optimizer.AdamW.Config"
                 | "File.Write"
                 | "File.WriteReceipt"
+                | "File.Entry"
+                | "File.Append"
+                | "File.Remove"
+                | "File.AppendReceipt"
+                | "File.RemoveReceipt"
+                | "HTTP.Headers"
+                | "HTTP.Request"
+                | "HTTP.URL"
+                | "HTTP.Method"
+                | "HTTP.Client.Request"
+                | "HTTP.Response"
+                | "HTTP.Server"
+                | "HTTP.ServerReceipt"
+                | "Process.Executable"
+                | "Process.Command"
+                | "Process.Result"
+                | "Process.Termination"
         ) {
             Ok(Self::Atom(s.into()))
         } else {
@@ -180,7 +197,7 @@ pub enum Data {
     Tensor(crate::tensor::Tensor),
     Device(String),
     Wrapped(Handle),
-    FileWrite { path: Handle, content: Handle },
+    Adapter(crate::adapters::AdapterValue),
     Int(BigInt),
     Float(f64),
     Text(String),
@@ -231,9 +248,7 @@ pub fn new(typ: Type, data: Data) -> Handle {
             Data::Tensor(t) => t.weight() - 16,
             Data::Device(s) => s.len() as u64,
             Data::Wrapped(contents) => contents.weight,
-            Data::FileWrite { path, content } => {
-                "File.Write.new".len() as u64 + path.weight + content.weight
-            }
+            Data::Adapter(v) => v.weight(),
             Data::Int(n) => (n.bits() + 7) / 8,
             Data::Float(_) => 8,
             Data::Text(s) => s.len() as u64,
@@ -329,6 +344,8 @@ impl Value {
             v
         } else if let Data::Wrapped(v) = &self.data {
             v.fields()
+        } else if let Data::Adapter(v) = &self.data {
+            v.fields().unwrap_or_else(|| std::process::abort())
         } else {
             std::process::abort()
         }
@@ -345,9 +362,7 @@ impl Value {
                     .map(|(n, x)| (n.clone(), x.json()))
                     .collect(),
             ),
-            Data::FileWrite { path, content } => {
-                json!({"operation":"File.Write.new","file_path":path.json(),"file_content":content.json()})
-            }
+            Data::Adapter(v) => v.json(),
             Data::Int(v) => json!(v.to_string()),
             Data::Float(v) => json!(format_float(*v)),
             Data::Text(v) => json!(v),
@@ -427,11 +442,7 @@ impl Value {
                     .collect::<Vec<_>>()
                     .join(",")
             ),
-            Data::FileWrite { path, content } => format!(
-                "{{\"operation\":\"File.Write.new\",\"file_path\":{},\"file_content\":{}}}",
-                path.canonical_json(),
-                content.canonical_json()
-            ),
+            Data::Adapter(v) => v.canonical_json(),
             Data::Int(n) => quote(&n.to_string()),
             Data::Float(n) => quote(&format_float(*n)),
             Data::Text(s) => quote(s),
@@ -587,10 +598,27 @@ pub fn canonical_json_value(value: &Json) -> String {
                 &["dtype", "shape", "device", "values"]
             } else if object
                 .get("operation")
-                .is_some_and(|v| v == "File.Write.new")
+                .is_some_and(|v| v == "File.Write.new" || v == "File.Append.new")
                 && object.contains_key("file_path")
             {
                 &["operation", "file_path", "file_content"]
+            } else if object
+                .get("operation")
+                .is_some_and(|v| v == "File.Remove.new")
+                && object.contains_key("entries")
+            {
+                &["operation", "entries"]
+            } else if object.get("operation").is_some_and(Json::is_string)
+                && object.contains_key("span")
+            {
+                &[
+                    "operation",
+                    "span",
+                    "receipt",
+                    "result_type",
+                    "status",
+                    "process",
+                ]
             } else if object.get("code").is_some_and(Json::is_string)
                 && object.get("stage").is_some_and(Json::is_string)
             {
@@ -603,7 +631,12 @@ pub fn canonical_json_value(value: &Json) -> String {
                     "actual",
                     "related",
                     "error",
+                    "removal_entries",
+                    "removal_progress",
                     "flow_progress",
+                    "write_progress",
+                    "http_progress",
+                    "process_progress",
                     "last_completed_activation",
                     "cleanup_errors",
                 ]
@@ -623,11 +656,12 @@ pub fn canonical_json_value(value: &Json) -> String {
             let mut fields = vec![];
             for key in ordered {
                 if let Some(v) = object.get(*key) {
-                    fields.push(format!(
-                        "{}:{}",
-                        canonical_json_value(&json!(key)),
+                    let encoded = if *key == "value" {
+                        canonical_typed_payload(object.get("type").and_then(Json::as_str), v)
+                    } else {
                         canonical_json_value(v)
-                    ))
+                    };
+                    fields.push(format!("{}:{}", canonical_json_value(&json!(key)), encoded))
                 }
             }
             for (key, v) in object {
@@ -642,6 +676,39 @@ pub fn canonical_json_value(value: &Json) -> String {
             format!("{{{}}}", fields.join(","))
         }
     }
+}
+
+fn canonical_typed_payload(typ: Option<&str>, value: &Json) -> String {
+    let names: &[&str] = match typ {
+        Some("Process.Executable") => &["path"],
+        Some("Process.Command") => &[
+            "executable",
+            "arguments",
+            "environment",
+            "directory",
+            "stdin",
+        ],
+        Some("Process.Result") => &["termination", "stdout", "stderr"],
+        Some("Process.Termination") => &["kind", "exit_code", "signal"],
+        _ => return canonical_json_value(value),
+    };
+    let object = value
+        .as_object()
+        .expect("typed process payload is an object");
+    format!(
+        "{{{}}}",
+        names
+            .iter()
+            .filter_map(|name| object.get(*name).map(|v| {
+                format!(
+                    "{}:{}",
+                    canonical_json_value(&json!(name)),
+                    canonical_json_value(v)
+                )
+            }))
+            .collect::<Vec<_>>()
+            .join(",")
+    )
 }
 
 pub fn format_float32(n: f32) -> String {
@@ -676,6 +743,7 @@ pub fn snapshot(v: &Handle) -> Handle {
             ),
             ("device".into(), text(&t.storage.location)),
         ]),
+        Data::Adapter(payload) => new(v.typ.clone(), Data::Adapter(payload.snapshot())),
         Data::Wrapped(contents) => snapshot(contents),
         Data::Record(fields) => {
             let out = record(fields.iter().map(|(n, v)| (n.clone(), snapshot(v))));
