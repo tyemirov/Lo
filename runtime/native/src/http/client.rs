@@ -313,6 +313,9 @@ pub fn exchange(
             if fields.len() < 2 || fields[0] != "HTTP/1.1" {
                 return Err(host("unsupported HTTP response version"));
             }
+            if fields[1].len() != 3 || !fields[1].bytes().all(|byte| byte.is_ascii_digit()) {
+                return Err(host("malformed HTTP status code"));
+            }
             let status = fields[1]
                 .parse::<u16>()
                 .map_err(|_| host("malformed HTTP status code"))?;
@@ -469,8 +472,13 @@ impl Reader<'_> {
     }
     pub fn head(&mut self) -> Result<(String, Vec<(String, Vec<u8>)>, usize), Fault> {
         let line = self.line(MAX_HEADERS)?;
-        let mut size = line.len() + 2;
+        let size = line.len() + 2;
         let first = String::from_utf8(line).map_err(|_| host("invalid HTTP status line"))?;
+        let (headers, size) = self.fields(size)?;
+        self.strict_crlf = true;
+        Ok((first, headers, size))
+    }
+    fn fields(&mut self, mut size: usize) -> Result<(Vec<(String, Vec<u8>)>, usize), Fault> {
         let mut headers: Vec<(String, Vec<u8>)> = vec![];
         loop {
             let line = self.line(MAX_HEADERS.saturating_sub(size))?;
@@ -480,6 +488,9 @@ impl Reader<'_> {
             }
             if line.is_empty() {
                 break;
+            }
+            if line.iter().any(|b| *b != 9 && (*b < 32 || *b == 127)) {
+                return Err(host("malformed MIME header"));
             }
             if line.starts_with(b" ") || line.starts_with(b"\t") {
                 let Some((_, previous)) = headers.last_mut() else {
@@ -496,13 +507,9 @@ impl Reader<'_> {
                 std::str::from_utf8(&line[..colon]).map_err(|_| host("malformed MIME header"))?;
             let name = header_name(name).map_err(host)?;
             let value = trim(&line[colon + 1..]).to_vec();
-            if value.iter().any(|b| *b != 9 && (*b < 32 || *b == 127)) {
-                return Err(host("malformed MIME header"));
-            }
             headers.push((name, value));
         }
-        self.strict_crlf = true;
-        Ok((first, headers, size))
+        Ok((headers, size))
     }
     fn exact(&mut self, length: usize) -> Result<Vec<u8>, Fault> {
         if length > MAX_BODY {
@@ -549,14 +556,7 @@ impl Reader<'_> {
                     )
                     .map_err(|_| host("invalid byte in chunk length"))?;
                     if n == 0 {
-                        let mut size = 0;
-                        loop {
-                            let line = self.line(MAX_HEADERS - size)?;
-                            size += line.len() + 2;
-                            if line.is_empty() {
-                                break;
-                            }
-                        }
+                        self.fields(0)?;
                         break;
                     }
                     if out.len().saturating_add(n) > MAX_BODY {

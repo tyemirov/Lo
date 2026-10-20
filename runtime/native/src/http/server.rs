@@ -416,6 +416,19 @@ fn handle_request(
                 {
                     continue
                 }
+                Err(e)
+                    if matches!(
+                        e.kind(),
+                        std::io::ErrorKind::BrokenPipe
+                            | std::io::ErrorKind::ConnectionReset
+                            | std::io::ErrorKind::ConnectionAborted
+                    ) =>
+                {
+                    return Err(Fault::Host(
+                        "runtime.cancelled",
+                        format!("HTTP.respond: {e}"),
+                    ))
+                }
                 Err(e) => return Err(host(format!("HTTP.respond: {e}"))),
             }
         }
@@ -509,7 +522,7 @@ fn read_request(
     }
     active.store(true, Ordering::Release);
     let method = parts[0];
-    let raw_path = parts[1].split('?').next().unwrap();
+    let raw_path = request_path(method, parts[1]).map_err(RequestError::Host)?;
     let path = percent_decode(raw_path).map_err(RequestError::Host)?;
     let input = record([
         (
@@ -595,6 +608,32 @@ fn read_request(
         parts[2] == "HTTP/1.0",
         invocation_deadline,
     ))
+}
+fn request_path<'a>(method: &str, target: &'a str) -> Result<&'a str, Fault> {
+    let target = target.split('?').next().unwrap();
+    if target.starts_with('/') || target == "*" {
+        return Ok(target);
+    }
+    if method == "CONNECT" {
+        return Ok("");
+    }
+    let (scheme, rest) = target
+        .split_once(':')
+        .ok_or_else(|| host("invalid HTTP request target"))?;
+    if !scheme.starts_with(|c: char| c.is_ascii_alphabetic())
+        || !scheme
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"+-.".contains(&b))
+    {
+        return Err(host("invalid HTTP request target"));
+    }
+    let Some(authority) = rest.strip_prefix("//") else {
+        return Ok("");
+    };
+    Ok(authority
+        .find('/')
+        .map(|start| &authority[start..])
+        .unwrap_or(""))
 }
 fn percent_decode(input: &str) -> Result<Vec<u8>, Fault> {
     let b = input.as_bytes();
