@@ -1,4 +1,5 @@
 mod action;
+mod adapters;
 mod autodiff;
 mod checkpoint;
 mod checkpoint_print;
@@ -9,7 +10,9 @@ mod derivative;
 mod exports;
 mod files;
 mod generated_operations;
+mod http;
 mod operations;
+mod process;
 mod resources;
 mod tensor;
 mod training;

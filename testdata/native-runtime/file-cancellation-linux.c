@@ -11,12 +11,12 @@ extern unsigned alarm(unsigned);
 extern int pthread_create(Thread *, const void *, void *(*)(void *), void *);
 extern int pthread_join(Thread, void **);
 extern int pthread_kill(Thread, int);
-extern int lo_cli_main(int, const char **);
+extern int lo_cli_main(int, const char **, const char **);
 static char payload[1048576];
 static void *execute(void *unused) {
     (void)unused;
     const char *arguments[] = {"fixture", "run", "--format", "json", "--read-root", ".", "--write-root", "."};
-    return (void *)(__INTPTR_TYPE__)lo_cli_main(8, arguments);
+    return (void *)(__INTPTR_TYPE__)lo_cli_main(8, arguments, 0);
 }
 static int contains(const char *text, const char *needle) {
     for (; *text; ++text) {

@@ -1195,3 +1195,190 @@ pub unsafe extern "C" fn lo_derivative_host_failure(
 ) {
     call(c, a, n, s, o, Some("lo_derivative_host_failure"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EAppend_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.Append.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2Elist(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.list"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ERemove_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.Remove.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EExecutable_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Executable.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2ECommand_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Command.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2ETermination_2Esignal(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Termination.signal"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EHeaders_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Headers.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EHeaders_2Evalues(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Headers.values"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EURL_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.URL.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EMethod_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Method.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EClient_2ERequest_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Client.Request.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EResponse_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Response.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EResponse_2EText_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Response.Text.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EResponse_2EBytes_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Response.Bytes.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_HTTP_2EServer_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("HTTP.Server.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2Eopen_5Fpaths(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.open_paths"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2ETermination_2Eexit_5Fcode(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Termination.exit_code"))
+}

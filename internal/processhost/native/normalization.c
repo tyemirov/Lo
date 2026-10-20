@@ -1,8 +1,12 @@
+#ifdef LO_NATIVE_RUNTIME
+#include "lo_process_abi.h"
+#else
 #include <mach/mach.h>
 #include <mach/exception_types.h>
 #include <mach/thread_status.h>
 #include <servers/bootstrap.h>
 #include <limits.h>
+#endif
 
 static int drop(mach_port_t port) {
     return !MACH_PORT_VALID(port) || mach_port_deallocate(mach_task_self(), port) == KERN_SUCCESS ? 0 : 1;

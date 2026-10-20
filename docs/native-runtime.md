@@ -2,9 +2,11 @@
 
 I007 supplies the core runtime.
 I008 supplies CPU tensors, differentiation, optimizers, and checkpoints.
+I009 adds file, process, and HTTP adapters.
 The [runtime contract](native-runtime-contract.md) defines their ABI and semantic requirements.
 The [compiler plan](standalone-compiler-plan.md) defines the remaining migration.
 The [validation receipt](evidence/native-runtime/validation.json) records test results, runtime identities, and qualification limits.
+The [adapter receipt](evidence/native-adapters/validation.json) records I009 validation.
 
 The explicit LLVM build route uses native code and a static Rust runtime.
 The default build route still uses Go until I011.
@@ -14,13 +16,11 @@ An LLVM build does not select another backend when compilation fails.
 
 The development distribution builds `darwin/arm64` and `linux/arm64` executables from a Darwin arm64 host.
 The runtime implements core values, CPU FP32 operations, Parameters, gradients, SGD, AdamW, and canonical checkpoints.
-`File.read` and `File.Write.new` supply the confined file operations required by checkpoint workflows.
+The file adapter implements reads, writes, appends, directory observations, open-file probes, and ordered removal.
 File access requires an explicit root grant.
-Target construction does not activate a write.
+Target construction does not activate an operation.
 
-I009 owns the remaining file, process, and HTTP operations.
-The checkpoint cancellation tests use open pipe descriptors with a connected peer.
-Cancellation while a write waits for a pipe reader remains unqualified under I009.
+The [adapter guide](native-adapters.md) defines capability selection, process availability, service lifetime, and adapter verification.
 I010 owns Metal and device execution.
 F017 owns the complete installed distribution, including the Linux compiler host.
 I011 owns full language qualification and removal of Go generation.
@@ -30,6 +30,8 @@ These development commands do not close the installed-distribution acceptance cr
 
 Preparation requires network access for pinned tool archives.
 The runtime build uses the repository dependency sources with Cargo offline and frozen options.
+The pinned C compiler builds the process transport and ring with headers from Lo.
+Darwin link inputs include system, Security, and CoreFoundation symbol descriptions.
 Cargo receives only the declared build environment.
 Preparation rejects compiler flag, wrapper, and profile overrides from the caller.
 The build receipt records the runtime source digest and the declared environment.

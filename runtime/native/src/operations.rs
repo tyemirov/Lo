@@ -82,6 +82,12 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
     }
 }
 pub fn admit(s: &Site) -> Result<(), String> {
+    if crate::process::SUPPORTED.contains(&s.operation.as_str()) {
+        return crate::process::admit(s);
+    }
+    if crate::http::SUPPORTED.contains(&s.operation.as_str()) {
+        return crate::http::admit(s);
+    }
     if crate::tensor::SUPPORTED.contains(&s.operation.as_str()) {
         return crate::tensor::admit(s);
     }

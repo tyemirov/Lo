@@ -199,9 +199,14 @@ Keep the current process availability and unavailable errors on each platform.
 The current process host supports Darwin only.
 
 On Darwin, link the process launcher into each application executable as a private entry mode.
-Use the same executable and the private bootstrap channel for confined process startup.
+Let the operator explicitly select the application executable as the process launcher.
+Keep explicit selection of an external launcher under the current identity checks.
+Use the private bootstrap channel for confined process startup.
 Keep public process configuration and validate the executable identity before entry.
 Do not add a Lo installation dependency to compiled applications.
+Give the original process entry environment to the embedded launcher.
+Close undeclared child descriptors during process creation.
+Never retry an ambiguous descriptor close with a possibly reused descriptor number.
 
 Keep request storage bounded during repeated service requests.
 Keep explicit device selection without automatic CPU substitution.

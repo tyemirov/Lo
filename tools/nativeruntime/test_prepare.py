@@ -7,9 +7,16 @@ import shlex
 import subprocess
 import sys
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 CLI = ROOT / 'tools/nativeruntime/prepare.py'
-STATE = ROOT / '_scratch/i007-i008-20261020/preparation/test-missing'
+
+
+@pytest.fixture
+def missing_state(tmp_path: Path) -> Path:
+    assert tmp_path.resolve().is_relative_to(ROOT / '_scratch')
+    return tmp_path / 'missing'
 
 
 def test_default_make_preparation_includes_linux_platform() -> None:
@@ -29,8 +36,8 @@ def invoke(*arguments: str) -> subprocess.CompletedProcess[str]:
                           capture_output=True, text=True, check=False)
 
 
-def test_missing_archives_require_explicit_download() -> None:
-    result = invoke('--state', str(STATE))
+def test_missing_archives_require_explicit_download(missing_state: Path) -> None:
+    result = invoke('--state', str(missing_state))
     assert result.returncode == 1
     assert 'requires --download' in result.stderr
 
@@ -41,9 +48,9 @@ def test_state_must_be_in_scratch() -> None:
     assert 'preparation state must be under Lo/_scratch' in result.stderr
 
 
-def test_runtime_build_requires_prepared_compiler() -> None:
+def test_runtime_build_requires_prepared_compiler(missing_state: Path) -> None:
     result = subprocess.run([sys.executable, '-B', str(CLI.with_name('build.py')),
-                             '--preparation', str(STATE), '--output', str(STATE / 'distribution')],
+                             '--preparation', str(missing_state), '--output', str(missing_state / 'distribution')],
                             cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
                             capture_output=True, text=True, check=False)
     assert result.returncode == 1
@@ -73,9 +80,9 @@ def test_runtime_build_uses_prepared_host_linker() -> None:
     assert receipt['host_linker']['source']['path'] == 'tools/nativeruntime/host_linker.c'
 
 
-def test_guest_runner_rejects_missing_executable() -> None:
+def test_guest_runner_rejects_missing_executable(missing_state: Path) -> None:
     result = subprocess.run([sys.executable, '-B', str(CLI.with_name('run.py')),
-                             '--preparation', str(STATE), str(STATE / 'missing')],
+                             '--preparation', str(missing_state), str(missing_state / 'missing')],
                             cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
                             capture_output=True, text=True, check=False)
     assert result.returncode == 1
@@ -140,11 +147,11 @@ def test_native_import_scan_uses_native_archive_symbols() -> None:
                                                '_lo_program_metadata', '_lo_program_metadata_size'}
 
 
-def test_corrupt_pinned_archive_is_rejected() -> None:
+def test_corrupt_pinned_archive_is_rejected(missing_state: Path) -> None:
     import tempfile
 
-    STATE.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix='corrupt-archive-', dir=STATE.parent) as temporary:
+    missing_state.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='corrupt-archive-', dir=missing_state.parent) as temporary:
         state = Path(temporary)
         (state / 'rustc.tar.xz').write_bytes(b'not the pinned compiler')
         result = invoke('--state', str(state), '--rust-only')
@@ -170,8 +177,8 @@ def test_preparation_reuses_frozen_compiler_files() -> None:
     assert {path: path.stat().st_mtime_ns for path in before} == before
 
 
-def test_runtime_build_rejects_undeclared_cargo_controls() -> None:
-    wrapper = str(ROOT / '_scratch/i007-i008-20261020/core/undeclared-wrapper')
+def test_runtime_build_rejects_undeclared_cargo_controls(missing_state: Path) -> None:
+    wrapper = str(missing_state / 'undeclared-wrapper')
     controls = {'RUSTFLAGS': '-Copt-level=3', 'CARGO_ENCODED_RUSTFLAGS': '-Copt-level=3',
                 'RUSTC_WRAPPER': wrapper, 'RUSTC_WORKSPACE_WRAPPER': wrapper,
                 'CARGO_BUILD_RUSTFLAGS': '-Copt-level=3', 'CARGO_PROFILE_RELEASE_OPT_LEVEL': '3',
@@ -183,7 +190,7 @@ def test_runtime_build_rejects_undeclared_cargo_controls() -> None:
         environment = dict(baseline, CI='1')
         environment[name] = value
         result = subprocess.run([sys.executable, '-B', str(CLI.with_name('build.py')),
-                                 '--preparation', str(STATE), '--output', str(STATE / 'distribution')],
+                                 '--preparation', str(missing_state), '--output', str(missing_state / 'distribution')],
                                 cwd=ROOT, env=environment, stdin=subprocess.DEVNULL,
                                 capture_output=True, text=True, check=False)
         assert result.returncode == 1

@@ -134,9 +134,10 @@ fn visit_storages(
                 stack.extend_from_slice(&e.trace);
                 stack.extend_from_slice(&e.flow_progress)
             }
-            Data::FileWrite { path, content } => {
-                stack.push(path.clone());
-                stack.push(content.clone())
+            Data::Adapter(value) => {
+                if let Some(fields) = value.fields() {
+                    stack.extend(fields.values().cloned());
+                }
             }
             _ => (),
         }

@@ -55,7 +55,7 @@ func llvmLinkRecipe(target string) (arguments, inputs []string) {
 	switch target {
 	case "darwin/arm64":
 		return []string{"-dead_strip", "-arch", "arm64", "-platform_version", "macos", "27.0", "27.0",
-			"-o", "{output}", "{object}", "{runtime}", "{input:system}"}, []string{"system"}
+			"-o", "{output}", "{object}", "{runtime}", "{input:system}", "{input:security}", "{input:corefoundation}"}, []string{"system", "security", "corefoundation"}
 	case "linux/arm64":
 		return []string{"-m", "aarch64elf", "-dynamic-linker", "/lib/ld-linux-aarch64.so.1",
 				"-o", "{output}", "{input:crt1}", "{input:crti}", "{object}", "{runtime}",
@@ -260,10 +260,10 @@ func BuildLLVM(ctx context.Context, program ir.Program, output, target string, b
 		return fail(diagnostic.BuildGenerate, err)
 	}
 	module = append(module, []byte(`
-declare i32 @lo_cli_main(i32, ptr)
-define i32 @main(i32 %argc, ptr %argv) {
+declare i32 @lo_cli_main(i32, ptr, ptr)
+define i32 @main(i32 %argc, ptr %argv, ptr %envp) {
 entry:
-  %status = call i32 @lo_cli_main(i32 %argc, ptr %argv)
+  %status = call i32 @lo_cli_main(i32 %argc, ptr %argv, ptr %envp)
   ret i32 %status
 }
 `)...)

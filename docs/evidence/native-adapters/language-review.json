@@ -1,0 +1,16 @@
+{
+  "reference": "https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf",
+  "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+  "review_scope": "New native adapter guide and changed prose in the runtime guides, compiler plan, and I009.",
+  "review_basis": "Producing-agent review against applicable Part 1 rules, Part 2 dictionary, and repository terminology.",
+  "mechanical_changed_prose_findings": 0,
+  "mechanical_unchanged_issue_findings": 12,
+  "whole_document_compliance_claim": false,
+  "documents": {
+    "ISSUES.md": "73de39d2e79b09c3d91153c8d79b82813aabdd07e58032cf8317d990ec217775",
+    "docs/native-runtime-contract.md": "5fb76788d7150a55f38ad31970dc6e1dae8005894c29567156930af99c3fece0",
+    "docs/native-runtime.md": "9f6c730ec97ea52492807ce0602ab74be5a7f542a529d195fe08666bf413ba26",
+    "docs/standalone-compiler-plan.md": "4d28702fd14dbf5b9bca0f5f222749c0867c3e7304d8ae684785182f21809c6b",
+    "docs/native-adapters.md": "e1e3f9fecf4e5a376878bb8180463913cfd0b672c53f312ebaa7658025e76c05"
+  }
+}

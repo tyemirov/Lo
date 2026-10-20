@@ -1,0 +1,36 @@
+package main
+
+import (
+ "bytes"
+ "crypto/ecdsa"
+ "crypto/elliptic"
+ "crypto/rand"
+ "crypto/tls"
+ "crypto/x509"
+ "crypto/x509/pkix"
+ _ "embed"
+ "encoding/json"
+ "encoding/pem"
+ "fmt"
+ "io"
+ "log"
+ "math/big"
+ "net"
+ "net/http"
+ "net/http/httptest"
+ "os"
+ "os/exec"
+ "sync/atomic"
+ "syscall"
+ "time"
+ "unsafe"
+)
+
+//go:embed program
+var program []byte
+
+func must(err error){if err!=nil{panic(err)}}
+func loopback(){descriptor,err:=syscall.Socket(syscall.AF_INET,syscall.SOCK_DGRAM,0);must(err);defer syscall.Close(descriptor);var request [40]byte;copy(request[:],"lo");_,_,code:=syscall.Syscall(syscall.SYS_IOCTL,uintptr(descriptor),0x8913,uintptr(unsafe.Pointer(&request[0])));if code!=0{panic(code)};request[16]|=1;_,_,code=syscall.Syscall(syscall.SYS_IOCTL,uintptr(descriptor),0x8914,uintptr(unsafe.Pointer(&request[0])));if code!=0{panic(code)}}
+func authority(serial int64)(*x509.Certificate,*ecdsa.PrivateKey,[]byte){key,err:=ecdsa.GenerateKey(elliptic.P256(),rand.Reader);must(err);now:=time.Now();template:=&x509.Certificate{SerialNumber:big.NewInt(serial),Subject:pkix.Name{CommonName:"Lo guest test authority"},NotBefore:now.Add(-time.Hour),NotAfter:now.Add(time.Hour),IsCA:true,BasicConstraintsValid:true,KeyUsage:x509.KeyUsageCertSign};der,err:=x509.CreateCertificate(rand.Reader,template,template,&key.PublicKey,key);must(err);certificate,err:=x509.ParseCertificate(der);must(err);return certificate,key,der}
+func execute()([]byte,[]byte,int){name,err:=syscall.BytePtrFromString("lo-verified-program");must(err);descriptor,_,code:=syscall.Syscall(279,uintptr(unsafe.Pointer(name)),0,0);if code!=0{panic(code)};file:=os.NewFile(descriptor,"lo-verified-program");defer file.Close();_,err=file.Write(program);must(err);command:=exec.Command("/proc/self/fd/3","run","--http-allow","GET,https://127.0.0.1:34443,127.0.0.1","--format","json");command.ExtraFiles=[]*os.File{file};command.Env=[]string{"PATH=","SSL_CERT_FILE=/tls-roots.pem","SSL_CERT_DIR=/tls-certs"};var stdout,stderr bytes.Buffer;command.Stdout=&stdout;command.Stderr=&stderr;err=command.Run();if err!=nil{if _,ok:=err.(*exec.ExitError);!ok{panic(err)}};return stdout.Bytes(),stderr.Bytes(),command.ProcessState.ExitCode()}
+func main(){must(os.MkdirAll("/proc",os.ModePerm));must(syscall.Mount("proc","/proc","proc",0,""));loopback();must(os.MkdirAll("/tls-certs",os.ModePerm));ca,key,der:=authority(1);_,_,untrusted:=authority(9);var count atomic.Int32;for _,scenario:=range []string{"trusted","wrong-name","untrusted"}{roots:=der;if scenario=="untrusted"{roots=untrusted};must(os.WriteFile("/tls-roots.pem",pem.EncodeToMemory(&pem.Block{Type:"CERTIFICATE",Bytes:roots}),0o644));now:=time.Now();address:=net.ParseIP("127.0.0.1");if scenario=="wrong-name"{address=net.ParseIP("::1")};leaf:=&x509.Certificate{SerialNumber:big.NewInt(2),Subject:pkix.Name{CommonName:"Lo guest"},NotBefore:now.Add(-time.Hour),NotAfter:now.Add(time.Hour),IPAddresses:[]net.IP{address},KeyUsage:x509.KeyUsageDigitalSignature,ExtKeyUsage:[]x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}};certificate,err:=x509.CreateCertificate(rand.Reader,leaf,ca,&key.PublicKey,key);must(err);private,err:=x509.MarshalECPrivateKey(key);must(err);pair,err:=tls.X509KeyPair(pem.EncodeToMemory(&pem.Block{Type:"CERTIFICATE",Bytes:certificate}),pem.EncodeToMemory(&pem.Block{Type:"EC PRIVATE KEY",Bytes:private}));must(err);listener,err:=net.Listen("tcp","127.0.0.1:34443");must(err);server:=httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){count.Add(1);_,_=io.WriteString(w,"verified")}));server.Listener.Close();server.Listener=listener;server.Config.ErrorLog=log.New(io.Discard,"",0);server.TLS=&tls.Config{Certificates:[]tls.Certificate{pair},MinVersion:tls.VersionTLS12};server.StartTLS();stdout,stderr,status:=execute();server.Close();if scenario=="trusted"{if status!=0||len(stderr)!=0||!bytes.Contains(stdout,[]byte(`"value":"dmVyaWZpZWQ="`)){panic(fmt.Sprintf("trusted: %d %s %s",status,stdout,stderr))}}else if status!=1||!bytes.Contains(stderr,[]byte("HTTP.ExchangeFailed"))||bytes.Contains(stderr,[]byte("tls-roots")){panic(fmt.Sprintf("%s: %d %s %s",scenario,status,stdout,stderr))};must(json.NewEncoder(os.Stdout).Encode(map[string]any{"scenario":scenario,"status":"pass"}))};if count.Load()!=1{panic(fmt.Sprintf("remote invocation count %d",count.Load()))}}

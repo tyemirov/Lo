@@ -1,0 +1,64 @@
+{
+  "issue": "I009",
+  "reviewer": "mpr-architect",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_model_telemetry": "not exposed by host",
+  "status": "no unresolved P1/P2 findings in bounded review",
+  "confirmed_repairs": [
+    "Process opaque ownership and no retry against reused descriptors or unwitnessed PIDs",
+    "Cancellation during bounded executable hashing",
+    "Darwin SecTrust policy and hostname verification",
+    "HTTP TLS flush, request deadline, framing, Connection token lists, and response trailers",
+    "File mutation diagnostic context with primary classification and progress",
+    "Deterministic FIFO admission witness before cancellation",
+    "Darwin generation test fixture link inputs"
+  ],
+  "required_final_evidence": [
+    "candidate-five-files-process.log.gz",
+    "http-candidate-five-final.log.gz",
+    "make-ci.log.gz"
+  ],
+  "limits": [
+    "Read-only source review; reviewer did not run tests.",
+    "Default Go-generated compilation remains until I011."
+  ],
+  "assignments": [
+    {
+      "agent": "/root/adapters_files",
+      "role": "mpr-worker",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/adapters_process",
+      "role": "mpr-worker",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/adapters_http",
+      "role": "mpr-worker",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/adapters_architecture",
+      "role": "mpr-architect",
+      "requested_model": "gpt-6-astra",
+      "requested_effort": "high",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/adapters_inventory",
+      "role": "mpr-explorer",
+      "requested_model": "gpt-6-luna",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    }
+  ],
+  "final_gate_status": "All required final checks completed successfully with unchanged reviewed source."
+}
