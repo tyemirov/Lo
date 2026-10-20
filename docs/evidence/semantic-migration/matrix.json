@@ -1,0 +1,2964 @@
+{
+  "operations": [
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Autodiff.InvalidLoss",
+        "Autodiff.UndefinedDerivative",
+        "Numeric.NonFinite",
+        "Numeric.DivideByZero",
+        "Numeric.Domain",
+        "Tensor.ShapeMismatch",
+        "Tensor.InvalidShape",
+        "Tensor.EmptyReduction",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Autodiff.grad",
+      "positive": [
+        "TestRunBuiltinCatalog/Autodiff.grad"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Autodiff.grad"
+      ],
+      "runtime_negative": [
+        "TestAutodiffFailures",
+        "TestAutodiffFailureStopsCommitAndCanBeHandled"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Autodiff.grad"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Autodiff.stop",
+      "positive": [
+        "TestRunBuiltinCatalog/Autodiff.stop"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Autodiff.stop"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Autodiff.stop"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Bool.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Bool.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Bool.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Bool.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Bytes.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Bytes.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Bytes.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Bytes.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Checkpoint.InvalidData",
+        "Checkpoint.SchemaMismatch",
+        "Tensor.HostObservationRequired",
+        "Device.AllocationFailed"
+      ],
+      "operation": "Checkpoint.decode",
+      "positive": [
+        "TestRunBuiltinCatalog/Checkpoint.decode"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Checkpoint.decode"
+      ],
+      "runtime_negative": [
+        "TestCheckpointRejectsInvalidData",
+        "TestCheckpointOptimizerValidation"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Checkpoint.decode"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.HostObservationRequired"
+      ],
+      "operation": "Checkpoint.encode",
+      "positive": [
+        "TestRunBuiltinCatalog/Checkpoint.encode"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Checkpoint.encode"
+      ],
+      "runtime_negative": [
+        "TestCheckpointMetalTransfers",
+        "TestSemanticRuntimeRejections/Checkpoint.encode"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Checkpoint.encode"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Device.InvalidSelector"
+      ],
+      "operation": "Device.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Device.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Device.new"
+      ],
+      "runtime_negative": [
+        "TestTensorDynamicFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Device.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Error.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Error.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Error.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Error.new"
+    },
+    {
+      "activation_errors": [
+        "File.AppendFailed"
+      ],
+      "capability": "File.append",
+      "errors": null,
+      "operation": "File.Append.new",
+      "positive": [
+        "TestRunBuiltinCatalog/File.Append.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.Append.new"
+      ],
+      "runtime_negative": [
+        "TestFileCommitFailure"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.Append.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "File.Path.eq",
+      "positive": [
+        "TestRunBuiltinCatalog/File.Path.eq"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.Path.eq"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.Path.eq"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "File.Path.new",
+      "positive": [
+        "TestRunBuiltinCatalog/File.Path.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.Path.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.Path.new"
+    },
+    {
+      "activation_errors": [
+        "File.EntryChanged",
+        "File.RemoveFailed"
+      ],
+      "capability": "File.remove",
+      "errors": [
+        "File.InvalidSelection"
+      ],
+      "operation": "File.Remove.new",
+      "positive": [
+        "TestRunBuiltinCatalog/File.Remove.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.Remove.new"
+      ],
+      "runtime_negative": [
+        "TestFileLanguageSelectionValidation",
+        "TestFileRemovalFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.Remove.new"
+    },
+    {
+      "activation_errors": [
+        "File.WriteFailed"
+      ],
+      "capability": "File.write",
+      "errors": null,
+      "operation": "File.Write.new",
+      "positive": [
+        "TestRunBuiltinCatalog/File.Write.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.Write.new"
+      ],
+      "runtime_negative": [
+        "TestFileCommitFailure"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.Write.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryAbsent",
+        "File.ListFailed",
+        "File.InvalidName"
+      ],
+      "operation": "File.list",
+      "positive": [
+        "TestRunBuiltinCatalog/File.list"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.list"
+      ],
+      "runtime_negative": [
+        "TestFileDiscoveryFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.list"
+    },
+    {
+      "activation_errors": null,
+      "capability": "File.open_paths",
+      "errors": [
+        "File.OpenFilesFailed"
+      ],
+      "operation": "File.open_paths",
+      "positive": [
+        "TestRunBuiltinCatalog/File.open_paths"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.open_paths"
+      ],
+      "runtime_negative": [
+        "TestFileOpenPathsResults"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.open_paths"
+    },
+    {
+      "activation_errors": null,
+      "capability": "File.read",
+      "errors": [
+        "File.ReadFailed"
+      ],
+      "operation": "File.read",
+      "positive": [
+        "TestRunBuiltinCatalog/File.read"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.read"
+      ],
+      "runtime_negative": [
+        "TestRunFileReads"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.read"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Numeric.NonFinite"
+      ],
+      "operation": "Float.add",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.add"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.add"
+      ],
+      "runtime_negative": [
+        "TestFloatFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.add"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Numeric.NonFinite",
+        "Numeric.DivideByZero"
+      ],
+      "operation": "Float.div",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.div"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.div"
+      ],
+      "runtime_negative": [
+        "TestFloatFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.div"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.eq",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.eq"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.eq"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.eq"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.gt",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.gt"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.gt"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.gt"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.gte",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.gte"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.gte"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.gte"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.lt",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.lt"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.lt"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.lt"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.lte",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.lte"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.lte"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.lte"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Numeric.NonFinite"
+      ],
+      "operation": "Float.mul",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.mul"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.mul"
+      ],
+      "runtime_negative": [
+        "TestFloatFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.mul"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Numeric.NonFinite",
+        "Numeric.Domain"
+      ],
+      "operation": "Float.sqrt",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.sqrt"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.sqrt"
+      ],
+      "runtime_negative": [
+        "TestFloatFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.sqrt"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Numeric.NonFinite"
+      ],
+      "operation": "Float.sub",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.sub"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.sub"
+      ],
+      "runtime_negative": [
+        "TestFloatFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.sub"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.to_int",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.to_int"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.to_int"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.to_int"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Float.to_string",
+      "positive": [
+        "TestRunBuiltinCatalog/Float.to_string"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Float.to_string"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Float.to_string"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Flow.fold",
+      "positive": [
+        "TestRunBuiltinCatalog/Flow.fold"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Flow.fold"
+      ],
+      "runtime_negative": [
+        "TestFlowFoldRecoverableErrorProgress"
+      ],
+      "negative_applicability": "verifier_and_callback",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Flow.fold"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch",
+        "Numeric.NonFinite",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Gradients.add",
+      "positive": [
+        "TestRunBuiltinCatalog/Gradients.add"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Gradients.add"
+      ],
+      "runtime_negative": [
+        "TestParametersSchemaFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Gradients.add"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch"
+      ],
+      "operation": "Gradients.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Gradients.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Gradients.new"
+      ],
+      "runtime_negative": [
+        "TestParametersSchemaFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Gradients.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch",
+        "Numeric.NonFinite",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Gradients.scale",
+      "positive": [
+        "TestRunBuiltinCatalog/Gradients.scale"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Gradients.scale"
+      ],
+      "runtime_negative": [
+        "TestParametersScaleFailuresAndMetadataSnapshots"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Gradients.scale"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [],
+      "operation": "Gradients.values",
+      "positive": [
+        "TestRunBuiltinCatalog/Gradients.values"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Gradients.values"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Gradients.values"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Gradients.zero",
+      "positive": [
+        "TestRunBuiltinCatalog/Gradients.zero"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Gradients.zero"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Gradients.zero"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Gradients.zero"
+    },
+    {
+      "activation_errors": [
+        "HTTP.ExchangeFailed"
+      ],
+      "capability": "HTTP.request",
+      "errors": [
+        "HTTP.InvalidRequest"
+      ],
+      "operation": "HTTP.Client.Request.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Client.Request.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Client.Request.new"
+      ],
+      "runtime_negative": [
+        "TestAdapterHTTPClientConstruction",
+        "TestAdapterHTTPClientProtocolLimits"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Client.Request.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "HTTP.InvalidHeaders"
+      ],
+      "operation": "HTTP.Headers.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Headers.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Headers.new"
+      ],
+      "runtime_negative": [
+        "TestAdapterHTTPHeaderValidation"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Headers.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "HTTP.InvalidHeaders"
+      ],
+      "operation": "HTTP.Headers.values",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Headers.values"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Headers.values"
+      ],
+      "runtime_negative": [
+        "TestAdapterHTTPHeaderValidation"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Headers.values"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "HTTP.InvalidMethod"
+      ],
+      "operation": "HTTP.Method.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Method.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Method.new"
+      ],
+      "runtime_negative": [
+        "TestAdapterHTTPClientConstruction"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Method.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "HTTP.Response.Bytes.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Response.Bytes.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Response.Bytes.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Response.Bytes.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "HTTP.Response.Text.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Response.Text.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Response.Text.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Response.Text.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "HTTP.Response.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Response.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Response.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Response.new"
+    },
+    {
+      "activation_errors": [
+        "HTTP.ServerStartFailed"
+      ],
+      "capability": "HTTP.listen",
+      "errors": null,
+      "operation": "HTTP.Server.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.Server.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.Server.new"
+      ],
+      "runtime_negative": [
+        "TestServeStartupFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.Server.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "HTTP.InvalidURL"
+      ],
+      "operation": "HTTP.URL.new",
+      "positive": [
+        "TestRunBuiltinCatalog/HTTP.URL.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/HTTP.URL.new"
+      ],
+      "runtime_negative": [
+        "TestAdapterHTTPClientConstruction"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.URL.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Int.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Int.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Int.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Int.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Numeric.NonFinite"
+      ],
+      "operation": "Int.to_float",
+      "positive": [
+        "TestRunBuiltinCatalog/Int.to_float"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Int.to_float"
+      ],
+      "runtime_negative": [
+        "TestFloatFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Int.to_float"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Int.to_string",
+      "positive": [
+        "TestRunBuiltinCatalog/Int.to_string"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Int.to_string"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Int.to_string"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "List.filter",
+      "positive": [
+        "TestRunBuiltinCatalog/List.filter"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/List.filter"
+      ],
+      "runtime_negative": [
+        "TestRunFallibleListVariants"
+      ],
+      "negative_applicability": "verifier_and_callback",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/List.filter"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "List.flat_map",
+      "positive": [
+        "TestRunBuiltinCatalog/List.flat_map"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/List.flat_map"
+      ],
+      "runtime_negative": [
+        "TestRunFallibleListVariants"
+      ],
+      "negative_applicability": "verifier_and_callback",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/List.flat_map"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "List.fold",
+      "positive": [
+        "TestRunBuiltinCatalog/List.fold"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/List.fold"
+      ],
+      "runtime_negative": [
+        "TestRunFallibleListVariants"
+      ],
+      "negative_applicability": "verifier_and_callback",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/List.fold"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "List.length",
+      "positive": [
+        "TestRunBuiltinCatalog/List.length"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/List.length"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/List.length"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "List.map",
+      "positive": [
+        "TestRunBuiltinCatalog/List.map"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/List.map"
+      ],
+      "runtime_negative": [
+        "TestRunFallibleListVariants"
+      ],
+      "negative_applicability": "verifier_and_callback",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/List.map"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "List.new",
+      "positive": [
+        "TestRunBuiltinCatalog/List.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/List.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/List.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "List.unfold",
+      "positive": [
+        "TestRunBuiltinCatalog/List.unfold"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/List.unfold"
+      ],
+      "runtime_negative": [
+        "TestRunFallibleListVariants"
+      ],
+      "negative_applicability": "verifier_and_callback",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/List.unfold"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Map.MissingKey"
+      ],
+      "operation": "Map.get",
+      "positive": [
+        "TestRunBuiltinCatalog/Map.get"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Map.get"
+      ],
+      "runtime_negative": [
+        "TestRunRecoverableErrors"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Map.get"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Map.has_key",
+      "positive": [
+        "TestRunBuiltinCatalog/Map.has_key"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Map.has_key"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Map.has_key"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Map.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Map.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Map.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Map.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.add",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.add"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.add"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.add"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Math.DivideByZero"
+      ],
+      "operation": "Math.div",
+      "positive": [
+        "TestSemanticMigrationArithmeticSuccess/Math.div"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.div"
+      ],
+      "runtime_negative": [
+        "TestRunBuiltinCatalog/Math.div"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestSemanticMigrationArithmeticSuccess/Math.div"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.eq",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.eq"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.eq"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.eq"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.gt",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.gt"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.gt"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.gt"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.gte",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.gte"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.gte"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.gte"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.lt",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.lt"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.lt"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.lt"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.lte",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.lte"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.lte"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.lte"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Math.EmptyList"
+      ],
+      "operation": "Math.max",
+      "positive": [
+        "TestSemanticMigrationArithmeticSuccess/Math.max"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.max"
+      ],
+      "runtime_negative": [
+        "TestRunBuiltinCatalog/Math.max"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestSemanticMigrationArithmeticSuccess/Math.max"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Math.EmptyList"
+      ],
+      "operation": "Math.min",
+      "positive": [
+        "TestSemanticMigrationArithmeticSuccess/Math.min"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.min"
+      ],
+      "runtime_negative": [
+        "TestRunBuiltinCatalog/Math.min"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestSemanticMigrationArithmeticSuccess/Math.min"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Math.ModuloByZero"
+      ],
+      "operation": "Math.mod",
+      "positive": [
+        "TestSemanticMigrationArithmeticSuccess/Math.mod"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.mod"
+      ],
+      "runtime_negative": [
+        "TestRunBuiltinCatalog/Math.mod"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestSemanticMigrationArithmeticSuccess/Math.mod"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.mul",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.mul"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.mul"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.mul"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.product",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.product"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.product"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.product"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.sub",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.sub"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.sub"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.sub"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Math.sum",
+      "positive": [
+        "TestRunBuiltinCatalog/Math.sum"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Math.sum"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Math.sum"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Optimizer.InvalidConfig"
+      ],
+      "operation": "Optimizer.AdamW.Config.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.AdamW.Config.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.AdamW.Config.new"
+      ],
+      "runtime_negative": [
+        "TestOptimizerInvalidConfigurations"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.AdamW.Config.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch",
+        "Numeric.NonFinite",
+        "Numeric.DivideByZero",
+        "Numeric.Domain",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Optimizer.AdamW.State.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.AdamW.State.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.AdamW.State.new"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Optimizer.AdamW.State.new"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.AdamW.State.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.DeviceMismatch",
+        "Device.Unavailable",
+        "Device.AllocationFailed",
+        "Device.TransferFailed",
+        "Device.UnsupportedProfile",
+        "Device.LibraryFailed",
+        "Device.Lost"
+      ],
+      "operation": "Optimizer.AdamW.State.to",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.AdamW.State.to"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.AdamW.State.to"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Optimizer.AdamW.State.to"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.AdamW.State.to"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch",
+        "Numeric.NonFinite",
+        "Numeric.DivideByZero",
+        "Numeric.Domain",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Optimizer.AdamW.step",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.AdamW.step"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.AdamW.step"
+      ],
+      "runtime_negative": [
+        "TestOptimizerSchemasAndFailureOrder"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.AdamW.step"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Optimizer.InvalidConfig"
+      ],
+      "operation": "Optimizer.SGD.Config.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.SGD.Config.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.SGD.Config.new"
+      ],
+      "runtime_negative": [
+        "TestOptimizerInvalidConfigurations"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.SGD.Config.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch",
+        "Numeric.NonFinite",
+        "Numeric.DivideByZero",
+        "Numeric.Domain",
+        "Device.UnsupportedOperation"
+      ],
+      "operation": "Optimizer.SGD.State.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.SGD.State.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.SGD.State.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_canonical_state_constructor",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.SGD.State.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.DeviceMismatch",
+        "Device.Unavailable",
+        "Device.AllocationFailed",
+        "Device.TransferFailed",
+        "Device.UnsupportedProfile",
+        "Device.LibraryFailed",
+        "Device.Lost"
+      ],
+      "operation": "Optimizer.SGD.State.to",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.SGD.State.to"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.SGD.State.to"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Optimizer.SGD.State.to"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.SGD.State.to"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch",
+        "Numeric.NonFinite",
+        "Numeric.DivideByZero",
+        "Numeric.Domain",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Optimizer.SGD.step",
+      "positive": [
+        "TestRunBuiltinCatalog/Optimizer.SGD.step"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Optimizer.SGD.step"
+      ],
+      "runtime_negative": [
+        "TestOptimizerSchemasAndFailureOrder"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Optimizer.SGD.step"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Gradient.SchemaMismatch"
+      ],
+      "operation": "Parameters.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Parameters.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Parameters.new"
+      ],
+      "runtime_negative": [
+        "TestDeviceParameterLocations"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Parameters.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.DeviceMismatch",
+        "Device.Unavailable",
+        "Device.AllocationFailed",
+        "Device.TransferFailed",
+        "Device.UnsupportedProfile",
+        "Device.LibraryFailed",
+        "Device.Lost"
+      ],
+      "operation": "Parameters.to",
+      "positive": [
+        "TestRunBuiltinCatalog/Parameters.to"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Parameters.to"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Parameters.to"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Parameters.to"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [],
+      "operation": "Parameters.values",
+      "positive": [
+        "TestRunBuiltinCatalog/Parameters.values"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Parameters.values"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Parameters.values"
+    },
+    {
+      "activation_errors": [
+        "Process.ExecutionFailed"
+      ],
+      "capability": "Process.run",
+      "errors": [
+        "Process.InvalidCommand"
+      ],
+      "operation": "Process.Command.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Command.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Command.new"
+      ],
+      "runtime_negative": [
+        "TestAdapterProcessConstructorValidation",
+        "TestAdapterProcessLifecycleFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Command.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.InvalidExecutable"
+      ],
+      "operation": "Process.Executable.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Executable.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Executable.new"
+      ],
+      "runtime_negative": [
+        "TestAdapterProcessConstructorValidation"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Executable.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.TerminationKind"
+      ],
+      "operation": "Process.Termination.exit_code",
+      "positive": [
+        "TestAdapterProcessResultExecution/exited"
+      ],
+      "boundary": "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Termination.exit_code"
+      ],
+      "runtime_negative": [
+        "TestAdapterProcessResultExecution/wrong-exited"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestAdapterProcessResultExecution/exited"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.TerminationKind"
+      ],
+      "operation": "Process.Termination.signal",
+      "positive": [
+        "TestAdapterProcessResultExecution/signaled"
+      ],
+      "boundary": "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Termination.signal"
+      ],
+      "runtime_negative": [
+        "TestAdapterProcessResultExecution/wrong-signaled"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestAdapterProcessResultExecution/signaled"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Range.contains",
+      "positive": [
+        "TestRunBuiltinCatalog/Range.contains"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Range.contains"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Range.contains"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Range.is_empty",
+      "positive": [
+        "TestRunBuiltinCatalog/Range.is_empty"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Range.is_empty"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Range.is_empty"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Range.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Range.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Range.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Range.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Record.merge",
+      "positive": [
+        "TestRunBuiltinCatalog/Record.merge"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Record.merge"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Record.merge"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Record.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Record.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Record.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Record.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Scalar.eq",
+      "positive": [
+        "TestRunBuiltinCatalog/Scalar.eq"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Scalar.eq"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Scalar.eq"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Scalar.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Scalar.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Scalar.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Scalar.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "String.FromScalars.new",
+      "positive": [
+        "TestRunBuiltinCatalog/String.FromScalars.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/String.FromScalars.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/String.FromScalars.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "String.concat",
+      "positive": [
+        "TestRunBuiltinCatalog/String.concat"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/String.concat"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/String.concat"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "String.eq",
+      "positive": [
+        "TestRunBuiltinCatalog/String.eq"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/String.eq"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/String.eq"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "String.length",
+      "positive": [
+        "TestRunBuiltinCatalog/String.length"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/String.length"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/String.length"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "String.lower",
+      "positive": [
+        "TestRunBuiltinCatalog/String.lower"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/String.lower"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/String.lower"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "String.new",
+      "positive": [
+        "TestRunBuiltinCatalog/String.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/String.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/String.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "String.upper",
+      "positive": [
+        "TestRunBuiltinCatalog/String.upper"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/String.upper"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/String.upper"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.ShapeMismatch",
+        "Numeric.NonFinite",
+        "Tensor.DeviceMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost"
+      ],
+      "operation": "Tensor.add",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.add"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.add"
+      ],
+      "runtime_negative": [
+        "TestTensorCPUFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.add"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.InvalidShape",
+        "Tensor.ShapeMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Tensor.broadcast",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.broadcast"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.broadcast"
+      ],
+      "runtime_negative": [
+        "TestTensorShapeBoundaries",
+        "TestMetalComputeControlledFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.broadcast"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Tensor.device",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.device"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.device"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.device"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.ShapeMismatch",
+        "Numeric.NonFinite",
+        "Tensor.DeviceMismatch",
+        "Device.UnsupportedOperation",
+        "Numeric.DivideByZero",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost"
+      ],
+      "operation": "Tensor.div",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.div"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.div"
+      ],
+      "runtime_negative": [
+        "TestTensorCPUFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.div"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Tensor.dtype",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.dtype"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.dtype"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.dtype"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.ShapeMismatch",
+        "Numeric.NonFinite",
+        "Tensor.DeviceMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost"
+      ],
+      "operation": "Tensor.matmul",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.matmul"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.matmul"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Tensor.matmul"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.matmul"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.InvalidShape",
+        "Tensor.ShapeMismatch",
+        "Device.UnsupportedOperation",
+        "Numeric.NonFinite",
+        "Tensor.EmptyReduction",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Tensor.mean",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.mean"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.mean"
+      ],
+      "runtime_negative": [
+        "TestTensorCPUFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.mean"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.ShapeMismatch",
+        "Numeric.NonFinite",
+        "Tensor.DeviceMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost"
+      ],
+      "operation": "Tensor.mul",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.mul"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.mul"
+      ],
+      "runtime_negative": [
+        "TestTensorCPUFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.mul"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.InvalidShape",
+        "Numeric.NonFinite"
+      ],
+      "operation": "Tensor.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.new"
+      ],
+      "runtime_negative": [
+        "TestTensorDynamicFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Tensor.rank",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.rank"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.rank"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.rank"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Tensor.relu",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.relu"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.relu"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Tensor.relu"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.relu"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.InvalidShape",
+        "Tensor.ShapeMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Tensor.reshape",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.reshape"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.reshape"
+      ],
+      "runtime_negative": [
+        "TestTensorShapeBoundaries",
+        "TestMetalComputeControlledFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.reshape"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "Tensor.shape",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.shape"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.shape"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.shape"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Numeric.Domain",
+        "Numeric.NonFinite",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Tensor.sqrt",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.sqrt"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.sqrt"
+      ],
+      "runtime_negative": [
+        "TestTensorCPUFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.sqrt"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.ShapeMismatch",
+        "Numeric.NonFinite",
+        "Tensor.DeviceMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost"
+      ],
+      "operation": "Tensor.sub",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.sub"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.sub"
+      ],
+      "runtime_negative": [
+        "TestSemanticRuntimeRejections/Tensor.sub"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.sub"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.InvalidShape",
+        "Tensor.ShapeMismatch",
+        "Device.UnsupportedOperation",
+        "Numeric.NonFinite",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Tensor.sum",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.sum"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.sum"
+      ],
+      "runtime_negative": [
+        "TestTensorCPUFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.sum"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.DeviceMismatch",
+        "Device.Unavailable",
+        "Device.AllocationFailed",
+        "Device.TransferFailed",
+        "Device.UnsupportedProfile",
+        "Device.LibraryFailed",
+        "Device.Lost"
+      ],
+      "operation": "Tensor.to",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.to"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.to"
+      ],
+      "runtime_negative": [
+        "TestCheckpointTransferFailureCleanup",
+        "TestMetalControlledFailures",
+        "TestSemanticRuntimeRejections/Tensor.to"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.to"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.ShapeMismatch",
+        "Tensor.HostObservationRequired"
+      ],
+      "operation": "Tensor.to_float",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.to_float"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.to_float"
+      ],
+      "runtime_negative": [
+        "TestTensorDynamicFailures",
+        "TestMetalTensorBoundaries"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.to_float"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.InvalidShape",
+        "Tensor.ShapeMismatch",
+        "Device.UnsupportedOperation",
+        "Device.Unavailable",
+        "Device.UnsupportedProfile",
+        "Device.AllocationFailed",
+        "Device.LibraryFailed",
+        "Device.ExecutionFailed",
+        "Device.Lost",
+        "Tensor.DeviceMismatch"
+      ],
+      "operation": "Tensor.transpose",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.transpose"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.transpose"
+      ],
+      "runtime_negative": [
+        "TestTensorShapeBoundaries",
+        "TestMetalComputeControlledFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.transpose"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Tensor.HostObservationRequired"
+      ],
+      "operation": "Tensor.values",
+      "positive": [
+        "TestRunBuiltinCatalog/Tensor.values"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Tensor.values"
+      ],
+      "runtime_negative": [
+        "TestDeviceAuthorizationAndFailures/observation"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Tensor.values"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": null,
+      "operation": "UTF8.Bytes.new",
+      "positive": [
+        "TestRunBuiltinCatalog/UTF8.Bytes.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/UTF8.Bytes.new"
+      ],
+      "runtime_negative": [],
+      "negative_applicability": "verifier_only_typed_total",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/UTF8.Bytes.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "UTF8.InvalidBytes"
+      ],
+      "operation": "UTF8.String.new",
+      "positive": [
+        "TestRunBuiltinCatalog/UTF8.String.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/UTF8.String.new"
+      ],
+      "runtime_negative": [
+        "TestRunRecoverableErrors"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/UTF8.String.new"
+    }
+  ],
+  "cli": [
+    {
+      "id": "parse",
+      "tests": [
+        "TestSyntaxStructure",
+        "TestParserExternalInputs"
+      ],
+      "oracle": "AST_pipe_shape;invalid_UTF8_NUL_depth=exit1",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "check",
+      "tests": [
+        "TestVerifierBuiltinContracts",
+        "TestVerifierRejections"
+      ],
+      "oracle": "result_type;located_check_diagnostic",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "inspect",
+      "tests": [
+        "TestInspectionResources",
+        "TestInspectionRejectsInvalidSource"
+      ],
+      "oracle": "resource_and_effect_summary;no_activation",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "build",
+      "tests": [
+        "TestNativeStandalone",
+        "TestNativeBuildBoundary",
+        "TestNativeCrossTarget"
+      ],
+      "oracle": "build_receipt;artifact_without_source;target_identity",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "run",
+      "tests": [
+        "TestRunValues",
+        "TestRunHostLimitsAndAuthorization"
+      ],
+      "oracle": "typed_value;stdout;stderr;exit_status",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "serve",
+      "tests": [
+        "TestServeHTTP",
+        "TestServeStartupFailures",
+        "TestServeGracefulActiveRequest"
+      ],
+      "oracle": "ready_response_stopped;HTTP_status_body;joined_shutdown",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--output",
+      "tests": [
+        "TestNativeBuildBoundary",
+        "TestNativeBuildPaths"
+      ],
+      "oracle": "required_nonempty_single_output;artifact_path",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--target",
+      "tests": [
+        "TestNativeCrossTarget",
+        "TestNativeBuildBoundary"
+      ],
+      "oracle": "darwin/arm64;linux/arm64;unsupported_rejected",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--device-backend",
+      "tests": [
+        "TestNativeMetalSelection",
+        "TestNativeMetalSoftwareArtifact"
+      ],
+      "oracle": "software_or_metal;unsupported_target_rejected",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--format",
+      "tests": [
+        "TestFirstVerifierSlice",
+        "TestCLIErrorBoundary",
+        "TestRunValues"
+      ],
+      "oracle": "text_or_json;invalid_format=exit2",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--read-root",
+      "tests": [
+        "TestRunFileReads",
+        "TestRunHostLimitsAndAuthorization"
+      ],
+      "oracle": "read_bytes;path_confinement;capability_denied",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--write-root",
+      "tests": [
+        "TestFileCommitOrder",
+        "TestFileCommitAuthorization"
+      ],
+      "oracle": "exact_bytes;capability_denied",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--list-root",
+      "tests": [
+        "TestFileDiscovery",
+        "TestFileDiscoveryFailures"
+      ],
+      "oracle": "sorted_entries;directory_absent;denied",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--remove-root",
+      "tests": [
+        "TestFileRemoval",
+        "TestFileRemovalFailures"
+      ],
+      "oracle": "selected_entries_removed;failure_progress",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--open-files-root",
+      "tests": [
+        "TestFileOpenPaths",
+        "TestFileOpenPathsResults"
+      ],
+      "oracle": "canonical_paths;invalid_probe_rejected",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--max-steps",
+      "tests": [
+        "TestSemanticMigrationStepBoundary",
+        "TestRunHostLimitsAndAuthorization"
+      ],
+      "oracle": "Math.add:3=exit2;4=3;5=3",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--listen",
+      "tests": [
+        "TestServeHTTP",
+        "TestServeStartupFailures"
+      ],
+      "oracle": "explicit_port_authority;denied_before_ready",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--http-allow",
+      "tests": [
+        "TestAdapterHTTPClientExchange",
+        "TestAdapterHTTPClientAuthority"
+      ],
+      "oracle": "METHOD_ORIGIN_ADDRESS_grant;deny_mismatch",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--process-allow",
+      "tests": [
+        "TestAdapterProcessPolicyAcceptsInertCompilerInputs",
+        "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs",
+        "TestAdapterProcessPolicyRejectsFlagsForOtherCommands"
+      ],
+      "oracle": "explicit_process_policy;no_parent_authority",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--process-launcher",
+      "tests": [
+        "TestAdapterProcessPolicyAcceptsInertCompilerInputs",
+        "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs",
+        "TestAdapterProcessPolicyRejectsFlagsForOtherCommands"
+      ],
+      "oracle": "explicit_process_policy;no_parent_authority",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--process-read-root",
+      "tests": [
+        "TestAdapterProcessPolicyAcceptsInertCompilerInputs",
+        "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs",
+        "TestAdapterProcessPolicyRejectsFlagsForOtherCommands"
+      ],
+      "oracle": "explicit_process_policy;no_parent_authority",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "--allow-device",
+      "tests": [
+        "TestDeviceTransferRoundTrip",
+        "TestDeviceGrantArguments",
+        "TestDeviceAuthorizationAndFailures"
+      ],
+      "oracle": "explicit_selector;bit_preserving_transfer;denied_without_grant",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "metadata",
+      "tests": [
+        "TestNativeMetalSoftwareArtifact"
+      ],
+      "oracle": "device_backend=software",
+      "boundary": "native_cli"
+    },
+    {
+      "id": "exit-status",
+      "tests": [
+        "TestCLIErrorBoundary",
+        "TestRunRecoverableErrors",
+        "TestSemanticMigrationStepBoundary"
+      ],
+      "oracle": "success=0;rejected_or_Lo_error=1;host_error=2",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "artifact-invocation",
+      "tests": [
+        "TestNativeStandalone",
+        "TestNativeBuildBoundary"
+      ],
+      "oracle": "run_or_serve_without_source",
+      "boundary": "native_cli"
+    }
+  ],
+  "semantics": [
+    {
+      "id": "syntax_types_scopes",
+      "tests": [
+        "TestConformance",
+        "TestVerifierContracts",
+        "TestVerifierEdgeContracts"
+      ],
+      "oracle": "testdata/conformance/*.json;located_diagnostics",
+      "boundary": "compiler_cli"
+    },
+    {
+      "id": "read_order",
+      "tests": [
+        "TestEvaluatorReadOrder",
+        "TestEvaluatorMatchRegions",
+        "TestEvaluatorErrorPrecedence",
+        "TestSemanticNativeReadOrder",
+        "TestSemanticNativeMatchRegions",
+        "TestSemanticNativeErrorPrecedence"
+      ],
+      "oracle": "unused,repeat,repeat,b,a;selected_only;first_failure",
+      "boundary": "evaluator_api;generated_native_api"
+    },
+    {
+      "id": "immutability",
+      "tests": [
+        "TestEvaluatorImmutableResults",
+        "TestParametersStopAndIdentity"
+      ],
+      "oracle": "input_copies;original_values_unchanged",
+      "boundary": "evaluator_api_and_cli"
+    },
+    {
+      "id": "error_trace",
+      "tests": [
+        "TestRunRecoverableErrors",
+        "TestRunStoredFallibility",
+        "TestTypedCommitFailureStopsLaterEffects"
+      ],
+      "oracle": "kind_input_trace;stored_fallibility;later_effect_absent",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "file_activation",
+      "tests": [
+        "TestFileCommitOrder",
+        "TestFileCommitFailure",
+        "TestAdapterFileReceipts",
+        "TestFileLanguageLateFailureProgress"
+      ],
+      "oracle": "ordered_bytes;receipts;completed_prefix",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "flow_activation",
+      "tests": [
+        "TestFlowFold",
+        "TestFlowFoldRecoverableErrorProgress",
+        "TestFlowFoldStepLimitProgress"
+      ],
+      "oracle": "sequential_accumulator;completed_prefix;budget_failure",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "http_activation",
+      "tests": [
+        "TestAdapterHTTPClientExchange",
+        "TestAdapterHTTPClientNoReplay",
+        "TestAdapterHTTPClientCleanupEvidence"
+      ],
+      "oracle": "response_bytes;one_request;cleanup_failure_progress",
+      "boundary": "cli_and_controlled_runner"
+    },
+    {
+      "id": "process_activation",
+      "tests": [
+        "TestAdapterProcessActivationContract",
+        "TestAdapterProcessLifecycleCompleted",
+        "TestAdapterProcessLifecycleCancellation",
+        "TestAdapterProcessLifecycleExactOutputLimit"
+      ],
+      "oracle": "completion_before_receipt;joined_workers;exact_output_limit",
+      "boundary": "controlled_adapter_api"
+    },
+    {
+      "id": "cancellation",
+      "tests": [
+        "TestEvaluatorCancellation",
+        "TestFileReadCancellation",
+        "TestFileWriteCancellation",
+        "TestFlowFoldNestedCancellationProgress",
+        "TestServeShutdownPendingConnection",
+        "TestSemanticNativeCancellation",
+        "TestSemanticNativeMetalFailureCleanup"
+      ],
+      "oracle": "runtime.cancelled;no_later_effect;released_resources",
+      "boundary": "controlled_api_and_cli;generated_native_api"
+    },
+    {
+      "id": "charges",
+      "tests": [
+        "TestSemanticMigrationStepBoundary",
+        "TestTensorWorkCharges",
+        "TestOptimizerPrimitiveWorkCharges",
+        "TestCheckpointBitsAndWork",
+        "TestNativeEffectBudgetDifferential",
+        "TestNativeTensorBudgetDifferential"
+      ],
+      "oracle": "Math.add_min=4;optimizer_deltas=36,180;charged_before_effect",
+      "boundary": "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+    },
+    {
+      "id": "cleanup",
+      "tests": [
+        "TestDeviceCallbackLifetime",
+        "TestDeviceRetainedCallbackValues",
+        "TestCheckpointTransferFailureCleanup",
+        "TestServerPartialStartupCleanup",
+        "TestAdapterReceiptSessionCleanupDiagnostic",
+        "TestSemanticNativeMetalFailureCleanup"
+      ],
+      "oracle": "live_buffers=0;release_once;cleanup_error_preserved",
+      "boundary": "controlled_runner_and_adapter;generated_native_api"
+    },
+    {
+      "id": "checkpoint_bytes",
+      "tests": [
+        "TestSemanticMigrationCheckpointResume",
+        "TestCheckpointBitsAndWork",
+        "TestCheckpointRejectsInvalidData"
+      ],
+      "oracle": "literal_canonical_bytes;negative_zero_subnormal_bits;malformed_rejected",
+      "boundary": "cli_and_controlled_runner"
+    },
+    {
+      "id": "checkpoint_resume",
+      "tests": [
+        "TestSemanticMigrationCheckpointResume",
+        "TestCheckpointFreshProcess",
+        "TestCheckpointAdamWMetalResume",
+        "TestSemanticNativeMetalCheckpointResume"
+      ],
+      "oracle": "SGD_p=1;AdamW_p=1.296875,m=1.5,v=3,powers=.25,step=2",
+      "boundary": "cli_and_controlled_runner;generated_native_api"
+    },
+    {
+      "id": "container_transfer",
+      "tests": [
+        "TestCheckpointMetalTransfers",
+        "TestCheckpointTransferFailureCleanup",
+        "TestDeviceTransferRoundTrip",
+        "TestSemanticNativeMetalCheckpointResume",
+        "TestSemanticNativeMetalFailureCleanup"
+      ],
+      "oracle": "explicit_transfer;shape_dtype_bits;atomic_failure_cleanup",
+      "boundary": "cli_and_controlled_runner;generated_native_api"
+    },
+    {
+      "id": "resource_limits",
+      "tests": [
+        "TestRunResourceLimits",
+        "TestRunExpandedValueLimit",
+        "TestTensorLimits",
+        "TestSemanticMigrationFailurePreventsEffects"
+      ],
+      "oracle": "limit_diagnostic;no_stdout;later_file_absent",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "standalone_runtime",
+      "tests": [
+        "TestNativeStandalone",
+        "TestNativeRemovedSourceDiagnostics"
+      ],
+      "oracle": "no_source_or_Lo_runtime_install;source_mapped_diagnostic",
+      "boundary": "native_cli"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "Int",
+      "tests": [
+        "TestRunValues",
+        "TestNativeRuntimeDifferential"
+      ],
+      "oracle": "unbounded_integer;exact_decimal;truncation_toward_zero",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "Float",
+      "tests": [
+        "TestFloatArithmetic",
+        "TestFloatFailures"
+      ],
+      "oracle": "binary64;finite_only;signed_zero;exact_literals",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "cpu-fp32",
+      "tests": [
+        "TestTensorCPUOperations",
+        "TestTensorPrecisionAndHigherRank"
+      ],
+      "oracle": "FP32_each_primitive;fixed_reduction_order;exact_serialization",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "metal-fp32",
+      "tests": [
+        "TestMetalComputeProfile",
+        "TestMetalComputePrimitives",
+        "TestMetalComputeNumericFailures",
+        "TestSemanticNativeMetalProfile"
+      ],
+      "oracle": "arithmetic_flush_subnormal_and_signed_zero;layout_preserves_bits;exact_profile_bits;primitive_atol=1e-6,rtol=1e-5",
+      "boundary": "runner_api_with_software_metal_model;generated_native_software_model"
+    },
+    {
+      "id": "checkpoint-fp32",
+      "tests": [
+        "TestSemanticMigrationCheckpointResume",
+        "TestCheckpointBitsAndWork",
+        "TestSemanticNativeMetalCheckpointResume"
+      ],
+      "oracle": "exact_canonical_bytes_and_resumed_state;no_tolerance",
+      "boundary": "cli_and_software_metal_model;generated_native_software_model"
+    },
+    {
+      "id": "training",
+      "tests": [
+        "TestAutodiffAnalyticalAndFiniteDifferences",
+        "TestMetalComputeTraining",
+        "TestMetalTrainingGradients"
+      ],
+      "oracle": "independent_finite_differences_and_docs/evidence/training-reference-results.json;per_fixture_tolerances",
+      "boundary": "cli_and_software_metal_model"
+    }
+  ],
+  "gaps": [
+    {
+      "ID": "native-injected-device-runtime",
+      "Scope": "runWithDevices;metalComputeFactory",
+      "Reason": "Current_matrix_names_exact_API_boundaries;generated_native_fixtures_cover_read_order_selected_regions_failure_precedence_cancellation_Metal_numeric_profile_checkpoint_resume_transfers_numeric_failure_and_cleanup;remaining_injected_variant_permutations_do_not_add_absent_I005_contract_axes;I011_requires_complete_backend_parity",
+      "Owner": "I011",
+      "Acceptance": "downstream"
+    },
+    {
+      "ID": "catalog-error-kind-exhaustiveness",
+      "Scope": "errors;activation_errors",
+      "Reason": "I005_requires_positive_and_applicable_negative_per_operation_not_every_kind_per_operation;all_catalog_kinds_are_inventoried;each_fallible_operation_has_runtime_negative_or_the_source_reviewed_SGD_constructor_exemption;exhaustive_kind_cartesian_product_is_not_claimed",
+      "Owner": "I005",
+      "Acceptance": "disclosed_limit"
+    },
+    {
+      "ID": "linux-arm64-execution",
+      "Scope": "semantic_corpus",
+      "Reason": "host_darwin_arm64;cross_build_test_is_not_linux_execution",
+      "Owner": "I011",
+      "Acceptance": "downstream"
+    },
+    {
+      "ID": "standalone-compiler-offline",
+      "Scope": "I004;F017;I011",
+      "Reason": "current_native_build_uses_Go;not_established_by_semantic_corpus",
+      "Owner": "F017",
+      "Acceptance": "downstream"
+    },
+    {
+      "ID": "sgd-state-constructor-error-catalog",
+      "Scope": "Optimizer.SGD.State.new",
+      "Reason": "internal/runtimeops/optimizer.go:optimizerOperation_returns_Success_of_NewSGDState_with_existing_checked_Parameters_validated_SGDConfig_and_step_zero;internal/value/optimizer.go:stateBase_checks_only_canonical_shape_kind_step_and_config;constructor_performs_no_tensor_arithmetic_or_backend_call;catalog_errors_are_conservative_shared_optimizer_metadata;verifier_rejection_is_applicable_negative",
+      "Owner": "I005",
+      "Acceptance": "disclosed_limit"
+    }
+  ]
+}

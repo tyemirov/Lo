@@ -1,0 +1,150 @@
+{
+  "status": "passed",
+  "issue_count": 49,
+  "selected_issues": {
+    "P004": {
+      "status": "x",
+      "dependencies": [
+        "F016",
+        "I003"
+      ]
+    },
+    "P005": {
+      "status": "x",
+      "dependencies": [
+        "I004",
+        "I005"
+      ]
+    },
+    "P006": {
+      "status": " ",
+      "dependencies": [
+        "P004"
+      ]
+    },
+    "I004": {
+      "status": "x",
+      "dependencies": [
+        "P004"
+      ]
+    },
+    "I005": {
+      "status": "x",
+      "dependencies": [
+        "P004"
+      ]
+    },
+    "I006": {
+      "status": " ",
+      "dependencies": [
+        "P005",
+        "I005"
+      ]
+    },
+    "I007": {
+      "status": " ",
+      "dependencies": [
+        "I006"
+      ]
+    },
+    "I008": {
+      "status": " ",
+      "dependencies": [
+        "I007",
+        "F016"
+      ]
+    },
+    "I009": {
+      "status": " ",
+      "dependencies": [
+        "I007"
+      ]
+    },
+    "I010": {
+      "status": " ",
+      "dependencies": [
+        "I008",
+        "I009",
+        "F014"
+      ]
+    },
+    "I011": {
+      "status": " ",
+      "dependencies": [
+        "F017",
+        "I005"
+      ]
+    },
+    "I012": {
+      "status": " ",
+      "dependencies": [
+        "F022",
+        "F023"
+      ]
+    },
+    "F017": {
+      "status": " ",
+      "dependencies": [
+        "P005",
+        "I008",
+        "I009",
+        "I010"
+      ]
+    },
+    "F018": {
+      "status": " ",
+      "dependencies": [
+        "P006",
+        "I011"
+      ]
+    },
+    "F019": {
+      "status": " ",
+      "dependencies": [
+        "F018",
+        "P006"
+      ]
+    },
+    "F020": {
+      "status": " ",
+      "dependencies": [
+        "F019",
+        "P006"
+      ]
+    },
+    "F021": {
+      "status": " ",
+      "dependencies": [
+        "F018",
+        "F020",
+        "P006"
+      ]
+    },
+    "F022": {
+      "status": " ",
+      "dependencies": [
+        "F021"
+      ]
+    },
+    "F023": {
+      "status": " ",
+      "dependencies": [
+        "F018",
+        "I011"
+      ]
+    }
+  },
+  "unique_issue_identifiers": true,
+  "local_dependencies_present": true,
+  "dependency_cycles": [],
+  "closed_issue_dependencies_satisfied": true,
+  "I006_dependencies_satisfied": true,
+  "local_links_checked": 106,
+  "source_sha256": {
+    "docs/native-runtime-contract.md": "cf87e728e8de1a0b6d00bd92f441f92569f1b707f3a9eae0b085cf2ab881c0c2",
+    "docs/native-backend-experiment.md": "a138476a103adfed3d19678397979c56c503eb839596af2c598b1275e7c78fce",
+    "docs/semantic-migration.md": "364eb073c598c7251c7045c275f59f111b1ecaeaed349c40a603d85fe36b3ba8",
+    "docs/standalone-compiler-plan.md": "ed6a298e2bad599d2d2e5af36877d5220dc7582ebb3b5208692fa09cfedd70f0",
+    "ISSUES.md": "f11853cfe1220ef2fb2a7caf51d80b351337841f86ebfd635db77e9190647770"
+  }
+}

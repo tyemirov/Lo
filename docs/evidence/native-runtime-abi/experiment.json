@@ -1,0 +1,390 @@
+{
+  "cells": [
+    {
+      "passed": true,
+      "stages": {
+        "caller": {
+          "artifact": {
+            "bytes": 7480,
+            "format": "Mach-O",
+            "kind": "object",
+            "sha256": "54acaa2fce89dcd6b1c5d9fc5db805cb6874c7cbd1526d9e158fec3380896ec6",
+            "target": "aarch64-apple-darwin"
+          },
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+            "--target=aarch64-apple-darwin",
+            "-nostdinc",
+            "-ffreestanding",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-g",
+            "-c",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/client.c",
+            "-o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/client.o",
+            "-mmacosx-version-min=27.0"
+          ],
+          "exit_code": 0,
+          "seconds": 0.047036,
+          "stderr": "",
+          "stdout": ""
+        },
+        "link": {
+          "artifact": {
+            "bytes": 409616,
+            "format": "Mach-O",
+            "kind": "executable",
+            "sha256": "9ffc5dab03f7bef7a51f5190d5f86b636677e26720b5d81a727264b5b64bebcb",
+            "target": "aarch64-apple-darwin"
+          },
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld64.lld",
+            "-arch",
+            "arm64",
+            "-platform_version",
+            "macos",
+            "27.0",
+            "27.0",
+            "-syslibroot",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+            "-dead_strip",
+            "-o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/client",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/client.o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/prepared/aarch64-apple-darwin/liblo_abi_probe.a",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/libSystem.tbd"
+          ],
+          "exit_code": 0,
+          "seconds": 0.027809,
+          "stderr": "",
+          "stdout": ""
+        },
+        "platform_compile": {
+          "artifact": {
+            "bytes": 1144,
+            "format": "Mach-O",
+            "kind": "object",
+            "sha256": "af051593b9a6de188c65b6f62579ca73a4e7382e37cffac74b074665ca9905ee",
+            "target": "aarch64-apple-darwin"
+          },
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+            "--target=aarch64-apple-darwin",
+            "-nostdinc",
+            "-ffreestanding",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-mmacosx-version-min=27.0",
+            "-c",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/platform.c",
+            "-o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/platform.o"
+          ],
+          "exit_code": 0,
+          "seconds": 0.025251,
+          "stderr": "",
+          "stdout": ""
+        },
+        "platform_link": {
+          "artifact": {
+            "bytes": 33744,
+            "format": "Mach-O",
+            "kind": "executable",
+            "sha256": "c891e4946d290ca6871ff3eac0fb853a0715f9b22e007098c687b5dbde6b4184",
+            "target": "aarch64-apple-darwin"
+          },
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld64.lld",
+            "-arch",
+            "arm64",
+            "-platform_version",
+            "macos",
+            "27.0",
+            "27.0",
+            "-syslibroot",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot",
+            "-o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/platform",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/platform.o",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/libSystem.tbd",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/Foundation.tbd",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/Metal.tbd",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/libobjc.tbd"
+          ],
+          "exit_code": 0,
+          "seconds": 0.017134,
+          "stderr": "",
+          "stdout": ""
+        },
+        "platform_run": {
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/platform",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot"
+          ],
+          "exit_code": 0,
+          "seconds": 0.091971,
+          "stderr": "",
+          "stdout": "platform foundation 1 objc 1 metal 1 process 1\n"
+        },
+        "run": {
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-apple-darwin/client",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/darwin-sysroot"
+          ],
+          "exit_code": 0,
+          "seconds": 0.088473,
+          "stderr": "",
+          "stdout": "thread 2 10 0 23\nsuccess 0 0 23\nlimit 2 9 1\nerror 1 7 -7\ncallback 1 17 -17\ncleanup 0 callbacks 3\n"
+        }
+      },
+      "target": "aarch64-apple-darwin"
+    },
+    {
+      "passed": true,
+      "stages": {
+        "caller": {
+          "artifact": {
+            "bytes": 11312,
+            "format": "ELF",
+            "kind": "object",
+            "sha256": "51634cb7fd5a58b428d9ccd4ea52acc9236b3880c3a29fd9c02aa31695d20ae3",
+            "target": "aarch64-unknown-linux-gnu"
+          },
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/clang",
+            "--target=aarch64-unknown-linux-gnu",
+            "-nostdinc",
+            "-ffreestanding",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-g",
+            "-c",
+            "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/client.c",
+            "-o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-unknown-linux-gnu/client.o"
+          ],
+          "exit_code": 0,
+          "seconds": 0.023988,
+          "stderr": "",
+          "stdout": ""
+        },
+        "link": {
+          "artifact": {
+            "bytes": 4159216,
+            "format": "ELF",
+            "kind": "executable",
+            "sha256": "a2a9b3d90ac4cc3c314ed4941aebefa146b13e31c76fe0a5a12cd8f8c74dfcf9",
+            "target": "aarch64-unknown-linux-gnu"
+          },
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/ld.lld",
+            "-m",
+            "aarch64elf",
+            "--sysroot=/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot",
+            "-pie",
+            "--gc-sections",
+            "--dynamic-linker",
+            "/lib/ld-linux-aarch64.so.1",
+            "-o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-unknown-linux-gnu/client",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/Scrt1.o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crti.o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-unknown-linux-gnu/client.o",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/prepared/aarch64-unknown-linux-gnu/liblo_abi_probe.a",
+            "-L/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu",
+            "-L/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot/lib/aarch64-linux-gnu",
+            "-lc",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot/lib/aarch64-linux-gnu/libgcc_s.so.1",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot/usr/lib/aarch64-linux-gnu/crtn.o"
+          ],
+          "exit_code": 0,
+          "seconds": 0.046451,
+          "stderr": "",
+          "stdout": ""
+        },
+        "run": {
+          "command": [
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+            "-f",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/runner",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution/aarch64-unknown-linux-gnu/client",
+            "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/linux-sysroot"
+          ],
+          "exit_code": 0,
+          "seconds": 0.977115,
+          "stderr": "",
+          "stdout": "thread 2 10 0 23\nsuccess 0 0 23\nlimit 2 9 1\nerror 1 7 -7\ncallback 1 17 -17\ncleanup 0 callbacks 3\n"
+        }
+      },
+      "target": "aarch64-unknown-linux-gnu"
+    }
+  ],
+  "inputs": {
+    "isolation_bundle_sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad",
+    "manifest_sha256": "d59bdc4b3294c48d6a328069100a89d1f3a4e8a83ad3ec4c529bd8ef46620734",
+    "source_sha256": {
+      "cranelift/Cargo.lock": "01d5451805716dba051746a5ae77381c9ba7a37a83fd5dabd3656e9027be9d43",
+      "cranelift/Cargo.toml": "c3bae873f7bf63fd3681b49736afe4a984aed8767262130f99b8d45cc2d059cb",
+      "cranelift/src/main.rs": "eac363f33734900c2110b5083ef1b35f43120454140b3a473d1c4523c9415e92",
+      "guest_init.c": "236145390aef2a6ac8344cbf31015cf7bb637d5d676f6761be54cb6ee6663e5c",
+      "isolation_probe.c": "ae34ec421ec2717ba801a670381d672dcc246ca3dcb96656f31c924cf182c93c",
+      "probe.ll": "1e3d6aa898c4b876e0b32c448af08746a78245aa7407e54730283135e212bbdb",
+      "probe.py": "3f131e6cc2e1558f16b8b4530aab9b788f5b87a66f27637618e4e3b98f9a2b85",
+      "runner.rs": "ed3e69880248207f6835d3665b86f60b1a7d3d9e6907159cfa75b03646bf7723",
+      "runtime.c": "4f25463ce3760ff860a1004848764db5d308189ae487d414e504ff25d2f8529e"
+    },
+    "targets": {
+      "aarch64-apple-darwin": {
+        "bundle_sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad",
+        "sysroot_sha256": "c027f99bed6821a469226f9bd09428f104b3674931b4a5eae597718654fbde16"
+      },
+      "aarch64-unknown-linux-gnu": {
+        "bundle_sha256": "6b4af751e1312e11723fc7b96f6518e60f2c91274ea6602aabdd773f02085bad",
+        "sysroot_sha256": "aff249084f6b3c46c8813ead329dacb482c955929ddb034824bbdaa0d4f66028"
+      }
+    }
+  },
+  "isolation_probe": {
+    "command": [
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/sandbox-exec",
+      "-f",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/isolation.sb",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/toolchain/bin/isolation-probe",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/readonly-sentinel",
+      "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime-abi/execution"
+    ],
+    "exit_code": 0,
+    "seconds": 0.020156,
+    "stderr": "",
+    "stdout": "{\"readonly_write\":\"denied\",\"network\":\"denied\",\"descendant\":\"denied\",\"writable_state\":\"allowed\"}\n"
+  },
+  "qualification": "passed",
+  "runtime_libraries": {
+    "aarch64-apple-darwin": "c5960c0abe1aa7ae39a07bc1f1e01264daa0c678f56777abb0d41c0f6c925829",
+    "aarch64-unknown-linux-gnu": "15d905dd67e8d3b56c1e856706d24baf08fbe28c11ad51b08a7db3f3b84d563f"
+  },
+  "runtime_manifest_sha256": "dca706539830acdd62719ee42aaf2b7cb4bb862d57a62c25daa10b0bc6754239",
+  "runtime_preparation": {
+    "compiler": {
+      "identity": "rustc 1.85.1 (4eb161250 2025-03-15)\nbinary: rustc\ncommit-hash: 4eb161250e340c8f48f66e2b929ef4a5bed7c181\ncommit-date: 2025-03-15\nhost: aarch64-apple-darwin\nrelease: 1.85.1\nLLVM version: 19.1.7\n",
+      "path": "_scratch/i004-20261019/rust-prefix/bin/rustc",
+      "sha256": "731d78259541b7e845568083df94b541176af5669509d077ee23a88d81f27d41",
+      "sysroot": {
+        "path": "_scratch/i004-20261019/rust-prefix",
+        "sha256": "851544be02a3ae17422a879df3c63ba8774d8a7ad31b453d19d0a4d5fae22598"
+      }
+    },
+    "libraries": {
+      "aarch64-apple-darwin": {
+        "archive": {
+          "path": "_scratch/p005-20261019/prepared/aarch64-apple-darwin/liblo_abi_probe.a",
+          "sha256": "c5960c0abe1aa7ae39a07bc1f1e01264daa0c678f56777abb0d41c0f6c925829"
+        },
+        "command": [
+          "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rust-prefix/bin/rustc",
+          "--edition=2021",
+          "--crate-name",
+          "lo_abi_probe",
+          "--crate-type",
+          "staticlib",
+          "--sysroot",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rust-prefix",
+          "--target",
+          "aarch64-apple-darwin",
+          "-C",
+          "panic=abort",
+          "-C",
+          "opt-level=2",
+          "-C",
+          "debuginfo=2",
+          "--remap-path-prefix",
+          "/Users/tyemirov/Development/Research/Lo=/lo",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/runtime.rs",
+          "-o",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/prepared/aarch64-apple-darwin/liblo_abi_probe.a"
+        ]
+      },
+      "aarch64-unknown-linux-gnu": {
+        "archive": {
+          "path": "_scratch/p005-20261019/prepared/aarch64-unknown-linux-gnu/liblo_abi_probe.a",
+          "sha256": "15d905dd67e8d3b56c1e856706d24baf08fbe28c11ad51b08a7db3f3b84d563f"
+        },
+        "command": [
+          "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rust-prefix/bin/rustc",
+          "--edition=2021",
+          "--crate-name",
+          "lo_abi_probe",
+          "--crate-type",
+          "staticlib",
+          "--sysroot",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/i004-20261019/rust-prefix",
+          "--target",
+          "aarch64-unknown-linux-gnu",
+          "-C",
+          "panic=abort",
+          "-C",
+          "opt-level=2",
+          "-C",
+          "debuginfo=2",
+          "--remap-path-prefix",
+          "/Users/tyemirov/Development/Research/Lo=/lo",
+          "/Users/tyemirov/Development/Research/Lo/experiments/native-runtime-abi/runtime.rs",
+          "-o",
+          "/Users/tyemirov/Development/Research/Lo/_scratch/p005-20261019/prepared/aarch64-unknown-linux-gnu/liblo_abi_probe.a"
+        ]
+      }
+    },
+    "runtime_source": {
+      "path": "experiments/native-runtime-abi/runtime.rs",
+      "sha256": "b0097e57333fb57557741a826ca92a7b197b9dadce1cb6a4e9ff7d9c9eca3ebd"
+    },
+    "schema": 1
+  },
+  "source_sha256": {
+    "Foundation.tbd": "35e29a7cbd59f2458e6c555476c53c581ef940b7f4a8382426392448aed83a80",
+    "Metal.tbd": "a273a813527a75771929ae6a9b3a88908e780ca35d4d1145a4bbcf90a787a730",
+    "client.c": "eabf94c8574dfce9067f8f52e2b003e9f23dcf323f9a5dd79ec9819176f1e9b9",
+    "contract.h": "21c679945665eef40735e98d723f73f64fd17d1dcac0109a84a52885fb23d739",
+    "expected.txt": "fabb86961e6f96d9d237b6b40590682be2a281a87f50bf0295fde04db764b2b6",
+    "libSystem.tbd": "f87e80011529904a3a79fc96185ffbf3aff7b89efa68008e39495d0c8d834bc3",
+    "libobjc.tbd": "9b0e67e99410f0d5108d7f956949bb7085b2d72cd8082c408bc6e5f8390eb01c",
+    "platform-inputs.json": "0d01fb0c9a8d495823cb247d1a64a922c6dd4c2af203531573b21b9cda7b3e00",
+    "platform.c": "789846441e3a4d3bfd245a6606687c27d38fc656c8913fe424d59b815660add1",
+    "prepare.py": "68cd679ee57618d0a3118b4e8c691116f187497784007e15afa9d1d4f543d5c5",
+    "probe.mk": "291505ee1c94fc85c8303ef89b8081dc781122c9c25428b5362235a82307b6ed",
+    "probe.py": "b9bbffe3dd8cb8ffb7ef5b5e04b180ce6841283da705bb2029a0519d22c8200a",
+    "runtime.rs": "b0097e57333fb57557741a826ca92a7b197b9dadce1cb6a4e9ff7d9c9eca3ebd",
+    "test_probe.py": "7c379e269f67ca9b501b8de0410f2be484291ff56cd61273b1b0765066d649d7"
+  }
+}

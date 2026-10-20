@@ -1,0 +1,9 @@
+_scratch/i004-20261019/toolchain/bin/llc:
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1345.120.2)
+	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.12)
+	/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 1700.255.5)
+_scratch/i004-20261019/toolchain/bin/lld:
+	/usr/lib/libxml2.2.dylib (compatibility version 10.0.0, current version 10.9.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1345.120.2)
+	/usr/lib/libz.1.dylib (compatibility version 1.0.0, current version 1.2.12)
+	/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 1700.255.5)

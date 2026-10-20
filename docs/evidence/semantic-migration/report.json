@@ -1,0 +1,3503 @@
+{
+  "execution_status": "passed",
+  "coverage_status": "complete_with_limits",
+  "operation_count": 122,
+  "cli_contract_count": 25,
+  "matrix_sha256": "b8831ae0e133ceef34a3b3403be9142f3dbec771416a3e988563547c62627101",
+  "log_sha256": {
+    "interpreter": "4ac994980a030e33da5e252ab27b48e1ae5a325cdb1287f73da8c11750cb0faf",
+    "native": "ec681dc9e45a312d44c35b3e5af036111fe655621630f0e79349ce254a24f009"
+  },
+  "source_sha256": {
+    "internal/adapter/file_entries.go": "eadc3b55abee6034f2dafd9525c61021bc79027a00f809295c3afb8d780ff8a0",
+    "internal/adapter/file_identity_darwin.go": "608e95213015c63690120676a452e04e0de1607a6f5ab123bdd853f06a09d3be",
+    "internal/adapter/file_identity_linux.go": "608e95213015c63690120676a452e04e0de1607a6f5ab123bdd853f06a09d3be",
+    "internal/adapter/file_io.go": "01a5a1c66aa6f998c6c7ec336b20b2026c1f23ff2042b6b5494dc4dc29dd8fae",
+    "internal/adapter/file_open_paths.go": "2b83d8803b857d6b9174c17b4c64b91b643a4ecf4f59bb78f58fefaa7cf79582",
+    "internal/adapter/file_probe.go": "d8c32818390c0db8205074d4e707539f320a95bff6840c11e83bd68773784f3f",
+    "internal/adapter/file_probe_process.go": "a7051ca0afe1d61cc7d0babfa6cef1bd31a453ef55ad0c0e0a9152890d5d857c",
+    "internal/adapter/file_remove.go": "592ce25f6735dcbb44413511deb4be9919c9a9f24741c44c6abdbd5248c0ac66",
+    "internal/adapter/files.go": "c8d9bef21c7e0a0285db3afe355e15532a80696c7fa5a2c575f8d0297f135f5b",
+    "internal/adapter/http.go": "a25babdae307e8828be2e4c3d046fac28793e18f92c9f2e1403b75833e682aad",
+    "internal/adapter/http_client.go": "101150bda2905e28fc50d204c07e67d78b9798bf891eada3c46d429b37a0f42f",
+    "internal/adapter/http_policy.go": "de2a5d4f167aee5d987c130ae58011fb6a60fb2b059bc00d91a4abf4d48a78d8",
+    "internal/adapter/process.go": "40594780a97982550a1d69c10b0b90f979ad28304c85b1f2a45cf85fda24ba48",
+    "internal/adapter/process_failure.go": "a8c3235b0037e7eb626a261770e1de9b8a6c1f2d30a9b7d61935b100b06ebed4",
+    "internal/adapter/process_lifecycle.go": "775138a8f71b4f91e025de1f5efbd213e83b26ece662e68c897048667ac4ff41",
+    "internal/adapter/process_policy.go": "bdd933cd382ca3e7ad7888eee31fa087cc889900df862e40cee25d9af94b0356",
+    "internal/adapter/process_registry.go": "96bea717aea870b7e4bac4e082eb83d14858afe38910904f07c04ae3d8cb090f",
+    "internal/adapter/process_registry_files.go": "c71167da46afea02d2a65636af33fa357f41d4d6dafe9402a38a5b3614e98ed5",
+    "internal/adapter/server.go": "8dc86981b545bf8395bc60fa24e1b02e5c752821f2fdf490a74b87ea112b6902",
+    "internal/autodiff/plan.go": "5e4e5e51033e5073e174911d3bd455bc2d572bbac4484dabf4d541f7a381f777",
+    "internal/catalog/autodiff.go": "750fda11c969fd188d6dddf497ed76253813dac9806859eeb0ee8856c2164b65",
+    "internal/catalog/catalog.go": "8e15a66586965ecbe2890bcb39770df0944d140105378fed2e3552ca1df162ca",
+    "internal/catalog/checkpoint.go": "18ff7cbd4fdd22b11c971572b0737a7721e04fce600b718bd611c04e8f41440a",
+    "internal/catalog/optimizer.go": "e86ef0da21332d37bcd120450df99c75d241ea1e27aadc421a2a5650f9fa5dbe",
+    "internal/catalog/parameters.go": "00f38b5260ecf015aa318a209fd6568d2a659e83e1b9bfc4cca39e002f1185e6",
+    "internal/catalog/tensor.go": "e6be8c898d76c6eeba8ac33c2b5a7173ad130e13741bddfecc73beae2d3acb36",
+    "internal/check/autodiff.go": "5a85270b627bfad3f1d253cb3957353694c5cb6605aa8e499cb0d367e01609fe",
+    "internal/check/call.go": "2ffb343a556528d14f68ca8164d41bc1bc1e437ecffc90fb4197e4abfa21c54c",
+    "internal/check/check.go": "0e704fb242f9d3bf234387d137b743d9e3389d16942e31f04990d472a27712be",
+    "internal/check/checkpoint.go": "89760844818292c3a33751ac5125407bd9d549718b2ed147822ed3982526f8d1",
+    "internal/check/collections.go": "f8777520c658b01d30ba81ff109b80bd4bace22856c75503dd700465dfe3caae",
+    "internal/check/expression.go": "3c27d322f4b997b580e30cc9591b77e5908511d68e0145634b81fa43be435b04",
+    "internal/check/match.go": "9a5551b25fcb5deef07d35c1aeeb66573e2e701b51d7deb970727b4fb6387449",
+    "internal/check/optimizer.go": "75de8def75a753e60092bb6abd6a346c5036ed89b63f57ab655198e4be2641e4",
+    "internal/check/parameters.go": "b6afd937389bafebd0d9568a6aeb2729166322a5d134f9a6ef865ac05e63441a",
+    "internal/check/type.go": "ef6079d876eea30c67d281231ae8f380db01bc12c8dabe685e575a02eb40f39a",
+    "internal/codegen/arguments.go": "f30d3be1ed910d37f9a2237b3608f0ddfd4c7142c9971331c55845049423238a",
+    "internal/codegen/expression.go": "217c04f86e2af94f356b5b5f3f36a140a16fdaa811906edf98cc0abc28475b8e",
+    "internal/codegen/generate.go": "36c40ce506ae28b9418a4d16309ad2aca5e2214b3df7b1c3e9b279e212cb5d4c",
+    "internal/codegen/gradient.go": "f32d6c157ae057eeeda9164c9fbf0ef789dddcfd1a02d36251753fa19adf665e",
+    "internal/codegen/list.go": "5f907fd21afa3a9fd4699d69ebba1a024c3a8dd59eec38a0b0d6f72fc5356b59",
+    "internal/codegen/operations.go": "f661552dd8b02c00990298ad5fa589a83bb1f61a1b46a46ad7d9d824065a71d6",
+    "internal/compiler/compiler.go": "a37489303ed387f8ada4cc977c643c96517bad47cd1a4843464fdf80b8178380",
+    "internal/derivative/vjp.go": "e12a6e750d368af4565b27ed736cfcecb595beeea48b4c6e5ab614bbea0167dd",
+    "internal/device/build.go": "713dad1e5cab521f6da6d3ac44c1e59c63dc764b9b12d45532e5c5317b805972",
+    "internal/device/compute.go": "6753afc97e6d1cfa8103845e2a45b1bb10a564d6f8f50759c50bff59e47ea989",
+    "internal/device/device.go": "b7d141e6debf1db8cfc936a39c12e567a04105c7cb51b518d1393a157af3029f",
+    "internal/device/metal_bridge.h": "24bb8d03421440d1d22df9c0d6a5454959daa35dc28317bfd221d2c6e772ff47",
+    "internal/device/metal_bridge_darwin.m": "3532af5341db44c7003aa12c3c2df94ba49217f7dfec87b0724afa721887ae74",
+    "internal/device/metal_darwin.go": "feafecd54b00946646cc73a9c32460b72f0ada46ce7eba83f17712a2c22c45a4",
+    "internal/device/metal_disabled.go": "ddccb1685eb958264a91ca3e3cd9d86808f7f81aace289e5951fac4981586d65",
+    "internal/device/metal_kernels.metal": "eec1b13249c95d41c3754049c62b15008a3c307424557fb8bcff5580a771b16e",
+    "internal/device/metal_types.h": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683",
+    "internal/diagnostic/diagnostic.go": "4b56533f7cae515ce2e423d64116d419a31e9079b9b9be87544a6591618fda69",
+    "internal/eval/autodiff.go": "598443afb24f8fe11051224e6113347a4ee32c58662564ee4e61a9715ae9a0b3",
+    "internal/eval/builtin.go": "4028e21d9c48f5962b98db1a03c3ab10cf8b6fe75b06d4293ae5e0ae6dd5ad82",
+    "internal/eval/eval.go": "c585410b1f5f31db555dd62db13590c5527db16dd00077d96564fcb560647f6e",
+    "internal/eval/list.go": "6eb19d89cadc32086a21d91505a350c92bec3ef91d8ed6ddc0a44ef5532ac221",
+    "internal/execution/activation_progress.go": "e0db8b7c5aac92fa500b87488c84ac78878a9beb206e8e5c993b371d4e350f40",
+    "internal/execution/contract.go": "a8a554955e4abcf9e14930b462d7630b08266d132ab4492cecd13db47c377cd6",
+    "internal/execution/failure_capture.go": "2134f4f3ca2fb84529dd80ec1bff063359df7c4911b648901d03509d8f8e2c12",
+    "internal/execution/file.go": "19caf10a701384b4e7540b9ce16925f3aa8e20f7910583eb852f8efe63deaab7",
+    "internal/execution/file_write_progress.go": "675892824dcca6ae77d0e5cda97f541b2e862e27c74f9ac4ca5cda37fbf02b99",
+    "internal/execution/flow_progress.go": "b914f748f7a5c5da4a991088c762b8296e0a94e54619db915d58e7da701ca4cc",
+    "internal/execution/http_progress.go": "95e320a22d4f6f9008b072f0524fd8d2961cf51c2eef385c0c0aaffead585a0a",
+    "internal/execution/operation_cleanup.go": "ac774842566e7c3ea97f28e580f1b3a33d50c6073fb17abf1c276a75145a54bc",
+    "internal/execution/process_progress.go": "c4919a2e1f8660e8c620d895c637ddfcef36abd35e752405e1185b6b434ccb57",
+    "internal/execution/program.go": "936b6a379748469c208b8f5987def07472e078f8b84a34b571cca200542590d0",
+    "internal/execution/session.go": "4f98a30fd84f12b8f0bc3f14a9b28159a9b274309deada8d705f5fee5fb98570",
+    "internal/identity/flow.go": "ee15f4ac26587b22dd15def1280cdf73e2b3f73ece81d93666c441bc6c6ddf39",
+    "internal/inspect/analyze.go": "281a7a75f11bd2f14d2f097e734af6f974768b99476db86542527aae5c727c9a",
+    "internal/inspect/autodiff.go": "728f882d823f526bd0af06b5c438be756fd656d7d2d184a36de8edfe5e98fce4",
+    "internal/inspect/expression.go": "1f64a503afdd94a4420722e7d032cd862f72442850bb5d490394f8f6faeb9513",
+    "internal/inspect/index.go": "758754b5dedb0f0e5145818bbd27e5e5fefc2855b83298400e5c098012c0124f",
+    "internal/inspect/process.go": "4181b384c953e092310799271ba47a68bf135ecb1ec22aa9ef34dc86acee188e",
+    "internal/inspect/report.go": "e0881b1658b129de96a1d45cb4acfdf3d2246d16da128218427f10995863eace",
+    "internal/ir/ir.go": "28e554a3c1ebfa6fe155869dae9c165404cd26c19b4819c15c7265821b71faff",
+    "internal/metalconfig/config.go": "de4297ef13cb86faa5259e9270ffe5a76679b0ecb54600d231eafb5f247828e2",
+    "internal/nativebuild/build.go": "bf8a75dcf6502d152d987df1316e319437d6af6b68375380a15d06758bb630d5",
+    "internal/nativebuild/metal.go": "0b44e166912b5faabf69526b891f7299e5f1ff732d62bc9b460f8c6ea0a0c907",
+    "internal/nativebuild/paths.go": "a9727d5a7d468afc4f41d6ef0c0395b2a47db8824e7b30feff39f34f2734442d",
+    "internal/nativebuild/qualification.go": "738cf76e0273a075ce71d13eff4c4ae82cea3564133f3f82382c25f042a5291e",
+    "internal/processhost/helper_identity.go": "e86336237116d709ddedd9b554fd323a98ae4f5daee0ce47b0a01589a399bf75",
+    "internal/processhost/native/launcher.c": "0b4d0247b0436f085a02bebbea052d36b31dbd9e5d3079f1ec69c4b390726722",
+    "internal/processhost/native/normalization.c": "bca34b235eae64168f7fc4bcf6a25c32ccac65cc357b451fc6414317a0a8ce1e",
+    "internal/processhost/native/protocol.h": "d91353f6b15d4810d844f33bd16ed6127fae3942b0c6b801a82842a64c642e08",
+    "internal/processhost/native_config_darwin.go": "affb8ed9303ef6d0fe2f4205d4296cda636b49f4efd41569f664321f2c8914a5",
+    "internal/processhost/native_darwin.go": "8a7be52c5ed2eeafbb6f4ed092570d74491b7ef80d5af0d2a88e086e7c7a69dc",
+    "internal/processhost/native_other.go": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16",
+    "internal/processhost/native_ownership_darwin_test.go": "98dcad178c35b9b540237c874d00b8348b6b1786ba25cd142c8bc826bc24063e",
+    "internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+    "internal/processhost/session.go": "c5b17ae16b8e2de5c3d59e7f2cf364af3b4aef6f86a1ebf32f646809e64a0ab7",
+    "internal/processhost/startup.go": "029e0f4dbd048ef277115bd17128c113e33791c372a416a9c2866d580ce1f50f",
+    "internal/resolve/scope.go": "59ee6ebda753d154d1c511edf669ef5d0b01566e711716f229596871df8ce742",
+    "internal/runner/command.go": "1d985339d62475e893850ac329c530a75f43bc873f54c2072ba3c7a563bc7b07",
+    "internal/runner/execute.go": "03c5e1d4d4c0e5f16e87d99cae9e60000cbdd53b5f1540acda398dc62067db90",
+    "internal/runtimebundle/bundle.go": "a12b0daf9b274a0632ed9c817db64a964870428f7b51d8e20d6118efd89f6ce2",
+    "internal/runtimebundle/manifest.json": "5b63feef903c71b40e1a8f95af37eda9155b7648c28e396b4d11c14ae84a917e",
+    "internal/runtimebundle/metal-manifest.json": "8ca107dd0528be8158735518b83e5c9c1403bb5809e9d34a47755b3be4c59f10",
+    "internal/runtimebundle/metal_disabled.go": "e0881071954e468c75d9ebfd54770ac592acc21c366c5672b2b20ec50e143733",
+    "internal/runtimebundle/metal_enabled.go": "223ee4acaebc9ea7e696a8009e24e59282c5087e359fb7c51de716e7775139fc",
+    "internal/runtimeops/arithmetic.go": "05fd5c8ceecafddfab7563b3af0f4fbd04ffd7b138f25858b17abece5c44d169",
+    "internal/runtimeops/builtin.go": "d36cae4fb77a491bc5f782b6517aa4a4c1f686ced5ff1618fa8b5baba03bf54b",
+    "internal/runtimeops/checkpoint.go": "5e6e0b3c3caac5533119299f0d056579da24397e02c2e71f9c416566394fe0a7",
+    "internal/runtimeops/control.go": "490271cfe61153ea2262a980f2159d7e76f47ea43195932be2a01d3bd5ea34c0",
+    "internal/runtimeops/derivative.go": "65d78ba3447b9ad81de66ce688de1a8e8973ba5ec2d770d2e5bd39b7a8625a0a",
+    "internal/runtimeops/float.go": "646fef81daf610e10288ba0e5dc07ecc0eb2cbb78cbf0d33a5061ee6ea5d9aba",
+    "internal/runtimeops/helpers.go": "39bf9655b671604400c014628a21d98a607e1e05a9f49a84a3f5a4841ab96662",
+    "internal/runtimeops/http_client.go": "8eb796d5b11cf94cc40448b61f4ce33eee79275fff85a94ea5608744c8e4dbee",
+    "internal/runtimeops/optimizer.go": "5a2f07557ea7b9674d3e9d63e01872c5c014b8e98a770ea3387d5d67f3e14782",
+    "internal/runtimeops/parameters.go": "40cd6e052b4dfc639ad0f03731f193173e2dac456715a4c75e735060b648b4ee",
+    "internal/runtimeops/process.go": "8ca7d996116471da1bbdf79e789e1032fa20af9a2541b9fe4323121273aa7e3b",
+    "internal/runtimeops/runtime.go": "abd865024be4f874797db19772fac82e78a26628c0204cba4b4e7e14ed7659b5",
+    "internal/runtimeops/tensor.go": "30c64760f69cf0d4949ffc62d238319829ee63f543e2b9c8d550adaca6d3e318",
+    "internal/source/source.go": "6612c2bad62638c79aad2f1ecc61a7faa8887382452e299488250dd5b9dc3521",
+    "internal/syntax/ast.go": "ed1002b6508bf1834e0ab53c0816afb31d3d53e750db256e2275a68f97e2fe40",
+    "internal/syntax/lexer.go": "c1213cae056971402d9fc1f1a91e81a96ffb5e830f9945bc73ea3f79fe886038",
+    "internal/syntax/parser.go": "d6f1f4d0ed72cffe4df618a99036f6af3b67054b09cbe026db773ea173c89880",
+    "internal/tensor/compute.go": "63379f95df09dc89eaf3fac409c41138d71705eb16346f1edc254d036752b0e4",
+    "internal/tensor/cpu.go": "a82c9542f91b43d71e1b0bae70c8721647f6154bec08fda08136aeef336de00f",
+    "internal/tensor/device.go": "e9c7f1fdfc18f596773f4bb45f59148ec45382939467d201d140c70a67c628d6",
+    "internal/tensor/shape.go": "15aefdc0b82cc111063ac03234c5a5064c9a773e6dadd1dc63c51a3d247fd649",
+    "internal/tensorfacts/analyze.go": "f4271c9425af0bdad0dedbb5ec584ccb08c81275af5f1a0eb5b10db82e2ddedc",
+    "internal/tensorfacts/scope.go": "3bd17cd566ad2bf775296a38e2a185278d2131fa1b41e9b08cb0d686cc443788",
+    "internal/types/training.go": "8f67e2579f1b6572a6a870c062a120785831c5ef3dad117502e5266274ccd598",
+    "internal/types/types.go": "fec5acb35c8a13710b67e8fb2bc655f2e2b06a95e1c98d59e6fc764d7cc9cfbb",
+    "internal/value/error.go": "4b82a69f188761a757ddef8bcd8853fd6bb6575aeaef058ec9e9c82d87e51c69",
+    "internal/value/file.go": "2e0e08cebc6c4c12250f51160015d770e01d2f16891e2220b43d173fef0d826c",
+    "internal/value/headers.go": "04b3263cfa0cd56bd838af116190e8290a0d8840b6cde6a092e517eb677eb236",
+    "internal/value/http_client.go": "3f04db38d0d767f0b54eef416ddc54a0f1ff4f3701fd9f43ae4b494088366a06",
+    "internal/value/optimizer.go": "65ba9f205caf5db47b9b94d84b1b7017f890837dabed8fcff78964ffbc5c974a",
+    "internal/value/parameters.go": "dd1470ba363ba43d308bdc9d387a3b18b81fb9546bd1bd24aa026870f8665283",
+    "internal/value/process.go": "0e87bf9b830f8c74c8f55fc3f3b9a2fb139fea84f06d98369697d58dea796b07",
+    "internal/value/process_result.go": "cf9bcddc214dc2189cd0d935b24914a35567824d014042e444273f1440fcbc66",
+    "internal/value/receipt.go": "3c90f7426a5569d625d5e738c4f0193c27fbac704bc4e3486ceade18980946c8",
+    "internal/value/resources.go": "41987b556b83a55a4d1cc1907c7ce5d6a52248c9a3ed7032eaa2ac81accb9471",
+    "internal/value/snapshot_weight.go": "56d4156a18cb5318a659876c083591707df657e16a983f6ae88bd4571efb7e1d",
+    "internal/value/target.go": "4d983b7fcbd26a170bb32a3f3709828e5bf3ba0b3d499087aa2b8a4145fa0652",
+    "internal/value/tensor.go": "d343bd2a2ff5875a6bb14f0aec6d78e7bcb5e72c7da2082aa3d11e6e63f80492",
+    "internal/value/value.go": "60716ec790c7a990038e4c9125fd499810e44b061b2caad7b26d8c62ea8e6e95",
+    "tests/integration/activation_test.go": "51f3b447ad1568f681ddc64bbbc0b0867a15618e36fbbd3e136eeaf404634701",
+    "tests/integration/adapter_http_client_test.go": "e713819aaae44a724c0f8415a16fae7e944e73cf1c295b1738804c20d3a24fbf",
+    "tests/integration/adapter_http_composition_test.go": "4c16d197d59bcfa16841fa6073d898e7f27049a25b50c58f1179b33e50f9d375",
+    "tests/integration/adapter_http_values_test.go": "66523662c61e35121bdcb42c27bf7204cf1c92eb182d5e454395863cfba5d504",
+    "tests/integration/adapter_process_boundary_test.go": "0193f08279515ecbd71934a0567230c5fd30a582467979e1b91201511211f9e1",
+    "tests/integration/adapter_process_completion_test.go": "d526e46c0e09a612c87392757c2043a4f52e06b5a2d9a244f6d0b885b2e39b87",
+    "tests/integration/adapter_process_composition_test.go": "be70c7e4456f684156816cd717c933182ece746eed5c45143311241dc5796886",
+    "tests/integration/adapter_process_gate_test.go": "df47935600283140fd25a4199e321b34b97b6cad0c5b1b63a92ca9f260db4cab",
+    "tests/integration/adapter_process_inspect_test.go": "0e5cfd2540d5207e10c7b8fa9b52620e814a17a0c2bbbd9e863a892edc255bd2",
+    "tests/integration/adapter_process_lifecycle_test.go": "c417d504dc9e379a5fffc9bd89372ef2ff1989abd23b0d182b0fb28068e29230",
+    "tests/integration/adapter_process_policy_test.go": "e67a75c8f4a4b9e28c18cce0f8f0e723e048e2e005b038ae98945a4bef02d575",
+    "tests/integration/adapter_process_registry_test.go": "c10328b6521fc49010112b30a73ce639292096ab90c2d5b621e1efeb9888df84",
+    "tests/integration/adapter_process_results_test.go": "578912c6cbe7b7dd1807b9dcbf6d5c85d2d0a46dad26118567eb2306037d1dce",
+    "tests/integration/adapter_process_start_test.go": "221ba3c34b10b9bf37f76382ee28cd849108e15a3cf2e111572cd5b0f0d81796",
+    "tests/integration/adapter_process_values_test.go": "83ec9065a0ef1638886acd26307d29c7bc65636a19d94f1252e73afc917120cb",
+    "tests/integration/adapter_purity_test.go": "f458787da0d5b5622662eb42f2cffbc328dfd963397abeaa8877ac67a7b5666b",
+    "tests/integration/adapter_receipts_test.go": "44dcc0071224aa6446a9af42feb824cf8712b71359e37915694f4ab7dcae2bf3",
+    "tests/integration/adapter_test.go": "38168c3b3327b9b2130ceb2551474dcfd68919fda0480dbfad9abc4957ecb31f",
+    "tests/integration/autodiff_contract_test.go": "6736749588dae2af53ef9a300ba6e73d4d6ba7dc3d8054c02d502140e436a407",
+    "tests/integration/autodiff_numeric_test.go": "3a2aecb590593d00ffd1639fdb0c9ac850c9e58eb184cfff7565e58c0e9a3b67",
+    "tests/integration/autodiff_test.go": "8ad53ebf9cfde098510fdd9c1bc8aea2f4d2d7350be165369303dfa3ca6cdc37",
+    "tests/integration/catalog_test.go": "ccce982f037f94673ec9ff23d11a12904b121977465fefd2c700fce80d776f94",
+    "tests/integration/checkpoint_contract_test.go": "7e8771d59e8d34ecb1847fde434a54dffd31195d60ea886dbbede73a6ea2f4c6",
+    "tests/integration/checkpoint_failure_test.go": "fb1998041c2beee10655cf5a52d69833645ee2d557e988f4c700e5b5c7655134",
+    "tests/integration/checkpoint_metal_live_test.go": "2b0f47d13bb2473af6f1b0facfb6d98cfbe5489e325e9b2e3b84556828e67e56",
+    "tests/integration/checkpoint_test.go": "45da33a4c39e82e7e82a07eb630f6abdfcddb174e8a6115a5d1eaa170a4602cb",
+    "tests/integration/checkpoint_xor_test.go": "7e2fec8f9bbb6baaacbcfc9cd949ea35691445b89f22a03644964b86f75c3948",
+    "tests/integration/cli_test.go": "63040dedab82a80bcfa04f9172ee97788a920d5bdf92e02175115cc96b332b9f",
+    "tests/integration/device_resources_test.go": "f25388a74a1cc966d529d462620e42a43e2e87f0d053079f2e776c635e9c0390",
+    "tests/integration/device_test.go": "e216d2cf6544aa638b7ee49c4882c778bc72c2990e3694eecc05db38c3310745",
+    "tests/integration/diagnostic_trace_test.go": "7a8a654ab426a31e96af99b0e4041bfab309906029556d12a21041aad1df3506",
+    "tests/integration/eval_test.go": "d57a2034945b527caeb3d8424310a7a9a1030f605c27ce131d814368726e8b9f",
+    "tests/integration/file_failures_test.go": "050cd2e8d5289b06916407c57f19a677a362669e316b4078ea718ae6a2190ef9",
+    "tests/integration/file_language_test.go": "93d5594ab116830dd996ec4c5a7de1502ce5c851005d9ef65a88f1a1605f256b",
+    "tests/integration/file_probe_binding_test.go": "59a360d369abb99151f6ad6d5650d9df0de56fe4c0368b29c1845a7f10fd66b3",
+    "tests/integration/file_probe_test.go": "cabd02ed4adb2be77f8a5afa1f965571bd10b721823dff07bd6740ea4d35c9be",
+    "tests/integration/file_workflow_test.go": "6623bbe58aa417991af1815ef0e912b218340730bc2b3c39e8b7771e86a4b2ae",
+    "tests/integration/float_test.go": "8ee88fca343268d265577cd743a22ece3984be6396ff8e2711159f25f6251084",
+    "tests/integration/flow_fold_budget_progress_test.go": "230e5f4a865e62e82e29da6db27c8abd3c9558af037fd785b5e940e59c59f9dd",
+    "tests/integration/flow_fold_error_progress_test.go": "ac53f5126af41c8be33e35b24351d4e0f585a717c3608e54e2010f4402e4ddc8",
+    "tests/integration/flow_fold_test.go": "efadfa8e4e29e14e3169a3a970ed986d7f1b3d5004c15cce171a4ac81c8e5de6",
+    "tests/integration/gateway_cleanup_test.go": "a709a74329c5bc7abbc22b0e33825d177b8d1e4f1f6cf7efaa44b8725aa8595e",
+    "tests/integration/graph_test.go": "5dc06d3463fc978541b9cd9e81b9e0786373c2b5122a6fc67f2f13634c2b7baf",
+    "tests/integration/inspect_test.go": "08483bd04ef36dfd88d81e6c5fb6880c0a4a4854e7b8779d9abafa36827f96bd",
+    "tests/integration/metal_compute_test.go": "d7bbe27ad6713a4e7d27c716f876b57cb326372c96975e330f41e9e4eadc5a5d",
+    "tests/integration/metal_executor_test.go": "6ab29b61c66472d451a8ed6abede939e7d8d0d148ac9b602222ab32386ffa9a0",
+    "tests/integration/metal_live_test.go": "da6370f5f9b92ee9c98a544b782621cd0bb900c464e36e5b752324211221394d",
+    "tests/integration/metal_test.go": "f3864b60ddf681d0bf00e3b2a4bdd9c92e98cf4db41cf3918dd958713fb0b4cf",
+    "tests/integration/metal_training_test.go": "899048724515cf9aa9e123de9f00b8c040a7dc92d5d949e0eff4fd8c17813ca7",
+    "tests/integration/native_metal_live_test.go": "6fa7209265cc3e4a7062cabf62be910adcdbf1c1796e6576462276c23f100dec",
+    "tests/integration/native_metal_test.go": "310284f8bec4ff5439c0bdfdb3c865100647ac58850b69495e5318b28ef1771d",
+    "tests/integration/native_paths_test.go": "b7d55f8a44f2b81516c04ce6be1bc25675100224f48f05cf8bce75367870692d",
+    "tests/integration/native_test.go": "5c1ba2c3ae32b80cf3dce9cec393dbac3685b082a4f5968337347766bd61fce9",
+    "tests/integration/optimizer_test.go": "97831aaaacc010feea3a884626b1303d7fa4e327531b724e61ae2968a58536c6",
+    "tests/integration/parameters_test.go": "a1eca17a8505901d9e11c2db8eaa95002590cc30a7d9d5016234539c9b96e82a",
+    "tests/integration/process_host_session_test.go": "e4eef99170779a17a43a4f8e5af81be12efc28b8b4b999c91b6f9f4634f4a6ac",
+    "tests/integration/process_resource_only_test.go": "edc5b5f87729141347a36eabb3d1ae5c33da82c0f8ab7ec878fc0007e85107e6",
+    "tests/integration/run_test.go": "6ac8be2a9e6e6f342f4204cc4cbfbce89d480d9d6ff018c33cb7dde588a981fe",
+    "tests/integration/runtime_catalog_test.go": "c6ed8d2d222d797a8f528a47a38adf30a272f9056461b5917532f775300593d2",
+    "tests/integration/semantic_coverage_test.go": "410b0fd74c7f92ab51a03c4a138cff76b1f1a55ae736553b189a9ca2ba19432b",
+    "tests/integration/semantic_fixtures_test.go": "07dc7c3d540749bb615417027735990fb989ecbb89826025afaac953fd1b54d3",
+    "tests/integration/semantic_native_test.go": "92725d9561c8935cb0e1445d1191078aca41fd63e7baa5642511ef71f1834ece",
+    "tests/integration/semantic_runtime_test.go": "95d95bc5d6e16a1137e8655dceb91427afb86cc7f9c4655e2e161e40325ecc2e",
+    "tests/integration/serve_test.go": "ec5abdf019065e164614cad40e5a6e27173afc989d2671d9b3278a50293c8ac3",
+    "tests/integration/tensor_budget_test.go": "1fe1fdc6d9a4ed39c0291a837d5f4f55f590e9cbe01415449a18048dae0d46fd",
+    "tests/integration/tensor_contract_test.go": "e4d944564382b07c6fa1a1d2040014732898c9f325ef1caf18a288270ad77eed",
+    "tests/integration/tensor_test.go": "7e22bb256fb6d145f38cd20ddf90c221677219450566d59d55c40b8838ad5de1",
+    "tests/integration/training_test.go": "5e18d180f4094a562ea5ed700d4f1f84087c5c441d4a81fea939b74fe4b28127",
+    "tests/integration/typed_commit_test.go": "2d66ab392519be549c3683cd1204ad480726f8698bc0c21ab8a6d5a0eb8926db",
+    "tests/integration/verifier_test.go": "da8aa86569d1b8756e39f5c7347ebc4b022bea7b0a27b880f3a399060a5a1040",
+    "tests/integration/xor_metal_live_test.go": "b7c6e5c0becf6e4c328ff5e9e960ea7b624810624b39d7cc710a5618a9e15f39",
+    "tests/integration/xor_test.go": "5e555b5e90d8a48cb6a0d0ee0e50bd6327ba62c12c8abbfd223b12273fc690e3",
+    "tools/semanticcoverage/report.py": "15a57e5cda5310bb3fb02f34e62298821cbeeb9f791160577f3289647ba5b541",
+    "tools/semanticcoverage/run.py": "c2eaddb5ed223003ec7c52b0447886fac4260021ccf096c7693fb71e088a823b",
+    "tools/semanticcoverage/test_report.py": "964825380ab2cda377d8b73c7ec3ca902e21a572f33a9508b7ffb9d01a7d9c2c",
+    "testdata/conformance/argument-count.lo": "9bfbdc37214f986a3ff9250a341d7dbabd17b7876c46879485de9d208d006e90",
+    "testdata/conformance/autodiff-read.lo": "9c361a5f5bfbe4a97cfa452e5beb22722df5f2f159c451b089f2c464841585d9",
+    "testdata/conformance/autodiff-shared.lo": "a3794280400d708b320b37c3ae6f8560b54dcb741449f060697bb4d110f6afab",
+    "testdata/conformance/autodiff-undefined.lo": "96d05c53968bdf659b88e90f7c6c3a1983b94c769cc0ec1ae02ab0bce667f033",
+    "testdata/conformance/bad-character.lo": "72081cddd49577c43c960cafb268a95144f1006f5612fe24c5bf9fb03852c98c",
+    "testdata/conformance/bad-escape.lo": "e476ce1c5e6a3d3613e7aaef81e6311d4ca8ea07d8cd672f14b7c5bd455df22c",
+    "testdata/conformance/bad-exponent.lo": "328bb4948abb9eea813b86e7191f225ba5325707bcee8850c89be1bf0ab48bb8",
+    "testdata/conformance/bad-string.lo": "cdb47b80f9ea797d356fda9e7791d58aec83d7831fe6814a2126de0911a39a08",
+    "testdata/conformance/bom.lo": "d172a3d28bb2847fc46d15d98e808810523e698f1aa4d178603086fea61f05e9",
+    "testdata/conformance/capture.lo": "0463129846f3d20ee15b163db64ba8c27cacaee1408d212175870c8dbadb51c2",
+    "testdata/conformance/check-list-sum.lo": "7dfb56cf3ba635e8603f34d68bf1ae0c34435301324e9ada0fc1d580bc5551b5",
+    "testdata/conformance/check-wrong-list.lo": "5d13f1d93877a07f09d9f77f8bdc61470292d0c88389d0c5c27e11afcbcd7147",
+    "testdata/conformance/comments.lo": "022b79b84cf8e846769ae0be80cd25b8bce01b949a049a4ef0fc7b3b2f4240eb",
+    "testdata/conformance/commit-value.lo": "2dc23ae1f06abe4c903bfb353e0ee1977e43c6e713df2ed1087b8fc84eae2d67",
+    "testdata/conformance/double-fallible.lo": "e4fbca60de319bc27a9c64f767987555293a43cd06e13ca6bb6bea399c716e66",
+    "testdata/conformance/duplicate-argument.lo": "4f2210a47b57c1c0ed2e9f21ce3ab7e120f8ec304741bc4482658fd3e2bf207b",
+    "testdata/conformance/duplicate-binding.lo": "77325de64b12330fa9169711d7672f0789c6f0a02cd2348c5ef71d648fd04a0a",
+    "testdata/conformance/duplicate-parameter.lo": "4687cfd4ce80a6030fd2f3257f3c5b2419f04ae8854b9aaf6f1923f14c1171ca",
+    "testdata/conformance/early-flow-return.lo": "47d0f687af49e3c115be0f44df2ba1ae784cbd8070f6524ef022cfb377732f73",
+    "testdata/conformance/early-top-return.lo": "bfbc60ced99b5b978f6b888786bd744a21e853dcbad59ec9d1ef8733ba169515",
+    "testdata/conformance/empty-generic.lo": "59c071c170581f488b658d5d60a61e7fdc72234e866e6eeb7aa9aab424872bf7",
+    "testdata/conformance/empty-program.lo": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "testdata/conformance/fallible-self-handler.lo": "7e1e52f2f9f034d46442fd9fd9185cd20f48bd1e8a6e6b966165608843d1bde3",
+    "testdata/conformance/fallible-total.lo": "7cb054430ed6c12c79752e5b810dceab862caf3bad4e6486e1e39c557ce3ec24",
+    "testdata/conformance/float-arithmetic.lo": "1db7c247b859734d2afaab26fc6873d050ee7b187a2d344d56aeb989bb5c9bfb",
+    "testdata/conformance/float-explicit-conversion.lo": "dd6d2d90216102c3a64abc819eb7249e557f72ba200320d27464140692c20640",
+    "testdata/conformance/float-unhandled.lo": "6b0f4b4fc240f3d9d0ea6b5702f8a31e446f1e89e4cba0266c25ceb84434fd5d",
+    "testdata/conformance/float-zero-division.lo": "54194a3caef1d427526d4ed4021fad842b87954ddde013416f2bf2c27cb88683",
+    "testdata/conformance/flow-definition.lo": "1f6eea87ec3f08ca1189d56b5ac3b150b7ce3525d47ab30d08caa61836cbe16b",
+    "testdata/conformance/gradient-schema.lo": "bafcad76c57c95e0bb2a59f56f6d0b2d7fb8e59bfcb941af1c1917d1f9c312ef",
+    "testdata/conformance/gradient-stop.lo": "e44aa277c7dba44c5da65f02df054ad83227cf58aa07507bbeb81747b1bad950",
+    "testdata/conformance/invalid-map-key.lo": "1c1dee3ddcda96e779261d18413e53104ec4437966dfd5b4fff1d9d62af1ef00",
+    "testdata/conformance/leading-zero.lo": "bbcde8be31590cfe374d607d57d3ff366692c687f2245eeccf09705310f059c6",
+    "testdata/conformance/literal-underscore.lo": "2d0535929cf4000568c2ea07447f31a1a01b8b2a0b7b069ae5c1443f6eae0a3b",
+    "testdata/conformance/literals.lo": "c088c779aa834742fa16fdb9f738758c1eb8c7b1bc5d17283d30b91ebd0de427",
+    "testdata/conformance/lone-cr.lo": "f8056f120c48663ffaef971afbef79ca10f26bdaf7adf3e7711ca5ab6ce906ca",
+    "testdata/conformance/manifest.json": "3b2b00c1d4253bccab3df5c255665a2e16440718e5562a980d8df6969d6df7b3",
+    "testdata/conformance/map-entry.lo": "a58d4ad350bf7d2d27eb6692aebd37d7ce2c42e2b94402a9f2e305799afba132",
+    "testdata/conformance/map-get-total.lo": "eed0c0f2c79b4b34f629f63477f73c35a050381b7183c9910aea8d8077677a48",
+    "testdata/conformance/missing-default.lo": "300d84916d6372a28b5ba8c56096ae42d4fcab4b6013528ec38a6087e01670ef",
+    "testdata/conformance/missing-field.lo": "5d543d40d4c54ea4322b2d384bdfbff65a5bc9a29eb471d303a059766ecd8ac3",
+    "testdata/conformance/missing-handler.lo": "cb5280ee49a3ea2135dd10b7e120f611892a7158ceb2f4bd7434ff7a319058fe",
+    "testdata/conformance/missing-return.lo": "3d97a5243bbd24838930156d794a23be990c50263cc087f731b83e9fe7c25f5c",
+    "testdata/conformance/missing-separator.lo": "1c5acf265b2527407586224a4e53bef082756c566fe5d8c1a7b45b3f1e47eb1d",
+    "testdata/conformance/mixed-list.lo": "5a811a2600dad6aa9f94f308377ad43c7eec3064f4b06aa94cc45f50431c2193",
+    "testdata/conformance/multiline-pipe.lo": "96aed4ce3c5c91b8bc67dfb90db6ce402b564f7beabc721078f537154b27bc79",
+    "testdata/conformance/nested-types.lo": "f80b2ed22e555de81716e4d924dbe8258e6950a920e12fd9e1b434565fad13ed",
+    "testdata/conformance/null-argument.lo": "687d5a53bdce1f9787fd2c90da467773747e2309e72229265ce749129666933f",
+    "testdata/conformance/null-is-not-name.lo": "5483cbcc032f7e38e3faf3a5377ce24f9ce1de5220dd9836723488f79834022a",
+    "testdata/conformance/numeric-suffix.lo": "77b2dda20ba4a7ad663579718895cc8850cbf84cc8bb0ed5aed7adfdc7d5d15e",
+    "testdata/conformance/optimizer-adamw.lo": "3bbe19944d959f42e765e03864ef9841936fd6bcdef06421bb096bc1d0e7d32b",
+    "testdata/conformance/optimizer-invalid-config.lo": "e3f2f4b9902fa39d0c67b0d4a70984e4b8004ebe890cf83ba5ae93201ab6a6c8",
+    "testdata/conformance/optimizer-sgd.lo": "a78dd84254faa3a92ec43a8a57637ca120273c3abed197c57c3d49116ca2ea45",
+    "testdata/conformance/pipe-without-call.lo": "ebb1f967703a4bcb75d8a1adb42f05eb8f133670f849936ee3d4eec5e6e99c99",
+    "testdata/conformance/predicate-match.lo": "23be52de4dd3aecf222fec196cd4338cc63e590d8650139c627286ed648c6a16",
+    "testdata/conformance/projection.lo": "db99aee8ff2fd28912945b51f28c1ee021284af6b677c15514f5659526e4059f",
+    "testdata/conformance/propagation.lo": "0995e5980cde598ba1456f46d963529e1a70c16f0cef28b7c4d870a7b2c1ffc0",
+    "testdata/conformance/record-missing-colon.lo": "749cb1c5b8d5411a16b048179870f97eeabe6ebe19e528d1f8d515d51de9cf70",
+    "testdata/conformance/recursion.lo": "815d365020cab9754c67140774dc5b8f79ba385261247b5cfa925e5334b363ea",
+    "testdata/conformance/self-handler.lo": "4e8bd94ea3fc5eee4295d2b590e84786f20594a4955078bf391141c981dd08f9",
+    "testdata/conformance/semicolon-in-call.lo": "7145aa2013603c7c9fd539f9574fef38d5d2ba4e12256139155d46e67c06c9e3",
+    "testdata/conformance/shadow-builtin.lo": "8eb07a8a3aad2dc78c54d6c1137b52b9c2a3b45a0c245c093279be7f271896ea",
+    "testdata/conformance/surrogate.lo": "92f92535c55ccc07ffdfb0bae8d0a1635657055d05213d9c231439f51f798c95",
+    "testdata/conformance/tensor-dynamic-shape.lo": "45031230897286e400840be433adc66fa422d2a4411d9c94a5a591a1b500965c",
+    "testdata/conformance/tensor-empty-mean.lo": "b03f2e6b492e16a4fef5dd9e0f5a583154f0203297aa3fd376d40fa391b3fe83",
+    "testdata/conformance/tensor-empty.lo": "2360192d918307bc1a37a5ccdaec92ad93ad9f40889d3cfb4b01054e0a7bf5ed",
+    "testdata/conformance/tensor-fp32-rounding.lo": "4736c4c43e774462059747fd5b311824cec8e71cd3a5c83215d5a9a384bc02e7",
+    "testdata/conformance/tensor-invalid-axes.lo": "bac5148e89a5189b1bd3028e20caeb70bef837f6d2c7e06501dc85df942a8b7c",
+    "testdata/conformance/tensor-matmul.lo": "bfd4aad4d94c97baa1360ba2c4439a9d46eb94a22d32520b3f9ec642d39b9e35",
+    "testdata/conformance/tensor-reduction-order.lo": "efc50008665f66de6072e828759275511059285ac06d30459edb82f445970711",
+    "testdata/conformance/tensor-static-shape.lo": "864ee6647c5c29781503ac4f07dd2c861bd492fe2ee896c82636ccd0150fa914",
+    "testdata/conformance/transitive-effect.lo": "e66e63fdb1bcfdfae6c090f117aaa36c4f968f1ac322e0d58c5eed4e20d5b764",
+    "testdata/conformance/unknown-argument.lo": "202f317548729fc21d6ecf43864b0952a62e97e41aba58f2b4be461eb1fa2408",
+    "testdata/conformance/unknown-call.lo": "63ab53d8228083743e75f947138ca15171b8d3b3a2dedde05227056424150dfb",
+    "testdata/conformance/unknown-reference.lo": "10a0f183f383af6e8f2ea30d76a98f4c4661d64c7366fdf25be8bf991ea4da33",
+    "testdata/conformance/wrong-branch.lo": "7c34a713e4595f864be1d499bef7f11145240833e160a0c82a94920ba70db9d8",
+    "testdata/conformance/wrong-callback.lo": "156d1035c778360bdbb6440a7d312d72a3f34d56be86ba7f949e329d0d43676c",
+    "testdata/conformance/wrong-record.lo": "e49413abbbbeb7fe0351bf5734f448f3969e5b0469555d317077862c0f5f5c76",
+    "testdata/fileprobe/main.go": "4b9039b17c015ae14751ee31452d6f87b3198aef23d7870b658cf74908adb8b7",
+    "testdata/metal_unavailable.c": "86f830f16f34f8d2e56840798789b1b95818109f67ed78cb0be12f3e270ebe56",
+    "testdata/native_toolchain/main.go": "9e0266720fb2f81986de4e718e0dad93de440bf2a5d25e77f6f6d522d3040c62",
+    "testdata/semantic-migration/matrix.json": "b8831ae0e133ceef34a3b3403be9142f3dbec771416a3e988563547c62627101",
+    "examples/agent_file_workflow.lo": "410a76aedc8daed1a85ffd3b7aa9ddd9ae4948c7bb6a707c33aff6654e9bcac9",
+    "examples/count_letter.lo": "0a49c71cdb99196388039eb8706be235788f82577a90bb38f5d815cb2a316d4c",
+    "examples/count_letter_flow.lo": "4d6ed19c53f0aa05fca8cec4abc7069f9f691a13fea33a2c28461b2911117771",
+    "examples/count_letter_input.txt": "5a81483d96b0bc15ad19af7f5a662e14b275729fbc05579b18513e7f550016b1",
+    "examples/device_transfer.lo": "9533459da9bea554ba6e53e4a481c47495f130e86276f2d8d24017082e802e24",
+    "examples/dynamic_filter.lo": "8d51429aa1a7a36a9c8bf27cba9166fe3299ea06140700a87e922444d9e3d96f",
+    "examples/extract_vowels.lo": "05b8db905bc6db5773dd00dee04939d26fd9677c738af2770871b6ac02c846a9",
+    "examples/http_division.lo": "1bd566d7777fde7fd23336e4f1c2bb19dbd1ae0cbe3f517c95a785ed3a776630",
+    "examples/http_echo.lo": "1cc84ce00c87a2b29af52824a21f4acffeb2754f7a5b924358fbad2c30d9fab9",
+    "examples/list_sum.lo": "0463c1ccfb08e5e811216f3fcec326be84b7d41a205f39b968ad74949426cac5",
+    "examples/metal_arithmetic.lo": "febccd0cd810cc27603661620f7d59fc94d164ea3b7bff591106c5d3c0fbabbb",
+    "examples/metal_transfer.lo": "a0fbe9476df6ee454c7244bd2ea0d4de3d0fff681456cf807712123deca5b8c3",
+    "examples/status_effect.lo": "dc4924cfd0fd54bd8a159aec252f6c40b9fad1a38f623dd904a26e10c821353f",
+    "examples/tensor_forward.lo": "1672fc90b0cc021149ab2e8d61791e38d24573edb887fb370aecfd2857613f2e",
+    "examples/training_adamw.lo": "aa092459b9b051c174a7e47223767ed3d1d14ce6e35ab35ffc6348f9f5d30e8c",
+    "examples/training_cpu.lo": "86a8899580f196ebf822efd80f08dca717017104bbd4e45ce65a7deabc344b85",
+    "examples/training_metal.lo": "9168404f86323398c22fcfd7f41ff36a53bb35d61bed29fc5d40ea71d65b14d0",
+    "examples/training_sgd.lo": "ac5a737a9017cba525a948366228811ea3f9ab5930014a5c12d083ef97e62203",
+    "examples/xor_cpu.lo": "2615df58471b98592433366a1338ad0a0473d3feb762e2c71a0e9c40277656df",
+    "examples/xor_infer_cpu.lo": "5a0bf7328e348b3f67bb3c279e160febc498e700a229e466eecce15db4c25f64",
+    "examples/xor_infer_metal.lo": "b53f14a424b3f7915bbce2061987f6c85223964a6c1a461b85fc0742e8326244",
+    "examples/xor_metal.lo": "0a236df5c943858ea54c5652a31063ccdd677322c9b216bd2f84f856edfdf571",
+    "examples/xor_resume_cpu.lo": "e65b6310ebca5117e6a67cf89d5a7d2c3e8a8adae2606fdd78497a1e65f72238",
+    "examples/xor_resume_metal.lo": "24946fe9de6d7ca369b0794edab302fde4895c2d3f070ccde947c11fce52fd3a",
+    "examples/xor_save_cpu.lo": "ccde0e8babbedf1498eb9ea558495b5483a3a8a7479314805fa0aec7e75d585f",
+    "examples/xor_save_metal.lo": "9d5a5e34f017986aafe99d45fc2eb1e6ca3f57d7c2a8922a8cebb70278ff8eda",
+    "docs/examples/gateway-log-cleanup.lo": "4b8bfd89eaf598cc12fe032aa9c88e727ca8ebe741fa457a0d7931f5bebf6728",
+    "docs/examples/training-mvp.lo": "c8de3cfd9df3208571853192c198a470b9567c32777efb6b161643445839af3b",
+    "go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+    "go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03",
+    "Makefile": "bd3d457c906fc54688935a591e2a968cc186bee86c86b1d5506f180b0e15cd7c",
+    "docs/evidence/training-reference-results.json": "d83f1c3f1b7154fe1af2c98b10f604c8dab05b0539f0134678dbd9cc8d0bb814"
+  },
+  "execution_identity": {
+    "source_sha256": "a9462098f1449a640b8c5b18164addd65b326f32f5b3bab137e68d9bc768de63",
+    "matrix_sha256": "b8831ae0e133ceef34a3b3403be9142f3dbec771416a3e988563547c62627101"
+  },
+  "coverage_gates": {
+    "interpreter": {
+      "TestSemanticCoverageInventory": "pass",
+      "TestSemanticCoverageRunIdentity": "pass"
+    },
+    "native": {
+      "TestSemanticCoverageInventory": "pass",
+      "TestSemanticCoverageRunIdentity": "pass"
+    }
+  },
+  "references": [
+    {
+      "test": "TestAdapterFileReceipts",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterHTTPClientAuthority",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterHTTPClientCleanupEvidence",
+      "boundaries": [
+        "cli_and_controlled_runner"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterHTTPClientConstruction",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterHTTPClientExchange",
+      "boundaries": [
+        "cli_and_controlled_runner",
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterHTTPClientNoReplay",
+      "boundaries": [
+        "cli_and_controlled_runner"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterHTTPClientProtocolLimits",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterHTTPHeaderValidation",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessActivationContract",
+      "boundaries": [
+        "controlled_adapter_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessConstructorValidation",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessLifecycleCancellation",
+      "boundaries": [
+        "controlled_adapter_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessLifecycleCompleted",
+      "boundaries": [
+        "controlled_adapter_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessLifecycleExactOutputLimit",
+      "boundaries": [
+        "controlled_adapter_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessLifecycleFailures",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessPolicyAcceptsInertCompilerInputs",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessPolicyRejectsFlagsForOtherCommands",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessResultExecution/exited",
+      "boundaries": [
+        "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessResultExecution/signaled",
+      "boundaries": [
+        "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessResultExecution/wrong-exited",
+      "boundaries": [
+        "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterProcessResultExecution/wrong-signaled",
+      "boundaries": [
+        "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAdapterReceiptSessionCleanupDiagnostic",
+      "boundaries": [
+        "controlled_runner_and_adapter;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAutodiffAnalyticalAndFiniteDifferences",
+      "boundaries": [
+        "cli_and_software_metal_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAutodiffFailureStopsCommitAndCanBeHandled",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestAutodiffFailures",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCLIErrorBoundary",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCheckpointAdamWMetalResume",
+      "boundaries": [
+        "cli_and_controlled_runner;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCheckpointBitsAndWork",
+      "boundaries": [
+        "cli_and_controlled_runner",
+        "cli_and_software_metal_model;generated_native_software_model",
+        "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCheckpointFreshProcess",
+      "boundaries": [
+        "cli_and_controlled_runner;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCheckpointMetalTransfers",
+      "boundaries": [
+        "cli_and_controlled_runner;generated_native_api",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCheckpointOptimizerValidation",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCheckpointRejectsInvalidData",
+      "boundaries": [
+        "cli_and_controlled_runner",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestCheckpointTransferFailureCleanup",
+      "boundaries": [
+        "cli_and_controlled_runner;generated_native_api",
+        "controlled_runner_and_adapter;generated_native_api",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestConformance",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestDeviceAuthorizationAndFailures",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestDeviceAuthorizationAndFailures/observation",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestDeviceCallbackLifetime",
+      "boundaries": [
+        "controlled_runner_and_adapter;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestDeviceGrantArguments",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestDeviceParameterLocations",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestDeviceRetainedCallbackValues",
+      "boundaries": [
+        "controlled_runner_and_adapter;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestDeviceTransferRoundTrip",
+      "boundaries": [
+        "cli_and_controlled_runner;generated_native_api",
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestEvaluatorCancellation",
+      "boundaries": [
+        "controlled_api_and_cli;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestEvaluatorErrorPrecedence",
+      "boundaries": [
+        "evaluator_api;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestEvaluatorImmutableResults",
+      "boundaries": [
+        "evaluator_api_and_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestEvaluatorMatchRegions",
+      "boundaries": [
+        "evaluator_api;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestEvaluatorReadOrder",
+      "boundaries": [
+        "evaluator_api;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileCommitAuthorization",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileCommitFailure",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileCommitOrder",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileDiscovery",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileDiscoveryFailures",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileLanguageLateFailureProgress",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileLanguageSelectionValidation",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileOpenPaths",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileOpenPathsResults",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileReadCancellation",
+      "boundaries": [
+        "controlled_api_and_cli;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileRemoval",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileRemovalFailures",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFileWriteCancellation",
+      "boundaries": [
+        "controlled_api_and_cli;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFirstVerifierSlice",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFloatArithmetic",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFloatFailures",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFlowFold",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFlowFoldNestedCancellationProgress",
+      "boundaries": [
+        "controlled_api_and_cli;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFlowFoldRecoverableErrorProgress",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestFlowFoldStepLimitProgress",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestInspectionRejectsInvalidSource",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestInspectionResources",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalComputeControlledFailures",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalComputeNumericFailures",
+      "boundaries": [
+        "runner_api_with_software_metal_model;generated_native_software_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalComputePrimitives",
+      "boundaries": [
+        "runner_api_with_software_metal_model;generated_native_software_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalComputeProfile",
+      "boundaries": [
+        "runner_api_with_software_metal_model;generated_native_software_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalComputeTraining",
+      "boundaries": [
+        "cli_and_software_metal_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalControlledFailures",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalTensorBoundaries",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestMetalTrainingGradients",
+      "boundaries": [
+        "cli_and_software_metal_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeBuildBoundary",
+      "boundaries": [
+        "compiler_cli",
+        "native_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeBuildPaths",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeCrossTarget",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeEffectBudgetDifferential",
+      "boundaries": [
+        "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeMetalSelection",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeMetalSoftwareArtifact",
+      "boundaries": [
+        "compiler_cli",
+        "native_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeRemovedSourceDiagnostics",
+      "boundaries": [
+        "native_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeRuntimeDifferential",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeStandalone",
+      "boundaries": [
+        "compiler_cli",
+        "native_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestNativeTensorBudgetDifferential",
+      "boundaries": [
+        "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestOptimizerInvalidConfigurations",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestOptimizerPrimitiveWorkCharges",
+      "boundaries": [
+        "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestOptimizerSchemasAndFailureOrder",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestParametersScaleFailuresAndMetadataSnapshots",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestParametersSchemaFailures",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestParametersStopAndIdentity",
+      "boundaries": [
+        "evaluator_api_and_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestParserExternalInputs",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Autodiff.grad",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Autodiff.stop",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Bool.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Bytes.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Checkpoint.decode",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Checkpoint.encode",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Device.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Error.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.Append.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.Path.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.Path.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.Remove.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.Write.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.list",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.open_paths",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/File.read",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.div",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.gt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.gte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.lt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.lte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.mul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.sqrt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.sub",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.to_int",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Float.to_string",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Flow.fold",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Gradients.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Gradients.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Gradients.scale",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Gradients.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Gradients.zero",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Client.Request.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Headers.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Headers.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Method.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Response.Bytes.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Response.Text.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Response.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.Server.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/HTTP.URL.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Int.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Int.to_float",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Int.to_string",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/List.filter",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/List.flat_map",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/List.fold",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/List.length",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/List.map",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/List.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/List.unfold",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Map.get",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Map.has_key",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Map.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.div",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.gt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.gte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.lt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.lte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.max",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.min",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.mod",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.mul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.product",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.sub",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Math.sum",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.AdamW.Config.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.AdamW.State.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.AdamW.State.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.AdamW.step",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.SGD.Config.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.SGD.State.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.SGD.State.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Optimizer.SGD.step",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Parameters.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Parameters.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Parameters.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Process.Command.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Process.Executable.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Range.contains",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Range.is_empty",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Range.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Record.merge",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Record.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Scalar.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Scalar.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/String.FromScalars.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/String.concat",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/String.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/String.length",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/String.lower",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/String.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/String.upper",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.broadcast",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.device",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.div",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.dtype",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.matmul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.mean",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.mul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.rank",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.relu",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.reshape",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.shape",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.sqrt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.sub",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.sum",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.to_float",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.transpose",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/Tensor.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/UTF8.Bytes.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunBuiltinCatalog/UTF8.String.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunExpandedValueLimit",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunFallibleListVariants",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunFileReads",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunHostLimitsAndAuthorization",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunRecoverableErrors",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunResourceLimits",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunStoredFallibility",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestRunValues",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Autodiff.grad",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Autodiff.stop",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Bool.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Bytes.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Checkpoint.decode",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Checkpoint.encode",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Device.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Error.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.Append.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.Path.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.Path.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.Remove.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.Write.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.list",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.open_paths",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/File.read",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.div",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.gt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.gte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.lt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.lte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.mul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.sqrt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.sub",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.to_int",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Float.to_string",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Flow.fold",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Gradients.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Gradients.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Gradients.scale",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Gradients.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Gradients.zero",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Client.Request.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Headers.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Headers.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Method.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Response.Bytes.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Response.Text.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Response.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.Server.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/HTTP.URL.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Int.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Int.to_float",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Int.to_string",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/List.filter",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/List.flat_map",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/List.fold",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/List.length",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/List.map",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/List.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/List.unfold",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Map.get",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Map.has_key",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Map.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.div",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.gt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.gte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.lt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.lte",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.max",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.min",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.mod",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.mul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.product",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.sub",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Math.sum",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.AdamW.Config.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.AdamW.State.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.AdamW.State.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.AdamW.step",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.SGD.Config.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.SGD.State.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.SGD.State.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Optimizer.SGD.step",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Parameters.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Parameters.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Parameters.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Process.Command.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Process.Executable.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Process.Termination.exit_code",
+      "boundaries": [
+        "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Process.Termination.signal",
+      "boundaries": [
+        "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Range.contains",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Range.is_empty",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Range.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Record.merge",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Record.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Scalar.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Scalar.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/String.FromScalars.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/String.concat",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/String.eq",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/String.length",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/String.lower",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/String.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/String.upper",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.add",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.broadcast",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.device",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.div",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.dtype",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.matmul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.mean",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.mul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.rank",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.relu",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.reshape",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.shape",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.sqrt",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.sub",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.sum",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.to_float",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.transpose",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/Tensor.values",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/UTF8.Bytes.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticBuiltinRejections/UTF8.String.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticMigrationArithmeticSuccess/Math.div",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticMigrationArithmeticSuccess/Math.max",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticMigrationArithmeticSuccess/Math.min",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticMigrationArithmeticSuccess/Math.mod",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticMigrationCheckpointResume",
+      "boundaries": [
+        "cli_and_controlled_runner",
+        "cli_and_controlled_runner;generated_native_api",
+        "cli_and_software_metal_model;generated_native_software_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticMigrationFailurePreventsEffects",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticMigrationStepBoundary",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticNativeCancellation",
+      "boundaries": [
+        "controlled_api_and_cli;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticNativeErrorPrecedence",
+      "boundaries": [
+        "evaluator_api;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticNativeMatchRegions",
+      "boundaries": [
+        "evaluator_api;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticNativeMetalCheckpointResume",
+      "boundaries": [
+        "cli_and_controlled_runner;generated_native_api",
+        "cli_and_software_metal_model;generated_native_software_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticNativeMetalFailureCleanup",
+      "boundaries": [
+        "cli_and_controlled_runner;generated_native_api",
+        "controlled_api_and_cli;generated_native_api",
+        "controlled_runner_and_adapter;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticNativeMetalProfile",
+      "boundaries": [
+        "runner_api_with_software_metal_model;generated_native_software_model"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticNativeReadOrder",
+      "boundaries": [
+        "evaluator_api;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Checkpoint.encode",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Gradients.zero",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Optimizer.AdamW.State.new",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Optimizer.AdamW.State.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Optimizer.SGD.State.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Parameters.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Tensor.matmul",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Tensor.relu",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Tensor.sub",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSemanticRuntimeRejections/Tensor.to",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestServeGracefulActiveRequest",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestServeHTTP",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestServeShutdownPendingConnection",
+      "boundaries": [
+        "controlled_api_and_cli;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestServeStartupFailures",
+      "boundaries": [
+        "cli_interpreter_and_native",
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestServerPartialStartupCleanup",
+      "boundaries": [
+        "controlled_runner_and_adapter;generated_native_api"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestSyntaxStructure",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTensorCPUFailures",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTensorCPUOperations",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTensorDynamicFailures",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTensorLimits",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTensorPrecisionAndHigherRank",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTensorShapeBoundaries",
+      "boundaries": [
+        "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTensorWorkCharges",
+      "boundaries": [
+        "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestTypedCommitFailureStopsLaterEffects",
+      "boundaries": [
+        "cli_interpreter_and_native"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestVerifierBuiltinContracts",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestVerifierContracts",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestVerifierEdgeContracts",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    },
+    {
+      "test": "TestVerifierRejections",
+      "boundaries": [
+        "compiler_cli"
+      ],
+      "interpreter": "pass",
+      "native": "pass"
+    }
+  ],
+  "gaps": [
+    {
+      "ID": "native-injected-device-runtime",
+      "Scope": "runWithDevices;metalComputeFactory",
+      "Reason": "Current_matrix_names_exact_API_boundaries;generated_native_fixtures_cover_read_order_selected_regions_failure_precedence_cancellation_Metal_numeric_profile_checkpoint_resume_transfers_numeric_failure_and_cleanup;remaining_injected_variant_permutations_do_not_add_absent_I005_contract_axes;I011_requires_complete_backend_parity",
+      "Owner": "I011",
+      "Acceptance": "downstream"
+    },
+    {
+      "ID": "catalog-error-kind-exhaustiveness",
+      "Scope": "errors;activation_errors",
+      "Reason": "I005_requires_positive_and_applicable_negative_per_operation_not_every_kind_per_operation;all_catalog_kinds_are_inventoried;each_fallible_operation_has_runtime_negative_or_the_source_reviewed_SGD_constructor_exemption;exhaustive_kind_cartesian_product_is_not_claimed",
+      "Owner": "I005",
+      "Acceptance": "disclosed_limit"
+    },
+    {
+      "ID": "linux-arm64-execution",
+      "Scope": "semantic_corpus",
+      "Reason": "host_darwin_arm64;cross_build_test_is_not_linux_execution",
+      "Owner": "I011",
+      "Acceptance": "downstream"
+    },
+    {
+      "ID": "standalone-compiler-offline",
+      "Scope": "I004;F017;I011",
+      "Reason": "current_native_build_uses_Go;not_established_by_semantic_corpus",
+      "Owner": "F017",
+      "Acceptance": "downstream"
+    },
+    {
+      "ID": "sgd-state-constructor-error-catalog",
+      "Scope": "Optimizer.SGD.State.new",
+      "Reason": "internal/runtimeops/optimizer.go:optimizerOperation_returns_Success_of_NewSGDState_with_existing_checked_Parameters_validated_SGDConfig_and_step_zero;internal/value/optimizer.go:stateBase_checks_only_canonical_shape_kind_step_and_config;constructor_performs_no_tensor_arithmetic_or_backend_call;catalog_errors_are_conservative_shared_optimizer_metadata;verifier_rejection_is_applicable_negative",
+      "Owner": "I005",
+      "Acceptance": "disclosed_limit"
+    }
+  ]
+}

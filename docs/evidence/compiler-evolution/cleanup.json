@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "task_issues": [
+    "I004",
+    "I005",
+    "P005"
+  ],
+  "removed": [
+    "_scratch/i005-20261019",
+    "_scratch/i004-20261019",
+    "_scratch/p005-20261019",
+    "_scratch/native-backend-probe",
+    "_scratch/native-runtime-abi",
+    "_scratch/build-state/work/lo-native-1654075081",
+    "_scratch/build-state/tmp/TestNativeTensorBudgetDifferential1826556931",
+    "_scratch/build-state/work/lo-native-1702393810",
+    "_scratch/build-state/tmp/TestRunBuiltinCatalogFloat.lte575804664",
+    ".mprlab/I005-PLAN.md"
+  ],
+  "preserved_shared_state": "_scratch/build-state",
+  "ownership": "task plan and semantic worker ownership audit",
+  "preserved_evidence": [
+    "docs/evidence/compiler-evolution",
+    "docs/evidence/semantic-migration",
+    "docs/evidence/native-runtime-abi",
+    "experiments/native-backends"
+  ],
+  "archived_log_digests_verified": true,
+  "all_owned_paths_absent": true
+}
