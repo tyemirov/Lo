@@ -32,6 +32,9 @@ BENCH_TIME ?= 300ms
 NATIVE_BENCH_WORK ?= _scratch/f001-native/benchmark
 NATIVE_BENCH_LANE ?= all
 NATIVE_BACKEND_INPUTS ?= _scratch/native-backends/inputs.json
+NATIVE_LOWERING_ROOT ?= _scratch/native-lowering
+NATIVE_LOWERING_TOOLS ?= $(NATIVE_LOWERING_ROOT)/tools.json
+NATIVE_LOWERING_STATE ?= $(NATIVE_LOWERING_ROOT)/execution
 
 .DEFAULT_GOAL := build
 
@@ -127,6 +130,16 @@ test-semantic-report: | tool-state
 
 test-semantic-migration: runtime-bundle test-semantic-report | tool-state
 	python3 -B tools/semanticcoverage/run.py run --output-root "$(LO_BUILD_ROOT)" </dev/null
+
+.PHONY: prepare-native-lowering test-native-lowering test-native-lowering-tools
+prepare-native-lowering: | tool-state
+	python3 -B tools/nativelowering/prepare.py --state "$(NATIVE_LOWERING_ROOT)" --download </dev/null
+
+test-native-lowering: build | tool-state
+	python3 -B tools/nativelowering/run.py --lo bin/lo --tools "$(NATIVE_LOWERING_TOOLS)" --state "$(NATIVE_LOWERING_STATE)" </dev/null
+
+test-native-lowering-tools: | tool-state
+	UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q tools/nativelowering/test_cli.py </dev/null
 
 ci: verify-runtime-bundle fmt lint test test-native build test-semantic-report
 
