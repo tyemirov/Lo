@@ -40,6 +40,8 @@ type Receipt struct {
 	Target   string `json:"target"`
 	Emit     string `json:"emit,omitempty"`
 	ABI      string `json:"abi,omitempty"`
+	Codegen  string `json:"codegen,omitempty"`
+	Runtime  string `json:"runtime_sha256,omitempty"`
 }
 type Metadata struct {
 	SourceDigest  string                `json:"source_sha256"`

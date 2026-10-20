@@ -85,13 +85,19 @@ func Emit(ctx context.Context, plan nativeplan.Plan, target string) ([]byte, err
 		out.write("%s", chunk.String())
 		start = end
 	}
-	out.write("\", align 1\n@lo_program_metadata_size = constant i64 %d\n@lo_program_flow_count = constant i64 %d\n", len(module.Metadata), len(module.Functions)-1)
-	out.write("@lo_program_flows = constant [%d x ptr] ", len(module.Functions)-1)
-	if len(module.Functions) == 1 {
+	var callbacks []nativeplan.Function
+	for _, function := range module.Functions {
+		if function.Flow >= 0 {
+			callbacks = append(callbacks, function)
+		}
+	}
+	out.write("\", align 1\n@lo_program_metadata_size = constant i64 %d\n@lo_program_flow_count = constant i64 %d\n", len(module.Metadata), len(callbacks))
+	out.write("@lo_program_flows = constant [%d x ptr] ", len(callbacks))
+	if len(callbacks) == 0 {
 		out.write("zeroinitializer\n\n")
 	} else {
 		parts := []string{}
-		for _, f := range module.Functions[1:] {
+		for _, f := range callbacks {
 			parts = append(parts, "ptr @"+f.Symbol)
 		}
 		out.write("[%s]\n\n", strings.Join(parts, ", "))
@@ -123,6 +129,7 @@ func Emit(ctx context.Context, plan nativeplan.Plan, target string) ([]byte, err
 		}
 	}
 	out.write("declare void @lo_value_retain(ptr)\ndeclare void @lo_value_release(ptr)\ndeclare void @lo_scope_leave(ptr, ptr, i64)\ndeclare void @lo_flow_leave(ptr)\ndeclare i32 @lo_boolean_value(ptr)\n\n")
+	out.write("declare void @lo_derivative_leave(ptr)\n\n")
 	for _, function := range module.Functions {
 		emitFunction(out, debug, module, function)
 	}
@@ -290,6 +297,14 @@ func (e *functionEmitter) instruction(i nativeplan.Instruction) {
 		e.line(i.Site, "call void @lo_scope_leave(ptr %%context, ptr %s, i64 %d)", e.payload(0), i.Site)
 	case nativeplan.FlowLeave:
 		e.line(i.Site, "call void @lo_flow_leave(ptr %%context)")
+	case nativeplan.TapeLeave:
+		e.line(i.Site, "call void @lo_derivative_leave(ptr %%context)")
+	case nativeplan.Release:
+		for _, id := range i.Inputs {
+			value := e.value(id)
+			e.line(i.Site, "call void @lo_value_release(ptr %s)", value)
+			e.line(i.Site, "store ptr null, ptr %%v%d, align 8", id)
+		}
 	case nativeplan.ReleaseAll:
 		for index, owned := range e.f.Values {
 			if owned {
@@ -371,7 +386,12 @@ func (d *debugInfo) location(subprogram int, site nativeplan.Location) int {
 	if site.File != "" {
 		scope = d.add(fmt.Sprintf("!DILexicalBlockFile(scope: !%d, file: !%d, discriminator: 0)", subprogram, d.file(site.File)))
 	}
-	id := d.add(fmt.Sprintf("!DILocation(line: %d, column: %d, scope: !%d)", site.Start.Line, site.Start.Column, scope))
+	column := site.Start.Column
+	// LLVM stores debug columns in 16 bits; zero denotes an unknown column.
+	if column >= 1<<16 {
+		column = 0
+	}
+	id := d.add(fmt.Sprintf("!DILocation(line: %d, column: %d, scope: !%d)", site.Start.Line, column, scope))
 	d.locations[key] = id
 	return id
 }

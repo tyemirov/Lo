@@ -35,14 +35,16 @@ type flowMetadata struct {
 	Location   uint64              `json:"location"`
 }
 type programMetadata struct {
-	ABI    string `json:"abi"`
-	Source struct {
+	ABI       string `json:"abi"`
+	HasResult bool   `json:"has_result"`
+	Source    struct {
 		Path   string `json:"path"`
 		SHA256 string `json:"sha256"`
 	} `json:"source"`
-	Types     []typeMetadata `json:"types"`
-	Locations []Location     `json:"locations"`
-	Flows     []flowMetadata `json:"flows"`
+	Types       []typeMetadata       `json:"types"`
+	Locations   []Location           `json:"locations"`
+	Flows       []flowMetadata       `json:"flows"`
+	Derivatives []derivativeMetadata `json:"derivatives"`
 }
 type lowering struct {
 	ctx              context.Context
@@ -53,19 +55,21 @@ type lowering struct {
 	flows            map[identity.FlowID]ir.Flow
 	approximateBytes int
 	err              error
+	synthetic        []Function
 }
 type functionBuilder struct {
-	l            *lowering
-	f            Function
-	current      BlockID
-	bindings     map[ir.BindingID]ValueID
-	bindingTypes map[ir.BindingID]types.Type
-	parameters   []ValueID
-	bodyCleanup  BlockID
-	leaveFlow    BlockID
-	finish       BlockID
-	errorExit    BlockID
-	resultValues map[ResultID]ValueID
+	l             *lowering
+	f             Function
+	current       BlockID
+	bindings      map[ir.BindingID]ValueID
+	bindingTypes  map[ir.BindingID]types.Type
+	parameters    []ValueID
+	bodyCleanup   BlockID
+	leaveFlow     BlockID
+	finish        BlockID
+	errorExit     BlockID
+	resultValues  map[ResultID]ValueID
+	invalidBlocks map[BlockID]BlockID
 }
 
 // Lower verifies the checked graph and produces an immutable native plan.
@@ -78,11 +82,13 @@ func Lower(ctx context.Context, program ir.Program) (Plan, error) {
 	}
 	l := &lowering{ctx: ctx, program: program, typeIDs: map[string]uint64{}, flowIDs: map[identity.FlowID]uint64{}, flows: map[identity.FlowID]ir.Flow{}}
 	l.metadata.ABI = ABIIdentity
+	l.metadata.HasResult = program.ResultType() != nil
 	l.metadata.Source.Path = program.Source().Path()
 	l.metadata.Source.SHA256 = fmt.Sprintf("%x", sha256.Sum256([]byte(program.Source().Text())))
 	l.metadata.Types = []typeMetadata{}
 	l.metadata.Locations = []Location{}
 	l.metadata.Flows = []flowMetadata{}
+	l.metadata.Derivatives = []derivativeMetadata{}
 	for i, flow := range program.Flows() {
 		if flow == nil {
 			return nil, fmt.Errorf("native lowering: absent flow")
@@ -121,6 +127,7 @@ func Lower(ctx context.Context, program ir.Program) (Plan, error) {
 		}
 		module.Functions = append(module.Functions, l.function(flow, flow.Body(), flow.Span()))
 	}
+	module.Functions = append(module.Functions, l.synthetic...)
 	if l.err != nil {
 		return nil, l.err
 	}
@@ -165,7 +172,7 @@ func (l *lowering) site(span source.Span, action string, t types.Type, owner str
 		return 0
 	}
 	id := uint64(len(l.metadata.Locations))
-	l.metadata.Locations = append(l.metadata.Locations, Location{ID: id, File: span.File(), Start: span.Start(), End: span.End(), Action: action, Type: l.typeID(t), Labels: []string{}, Owner: owner})
+	l.metadata.Locations = append(l.metadata.Locations, Location{ID: id, File: span.File(), Start: span.Start(), End: span.End(), Action: action, Type: l.typeID(t), Labels: []string{}, Owner: owner, Arguments: []ArgumentMetadata{}})
 	l.approximateBytes += len(span.File()) + len(action) + len(owner) + 200
 	if l.approximateBytes > MaxModuleBytes && l.err == nil {
 		l.err = fmt.Errorf("%w: metadata exceeds %d bytes", ErrLimit, MaxModuleBytes)
@@ -224,8 +231,15 @@ func (b *functionBuilder) adopt(result ResultID, site uint64) {
 	b.instruction(Instruction{Kind: AdoptResult, Result: result, Value: b.resultValues[result], Site: site})
 }
 func (b *functionBuilder) invalid(site uint64, exit BlockID) BlockID {
+	if existing, ok := b.invalidBlocks[exit]; ok {
+		return existing
+	}
 	saved := b.current
 	target := b.block()
+	if b.invalidBlocks == nil {
+		b.invalidBlocks = map[BlockID]BlockID{}
+	}
+	b.invalidBlocks[exit] = target
 	b.current = target
 	result, _ := b.raw(InvalidStatusSymbol, nil, site, false)
 	b.instruction(Instruction{Kind: CopyResult, Result: result, Site: site})
@@ -407,8 +421,7 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 	var result ValueID
 	switch expr := expression.(type) {
 	case autodiff.Call:
-		b.l.err = fmt.Errorf("%w: specialized autodiff at %s:%d:%d", ErrUnsupported, span.File(), span.Start().Line, span.Start().Column)
-		return 0
+		result = b.gradient(expr)
 	case ir.Literal:
 		site := b.site(span, "literal", expr.Type())
 		meta := &b.l.metadata.Locations[site]
@@ -492,14 +505,17 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 			return 0
 		}
 		args := make([]ValueID, len(expr.Arguments()))
+		metadata := make([]ArgumentMetadata, len(expr.Arguments()))
 		for _, argument := range expr.Arguments() {
 			switch arg := argument.(type) {
 			case ir.ValueArgument:
 				args[arg.Position()] = b.expression(arg.Value())
+				metadata[arg.Position()] = ArgumentMetadata{Kind: "value", Type: b.l.typeID(arg.Value().Type())}
 			case ir.FlowArgument:
 				site := b.site(arg.Span(), "flow_ref", nil)
 				b.l.metadata.Locations[site].Flow = b.l.flowIDs[arg.Flow()]
 				args[arg.Position()] = b.checked("lo_flow_ref", nil, site, false, false)
+				metadata[arg.Position()] = ArgumentMetadata{Kind: "flow", Flow: b.l.flowIDs[arg.Flow()]}
 			default:
 				b.l.err = fmt.Errorf("%w: argument %T", ErrUnsupported, arg)
 			}
@@ -507,6 +523,7 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 		site := b.site(span, "operation", expr.Type())
 		b.l.metadata.Locations[site].Operation = op.Name()
 		b.l.metadata.Locations[site].Labels = append([]string{}, expr.Labels()...)
+		b.l.metadata.Locations[site].Arguments = metadata
 		result = b.call(OperationSymbol(op.Name()), args, span, expr.Type(), site)
 	case ir.Match:
 		selector := b.expression(expr.Selector())

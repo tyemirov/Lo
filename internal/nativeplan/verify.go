@@ -60,7 +60,11 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 	callSymbols := map[ResultID]string{}
 	resultValues := map[ResultID]ValueID{}
 	adoptions := map[ValueID][]definition{}
+	releases := map[ValueID][]definition{}
 	helperArity := map[string]int{LiteralSymbol: 0, StepSymbol: 0, ChargeSymbol: 1, ScopeEnterSymbol: 0, FlowEnterSymbol: 0, CauseSymbol: 1, InvalidStatusSymbol: 0, CommitSymbol: 1, "lo_project": 1, "lo_match": 2, "lo_flow_ref": 0, "lo_convert_success": 1, "lo_convert_failure": 1, "lo_convert_propagate": 1, "lo_convert_record_view": 1, "lo_convert_scalar_list_view": 1, "lo_convert_fallible_record_view": 1}
+	for symbol, arity := range map[string]int{"lo_derivative_enter": 0, "lo_derivative_snapshot": -1, "lo_derivative_retain": 1, "lo_derivative_loss": -1, "lo_derivative_zero": 1, "lo_derivative_seed": 1, "lo_derivative_reverse": -1, "lo_derivative_finish": 1, "lo_derivative_failure": 1, "lo_derivative_host_failure": 0} {
+		helperArity[symbol] = arity
+	}
 	for index, block := range f.Blocks {
 		if block.ID != BlockID(index) || block.End.Kind < Jump || block.End.Kind > Return {
 			return fmt.Errorf("invalid block or missing terminator %d", index)
@@ -80,7 +84,7 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 			if instruction.Site >= uint64(len(sites)) {
 				return fmt.Errorf("missing instruction source")
 			}
-			if instruction.Kind < Call || instruction.Kind > ReleaseAll {
+			if instruction.Kind < Call || instruction.Kind > TapeLeave {
 				return fmt.Errorf("invalid instruction")
 			}
 			if instruction.Value != 0 && instruction.Kind != AdoptResult {
@@ -113,7 +117,7 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 				}
 				if _, ok := functions[instruction.Symbol]; !ok {
 					if arity, ok := helperArity[instruction.Symbol]; ok {
-						if len(instruction.Inputs) != arity {
+						if arity >= 0 && len(instruction.Inputs) != arity {
 							return fmt.Errorf("helper %s has incorrect arity", instruction.Symbol)
 						}
 					} else if instruction.Symbol == FlowErrorSymbol {
@@ -125,11 +129,27 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 						if !ok || OperationSymbol(op.Name()) != instruction.Symbol {
 							return fmt.Errorf("unknown runtime helper %s", instruction.Symbol)
 						}
+						if len(sites[instruction.Site].Arguments) != len(instruction.Inputs) {
+							return fmt.Errorf("operation arguments differ from admitted metadata")
+						}
+						for _, argument := range sites[instruction.Site].Arguments {
+							if argument.Kind != "value" && argument.Kind != "flow" {
+								return fmt.Errorf("invalid operation argument metadata")
+							}
+						}
 					}
 				}
 			}
 			if instruction.Kind == AdoptResult {
 				adoptions[instruction.Value] = append(adoptions[instruction.Value], definition{block.ID, position})
+			}
+			if instruction.Kind == Release {
+				for _, value := range instruction.Inputs {
+					if value == 0 || int(value) > len(f.Values) || !f.Values[value-1] {
+						return fmt.Errorf("invalid planned value release")
+					}
+					releases[value] = append(releases[value], definition{block.ID, position})
+				}
 			}
 			if instruction.Kind == Parameter && instruction.Index >= uint64(f.Arity) {
 				return fmt.Errorf("invalid parameter position")
@@ -223,6 +243,11 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 		if def.block == block && def.index >= index || !dominates(def.block, block) {
 			return fmt.Errorf("operand %d is not available in block %d", value, block)
 		}
+		for _, release := range releases[value] {
+			if dominates(release.block, block) && (release.block != block || release.index < index) {
+				return fmt.Errorf("operand %d used after planned release", value)
+			}
+		}
 		if f.Blocks[def.block].Instructions[def.index].Kind == Call {
 			available := false
 			for _, adopt := range adoptions[value] {
@@ -284,7 +309,7 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 						return err
 					}
 				}
-			} else {
+			} else if instruction.Kind != Release {
 				for _, value := range instruction.Inputs {
 					if err := checkValue(value, block.ID, index); err != nil {
 						return err
@@ -315,8 +340,8 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 	}
 	// Verify scope and flow lifetimes on every reachable status path.
 	type state struct {
-		block                         BlockID
-		flow, scope, released, closed bool
+		block                               BlockID
+		flow, scope, tape, released, closed bool
 	}
 	queue := []state{{block: 0, released: true}}
 	seen := map[state]bool{}
@@ -347,6 +372,9 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 			}
 			switch instruction.Kind {
 			case Call:
+				if instruction.Symbol == "lo_derivative_enter" && (current.tape || !current.scope) {
+					return fmt.Errorf("invalid derivative tape entry")
+				}
 				if instruction.Symbol == FlowEnterSymbol && (current.flow || current.scope) {
 					return fmt.Errorf("flow entered twice")
 				}
@@ -370,6 +398,11 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 					return fmt.Errorf("flow left before body cleanup")
 				}
 				current.flow = false
+			case TapeLeave:
+				if !current.tape || !current.scope {
+					return fmt.Errorf("invalid derivative tape cleanup")
+				}
+				current.tape = false
 			case ReleaseAll:
 				if index != len(block.Instructions)-1 {
 					return fmt.Errorf("operand use after owned cleanup")
@@ -386,7 +419,7 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 			}
 		}
 		if block.End.Kind == Return {
-			if current.flow || current.scope || !current.released {
+			if current.flow || current.scope || current.tape || !current.released {
 				return fmt.Errorf("exit without complete cleanup")
 			}
 			continue
@@ -400,6 +433,8 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 					state.flow = true
 				case ScopeEnterSymbol:
 					state.scope = true
+				case "lo_derivative_enter":
+					state.tape = true
 				}
 			}
 			queue = append(queue, state)

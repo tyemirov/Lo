@@ -117,11 +117,19 @@ func TestPlanMetadataIsImmutable(t *testing.T) {
 		if len(snapshot.Locations[i].Labels) > 0 {
 			snapshot.Locations[i].Labels[0] = "corrupted"
 		}
+		if len(snapshot.Locations[i].Arguments) > 0 {
+			snapshot.Locations[i].Arguments[0].Kind = "corrupted"
+		}
 	}
 	for _, location := range plan.Snapshot().Locations {
 		for _, label := range location.Labels {
 			if label == "corrupted" {
 				t.Fatal("snapshot mutated sealed labels")
+			}
+		}
+		for _, argument := range location.Arguments {
+			if argument.Kind == "corrupted" {
+				t.Fatal("snapshot mutated sealed argument metadata")
 			}
 		}
 	}

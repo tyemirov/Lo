@@ -34,6 +34,7 @@ func (p *verifiedPlan) Snapshot() Module {
 	m.Locations = slices.Clone(m.Locations)
 	for i := range m.Locations {
 		m.Locations[i].Labels = slices.Clone(m.Locations[i].Labels)
+		m.Locations[i].Arguments = slices.Clone(m.Locations[i].Arguments)
 	}
 	m.Functions = slices.Clone(m.Functions)
 	for i := range m.Functions {
@@ -69,19 +70,30 @@ func Read(plan Plan) (Module, error) {
 }
 
 type Location struct {
-	ID        uint64          `json:"id"`
-	File      string          `json:"file"`
-	Start     source.Position `json:"start"`
-	End       source.Position `json:"end"`
-	Action    string          `json:"action"`
-	Type      uint64          `json:"type"`
-	Text      string          `json:"text"`
-	FloatBits string          `json:"float_bits"`
-	Field     string          `json:"field"`
-	Flow      uint64          `json:"flow"`
-	Operation string          `json:"operation"`
-	Labels    []string        `json:"labels"`
-	Owner     string          `json:"owner"`
+	ID              uint64             `json:"id"`
+	File            string             `json:"file"`
+	Start           source.Position    `json:"start"`
+	End             source.Position    `json:"end"`
+	Action          string             `json:"action"`
+	Type            uint64             `json:"type"`
+	Text            string             `json:"text"`
+	FloatBits       string             `json:"float_bits"`
+	Field           string             `json:"field"`
+	Flow            uint64             `json:"flow"`
+	Operation       string             `json:"operation"`
+	Labels          []string           `json:"labels"`
+	Owner           string             `json:"owner"`
+	Arguments       []ArgumentMetadata `json:"arguments"`
+	DerivativePlan  uint64             `json:"derivative_plan"`
+	DerivativeNode  uint64             `json:"derivative_node"`
+	DerivativeFrame uint64             `json:"derivative_frame"`
+}
+
+// ArgumentMetadata identifies a checked value or callback in parameter order.
+type ArgumentMetadata struct {
+	Kind string `json:"kind"`
+	Type uint64 `json:"type"`
+	Flow uint64 `json:"flow"`
 }
 
 type Function struct {
@@ -114,6 +126,8 @@ const (
 	ScopeLeave
 	FlowLeave
 	ReleaseAll
+	Release
+	TapeLeave
 )
 
 type Instruction struct {
