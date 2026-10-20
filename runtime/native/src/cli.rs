@@ -12,6 +12,8 @@ use std::{
 };
 macro_rules! checked_stderr {($($argument:tt)*)=>{if writeln!(std::io::stderr().lock(),$($argument)*).is_err(){return 2}};}
 static CANCELLED: AtomicBool = AtomicBool::new(false);
+const SIGPIPE: c_int = 13;
+const SIG_IGN: usize = 1;
 pub fn cancelled() -> bool {
     CANCELLED.load(Ordering::Relaxed)
 }
@@ -118,6 +120,7 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
 }
 #[no_mangle]
 pub unsafe extern "C" fn lo_cli_main(argc: c_int, argv: *const *const c_char) -> c_int {
+    signal(SIGPIPE, SIG_IGN);
     let mut args = vec![];
     for i in 1..argc {
         let s = match CStr::from_ptr(*argv.add(i as usize)).to_str() {
