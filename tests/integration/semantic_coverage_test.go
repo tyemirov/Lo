@@ -27,7 +27,7 @@ func TestSemanticCoverageRunIdentity(t *testing.T) {
 		t.Fatalf("unknown semantic backend %q", backend)
 	}
 	var paths []string
-	for _, directory := range []string{"internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"} {
+	for _, directory := range []string{"cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"} {
 		err := filepath.WalkDir(filepath.Join(repository, directory), func(path string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -77,10 +77,7 @@ func TestSemanticCoverageRunIdentity(t *testing.T) {
 		}
 		fmt.Fprintf(hash, "%s\x00%x\n", filepath.ToSlash(relative), sha256.Sum256(data))
 	}
-	matrix, err := os.ReadFile(filepath.Join(repository, "testdata", "semantic-migration", "matrix.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	matrix := semanticMatrixBytes(t)
 	identity, err := json.Marshal(map[string]string{"backend": backend, "source_sha256": fmt.Sprintf("%x", hash.Sum(nil)), "matrix_sha256": fmt.Sprintf("%x", sha256.Sum256(matrix))})
 	if err != nil {
 		t.Fatal(err)
@@ -114,12 +111,33 @@ type semanticMatrix struct {
 	Gaps       []struct{ ID, Scope, Reason, Owner, Acceptance string } `json:"gaps"`
 }
 
+func semanticMatrixBytes(t *testing.T) []byte {
+	t.Helper()
+	path := os.Getenv("LO_SEMANTIC_MATRIX")
+	if path == "" {
+		path = filepath.Join("testdata", "semantic-migration", "matrix.json")
+	}
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(repository, path)
+	}
+	resolved, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		t.Fatalf("resolve semantic matrix %s: %v", path, err)
+	}
+	relative, err := filepath.Rel(repository, resolved)
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		t.Fatalf("semantic matrix outside repository: %s", path)
+	}
+	data, err := os.ReadFile(resolved)
+	if err != nil {
+		t.Fatalf("read semantic matrix %s: %v", path, err)
+	}
+	return data
+}
+
 func readSemanticMatrix(t *testing.T) semanticMatrix {
 	t.Helper()
-	data, err := os.ReadFile(filepath.Join(repository, "testdata", "semantic-migration", "matrix.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	data := semanticMatrixBytes(t)
 	var matrix semanticMatrix
 	decoder := json.NewDecoder(strings.NewReader(string(data)))
 	decoder.DisallowUnknownFields()
