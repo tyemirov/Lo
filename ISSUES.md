@@ -1278,7 +1278,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [validation receipt](docs/evidence/native-lowering/validation.json) records successful CI, source identities, and independent review.
   Linux executable qualification and the full runtime port are downstream acceptance work.
 
-- [ ] [I007] (P1) {I006} Port core values and execution to the native runtime
+- [x] [I007] (P1) {I006} Port core values and execution to the native runtime
   Goal:
   Execute core Lo values through the selected native ABI.
 
@@ -1297,7 +1297,16 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify bounded memory across repeated calls and complete cleanup after failure.
   - Verify no unwinding crosses the ABI.
 
-- [ ] [I008] (P1) {I007,F016} Port tensors, differentiation, optimizers, and checkpoints
+  Completed on October 20, 2026.
+  The explicit LLVM executable route links the precompiled Rust runtime.
+  Core LLVM checks passed on Darwin arm64 and Linux arm64 in QEMU.
+  Each target passed 10,240 requests with retained contexts and complete cleanup.
+  Exact error traces, step limits, core operations, and metadata rejection passed.
+  Independent review found no remaining material core defect.
+  The [runtime receipt](docs/evidence/native-runtime/validation.json) records the qualification scope and source identities.
+  Final CI passed.
+
+- [x] [I008] (P1) {I007,F016} Port tensors, differentiation, optimizers, and checkpoints
   Goal:
   Preserve complete CPU training and model persistence in the native runtime.
 
@@ -1306,6 +1315,8 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Preserve tape lifetime, numeric checks, execution charges, and tensor admission.
   - Preserve canonical checkpoint bytes and typed import diagnostics.
   - Restore complete optimizer state without changes to resumed results.
+  - Lower the checked autodiff plan with its source frames, charges, and release points.
+  - Implement the confined file operations required by the existing checkpoint workflows before full I009 acceptance.
 
   Deliverables:
   - Add numerical runtime operations, checkpoint codecs, and native fixtures.
@@ -1315,6 +1326,19 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify the existing 200-step training and 500-step XOR workflows.
   - Compare uninterrupted and resumed execution exactly within the same profile.
   - Verify malformed checkpoints, resource limits, cancellation, and failure cleanup.
+
+  Completed on October 20, 2026.
+  Existing LLVM training tests failed at the absent numerical runtime and specialized autodiff boundary.
+  The implementation includes the confined file operations needed for checkpoint persistence.
+  The 200-step training and 500-step XOR checks passed on both targets.
+  CPU checkpoint resumption matched uninterrupted training exactly.
+  All 13 analytical derivative and finite-difference fixtures passed through LLVM on Darwin.
+  Linux checkpoint tests passed across eight separate guest processes.
+  Resource lifetime, compiled work charges, cancellation, and failure cleanup passed.
+  Canonical bytes and exact malformed checkpoint diagnostics passed.
+  Independent review found no remaining material defect.
+  The [runtime receipt](docs/evidence/native-runtime/validation.json) records the complete evidence and qualification limits.
+  Final CI passed.
 
 - [ ] [I009] (P1) {I007} Port confined files, processes, and HTTP execution
   Goal:
