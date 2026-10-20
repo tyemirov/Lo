@@ -5,7 +5,8 @@ extern int fcntl(int, int, ...);
 extern int dup2(int, int);
 extern Offset lseek(int, Offset, int);
 extern long read(int, void *, Size);
-extern int lo_cli_main(int, const char **);
+extern long write(int, const void *, Size);
+extern int lo_cli_main(int, const char **, const char **);
 #ifdef __APPLE__
 extern int *__error(void);
 #define ERROR_ADDRESS __error
@@ -36,14 +37,18 @@ int main(void) {
     int saved = fcntl(2, 0, 3);
     if (output < 0 || saved < 0 || dup2(output, 2) < 0) return 10;
     const char *arguments[] = {"fixture", "run", "--format", "json", "--read-root", ".", "--max-steps", LO_CASE == 2 ? "1" : "1000"};
-    int status = lo_cli_main(8, arguments);
+    int status = lo_cli_main(8, arguments, 0);
     if (dup2(saved, 2) < 0 || lseek(output, 0, 0) < 0) return 11;
     char diagnostic[8192];
     long count = read(output, diagnostic, sizeof(diagnostic) - 1);
     if (count <= 0) return 12;
     diagnostic[count] = 0;
     if (status != (LO_CASE == 0 ? 1 : 2)) return 20;
-    if (!contains(diagnostic, "close runtime resources")) return 21;
+    if (!contains(diagnostic, "close runtime resources")) {
+        write(2, diagnostic, (Size)count);
+        return 21;
+    }
+    if (LO_CASE != 1 && !contains(diagnostic, "; cleanup: close runtime resources")) return 25;
     if (LO_CASE == 0 && (!contains(diagnostic, "\"kind\":\"Math.DivideByZero\"") ||
                         !contains(diagnostic, "\"cleanup_errors\":["))) return 22;
     if (LO_CASE == 2 && (!contains(diagnostic, "\"code\":\"runtime.limit\"") ||
