@@ -121,6 +121,23 @@ def test_prepare_pins_fixtures_without_backend_qualification(workspace: Path, de
     assert json.loads((workspace / '_scratch/native-backend-probe/result.json').read_text())['qualification'] != 'passed'
 
 
+@pytest.mark.parametrize('action', ['prepare', 'run'])
+@pytest.mark.parametrize('name', ['result.json', 'prepared.json', 'execution/inputs.json'])
+def test_manifest_in_writable_state_is_rejected_without_writes(
+    workspace: Path, declared_inputs: dict[str, Any], action: str, name: str,
+) -> None:
+    state = workspace / '_scratch/native-backend-probe'
+    manifest = state / name
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(json.dumps(declared_inputs))
+    before = {path.relative_to(state): path.read_bytes() for path in state.rglob('*') if path.is_file()}
+    result = invoke(workspace, action, '--inputs', manifest.relative_to(workspace).as_posix())
+    after = {path.relative_to(state): path.read_bytes() for path in state.rglob('*') if path.is_file()}
+    assert after == before
+    assert result.returncode == 1
+    assert 'manifest overlaps writable experiment state' in result.stderr
+
+
 def test_run_rejects_stale_receipt_before_tool_execution(workspace: Path, declared_inputs: dict[str, Any]) -> None:
     assert invoke(workspace, 'prepare', '--inputs', 'inputs.json').returncode == 0
     receipt = workspace / '_scratch/native-backend-probe/prepared.json'

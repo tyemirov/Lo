@@ -130,6 +130,8 @@ class Inputs:
     @classmethod
     def read(cls, name: str) -> Inputs:
         path = relative_path(name)
+        if path.is_relative_to(relative_path(STATE_NAME, exists=False)):
+            raise InputError('manifest overlaps writable experiment state')
         value = fields(json.loads(path.read_text()), {'isolation', 'targets'}, 'inputs: isolation and targets')
         isolation = fields(value['isolation'], {'kind', 'bundle', 'tool', 'probe'}, 'isolation')
         if isolation['kind'] not in ('sandbox-exec', 'bwrap'):
