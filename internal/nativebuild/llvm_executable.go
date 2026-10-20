@@ -241,10 +241,22 @@ func BuildLLVM(ctx context.Context, program ir.Program, output, target string, b
 	}
 	plan, err := nativeplan.Lower(ctx, program)
 	if err != nil {
+		if ctx.Err() != nil {
+			return fail(diagnostic.BuildCancelled, ctx.Err())
+		}
+		if errors.Is(err, nativeplan.ErrLimit) {
+			return fail(diagnostic.BuildLimit, err)
+		}
 		return fail(diagnostic.BuildGenerate, err)
 	}
 	module, err := llvmemit.Emit(ctx, plan, target)
 	if err != nil {
+		if ctx.Err() != nil {
+			return fail(diagnostic.BuildCancelled, ctx.Err())
+		}
+		if errors.Is(err, nativeplan.ErrLimit) {
+			return fail(diagnostic.BuildLimit, err)
+		}
 		return fail(diagnostic.BuildGenerate, err)
 	}
 	module = append(module, []byte(`
