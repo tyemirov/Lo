@@ -1,0 +1,100 @@
+{
+  "abi": "lo-native-1",
+  "llvm": "21.1.8",
+  "host": "darwin/arm64",
+  "compiler": {
+    "path": "bin/clang",
+    "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+  },
+  "targets": {
+    "darwin/arm64": {
+      "triple": "aarch64-apple-darwin",
+      "linker": {
+        "path": "bin/ld64.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "runtime": {
+        "path": "runtime/aarch64-apple-darwin/liblo_runtime.a",
+        "sha256": "4a0c74573e5a16834824167bab7ce5f77613d4ce4466fe7778e6f0a16558db7e"
+      },
+      "inputs": {
+        "system": {
+          "path": "platform/darwin/libSystem.tbd",
+          "sha256": "5e88533578fc2d31b4f4109f161436995a9f28ea41a551a7d2cec95d9baa4c52"
+        }
+      },
+      "link_args": [
+        "-dead_strip",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "macos",
+        "27.0",
+        "27.0",
+        "-o",
+        "{output}",
+        "{object}",
+        "{runtime}",
+        "{input:system}"
+      ]
+    },
+    "linux/arm64": {
+      "triple": "aarch64-unknown-linux-gnu",
+      "linker": {
+        "path": "bin/ld.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "runtime": {
+        "path": "runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+        "sha256": "409a82c32c938b2f4ca683de6d539111c767b7c53c7a108036e393b89de3084b"
+      },
+      "inputs": {
+        "crt1": {
+          "path": "platform/linux/crt1.o",
+          "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc"
+        },
+        "crti": {
+          "path": "platform/linux/crti.o",
+          "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5"
+        },
+        "crtn": {
+          "path": "platform/linux/crtn.o",
+          "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5"
+        },
+        "libc": {
+          "path": "platform/linux/libc.so.6",
+          "sha256": "e4ac8ae1d81e4865e3aadedb962879cf9415903b3f2ba81ec75e9962b86ab8b0"
+        },
+        "libm": {
+          "path": "platform/linux/libm.so.6",
+          "sha256": "3c4cb3be0b974edf05f023f85ab15107fb5afc2687163593d0d4cf8e80c17b39"
+        },
+        "libgcc": {
+          "path": "platform/linux/libgcc_s.so.1",
+          "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7"
+        },
+        "nonshared": {
+          "path": "platform/linux/libc_nonshared.a",
+          "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f"
+        }
+      },
+      "link_args": [
+        "-m",
+        "aarch64elf",
+        "-dynamic-linker",
+        "/lib/ld-linux-aarch64.so.1",
+        "-o",
+        "{output}",
+        "{input:crt1}",
+        "{input:crti}",
+        "{object}",
+        "{runtime}",
+        "{input:libgcc}",
+        "{input:libm}",
+        "{input:libc}",
+        "{input:nonshared}",
+        "{input:crtn}"
+      ]
+    }
+  }
+}

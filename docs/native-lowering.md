@@ -41,11 +41,15 @@ The structural contract includes literals, references, projections, conversions,
 Flow calls keep parameter order, handler identity, and source context.
 Built-in calls keep result types, argument positions, labels, and callback identities.
 Each call site has a unique metadata identity, including sites with the same source span.
+Lo runtime metadata keeps the complete source position.
+LLVM debug metadata uses column zero when the column exceeds 65,535.
+This follows the [LLVM debug-location rule](https://llvm.org/doxygen/DebugInfoMetadata_8cpp_source.html).
 
 Autodiff calls contain derivative plans and resource metadata.
-The initial lowering route rejects these specialized calls explicitly.
-I008 must implement their full contract before this route accepts them.
-It must not treat an autodiff call as an ordinary catalog call.
+I008 lowers each checked derivative plan into a dedicated native function.
+The function keeps source frames, forward evaluation, reverse accumulation, charges, and release points.
+The [native runtime](native-runtime.md) supplies the tape and numerical operations.
+The verifier checks derivative metadata before emission.
 
 ## Execution Order
 

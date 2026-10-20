@@ -7,10 +7,24 @@ The default executable build still generates Go source with Go 1.27.1.
 LLVM module emission does not change the language specification.
 The [semantic migration contract](semantic-migration.md) records current coverage and its evidence requirements.
 
-I004, I005, P005, and I006 passed their acceptance checks.
+I004, I005, P005, I006, I007, and I008 passed their acceptance checks.
 I006 implements the [native lowering boundary](native-lowering.md) with LLVM modules for both targets.
-I007 is the next implementation step.
-It supplies core runtime values and execution under the selected ABI.
+I007 supplies core runtime values and execution under the selected ABI.
+Core LLVM checks passed on Darwin arm64 and Linux arm64 in QEMU.
+Each target passed 10,240 requests with retained contexts and complete cleanup.
+Exact error traces, core operations, and execution limits passed their focused checks.
+Final CI passed.
+I008 implements numerical operations, autodiff plans, optimizers, and checkpoints.
+Its acceptance includes the existing backpropagation, 200-step training, 500-step XOR, and checkpoint resumption tests through LLVM executables.
+The training and XOR checks passed on Darwin arm64 and Linux arm64 in QEMU.
+CPU checkpoint resumption matched uninterrupted training exactly.
+Resource lifetime, metadata admission, work charges, cancellation, and exact checkpoint diagnostics passed.
+All 13 analytical derivative and finite-difference fixtures passed through LLVM on Darwin.
+Linux checkpoint tests passed across eight separate guest processes.
+Independent review found no remaining material defect.
+The confined file operations required by these workflows precede full I009 acceptance.
+The [runtime development guide](native-runtime.md) gives the explicit LLVM build and verification commands.
+The [runtime receipt](evidence/native-runtime/validation.json) records source identities and validation results.
 The installed standalone compiler criterion is still open under F017 and I011.
 
 ## Required Outcome
@@ -31,8 +45,9 @@ Self-hosting is outside this plan.
 ## Current Contract
 
 The [frontend](../internal/compiler/compiler.go) produces a typed [checked graph](../internal/ir/ir.go).
-The [native generator](../internal/codegen/generate.go) converts that graph to direct Go control flow.
-The [builder](../internal/nativebuild/build.go) locates Go and compiles an embedded source bundle.
+The default [native generator](../internal/codegen/generate.go) converts that graph to direct Go control flow.
+The default [builder](../internal/nativebuild/build.go) locates Go and compiles an embedded source bundle.
+The explicit LLVM route lowers the graph and links the precompiled Rust runtime.
 Native artifacts already execute without Go or Lo installed.
 
 The migration covers the current catalog, including F015, F016, and I003.
@@ -164,8 +179,8 @@ The validation requirements in each issue are its acceptance criteria.
 | Compare complete toolchains | I004, P005 | Four-cell experiment and one selected backend, ABI, and platform contract. |
 | Record semantic coverage | I005 | Full current-language corpus with independent expectations. |
 | Add native lowering | I006 | Completed: verified control, cost, error, cleanup, LLVM emission, and bounded runtime execution. |
-| Port core values | I007 | Core runtime and generated calls pass public fixtures. |
-| Port numeric execution | I008 | Tensors, autodiff, optimizers, and checkpoints pass their contracts. |
+| Port core values | I007 | Completed: core runtime and generated calls pass public fixtures. |
+| Port numeric execution | I008 | Completed: CPU tensors, autodiff, optimizers, and checkpoints pass their contracts. |
 | Port adapters | I009 | Files, processes, and HTTP pass confinement and lifecycle tests. |
 | Port devices | I010 | Transfers, Metal profiles, and resource cleanup pass software acceptance. |
 | Supply the distribution | F017 | Complete relocatable offline compiler package. |

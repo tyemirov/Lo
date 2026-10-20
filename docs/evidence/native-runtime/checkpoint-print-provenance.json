@@ -1,0 +1,14 @@
+{
+  "unicode": "17.0.0",
+  "source": "Go standard library unicode.IsPrint, version checked by retained generator",
+  "generator": {
+    "path": "tools/nativeruntime/generatecheckpointprint/main.go",
+    "sha256": "c8b73e324b02486aac713479a5be7a017d4be37d1efe98866d36282b86cd2a6d"
+  },
+  "module": {
+    "path": "runtime/native/src/checkpoint_print.rs",
+    "sha256": "5cf1724aeca2ca9b2c3066b087217f8c38d7fe5e694ccb9cb21c139fc986ac1b"
+  },
+  "non_printable_ranges": 742,
+  "regeneration": "byte-for-byte identical to preparation/checkpoint_print.reproduced.rs"
+}

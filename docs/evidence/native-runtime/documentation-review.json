@@ -1,0 +1,19 @@
+{
+  "reference": "ASD-STE100 Issue 9, January 2025",
+  "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+  "reference_retained_in_distribution": false,
+  "scope": [
+    "new docs/native-runtime.md",
+    "changed prose in docs/native-runtime-contract.md",
+    "changed prose in docs/native-lowering.md",
+    "changed prose in docs/standalone-compiler-plan.md",
+    "I007 and I008 changes"
+  ],
+  "producer_review": "Reviewed changed prose against Part 1 rules, Part 2 meanings, and repository terminology.",
+  "mechanical_check": "ste-check.json",
+  "changed_prose_findings": 0,
+  "existing_tracker_findings": 12,
+  "existing_findings_comparison": "Rule and text sets match the earlier tracker report. The changed text adds no mechanical findings.",
+  "full_tracker_compliance_claimed": false,
+  "document_structure": "document-structure.json"
+}

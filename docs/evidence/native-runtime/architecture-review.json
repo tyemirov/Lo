@@ -1,0 +1,44 @@
+{
+  "role": "mpr-architect",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "agent": "/root/runtime_architecture",
+  "assignment_evidence": "Fixed native role metadata. Per-run actual model telemetry is unavailable.",
+  "source_review": "accepted",
+  "final_evidence_review": "accepted",
+  "remaining_material_source_findings": 0,
+  "resolved_findings": [
+    "Preserve retained aliases while releasing root storage with no remaining value reference.",
+    "Reject foreign context handles and malformed derivative metadata.",
+    "Preserve cancellation and primary errors during checkpoint file cleanup.",
+    "Preserve JSON admission, source-order diagnostics, field context, and decode charges.",
+    "Use a closed Cargo environment and reject undeclared caller overrides.",
+    "Exercise numerical work charges through compiled artifacts, including exact failure boundaries.",
+    "Keep long multibyte checkpoint parsing linear in input size.",
+    "Use the LLVM unknown debug column for out-of-range columns and retain exact Lo runtime locations.",
+    "Preserve Go numeric grammar and direct FP32 rounding without double rounding.",
+    "Preserve Unicode 17 field-name quoting through a generated Rust table.",
+    "Replace the obsolete autodiff rejection reference and inventory the new compiler flags.",
+    "Reference passing final CI publication tests and accurately label the intermediate compilation failure."
+  ],
+  "last_bounded_reviews": {
+    "numeric_admission": "No material defect in grammar, FP32/FP64 rounding, overflow, underflow, signed zero, or integer admission.",
+    "unicode_quoting": "All 742 ranges are sorted, disjoint, and coalesced. Escape rules match Go quoting. No runtime Go dependency.",
+    "semantic_inventory": "New records accurately describe the always-active missing-distribution and no-publication checks."
+  },
+  "scope_limits": [
+    "I009 owns complete file, process, and HTTP execution.",
+    "Pipe cancellation tests use opened descriptors with connected peers.",
+    "I010 owns Metal and device execution.",
+    "F017 and I011 own installed offline compiler acceptance and complete migration."
+  ],
+  "final_verification": {
+    "source_file_identities": 684,
+    "runtime_source_digest": "matches final build receipt",
+    "runtime_archives": "Both final target archive bytes match their recorded SHA-256 digests.",
+    "manifest_digest": "matches final build receipt",
+    "repository_ci": "passed",
+    "publication_cases": 4,
+    "remaining_material_findings": 0
+  }
+}

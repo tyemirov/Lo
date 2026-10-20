@@ -2,7 +2,8 @@
 
 P005 owns the native backend, runtime ABI, and platform decisions.
 The selected design uses LLVM 21.1.8, LLD 21.1.8, and a precompiled Rust runtime.
-The current implementation still generates Go source.
+The default build route still generates Go source.
+I007 and I008 implement the explicit [LLVM executable route](native-runtime.md).
 This document defines the replacement contract for I006 through F017.
 The P005 acceptance checks passed on October 19, 2026.
 The [final validation receipt](evidence/compiler-evolution/validation.json) records the repository checks and independent review.
