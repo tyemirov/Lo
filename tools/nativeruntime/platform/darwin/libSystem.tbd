@@ -7,12 +7,14 @@ compatibility-version: 1
 exports:
   - targets: [ arm64-macos ]
     symbols:
+      - dyld_stub_binder
       - _CCRandomGenerateBytes
       - __NSGetArgc
       - __NSGetArgv
       - __NSGetEnviron
       - __NSGetExecutablePath
       - __Unwind_Backtrace
+      - __Unwind_DeleteException
       - __Unwind_GetCFA
       - __Unwind_GetDataRelBase
       - __Unwind_GetIP
@@ -21,6 +23,7 @@ exports:
       - __Unwind_GetRegionStart
       - __Unwind_GetTextRelBase
       - __Unwind_Resume
+      - __Unwind_RaiseException
       - __Unwind_SetGR
       - __Unwind_SetIP
       - ___assert_rtn
@@ -33,6 +36,7 @@ exports:
       - __tlv_atexit
       - __tlv_bootstrap
       - _abort
+      - _alarm
       - _accept
       - _bind
       - _bzero
@@ -102,6 +106,7 @@ exports:
       - _memset
       - _mkdir
       - _mmap
+      - _mkfifo
       - _mprotect
       - _munmap
       - _nanosleep

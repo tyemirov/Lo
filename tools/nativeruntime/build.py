@@ -9,7 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from prepare import LOCK, ROOT, RUST_COMPONENTS, digest, local, tree_digest
+from prepare import LOCK, ROOT, RUST_COMPONENTS, digest, local, pin_file, tree_digest
 
 TARGETS = {'darwin/arm64': 'aarch64-apple-darwin', 'linux/arm64': 'aarch64-unknown-linux-gnu'}
 
@@ -23,14 +23,48 @@ def validate_build_environment() -> None:
             raise ValueError(f'undeclared Cargo build control: {name}')
 
 
-def cargo_environment(preparation: Path, compiler: Path) -> dict[str, str]:
+def cargo_environment(preparation: Path, compiler: Path, host_linker: Path, sdk: Path) -> dict[str, str]:
     # No caller environment is a Cargo input. These are the complete declared
     # inputs; Cargo.toml, .cargo/config.toml and the vendored lock own all flags.
     return {'CI': '1', 'CARGO_HOME': str(local(preparation / 'cargo-home')),
             'RUSTUP_HOME': str(local(preparation / 'rustup-home')),
             'RUSTC': str(compiler), 'CARGO_TARGET_DIR': str(local(preparation / 'cargo-target')),
+            'CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER': str(host_linker), 'SDKROOT': str(sdk),
             'TMPDIR': str(preparation), 'PATH': str(compiler.parent),
             'LC_ALL': 'C', 'TZ': 'UTC'}
+
+
+def prepare_host_linker(preparation: Path, tool_pins: dict[str, dict[str, str]]) -> tuple[Path, Path]:
+    work = local(preparation / 'host-linker')
+    library = local(work / 'sdk/usr/lib')
+    library.mkdir(parents=True, exist_ok=True)
+    stub = local(ROOT / 'tools/nativeruntime/platform/darwin/libSystem.tbd')
+    for name in ('libSystem.tbd', 'libc.tbd', 'libm.tbd'):
+        target = local(library / name)
+        target.unlink(missing_ok=True)
+        os.link(stub, target)
+    selected = {}
+    for name in ('clang', 'ld64.lld'):
+        pin = tool_pins[name]
+        path = local(Path(pin['path']))
+        if digest(path) != pin['sha256']:
+            raise ValueError(f'prepared LLVM tool digest mismatch: {name}')
+        selected[name] = path
+    sdk, executable, object_path = local(work / 'sdk'), local(work / 'linker'), local(work / 'linker.o')
+    commands = [
+        [str(selected['clang']), '-target', 'aarch64-apple-darwin', '-mmacosx-version-min=27.0',
+         '-nostdinc', '-fno-stack-protector',
+         '-DLO_CLANG=' + json.dumps(str(selected['clang'])),
+         '-DLO_LINKER=' + json.dumps(str(selected['ld64.lld'])), '-DLO_SYSROOT=' + json.dumps(str(sdk)),
+         '-c', str(local(ROOT / 'tools/nativeruntime/host_linker.c')), '-o', str(object_path)],
+        [str(selected['ld64.lld']), '-arch', 'arm64', '-platform_version', 'macos', '27.0', '27.0',
+         '-o', str(executable), str(object_path), str(stub)]]
+    for command in commands:
+        result = subprocess.run(command, cwd=ROOT, env={'CI': '1', 'PATH': '', 'TMPDIR': str(work)},
+                                stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False)
+        if result.returncode:
+            raise ValueError(f'host linker preparation failed: {result.stderr}')
+    return executable, sdk
 
 
 def build(preparation: Path, output: Path, targets: list[str]) -> Path:
@@ -62,7 +96,8 @@ def build(preparation: Path, output: Path, targets: list[str]) -> Path:
     cargo = local(Path(rust['cargo']['path']))
     output.mkdir(parents=True, exist_ok=True)
     local(output / 'toolchain.json').unlink(missing_ok=True)
-    environment = cargo_environment(preparation, compiler)
+    host_linker, sdk = prepare_host_linker(preparation, tools['tools'])
+    environment = cargo_environment(preparation, compiler, host_linker, sdk)
     def copy_file(source: Path, relative: str) -> dict[str, str]:
         target = local(output / relative)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -118,7 +153,10 @@ def build(preparation: Path, output: Path, targets: list[str]) -> Path:
         raise ValueError('runtime source changed during build')
     manifest.write_text(json.dumps(distribution, indent=2) + '\n')
     provenance = {'runtime_source_sha256': source_digest, 'rust': rust,
-                  'llvm': tools, 'cargo_environment': environment, 'manifest_sha256': digest(manifest)}
+                  'llvm': tools, 'cargo_environment': environment, 'manifest_sha256': digest(manifest),
+                  'host_linker': {'executable': pin_file(host_linker),
+                                  'source': pin_file(local(ROOT / 'tools/nativeruntime/host_linker.c')),
+                                  'sdk_sha256': tree_digest(sdk)}}
     (output / 'build-receipt.json').write_text(json.dumps(provenance, indent=2) + '\n')
     return manifest
 

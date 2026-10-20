@@ -3,12 +3,24 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import shlex
 import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 CLI = ROOT / 'tools/nativeruntime/prepare.py'
 STATE = ROOT / '_scratch/i007-i008-20261020/preparation/test-missing'
+
+
+def test_default_make_preparation_includes_linux_platform() -> None:
+    result = subprocess.run(['make', '--no-print-directory', '-n', 'prepare-native-runtime'],
+                            cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
+                            capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    command, = [shlex.split(line) for line in result.stdout.splitlines()
+                if 'tools/nativeruntime/prepare.py' in line]
+    assert '--download' in command
+    assert '--platform' in command
 
 
 def invoke(*arguments: str) -> subprocess.CompletedProcess[str]:
@@ -36,6 +48,29 @@ def test_runtime_build_requires_prepared_compiler() -> None:
                             capture_output=True, text=True, check=False)
     assert result.returncode == 1
     assert 'missing prepared Rust receipt' in result.stderr
+
+
+def test_runtime_build_uses_prepared_host_linker() -> None:
+    import json
+    import pytest
+
+    supplied = os.environ.get('LO_NATIVE_PREPARATION')
+    if supplied is None:
+        pytest.skip('LO_NATIVE_PREPARATION selects the prepared compiler inputs')
+    state = (ROOT / supplied).resolve()
+    assert state.is_relative_to(ROOT / '_scratch')
+    result = subprocess.run([sys.executable, '-B', str(CLI.with_name('build.py')),
+                             '--preparation', str(state), '--output', str(state / 'distribution')],
+                            cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
+                            capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    manifest = json.loads((state / 'distribution/toolchain.json').read_text())
+    assert set(manifest['targets']) == {'darwin/arm64', 'linux/arm64'}
+    receipt = json.loads((state / 'distribution/build-receipt.json').read_text())
+    environment = receipt['cargo_environment']
+    assert environment['CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER'] == str(state / 'host-linker/linker')
+    assert environment['SDKROOT'] == str(state / 'host-linker/sdk')
+    assert receipt['host_linker']['source']['path'] == 'tools/nativeruntime/host_linker.c'
 
 
 def test_guest_runner_rejects_missing_executable() -> None:
