@@ -27,6 +27,7 @@ type parameterMetadata struct {
 	Type uint64 `json:"type"`
 }
 type flowMetadata struct {
+	Identity   string              `json:"identity"`
 	ID         uint64              `json:"id"`
 	Name       string              `json:"name"`
 	Parameters []parameterMetadata `json:"parameters"`
@@ -100,7 +101,7 @@ func Lower(ctx context.Context, program ir.Program) (Plan, error) {
 		l.flows[flow.ID()] = flow
 	}
 	for i, flow := range program.Flows() {
-		meta := flowMetadata{ID: uint64(i), Name: flow.Name(), Parameters: []parameterMetadata{}, Output: l.typeID(flow.Signature().Output())}
+		meta := flowMetadata{Identity: string(flow.ID()), ID: uint64(i), Name: flow.Name(), Parameters: []parameterMetadata{}, Output: l.typeID(flow.Signature().Output())}
 		for _, param := range flow.Parameters() {
 			meta.Parameters = append(meta.Parameters, parameterMetadata{param.Name, l.typeID(param.Type)})
 		}

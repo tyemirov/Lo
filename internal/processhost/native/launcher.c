@@ -1,3 +1,6 @@
+#ifdef LO_NATIVE_RUNTIME
+#include "lo_process_abi.h"
+#else
 #include <errno.h>
 #include <fcntl.h>
 #include <sandbox.h>
@@ -6,6 +9,7 @@
 #include <string.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#endif
 #include "protocol.h"
 
 /* Supplied by the separately reviewed IPC normalizer; no stub is linked. */

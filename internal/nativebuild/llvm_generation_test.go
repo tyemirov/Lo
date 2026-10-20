@@ -107,7 +107,7 @@ func generationTestManifest(t *testing.T, root string) string {
 	record := llvmDistribution{ABI: nativeplan.ABIIdentity, LLVM: llvmVersion, Host: runtime.GOOS + "/" + runtime.GOARCH,
 		Compiler: pin, Targets: map[string]llvmTarget{"darwin/arm64": {
 			Triple: "aarch64-apple-darwin", Linker: pin, Runtime: pin,
-			Inputs: map[string]llvmFile{"system": pin}, LinkArgs: arguments,
+			Inputs: map[string]llvmFile{"system": pin, "security": pin, "corefoundation": pin}, LinkArgs: arguments,
 		}}}
 	data, err := json.Marshal(record)
 	if err != nil {
