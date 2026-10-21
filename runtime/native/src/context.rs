@@ -191,6 +191,7 @@ pub struct Flow {
     pub output: Type,
 }
 pub struct Program {
+    pub artifact: Option<Json>,
     pub derivatives: Vec<crate::autodiff::Plan>,
     pub sites: Vec<Site>,
     pub flows: Vec<Flow>,
@@ -476,6 +477,7 @@ impl Program {
             }
         }
         Ok(Self {
+            artifact: v.get("artifact").cloned(),
             derivatives,
             sites,
             flows,
@@ -487,20 +489,28 @@ impl Program {
 }
 impl Context {
     pub fn new(program: Arc<Program>, steps: u64) -> Self {
+        let session = Session::empty(program, steps);
+        Self::with_session(session, crate::files::empty(), true)
+    }
+    fn with_session(
+        session: Arc<Session>,
+        files: crate::files::Files,
+        observe_cli_cancel: bool,
+    ) -> Self {
         LIVE_CONTEXTS.fetch_add(1, Ordering::Relaxed);
         Self {
-            session: Session::empty(program.clone(), steps),
             cancellation: Arc::new(AtomicBool::new(false)),
             deadline: None,
-            observe_cli_cancel: true,
-            files: crate::files::empty(),
+            observe_cli_cancel,
+            files,
             last_activation: None,
-            resources: crate::resources::Ledger::new(),
-            device_grant: String::new(),
+            resources: crate::resources::Ledger::with_config(session.devices.clone()),
+            device_grant: session.devices.grant.clone(),
             tapes: vec![],
-            program,
+            program: session.program.clone(),
             owner: thread::current().id(),
-            remaining: steps,
+            remaining: session.steps,
+            session,
             weight: 0,
             depth: 0,
             fault: None,
@@ -514,19 +524,39 @@ impl Context {
     }
     pub fn request(session: Arc<Session>) -> Result<Self, Fault> {
         let files = session.files.lock().unwrap().fork().map_err(host)?;
-        let mut context = Self::new(session.program.clone(), session.steps);
-        context.files = files;
-        context.session = session;
-        context.observe_cli_cancel = false;
-        Ok(context)
+        Ok(Self::with_session(session, files, false))
     }
     pub fn invoke(&mut self, flow: usize, args: &[Handle]) -> Outcome {
         unsafe { crate::exports::invoke(self, flow, args, 0) }
     }
     pub fn close(&mut self) -> Result<(), Fault> {
-        self.files
-            .close()
-            .map_err(|message| host(format!("close runtime resources \"program\": {message}")))
+        let files = self.files.close().err().map(host);
+        let devices = self.resources.close().err();
+        match combine_cleanup(files, devices) {
+            None => Ok(()),
+            Some(fault) => {
+                let message = format!("close runtime resources \"program\": {}", fault.message());
+                let details = match fault {
+                    Fault::Boundary { mut details, .. } => {
+                        details.cleanup_messages.clear();
+                        *details
+                    }
+                    _ => BoundaryDetails::default(),
+                };
+                Err(host(message).with_details(details))
+            }
+        }
+    }
+    pub fn device_parts(&mut self) -> (&mut crate::resources::Ledger, crate::device::Control<'_>) {
+        let control = crate::device::Control::new(
+            &self.cancelled,
+            &self.cancellation,
+            self.deadline,
+            self.observe_cli_cancel,
+            &self.cancel_polls,
+            self.cancel_after_polls,
+        );
+        (&mut self.resources, control)
     }
     pub fn capture_fault(&self, fault: Fault) -> Fault {
         if matches!(fault.primary(), Fault::Recoverable(_)) {

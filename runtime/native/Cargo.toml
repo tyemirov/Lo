@@ -8,6 +8,9 @@ rust-version = "1.85.1"
 name = "lo_runtime"
 crate-type = ["staticlib"]
 
+[features]
+metal = []
+
 [dependencies]
 num-bigint = "=0.4.6"
 num-traits = "=0.2.19"

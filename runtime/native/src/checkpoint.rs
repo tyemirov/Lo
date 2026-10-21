@@ -831,7 +831,9 @@ fn decode_document(c: &mut Context, encoded: &Json, template: &Handle, trailing:
             training::validate(&result).map_err(invalid)?;
             if result.typ.kind() == "Optimizer.AdamW.State" {
                 for value in result.fields()["second_moment"].fields().values() {
-                    for (index, number) in tensor::data(value).storage.values.iter().enumerate() {
+                    for (index, number) in
+                        tensor::data(value).storage.host_values().iter().enumerate()
+                    {
                         if index % 1024 == 0 {
                             c.check_cancel()?;
                         }
@@ -841,7 +843,7 @@ fn decode_document(c: &mut Context, encoded: &Json, template: &Handle, trailing:
                     }
                 }
                 for name in ["beta1_power", "beta2_power"] {
-                    let number = tensor::data(&result.fields()[name]).storage.values[0];
+                    let number = tensor::data(&result.fields()[name]).storage.host_values()[0];
                     if !(0.0..=1.0).contains(&number) {
                         return Err(invalid("AdamW beta powers must be in [0,1]"));
                     }
@@ -1038,7 +1040,7 @@ fn transfer(c: &mut Context, value: &Handle, destination: &str, operation: &str)
                 } else {
                     data.shape.count
                 },
-                data.weight(),
+                data.shape.weight() - 3 + destination.len() as u64,
             )?;
             Ok(tensor::value(tensor::transfer(c, data, destination)?))
         }

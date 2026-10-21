@@ -7,6 +7,7 @@ mod cli;
 mod collections;
 mod context;
 mod derivative;
+mod device;
 mod exports;
 mod files;
 mod generated_operations;
