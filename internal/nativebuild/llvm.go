@@ -2,6 +2,9 @@ package nativebuild
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -12,8 +15,27 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/llvmemit"
+	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
 	"github.com/MarcoPoloResearchLab/Lo/internal/nativeplan"
 )
+
+const LLVMCompilerIdentity = "lo-native-llvm-v1"
+
+type llvmArtifact struct {
+	SourceDigest  string                `json:"source_sha256"`
+	Source        string                `json:"source"`
+	Compiler      string                `json:"compiler"`
+	Toolchain     string                `json:"toolchain"`
+	Target        string                `json:"target"`
+	DeviceBackend device.BuildBackend   `json:"device_backend"`
+	Runtime       string                `json:"runtime_sha256,omitempty"`
+	Metal         *metalconfig.Identity `json:"metal,omitempty"`
+}
+
+func llvmArtifactMetadata(program ir.Program, target string, backend device.BuildBackend, runtimeDigest string, metal *metalconfig.Identity) (json.RawMessage, error) {
+	sum := sha256.Sum256([]byte(program.Source().Text()))
+	return json.Marshal(llvmArtifact{SourceDigest: hex.EncodeToString(sum[:]), Source: program.Source().Path(), Compiler: LLVMCompilerIdentity, Toolchain: "LLVM " + llvmVersion, Target: target, DeviceBackend: backend, Runtime: runtimeDigest, Metal: metal})
+}
 
 // EmitLLVM writes a verified LLVM module without executing a compiler toolchain.
 func EmitLLVM(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend) (receipt Receipt, failure diagnostic.Diagnostic) {
@@ -29,8 +51,11 @@ func EmitLLVM(ctx context.Context, program ir.Program, output, target string, ba
 	if target != "darwin/arm64" && target != "linux/arm64" {
 		return fail(diagnostic.BuildTarget, fmt.Errorf("unsupported target %q", target))
 	}
-	if backend != device.SoftwareBuild {
-		return fail(diagnostic.BuildBackend, fmt.Errorf("LLVM module emission requires the software build configuration"))
+	if backend == device.MetalBuild && (target != metalconfig.Target || runtime.GOOS+"/"+runtime.GOARCH != metalconfig.Target) {
+		return fail(diagnostic.BuildTarget, fmt.Errorf("Metal requires a %s host and target", metalconfig.Target))
+	}
+	if backend != device.SoftwareBuild && backend != device.MetalBuild {
+		return fail(diagnostic.BuildBackend, fmt.Errorf("unsupported device backend %q", backend))
 	}
 	if output == "" {
 		return fail(diagnostic.BuildOutput, fmt.Errorf("an output path is required"))
@@ -69,7 +94,11 @@ func EmitLLVM(ctx context.Context, program ir.Program, output, target string, ba
 		}
 		return fail(diagnostic.BuildGenerate, err)
 	}
-	module, err := llvmemit.Emit(ctx, plan, target)
+	artifactMetadata, err := llvmArtifactMetadata(program, target, backend, "", nil)
+	if err != nil {
+		return fail(diagnostic.BuildGenerate, err)
+	}
+	module, err := llvmemit.EmitArtifact(ctx, plan, target, artifactMetadata)
 	if err != nil {
 		if ctx.Err() != nil {
 			return fail(diagnostic.BuildCancelled, ctx.Err())

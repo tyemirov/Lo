@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"slices"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/llvmemit"
+	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
 	"github.com/MarcoPoloResearchLab/Lo/internal/nativeplan"
 )
 
@@ -42,16 +44,32 @@ type llvmDistribution struct {
 	Host     string                `json:"host"`
 	Compiler llvmFile              `json:"compiler"`
 	Targets  map[string]llvmTarget `json:"targets"`
+	Metal    *llvmMetalTarget      `json:"metal,omitempty"`
+}
+
+type llvmMetalTarget struct {
+	Target string `json:"target"`
+	llvmTarget
+	Identity metalconfig.Identity `json:"identity"`
+	Kernel   llvmFile             `json:"kernel"`
 }
 
 type admittedLLVM struct {
 	compiler, linker, archive, archiveDigest, triple string
 	inputs                                           map[string]string
 	linkArgs                                         []string
+	metal                                            *metalconfig.Identity
 }
 
 // Link recipes belong to the compiler. A manifest identifies their exact inputs.
-func llvmLinkRecipe(target string) (arguments, inputs []string) {
+func llvmLinkRecipe(target string, backend device.BuildBackend) (arguments, inputs []string) {
+	if backend == device.MetalBuild {
+		if target != metalconfig.Target {
+			return nil, nil
+		}
+		arguments, inputs = llvmLinkRecipe(target, device.SoftwareBuild)
+		return append(arguments, "{input:foundation}", "{input:metal}", "{input:objc}"), append(inputs, "foundation", "metal", "objc")
+	}
 	switch target {
 	case "darwin/arm64":
 		return []string{"-dead_strip", "-arch", "arm64", "-platform_version", "macos", "27.0", "27.0",
@@ -66,7 +84,7 @@ func llvmLinkRecipe(target string) (arguments, inputs []string) {
 	}
 }
 
-func admitLLVM(ctx context.Context, manifest, target, snapshots string) (admittedLLVM, error) {
+func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend device.BuildBackend) (admittedLLVM, error) {
 	var admitted admittedLLVM
 	path, err := filepath.Abs(manifest)
 	if err != nil {
@@ -101,10 +119,23 @@ func admitLLVM(ctx context.Context, manifest, target, snapshots string) (admitte
 		"linux/arm64":  "aarch64-unknown-linux-gnu",
 	}[target]
 	selected, ok := distribution.Targets[target]
+	if backend == device.MetalBuild {
+		if distribution.Metal == nil {
+			return admitted, fmt.Errorf("toolchain has no Metal runtime")
+		}
+		metal := distribution.Metal
+		expected := metalconfig.PinnedIdentity()
+		expected.KernelSHA256 = metal.Kernel.SHA256
+		if metal.Target != target || len(metal.Kernel.SHA256) != 64 || !reflect.DeepEqual(expected, metal.Identity) {
+			return admitted, fmt.Errorf("Metal runtime does not match the pinned target and numeric profile")
+		}
+		selected, ok = metal.llvmTarget, true
+		admitted.metal = &metal.Identity
+	}
 	if !ok || triple == "" || selected.Triple != triple {
 		return admitted, fmt.Errorf("toolchain has no matching target %q", target)
 	}
-	arguments, names := llvmLinkRecipe(target)
+	arguments, names := llvmLinkRecipe(target, backend)
 	if !slices.Equal(selected.LinkArgs, arguments) || len(selected.Inputs) != len(names) {
 		return admitted, fmt.Errorf("toolchain must use the compiler's exact %s link recipe and input set", target)
 	}
@@ -160,6 +191,14 @@ func admitLLVM(ctx context.Context, manifest, target, snapshots string) (admitte
 	if admitted.archive, err = file("Lo runtime archive", selected.Runtime); err != nil {
 		return admitted, err
 	}
+	if backend == device.MetalBuild {
+		if _, err = file("embedded Metal kernel", distribution.Metal.Kernel); err != nil {
+			return admitted, err
+		}
+		if err = validateMetalKernel(ctx, admitted.archive, distribution.Metal.Kernel.SHA256); err != nil {
+			return admitted, err
+		}
+	}
 	admitted.inputs = map[string]string{}
 	for name, input := range selected.Inputs {
 		if name == "" || strings.ContainsAny(name, "{}") {
@@ -189,8 +228,11 @@ func BuildLLVM(ctx context.Context, program ir.Program, output, target string, b
 	if target != "darwin/arm64" && target != "linux/arm64" {
 		return fail(diagnostic.BuildTarget, fmt.Errorf("unsupported target %q", target))
 	}
-	if backend != device.SoftwareBuild {
-		return fail(diagnostic.BuildBackend, fmt.Errorf("LLVM execution requires the software build configuration"))
+	if backend == device.MetalBuild && (target != metalconfig.Target || runtime.GOOS+"/"+runtime.GOARCH != metalconfig.Target) {
+		return fail(diagnostic.BuildTarget, fmt.Errorf("Metal requires a %s host and target", metalconfig.Target))
+	}
+	if backend != device.SoftwareBuild && backend != device.MetalBuild {
+		return fail(diagnostic.BuildBackend, fmt.Errorf("unsupported device backend %q", backend))
 	}
 	ctx, cancel := context.WithTimeout(ctx, BuildTimeout)
 	defer cancel()
@@ -229,7 +271,7 @@ func BuildLLVM(ctx context.Context, program ir.Program, output, target string, b
 			receipt, failure = fail(diagnostic.BuildOutput, fmt.Errorf("remove build directory: %w", err))
 		}
 	}()
-	toolchain, err := admitLLVM(ctx, manifest, target, filepath.Join(work, "toolchain"))
+	toolchain, err := admitLLVM(ctx, manifest, target, filepath.Join(work, "toolchain"), backend)
 	if err != nil {
 		if ctx.Err() != nil {
 			return fail(diagnostic.BuildCancelled, ctx.Err())
@@ -249,7 +291,11 @@ func BuildLLVM(ctx context.Context, program ir.Program, output, target string, b
 		}
 		return fail(diagnostic.BuildGenerate, err)
 	}
-	module, err := llvmemit.Emit(ctx, plan, target)
+	artifactMetadata, err := llvmArtifactMetadata(program, target, backend, toolchain.archiveDigest, toolchain.metal)
+	if err != nil {
+		return fail(diagnostic.BuildGenerate, err)
+	}
+	module, err := llvmemit.EmitArtifact(ctx, plan, target, artifactMetadata)
 	if err != nil {
 		if ctx.Err() != nil {
 			return fail(diagnostic.BuildCancelled, ctx.Err())
@@ -351,7 +397,7 @@ entry:
 		return fail(diagnostic.BuildOutput, err)
 	}
 	return Receipt{Command: "build", Status: "ok", Artifact: output, Target: target,
-		Codegen: "llvm", ABI: nativeplan.ABIIdentity, Runtime: toolchain.archiveDigest}, nil
+		Codegen: "llvm", ABI: nativeplan.ABIIdentity, Runtime: toolchain.archiveDigest, DeviceBackend: backend, Metal: toolchain.metal}, nil
 }
 
 func publishLLVM(ctx context.Context, staged, destination, work string, removeWork func(string) error) (err error) {

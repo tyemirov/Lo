@@ -3,6 +3,7 @@ package llvmemit
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"slices"
@@ -51,6 +52,15 @@ func quoted(text string) string {
 
 // Emit produces a complete LLVM module without invoking compiler tools.
 func Emit(ctx context.Context, plan nativeplan.Plan, target string) ([]byte, error) {
+	return emit(ctx, plan, target, nil)
+}
+
+// EmitArtifact includes the selected executable configuration in its program metadata.
+func EmitArtifact(ctx context.Context, plan nativeplan.Plan, target string, artifact json.RawMessage) ([]byte, error) {
+	return emit(ctx, plan, target, artifact)
+}
+
+func emit(ctx context.Context, plan nativeplan.Plan, target string, artifact json.RawMessage) ([]byte, error) {
 	if ctx == nil {
 		return nil, fmt.Errorf("LLVM emission requires a context")
 	}
@@ -65,6 +75,20 @@ func Emit(ctx context.Context, plan nativeplan.Plan, target string) ([]byte, err
 	module, err := nativeplan.Read(plan)
 	if err != nil {
 		return nil, err
+	}
+	if artifact != nil {
+		var metadata map[string]json.RawMessage
+		if err := json.Unmarshal(module.Metadata, &metadata); err != nil {
+			return nil, fmt.Errorf("LLVM artifact metadata: %w", err)
+		}
+		metadata["artifact"] = artifact
+		module.Metadata, err = json.Marshal(metadata)
+		if err != nil {
+			return nil, fmt.Errorf("LLVM artifact metadata: %w", err)
+		}
+		if len(module.Metadata) > nativeplan.MaxModuleBytes {
+			return nil, fmt.Errorf("%w: artifact metadata exceeds %d bytes", nativeplan.ErrLimit, nativeplan.MaxModuleBytes)
+		}
 	}
 	out := &output{ctx: ctx}
 	debug := newDebug(module)
