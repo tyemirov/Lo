@@ -1,0 +1,22 @@
+{
+  "documents": [
+    "docs/native-devices.md",
+    "docs/native-runtime.md",
+    "docs/standalone-compiler-plan.md"
+  ],
+  "checked_local_links": 36,
+  "unresolved": [],
+  "issue": "I010",
+  "issue_status": "closed",
+  "closed_dependencies": [
+    "I008",
+    "I009",
+    "F014"
+  ],
+  "open_downstream": [
+    "F017",
+    "I011"
+  ],
+  "source_hashes_verified": 103,
+  "preserved_log_hashes_verified": 27
+}

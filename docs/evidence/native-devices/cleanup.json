@@ -1,0 +1,8 @@
+{
+  "task_directory": "_scratch/i010-20261020",
+  "task_directory_removed": true,
+  "temporary_plan": ".mprlab/I010-PLAN.md",
+  "temporary_plan_removed": true,
+  "shared_preparation_preserved": "_scratch/native-runtime",
+  "shared_build_state_preserved": "_scratch/build-state"
+}

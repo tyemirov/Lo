@@ -1,0 +1,204 @@
+{
+  "runtime_source_sha256": "94b3e40579b7296e46f6a2332f654ec85b0bccd02ab68dc02132a9495fccc358",
+  "rust": {
+    "version": "1.85.1",
+    "prefix": "_scratch/native-runtime/rust-prefix",
+    "archives": [
+      {
+        "archive": "rustc.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+        "bytes": 55006972
+      },
+      {
+        "archive": "cargo.tar.xz",
+        "url": "https://static.rust-lang.org/dist/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+        "bytes": 6766048
+      },
+      {
+        "archive": "rust-std.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+        "bytes": 27522824
+      },
+      {
+        "archive": "rust-std-linux.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-unknown-linux-gnu.tar.xz",
+        "sha256": "760fa132058ed45a67d0cd7d04638fde86fd26adc563dff1a3e6d97d300446ff",
+        "bytes": 33440220
+      },
+      {
+        "archive": "rustfmt.tar.xz",
+        "url": "https://static.rust-lang.org/dist/rustfmt-1.85.1-aarch64-apple-darwin.tar.xz",
+        "sha256": "90adc209908355ee7e315b98c84f16e6773c8664291b0981a4ff80992bc0fb66",
+        "bytes": 1594560
+      }
+    ],
+    "prefix_sha256": "e4145ce1962bb49ba45667d082625415f007524ed0f2df0f380b16976422fe2a",
+    "rustc": {
+      "path": "_scratch/native-runtime/rust-prefix/bin/rustc",
+      "sha256": "731d78259541b7e845568083df94b541176af5669509d077ee23a88d81f27d41",
+      "identity": "rustc 1.85.1 (4eb161250 2025-03-15)"
+    },
+    "cargo": {
+      "path": "_scratch/native-runtime/rust-prefix/bin/cargo",
+      "sha256": "ca274de824f0741d809e115eab77c40208c5ad6484646c381c04f12ec49e6a79",
+      "identity": "cargo 1.85.1 (d73d2caf9 2024-12-31)"
+    }
+  },
+  "llvm": {
+    "version": "21.1.8",
+    "archive": {
+      "archive": "llvm.tar.xz",
+      "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+      "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+      "bytes": 1503047352
+    },
+    "tools": {
+      "clang": {
+        "path": "_scratch/native-runtime/tools/bin/clang",
+        "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+      },
+      "clang-21": {
+        "path": "_scratch/native-runtime/tools/bin/clang-21",
+        "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+      },
+      "ld.lld": {
+        "path": "_scratch/native-runtime/tools/bin/ld.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "ld64.lld": {
+        "path": "_scratch/native-runtime/tools/bin/ld64.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "llc": {
+        "path": "_scratch/native-runtime/tools/bin/llc",
+        "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e"
+      },
+      "lld": {
+        "path": "_scratch/native-runtime/tools/bin/lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "llvm-ar": {
+        "path": "_scratch/native-runtime/tools/bin/llvm-ar",
+        "sha256": "c2640fc0a747413fe27818531d4a22f979d91b7e299723a68225917c42574b50"
+      },
+      "llvm-dwarfdump": {
+        "path": "_scratch/native-runtime/tools/bin/llvm-dwarfdump",
+        "sha256": "36b66049cc0995fdd7623235b260ecccd0239d87cc719488f7658f36a18fbc9b"
+      },
+      "llvm-nm": {
+        "path": "_scratch/native-runtime/tools/bin/llvm-nm",
+        "sha256": "a011020cab7ca848ebb10948c636cde63a83cf81e81156285f96f577ea70e426"
+      },
+      "llvm-objdump": {
+        "path": "_scratch/native-runtime/tools/bin/llvm-objdump",
+        "sha256": "f67fda63d4f65df56e76fe8ba47f03eb81e8bbfb20ef1615c18f685c7177e28c"
+      },
+      "llvm-readobj": {
+        "path": "_scratch/native-runtime/tools/bin/llvm-readobj",
+        "sha256": "73efdbad7294e02ed570d7156d1d1c8d77ed922c2df281435a7a1f8ad90eeb30"
+      },
+      "opt": {
+        "path": "_scratch/native-runtime/tools/bin/opt",
+        "sha256": "66e9c199539e80e7cdeb1a6dc370e5278a6e90ad3b18e984d1af746b1ede35c7"
+      }
+    }
+  },
+  "cargo_environment": {
+    "CI": "1",
+    "CARGO_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/cargo-home",
+    "RUSTUP_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rustup-home",
+    "RUSTC": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin/rustc",
+    "CARGO_TARGET_DIR": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/cargo-target",
+    "CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/host-linker/linker",
+    "SDKROOT": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/host-linker/sdk",
+    "TMPDIR": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime",
+    "PATH": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin",
+    "MACOSX_DEPLOYMENT_TARGET": "27.0",
+    "LC_ALL": "C",
+    "TZ": "UTC",
+    "CRATE_CC_NO_DEFAULTS": "1",
+    "CC_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+    "AR_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+    "CFLAGS_aarch64_apple_darwin": "-target aarch64-apple-darwin -nostdinc -I/Users/tyemirov/Development/Research/Lo/runtime/native/include -fPIC -I/Users/tyemirov/Development/Research/Lo/runtime/native/include/darwin -mmacosx-version-min=27.0",
+    "CC_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+    "AR_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+    "CFLAGS_aarch64_unknown_linux_gnu": "-target aarch64-unknown-linux-gnu -nostdinc -I/Users/tyemirov/Development/Research/Lo/runtime/native/include -fPIC"
+  },
+  "manifest_sha256": "2e434eacf9f2822cc51d53c1a3992a3b3a991de553082de4e38c6a60112e6e31",
+  "process_sources": {
+    "launcher.c": {
+      "path": "internal/processhost/native/launcher.c",
+      "sha256": "dba9bdfe4c22c6db8847ae74e2fd58a15f67499d849f8a5b5aa4fc50ebf839f8"
+    },
+    "normalization.c": {
+      "path": "internal/processhost/native/normalization.c",
+      "sha256": "b1b6b9e1adf7d1e76a59ecb6d07e4ce2b6418d4d809e932bf0b4f084978c4732"
+    },
+    "protocol.h": {
+      "path": "internal/processhost/native/protocol.h",
+      "sha256": "d91353f6b15d4810d844f33bd16ed6127fae3942b0c6b801a82842a64c642e08"
+    }
+  },
+  "host_linker": {
+    "executable": {
+      "path": "_scratch/native-runtime/host-linker/linker",
+      "sha256": "472e7d4690e75f2baa7dd99194c6aff03010deb703d0db5b0ea69dd5373aa5c3"
+    },
+    "source": {
+      "path": "tools/nativeruntime/host_linker.c",
+      "sha256": "a38238083cbf2448d3c754509b4be10b1c3c586c8bc95ad1e2f4521a9680a916"
+    },
+    "sdk_sha256": "f356b43b80ea634b485f781e2d38e141d4aba8793bea70d5b0a7b1750d4b0bc0"
+  },
+  "metal": {
+    "archive": {
+      "path": "internal/runtimebundle/metal.zip",
+      "sha256": "43c38ea16cbf9429075595a458954a518c5723dbce77de70386495a090169660"
+    },
+    "manifest": {
+      "path": "internal/runtimebundle/metal-manifest.json",
+      "sha256": "8ca107dd0528be8158735518b83e5c9c1403bb5809e9d34a47755b3be4c59f10"
+    },
+    "producer": {
+      "path": "bin/lo-metal-build.json",
+      "sha256": "e5e4cf47cd89d5edbfd3c1ef72680c749f03104b4d5b87af26dfe6b5c48eac7c"
+    },
+    "sources": {
+      "internal/device/metal_bridge.h": {
+        "path": "internal/device/metal_bridge.h",
+        "sha256": "24bb8d03421440d1d22df9c0d6a5454959daa35dc28317bfd221d2c6e772ff47"
+      },
+      "internal/device/metal_bridge_darwin.m": {
+        "path": "internal/device/metal_bridge_darwin.m",
+        "sha256": "3532af5341db44c7003aa12c3c2df94ba49217f7dfec87b0724afa721887ae74"
+      },
+      "internal/device/metal_darwin.go": {
+        "path": "internal/device/metal_darwin.go",
+        "sha256": "feafecd54b00946646cc73a9c32460b72f0ada46ce7eba83f17712a2c22c45a4"
+      },
+      "internal/device/metal_kernels.metal": {
+        "path": "internal/device/metal_kernels.metal",
+        "sha256": "eec1b13249c95d41c3754049c62b15008a3c307424557fb8bcff5580a771b16e"
+      },
+      "internal/device/metal_types.h": {
+        "path": "internal/device/metal_types.h",
+        "sha256": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683"
+      },
+      "internal/metalconfig/config.go": {
+        "path": "internal/metalconfig/config.go",
+        "sha256": "de4297ef13cb86faa5259e9270ffe5a76679b0ecb54600d231eafb5f247828e2"
+      },
+      "internal/runtimebundle/metal-manifest.json": {
+        "path": "internal/runtimebundle/metal-manifest.json",
+        "sha256": "8ca107dd0528be8158735518b83e5c9c1403bb5809e9d34a47755b3be4c59f10"
+      },
+      "internal/runtimebundle/metal.zip": {
+        "path": "internal/runtimebundle/metal.zip",
+        "sha256": "43c38ea16cbf9429075595a458954a518c5723dbce77de70386495a090169660"
+      }
+    }
+  }
+}
