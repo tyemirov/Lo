@@ -1,0 +1,13 @@
+{
+  "MTLDevice.supportsFamily:": "B24@0:8q16",
+  "MTLDevice.hasUnifiedMemory": "B16@0:8",
+  "MTLDevice.maxBufferLength": "Q16@0:8",
+  "MTLDevice.registryID": "Q16@0:8",
+  "MTLDevice.newBufferWithLength:options:": "@32@0:8Q16Q24",
+  "MTLComputeCommandEncoder.dispatchThreads:threadsPerThreadgroup:": "v64@0:8{?=QQQ}16{?=QQQ}40",
+  "MTLComputeCommandEncoder.setBuffer:offset:atIndex:": "v40@0:8@16Q24Q32",
+  "MTLComputeCommandEncoder.setBytes:length:atIndex:": "v40@0:8r^v16Q24Q32",
+  "MTLBuffer.contents": "^v16@0:8",
+  "MTLBuffer.allocatedSize": "Q16@0:8",
+  "MTLCommandBuffer.status": "Q16@0:8"
+}

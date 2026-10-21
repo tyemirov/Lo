@@ -620,7 +620,7 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
                     context.resources.validate(&tensor.storage)?;
                     let tape = context.tapes.last_mut().unwrap();
                     if !tape.storage.contains(&tensor.storage.id) {
-                        let bytes = 4 * tensor.storage.values.len() as u64;
+                        let bytes = tensor.storage.reserved_bytes();
                         if bytes > (32 << 20) - tape.bytes {
                             return Err(limit("derivative tape bytes"));
                         }

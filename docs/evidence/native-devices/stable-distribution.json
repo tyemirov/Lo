@@ -1,0 +1,31 @@
+{
+  "matches_final_candidate": true,
+  "manifest_sha256": "2e434eacf9f2822cc51d53c1a3992a3b3a991de553082de4e38c6a60112e6e31",
+  "verified_files": [
+    "bin/clang",
+    "bin/ld64.lld",
+    "runtime/aarch64-apple-darwin/liblo_runtime.a",
+    "platform/darwin/libSystem.tbd",
+    "platform/darwin/Security.tbd",
+    "platform/darwin/CoreFoundation.tbd",
+    "bin/ld.lld",
+    "runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+    "platform/linux/crt1.o",
+    "platform/linux/crti.o",
+    "platform/linux/crtn.o",
+    "platform/linux/libc.so.6",
+    "platform/linux/libm.so.6",
+    "platform/linux/libgcc_s.so.1",
+    "platform/linux/libc_nonshared.a",
+    "bin/ld64.lld",
+    "runtime/aarch64-apple-darwin/metal/liblo_runtime.a",
+    "platform/darwin/metal/libSystem.tbd",
+    "platform/darwin/metal/Security.tbd",
+    "platform/darwin/metal/CoreFoundation.tbd",
+    "platform/darwin/metal/Foundation.tbd",
+    "platform/darwin/metal/Metal.tbd",
+    "platform/darwin/metal/libobjc.tbd",
+    "runtime/aarch64-apple-darwin/metal/metal.metallib"
+  ],
+  "distribution": "_scratch/native-runtime/distribution"
+}

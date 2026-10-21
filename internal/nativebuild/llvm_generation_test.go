@@ -103,7 +103,7 @@ func generationTestManifest(t *testing.T, root string) string {
 		t.Fatal(err)
 	}
 	pin := llvmFile{Path: "input", SHA256: snapshotTestDigest(t, input)}
-	arguments, _ := llvmLinkRecipe("darwin/arm64")
+	arguments, _ := llvmLinkRecipe("darwin/arm64", device.SoftwareBuild)
 	record := llvmDistribution{ABI: nativeplan.ABIIdentity, LLVM: llvmVersion, Host: runtime.GOOS + "/" + runtime.GOARCH,
 		Compiler: pin, Targets: map[string]llvmTarget{"darwin/arm64": {
 			Triple: "aarch64-apple-darwin", Linker: pin, Runtime: pin,

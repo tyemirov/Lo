@@ -3,16 +3,97 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 import shutil
 from pathlib import Path
 import subprocess
 import sys
+import zipfile
 
 from prepare import LOCK, ROOT, RUST_COMPONENTS, digest, local, pin_file, tree_digest
 
 TARGETS = {'darwin/arm64': 'aarch64-apple-darwin', 'linux/arm64': 'aarch64-unknown-linux-gnu'}
+
+
+def metal_bundle() -> tuple[bytes, dict[str, object], dict[str, object]]:
+    archive = local(ROOT / 'internal/runtimebundle/metal.zip')
+    manifest = local(ROOT / 'internal/runtimebundle/metal-manifest.json')
+    producer = local(ROOT / 'bin/lo-metal-build.json')
+    if not all(path.is_file() for path in (archive, manifest, producer)):
+        raise ValueError('Metal requires the prepared F014 kernel bundle and producer receipt from make build-metal')
+    record = json.loads(manifest.read_text())
+    receipt = json.loads(producer.read_text())
+    if set(record) != {'identity', 'files'}:
+        raise ValueError('Metal bundle manifest has an incorrect field set')
+    identity, files = record['identity'], record['files']
+    identity_fields = {'profile', 'go', 'xcode', 'sdk', 'clang', 'metal_compiler', 'kernel_linker',
+                       'deployment_target', 'kernel_flags', 'kernel_sha256'}
+    paths = {'internal/device/metal.metallib', 'internal/device/metal_darwin.go',
+             'internal/device/metal_bridge_darwin.m', 'internal/device/metal_bridge.h',
+             'internal/device/metal_types.h'}
+    if set(identity) != identity_fields or set(files) != paths:
+        raise ValueError('Metal bundle has an incorrect identity or source set')
+    if identity['profile'] != 'metal-fp32' or identity['deployment_target'] != '27.0':
+        raise ValueError('Metal bundle uses an unsupported numeric profile')
+    verified_sources = paths - {'internal/device/metal.metallib'}
+    verified_sources |= {'internal/device/metal_kernels.metal', 'internal/metalconfig/config.go',
+                         'internal/runtimebundle/metal.zip', 'internal/runtimebundle/metal-manifest.json'}
+    for name in sorted(verified_sources):
+        path = local(ROOT / name)
+        if digest(path) != receipt['source_sha256'].get(name):
+            raise ValueError(f'Metal producer source identity differs: {name}')
+    with zipfile.ZipFile(archive) as supplied:
+        if len(supplied.namelist()) != len(paths) or set(supplied.namelist()) != paths:
+            raise ValueError('Metal bundle archive has an incorrect member set')
+        for name in sorted(paths):
+            data = supplied.read(name)
+            if hashlib.sha256(data).hexdigest() != files[name]:
+                raise ValueError(f'Metal bundle member digest differs: {name}')
+            if name in verified_sources and digest(local(ROOT / name)) != files[name]:
+                raise ValueError(f'Metal bundle source differs: {name}')
+        library = supplied.read('internal/device/metal.metallib')
+    if files['internal/device/metal.metallib'] != identity['kernel_sha256'] or receipt['metallib_sha256'] != identity['kernel_sha256']:
+        raise ValueError('Metal kernel identity differs from its producer receipt')
+    return library, identity, {'archive': pin_file(archive), 'manifest': pin_file(manifest),
+                               'producer': pin_file(producer),
+                               'sources': {name: pin_file(local(ROOT / name)) for name in sorted(verified_sources)}}
+
+
+def metal_archive(preparation: Path, tools: dict[str, dict[str, str]], archive: Path,
+                  library: bytes, identity: dict[str, object]) -> tuple[Path, Path]:
+    work = local(preparation / 'metal-native')
+    work.mkdir(parents=True, exist_ok=True)
+    compiler = str(local(Path(tools['clang']['path'])))
+    headers = local(ROOT / 'runtime/native/include')
+    bridge = local(ROOT / 'internal/device/metal_bridge_darwin.m')
+    embedding = local(work / 'kernel.c')
+    embedding.write_text('#include <stddef.h>\nconst unsigned char lo_native_metal_kernel_bytes[]={'
+                         + ','.join(f'0x{byte:02x}' for byte in library)
+                         + '};\nconst size_t lo_native_metal_kernel_length=sizeof(lo_native_metal_kernel_bytes);\n'
+                         + 'const char lo_native_metal_kernel_digest[]=' + json.dumps(identity['kernel_sha256']) + ';\n'
+                         + 'const void *lo_native_metal_library(size_t *length){*length=lo_native_metal_kernel_length;return lo_native_metal_kernel_bytes;}\n'
+                         + 'const char *lo_native_metal_kernel_sha256(void){return lo_native_metal_kernel_digest;}\n')
+    environment = {'CI': '1', 'PATH': '', 'TMPDIR': str(work)}
+    base = [compiler, '-target', 'aarch64-apple-darwin', '-mmacosx-version-min=27.0', '-nostdinc',
+            '-I' + str(headers), '-I' + str(headers / 'darwin'), '-I' + str(bridge.parent),
+            '-fPIC', '-O2', '-Werror']
+    objects = [work / 'bridge.o', work / 'kernel.o']
+    for command in [base + ['-fblocks', '-fno-objc-arc', '-c', str(bridge), '-o', str(objects[0])],
+                    base + ['-c', str(embedding), '-o', str(objects[1])]]:
+        result = subprocess.run(command, env=environment, cwd=ROOT, stdin=subprocess.DEVNULL,
+                                capture_output=True, text=True, check=False)
+        if result.returncode:
+            raise ValueError(f'native Metal bridge build failed: {result.stderr}')
+    combined = local(work / 'liblo_runtime.a')
+    shutil.copyfile(archive, combined)
+    subprocess.run([str(local(Path(tools['llvm-ar']['path']))), 'q', str(combined),
+                    *[str(path) for path in objects]], env=environment, cwd=ROOT,
+                   stdin=subprocess.DEVNULL, capture_output=True, check=True, text=True)
+    kernel = local(work / 'metal.metallib')
+    kernel.write_bytes(library)
+    return combined, kernel
 
 
 def validate_build_environment() -> None:
@@ -116,7 +197,10 @@ def prepare_host_linker(preparation: Path, tool_pins: dict[str, dict[str, str]])
     return executable, sdk
 
 
-def build(preparation: Path, output: Path, targets: list[str]) -> Path:
+def build(preparation: Path, output: Path, targets: list[str], include_metal: bool = False) -> Path:
+    if include_metal and 'darwin/arm64' not in targets:
+        raise ValueError('Metal requires the darwin/arm64 runtime target')
+    metal_inputs = metal_bundle() if include_metal else None
     receipt = local(preparation / 'rust.json')
     if not receipt.is_file():
         raise ValueError(f'missing prepared Rust receipt: {receipt}')
@@ -207,12 +291,43 @@ def build(preparation: Path, output: Path, targets: list[str]) -> Path:
         target_records[target] = {'triple': triple, 'linker': linker, 'runtime': runtime,
                                   'inputs': inputs, 'link_args': args}
     distribution['targets'] = target_records
+    if metal_inputs is not None:
+        library, identity, metal_provenance = metal_inputs
+        triple = TARGETS['darwin/arm64']
+        command = [str(cargo), 'build', '--frozen', '--offline', '--release', '--target', triple,
+                   '--features', 'metal', '--config', str(local(ROOT / 'runtime/native/.cargo/config.toml')),
+                   '--manifest-path', str(local(ROOT / 'runtime/native/Cargo.toml'))]
+        result = subprocess.run(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL,
+                                capture_output=True, text=True, check=False)
+        (preparation / 'cargo-metal.json').write_text(json.dumps({'command': command, 'environment': environment,
+                                                                'status': result.returncode,
+                                                                'stdout': result.stdout, 'stderr': result.stderr}, indent=2) + '\n')
+        if result.returncode:
+            raise ValueError(f'Metal runtime build failed: {result.stderr}')
+        archive = process_archive(preparation, tools['tools'],
+                                  local(preparation / 'cargo-target' / triple / 'release/liblo_runtime.a'))
+        archive, kernel = metal_archive(preparation, tools['tools'], archive, library, identity)
+        metal_record = dict(target_records['darwin/arm64'])
+        metal_record['runtime'] = copy_file(archive, 'runtime/' + triple + '/metal/liblo_runtime.a')
+        metal_record['inputs'] = {}
+        for name, filename in (('system', 'libSystem.tbd'), ('security', 'Security.tbd'),
+                               ('corefoundation', 'CoreFoundation.tbd'), ('foundation', 'Foundation.tbd'),
+                               ('metal', 'Metal.tbd'), ('objc', 'libobjc.tbd')):
+            metal_record['inputs'][name] = copy_file(local(ROOT / 'tools/nativeruntime/platform/darwin/metal' / filename),
+                                                     'platform/darwin/metal/' + filename)
+        metal_record['link_args'] = metal_record['link_args'] + ['{input:foundation}', '{input:metal}', '{input:objc}']
+        metal_record['identity'] = identity
+        metal_record['kernel'] = copy_file(kernel, 'runtime/' + triple + '/metal/metal.metallib')
+        metal_record['target'] = 'darwin/arm64'
+        distribution['metal'] = metal_record
     manifest = local(output / 'toolchain.json')
     if tree_digest(local(ROOT / 'runtime/native')) != source_digest:
         raise ValueError('runtime source changed during build')
     if process_sources != {name: pin_file(local(ROOT / 'internal/processhost/native' / name))
                            for name in process_sources}:
         raise ValueError('process source changed during build')
+    if metal_inputs is not None and metal_bundle()[2] != metal_provenance:
+        raise ValueError('Metal producer inputs changed during build')
     manifest.write_text(json.dumps(distribution, indent=2) + '\n')
     provenance = {'runtime_source_sha256': source_digest, 'rust': rust,
                   'llvm': tools, 'cargo_environment': environment, 'manifest_sha256': digest(manifest),
@@ -220,6 +335,8 @@ def build(preparation: Path, output: Path, targets: list[str]) -> Path:
                   'host_linker': {'executable': pin_file(host_linker),
                                   'source': pin_file(local(ROOT / 'tools/nativeruntime/host_linker.c')),
                                   'sdk_sha256': tree_digest(sdk)}}
+    if metal_inputs is not None:
+        provenance['metal'] = metal_provenance
     (output / 'build-receipt.json').write_text(json.dumps(provenance, indent=2) + '\n')
     return manifest
 
@@ -229,6 +346,7 @@ def main() -> int:
     parser.add_argument('--preparation', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--target', choices=tuple(TARGETS), action='append')
+    parser.add_argument('--metal', action='store_true')
     arguments = parser.parse_args()
     try:
         validate_build_environment()
@@ -241,7 +359,7 @@ def main() -> int:
             except BlockingIOError as error:
                 raise ValueError('another runtime builder owns this preparation state') from error
             print(json.dumps({'toolchain': str(build(preparation, local(arguments.output),
-                                                    arguments.target or list(TARGETS)).relative_to(ROOT))}))
+                                                    arguments.target or list(TARGETS), arguments.metal).relative_to(ROOT))}))
         return 0
     except (ValueError, OSError, KeyError, subprocess.CalledProcessError) as error:
         print(f'native runtime build: {error}', file=sys.stderr)

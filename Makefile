@@ -89,12 +89,15 @@ test-integration: runtime-bundle | tool-state
 test-native: runtime-bundle | tool-state
 	LO_TEST_BACKEND=native $(GO) test ./tests/integration $(TEST_ARGS) </dev/null
 
-.PHONY: prepare-native-runtime build-native-runtime test-native-llvm test-native-runtime-tools
+.PHONY: prepare-native-runtime build-native-runtime build-native-runtime-metal test-native-llvm test-native-runtime-tools
 prepare-native-runtime: | tool-state
 	python3 -B tools/nativeruntime/prepare.py --state "$(NATIVE_RUNTIME_STATE)" --download --platform </dev/null
 
 build-native-runtime: | tool-state
 	python3 -B tools/nativeruntime/build.py --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(NATIVE_RUNTIME_STATE)/distribution" </dev/null
+
+build-native-runtime-metal: | tool-state
+	python3 -B tools/nativeruntime/build.py --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(NATIVE_RUNTIME_STATE)/distribution" --metal </dev/null
 
 test-native-llvm: runtime-bundle | tool-state
 	LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test ./tests/integration $(TEST_ARGS) </dev/null

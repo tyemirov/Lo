@@ -1,0 +1,193 @@
+{
+  "issue": "I010",
+  "date": "2026-10-20",
+  "status": "passed",
+  "backend": "LLVM 21.1.8 + LLD 21.1.8 + precompiled Rust 1.85.1 runtime",
+  "abi": "lo-native-1",
+  "targets": [
+    "darwin/arm64",
+    "linux/arm64"
+  ],
+  "execution_environments": {
+    "darwin": "Darwin arm64 host with native C device fixtures",
+    "linux": "QEMU 11.1.2 with Linux 6.12.110 and glibc 2.36",
+    "metal": "Controlled C executor at the native device ABI. The real Objective-C bridge is linked with an injected unavailable device."
+  },
+  "latest_runtime_receipt": "candidate-two-build-receipt.json",
+  "latest_toolchain": "candidate-two-toolchain.json",
+  "source_identity": "source-identity.json",
+  "independent_review": "review.json",
+  "log_hashes": "logs.json",
+  "validation": {
+    "native_devices_final": {
+      "command": "make -o runtime-bundle test-native-llvm LLVM_TOOLCHAIN=_scratch/i010-20261020/candidate-two/toolchain.json TEST_ARGS='-run \"TestDevice|TestMetalSelection|TestLLVM.*Device|TestLLVM.*Metal\" -timeout=30m -count=1 -v' </dev/null",
+      "passed_tests": 47,
+      "passed_subcases": 207,
+      "failed_tests": [
+        "TestLLVMDeviceHTTPRequestLifetime"
+      ],
+      "seconds": 269.704,
+      "log": "candidate-two-final.log.gz",
+      "resolved_by": "http_final"
+    },
+    "http_final": {
+      "command": "make -o runtime-bundle test-native-llvm LLVM_TOOLCHAIN=_scratch/i010-20261020/candidate-two/toolchain.json TEST_ARGS='-run \"TestLLVM.*DeviceHTTPRequestLifetime\" -timeout=30m -count=1 -v' </dev/null",
+      "passed_tests": 2,
+      "passed_subcases": 2,
+      "failed_tests": [],
+      "seconds": 8.522,
+      "log": "http-receipts-candidate-two-final.log.gz"
+    },
+    "cpu_and_adapters": {
+      "generation": 1,
+      "passed_tests": 19,
+      "passed_subcases": 47,
+      "failed_tests": [],
+      "seconds": 193.503,
+      "log": "cpu-adapter-regression.log.gz",
+      "applicability": "Candidate two changes CLI invalid-grant diagnostics and separate platform inputs. CPU and adapter implementations are unchanged."
+    },
+    "resource_boundaries": {
+      "generation": 1,
+      "passed_tests": 2,
+      "passed_subcases": 24,
+      "failed_tests": [],
+      "seconds": 26.78,
+      "log": "native-resource-boundaries.log.gz",
+      "final_generation": "Repeated successfully in native_devices_final."
+    },
+    "runtime_build_tools": {
+      "command": "make test-native-runtime-tools </dev/null",
+      "tests": 13,
+      "seconds": 6.6,
+      "log": "native-runtime-tools-final.log.gz"
+    },
+    "lowering_output": {
+      "command": "make -o runtime-bundle test-integration TEST_ARGS='-run TestLLVMLoweringPreservesOutput -count=1 -v' </dev/null",
+      "passed_tests": 1,
+      "passed_subcases": 0,
+      "failed_tests": [],
+      "seconds": 1.007,
+      "log": "lowering-preserves-output-final.log.gz"
+    }
+  },
+  "native_contracts": {
+    "resources": [
+      "Explicit grants and bit-preserving transfers",
+      "Opaque device buffers without a persistent host shadow",
+      "Actual reserved-byte budgets and distinct logical work charges",
+      "Shared allocation identity, scope release, stale storage rejection, and cleanup receipts",
+      "Lazy backend creation and isolated HTTP request ledgers",
+      "Cancellation, sticky device loss, primary failure preservation, and prevention of later commits"
+    ],
+    "metal": [
+      "All current operation descriptors and fixed metal-fp32 profile",
+      "Explicit Metal archive selection without CPU substitution",
+      "Separate software and Metal platform inputs",
+      "Verified embedded kernel bytes, length, digest, and build metadata",
+      "Objective-C ABI reflection and production unavailable-device result"
+    ],
+    "training": [
+      "Analytical gradients and existing finite-difference expectations",
+      "Repeated 200-step training",
+      "Repeated 500-step XOR with all four classifications",
+      "Complete Parameter, SGD, and AdamW state transfers",
+      "Checkpoint restoration and resumed optimizer state"
+    ]
+  },
+  "numerical_details": {
+    "primitive_cases_per_target": 17,
+    "profile_cases_per_target": 6,
+    "derivative_cases_per_target": 28,
+    "optimizer_checkpoint_cases_per_target": 6,
+    "numeric_failure_cases_per_target": 5,
+    "artifact_executions_per_numeric_case": 3,
+    "training_updates": 200,
+    "xor_updates": 500,
+    "xor_initial_loss": 0.3561249971,
+    "xor_final_loss": 4.251353501e-13,
+    "xor_predictions": [
+      6.6410286e-07,
+      0.9999993,
+      0.9999995,
+      7.2148754e-07
+    ]
+  },
+  "http_details": {
+    "requests_per_target": 1000,
+    "allocations_per_target": 3000,
+    "releases_per_target": 3000,
+    "transfers_per_target": 2000,
+    "live_resources_after_shutdown": 0
+  },
+  "resolved_validation_failures": [
+    {
+      "log": "http-receipts-diagnostic.log.gz",
+      "cause": "A keep-alive fixture admitted one empty request context while waiting for EOF.",
+      "resolution": "The final request explicitly closes the connection before receipt assertions."
+    },
+    {
+      "log": "duplicate-grant-red.log.gz",
+      "cause": "Artifact CLI overwrote CPU-grant and duplicate-grant diagnostics.",
+      "resolution": "Candidate two preserves the original parser diagnostic and stops after duplicate admission failure."
+    },
+    {
+      "log": "metal-coherent-kernel-review-red.log.gz",
+      "cause": "A coherent manifest and separate kernel replacement could select different embedded archive bytes.",
+      "resolution": "Admission verifies named kernel data inside the digest-verified archive. The recorded overlay reproduced the defect without changing repository source."
+    },
+    {
+      "log": "make-ci-stale-metal-expectation.log.gz",
+      "cause": "A stale test rejected all Metal LLVM emission.",
+      "resolution": "The test selects the unsupported Linux/Metal combination and verifies atomic output preservation."
+    },
+    {
+      "log": "candidate-two-final.log.gz",
+      "cause": "The Darwin HTTP receipt fixture required snprintf, absent from the separated software link inputs.",
+      "resolution": "The fixture uses distinct exit codes for each receipt assertion. Both target checks pass."
+    },
+    {
+      "log": "make-ci-interrupted-for-http-fixture.log.gz",
+      "cause": "The primary agent stopped CI to apply the HTTP fixture correction.",
+      "resolution": "Final CI restarted after that correction."
+    }
+  ],
+  "scope_limits": [
+    "The default executable compiler still generates Go source until I011.",
+    "The installed offline compiler acceptance criterion remains F017 and I011.",
+    "The development compiler host is Darwin arm64; Linux-host compiler packaging remains F017.",
+    "Linux supports the software device boundary; production Metal execution is Darwin-only.",
+    "Actual Metal GPU execution, driver behavior, and performance are unmeasured.",
+    "Software simulation and emulation satisfy device acceptance. No physical-device gate remains.",
+    "Native fixtures inject a device boundary while Lo evaluation, autodiff, optimizer operations, resource ownership, and generated machine code remain real."
+  ],
+  "stable_distribution": "stable-distribution.json",
+  "documentation_language": "language-review.json",
+  "pending": [],
+  "effective_native_results": {
+    "passed_tests": 48,
+    "passed_subcases": 208,
+    "unresolved_failures": 0,
+    "basis": [
+      "candidate-two-final.log.gz",
+      "http-receipts-candidate-two-final.log.gz"
+    ],
+    "note": "The focused corrected HTTP run replaces the Darwin fixture link failure and repeats the Linux case."
+  },
+  "repository_ci": {
+    "command": "make ci TEST_ARGS='-timeout=30m -v' </dev/null",
+    "exit_code": 0,
+    "native_integration_seconds": 518.049,
+    "semantic_report_tests": 16,
+    "log": "make-ci.log.gz",
+    "includes": [
+      "runtime bundle verification",
+      "Go formatting and vet",
+      "all Go packages and integration tests",
+      "Go-generated executable integration lane",
+      "compiler build",
+      "semantic report regression tests"
+    ]
+  },
+  "cleanup": "cleanup.json"
+}

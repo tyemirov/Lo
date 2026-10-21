@@ -1,0 +1,189 @@
+{
+  "abi": "lo-native-1",
+  "llvm": "21.1.8",
+  "host": "darwin/arm64",
+  "compiler": {
+    "path": "bin/clang",
+    "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+  },
+  "targets": {
+    "darwin/arm64": {
+      "triple": "aarch64-apple-darwin",
+      "linker": {
+        "path": "bin/ld64.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "runtime": {
+        "path": "runtime/aarch64-apple-darwin/liblo_runtime.a",
+        "sha256": "68eae575dc44d3d07714b4753f7a5fdc88248b0270857c95d1089465882afc6b"
+      },
+      "inputs": {
+        "system": {
+          "path": "platform/darwin/libSystem.tbd",
+          "sha256": "cf1c4c40fcee8ba0bf191277f38ecb464e51c5c326975cd5fb09a75d83ec11b7"
+        },
+        "security": {
+          "path": "platform/darwin/Security.tbd",
+          "sha256": "eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf"
+        },
+        "corefoundation": {
+          "path": "platform/darwin/CoreFoundation.tbd",
+          "sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991"
+        }
+      },
+      "link_args": [
+        "-dead_strip",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "macos",
+        "27.0",
+        "27.0",
+        "-o",
+        "{output}",
+        "{object}",
+        "{runtime}",
+        "{input:system}",
+        "{input:security}",
+        "{input:corefoundation}"
+      ]
+    },
+    "linux/arm64": {
+      "triple": "aarch64-unknown-linux-gnu",
+      "linker": {
+        "path": "bin/ld.lld",
+        "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+      },
+      "runtime": {
+        "path": "runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+        "sha256": "35a7d7d12cc1a89ead0895908bbcb352c251df7715547397bed45a8c3349e284"
+      },
+      "inputs": {
+        "crt1": {
+          "path": "platform/linux/crt1.o",
+          "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc"
+        },
+        "crti": {
+          "path": "platform/linux/crti.o",
+          "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5"
+        },
+        "crtn": {
+          "path": "platform/linux/crtn.o",
+          "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5"
+        },
+        "libc": {
+          "path": "platform/linux/libc.so.6",
+          "sha256": "e4ac8ae1d81e4865e3aadedb962879cf9415903b3f2ba81ec75e9962b86ab8b0"
+        },
+        "libm": {
+          "path": "platform/linux/libm.so.6",
+          "sha256": "3c4cb3be0b974edf05f023f85ab15107fb5afc2687163593d0d4cf8e80c17b39"
+        },
+        "libgcc": {
+          "path": "platform/linux/libgcc_s.so.1",
+          "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7"
+        },
+        "nonshared": {
+          "path": "platform/linux/libc_nonshared.a",
+          "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f"
+        }
+      },
+      "link_args": [
+        "-m",
+        "aarch64elf",
+        "-dynamic-linker",
+        "/lib/ld-linux-aarch64.so.1",
+        "-o",
+        "{output}",
+        "{input:crt1}",
+        "{input:crti}",
+        "{object}",
+        "{runtime}",
+        "{input:libgcc}",
+        "{input:libm}",
+        "{input:libc}",
+        "{input:nonshared}",
+        "{input:crtn}"
+      ]
+    }
+  },
+  "metal": {
+    "triple": "aarch64-apple-darwin",
+    "linker": {
+      "path": "bin/ld64.lld",
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+    },
+    "runtime": {
+      "path": "runtime/aarch64-apple-darwin/metal/liblo_runtime.a",
+      "sha256": "0daf77551b7d3421cbb49b4d72e5f00625fbbbc4c4976d9667e1930df8c287b9"
+    },
+    "inputs": {
+      "system": {
+        "path": "platform/darwin/metal/libSystem.tbd",
+        "sha256": "fec2056ed4f4713a175d551b2a9b8f035c2b1c04a2ee436cd24929a8bc8ddf6b"
+      },
+      "security": {
+        "path": "platform/darwin/metal/Security.tbd",
+        "sha256": "eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf"
+      },
+      "corefoundation": {
+        "path": "platform/darwin/metal/CoreFoundation.tbd",
+        "sha256": "0b434ed47bfd421626c69c5a6024c53e6a9fb897faa06838d8c134c8c617f823"
+      },
+      "foundation": {
+        "path": "platform/darwin/metal/Foundation.tbd",
+        "sha256": "42847d4ca344834bab04ac84b5f7076fa55af6df0ec845bc16207ff99edfbc27"
+      },
+      "metal": {
+        "path": "platform/darwin/metal/Metal.tbd",
+        "sha256": "6fcc47589a334a556d26e755cf3c98b66be65648ab777fbb85b0b1afcc8d7342"
+      },
+      "objc": {
+        "path": "platform/darwin/metal/libobjc.tbd",
+        "sha256": "012fef9e8f6daed6cc686c7d35c042b3a86a88298a7c3a6c383e021a69f854b4"
+      }
+    },
+    "link_args": [
+      "-dead_strip",
+      "-arch",
+      "arm64",
+      "-platform_version",
+      "macos",
+      "27.0",
+      "27.0",
+      "-o",
+      "{output}",
+      "{object}",
+      "{runtime}",
+      "{input:system}",
+      "{input:security}",
+      "{input:corefoundation}",
+      "{input:foundation}",
+      "{input:metal}",
+      "{input:objc}"
+    ],
+    "identity": {
+      "profile": "metal-fp32",
+      "go": "go1.27.1",
+      "xcode": "Xcode 27.1\nBuild version 27A9275",
+      "sdk": "27.0",
+      "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "metal_compiler": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+      "kernel_linker": "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)",
+      "deployment_target": "27.0",
+      "kernel_flags": [
+        "-std=metal3.1",
+        "-mmacosx-version-min=27.0",
+        "-fmetal-math-mode=safe",
+        "-fmetal-math-fp32-functions=precise",
+        "-ffp-contract=off"
+      ],
+      "kernel_sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"
+    },
+    "kernel": {
+      "path": "runtime/aarch64-apple-darwin/metal/metal.metallib",
+      "sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"
+    },
+    "target": "darwin/arm64"
+  }
+}

@@ -597,6 +597,38 @@ pub unsafe extern "C" fn lo_context_free(c: *mut Context) {
     }
 }
 #[no_mangle]
+pub unsafe extern "C" fn lo_context_set_device_grant(
+    c: *mut Context,
+    grant: *const std::os::raw::c_char,
+) -> std::os::raw::c_int {
+    if c.is_null() || grant.is_null() {
+        return 0;
+    }
+    let context = &mut *c;
+    if context.entry().is_err()
+        || context.remaining != context.session.steps
+        || context.weight != 0
+        || context.scopes != 0
+        || context.depth != 0
+        || !context.resources.can_configure()
+        || Arc::strong_count(&context.session) != 1
+    {
+        return 0;
+    }
+    let Ok(grant) = std::ffi::CStr::from_ptr(grant).to_str() else {
+        return 0;
+    };
+    let Ok(config) = crate::device::Config::new(grant) else {
+        return 0;
+    };
+    if !context.resources.configure(config.clone()) {
+        return 0;
+    }
+    Arc::get_mut(&mut context.session).unwrap().devices = config;
+    context.device_grant = grant.to_owned();
+    1
+}
+#[no_mangle]
 pub unsafe extern "C" fn lo_context_run(c: *mut Context, out: *mut ResultSlot) {
     if c.is_null() || out.is_null() {
         std::process::abort()

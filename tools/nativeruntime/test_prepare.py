@@ -195,3 +195,83 @@ def test_runtime_build_rejects_undeclared_cargo_controls(missing_state: Path) ->
                                 capture_output=True, text=True, check=False)
         assert result.returncode == 1
         assert f'undeclared Cargo build control: {name}' in result.stderr
+
+
+def test_metal_build_rejects_linux_only_target(tmp_path: Path) -> None:
+    supplied = os.environ.get('LO_NATIVE_PREPARATION')
+    if supplied is None:
+        pytest.skip('LO_NATIVE_PREPARATION selects the native producer inputs')
+    state = (ROOT / supplied).resolve()
+    output = tmp_path / 'rejected-distribution'
+    result = subprocess.run([sys.executable, '-B', str(CLI.with_name('build.py')),
+                             '--preparation', str(state), '--output', str(output),
+                             '--target', 'linux/arm64', '--metal'],
+                            cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
+                            capture_output=True, text=True, check=False)
+    assert result.returncode == 1
+    assert 'Metal requires the darwin/arm64 runtime target' in result.stderr
+    assert not (output / 'toolchain.json').exists()
+
+
+def test_metal_bridge_declarations_match_runtime_abi(tmp_path: Path) -> None:
+    import ctypes
+    import json
+
+    supplied = os.environ.get('LO_NATIVE_PREPARATION')
+    if supplied is None or sys.platform != 'darwin':
+        pytest.skip('Darwin native preparation selects the declared Objective-C ABI')
+    state = (ROOT / supplied).resolve()
+    tools = json.loads((state / 'tools.json').read_text())['tools']
+    compiler = ROOT / tools['clang']['path']
+    source = tmp_path / 'metal-abi.m'
+    source.write_text('#import <Metal/Metal.h>\n#include "metal_bridge.h"\n'
+                      '_Static_assert(sizeof(MTLSize)==24,"MTLSize");\n'
+                      '_Static_assert(sizeof(LoMetalOperation)==160,"LoMetalOperation");\n'
+                      '_Static_assert(sizeof(LoMetalError)==516,"LoMetalError");\n'
+                      'const char *abi[]={@encode(BOOL),@encode(NSUInteger),@encode(MTLGPUFamily),'
+                      '@encode(MTLSize),@encode(MTLCommandBufferStatus)};\n')
+    module = tmp_path / 'metal-abi.ll'
+    result = subprocess.run([str(compiler), '-target', 'aarch64-apple-darwin',
+                             '-mmacosx-version-min=27.0', '-nostdinc', '-fblocks', '-Werror',
+                             '-I' + str(ROOT / 'runtime/native/include'),
+                             '-I' + str(ROOT / 'runtime/native/include/darwin'),
+                             '-I' + str(ROOT / 'internal/device'), '-S', '-emit-llvm',
+                             str(source), '-o', str(module)], cwd=ROOT,
+                            env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
+                            capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+    declaration = module.read_text()
+    for encoding in ('B', 'Q', 'q', '{?=QQQ}'):
+        assert 'c"' + encoding + '\\00"' in declaration
+
+    # Protocol metadata requires no device discovery or GPU command submission.
+    ctypes.CDLL('/System/Library/Frameworks/Metal.framework/Versions/A/Metal')
+    runtime = ctypes.CDLL('/usr/lib/libobjc.A.dylib')
+
+    class Method(ctypes.Structure):
+        _fields_ = [('name', ctypes.c_void_p), ('types', ctypes.c_char_p)]
+
+    runtime.objc_getProtocol.argtypes = [ctypes.c_char_p]
+    runtime.objc_getProtocol.restype = ctypes.c_void_p
+    runtime.sel_registerName.argtypes = [ctypes.c_char_p]
+    runtime.sel_registerName.restype = ctypes.c_void_p
+    runtime.protocol_getMethodDescription.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                                     ctypes.c_bool, ctypes.c_bool]
+    runtime.protocol_getMethodDescription.restype = Method
+    expected = {
+        ('MTLDevice', 'supportsFamily:'): 'B24@0:8q16',
+        ('MTLDevice', 'hasUnifiedMemory'): 'B16@0:8',
+        ('MTLDevice', 'newBufferWithLength:options:'): '@32@0:8Q16Q24',
+        ('MTLComputeCommandEncoder', 'dispatchThreads:threadsPerThreadgroup:'): 'v64@0:8{?=QQQ}16{?=QQQ}40',
+        ('MTLComputeCommandEncoder', 'setBuffer:offset:atIndex:'): 'v40@0:8@16Q24Q32',
+        ('MTLComputeCommandEncoder', 'setBytes:length:atIndex:'): 'v40@0:8r^v16Q24Q32',
+        ('MTLBuffer', 'contents'): '^v16@0:8',
+        ('MTLBuffer', 'allocatedSize'): 'Q16@0:8',
+        ('MTLCommandBuffer', 'status'): 'Q16@0:8',
+    }
+    for (protocol, selector), encoding in expected.items():
+        handle = runtime.objc_getProtocol(protocol.encode())
+        assert handle, protocol
+        method = runtime.protocol_getMethodDescription(handle, runtime.sel_registerName(selector.encode()), True, True)
+        assert method.types is not None, (protocol, selector)
+        assert method.types.decode() == encoding, (protocol, selector, method.types)

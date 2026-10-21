@@ -268,6 +268,36 @@ pub unsafe extern "C" fn lo_cli_main(
         };
         args.push(s)
     }
+    if args == ["metadata"] {
+        if lo_program_metadata_size > 64 << 20 || lo_program_flow_count > 1_000_000 {
+            checked_stderr!("runtime.host-failure: program metadata size limit");
+            return 2;
+        }
+        let data = std::slice::from_raw_parts(
+            ptr::addr_of!(lo_program_metadata),
+            lo_program_metadata_size as usize,
+        );
+        let artifact = match Program::parse(data, lo_program_flow_count as usize) {
+            Ok(program) => program.artifact,
+            Err(message) => {
+                checked_stderr!("runtime.host-failure: {message}");
+                return 2;
+            }
+        };
+        let Some(artifact) = artifact else {
+            checked_stderr!("runtime.host-failure: absent artifact metadata");
+            return 2;
+        };
+        if let Err(error) = writeln!(
+            std::io::stdout().lock(),
+            "{}",
+            canonical_json_value(&artifact)
+        ) {
+            checked_stderr!("runtime.host-failure: write artifact metadata: {error}");
+            return 2;
+        }
+        return 0;
+    }
     let mut format = "text";
     let mut steps = 1_000_000u64;
     let mut error = None;
@@ -280,6 +310,8 @@ pub unsafe extern "C" fn lo_cli_main(
     let mut launcher_set = false;
     let mut http_grants = vec![];
     let mut ports = vec![];
+    let mut device_grant = String::new();
+    let mut device_set = false;
     let serving = args.first() == Some(&"serve");
     if args.first() != Some(&"run") && !serving {
         error = Some("artifact requires run or serve without a source path".to_string())
@@ -300,6 +332,18 @@ pub unsafe extern "C" fn lo_cli_main(
             match args[i].parse::<u64>() {
                 Ok(v) if v > 0 => steps = v,
                 _ => error = Some("invalid --max-steps: execution steps must be positive".into()),
+            }
+        } else if arg == "--allow-device" {
+            if device_set || i + 1 == args.len() {
+                error = Some("--allow-device requires one selector with run or serve".into());
+                break;
+            } else {
+                i += 1;
+                device_set = true;
+                device_grant = args[i].to_owned();
+                if device_grant.is_empty() || device_grant == "cpu" {
+                    error = Some("--allow-device requires a non-CPU selector".into());
+                }
             }
         } else if matches!(
             arg,
@@ -353,6 +397,12 @@ pub unsafe extern "C" fn lo_cli_main(
         i += 1;
     }
     let http = crate::http::Http::new(&http_grants, &ports);
+    let devices = crate::device::Config::new(&device_grant);
+    if let Err(message) = &devices {
+        if error.is_none() {
+            error = Some(message.clone());
+        }
+    }
     if let Err(message) = &http {
         error = Some(message.clone());
     }
@@ -400,7 +450,6 @@ pub unsafe extern "C" fn lo_cli_main(
     };
     signal(2, stop as *const () as usize);
     signal(15, stop as *const () as usize);
-    let mut context = Context::new(program.clone(), steps);
     let processes = match crate::process::configure(
         &process_grants,
         &process_launcher,
@@ -416,7 +465,12 @@ pub unsafe extern "C" fn lo_cli_main(
             } else {
                 host(message)
             };
-            return report(fault, &context, format == "json", None);
+            return report(
+                fault,
+                &Context::new(program.clone(), steps),
+                format == "json",
+                None,
+            );
         }
     };
     let files = match crate::files::configure_options(&roots) {
@@ -425,7 +479,7 @@ pub unsafe extern "C" fn lo_cli_main(
             let cleanup = processes.close().err();
             return report(
                 host(message),
-                &context,
+                &Context::new(program.clone(), steps),
                 format == "json",
                 cleanup.as_deref(),
             );
@@ -437,16 +491,22 @@ pub unsafe extern "C" fn lo_cli_main(
         processes,
         http: Arc::new(http.unwrap()),
         files: std::sync::Mutex::new(files),
+        devices: devices.unwrap(),
         serving,
     });
+    let mut context = match Context::request(session.clone()) {
+        Ok(context) => context,
+        Err(fault) => {
+            let cleanup = session.close().err().map(|f| f.message());
+            return report(
+                fault,
+                &Context::new(program.clone(), steps),
+                format == "json",
+                cleanup.as_deref(),
+            );
+        }
+    };
     let status = (|| {
-        context = match Context::request(session.clone()) {
-            Ok(context) => context,
-            Err(fault) => {
-                let cleanup = session.close().err().map(|f| f.message());
-                return report(fault, &context, format == "json", cleanup.as_deref());
-            }
-        };
         context.observe_cli_cancel = true;
         let mut out = ResultSlot {
             status: 0,
@@ -459,6 +519,11 @@ pub unsafe extern "C" fn lo_cli_main(
             Ok(v) => {
                 if let Some(e) = cause(&v) {
                     Err(Fault::Recoverable(e))
+                } else if !crate::tensor::host_publishable(&v) {
+                    Err(Fault::Host(
+                        "runtime.tensor-publication",
+                        "result contains a tensor without an explicit CPU transfer".into(),
+                    ))
                 } else {
                     Ok(v)
                 }

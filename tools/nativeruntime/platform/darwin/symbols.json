@@ -2,7 +2,8 @@
   "method": "LLVM native archive externals (--no-llvm-bc for both undefined and defined scans), verified by host dynamic symbol lookup",
   "rust": "1.85.1",
   "llvm": "21.1.8",
-  "archive_sha256": "df108bda120ec2bacb0e13989368977c1eb4b44c651af91796cc616339d14c2f",
+  "archive_sha256": "62001d29088046c9e1e10aeba284fb610cb5407b2b6b885f477bb39c985653b9",
+  "metal": false,
   "symbols": [
     "_CCRandomGenerateBytes",
     "__NSGetArgc",
@@ -604,7 +605,12 @@
       "_kCFTypeArrayCallBacks",
       "_kCFTypeDictionaryKeyCallBacks",
       "_kCFTypeDictionaryValueCallBacks"
-    ]
+    ],
+    "Foundation": [],
+    "Metal": []
+  },
+  "library_symbols": {
+    "objc": []
   },
   "program_symbols": [
     "_lo_entry",

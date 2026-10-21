@@ -1,0 +1,15 @@
+{
+  "reference": "https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf",
+  "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+  "review_scope": "New native device guide and changed prose in the runtime guide, compiler plan, and I010.",
+  "review_basis": "Producing-agent review against applicable Part 1 rules, Part 2 dictionary, and repository terminology.",
+  "mechanical_changed_prose_findings": 0,
+  "mechanical_unchanged_issue_findings": 12,
+  "whole_document_compliance_claim": false,
+  "documents": {
+    "ISSUES.md": "c9a48d82f4208b708b08080fdede312c26e72468a6d9a2242389161a2bb57a97",
+    "docs/native-devices.md": "712356e25c88f4c57a194bc2bd77baa9364999071773c8d5841edb2fd9385513",
+    "docs/native-runtime.md": "6418982e63ac6daedf569880c03d7041be18185d6da0bf44f252458128c2322d",
+    "docs/standalone-compiler-plan.md": "15080eb55902200022bf06478df3606c2837bbf4a70596f051592aacaf7d3e3f"
+  }
+}

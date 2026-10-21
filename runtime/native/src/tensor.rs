@@ -48,14 +48,37 @@ pub struct Storage {
     pub session: u64,
     pub id: u64,
     pub location: String,
-    pub values: Vec<f32>,
+    pub bytes: u64,
+    pub backing: crate::device::Backing,
+}
+impl Storage {
+    pub fn host_values(&self) -> &[f32] {
+        match &self.backing {
+            crate::device::Backing::Host(values) => values,
+            crate::device::Backing::Device(_) => std::process::abort(),
+        }
+    }
+    pub fn logical_bytes(&self) -> u64 {
+        match &self.backing {
+            crate::device::Backing::Host(values) => 4 * values.len() as u64,
+            crate::device::Backing::Device(allocation) => allocation.logical_bytes(),
+        }
+    }
+    pub fn reserved_bytes(&self) -> u64 {
+        self.bytes
+    }
+    pub fn release(&self) -> Result<(), Fault> {
+        match &self.backing {
+            crate::device::Backing::Host(_) => Ok(()),
+            crate::device::Backing::Device(allocation) => allocation.close(),
+        }
+    }
 }
 impl Drop for Storage {
     fn drop(&mut self) {
         use std::sync::atomic::Ordering;
         crate::resources::LIVE_STORAGES.fetch_sub(1, Ordering::Relaxed);
-        crate::resources::LIVE_STORAGE_BYTES
-            .fetch_sub(4 * self.values.len() as u64, Ordering::Relaxed);
+        crate::resources::LIVE_STORAGE_BYTES.fetch_sub(self.bytes, Ordering::Relaxed);
     }
 }
 #[derive(Clone)]
@@ -147,6 +170,18 @@ fn visit_storages(
 pub fn validate_inputs(c: &Context, values: &[Handle]) -> Result<(), Fault> {
     visit_storages(values, |storage| c.resources.validate(storage))
 }
+pub fn host_publishable(value: &Handle) -> bool {
+    let mut publishable = true;
+    if visit_storages(&[value.clone()], |storage| {
+        publishable &= storage.location == "cpu";
+        Ok(())
+    })
+    .is_err()
+    {
+        std::process::abort();
+    }
+    publishable
+}
 pub fn allocations(values: &[Handle]) -> Vec<u64> {
     let mut out = vec![];
     if visit_storages(values, |storage| {
@@ -204,10 +239,14 @@ pub fn transfer(c: &mut Context, a: &Tensor, destination: &str) -> Result<Tensor
             "transfers require CPU and one compute location".into(),
         ));
     }
-    Err(Fault::Numeric(
-        "Device.Unavailable",
-        format!("Device.Unavailable: backend {destination} is not present in this build"),
-    ))
+    let storage = {
+        let (resources, control) = c.device_parts();
+        resources.transfer(&a.storage, destination, &control)?
+    };
+    Ok(Tensor {
+        shape: a.shape.clone(),
+        storage,
+    })
 }
 #[derive(Clone)]
 struct Plan {
@@ -392,18 +431,77 @@ fn poll(c: &Context, i: usize) -> Result<(), Fault> {
         Ok(())
     }
 }
-fn execute_plan(
+fn device_layout(
+    kind: u32,
+    shape: &Shape,
+    a: Option<&Tensor>,
+    b: Option<&Tensor>,
+) -> crate::device::Operation {
+    let mut operation = crate::device::Operation {
+        kind,
+        count: shape.count as u32,
+        input_count: 0,
+        region: 0,
+        a_rank: 0,
+        b_rank: 0,
+        rank: shape.dims.len() as u32,
+        scalar: 0,
+        a: [0; 8],
+        b: [0; 8],
+        output: [0; 8],
+        axes: [0; 8],
+    };
+    for (slot, dimension) in operation.output.iter_mut().zip(&shape.dims) {
+        *slot = *dimension as u32;
+    }
+    if let Some(a) = a {
+        operation.a_rank = a.shape.dims.len() as u32;
+        operation.input_count = a.shape.count as u32;
+        for (slot, dimension) in operation.a.iter_mut().zip(&a.shape.dims) {
+            *slot = *dimension as u32;
+        }
+    }
+    if let Some(b) = b {
+        operation.b_rank = b.shape.dims.len() as u32;
+        for (slot, dimension) in operation.b.iter_mut().zip(&b.shape.dims) {
+            *slot = *dimension as u32;
+        }
+    }
+    operation
+}
+fn device_compute(
+    c: &mut Context,
+    location: &str,
+    operation: &crate::device::Operation,
+    shape: &Shape,
+    inputs: &[&Tensor],
+) -> Result<Tensor, Fault> {
+    if location != "metal:0" {
+        return Err(Fault::Numeric(
+            "Device.UnsupportedOperation",
+            format!("Device.UnsupportedOperation: tensor arithmetic is unavailable on {location}"),
+        ));
+    }
+    let inputs = inputs
+        .iter()
+        .map(|input| input.storage.clone())
+        .collect::<Vec<_>>();
+    let storage = {
+        let (resources, control) = c.device_parts();
+        resources.compute(location, operation, &inputs, &control)?
+    };
+    Ok(Tensor {
+        shape: shape.clone(),
+        storage,
+    })
+}
+fn execute_device(
     c: &mut Context,
     p: &Plan,
     a: &Tensor,
     b: Option<&Tensor>,
 ) -> Result<Tensor, Fault> {
-    raw_check_cancel(c)?;
-    c.resources.validate(&a.storage)?;
-    if let Some(b) = b {
-        c.resources.validate(&b.storage)?
-    }
-    if a.storage.location != "cpu" {
+    if a.storage.location != "metal:0" {
         return Err(Fault::Numeric(
             "Device.UnsupportedOperation",
             format!(
@@ -429,6 +527,66 @@ fn execute_plan(
             ),
         ));
     }
+    let kind = match p.op.as_str() {
+        "Tensor.add" => crate::device::ADD,
+        "Tensor.sub" => crate::device::SUB,
+        "Tensor.mul" => crate::device::MUL,
+        "Tensor.div" => crate::device::DIV,
+        "Tensor.sqrt" => crate::device::SQRT,
+        "Tensor.relu" => crate::device::RELU,
+        "Tensor.broadcast" => crate::device::BROADCAST,
+        "Tensor.transpose" => crate::device::TRANSPOSE,
+        "Tensor.sum" => crate::device::SUM,
+        "Tensor.mean" => crate::device::MEAN,
+        "Tensor.matmul" => crate::device::MATMUL,
+        _ => return Err(host("unknown device tensor primitive")),
+    };
+    let mut operation = device_layout(kind, &p.shape, Some(a), b);
+    operation.region = p.region as u32;
+    for (index, axis) in p.axes.iter().enumerate() {
+        if p.op == "Tensor.transpose" {
+            operation.axes[index] = *axis as u32;
+        } else {
+            operation.axes[*axis] = 1;
+        }
+    }
+    let mut inputs = vec![a];
+    if let Some(b) = b {
+        inputs.push(b);
+    }
+    device_compute(c, &a.storage.location, &operation, &p.shape, &inputs)
+}
+fn execute_plan(
+    c: &mut Context,
+    p: &Plan,
+    a: &Tensor,
+    b: Option<&Tensor>,
+) -> Result<Tensor, Fault> {
+    raw_check_cancel(c)?;
+    c.resources.validate(&a.storage)?;
+    if let Some(b) = b {
+        c.resources.validate(&b.storage)?
+    }
+    if a.storage.location != "cpu" {
+        return execute_device(c, p, a, b);
+    }
+    if p.op == "Tensor.reshape"
+        || matches!(p.op.as_str(), "Tensor.sum" | "Tensor.mean") && p.axes.is_empty()
+    {
+        return Ok(Tensor {
+            shape: p.shape.clone(),
+            storage: a.storage.clone(),
+        });
+    }
+    if p.op == "Tensor.mean" && p.region == 0 {
+        return Err(Fault::Numeric(
+            "Tensor.EmptyReduction",
+            format!(
+                "expected nonempty mean reduction region, got {}",
+                fmt_dims(&a.shape.dims)
+            ),
+        ));
+    }
     c.resources.check_allocation(4 * p.shape.count)?;
     let mut out = vec![0f32; p.shape.count as usize];
     if out.is_empty() {
@@ -436,8 +594,8 @@ fn execute_plan(
     }
     let ad = &a.shape.dims;
     let od = &p.shape.dims;
-    let av = &a.storage.values;
-    let bv = b.map(|b| b.storage.values.as_slice()).unwrap_or(&[]);
+    let av = a.storage.host_values();
+    let bv = b.map(|b| b.storage.host_values()).unwrap_or(&[]);
     match p.op.as_str() {
         "Tensor.matmul" => {
             let bd = &b.unwrap().shape.dims;
@@ -587,10 +745,11 @@ pub fn apply(
 pub fn constant(c: &mut Context, shape: &Shape, location: &str, n: f32) -> Result<Tensor, Fault> {
     c.tensor_budget(shape.count, shape.weight() - 3 + location.len() as u64)?;
     if location != "cpu" {
-        return Err(Fault::Numeric(
-            "Device.UnsupportedOperation",
-            format!("tensor arithmetic is unavailable on {location}"),
-        ));
+        let mut operation = device_layout(crate::device::FILL, shape, None, None);
+        operation.scalar = n.to_bits();
+        let out = device_compute(c, location, &operation, shape, &[])?;
+        c.weight += out.weight();
+        return Ok(out);
     }
     c.resources.check_allocation(4 * shape.count)?;
     let out = construct(c, shape, vec![n; shape.count as usize])?;
@@ -607,12 +766,18 @@ pub fn relu_derivative(c: &mut Context, g: &Tensor, a: &Tensor) -> Result<Tensor
     c.tensor_budget(a.shape.count, a.weight())?;
     c.resources.validate(&a.storage)?;
     c.resources.validate(&g.storage)?;
+    if a.storage.location != "cpu" {
+        let operation = device_layout(crate::device::RELU_GRAD, &a.shape, Some(a), Some(g));
+        let out = device_compute(c, &a.storage.location, &operation, &a.shape, &[a, g])?;
+        c.weight += out.weight();
+        return Ok(out);
+    }
     c.resources.check_allocation(4 * a.shape.count)?;
     let mut out = vec![0.0; a.shape.count as usize];
     for (i, v) in out.iter_mut().enumerate() {
         poll(c, i)?;
-        if a.storage.values[i] > 0.0 {
-            *v = g.storage.values[i]
+        if a.storage.host_values()[i] > 0.0 {
+            *v = g.storage.host_values()[i]
         }
     }
     let out = construct(c, &a.shape, out)?;
@@ -621,7 +786,13 @@ pub fn relu_derivative(c: &mut Context, g: &Tensor, a: &Tensor) -> Result<Tensor
 }
 pub fn check_sqrt(c: &mut Context, a: &Tensor) -> Result<(), Fault> {
     c.resources.validate(&a.storage)?;
-    for (i, x) in a.storage.values.iter().enumerate() {
+    if a.storage.location != "cpu" {
+        let operation = device_layout(crate::device::SQRT_GRAD, &a.shape, Some(a), None);
+        let out = device_compute(c, &a.storage.location, &operation, &a.shape, &[a])?;
+        c.resources.release(out.storage.id);
+        return Ok(());
+    }
+    for (i, x) in a.storage.host_values().iter().enumerate() {
         poll(c, i)?;
         if *x == 0.0 {
             return Err(numeric(
@@ -817,7 +988,10 @@ pub fn execute(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {
                     return Err(mismatch("rank-zero shape []", fmt_dims(&t.shape.dims)));
                 }
                 c.tensor_budget(1, 40)?;
-                Ok(new(atom("Float"), Data::Float(t.storage.values[0] as f64)))
+                Ok(new(
+                    atom("Float"),
+                    Data::Float(t.storage.host_values()[0] as f64),
+                ))
             }
             "Tensor.values" => {
                 if t.storage.location != "cpu" {
@@ -828,7 +1002,7 @@ pub fn execute(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {
                 }
                 c.tensor_budget(t.shape.count, 32 + 24 * t.shape.count)?;
                 let mut values = vec![];
-                for (i, n) in t.storage.values.iter().enumerate() {
+                for (i, n) in t.storage.host_values().iter().enumerate() {
                     poll(c, i)?;
                     values.push(new(atom("Float"), Data::Float(*n as f64)))
                 }

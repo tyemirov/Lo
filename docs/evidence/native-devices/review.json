@@ -1,0 +1,68 @@
+{
+  "issue": "I010",
+  "reviewer": "/root/devices_architecture",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_model_telemetry": "not exposed by host",
+  "status": "no unresolved correctness findings in the final bounded review",
+  "confirmed_repairs": [
+    "Kernel identity binds the manifest and separate kernel file to bytes and digest inside the verified runtime archive.",
+    "Separate Metal platform inputs preserve software runtime independence.",
+    "Artifact CLI preserves exact CPU and duplicate grant diagnostics.",
+    "Final test corrections preserve unsupported-target output checks and all six HTTP receipt assertions."
+  ],
+  "final_test_corrections": [
+    "The unsupported-emission test now selects Linux for Metal rejection.",
+    "The HTTP receipt fixture uses distinct exit codes and does not require snprintf."
+  ],
+  "limits": [
+    "Read-only source review; reviewer did not run tests.",
+    "Actual Metal GPU execution and performance remain unmeasured."
+  ],
+  "assignments": [
+    {
+      "agent": "/root/device_contracts",
+      "role": "mpr-explorer",
+      "requested_model": "gpt-6-luna",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/metal_contracts",
+      "role": "mpr-explorer",
+      "requested_model": "gpt-6-luna",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/devices_resources",
+      "role": "mpr-worker",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/devices_numerical",
+      "role": "mpr-worker",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/devices_metal",
+      "role": "mpr-worker",
+      "requested_model": "gpt-6.1-sol",
+      "requested_effort": "medium",
+      "actual_model_telemetry": "not exposed by host"
+    },
+    {
+      "agent": "/root/devices_architecture",
+      "role": "mpr-architect",
+      "requested_model": "gpt-6-astra",
+      "requested_effort": "high",
+      "actual_model_telemetry": "not exposed by host"
+    }
+  ],
+  "final_gate_status": "All final code checks passed. Reviewed production source is unchanged.",
+  "reviewer_log_check": "The reviewer read the preserved candidate-two, HTTP correction, and lowering correction logs and confirmed reported results."
+}

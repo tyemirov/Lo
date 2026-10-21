@@ -353,7 +353,7 @@ impl Value {
     pub fn json(&self) -> Json {
         let data = match &self.data {
             Data::Tensor(t) => {
-                json!({"dtype":"fp32","shape":t.shape.dims.iter().map(|d|d.to_string()).collect::<Vec<_>>(),"device":t.storage.location,"values":t.storage.values.iter().map(|n|format_float32(*n)).collect::<Vec<_>>()})
+                json!({"dtype":"fp32","shape":t.shape.dims.iter().map(|d|d.to_string()).collect::<Vec<_>>(),"device":t.storage.location,"values":t.storage.host_values().iter().map(|n|format_float32(*n)).collect::<Vec<_>>()})
             }
             Data::Device(d) => json!(d),
             Data::Wrapped(v) => Json::Object(
@@ -428,7 +428,7 @@ impl Value {
                 quote(&t.storage.location),
                 canonical_json_value(&json!(t
                     .storage
-                    .values
+                    .host_values()
                     .iter()
                     .map(|n| format_float32(*n))
                     .collect::<Vec<_>>()))

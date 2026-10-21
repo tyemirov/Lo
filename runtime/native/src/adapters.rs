@@ -48,6 +48,7 @@ pub struct Session {
     pub processes: Arc<crate::process::Processes>,
     pub http: Arc<crate::http::Http>,
     pub files: Mutex<crate::files::Files>,
+    pub devices: crate::device::Config,
     pub serving: bool,
 }
 impl Session {
@@ -58,6 +59,7 @@ impl Session {
             processes: Arc::new(crate::process::empty()),
             http: Arc::new(crate::http::Http::empty()),
             files: Mutex::new(crate::files::empty()),
+            devices: crate::device::Config::default(),
             serving: false,
         })
     }

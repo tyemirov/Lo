@@ -3,6 +3,7 @@
 I007 supplies the core runtime.
 I008 supplies CPU tensors, differentiation, optimizers, and checkpoints.
 I009 adds file, process, and HTTP adapters.
+I010 adds native device resources and Metal execution.
 The [runtime contract](native-runtime-contract.md) defines their ABI and semantic requirements.
 The [compiler plan](standalone-compiler-plan.md) defines the remaining migration.
 The [validation receipt](evidence/native-runtime/validation.json) records test results, runtime identities, and qualification limits.
@@ -21,7 +22,7 @@ File access requires an explicit root grant.
 Target construction does not activate an operation.
 
 The [adapter guide](native-adapters.md) defines capability selection, process availability, service lifetime, and adapter verification.
-I010 owns Metal and device execution.
+The [device guide](native-devices.md) defines native device resources, Metal build selection, and software verification.
 F017 owns the complete installed distribution, including the Linux compiler host.
 I011 owns full language qualification and removal of Go generation.
 These development commands do not close the installed-distribution acceptance criterion.

@@ -1,0 +1,6 @@
+{
+  "kind": "Review regression with only the new admission call removed through a Go compiler overlay. The repository source remains unchanged.",
+  "source_sha256": "5e9198f1937d6ab914965245e0b2669bd9e80936bb134d8ced384dc9539f2e5e",
+  "overlay_source_sha256": "47ccf9698eb397ee61fc2bd1c74a11890310eff0f7ea072a702aa883b3278c5e",
+  "removed_call": "\t\tif err = validateMetalKernel(ctx, admitted.archive, distribution.Metal.Kernel.SHA256); err != nil {\n\t\t\treturn admitted, err\n\t\t}\n"
+}

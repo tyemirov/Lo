@@ -7,7 +7,7 @@ The default executable build still generates Go source with Go 1.27.1.
 LLVM module emission does not change the language specification.
 The [semantic migration contract](semantic-migration.md) records current coverage and its evidence requirements.
 
-I004, I005, P005, I006, I007, I008, and I009 completed their acceptance checks.
+I004, I005, P005, I006, I007, I008, I009, and I010 completed their acceptance checks.
 I006 implements the [native lowering boundary](native-lowering.md) with LLVM modules for both targets.
 I007 supplies core runtime values and execution under the selected ABI.
 Core LLVM checks passed on Darwin arm64 and Linux arm64 in QEMU.
@@ -34,6 +34,18 @@ Each target completed 1,000 HTTP requests with complete request cleanup.
 Backpropagation, training, XOR, and checkpoint regression checks completed successfully.
 Final CI completed successfully.
 The [adapter receipt](evidence/native-adapters/validation.json) records the results and qualification limits.
+
+I010 implements native device resources and Metal execution.
+The [device guide](native-devices.md) describes opaque buffers, explicit transfers, resource ownership, and separate Metal build inputs.
+The Metal archive contains the verified precompiled kernels and the native adapter.
+Build admission verifies the kernel bytes inside the selected runtime archive.
+
+Software checks cover Metal arithmetic, backpropagation, 200-step training, 500-step XOR, and complete optimizer transfers.
+Darwin arm64 and Linux arm64 under QEMU provide the software execution environments.
+Physical Metal execution and performance remain unmeasured.
+The [device receipt](evidence/native-devices/validation.json) records results and qualification limits.
+I010 validation and final CI completed successfully on October 20, 2026.
+
 The [runtime development guide](native-runtime.md) gives the explicit LLVM build and verification commands.
 The [runtime receipt](evidence/native-runtime/validation.json) records source identities and validation results.
 The installed standalone compiler criterion is still open under F017 and I011.
@@ -193,7 +205,7 @@ The validation requirements in each issue are its acceptance criteria.
 | Port core values | I007 | Completed: core runtime and generated calls pass public fixtures. |
 | Port numeric execution | I008 | Completed: CPU tensors, autodiff, optimizers, and checkpoints pass their contracts. |
 | Port adapters | I009 | Files, processes, and HTTP pass confinement and lifecycle tests. |
-| Port devices | I010 | Transfers, Metal profiles, and resource cleanup pass software acceptance. |
+| Port devices | I010 | Completed: transfers, Metal profiles, and resource cleanup pass software acceptance. |
 | Supply the distribution | F017 | Complete relocatable offline compiler package. |
 | Qualify and replace | I011 | Full parity, clean-environment acceptance, and removal of obsolete Go build code. |
 | Specify composition | P006 | Modules, types, generics, and package rules. |

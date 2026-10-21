@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -14,10 +15,12 @@ import (
 )
 
 type llvmRuntimeScenario struct {
-	name, source string
-	harness      string
-	number       int
-	transform    func(*testing.T, []byte) []byte
+	name, source   string
+	expectedStdout string
+	metal          bool
+	harness        string
+	number         int
+	transform      func(*testing.T, []byte) []byte
 }
 
 func TestLLVMRuntimeLifetime(t *testing.T) {
@@ -72,6 +75,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 		ABI, LLVM, Host string
 		Compiler        fileIdentity
 		Targets         map[string]targetManifest
+		Metal           *targetManifest
 	}
 	data, err := os.ReadFile(manifest)
 	if err != nil {
@@ -84,12 +88,12 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 	if distribution.ABI != "lo-native-1" || distribution.LLVM != "21.1.8" || distribution.Host != host {
 		t.Fatal("toolchain identity mismatch")
 	}
-	target, exists := distribution.Targets[selectedTarget]
+	defaultTarget, exists := distribution.Targets[selectedTarget]
 	if !exists {
 		t.Fatalf("toolchain lacks target %s", selectedTarget)
 	}
 	triple := map[string]string{"darwin/arm64": "aarch64-apple-darwin", "linux/arm64": "aarch64-unknown-linux-gnu"}[selectedTarget]
-	if triple == "" || target.Triple != triple {
+	if triple == "" || defaultTarget.Triple != triple {
 		t.Fatal("toolchain target mismatch")
 	}
 	resolve := func(identity fileIdentity) string {
@@ -115,20 +119,35 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 		}
 		return path
 	}
-	compiler, linker, archive := resolve(distribution.Compiler), resolve(target.Linker), resolve(target.Runtime)
-	inputs := map[string]string{}
-	for name, identity := range target.Inputs {
-		inputs[name] = resolve(identity)
-	}
+	compiler := resolve(distribution.Compiler)
 	for _, scenario := range scenarios {
 		t.Run(scenario.name, func(t *testing.T) {
+			target := defaultTarget
+			if scenario.metal {
+				if selectedTarget != "darwin/arm64" || distribution.Metal == nil {
+					t.Fatal("Metal fixture requires the explicit Darwin Metal runtime")
+				}
+				target = *distribution.Metal
+				if target.Triple != triple {
+					t.Fatal("Metal fixture triple mismatch")
+				}
+			}
+			linker, archive := resolve(target.Linker), resolve(target.Runtime)
+			inputs := map[string]string{}
+			for name, identity := range target.Inputs {
+				inputs[name] = resolve(identity)
+			}
 			work := t.TempDir()
 			relative, err := filepath.Rel(repository, work)
 			if err != nil || !filepath.IsLocal(relative) {
 				t.Fatal("test directory leaves repository")
 			}
 			module, object, harness, executable := filepath.Join(work, "program.ll"), filepath.Join(work, "program.o"), filepath.Join(work, "lifetime.o"), filepath.Join(work, "lifetime")
-			emitted := runExecutable(t, binary, "build", sourceFile(t, scenario.source), "--emit", "llvm", "--target", selectedTarget, "--output", module, "--format", "json")
+			emitArguments := []string{"build", sourceFile(t, scenario.source), "--emit", "llvm", "--target", selectedTarget, "--output", module, "--format", "json"}
+			if scenario.metal {
+				emitArguments = append(emitArguments, "--device-backend", "metal")
+			}
+			emitted := runExecutable(t, binary, emitArguments...)
 			if emitted.status != 0 {
 				t.Fatalf("emit LLVM: %+v", emitted)
 			}
@@ -160,7 +179,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 					t.Fatalf("%s: %v\n%s", filepath.Base(tool), err, output)
 				}
 			}
-			flags := []string{"-target", target.Triple, "-O0", "-g", "-fPIC", "-ffp-contract=off"}
+			flags := []string{"-target", target.Triple, "-O0", "-g", "-fPIC", "-ffp-contract=off", "-I", filepath.Join(repository, "runtime/native/include"), "-I", filepath.Join(repository, "testdata/native-runtime")}
 			if selectedTarget == "darwin/arm64" {
 				flags = append(flags, "-mmacosx-version-min=27.0")
 			}
@@ -198,8 +217,23 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 			runTool(linker, arguments...)
 			if selectedTarget == "linux/arm64" {
 				got := runLinuxLLVMExecutable(t, executable)
-				if got.status != 0 || got.stdout != "" || got.stderr != "" {
+				if got.status != 0 || got.stdout != scenario.expectedStdout || got.stderr != "" {
 					t.Fatalf("Linux lifetime: %+v", got)
+				}
+			} else if scenario.expectedStdout != "" {
+				command := exec.Command(executable)
+				command.Dir = work
+				command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work, "TMP=" + work, "TEMP=" + work, "LC_ALL=C", "LANG=C"}
+				var stdout, stderr bytes.Buffer
+				command.Stdout, command.Stderr = &stdout, &stderr
+				if err := command.Run(); err != nil {
+					if _, ok := err.(*exec.ExitError); !ok {
+						t.Fatal(err)
+					}
+				}
+				got := result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}
+				if got.status != 0 || got.stdout != scenario.expectedStdout || got.stderr != "" {
+					t.Fatalf("native runtime output: %+v, expected %q", got, scenario.expectedStdout)
 				}
 			} else {
 				runTool(executable)

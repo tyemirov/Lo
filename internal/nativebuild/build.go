@@ -34,14 +34,16 @@ const MaxArtifactBytes = 64 << 20
 const CompilerIdentity = "lo-native-go-v1"
 
 type Receipt struct {
-	Command  string `json:"command"`
-	Status   string `json:"status"`
-	Artifact string `json:"artifact"`
-	Target   string `json:"target"`
-	Emit     string `json:"emit,omitempty"`
-	ABI      string `json:"abi,omitempty"`
-	Codegen  string `json:"codegen,omitempty"`
-	Runtime  string `json:"runtime_sha256,omitempty"`
+	Command       string                `json:"command"`
+	Status        string                `json:"status"`
+	Artifact      string                `json:"artifact"`
+	Target        string                `json:"target"`
+	Emit          string                `json:"emit,omitempty"`
+	ABI           string                `json:"abi,omitempty"`
+	Codegen       string                `json:"codegen,omitempty"`
+	Runtime       string                `json:"runtime_sha256,omitempty"`
+	DeviceBackend device.BuildBackend   `json:"device_backend,omitempty"`
+	Metal         *metalconfig.Identity `json:"metal,omitempty"`
 }
 type Metadata struct {
 	SourceDigest  string                `json:"source_sha256"`
