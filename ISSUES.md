@@ -1379,7 +1379,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [adapter receipt](docs/evidence/native-adapters/validation.json) records source identities, results, and qualification limits.
   I010, F017, and I011 keep their existing scope.
 
-- [ ] [I010] (P1) {I008,I009,F014} Port device resources and Metal execution
+- [x] [I010] (P1) {I008,I009,F014} Port device resources and Metal execution
   Goal:
   Preserve explicit device behavior in the replacement runtime.
 
@@ -1398,6 +1398,25 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify unavailable-device errors through the public artifact command.
   - Record unmeasured Metal behavior without requiring physical devices.
   - Verify Metal link inputs independently from software artifact inputs.
+
+  Completed on October 20, 2026.
+  Native device storage preserves explicit grants, transfers, scoped release, resource limits, and request isolation.
+  Software checks passed on Darwin arm64 and Linux arm64 under QEMU.
+  Each target completed 1,000 HTTP device requests with complete resource release.
+  Backpropagation, 200-step training, 500-step XOR, optimizer transfers, and checkpoint restoration passed.
+  Cancellation and device failures prevented later commits.
+
+  Metal uses separate runtime and platform inputs.
+  Build admission verifies the kernel bytes and digest inside the selected archive.
+  The production Metal adapter returned the required unavailable-device error through a controlled dependency.
+  Actual Metal execution and performance remain unmeasured.
+  Physical devices are not an acceptance condition.
+
+  Independent review found no unresolved correctness defect.
+  Final CI and all 13 runtime build tool tests passed.
+  The [device guide](docs/native-devices.md) describes the implementation and verification commands.
+  The [device receipt](docs/evidence/native-devices/validation.json) records source identities, results, and qualification limits.
+  F017 and I011 keep the complete compiler distribution and clean-environment acceptance work.
 
 - [ ] [I011] (P1) {F017,I005} Qualify the standalone compiler and remove Go generation
   Goal:
