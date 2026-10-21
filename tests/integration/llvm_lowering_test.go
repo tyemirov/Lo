@@ -99,7 +99,7 @@ func TestLLVMLoweringInvocation(t *testing.T) {
 
 func TestLLVMLoweringPreservesOutput(t *testing.T) {
 	input := sourceFile(t, "return 1\n")
-	for _, extra := range [][]string{{"--target", "windows/arm64"}, {"--device-backend", "metal"}} {
+	for _, extra := range [][]string{{"--target", "windows/arm64"}, {"--device-backend", "metal", "--target", "linux/arm64"}} {
 		output := filepath.Join(t.TempDir(), "existing.ll")
 		file, err := os.Create(output)
 		if err != nil {
