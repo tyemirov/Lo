@@ -62,7 +62,8 @@ func TestLLVMExecutableGenerationDiagnostics(t *testing.T) {
 				if scenario == "lowering-limit" {
 					span = generationLimitSpan{span, strings.Repeat("x", nativeplan.MaxModuleBytes+1)}
 				} else {
-					literalType, text = types.String(), strings.Repeat("\x00", nativeplan.MaxModuleBytes/18+1)
+					// A NUL uses six JSON bytes and eight LLVM bytes. Only emission exceeds the limit.
+					literalType, text = types.String(), strings.Repeat("\x00", nativeplan.MaxModuleBytes/8+1)
 				}
 				literal, err := ir.NewLiteral(literalType, text, span)
 				if err != nil {

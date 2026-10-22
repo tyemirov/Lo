@@ -51,7 +51,7 @@ Encoding and decoding are pure operations with explicit fallibility.
 They do not access files or cause implicit device transfers.
 They are outside the differentiable operation subset.
 
-File access uses the current `File.read`, `File.write`, and `commit` contract.
+File access uses the current `File.read`, `File.Write.new`, and `commit` contract.
 Reads require the selected read root.
 Writes require the selected write root and explicit commit activation.
 The checkpoint operations do not add another file adapter or grant.
@@ -107,13 +107,13 @@ Temporary decoded or transferred storage is released after failure or cancellati
 | `internal/check` | Infer exact checkpoint output types from the template and reject unsupported values. |
 | `internal/runtimeops` | Add the bounded codec and container transfers through the current tensor runtime. |
 | `internal/eval` | Dispatch the new checked operations. |
-| `internal/codegen` | Emit the same runtime calls for native artifacts. |
+| `internal/nativeplan` and `internal/llvmemit` | Lower checkpoint operations and emit native runtime calls. |
 | `internal/inspect` and `internal/tensorfacts` | Keep shapes and report transfers, CPU decode results, and possible errors. |
-| `internal/runtimebundle` | Regenerate the native runtime bundle from the selected source. |
+| `runtime/native` | Execute checkpoint operations and container transfers in the static native runtime. |
 | `tests/integration` | Exercise independent processes, malformed data, failures, and CPU/Metal parity. |
 
-The implementation reuses current value constructors and optimizer invariants.
-It does not add a second optimizer implementation.
+Each runtime preserves the same value and optimizer invariants.
+The native runtime implements the checked operations through its ABI.
 It does not import arbitrary runtime values.
 
 ## Acceptance
@@ -156,7 +156,7 @@ The [resume example](../examples/xor_resume_cpu.lo) restores that state and comp
 It writes the final Parameters to `bin/xor-parameters.json`.
 The [inference example](../examples/xor_infer_cpu.lo) loads those Parameters and returns predictions without training.
 Each command starts a separate process.
-The JSON checkpoint files contain data, and `File.write` replaces their previous contents.
+The JSON checkpoint files contain data, and a committed `File.Write` replaces their previous contents.
 
 For the explicit Metal workflow, use these commands:
 
@@ -173,20 +173,31 @@ Each training process uses six uploads and six downloads.
 Inference uses five uploads and one download.
 The training loops contain no host transfers.
 
-Native artifacts use the same operations and execution grants:
+Native artifacts use the same operations and execution grants.
+The prepared runtime manifest is necessary for these development compiler builds.
+Select a manifest with the Metal profile for the Metal artifact:
 
 ```bash
-LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_infer_cpu.lo --output ./bin/xor-infer
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_infer_cpu.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/xor-infer
 ./bin/xor-infer run --read-root ./bin --format json
-LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/xor_infer_metal.lo --device-backend metal --output ./bin/xor-infer-metal
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_infer_metal.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --device-backend metal --output ./bin/xor-infer-metal
 ./bin/xor-infer-metal run --allow-device metal:0 --read-root ./bin --format json
 ```
+
+Installed packages supply their own manifest and tools.
+Use the Darwin Metal package for a Metal artifact.
+No Go or native development tool installation is necessary for installed compilation.
+See the [distribution guide](compiler-distribution.md) for installation and build-state requirements.
 
 ## Open Decisions
 
 There are no open decisions for this implementation scope.
 
 ## Validation Evidence
+
+The following records describe the October 2026 checkpoint implementation before the LLVM migration.
+These historical results do not establish I011 qualification.
+The [semantic migration contract](semantic-migration.md) owns current native coverage requirements.
 
 The [initial failure](evidence/checkpoint-red.txt) records the missing transfer operations before implementation.
 The [software tests](evidence/checkpoint-software.txt) cover typed imports, invalid data, optimizer state, resource limits, and controlled Metal execution.

@@ -9,8 +9,9 @@ The [compiler plan](standalone-compiler-plan.md) defines the remaining migration
 The [validation receipt](evidence/native-runtime/validation.json) records test results, runtime identities, and qualification limits.
 The [adapter receipt](evidence/native-adapters/validation.json) records I009 validation.
 
-The explicit LLVM build route uses native code and a static Rust runtime.
-The default build route still uses Go until I011.
+All executable builds use LLVM and a static Rust runtime.
+The compiler no longer generates Go source.
+The [installed compiler](compiler-distribution.md) uses LLVM from its own package.
 An LLVM build does not select another backend when compilation fails.
 
 ## Supported Scope
@@ -23,8 +24,11 @@ Target construction does not activate an operation.
 
 The [adapter guide](native-adapters.md) defines capability selection, process availability, service lifetime, and adapter verification.
 The [device guide](native-devices.md) defines native device resources, Metal build selection, and software verification.
-F017 owns the complete installed distribution, including the Linux compiler host.
-I011 owns full language qualification and removal of Go generation.
+F017 supplies the complete installed distribution, including the Linux compiler host.
+I011 owns language qualification after removal of Go generation.
+
+Current corpus, offline, component, and CI checks passed.
+Performance qualification and final review remain pending.
 These development commands do not close the installed-distribution acceptance criterion.
 
 ## Prepare And Build
@@ -56,17 +60,23 @@ Make keeps caches and temporary files inside Lo.
    make build </dev/null
    ```
 
-4. Compile an executable through the explicit LLVM route:
+4. Create the development build directory:
 
    ```sh
-   bin/lo build examples/xor_cpu.lo \
-     --codegen llvm \
+   mkdir -p _scratch/native-runtime/build-state
+   ```
+
+5. Compile an executable with the selected toolchain:
+
+   ```sh
+   CI=1 LO_BUILD_ROOT="$PWD/_scratch/native-runtime/build-state" \
+     bin/lo build examples/xor_cpu.lo \
      --toolchain _scratch/native-runtime/distribution/toolchain.json \
      --output bin/xor-llvm \
      --format json </dev/null
    ```
 
-5. Execute the program:
+6. Execute the program:
 
    ```sh
    bin/xor-llvm run --format json </dev/null
@@ -80,6 +90,10 @@ python3 -B tools/nativeruntime/run.py \
   --preparation _scratch/native-runtime \
   bin/xor-linux run --format json </dev/null
 ```
+
+An explicit `--toolchain` input and an absolute `LO_BUILD_ROOT` are necessary for a development compiler.
+The installed compiler selects its packaged manifest.
+Both routes reject the removed `--codegen` option.
 
 The artifact needs its declared operating-system libraries.
 It does not need Lo, the source file, Go, Rust, or compiler tools.
@@ -114,30 +128,41 @@ The following checks use real LLVM executables:
 | Limits and cancellation | Preserve logical charges, host failures, and resource cleanup. |
 | Retained contexts | Keep storage bounded while preserving retained result handles and shared tensor storage. |
 
-The Darwin checks include all 13 analytical derivative and finite-difference fixtures.
-Both targets pass CPU training, XOR, and numerical resource tests.
+The earlier I008 checks include all 13 analytical derivative and finite-difference fixtures on Darwin.
+That snapshot passed CPU training, XOR, and numerical resource tests on both targets.
 Linux checkpoint tests use eight separate guest processes.
 Their SGD and AdamW results include complete optimizer state.
 
 Run focused groups separately:
 
 ```sh
-make test-native-llvm NATIVE_RUNTIME_STATE=_scratch/native-runtime \
+make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run 'TestCPUTrainingExample|TestXORExamples|TestCheckpointXOR/cpu' -count=1" </dev/null
 
-make test-native-llvm NATIVE_RUNTIME_STATE=_scratch/native-runtime \
+make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run TestAutodiff -count=1" </dev/null
 
-make test-native-llvm NATIVE_RUNTIME_STATE=_scratch/native-runtime \
+make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run 'TestTensor|TestNativeTensorBudgetDifferential' -count=1" </dev/null
 
-make test-native-llvm NATIVE_RUNTIME_STATE=_scratch/native-runtime \
+make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run 'TestLLVM|TestParameters|TestOptimizer|TestCheckpointFreshProcess|TestSemanticMigrationCheckpointResume' -count=1" </dev/null
 ```
 
 The Linux checks use QEMU without a physical-device requirement.
 Tests that directly inject Go evaluator dependencies do not establish LLVM runtime behavior.
 The native ABI tests supply separate evidence for numerical cancellation, storage ownership, and failure cleanup.
+
+## Metal Assets
+
+Run `make build-metal </dev/null` before `make build-native-runtime-metal` or package construction.
+The producer creates `runtime/metal/metal.metallib` and `runtime/metal/manifest.json`.
+The manifest identifies the kernel, adapter, producer, and embed source files.
+The native runtime producer checks these files against `bin/lo-metal-build.json`.
+
+It reads the kernel library directly, without a Go source archive.
+Software device models and injected failures supply device acceptance evidence.
+No physical device is necessary for any check.
 
 ## Runtime Structure
 

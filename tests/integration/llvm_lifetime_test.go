@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -12,15 +13,22 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
+const llvmCaptureName = ".lo-native-capture"
+
 type llvmRuntimeScenario struct {
-	name, source   string
-	expectedStdout string
-	metal          bool
-	harness        string
-	number         int
-	transform      func(*testing.T, []byte) []byte
+	name, source     string
+	timeout          time.Duration
+	expectedStdout   string
+	metal            bool
+	harness          string
+	number           int
+	transform        func(*testing.T, []byte) []byte
+	harnessTransform func(*testing.T, []byte) []byte
+	captureOutput    bool
+	verify           func(*testing.T, result)
 }
 
 func TestLLVMRuntimeLifetime(t *testing.T) {
@@ -75,6 +83,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 		ABI, LLVM, Host string
 		Compiler        fileIdentity
 		Targets         map[string]targetManifest
+		HostLibraries   map[string]fileIdentity `json:"host_libraries"`
 		Metal           *targetManifest
 	}
 	data, err := os.ReadFile(manifest)
@@ -120,6 +129,17 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 		return path
 	}
 	compiler := resolve(distribution.Compiler)
+	hostLibraryDirectory := ""
+	for _, identity := range distribution.HostLibraries {
+		directory := filepath.Dir(resolve(identity))
+		if hostLibraryDirectory != "" && directory != hostLibraryDirectory {
+			t.Fatal("toolchain host libraries require one directory")
+		}
+		hostLibraryDirectory = directory
+	}
+	if host == "linux/arm64" && hostLibraryDirectory == "" {
+		t.Fatal("Linux toolchain requires host libraries")
+	}
 	for _, scenario := range scenarios {
 		t.Run(scenario.name, func(t *testing.T) {
 			target := defaultTarget
@@ -141,6 +161,20 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 			relative, err := filepath.Rel(repository, work)
 			if err != nil || !filepath.IsLocal(relative) {
 				t.Fatal("test directory leaves repository")
+			}
+			if scenario.captureOutput {
+				capture, err := os.Create(filepath.Join(work, llvmCaptureName))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := capture.Close(); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() {
+					if err := os.Remove(filepath.Join(work, llvmCaptureName)); err != nil && !os.IsNotExist(err) {
+						t.Error(err)
+					}
+				})
 			}
 			module, object, harness, executable := filepath.Join(work, "program.ll"), filepath.Join(work, "program.o"), filepath.Join(work, "lifetime.o"), filepath.Join(work, "lifetime")
 			emitArguments := []string{"build", sourceFile(t, scenario.source), "--emit", "llvm", "--target", selectedTarget, "--output", module, "--format", "json"}
@@ -173,6 +207,10 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 			runTool := func(tool string, arguments ...string) {
 				t.Helper()
 				command := exec.Command(tool, arguments...)
+				if host == "linux/arm64" && (tool == compiler || tool == linker) {
+					loaderArguments := []string{"--inhibit-cache", "--library-path", hostLibraryDirectory, "--argv0", tool, tool}
+					command = exec.Command("/lib/ld-linux-aarch64.so.1", append(loaderArguments, arguments...)...)
+				}
 				command.Dir = work
 				command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work, "TMP=" + work, "TEMP=" + work, "LC_ALL=C", "LANG=C", "ZERO_AR_DATE=1"}
 				if output, err := command.CombinedOutput(); err != nil {
@@ -191,7 +229,24 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 			if !filepath.IsLocal(harnessSource) {
 				t.Fatal("harness leaves repository")
 			}
-			runTool(compiler, append(append([]string{}, flags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-fno-stack-protector", "-nostdinc", "-c", filepath.Join(repository, harnessSource), "-o", harness)...)
+			selectedHarness := filepath.Join(repository, harnessSource)
+			if scenario.harnessTransform != nil {
+				contents, err := os.ReadFile(selectedHarness)
+				if err != nil {
+					t.Fatal(err)
+				}
+				selectedHarness = filepath.Join(work, "harness.c")
+				file, err := os.Create(selectedHarness)
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, writeErr := file.Write(scenario.harnessTransform(t, contents))
+				closeErr := file.Close()
+				if writeErr != nil || closeErr != nil {
+					t.Fatalf("write harness: %v, %v", writeErr, closeErr)
+				}
+			}
+			runTool(compiler, append(append([]string{}, flags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-fno-stack-protector", "-nostdinc", "-c", selectedHarness, "-o", harness)...)
 			var arguments []string
 			for _, argument := range target.LinkArgs {
 				switch argument {
@@ -215,13 +270,25 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 				}
 			}
 			runTool(linker, arguments...)
-			if selectedTarget == "linux/arm64" {
-				got := runLinuxLLVMExecutable(t, executable)
-				if got.status != 0 || got.stdout != scenario.expectedStdout || got.stderr != "" {
+			if selectedTarget == "linux/arm64" && (host != selectedTarget || scenario.timeout == 0) {
+				capturePath := ""
+				if scenario.captureOutput {
+					capturePath = filepath.Join(work, llvmCaptureName)
+				}
+				got := runLinuxLLVMExecutableWithCapture(t, executable, capturePath)
+				if scenario.verify != nil {
+					scenario.verify(t, got)
+				} else if got.status != 0 || got.stdout != scenario.expectedStdout || got.stderr != "" {
 					t.Fatalf("Linux lifetime: %+v", got)
 				}
-			} else if scenario.expectedStdout != "" {
-				command := exec.Command(executable)
+			} else if scenario.expectedStdout != "" || scenario.verify != nil {
+				ctx := context.Background()
+				if scenario.timeout > 0 {
+					var cancel context.CancelFunc
+					ctx, cancel = context.WithTimeout(ctx, scenario.timeout)
+					defer cancel()
+				}
+				command := exec.CommandContext(ctx, executable)
 				command.Dir = work
 				command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work, "TMP=" + work, "TEMP=" + work, "LC_ALL=C", "LANG=C"}
 				var stdout, stderr bytes.Buffer
@@ -231,12 +298,22 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 						t.Fatal(err)
 					}
 				}
+				if ctx.Err() != nil {
+					t.Fatalf("native runtime scenario deadline: %v", ctx.Err())
+				}
 				got := result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}
-				if got.status != 0 || got.stdout != scenario.expectedStdout || got.stderr != "" {
+				if scenario.verify != nil {
+					scenario.verify(t, got)
+				} else if got.status != 0 || got.stdout != scenario.expectedStdout || got.stderr != "" {
 					t.Fatalf("native runtime output: %+v, expected %q", got, scenario.expectedStdout)
 				}
 			} else {
 				runTool(executable)
+			}
+			if scenario.captureOutput && host == selectedTarget {
+				if _, err := os.Stat(filepath.Join(work, llvmCaptureName)); !os.IsNotExist(err) {
+					t.Fatalf("owned capture not removed: %v", err)
+				}
 			}
 		})
 	}

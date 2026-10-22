@@ -2,14 +2,12 @@ package integration_test
 
 import (
 	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -18,6 +16,7 @@ func TestLLVMRuntimeToolchainAdmission(t *testing.T) {
 		t.Skip("requires the explicit LLVM runtime lane")
 	}
 	manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
+	compiler := developmentToolchainCompiler(t)
 	data, err := os.ReadFile(manifest)
 	if err != nil {
 		t.Fatal(err)
@@ -77,8 +76,7 @@ func TestLLVMRuntimeToolchainAdmission(t *testing.T) {
 			output := filepath.Join(root, "program")
 			writeLLVMFixture(t, output, []byte("previous artifact"))
 			before := sha256.Sum256([]byte("previous artifact"))
-			got := runExecutable(t, binary, "build", input, "--format", "json", "--codegen", "llvm",
-				"--toolchain", selected, "--output", output)
+			got := runExecutable(t, compiler, "build", input, "--format", "json", "--toolchain", selected, "--output", output)
 			if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "build.toolchain" {
 				t.Fatalf("unadmitted linker input must fail admission: %+v", got)
 			}
@@ -111,8 +109,7 @@ func TestLLVMRuntimeStandalone(t *testing.T) {
 return List.fold(List.new(1,2,3),123456789012345678901234567890,Add)`)
 	work := t.TempDir()
 	output := filepath.Join(work, "program")
-	built := runExecutable(t, binary, "build", input, "--format", "json", "--codegen", "llvm",
-		"--toolchain", os.Getenv("LO_LLVM_TOOLCHAIN"), "--output", output)
+	built := runExecutable(t, binary, "build", input, "--format", "json", "--toolchain", os.Getenv("LO_LLVM_TOOLCHAIN"), "--output", output)
 	if built.status != 0 {
 		t.Fatalf("build standalone LLVM executable: %+v", built)
 	}
@@ -156,11 +153,11 @@ return List.map(List.new(1,2),Twice)`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	match := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2})+)"`).FindSubmatch(module)
+	match := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2}|[^"\\])*)"`).FindSubmatch(module)
 	if match == nil {
 		t.Fatal("missing runtime metadata")
 	}
-	data, err := hex.DecodeString(strings.ReplaceAll(string(match[1]), `\`, ""))
+	data, err := decodeLLVMBytes(match[1])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,12 +194,11 @@ return List.map(List.new(1,2),Twice)`)
 }
 
 // The compiler must reject unavailable native inputs at the build boundary.
-// This remains active without a prepared toolchain.
 func TestLLVMRuntimeRequiresToolchain(t *testing.T) {
+	compiler, _ := controlledLLVMTools(t)
 	input := sourceFile(t, "return 123456789012345678901234567890\n")
 	output := filepath.Join(t.TempDir(), "program")
-	got := runExecutable(t, binary, "build", input, "--format", "json", "--codegen", "llvm",
-		"--toolchain", filepath.Join(t.TempDir(), "missing.json"),
+	got := runExecutable(t, compiler, "build", input, "--format", "json", "--toolchain", filepath.Join(t.TempDir(), "missing.json"),
 		"--output", output)
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "build.toolchain" {
 		t.Fatalf("missing LLVM distribution must be a build failure: %+v", got)

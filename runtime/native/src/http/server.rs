@@ -84,7 +84,7 @@ impl Http {
                 match client::exchange(context, &self.policy, &self.resolver, as_http(target)) {
                     Ok(v) => {
                         context.last_activation = Some(
-                            json!({"operation":"HTTP.request","span":{"file":site.raw["file"],"start":site.raw["start"],"end":site.raw["end"]},"result_type":"HTTP.Response","status":v.fields()["status"].json()}),
+                            json!({"operation":"HTTP.request","span":{"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")},"result_type":"HTTP.Response","status":v.fields()["status"].json()}),
                         );
                         context.charge(&v)?;
                         Ok(v)
@@ -199,7 +199,7 @@ impl Http {
                 });
                 let receipt = wrap("HTTP.ServerReceipt", Value::Fields(fields));
                 context.last_activation = Some(
-                    json!({"operation":"HTTP.listen","span":{"file":site.raw["file"],"start":site.raw["start"],"end":site.raw["end"]},"receipt":receipt.json()}),
+                    json!({"operation":"HTTP.listen","span":{"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")},"receipt":receipt.json()}),
                 );
                 context.charge(&receipt)?;
                 Ok(receipt)
@@ -227,9 +227,10 @@ impl Http {
             if crate::cli::cancelled() {
                 return Ok(());
             }
-            let state = self.state.lock().unwrap();
-            if let Some(failure) = &state.failure {
-                return Err(failure.clone());
+            let mut state = self.state.lock().unwrap();
+            if let Some(failure) = state.failure.take() {
+                state.stopping = true;
+                return Err(failure);
             }
             if state.stopping {
                 return Ok(());

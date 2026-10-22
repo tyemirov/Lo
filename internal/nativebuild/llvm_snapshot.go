@@ -21,7 +21,7 @@ func snapshotLLVMFile(ctx context.Context, source, destination, expectedSHA256 s
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
-	if err := cloneLLVMSnapshot(source, destination); err != nil {
+	if err := cloneLLVMSnapshot(ctx, source, destination); err != nil {
 		return "", fmt.Errorf("clone LLVM input %q: %w", source, err)
 	}
 	defer func() {

@@ -14,10 +14,16 @@ func installFileProbeFixture(t *testing.T) string {
 	t.Helper()
 	directory := fileFixtureRoot(t)
 	helper := filepath.Join(directory, "lsof")
-	command := exec.Command("go", "build", "-o", helper, "./testdata/fileprobe")
-	command.Dir = repository
-	if output, err := command.CombinedOutput(); err != nil {
-		t.Fatalf("build probe fixture: %v: %s", err, output)
+	if input := qualificationFixture(t, "fileprobe"); input != "" {
+		if err := os.Link(input, helper); err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		command := exec.Command("go", "build", "-o", helper, "./testdata/fileprobe")
+		command.Dir = repository
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("build probe fixture: %v: %s", err, output)
+		}
 	}
 	t.Setenv("PATH", directory+string(os.PathListSeparator)+os.Getenv("PATH"))
 	record := filepath.Join(directory, "arguments.json")

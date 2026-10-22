@@ -13,13 +13,14 @@ const (
 	Target           = "darwin/arm64"
 	GoToolchain      = "go1.27.1"
 	DeploymentTarget = "27.0"
-	LibraryPath      = "internal/device/metal.metallib"
-	KernelPath       = "internal/device/metal_kernels.metal"
+	LibraryPath      = "runtime/metal/metal.metallib"
+	ManifestPath     = "runtime/metal/manifest.json"
+	KernelPath       = "runtime/metal/kernels.metal"
 )
 
-// RuntimeFiles is the complete Metal supplement to the software runtime bundle.
+// RuntimeFiles is the complete inventory of Metal producer inputs.
 func RuntimeFiles() []string {
-	return []string{"internal/device/metal_darwin.go", "internal/device/metal_bridge_darwin.m", "internal/device/metal_bridge.h", "internal/device/metal_types.h", LibraryPath}
+	return []string{"internal/device/metal_darwin.go", "internal/device/metal_bridge_darwin.m", "internal/device/metal_bridge.h", "internal/device/metal_types.h", "runtime/metal/embed.go", KernelPath, LibraryPath, "internal/metalconfig/config.go", "tools/metalbuild/main.go"}
 }
 
 // KernelFlags fixes the arithmetic configuration of the embedded kernels.
@@ -30,7 +31,6 @@ func KernelFlags() []string {
 // Identity records build inputs; device identity and grants are runtime inputs.
 type Identity struct {
 	Profile          string   `json:"profile"`
-	Go               string   `json:"go"`
 	Xcode            string   `json:"xcode"`
 	SDK              string   `json:"sdk"`
 	Clang            string   `json:"clang"`
@@ -49,7 +49,7 @@ type Manifest struct {
 
 // PinnedIdentity returns the supported compiler and numeric profile configuration.
 func PinnedIdentity() Identity {
-	return Identity{Profile: device.MetalProfile, Go: GoToolchain, Xcode: "Xcode 27.1\nBuild version 27A9275", SDK: "27.0", Clang: "Apple clang version 21.0.0 (clang-2100.3.34.2)", Metal: "Apple metal version 32023.921 (metalfe-32023.921.6)", Metallib: "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)", DeploymentTarget: DeploymentTarget, KernelFlags: KernelFlags()}
+	return Identity{Profile: device.MetalProfile, Xcode: "Xcode 27.1\nBuild version 27A9275", SDK: "27.0", Clang: "Apple clang version 21.0.0 (clang-2100.3.34.2)", Metal: "Apple metal version 32023.921 (metalfe-32023.921.6)", Metallib: "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)", DeploymentTarget: DeploymentTarget, KernelFlags: KernelFlags()}
 }
 
 // NativeEnvironment verifies the local native tools and returns their cgo settings.

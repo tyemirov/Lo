@@ -966,7 +966,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
         ])),
     );
     context.last_activation = Some(
-        json!({"operation":"File.remove","span":{"file":site.raw["file"],"start":site.raw["start"],"end":site.raw["end"]},"receipt":receipt.json()}),
+        json!({"operation":"File.remove","span":{"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")},"receipt":receipt.json()}),
     );
     context.charge(&receipt)?;
     Ok(receipt)

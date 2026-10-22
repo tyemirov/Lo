@@ -235,22 +235,25 @@ func TestLLVMLinuxHTTPVerifiedTLS(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeLLVMFixture(t, filepath.Join(directory, "program"), data)
-	helper, err := os.ReadFile(filepath.Join(repository, "tests/integration/testdata/native-http/linux_driver.go.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	writeLLVMFixture(t, filepath.Join(directory, "main.go"), helper)
-	output := filepath.Join(directory, "linux-http-driver")
-	command := exec.Command("go", "build", "-o", output, filepath.Join(directory, "main.go"))
-	command.Dir = directory
-	for _, entry := range os.Environ() {
-		if !strings.HasPrefix(entry, "GOOS=") && !strings.HasPrefix(entry, "GOARCH=") && !strings.HasPrefix(entry, "CGO_ENABLED=") && !strings.HasPrefix(entry, "GOWORK=") {
-			command.Env = append(command.Env, entry)
+	output := qualificationFixture(t, "linux-http-driver")
+	if output == "" {
+		helper, err := os.ReadFile(filepath.Join(repository, "tests/integration/testdata/native-http/linux_driver.go.txt"))
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
-	command.Env = append(command.Env, "GOOS=linux", "GOARCH=arm64", "CGO_ENABLED=0", "GOWORK=off")
-	if data, err := command.CombinedOutput(); err != nil {
-		t.Fatalf("build isolated guest HTTP driver: %v: %s", err, data)
+		writeLLVMFixture(t, filepath.Join(directory, "main.go"), helper)
+		output = filepath.Join(directory, "linux-http-driver")
+		command := exec.Command("go", "build", "-o", output, filepath.Join(directory, "main.go"))
+		command.Dir = directory
+		for _, entry := range os.Environ() {
+			if !strings.HasPrefix(entry, "GOOS=") && !strings.HasPrefix(entry, "GOARCH=") && !strings.HasPrefix(entry, "CGO_ENABLED=") && !strings.HasPrefix(entry, "GOWORK=") {
+				command.Env = append(command.Env, entry)
+			}
+		}
+		command.Env = append(command.Env, "GOOS=linux", "GOARCH=arm64", "CGO_ENABLED=0", "GOWORK=off")
+		if data, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("build isolated guest HTTP driver: %v: %s", err, data)
+		}
 	}
 	got := runLinuxLLVMExecutable(t, output)
 	if got.status != 0 || got.stderr != "" {

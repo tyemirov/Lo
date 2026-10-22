@@ -17,6 +17,7 @@ func TestLLVMMetalBuildSelection(t *testing.T) {
 		t.Skip("requires the explicit LLVM runtime lane")
 	}
 	source := sourceFile(t, "return 1")
+	compiler := developmentToolchainCompiler(t)
 	for _, scenario := range []struct {
 		name, target, code string
 	}{
@@ -40,7 +41,7 @@ func TestLLVMMetalBuildSelection(t *testing.T) {
 			}
 			selected := filepath.Join(t.TempDir(), "toolchain.json")
 			writeLLVMFixture(t, selected, data)
-			got := runExecutable(t, binary, "build", source, "--codegen", "llvm", "--toolchain", selected, "--device-backend", "metal", "--target", scenario.target, "--output", filepath.Join(t.TempDir(), "program"), "--format", "json")
+			got := runExecutable(t, compiler, "build", source, "--toolchain", selected, "--device-backend", "metal", "--target", scenario.target, "--output", filepath.Join(t.TempDir(), "program"), "--format", "json")
 			if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != scenario.code {
 				t.Fatalf("Metal selection: %+v, want %s", got, scenario.code)
 			}
@@ -107,7 +108,7 @@ func TestLLVMMetalBuildStandalone(t *testing.T) {
 	work := t.TempDir()
 	source := sourceFile(t, "return 17")
 	original := filepath.Join(work, "original")
-	built := runExecutable(t, binary, "build", source, "--codegen", "llvm", "--toolchain", manifest, "--device-backend", "metal", "--output", original, "--format", "json")
+	built := runExecutable(t, binary, "build", source, "--toolchain", manifest, "--device-backend", "metal", "--output", original, "--format", "json")
 	if built.status != 0 {
 		t.Fatalf("Metal build: %+v", built)
 	}
@@ -171,8 +172,49 @@ func TestLLVMMetalBuildStandalone(t *testing.T) {
 	}
 }
 
+func TestLLVMMetalBroadcastStandalone(t *testing.T) {
+	manifest, _ := llvmMetalManifest(t)
+	work := t.TempDir()
+	source := sourceFile(t, `flow Main() -> Tensor<FP32>! { seed = Tensor.new(List.new(1.25), List.new()); return Tensor.broadcast(seed, List.new(2, 2)) }; return Main()`)
+	artifact := filepath.Join(work, "broadcast")
+	built := runExecutable(t, binary, "build", source, "--toolchain", manifest, "--device-backend", "metal", "--output", artifact, "--format", "json")
+	if built.status != 0 {
+		t.Fatalf("Metal broadcast build: %+v", built)
+	}
+	var receipt struct {
+		DeviceBackend string `json:"device_backend"`
+	}
+	if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil || receipt.DeviceBackend != "metal" {
+		t.Fatalf("Metal broadcast receipt: %+v, %v", built, err)
+	}
+	if err := os.Remove(source); err != nil {
+		t.Fatal(err)
+	}
+	command := exec.Command(artifact, "run", "--format", "json")
+	command.Dir = work
+	command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work}
+	var stdout, stderr bytes.Buffer
+	command.Stdout, command.Stderr = &stdout, &stderr
+	if err := command.Run(); err != nil {
+		t.Fatalf("standalone Metal broadcast: %v: %s", err, &stderr)
+	}
+	var envelope struct {
+		Command, Status string
+		Result          runtimeValue
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &envelope); err != nil || stderr.Len() != 0 || envelope.Command != "run" || envelope.Status != "ok" {
+		t.Fatalf("broadcast result: %s, %s, %v", &stdout, &stderr, err)
+	}
+	value := successfulValue(t, envelope.Result)
+	if value.Type != "Tensor<FP32>" {
+		t.Fatalf("broadcast type: %s", value.Type)
+	}
+	valueJSON(t, value, `{"dtype":"fp32","device":"cpu","shape":["2","2"],"values":["1.25","1.25","1.25","1.25"]}`)
+}
+
 func TestLLVMMetalBuildAdmission(t *testing.T) {
 	manifest, base := llvmMetalManifest(t)
+	compiler := developmentToolchainCompiler(t)
 	data, err := json.Marshal(base)
 	if err != nil {
 		t.Fatal(err)
@@ -236,7 +278,7 @@ func TestLLVMMetalBuildAdmission(t *testing.T) {
 			writeLLVMFixture(t, selected, changed)
 			output := filepath.Join(root, "program")
 			writeLLVMFixture(t, output, []byte("previous artifact"))
-			got := runExecutable(t, binary, "build", sourceFile(t, "return 1"), "--codegen", "llvm", "--toolchain", selected, "--device-backend", "metal", "--output", output, "--format", "json")
+			got := runExecutable(t, compiler, "build", sourceFile(t, "return 1"), "--toolchain", selected, "--device-backend", "metal", "--output", output, "--format", "json")
 			if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "build.toolchain" {
 				t.Fatalf("Metal admission: %+v", got)
 			}
@@ -261,7 +303,7 @@ func TestLLVMMetalSoftwareIsolation(t *testing.T) {
 		}
 	}
 	output := filepath.Join(t.TempDir(), "software")
-	got := runExecutable(t, binary, "build", sourceFile(t, "return 1"), "--codegen", "llvm", "--toolchain", manifest, "--device-backend", "software", "--output", output, "--format", "json")
+	got := runExecutable(t, binary, "build", sourceFile(t, "return 1"), "--toolchain", manifest, "--device-backend", "software", "--output", output, "--format", "json")
 	if got.status != 0 {
 		t.Fatalf("software build: %+v", got)
 	}
@@ -278,7 +320,7 @@ func TestLLVMMetalSoftwareIsolation(t *testing.T) {
 
 func TestLLVMMetalProductionUnavailable(t *testing.T) {
 	llvmMetalManifest(t)
-	runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "production-bridge-no-device", metal: true,
+	runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "production-bridge-no-device", metal: true, captureOutput: true,
 		harness: "testdata/native-runtime/metal-unavailable.c",
 		source:  `flow Main()->Int!{a=Tensor.new(List.new(1.0),List.new(1));b=Tensor.to(a,Device.new("metal:0"));target=File.Write.new(File.Path.new("later"),Bytes.new("wrong"));commit target;return 0};return Main()`}})
 }

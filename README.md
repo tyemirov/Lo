@@ -28,11 +28,12 @@ The [implementation audit](docs/implementation-audit.md) records the completed r
 The accepted [compiler design and implementation plan](docs/compiler-design.md) selects Go and a typed execution graph.
 It specifies compiler stages, package boundaries, diagnostics, inspection, acceptance criteria, and open language decisions.
 
-`lo build` creates standalone native executables through generated Go code.
+`lo build` creates standalone native executables with LLVM and a static Rust runtime.
 Artifacts support the current operations, CPU training, File workflows, and HTTP services.
 The [native compilation contract](docs/native-compilation-contract.md) defines toolchain requirements, limits, and artifact construction.
-F001 completed native qualification on macOS arm64 and Linux arm64.
-The [acceptance report](docs/native-compilation-results.md) records tests, performance measurements, and build resources.
+F001 qualified the previous Go-generation implementation on macOS arm64 and Linux arm64.
+Its [historical acceptance report](docs/native-compilation-results.md) records those measurements.
+I011 qualifies the current LLVM implementation against the same semantic and performance requirements.
 
 The selected [training extension design](docs/training-extension-design.md) defines FP32 tensors, reverse-mode autodiff, immutable optimizer state, and explicit device execution.
 P001 completed the design task.
@@ -61,24 +62,33 @@ This repository is public early so the design can be evaluated as an AI-agent ex
 
 ## Build and Validate
 
-The [standalone compiler plan](docs/standalone-compiler-plan.md) defines the proposed native backend migration and language extensions.
+The [standalone compiler plan](docs/standalone-compiler-plan.md) defines the native compiler and planned language extensions.
 The [backend experiment](docs/native-backend-experiment.md) records LLVM and Cranelift probe results separately from compiler acceptance.
-The current executable build uses the Go toolchain below.
+The [installed compiler distribution](docs/compiler-distribution.md) supplies offline compilation for both supported hosts and targets.
+No Go, Rust, C compiler, or developer SDK installation is necessary for installed builds.
+Go is necessary to build the compiler frontend from this repository.
+An explicit native toolchain manifest is necessary for development program builds.
 The [native lowering path](docs/native-lowering.md) adds `lo build --emit llvm` for LLVM modules.
 Module emission uses no external compiler tools.
-Complete native executable linking is part of the migration.
+Installed executable builds use the packaged LLVM backend, linker, static runtime, and platform inputs.
 
 The Makefile requires installed Go 1.27.1 and keeps tool state under `_scratch/build-state/`.
 For executable builds, set `LO_BUILD_ROOT` to that absolute directory.
 The qualified platforms are macOS on arm64 and Linux on arm64.
+A Darwin arm64 host is necessary for the following developer preparation procedure.
+For Linux installation, use the [distribution guide](docs/compiler-distribution.md).
 
 ```bash
-make build
+make prepare-native-runtime </dev/null
+make build-native-runtime </dev/null
+make build </dev/null
 ./bin/lo parse examples/http_division.lo --format json
 ./bin/lo check examples/list_sum.lo
 ./bin/lo inspect examples/agent_file_workflow.lo --format json
 ./bin/lo run examples/list_sum.lo
-LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo --output ./bin/list-sum
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo \
+  --toolchain _scratch/native-runtime/distribution/toolchain.json \
+  --output ./bin/list-sum
 ./bin/list-sum run
 ./bin/lo run examples/tensor_forward.lo
 ./bin/lo run examples/training_cpu.lo --format json
@@ -87,38 +97,47 @@ LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo --
 ./bin/lo run examples/count_letter.lo --read-root examples
 ./bin/lo serve examples/http_echo.lo --listen 0 --format json
 make test-conformance
-make ci
 ```
 
+Before CI, prepare the distributions with the [distribution guide](docs/compiler-distribution.md#construct-packages).
+Then run `make ci </dev/null`.
+CI uses the selected installed distribution for semantic reporter checks.
+Set `SEMANTIC_COMPILER` and `SEMANTIC_TOOLCHAIN` when that distribution is outside the default package directory.
+
 The conformance suite runs 83 static and runtime fixtures.
-The catalog tests verify all 111 built-in operations.
+The catalog tests verify all 122 built-in operations.
 The integration suite also tests built-in signatures, runtime values, evaluation order, error traces, and adapter authorization.
 The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.
 The [adapter examples](docs/compiler-design.md#executable-adapter-examples) specify file grants, listen grants, and expected results.
 
-Go 1.27.1 is necessary on the host for executable builds.
+Go 1.27.1 is necessary for development builds through `make build`.
 Artifacts need no Go installation, Lo installation, source file, or repository checkout during execution.
 Programs that use `File.open_paths` require `lsof` on the execution host.
 Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact target.
 The build uses the host target when this option is absent.
 Supply file, listen, and device grants when you execute the artifact.
-Use the artifact's `metadata` command to inspect its source digest, runtime bundle digest, target, and toolchain.
+Use the artifact's `metadata` command to inspect its source digest, runtime archive digest, target, and toolchain.
 The default artifact backend is `software`.
 For a Metal artifact, use the explicit build option:
 
 ```bash
-make build-metal
+make build-metal </dev/null
+make build-native-runtime-metal </dev/null
 ./bin/lo-metal parse examples/training_metal.lo --format json
 ./bin/lo-metal check examples/training_metal.lo --format json
 ./bin/lo-metal inspect examples/training_metal.lo --format json
 ./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
-LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo \
+  --toolchain _scratch/native-runtime/distribution/toolchain.json \
+  --device-backend metal --output ./bin/metal-training
 ./bin/metal-training run --allow-device metal:0 --format json
 ./bin/metal-training metadata
 ```
 
-Metal builds require the pinned Apple toolchain and a local `darwin/arm64` target.
+The pinned Apple toolchain is necessary for kernel preparation.
+Installed Metal compilation uses precompiled kernels.
+Its target must be local `darwin/arm64`.
 The [native Metal contract](docs/native-metal.md) specifies the toolchain, metadata, and validation commands.
 The training example returns initial loss `2.46875` and final loss `0.00013215476064942777` after 200 updates.
 The [training acceptance report](docs/metal-training.md) separates software acceptance from optional local Metal execution.
@@ -496,7 +515,7 @@ lo serve examples/http_division.lo
 ### Milestone 5: Native Compilation
 
 The [native compilation plan](docs/native-compilation-plan.md) defines F001.
-It covers performance baselines, shared runtime contracts, generated Go code, standalone artifacts, File workflows, and HTTP services.
+The historical F001 plan covers performance baselines, shared runtime contracts, Go generation, standalone artifacts, File workflows, and HTTP services.
 Its acceptance criteria require semantic equivalence, qualified target execution, and measured performance.
 F001 passed these criteria on both supported targets.
 
@@ -567,7 +586,9 @@ Matching focused native qualification passed.
 
 Process constructors, inspection, nominal results, termination accessors, and bounded execution share one [Process contract](specification.md#95-process-adapter).
 The selected Darwin 27 arm64 profile passed [native qualification](docs/evidence/process-host-native.json).
-Canonical public acceptance passed all 24 interpreter/generated-native cases. Final stack CI and independent completion review passed.
+Process acceptance for Go generation passed all 24 interpreter and Go-generated cases.
+Its CI checks and completion review passed.
+The [compiler plan](docs/standalone-compiler-plan.md) records current LLVM qualification.
 The selected host denies child writes, network access, and descendants, and clears the specified inherited Mach slots.
 Commands use exact arguments, explicit environment values, and stdin bytes without a shell or inherited environment.
 The conditional work bound uses host parallelism and completed lifetime. It is not a hard CPU quota.

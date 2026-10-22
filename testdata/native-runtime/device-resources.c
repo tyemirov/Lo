@@ -1,9 +1,10 @@
+#include "capture.h"
 #include "../../runtime/native/include/lo_device_driver.h"
 typedef __SIZE_TYPE__ Size;
 extern void *malloc(Size);
 extern void free(void *);
 extern void *memcpy(void *,const void *,Size);
-extern int pipe(int *),fcntl(int,int,...),dup2(int,int),close(int),kill(int,int),getpid(void),open(const char *,int,...),unlink(const char *);
+extern int fcntl(int,int,...),dup2(int,int),close(int),kill(int,int),getpid(void),open(const char *,int,...),unlink(const char *);
 extern long read(int,void *,Size),write(int,const void *,Size);
 extern int lo_cli_main(int,const char *const *,const char *const *);
 extern uint64_t lo_runtime_live_storages(void),lo_runtime_live_storage_bytes(void);
@@ -32,9 +33,9 @@ static void observe(uintptr_t user,const LoDeviceReceipt *receipt){(void)user;ev
  if(observed_live!=receipt->live_bytes)invalid=5;if(peak<observed_live)peak=observed_live;
 }
 int main(void){LoDeviceDriver driver={0,host_open,host_close,host_allocate,host_upload,host_download,host_release,host_supports,host_compute};if(!lo_device_install_driver(&driver))return 1;lo_device_set_observer(0,observe);
- int output[2];if(pipe(output))return 2;int saved_out=fcntl(1,0,3),saved_err=fcntl(2,0,3);if(saved_out<0||saved_err<0||dup2(output[1],1)<0||dup2(output[1],2)<0)return 3;close(output[1]);
+ int capture_error=lo_capture_start();if(capture_error)return capture_error;
  const char *args[]={"device-resources","run","--format","json","--allow-device","cuda-sim:0","--write-root","."};int status=lo_cli_main(8,args,0);
- if(dup2(saved_out,1)<0||dup2(saved_err,2)<0)return 4;close(saved_out);close(saved_err);char contents[16384];long length=read(output[0],contents,sizeof(contents)-1);close(output[0]);if(length<0)return 5;contents[length]=0;
+ capture_error=lo_capture_finish();if(capture_error)return capture_error;char *contents=lo_capture_bytes;long length=(long)lo_capture_length;
  int expected=LO_CASE==0||LO_CASE==10?0:LO_CASE==5||LO_CASE==6||LO_CASE==7||LO_CASE==8||LO_CASE==11?2:1;
  const char *kind=LO_CASE==1?"Device.Unavailable":LO_CASE==2||LO_CASE==9?"Device.AllocationFailed":LO_CASE==3||LO_CASE==4?"Device.TransferFailed":LO_CASE==5||LO_CASE==6?"runtime.host-failure":LO_CASE==7||LO_CASE==11?"runtime.cancelled":LO_CASE==8?"runtime.limit":LO_CASE==10?"Device.Lost":"\"status\":\"ok\"";
  if(status!=expected||!has(contents,kind)){write(2,contents,(Size)length);return 20+LO_CASE;}

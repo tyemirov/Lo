@@ -78,6 +78,47 @@ unsafe fn reject_thread(c: *const Context, out: *mut ResultSlot) -> bool {
         false
     }
 }
+enum ArgumentValues {
+    Empty,
+    One([Handle; 1]),
+    Two([Handle; 2]),
+    Many(Vec<Handle>),
+}
+impl std::ops::Deref for ArgumentValues {
+    type Target = [Handle];
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::Empty => &[],
+            Self::One(values) => values,
+            Self::Two(values) => values,
+            Self::Many(values) => values,
+        }
+    }
+}
+impl ArgumentValues {
+    unsafe fn read(args: *const *const Value, count: usize) -> Result<Self, Fault> {
+        let input = |index| {
+            let value = *args.add(index);
+            if value.is_null() {
+                Err(host("null input handle"))
+            } else {
+                Ok(borrow(value))
+            }
+        };
+        Ok(match count {
+            0 => Self::Empty,
+            1 => Self::One([input(0)?]),
+            2 => Self::Two([input(0)?, input(1)?]),
+            _ => {
+                let mut values = Vec::with_capacity(count);
+                for index in 0..count {
+                    values.push(input(index)?);
+                }
+                Self::Many(values)
+            }
+        })
+    }
+}
 pub unsafe fn call(
     c: *mut Context,
     args: *const *const Value,
@@ -94,21 +135,14 @@ pub unsafe fn call(
     }
     let result = (|| -> Outcome {
         if operation != Some("lo_derivative_host_failure") {
-            (&*c).entry()?;
+            (&*c).check_fault()?;
         }
         let s = (&*c).site(site)?;
         let count = usize::try_from(n).map_err(|_| host("invalid argument count"))?;
         if count > MAX_ITEMS || count > 0 && args.is_null() {
             return Err(host("invalid argument array"));
         }
-        let mut a = vec![];
-        for i in 0..count {
-            let p = *args.add(i);
-            if p.is_null() {
-                return Err(host("null input handle"));
-            }
-            a.push(borrow(p))
-        }
+        let a = ArgumentValues::read(args, count)?;
         crate::tensor::validate_inputs(&*c, &a)?;
         if let Some(op) = operation {
             if op.starts_with("lo_derivative_") {
@@ -118,22 +152,32 @@ pub unsafe fn call(
                 return crate::autodiff::execute(&mut *c, &s, &a);
             }
             if op.starts_with("lo_") {
-                let action = s.raw["action"].as_str().unwrap();
-                let expected = match op {
-                    "lo_flow_enter" => true,
-                    "lo_step" => matches!(action, "statement_step" | "expression_step"),
-                    "lo_convert_propagate" => matches!(action, "convert_propagate" | "cause"),
-                    _ => op.strip_prefix("lo_") == Some(action),
-                };
-                let argc = if matches!(
-                    op,
-                    "lo_literal" | "lo_step" | "lo_scope_enter" | "lo_flow_enter" | "lo_flow_ref"
-                ) {
-                    0
-                } else if op == "lo_match" {
-                    2
-                } else {
-                    1
+                let (expected, argc) = match op {
+                    "lo_flow_enter" => (true, 0),
+                    "lo_step" => (
+                        matches!(s.action, Action::StatementStep | Action::ExpressionStep),
+                        0,
+                    ),
+                    "lo_convert_propagate" => (
+                        matches!(s.action, Action::ConvertPropagate | Action::Cause),
+                        1,
+                    ),
+                    "lo_literal" => (s.action == Action::Literal, 0),
+                    "lo_scope_enter" => (s.action == Action::ScopeEnter, 0),
+                    "lo_flow_ref" => (s.action == Action::FlowRef, 0),
+                    "lo_charge_value" => (s.action == Action::ChargeValue, 1),
+                    "lo_cause" => (s.action == Action::Cause, 1),
+                    "lo_commit" => (s.action == Action::Commit, 1),
+                    "lo_project" => (s.action == Action::Project, 1),
+                    "lo_match" => (s.action == Action::Match, 2),
+                    "lo_convert_success" => (s.action == Action::ConvertSuccess, 1),
+                    "lo_convert_failure" => (s.action == Action::ConvertFailure, 1),
+                    "lo_convert_record_view" => (s.action == Action::ConvertRecordView, 1),
+                    "lo_convert_scalar_list_view" => (s.action == Action::ConvertScalarListView, 1),
+                    "lo_convert_fallible_record_view" => {
+                        (s.action == Action::ConvertFallibleRecordView, 1)
+                    }
+                    _ => (false, 1),
                 };
                 if !expected || count != argc {
                     return Err(host("runtime helper metadata mismatch"));
@@ -262,81 +306,51 @@ fn validate_helper(symbol: &str, s: &Site, a: &[Handle]) -> Result<(), Fault> {
 }
 fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
     let action = if symbol == "lo_convert_propagate" {
-        "convert_propagate"
+        Action::ConvertPropagate
     } else if symbol == "lo_flow_enter" {
-        "flow_enter"
+        Action::FlowEnter
     } else {
-        s.raw["action"].as_str().unwrap()
+        s.action
     };
     match action {
-        "statement_step" | "expression_step" => {
+        Action::StatementStep | Action::ExpressionStep => {
             if !a.is_empty() {
                 return Err(host("step arity"));
             }
             c.step()?;
-            Ok(new(atom("Null"), Data::Null))
+            Ok(c.control_null.clone())
         }
-        "scope_enter" => {
+        Action::ScopeEnter => {
             c.resources.scope_enter();
             c.scopes += 1;
-            Ok(new(atom("Null"), Data::Null))
+            Ok(c.control_null.clone())
         }
-        "flow_enter" => {
+        Action::FlowEnter => {
             if c.depth == 256 {
                 return Err(limit("flow depth"));
             }
             c.depth += 1;
-            Ok(new(atom("Null"), Data::Null))
+            Ok(c.control_null.clone())
         }
-        "charge_value" => {
+        Action::ChargeValue => {
             if a.len() != 1 {
                 return Err(host("charge arity"));
             }
             c.charge(&a[0])?;
-            Ok(new(atom("Null"), Data::Null))
+            Ok(c.control_null.clone())
         }
-        "literal" => {
+        Action::Literal => {
             if !a.is_empty() {
                 return Err(host("literal arity"));
             }
-            let t = s.raw["text"].as_str().ok_or_else(|| host("literal text"))?;
-            match s.typ.kind() {
-                "Int" => {
-                    let n = num_bigint::BigInt::parse_bytes(t.as_bytes(), 10)
-                        .ok_or_else(|| host("invalid compiled integer"))?;
-                    if n.bits() > MAX_BITS {
-                        return Err(limit("integer bits"));
-                    }
-                    Ok(int(n))
-                }
-                "Float" => {
-                    let bits = u64::from_str_radix(s.raw["float_bits"].as_str().unwrap(), 16)
-                        .map_err(|_| host("invalid Float bits"))?;
-                    let n = f64::from_bits(bits);
-                    if !n.is_finite() {
-                        return Err(host("invalid finite Float"));
-                    }
-                    Ok(new(atom("Float"), Data::Float(n)))
-                }
-                "String" => {
-                    if t.len() > MAX_BYTES {
-                        return Err(limit("string bytes"));
-                    }
-                    Ok(text(t))
-                }
-                "Bool" => {
-                    if t == "true" || t == "false" {
-                        Ok(boolean(t == "true"))
-                    } else {
-                        Err(host("invalid Boolean literal"))
-                    }
-                }
-                "Null" => Ok(new(atom("Null"), Data::Null)),
-                _ => Err(host("invalid literal type")),
+            match s.literal.as_ref() {
+                Some(Literal::Value(value)) => Ok(value.clone()),
+                Some(Literal::Limit(message)) => Err(limit(message)),
+                None => Err(host("literal has no admitted value")),
             }
         }
-        "flow_ref" => Ok(new(atom("Null"), Data::Flow(s.flow))),
-        "cause" => {
+        Action::FlowRef => Ok(new(atom("Null"), Data::Flow(s.flow))),
+        Action::Cause => {
             if a.len() != 1 {
                 return Err(host("cause arity"));
             }
@@ -346,19 +360,19 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
                 Ok(a[0].clone())
             }
         }
-        "convert_success" => {
+        Action::ConvertSuccess => {
             if a.len() != 1 {
                 return Err(host("conversion arity"));
             }
             Ok(success(&s.typ, a[0].clone()))
         }
-        "convert_failure" => {
+        Action::ConvertFailure => {
             if a.len() != 1 || a[0].typ != atom("Error") {
                 return Err(host("failure conversion input"));
             }
             Ok(failure(&s.typ, a[0].clone()))
         }
-        "convert_propagate" => {
+        Action::ConvertPropagate => {
             if a.len() != 1 {
                 return Err(host("conversion arity"));
             }
@@ -368,13 +382,13 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
                 _ => Err(host("propagation input type")),
             }
         }
-        "convert_record_view" => Ok(view(&a[0])),
-        "convert_fallible_record_view" => match &a[0].data {
+        Action::ConvertRecordView => Ok(view(&a[0])),
+        Action::ConvertFallibleRecordView => match &a[0].data {
             Data::Success(v) => Ok(success(&s.typ, view(v))),
             Data::Failure(e) => Ok(failure(&s.typ, e.clone())),
             _ => Err(host("fallible record view input")),
         },
-        "convert_scalar_list_view" => {
+        Action::ConvertScalarListView => {
             let mut output = vec![];
             for ch in a[0].string().chars() {
                 if output.len() == MAX_ITEMS {
@@ -384,7 +398,7 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
             }
             Ok(new(s.typ.clone(), Data::List(output)))
         }
-        "project" => {
+        Action::Project => {
             let field = s.raw["field"]
                 .as_str()
                 .ok_or_else(|| host("projection field"))?;
@@ -406,13 +420,16 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
                 .cloned()
                 .ok_or_else(|| host("unknown record field"))
         }
-        "match" => Ok(boolean(if matches!(a[1].data, Data::Range(..)) {
+        Action::Match => Ok(boolean(if matches!(a[1].data, Data::Range(..)) {
             contains(&a[1], &a[0])
         } else {
             equal(&a[0], &a[1])
         })),
-        "commit" => crate::adapters::commit(c, s, &a[0]),
-        _ => Err(host(format!("invalid runtime action {action}"))),
+        Action::Commit => crate::adapters::commit(c, s, &a[0]),
+        _ => Err(host(format!(
+            "invalid runtime action {}",
+            s.raw["action"].as_str().unwrap()
+        ))),
     }
 }
 macro_rules! helper {($($name:ident),*)=>{$(#[no_mangle] pub unsafe extern "C" fn $name(c:*mut Context,a:*const *const Value,n:u64,s:u64,o:*mut ResultSlot){call(c,a,n,s,o,Some(stringify!($name)))})*};}
@@ -515,7 +532,7 @@ pub unsafe extern "C" fn lo_flow_error(
         let Data::Error(mut error) = framed.data.clone() else {
             std::process::abort()
         };
-        error.operation = f.name;
+        error.operation = f.name.clone();
         error.site = site;
         Err(Fault::Recoverable(new(atom("Error"), Data::Error(error))))
     })();
@@ -531,7 +548,17 @@ pub unsafe fn invoke(c: *mut Context, flow: usize, a: &[Handle], site: u64) -> O
     if a.len() != f.parameters.len() || a.iter().zip(&f.parameters).any(|(a, (_, t))| a.typ != *t) {
         return Err(host("callback parameter metadata mismatch"));
     }
-    let raw = a.iter().map(Arc::as_ptr).collect::<Vec<_>>();
+    let mut inline = [ptr::null(); 2];
+    let heap;
+    let raw: &[*const Value] = if a.len() <= inline.len() {
+        for (slot, value) in inline.iter_mut().zip(a) {
+            *slot = Arc::as_ptr(value);
+        }
+        &inline[..a.len()]
+    } else {
+        heap = a.iter().map(Arc::as_ptr).collect::<Vec<_>>();
+        &heap
+    };
     let mut out = ResultSlot {
         status: 0,
         code: 0,
@@ -542,7 +569,7 @@ pub unsafe fn invoke(c: *mut Context, flow: usize, a: &[Handle], site: u64) -> O
     callback(c, raw.as_ptr(), raw.len() as u64, site, &mut out);
     match read(&*c, out) {
         Ok(v) => {
-            if v.typ != f.output.base() {
+            if &v.typ != f.output.base_ref() {
                 return Err(host("callback result type metadata mismatch"));
             }
             Ok(success(&f.output, v))
@@ -574,18 +601,49 @@ pub unsafe fn read(c: &Context, out: ResultSlot) -> Outcome {
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn lo_context_new(steps: u64) -> *mut Context {
-    if steps == 0 || lo_program_metadata_size > 64 << 20 || lo_program_flow_count > 1_000_000 {
-        return ptr::null_mut();
+pub unsafe extern "C" fn lo_program_new() -> *const Program {
+    if lo_program_metadata_size > 64 << 20 || lo_program_flow_count > 1_000_000 {
+        return ptr::null();
     }
     let data = std::slice::from_raw_parts(
         ptr::addr_of!(lo_program_metadata),
         lo_program_metadata_size as usize,
     );
     match Program::parse(data, lo_program_flow_count as usize) {
-        Ok(program) => Box::into_raw(Box::new(Context::new(Arc::new(program), steps))),
-        Err(_) => ptr::null_mut(),
+        Ok(program) => Arc::into_raw(Arc::new(program)),
+        Err(_) => ptr::null(),
     }
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_program_free(program: *const Program) {
+    if !program.is_null() {
+        drop(Arc::from_raw(program));
+    }
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_from_program(
+    program: *const Program,
+    steps: u64,
+) -> *mut Context {
+    if program.is_null() || steps == 0 {
+        return ptr::null_mut();
+    }
+    Arc::increment_strong_count(program);
+    Box::into_raw(Box::new(Context::new(Arc::from_raw(program), steps)))
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_new(steps: u64) -> *mut Context {
+    if steps == 0 {
+        return ptr::null_mut();
+    }
+    let program = lo_program_new();
+    let context = lo_context_from_program(program, steps);
+    lo_program_free(program);
+    context
+}
+#[no_mangle]
+pub extern "C" fn lo_runtime_live_programs() -> u64 {
+    LIVE_PROGRAMS.load(std::sync::atomic::Ordering::Relaxed)
 }
 #[no_mangle]
 pub unsafe extern "C" fn lo_context_free(c: *mut Context) {

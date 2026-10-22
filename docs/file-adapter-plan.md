@@ -85,7 +85,8 @@ The implementation now uses a private buffer and validates probe records before 
 ## Validation
 
 The Makefile supplies all build and test state under `_scratch/build-state/`.
-The runtime-bundle generator and integration setup share generated files.
+Runtime preparation and integration setup share generated inputs.
+Prepare the selected LLVM toolchain with the [runtime guide](native-runtime.md#prepare-and-build).
 Run these targets sequentially:
 
 ```bash

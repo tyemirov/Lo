@@ -1,61 +1,72 @@
 # Native Metal Artifacts
 
 F014 adds explicit Metal selection to native artifact construction.
-The artifact uses the same `metal-fp32` kernels and runtime operations as the Metal interpreter.
+The artifact uses the same `metal-fp32` kernels and numeric profile as the Metal interpreter.
 The [arithmetic contract](metal-arithmetic.md) defines its numeric behavior.
 
 ## Build And Execution
 
-1. Build the Metal-enabled compiler with `make build-metal`.
-2. Build the artifact with the explicit backend option:
+The [distribution guide](compiler-distribution.md) defines installation and build-state requirements.
+Use the installed Darwin Metal package for native Metal compilation:
 
-   ```bash
-   LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/metal_arithmetic.lo --device-backend metal --output ./bin/metal-example
-   ```
+```sh
+CI=1 PATH= LO_BUILD_ROOT="$PWD/build-state" \
+  "$PWD/install/lo-darwin-arm64-metal/bin/lo" build examples/metal_arithmetic.lo \
+  --device-backend metal --output "$PWD/bin/metal-example" --format json </dev/null
+"$PWD/bin/metal-example" run --allow-device metal:0 --format json </dev/null
+"$PWD/bin/metal-example" metadata </dev/null
+```
 
-3. Execute the artifact with its device grant:
-
-   ```bash
-   ./bin/metal-example run --allow-device metal:0 --format json
-   ./bin/metal-example metadata
-   ```
+The example assumes an installed package and an existing absolute build-state directory.
+The installed compiler supplies LLVM, LLD, runtime archives, and platform inputs.
+No Go, Rust, Xcode, Metal compiler, developer SDK, or network access is necessary for installed compilation.
+The compiler links precompiled kernels and does not compile MSL during a program build.
 
 The default backend is `software`, also available through `--device-backend software`.
-Both compilers use this default, regardless of source selectors or available devices.
-Software artifacts support `darwin/arm64` and `linux/arm64` with cgo disabled.
+Software artifacts support `darwin/arm64` and `linux/arm64`.
 Metal artifacts require a `darwin/arm64` host and target.
-The standard compiler rejects a Metal build with `build.backend-unavailable` on that host.
-An unsupported host or target produces `build.unsupported-target` before toolchain execution.
+The software package rejects Metal selection with `build.toolchain` because its manifest has no Metal runtime.
+An unsupported host or target produces `build.unsupported-target` before tool execution.
 Unknown backend names and duplicate options produce `cli.invalid-invocation`.
-
-Native Metal construction uses Go 1.27.1, Xcode 27.1 build 27A9275, macOS SDK 27.0, and Apple Clang 21.0.0.
-The builder verifies these versions and sets the compiler, SDK, deployment target, and cgo configuration.
-The kernel compilers and arithmetic flags remain fixed by the [Metal build contract](metal-transfers.md).
-Native artifact construction uses the compiled kernels supplied by the compiler.
-It does not compile MSL again.
 
 The executable needs macOS 27 or later and the system Metal and Foundation frameworks.
 Authorized Metal computation requires the selected Apple7 feature support and unified memory.
-Execution needs no source checkout, Go installation, Xcode installation, or separate kernel files.
+No source checkout, Lo installation, Go installation, Xcode installation, or external kernel file is necessary for execution.
 An unavailable device produces `Device.Unavailable` when the program requests authorized access.
 Programs that do not access Metal need no device grant.
 File, listen, and device grants remain execution inputs for `run` and `serve`.
 
+## Developer Preparation
+
+`make build-metal` prepares the kernel files and the Metal-enabled interpreter.
+Go 1.27.1, Xcode 27.1 build 27A9275, macOS SDK 27.0, and Apple Clang 21.0.0 are necessary for this developer operation.
+The producer verifies those versions and the kernel tools before construction.
+The [Metal build contract](metal-transfers.md) owns the fixed kernel compilers and arithmetic flags.
+
+`runtime/metal/kernels.metal` contains the kernel source.
+The producer writes `runtime/metal/metal.metallib` and `runtime/metal/manifest.json`.
+The manifest records the complete source list, file digests, and numeric profile.
+`bin/lo-metal-build.json` records the producer inputs and output identities.
+The interpreter embeds the same kernel library through `runtime/metal/embed.go`.
+
+The [native device guide](native-devices.md) describes `make build-native-runtime-metal`.
+That producer verifies the kernel files and compiles the Objective-C adapter with the pinned LLVM compiler.
+It embeds the kernel bytes in the static native runtime.
+The package producer supplies that runtime and its declared link inputs to the installed compiler.
+
 ## Runtime Manifest
 
-The software runtime archive excludes the Metal adapter implementation.
-`make build-metal` creates a separate archive from the explicit `metalconfig.RuntimeFiles` manifest.
-This archive contains `metal_darwin.go`, `metal_bridge_darwin.m`, `metal_bridge.h`, `metal_types.h`, and `metal.metallib`.
-Its generated manifest records each file digest and the pinned numeric configuration.
-The Metal-enabled compiler includes both archives and the Metal manifest.
+The software runtime does not contain the production Metal adapter.
+The Darwin Metal package includes a different runtime archive and a precompiled kernel library.
+Its `toolchain.json` records the runtime, kernel, linker, platform inputs, and fixed numeric identity.
+The link recipe adds Foundation, Metal, and Objective-C inputs to the software recipe.
 
-Before toolchain execution, the native builder verifies the Metal file set, file digests, kernel identity, and numeric configuration.
-It extracts the selected files into its temporary build module.
-Only the Metal artifact configuration enables the `metal` build tag and cgo.
+Before tool execution, the native builder verifies the declared inputs and kernel identity.
+It copies the selected tools and link inputs into its build directory.
 The resulting executable includes the compiled kernel bytes.
+The build does not generate Go source or use cgo.
 
 Both configurations keep the [native build limits](native-compilation-contract.md#build-limits).
-These limits cover toolchain probes and compilation.
 Cancellation stops the active tool process group.
 Build failure leaves the previous artifact unchanged and removes temporary build files.
 Publication uses a rename within the output directory.
@@ -64,29 +75,33 @@ Publication uses a rename within the output directory.
 
 The `metadata` command returns one JSON object.
 All artifacts record `device_backend` as `software` or `metal`.
-The existing source, compiler, runtime bundle, Go toolchain, and target fields remain required.
+The source, compiler, LLVM toolchain, target, and selected runtime digest identify the artifact build.
 
 Metal artifacts also record these fields:
 
 | Field | Meaning |
 | --- | --- |
-| `metal_runtime_sha256` | Digest of the complete Metal runtime archive. |
-| `metal_manifest_sha256` | Digest of its manifest. |
+| `runtime_sha256` | Digest of the selected static runtime archive. |
 | `metal.profile` | Numeric profile, currently `metal-fp32`. |
-| `metal.go`, `metal.xcode`, `metal.sdk`, `metal.clang` | Pinned native compiler identities. |
+| `metal.xcode`, `metal.sdk`, `metal.clang` | Tool identities from the kernel producer. |
 | `metal.metal_compiler`, `metal.kernel_linker` | Compiler identities for the supplied kernels. |
 | `metal.deployment_target`, `metal.kernel_flags` | Deployment target and arithmetic configuration. |
 | `metal.kernel_sha256` | Digest of the compiled kernel library. |
 
 Metadata contains no grants or runtime device identity.
-Runtime validation records the actual macOS version, device name, registry identifier, and kernel identity separately.
+The producer manifest and receipt are not part of artifact metadata.
 
 ## Validation
 
-Routine `make ci` includes software tests for backend selection, unavailable Metal access, standalone execution, and native build failures.
-Software tests require no GPU.
-The additional `make test-native-metal` target uses the explicit local Metal environment.
-It rejects an unavailable toolchain instead of skipping tests.
+Use `make test-native` with the selected `LLVM_TOOLCHAIN` for current native acceptance.
+The [device guide](native-devices.md#verification) describes the software Metal driver and cross-target checks.
+No physical device is necessary for these checks.
+The historical F014 evidence below does not establish I011 qualification.
+
+### Historical F014 Validation
+
+The following tests and records describe the October 15, 2026 Go-generation implementation.
+They do not describe the current LLVM build procedure.
 
 The initial public build and artifact tests failed because `--device-backend` was absent.
 The [software failure record](evidence/native-metal-red-software.txt) and [Metal failure record](evidence/native-metal-red-local.txt) preserve those results.
@@ -123,8 +138,8 @@ The [software artifact race test](evidence/native-metal-software-race.txt) also 
 The [tagged static check](evidence/native-metal-vet.txt) reported no diagnostics.
 
 The [reproducibility regression](evidence/native-metal-reproducibility-red.txt) detected differing linker identifiers for identical inputs.
-The builder now calculates a `-buildid` value from generated code and metadata for Metal artifacts.
-The [Go linker](https://go.googlesource.com/go/+/9922fb1d248467741150f62b8b6ca9b56c05176e/src/cmd/link/internal/ld/macho_update_uuid.go) uses that value to replace its external linker identifier.
+The F014 builder calculated a `-buildid` value from generated code and metadata for Metal artifacts.
+The [Go linker](https://go.googlesource.com/go/+/9922fb1d248467741150f62b8b6ca9b56c05176e/src/cmd/link/internal/ld/macho_update_uuid.go) used that value to replace its external linker identifier.
 The [repeated build check](evidence/native-metal-reproducibility.txt) and final local suite passed with this correction.
 
 The [compiler receipt](evidence/native-metal-build.json), [runtime manifest](evidence/native-metal-manifest.json), and [artifact metadata](evidence/native-metal-artifact.json) record the selected inputs.

@@ -111,7 +111,7 @@ Runtime tests supply additional behavioral evidence.
 | Backpropagation and shared derivative edges | [Interpreter](../internal/eval/autodiff.go), [VJP rules](../internal/derivative/vjp.go) | [Analytical and finite-difference tests](../tests/integration/autodiff_numeric_test.go), [context tests](../tests/integration/autodiff_test.go) |
 | Gradient schema and stop-gradient | [Parameter operations](../internal/runtimeops/parameters.go) | [Gradient lifecycle](../tests/integration/parameters_test.go) |
 | SGD, AdamW, immutable state, and config boundaries | [Optimizer operations](../internal/runtimeops/optimizer.go), [config](../internal/value/optimizer.go) | [Optimizer tests](../tests/integration/optimizer_test.go) |
-| Native derivatives | [Gradient code generation](../internal/codegen/gradient.go) | Autodiff, Parameter, and optimizer tests through `make test-native` |
+| Native derivatives | Historical `internal/codegen/gradient.go`, removed by I011 | Autodiff, Parameter, and optimizer tests through `make test-native` |
 | Device authorization, storage, and transfer simulation | [Device backend](../internal/device/device.go), [compute boundary](../internal/device/compute.go) | [Device tests](../tests/integration/device_test.go), [resource tests](../tests/integration/device_resources_test.go) |
 | Metal arithmetic, backpropagation, and optimizers | [Metal backend](../internal/device/metal_darwin.go) | [Software compute tests](../tests/integration/metal_compute_test.go), [training tests](../tests/integration/metal_training_test.go) |
 

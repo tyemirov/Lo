@@ -3,7 +3,9 @@
 P004 records this plan on October 16, 2026.
 I004 completed the backend experiment on October 19, 2026.
 The [runtime contract](native-runtime-contract.md) selects LLVM 21.1.8 with LLD 21.1.8 for the replacement design.
-The default executable build still generates Go source with Go 1.27.1.
+All executable builds use LLVM.
+An explicit toolchain manifest is necessary for the development compiler.
+The installed compiler selects LLVM from its own package.
 LLVM module emission does not change the language specification.
 The [semantic migration contract](semantic-migration.md) records current coverage and its evidence requirements.
 
@@ -48,7 +50,46 @@ I010 validation and final CI completed successfully on October 20, 2026.
 
 The [runtime development guide](native-runtime.md) gives the explicit LLVM build and verification commands.
 The [runtime receipt](evidence/native-runtime/validation.json) records source identities and validation results.
-The installed standalone compiler criterion is still open under F017 and I011.
+The [distribution guide](compiler-distribution.md) defines installed compilation for both hosts and both software targets.
+F017 completed installed package acceptance on October 20, 2026.
+Both compiler hosts passed offline builds for both software targets without external development tools.
+The resulting executables passed independent execution without the compiler packages or source files.
+Both hosts also passed 500-step XOR training through installed compilation.
+
+I011 removed Go generation and the embedded runtime source bundle.
+The interpreter remains available through explicit execution commands.
+
+Source freeze7 passed 2,624 Darwin native cases.
+It also passed 1,414 Linux native cases under QEMU HVF.
+Both native lanes recorded no failed or skipped cases.
+The interpreter passed 1,738 cases and excluded 153 native-only cases.
+The strict semantic report passed all 394 required references in three lanes.
+
+The unchanged packages passed offline acceptance, full CI, and all 56 component checks.
+Both installed compiler hosts passed 500-step XOR training.
+B001 through B004 are closed after their required checks passed.
+
+Earlier performance attempts did not establish complete acceptance.
+Campaign9 and campaign11 ended before measurement because their obsolete admission rules required a quiet host.
+Their source and package identities remained unchanged.
+
+I011 is in progress under the revised measurement contract requested by the user.
+External load is now recorded as context. It cannot prevent measurement or remove samples.
+The fixed corpus, paired measurements, sample counts, confidence calculations, and numeric thresholds stay the same.
+The maintained campaign runs one owned timing job at a time and retains failed and inconclusive results.
+The [measurement contract](native-compilation-contract.md#measurement-validity) defines admission and its limits.
+B005 corrected one blocked capture fixture. Its 21 affected scenarios passed on each target.
+Fresh CI found the same defect in another fixture.
+B005 now replaces all seven synchronous capture fixtures with one shared helper.
+The complete correction passed 178 Darwin checks, 176 Linux checks, and the host-to-Linux capture staging check.
+B006 corrected process cleanup and terminal record handling. All 25 campaign checks passed.
+Fresh full CI passed 2,635 native cases without failures or skips and all 197 qualification-tool checks.
+B005 and B006 are closed after their required checks and independent correction reviews passed.
+One complete performance campaign now uses the corrected source identity.
+Full performance acceptance, the evidence audit, and independent review of the complete qualification are not complete.
+The [interim findings](native-qualification-findings.md) record the measured results before corrective work.
+Darwin execution and process lanes passed. The four Darwin HTTP gates are inconclusive.
+The snapshot contains partial build observations. Linux measurements and final audits remain pending.
 
 ## Required Outcome
 
@@ -68,9 +109,11 @@ Self-hosting is outside this plan.
 ## Current Contract
 
 The [frontend](../internal/compiler/compiler.go) produces a typed [checked graph](../internal/ir/ir.go).
-The default [native generator](../internal/codegen/generate.go) converts that graph to direct Go control flow.
-The default [builder](../internal/nativebuild/build.go) locates Go and compiles an embedded source bundle.
-The explicit LLVM route lowers the graph and links the precompiled Rust runtime.
+The [native plan](../internal/nativeplan) preserves control flow, charges, errors, and resource cleanup.
+The [LLVM emitter](../internal/llvmemit/emit.go) converts that plan to native operations and runtime calls.
+The [builder](../internal/nativebuild/llvm_executable.go) uses declared LLVM inputs and links the precompiled Rust runtime.
+An explicit toolchain manifest is necessary for the development CLI.
+Installed compilers use a manifest pinned to their package identity.
 Native artifacts already execute without Go or Lo installed.
 
 The migration covers the current catalog, including F015, F016, and I003.
@@ -187,7 +230,7 @@ The following distribution contents are required:
 
 The current experiments establish SDK-free macOS linking with original Lo-authored symbol descriptions.
 They also establish Foundation, Objective-C, Metal, and process-sandbox symbol links.
-F017 must supply the complete inputs for the implemented runtime.
+F017 supplies the complete inputs for the implemented runtime.
 Precompiled Metal kernels need no new MSL compilation during a user build.
 They do not remove native framework linkage requirements.
 
@@ -206,8 +249,8 @@ The validation requirements in each issue are its acceptance criteria.
 | Port numeric execution | I008 | Completed: CPU tensors, autodiff, optimizers, and checkpoints pass their contracts. |
 | Port adapters | I009 | Files, processes, and HTTP pass confinement and lifecycle tests. |
 | Port devices | I010 | Completed: transfers, Metal profiles, and resource cleanup pass software acceptance. |
-| Supply the distribution | F017 | Complete relocatable offline compiler package. |
-| Qualify and replace | I011 | Full parity, clean-environment acceptance, and removal of obsolete Go build code. |
+| Supply the distribution | F017 | Completed: both compiler hosts pass offline compilation, relocation, rejection, and independent artifact execution. |
+| Qualify and replace | I011 | Blocked: campaign11 ended at its admission timeout without a measurement. Corpus, offline, component, and CI checks passed. Performance qualification and final review are not complete. |
 | Specify composition | P006 | Modules, types, generics, and package rules. |
 | Implement composition | F018, F019, F020, F021 | Modules, variants, generics, and offline packages. |
 | Add library and tools | F022, F023 | Standard library, formatter, test runner, editor, and debug support. |
@@ -224,7 +267,8 @@ Measurements cover distribution size, compile time, peak memory, artifact size, 
 The current 180-second, 2-GiB, and 64-MiB build limits remain applicable until an explicit contract decision changes them.
 
 The migration does not retain an automatic Go or interpreter fallback.
-I011 removes the Go generator and runtime source bundle after complete parity.
+I011 removed the Go generator and runtime source bundle after the initial corpus and corrected fixture checks.
+The final qualification must bind all results to the current source and installed packages.
 The interpreter remains an explicit implementation of the current language for execution and differential tests.
 
 ## Offline Acceptance Procedure

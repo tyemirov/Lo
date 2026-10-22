@@ -5,13 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/MarcoPoloResearchLab/Lo/internal/codegen"
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
@@ -32,7 +29,7 @@ func (b processResultBoundary) Commit(context.Context, value.Target) (value.Valu
 
 func TestAdapterProcessResultExecution(t *testing.T) {
 	root := fileFixtureRoot(t)
-	for _, test := range []struct{ name, constructor, expression string }{
+	for index, test := range []struct{ name, constructor, expression string }{
 		{"exited", "NewProcessExited", `Process.Termination.exit_code(result.termination)`},
 		{"signaled", "NewProcessSignaled", `Process.Termination.signal(result.termination)`},
 		{"wrong-exited", "NewProcessSignaled", `Process.Termination.exit_code(result.termination)`},
@@ -118,35 +115,18 @@ func TestAdapterProcessResultExecution(t *testing.T) {
 					}
 				}
 			}
-			generated, err := codegen.Generate(checked, "main")
-			if err != nil {
-				t.Fatal(err)
+			scenario := llvmRuntimeScenario{
+				name: "native-process-result", source: text.Text(), number: index, captureOutput: index == 2 || index == 3,
+				harness: "testdata/native-qualification/process-result.c",
+				transform: func(t *testing.T, module []byte) []byte {
+					t.Helper()
+					return []byte(strings.Replace(string(module), "define void @lo_entry(", "define void @lo_process_result_entry(", 1))
+				},
 			}
-			directory := t.TempDir()
-			relative, err := filepath.Rel(repository, directory)
-			if err != nil || strings.HasPrefix(relative, "..") {
-				t.Fatalf("native fixture outside repository: %s", directory)
+			if !wrongVariant {
+				scenario.expectedStdout = `{"command":"run","status":"ok","result":` + string(serialized) + "}\n"
 			}
-			harness := fmt.Sprintf(`package main
-import("context";"encoding/json";"errors";"fmt";"github.com/MarcoPoloResearchLab/Lo/internal/device";"github.com/MarcoPoloResearchLab/Lo/internal/execution";"github.com/MarcoPoloResearchLab/Lo/internal/value")
-type boundary struct { execution.Boundary }
-func(boundary)Commit(context.Context,value.Target)(value.Value,error){termination,err:=value.%s(value.Int64(7));if err!=nil{return nil,err};return value.NewProcessResult(termination,value.NewBytes([]byte(%q)),value.NewBytes([]byte(%q)))}
-func main(){program,err:=New();if err!=nil{panic(err)};result,err:=program.Run(context.Background(),boundary{},execution.DefaultBudget(),device.DefaultConfig());if err!=nil{var failure execution.Failure;if !errors.As(err,&failure){panic(err)};result=failure.Value()};data,err:=json.Marshal(result);if err!=nil{panic(err)};fmt.Print(string(data))}
-`, test.constructor, processArgumentSecret, processEnvironmentSecret)
-			for name, data := range map[string][]byte{"program.go": generated, "main.go": []byte(harness)} {
-				if err := os.WriteFile(filepath.Join(directory, name), data, 0o644); err != nil {
-					t.Fatal(err)
-				}
-			}
-			command := exec.Command("go", "run", ".")
-			command.Dir = directory
-			native, err := command.CombinedOutput()
-			if err != nil {
-				t.Fatalf("native execution: %v: %s", err, native)
-			}
-			if string(native) != string(serialized) {
-				t.Fatalf("native=%s interpreter=%s", native, serialized)
-			}
+			semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
 		})
 	}
 }

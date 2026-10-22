@@ -2,10 +2,11 @@
 
 F012 implements explicit Metal transfers through the interpreter on macOS arm64.
 The device selector is `metal:0`. Its host grant is `--allow-device metal:0`.
-The standard build and native artifacts report `Device.Unavailable` for authorized Metal access.
+The standard interpreter build reports `Device.Unavailable` for authorized Metal access.
+The Darwin Metal package supports native Metal artifacts through the static runtime.
 F013 adds [tensor arithmetic and training](metal-arithmetic.md). F014 owns native Metal artifacts.
 
-## Build and Execute
+## Developer Build and Execution
 
 Use the repository root for these commands:
 
@@ -43,11 +44,16 @@ Missing or different build inputs stop the build.
 The build does not install tools or change its selected compiler automatically.
 The Go build uses the selected SDK and clears conflicting Go and cgo flag overrides.
 
-The build compiles `metal_kernels.metal` into the ignored `internal/device/metal.metallib` artifact.
-Go embeds that library in `bin/lo-metal`.
+The build compiles `runtime/metal/kernels.metal` into the ignored `runtime/metal/metal.metallib` artifact.
+`runtime/metal/manifest.json` records the source files, digests, and numeric profile.
+Go embeds that library through `runtime/metal/embed.go` in `bin/lo-metal`.
 The resulting compiler needs system Apple frameworks during execution, with no external kernel file.
 The generated `bin/lo-metal-build.json` records tool versions, source hashes, compiler flags, kernel hash, and binary hash.
 It also records the build host's macOS version and build identifier.
+
+These development tools are not installed-compiler dependencies.
+The [distribution guide](compiler-distribution.md) defines installed compilation with packaged LLVM and LLD.
+The [native Metal guide](native-metal.md) describes direct kernel files and native artifact construction.
 
 ## Transfer Profile and Storage
 
@@ -93,7 +99,10 @@ The adapter then checks cancellation before the runtime can publish a result or 
 This implementation does not promise immediate GPU preemption.
 Cleanup failures remain host diagnostics and prevent successful result publication.
 
-## F012 Validation
+## Historical F012 Validation
+
+The following evidence records F012 before the LLVM migration.
+The [native device guide](native-devices.md#verification) defines current native software verification.
 
 The initial public tests rejected the absent selector, grant, transfer profile, and lost-session error.
 The [initial failure record](evidence/metal-red.txt) contains that evidence.

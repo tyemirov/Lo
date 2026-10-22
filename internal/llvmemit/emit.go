@@ -102,9 +102,13 @@ func emit(ctx context.Context, plan nativeplan.Plan, target string, artifact jso
 		}
 		var chunk strings.Builder
 		for _, value := range module.Metadata[start:end] {
-			chunk.WriteByte('\\')
-			chunk.WriteByte(hex[value>>4])
-			chunk.WriteByte(hex[value&15])
+			if value >= 32 && value < 127 && value != '"' && value != '\\' {
+				chunk.WriteByte(value)
+			} else {
+				chunk.WriteByte('\\')
+				chunk.WriteByte(hex[value>>4])
+				chunk.WriteByte(hex[value&15])
+			}
 		}
 		out.write("%s", chunk.String())
 		start = end
@@ -154,10 +158,55 @@ func emit(ctx context.Context, plan nativeplan.Plan, target string, artifact jso
 	}
 	out.write("declare void @lo_value_retain(ptr)\ndeclare void @lo_value_release(ptr)\ndeclare void @lo_scope_leave(ptr, ptr, i64)\ndeclare void @lo_flow_leave(ptr)\ndeclare i32 @lo_boolean_value(ptr)\n\n")
 	out.write("declare void @lo_derivative_leave(ptr)\n\n")
+	out.write(`define internal void @lo_result_copy_value(ptr %%out, ptr %%result) #0 {
+entry:
+  %%old_pointer = getelementptr %%lo.result, ptr %%out, i32 0, i32 2
+  %%old = load ptr, ptr %%old_pointer, align 8
+  %%value_pointer = getelementptr %%lo.result, ptr %%result, i32 0, i32 2
+  %%value = load ptr, ptr %%value_pointer, align 8
+  call void @lo_value_retain(ptr %%value)
+  call void @lo_value_release(ptr %%old)
+  %%copy = load %%lo.result, ptr %%result, align 8
+  store %%lo.result %%copy, ptr %%out, align 8
+  ret void
+}
+define internal void @lo_result_copy_host(ptr %%out, ptr %%result) #0 {
+entry:
+  %%old_pointer = getelementptr %%lo.result, ptr %%out, i32 0, i32 2
+  %%old = load ptr, ptr %%old_pointer, align 8
+  call void @lo_value_release(ptr %%old)
+  %%code_pointer = getelementptr %%lo.result, ptr %%result, i32 0, i32 1
+  %%code = load i32, ptr %%code_pointer, align 4
+  %%copy = insertvalue %%lo.result { i32 2, i32 0, ptr null }, i32 %%code, 1
+  store %%lo.result %%copy, ptr %%out, align 8
+  ret void
+}
+define internal i1 @lo_result_transfer(ptr %%out, ptr %%result, ptr %%owned) #0 {
+entry:
+  %%status_pointer = getelementptr %%lo.result, ptr %%result, i32 0, i32 0
+  %%status = load i32, ptr %%status_pointer, align 4
+  switch i32 %%status, label %%unknown [ i32 0, label %%payload i32 1, label %%payload i32 2, label %%host ]
+payload:
+  %%value_pointer = getelementptr %%lo.result, ptr %%result, i32 0, i32 2
+  %%value = load ptr, ptr %%value_pointer, align 8
+  store ptr %%value, ptr %%owned, align 8
+  call void @lo_result_copy_value(ptr %%out, ptr %%result)
+  ret i1 true
+host:
+  call void @lo_result_copy_host(ptr %%out, ptr %%result)
+  ret i1 true
+unknown:
+  ret i1 false
+}
+
+
+`)
+
 	for _, function := range module.Functions {
 		emitFunction(out, debug, module, function)
 	}
-	out.write("attributes #0 = { noinline \"fp-contract\"=\"off\" \"frame-pointer\"=\"all\" }\n\n")
+	out.write("attributes #0 = { noinline \"fp-contract\"=\"off\" \"frame-pointer\"=\"all\" }\n")
+	out.write("attributes #1 = { noinline optnone \"fp-contract\"=\"off\" \"frame-pointer\"=\"all\" }\n\n")
 	debug.emit(out)
 	if out.err != nil {
 		return nil, out.err
@@ -209,6 +258,69 @@ func (e *functionEmitter) owned(id nativeplan.ValueID, value string, site uint64
 	e.line(site, "store ptr %s, ptr %%v%d, align 8", value, id)
 }
 
+type failureTransfer struct {
+	result  nativeplan.ResultID
+	owned   nativeplan.ValueID
+	exit    nativeplan.BlockID
+	invalid nativeplan.BlockID
+}
+
+// failureTransfers recognizes only the verifier's isolated status-copy shape.
+func failureTransfers(f nativeplan.Function) (map[nativeplan.BlockID]failureTransfer, map[nativeplan.BlockID]bool) {
+	predecessors := make([][]nativeplan.BlockID, len(f.Blocks))
+	phiPredecessors := map[nativeplan.BlockID]bool{}
+	for _, block := range f.Blocks {
+		var targets []nativeplan.BlockID
+		switch block.End.Kind {
+		case nativeplan.Jump:
+			targets = block.End.Targets[:1]
+		case nativeplan.Status:
+			targets = block.End.Targets[:]
+		case nativeplan.Boolean, nativeplan.Arity:
+			targets = block.End.Targets[:2]
+		}
+		for _, target := range targets {
+			if !slices.Contains(predecessors[target], block.ID) {
+				predecessors[target] = append(predecessors[target], block.ID)
+			}
+		}
+		for _, instruction := range block.Instructions {
+			if instruction.Kind == nativeplan.Phi {
+				for _, predecessor := range instruction.Predecessors {
+					phiPredecessors[predecessor] = true
+				}
+			}
+		}
+	}
+	transfers := map[nativeplan.BlockID]failureTransfer{}
+	removed := map[nativeplan.BlockID]bool{}
+	for _, block := range f.Blocks {
+		end := block.End
+		if len(block.Instructions) != 0 || end.Kind != nativeplan.Status || end.Result == 0 || end.Targets[0] != end.Targets[1] {
+			continue
+		}
+		payload, host := f.Blocks[end.Targets[0]], f.Blocks[end.Targets[2]]
+		if payload.ID == host.ID || payload.ID == end.Targets[3] || host.ID == end.Targets[3] ||
+			len(predecessors[payload.ID]) != 1 || predecessors[payload.ID][0] != block.ID ||
+			len(predecessors[host.ID]) != 1 || predecessors[host.ID][0] != block.ID ||
+			phiPredecessors[payload.ID] || phiPredecessors[host.ID] ||
+			len(payload.Instructions) != 2 || len(host.Instructions) != 1 ||
+			payload.End.Kind != nativeplan.Jump || host.End.Kind != nativeplan.Jump || payload.End.Targets[0] != host.End.Targets[0] {
+			continue
+		}
+		adopt, copyValue, copyHost := payload.Instructions[0], payload.Instructions[1], host.Instructions[0]
+		if adopt.Kind != nativeplan.AdoptResult || copyValue.Kind != nativeplan.CopyResult || !copyValue.Payload ||
+			copyHost.Kind != nativeplan.CopyResult || copyHost.Payload || adopt.Result != end.Result ||
+			copyValue.Result != end.Result || copyHost.Result != end.Result ||
+			adopt.Site != end.Site || copyValue.Site != end.Site || copyHost.Site != end.Site {
+			continue
+		}
+		transfers[block.ID] = failureTransfer{end.Result, adopt.Value, payload.End.Targets[0], end.Targets[3]}
+		removed[payload.ID], removed[host.ID] = true, true
+	}
+	return transfers, removed
+}
+
 func emitFunction(out *output, debug *debugInfo, module nativeplan.Module, f nativeplan.Function) {
 	e := &functionEmitter{o: out, debug: debug, module: module, f: f, edges: map[nativeplan.BlockID][]string{}}
 	e.subprogram = debug.function(f, module.Locations[f.Site])
@@ -221,7 +333,14 @@ func emitFunction(out *output, debug *debugInfo, module nativeplan.Module, f nat
 			}
 		}
 	}
-	out.write("define void @%s(ptr %%context, ptr %%arguments, i64 %%argc, i64 %%callsite, ptr %%out) #0 !dbg !%d {\nentry:\n", f.Symbol, e.subprogram)
+	// Large acyclic ownership graphs make scalar optimizer passes expensive.
+	// Keep their checked sequence intact and optimize bounded functions normally.
+	const maxOptimizedBlocks = 1024
+	attributes := 0
+	if len(f.Blocks) > maxOptimizedBlocks {
+		attributes = 1
+	}
+	out.write("define void @%s(ptr %%context, ptr %%arguments, i64 %%argc, i64 %%callsite, ptr %%out) #%d !dbg !%d {\nentry:\n", f.Symbol, attributes, e.subprogram)
 	for index := range f.Values {
 		out.write("  %%v%d = alloca ptr, align 8\n  store ptr null, ptr %%v%d, align 8\n", index+1, index+1)
 	}
@@ -236,8 +355,18 @@ func emitFunction(out *output, debug *debugInfo, module nativeplan.Module, f nat
 		}
 	}
 	out.write("  store %%lo.result zeroinitializer, ptr %%out, align 8\n  br label %%b0\n")
+	transfers, removed := failureTransfers(f)
 	for _, block := range f.Blocks {
+		if removed[block.ID] {
+			continue
+		}
 		out.write("b%d:\n", block.ID)
+		if transfer, folded := transfers[block.ID]; folded {
+			valid := e.fresh()
+			e.line(block.End.Site, "%s = call i1 @lo_result_transfer(ptr %%out, ptr %s, ptr %%v%d)", valid, e.result(transfer.result), transfer.owned)
+			e.line(block.End.Site, "br i1 %s, label %%b%d, label %%b%d", valid, transfer.exit, transfer.invalid)
+			continue
+		}
 		// LLVM phi instructions precede every other instruction in their block.
 		for _, instruction := range block.Instructions {
 			if instruction.Kind == nativeplan.Phi {
@@ -297,26 +426,11 @@ func (e *functionEmitter) instruction(i nativeplan.Instruction) {
 	case nativeplan.OutputValue:
 		e.owned(i.Value, e.payload(0), i.Site)
 	case nativeplan.CopyResult:
-		old := e.payload(0)
+		helper := "lo_result_copy_host"
 		if i.Payload {
-			value := e.payload(i.Result)
-			e.line(i.Site, "call void @lo_value_retain(ptr %s)", value)
-			e.line(i.Site, "call void @lo_value_release(ptr %s)", old)
-			copy := e.fresh()
-			e.line(i.Site, "%s = load %%lo.result, ptr %s, align 8", copy, e.result(i.Result))
-			e.line(i.Site, "store %%lo.result %s, ptr %%out, align 8", copy)
-		} else {
-			e.line(i.Site, "call void @lo_value_release(ptr %s)", old)
-			codePointer := e.field(i.Result, 1)
-			code := e.fresh()
-			e.line(i.Site, "%s = load i32, ptr %s, align 4", code, codePointer)
-			statusOut := e.field(0, 0)
-			codeOut := e.field(0, 1)
-			valueOut := e.field(0, 2)
-			e.line(i.Site, "store i32 2, ptr %s, align 4", statusOut)
-			e.line(i.Site, "store i32 %s, ptr %s, align 4", code, codeOut)
-			e.line(i.Site, "store ptr null, ptr %s, align 8", valueOut)
+			helper = "lo_result_copy_value"
 		}
+		e.line(i.Site, "call void @%s(ptr %%out, ptr %s)", helper, e.result(i.Result))
 	case nativeplan.ScopeLeave:
 		e.line(i.Site, "call void @lo_scope_leave(ptr %%context, ptr %s, i64 %d)", e.payload(0), i.Site)
 	case nativeplan.FlowLeave:

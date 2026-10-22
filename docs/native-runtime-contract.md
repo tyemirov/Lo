@@ -2,8 +2,8 @@
 
 P005 owns the native backend, runtime ABI, and platform decisions.
 The selected design uses LLVM 21.1.8, LLD 21.1.8, and a precompiled Rust runtime.
-The default build route still generates Go source.
-I007 and I008 implement the explicit [LLVM executable route](native-runtime.md).
+All executable builds use the [LLVM executable route](native-runtime.md).
+The compiler no longer generates Go source.
 This document defines the replacement contract for I006 through F017.
 The P005 acceptance checks passed on October 19, 2026.
 The [final validation receipt](evidence/compiler-evolution/validation.json) records the repository checks and independent review.
@@ -15,7 +15,7 @@ Use its `ld64.lld` driver for Mach-O and its `ld.lld` driver for ELF.
 Generate position-independent code for both targets.
 Invoke the selected linker directly with explicit platform inputs.
 Reject absent or incorrect inputs before compilation.
-Keep one native backend after I011 removes Go generation.
+Keep LLVM as the only production native backend.
 
 Both LLVM and Cranelift passed the [four-cell experiment](../experiments/native-backends/qualification-20261019.json).
 LLVM also supplied source-location information for the generated operation.
@@ -45,8 +45,8 @@ Both arm64 hosts must compile software for both targets.
 Metal compilation is local to the Darwin host and target.
 The current experiment generated both targets on Darwin.
 The Linux-host tool archive is available and its ELF dependencies were examined.
-F017 must qualify installed compiler execution on the Linux host.
-This host qualification does not use the Darwin result as substitute evidence.
+F017 qualifies installed compiler execution on the Linux host through QEMU TCG.
+The [distribution guide](compiler-distribution.md) defines both compiler hosts and their independent acceptance environments.
 
 The selected [Linux LLVM archive](evidence/native-runtime-abi/linux-host-download.json) contains LLVM and LLD 21.1.8.
 Its examined requirements include glibc 2.34 symbols and `GLIBCXX_3.4.30`.
@@ -63,7 +63,7 @@ The [dependency inventory](evidence/native-runtime-abi/linux-host-dependencies.j
 | zlib | `1:1.2.13.dfsg-1` |
 
 Supply non-base host libraries inside the compiler distribution.
-Use the declared operating-system loader, libc, and libm at execution.
+Use the declared operating-system loader, libc, libm, and `libgcc_s.so.1` at execution.
 Keep application runtime dependencies separate from compiler host dependencies.
 Linux applications can use the declared libc and GCC support libraries without Lo installed.
 Darwin applications use the operating system's libSystem and selected frameworks.
@@ -228,8 +228,11 @@ Do not remove a charge when an optimization removes arithmetic.
 Keep cleanup edges on both successful and failed control flow.
 
 Disable link-time optimization for the first native runtime contract.
-Use LLVM `-O0` for the initial I006 implementation.
-Qualify `-O2` against the same independent expectations before enabling it.
+Use LLVM `-O2` without arithmetic reassociation or contraction.
+Apply `noinline` and `optnone` to generated functions with more than 1,024 basic blocks.
+This fixed selection limits optimization work for large generated functions.
+Keep the same independent expectations for optimization qualification.
+The initial I006 implementation used `-O0`.
 Retain the current 180-second, 2-GiB, and 64-MiB build limits.
 
 Use DWARF source locations for generated flows and runtime boundaries.
@@ -294,5 +297,9 @@ The [Rust receipt](evidence/native-runtime-abi/rust-linux-std.json) identifies t
 I006 implements the selected lowering contract and source maps.
 I007 through I010 implement the full runtime and adapters.
 F017 supplies and qualifies the installed distribution on both hosts.
-I011 verifies full semantic parity and removes Go generation.
-The current experiments do not satisfy the user's full standalone compiler criterion.
+
+I011 passed the current semantic, offline, component, and CI checks after removal of Go generation.
+Performance qualification and final review remain pending.
+The earlier experiments do not satisfy the full standalone compiler criterion.
+The [distribution guide](compiler-distribution.md) defines the installed compiler checks.
+Keep I011 pending until all qualification checks pass.

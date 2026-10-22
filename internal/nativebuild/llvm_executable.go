@@ -3,6 +3,8 @@ package nativebuild
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,12 +41,13 @@ type llvmTarget struct {
 }
 
 type llvmDistribution struct {
-	ABI      string                `json:"abi"`
-	LLVM     string                `json:"llvm"`
-	Host     string                `json:"host"`
-	Compiler llvmFile              `json:"compiler"`
-	Targets  map[string]llvmTarget `json:"targets"`
-	Metal    *llvmMetalTarget      `json:"metal,omitempty"`
+	ABI           string                `json:"abi"`
+	LLVM          string                `json:"llvm"`
+	Host          string                `json:"host"`
+	Compiler      llvmFile              `json:"compiler"`
+	Targets       map[string]llvmTarget `json:"targets"`
+	HostLibraries map[string]llvmFile   `json:"host_libraries,omitempty"`
+	Metal         *llvmMetalTarget      `json:"metal,omitempty"`
 }
 
 type llvmMetalTarget struct {
@@ -56,6 +59,7 @@ type llvmMetalTarget struct {
 
 type admittedLLVM struct {
 	compiler, linker, archive, archiveDigest, triple string
+	hostLibraries                                    string
 	inputs                                           map[string]string
 	linkArgs                                         []string
 	metal                                            *metalconfig.Identity
@@ -85,7 +89,14 @@ func llvmLinkRecipe(target string, backend device.BuildBackend) (arguments, inpu
 }
 
 func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend device.BuildBackend) (admittedLLVM, error) {
+	return admitPinnedLLVM(ctx, manifest, target, snapshots, backend, "")
+}
+
+func admitPinnedLLVM(ctx context.Context, manifest, target, snapshots string, backend device.BuildBackend, manifestSHA256 string) (admittedLLVM, error) {
 	var admitted admittedLLVM
+	if manifest == "" {
+		return admitted, fmt.Errorf("development compiler requires --toolchain with an offline distribution manifest")
+	}
 	path, err := filepath.Abs(manifest)
 	if err != nil {
 		return admitted, fmt.Errorf("toolchain manifest: %w", err)
@@ -94,12 +105,19 @@ func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend 
 	if err != nil {
 		return admitted, fmt.Errorf("read toolchain manifest: %w", err)
 	}
-	data, readErr := io.ReadAll(io.LimitReader(source, MaxDiagnostics+1))
+	data, readErr := io.ReadAll(io.LimitReader(llvmSnapshotReader{ctx: ctx, reader: source}, MaxDiagnostics+1))
 	if err := errors.Join(readErr, source.Close()); err != nil {
 		return admitted, fmt.Errorf("read toolchain manifest: %w", err)
 	}
 	if len(data) > MaxDiagnostics {
 		return admitted, fmt.Errorf("toolchain manifest exceeds %d bytes", MaxDiagnostics)
+	}
+	if manifestSHA256 != "" {
+		expected, err := hex.DecodeString(manifestSHA256)
+		actual := sha256.Sum256(data)
+		if err != nil || len(expected) != sha256.Size || !bytes.Equal(expected, actual[:]) {
+			return admitted, fmt.Errorf("toolchain manifest SHA-256 mismatch")
+		}
 	}
 	var distribution llvmDistribution
 	decoder := json.NewDecoder(bytes.NewReader(data))
@@ -110,9 +128,21 @@ func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend 
 	if err := decoder.Decode(new(any)); err != io.EOF {
 		return admitted, fmt.Errorf("toolchain manifest contains trailing data")
 	}
-	if distribution.ABI != nativeplan.ABIIdentity || distribution.LLVM != llvmVersion ||
+	if (distribution.Host != "darwin/arm64" && distribution.Host != "linux/arm64") || distribution.ABI != nativeplan.ABIIdentity || distribution.LLVM != llvmVersion ||
 		distribution.Host != runtime.GOOS+"/"+runtime.GOARCH {
 		return admitted, fmt.Errorf("toolchain ABI, LLVM version, or host identity does not match")
+	}
+	hostNames := []string{}
+	if distribution.Host == "linux/arm64" {
+		hostNames = []string{"libstdc++.so.6", "libgcc_s.so.1", "libxml2.so.2", "libicuuc.so.72", "libicudata.so.72", "liblzma.so.5", "libz.so.1"}
+	}
+	if len(distribution.HostLibraries) != len(hostNames) {
+		return admitted, fmt.Errorf("toolchain requires the exact host library set")
+	}
+	for _, name := range hostNames {
+		if _, ok := distribution.HostLibraries[name]; !ok {
+			return admitted, fmt.Errorf("toolchain requires host library %q", name)
+		}
 	}
 	triple := map[string]string{
 		"darwin/arm64": "aarch64-apple-darwin",
@@ -209,6 +239,16 @@ func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend 
 			return admitted, err
 		}
 	}
+	admitted.hostLibraries = filepath.Join(snapshots, "host", "lib")
+	for _, name := range hostNames {
+		identity := distribution.HostLibraries[name]
+		if identity.Path != filepath.Join("host", "lib", name) {
+			return admitted, fmt.Errorf("host library %q requires path host/lib/%s", name, name)
+		}
+		if _, err := file("host library "+name, identity); err != nil {
+			return admitted, err
+		}
+	}
 	admitted.triple, admitted.archiveDigest = triple, selected.Runtime.SHA256
 	admitted.linkArgs = arguments
 	return admitted, nil
@@ -216,6 +256,18 @@ func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend 
 
 // BuildLLVM compiles and links using only admitted, explicitly supplied inputs.
 func BuildLLVM(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend, manifest string) (receipt Receipt, failure diagnostic.Diagnostic) {
+	return buildLLVM(ctx, program, output, target, backend, manifest, "")
+}
+
+// BuildInstalledLLVM binds manifest admission to the installed frontend identity.
+func BuildInstalledLLVM(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend, manifest, manifestSHA256 string) (Receipt, diagnostic.Diagnostic) {
+	if manifestSHA256 == "" {
+		return Receipt{}, diagnostic.New(diagnostic.BuildToolchain, diagnostic.Build, "installed compiler requires a toolchain SHA-256 identity", nil)
+	}
+	return buildLLVM(ctx, program, output, target, backend, manifest, manifestSHA256)
+}
+
+func buildLLVM(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend, manifest, manifestSHA256 string) (receipt Receipt, failure diagnostic.Diagnostic) {
 	fail := func(code diagnostic.Code, err error) (Receipt, diagnostic.Diagnostic) {
 		return Receipt{}, diagnostic.New(code, diagnostic.Build, fmt.Sprintf("build LLVM executable: %v", err), nil)
 	}
@@ -271,7 +323,7 @@ func BuildLLVM(ctx context.Context, program ir.Program, output, target string, b
 			receipt, failure = fail(diagnostic.BuildOutput, fmt.Errorf("remove build directory: %w", err))
 		}
 	}()
-	toolchain, err := admitLLVM(ctx, manifest, target, filepath.Join(work, "toolchain"), backend)
+	toolchain, err := admitPinnedLLVM(ctx, manifest, target, filepath.Join(work, "toolchain"), backend, manifestSHA256)
 	if err != nil {
 		if ctx.Err() != nil {
 			return fail(diagnostic.BuildCancelled, ctx.Err())
@@ -330,12 +382,29 @@ entry:
 	if err := staging.Close(); err != nil {
 		return fail(diagnostic.BuildOutput, err)
 	}
+	linkDirectory, err := os.MkdirTemp(filepath.Dir(destination), ".lo-llvm-link-")
+	if err != nil {
+		return fail(diagnostic.BuildOutput, err)
+	}
+	defer func() {
+		if err := os.RemoveAll(linkDirectory); err != nil && failure == nil {
+			receipt, failure = fail(diagnostic.BuildOutput, fmt.Errorf("remove linker output directory: %w", err))
+		}
+	}()
+	linked := filepath.Join(linkDirectory, "program")
+	if err := writeFile(linked, nil); err != nil {
+		return fail(diagnostic.BuildOutput, err)
+	}
 	// No inherited compiler flags, SDK selection, or search PATH enters this lane.
 	env := []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + filepath.Join(work, "tmp"),
 		"TMP=" + filepath.Join(work, "tmp"), "TEMP=" + filepath.Join(work, "tmp"),
 		"LC_ALL=C", "LANG=C", "ZERO_AR_DATE=1"}
 	run := func(tool string, args []string) diagnostic.Diagnostic {
 		command := exec.CommandContext(ctx, tool, args...)
+		if runtime.GOOS == "linux" {
+			loaderArgs := append([]string{"--inhibit-cache", "--library-path", toolchain.hostLibraries, "--argv0", filepath.Base(tool), tool}, args...)
+			command = exec.CommandContext(ctx, "/lib/ld-linux-aarch64.so.1", loaderArgs...)
+		}
 		command.Dir, command.Env = work, env
 		data, err, exceeded := runTool(command, cancel)
 		if exceeded {
@@ -352,7 +421,7 @@ entry:
 		}
 		return nil
 	}
-	compileArgs := []string{"-target", toolchain.triple, "-O0", "-g", "-fPIC", "-ffp-contract=off", "-c", modulePath, "-o", objectPath}
+	compileArgs := []string{"-target", toolchain.triple, "-O2", "-g", "-fPIC", "-ffp-contract=off", "-c", modulePath, "-o", objectPath}
 	if target == "darwin/arm64" {
 		compileArgs = append(compileArgs, "-mmacosx-version-min=27.0")
 	}
@@ -367,7 +436,7 @@ entry:
 		case "{runtime}":
 			args[i] = toolchain.archive
 		case "{output}":
-			args[i] = staged
+			args[i] = linked
 		default:
 			if strings.HasPrefix(arg, "{input:") {
 				name := strings.TrimSuffix(strings.TrimPrefix(arg, "{input:"), "}")
@@ -377,10 +446,13 @@ entry:
 			}
 		}
 	}
+	if target == "darwin/arm64" {
+		args = append(args, "-oso_prefix", work+string(filepath.Separator))
+	}
 	if failure := run(toolchain.linker, args); failure != nil {
 		return Receipt{}, failure
 	}
-	artifact, err := os.Stat(staged)
+	artifact, err := os.Stat(linked)
 	if err != nil {
 		return fail(diagnostic.BuildOutput, err)
 	}
@@ -389,6 +461,12 @@ entry:
 	}
 	if err := ctx.Err(); err != nil {
 		return fail(diagnostic.BuildCancelled, err)
+	}
+	if err := os.Rename(linked, staged); err != nil {
+		return fail(diagnostic.BuildOutput, fmt.Errorf("stage linked executable: %w", err))
+	}
+	if err := os.RemoveAll(linkDirectory); err != nil {
+		return fail(diagnostic.BuildOutput, fmt.Errorf("remove linker output directory: %w", err))
 	}
 	if err := publishLLVM(ctx, staged, destination, work, os.RemoveAll); err != nil {
 		if ctx.Err() != nil {

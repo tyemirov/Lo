@@ -16,8 +16,11 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 )
+
+var installedToolchainSHA256 string
 
 func main() { os.Exit(execute(os.Args[1:], os.Stdout, os.Stderr)) }
 func execute(args []string, stdout, stderr io.Writer) int {
@@ -75,10 +78,25 @@ func execute(args []string, stdout, stderr io.Writer) int {
 			var d diagnostic.Diagnostic
 			if inv.Emit() == runner.LLVMEmission {
 				receipt, d = nativebuild.EmitLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
-			} else if inv.Codegen() == runner.LLVMCodegen {
-				receipt, d = nativebuild.BuildLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend(), inv.Toolchain())
+			} else if installedToolchainSHA256 != "" {
+				executable, err := os.Executable()
+				if err == nil {
+					executable, err = filepath.EvalSymlinks(executable)
+				}
+				if err != nil {
+					d = diagnostic.New(diagnostic.BuildToolchain, diagnostic.Build, fmt.Sprintf("resolve installed compiler: %v", err), nil)
+				} else {
+					manifest := filepath.Join(filepath.Dir(filepath.Dir(executable)), "toolchain.json")
+					if inv.Toolchain() != "" {
+						supplied, resolveErr := filepath.Abs(inv.Toolchain())
+						if resolveErr != nil || supplied != manifest {
+							return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, "installed compiler uses its own toolchain", nil), runner.ExitHost)
+						}
+					}
+					receipt, d = nativebuild.BuildInstalledLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend(), manifest, installedToolchainSHA256)
+				}
 			} else {
-				receipt, d = nativebuild.Build(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
+				receipt, d = nativebuild.BuildLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend(), inv.Toolchain())
 			}
 			if d != nil {
 				return runner.Report(stderr, inv.Format(), d, runner.ExitHost)

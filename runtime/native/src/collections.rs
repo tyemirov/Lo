@@ -1,6 +1,9 @@
 use crate::{context::*, value::*};
 use num_traits::{Signed, ToPrimitive};
-use std::sync::Arc;
+use std::{
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 
 pub fn admit(site: &Site, flows: &[Flow]) -> Result<(), String> {
     let invalid = || format!("invalid native collection contract {}", site.operation);
@@ -149,6 +152,24 @@ fn callback_failure(
     Fault::Recoverable(new(atom("Error"), Data::Error(error)))
 }
 
+struct CallbackArguments<'a>(&'a mut Vec<Handle>);
+impl Deref for CallbackArguments<'_> {
+    type Target = Vec<Handle>;
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
+impl DerefMut for CallbackArguments<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.0
+    }
+}
+impl Drop for CallbackArguments<'_> {
+    fn drop(&mut self) {
+        self.0.clear();
+    }
+}
+
 /// The context pointer permits callback reentry without retaining a Rust borrow.
 pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Outcome {
     let mut scope = Scope::enter(context);
@@ -186,11 +207,13 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
     } else {
         None
     };
-    let result = (|| -> Outcome {
+    let mut result = (|| -> Outcome {
         let mut output = Vec::new();
+        let mut callback_storage = Vec::new();
         for index in 0..count {
             (*context).step()?;
-            let mut callback_args = parameters.to_vec();
+            let mut callback_args = CallbackArguments(&mut callback_storage);
+            callback_args.extend_from_slice(parameters);
             if let Some(state) = &state {
                 callback_args.push(state.clone());
             }
@@ -263,10 +286,11 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
             Ok(new(site.typ.base(), Data::List(output)))
         }
     })();
-    if matches!(
-        result,
-        Err(Fault::Host(..) | Fault::Budget { .. } | Fault::RawCancellation)
-    ) {
+    if result
+        .as_ref()
+        .err()
+        .is_some_and(|fault| !matches!(fault.primary(), Fault::Recoverable(_)))
+    {
         if let Some(progress) = progress {
             if !(*context).flow_fault_progress {
                 (*context).flow_progress = vec![progress];
@@ -278,6 +302,12 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
                 (*context).flow_progress.insert(0, progress);
             }
             (*context).flow_fault_progress = true;
+            result = result.map_err(|fault| {
+                fault.with_details(crate::context::BoundaryDetails {
+                    flow_progress: (*context).flow_progress.clone(),
+                    ..Default::default()
+                })
+            });
         }
     }
     if let Ok(output) = &result {

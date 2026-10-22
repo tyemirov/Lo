@@ -1,5 +1,9 @@
 # Native Compilation Results
 
+This document records historical implementation evidence before I011.
+The [native compilation contract](native-compilation-contract.md) defines the current LLVM build requirements.
+The [compiler plan](standalone-compiler-plan.md) records the current migration status.
+
 F001 implements native CPU compilation through generated Go source.
 The [native contract](native-compilation-contract.md) fixes the semantic requirements, resource limits, corpus, and performance gates.
 Both targets passed all required semantic, performance, and build-resource gates.

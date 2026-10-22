@@ -155,6 +155,8 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `independent expectation`: A specified test result calculated without the implementation under examination.
 - `source identity`: A digest of the source files and fixtures used by one validation run.
 - `archive`: One file that contains a collection of files or compiled object members.
+- `guest export channel`: A dedicated byte stream that transfers guest artifacts and results to the acceptance host.
+- `kernel console`: The operating-system channel that reports kernel diagnostics.
 
 - `checkpoint`: Canonical bytes that keep typed Parameters or complete optimizer state for later execution.
 - `checkpoint template`: A CPU value that supplies the expected checkpoint type, field names, and tensor shapes.
@@ -168,6 +170,12 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `race detector`: Runtime analysis that finds memory access without the required synchronization.
 - `median`: The middle value of ordered measurements, or the mean of the two middle values.
 - `bootstrap interval`: An estimated statistical interval from repeated samples drawn with replacement from the measured values.
+- `paired ratio`: The native elapsed time divided by the reference elapsed time in one measurement pair.
+- `temporal correlation`: Statistical dependence between measurements made at different times.
+- `measurement drift`: A gradual change in measurements during an experiment.
+- `measurement precision`: The uncertainty of an estimated performance ratio, expressed by its interval width.
+- `performance regression`: An increase in execution cost relative to a specified reference.
+- `contention`: Competition between processes for a shared computing resource.
 - `allocation profile`: A sampled report of memory allocations attributed to functions.
 - `CPU profile`: A sampled report of processor time attributed to functions.
 
@@ -242,6 +250,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `runtime bundle`: The exact runtime sources and dependencies included with a compiler for executable construction.
 - `logical cost`: The execution steps and value weight charged under the Lo host execution contract.
 - `lowering plan`: A compiler representation with explicit statements, branches, calls, source locations, and logical costs.
+- `basic block`: An ordered instruction sequence with one entry point and one final control transfer.
 - `source map`: Data that connects generated code or runtime failures to positions in the original source.
 - `allocation receipt`: A session record that identifies one reserved buffer and its release.
 - `resource ledger`: Per-invocation records for live tensor storage and storage budgets.

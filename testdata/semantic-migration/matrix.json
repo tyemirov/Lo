@@ -1652,7 +1652,7 @@
       "positive": [
         "TestAdapterProcessResultExecution/exited"
       ],
-      "boundary": "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "boundary": "positive:direct_interpreter_and_native_abi;negative:compiler_cli;runtime_negative:fixture_specific",
       "negative": [
         "TestSemanticBuiltinRejections/Process.Termination.exit_code"
       ],
@@ -1672,7 +1672,7 @@
       "positive": [
         "TestAdapterProcessResultExecution/signaled"
       ],
-      "boundary": "positive:execution_api_and_generated_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "boundary": "positive:direct_interpreter_and_native_abi;negative:compiler_cli;runtime_negative:fixture_specific",
       "negative": [
         "TestSemanticBuiltinRejections/Process.Termination.signal"
       ],
@@ -2698,19 +2698,13 @@
       "boundary": "compiler_cli"
     },
     {
-      "id": "--codegen",
-      "tests": [
-        "TestLLVMRuntimeRequiresToolchain"
-      ],
-      "oracle": "explicit_llvm_selection;missing_distribution_is_build_toolchain_error;no_output_publication",
-      "boundary": "compiler_cli"
-    },
-    {
       "id": "--toolchain",
       "tests": [
-        "TestLLVMRuntimeRequiresToolchain"
+        "TestLLVMRuntimeRequiresToolchain",
+        "TestNativeCanonicalBuild",
+        "TestNativeRejectsBackendSelection"
       ],
-      "oracle": "explicit_manifest_path;missing_distribution_is_build_toolchain_error;no_output_publication",
+      "oracle": "canonical_llvm_build;installed_manifest_binding;no_Go_tools;missing_distribution_rejected;backend_selection_rejected;no_output_on_failure",
       "boundary": "compiler_cli"
     }
   ],
@@ -2736,7 +2730,7 @@
         "TestSemanticNativeErrorPrecedence"
       ],
       "oracle": "unused,repeat,repeat,b,a;selected_only;first_failure",
-      "boundary": "evaluator_api;generated_native_api"
+      "boundary": "evaluator_api;native_abi"
     },
     {
       "id": "immutability",
@@ -2811,7 +2805,7 @@
         "TestSemanticNativeMetalFailureCleanup"
       ],
       "oracle": "runtime.cancelled;no_later_effect;released_resources",
-      "boundary": "controlled_api_and_cli;generated_native_api"
+      "boundary": "controlled_api_and_cli;native_abi"
     },
     {
       "id": "charges",
@@ -2824,7 +2818,7 @@
         "TestNativeTensorBudgetDifferential"
       ],
       "oracle": "Math.add_min=4;optimizer_deltas=36,180;charged_before_effect",
-      "boundary": "evaluator_api_and_cli;generated_native_cli_budget_boundaries"
+      "boundary": "evaluator_api_and_cli;native_cli_budget_boundaries"
     },
     {
       "id": "cleanup",
@@ -2837,7 +2831,7 @@
         "TestSemanticNativeMetalFailureCleanup"
       ],
       "oracle": "live_buffers=0;release_once;cleanup_error_preserved",
-      "boundary": "controlled_runner_and_adapter;generated_native_api"
+      "boundary": "controlled_runner_and_adapter;native_abi"
     },
     {
       "id": "checkpoint_bytes",
@@ -2858,7 +2852,7 @@
         "TestSemanticNativeMetalCheckpointResume"
       ],
       "oracle": "SGD_p=1;AdamW_p=1.296875,m=1.5,v=3,powers=.25,step=2",
-      "boundary": "cli_and_controlled_runner;generated_native_api"
+      "boundary": "cli_and_controlled_runner;native_abi"
     },
     {
       "id": "container_transfer",
@@ -2870,7 +2864,7 @@
         "TestSemanticNativeMetalFailureCleanup"
       ],
       "oracle": "explicit_transfer;shape_dtype_bits;atomic_failure_cleanup",
-      "boundary": "cli_and_controlled_runner;generated_native_api"
+      "boundary": "cli_and_controlled_runner;native_abi"
     },
     {
       "id": "resource_limits",
@@ -2930,7 +2924,7 @@
         "TestSemanticNativeMetalProfile"
       ],
       "oracle": "arithmetic_flush_subnormal_and_signed_zero;layout_preserves_bits;exact_profile_bits;primitive_atol=1e-6,rtol=1e-5",
-      "boundary": "runner_api_with_software_metal_model;generated_native_software_model"
+      "boundary": "runner_api_with_software_metal_model;native_abi_with_software_metal_model"
     },
     {
       "id": "checkpoint-fp32",
@@ -2940,7 +2934,7 @@
         "TestSemanticNativeMetalCheckpointResume"
       ],
       "oracle": "exact_canonical_bytes_and_resumed_state;no_tolerance",
-      "boundary": "cli_and_software_metal_model;generated_native_software_model"
+      "boundary": "cli_and_software_metal_model;native_abi_with_software_metal_model"
     },
     {
       "id": "training",
@@ -2955,13 +2949,6 @@
   ],
   "gaps": [
     {
-      "ID": "native-injected-device-runtime",
-      "Scope": "runWithDevices;metalComputeFactory",
-      "Reason": "Current_matrix_names_exact_API_boundaries;generated_native_fixtures_cover_read_order_selected_regions_failure_precedence_cancellation_Metal_numeric_profile_checkpoint_resume_transfers_numeric_failure_and_cleanup;remaining_injected_variant_permutations_do_not_add_absent_I005_contract_axes;I011_requires_complete_backend_parity",
-      "Owner": "I011",
-      "Acceptance": "downstream"
-    },
-    {
       "ID": "catalog-error-kind-exhaustiveness",
       "Scope": "errors;activation_errors",
       "Reason": "I005_requires_positive_and_applicable_negative_per_operation_not_every_kind_per_operation;all_catalog_kinds_are_inventoried;each_fallible_operation_has_runtime_negative_or_the_source_reviewed_SGD_constructor_exemption;exhaustive_kind_cartesian_product_is_not_claimed",
@@ -2969,16 +2956,9 @@
       "Acceptance": "disclosed_limit"
     },
     {
-      "ID": "linux-arm64-execution",
-      "Scope": "semantic_corpus",
-      "Reason": "host_darwin_arm64;cross_build_test_is_not_linux_execution",
-      "Owner": "I011",
-      "Acceptance": "downstream"
-    },
-    {
       "ID": "standalone-compiler-offline",
       "Scope": "I004;F017;I011",
-      "Reason": "current_native_build_uses_Go;not_established_by_semantic_corpus",
+      "Reason": "F017_installed_acceptance_records_offline_compile_link_and_separate_execution;full_corpus_remains_I011",
       "Owner": "F017",
       "Acceptance": "downstream"
     },
@@ -2989,5 +2969,1215 @@
       "Owner": "I005",
       "Acceptance": "disclosed_limit"
     }
-  ]
+  ],
+  "native_tests": {
+    "TestAdapterFileReceipts": [
+      "TestAdapterFileReceipts"
+    ],
+    "TestAdapterHTTPClientAuthority": [
+      "TestAdapterHTTPClientAuthority"
+    ],
+    "TestAdapterHTTPClientCleanupEvidence": [
+      "TestLLVMHTTPClientCleanupEvidence"
+    ],
+    "TestAdapterHTTPClientConstruction": [
+      "TestAdapterHTTPClientConstruction"
+    ],
+    "TestAdapterHTTPClientExchange": [
+      "TestAdapterHTTPClientExchange"
+    ],
+    "TestAdapterHTTPClientNoReplay": [
+      "TestAdapterHTTPClientNoReplay"
+    ],
+    "TestAdapterHTTPClientProtocolLimits": [
+      "TestAdapterHTTPClientProtocolLimits"
+    ],
+    "TestAdapterHTTPHeaderValidation": [
+      "TestAdapterHTTPHeaderValidation"
+    ],
+    "TestAdapterProcessActivationContract": [
+      "TestAdapterProcessActivationContract"
+    ],
+    "TestAdapterProcessConstructorValidation": [
+      "TestAdapterProcessConstructorValidation"
+    ],
+    "TestAdapterProcessLifecycleCancellation": [
+      "TestLLVMProcessLifecycleCancellation"
+    ],
+    "TestAdapterProcessLifecycleCompleted": [
+      "TestLLVMProcessLifecycleCompleted"
+    ],
+    "TestAdapterProcessLifecycleExactOutputLimit": [
+      "TestLLVMProcessLifecycleExactOutputLimit"
+    ],
+    "TestAdapterProcessLifecycleFailures": [
+      "TestLLVMProcessLifecycleFailures",
+      "TestLLVMProcessLifecycleExactOutputLimit",
+      "TestLLVMProcessDriverOwnership"
+    ],
+    "TestAdapterProcessPolicyAcceptsInertCompilerInputs": [
+      "TestAdapterProcessPolicyAcceptsInertCompilerInputs"
+    ],
+    "TestAdapterProcessPolicyRejectsFlagsForOtherCommands": [
+      "TestAdapterProcessPolicyRejectsFlagsForOtherCommands"
+    ],
+    "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs": [
+      "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs"
+    ],
+    "TestAdapterProcessResultExecution/exited": [
+      "TestAdapterProcessResultExecution/exited"
+    ],
+    "TestAdapterProcessResultExecution/signaled": [
+      "TestAdapterProcessResultExecution/signaled"
+    ],
+    "TestAdapterProcessResultExecution/wrong-exited": [
+      "TestAdapterProcessResultExecution/wrong-exited"
+    ],
+    "TestAdapterProcessResultExecution/wrong-signaled": [
+      "TestAdapterProcessResultExecution/wrong-signaled"
+    ],
+    "TestAdapterReceiptSessionCleanupDiagnostic": [
+      "TestLLVMReceiptSessionCleanupDiagnostic",
+      "TestLLVMServerCallbackIndependentCleanup"
+    ],
+    "TestAutodiffAnalyticalAndFiniteDifferences": [
+      "TestAutodiffAnalyticalAndFiniteDifferences"
+    ],
+    "TestAutodiffFailureStopsCommitAndCanBeHandled": [
+      "TestLLVMFailureStopsCommit/autodiff-handled"
+    ],
+    "TestAutodiffFailures": [
+      "TestAutodiffFailures"
+    ],
+    "TestCLIErrorBoundary": [
+      "TestCLIErrorBoundary"
+    ],
+    "TestCheckpointAdamWMetalResume": [
+      "TestLLVMMetalOptimizersAndCheckpoints"
+    ],
+    "TestCheckpointBitsAndWork": [
+      "TestLLVMCheckpointBitsAndWork"
+    ],
+    "TestCheckpointFreshProcess": [
+      "TestCheckpointFreshProcess"
+    ],
+    "TestCheckpointMetalTransfers": [
+      "TestLLVMMetalOptimizersAndCheckpoints"
+    ],
+    "TestCheckpointOptimizerValidation": [
+      "TestLLVMCheckpointOptimizerStatePublicAdmission"
+    ],
+    "TestCheckpointRejectsInvalidData": [
+      "TestCheckpointRejectsInvalidData"
+    ],
+    "TestCheckpointTransferFailureCleanup": [
+      "TestLLVMCheckpointTransferFailureCleanup"
+    ],
+    "TestConformance": [
+      "TestConformance"
+    ],
+    "TestDeviceAuthorizationAndFailures": [
+      "TestDeviceAuthorizationAndFailures"
+    ],
+    "TestDeviceAuthorizationAndFailures/observation": [
+      "TestDeviceAuthorizationAndFailures/observation"
+    ],
+    "TestDeviceCallbackLifetime": [
+      "TestLLVMDeviceCallbackLifetime",
+      "TestCollectionArgumentResults",
+      "TestLLVMCollectionArgumentLifetime"
+    ],
+    "TestDeviceGrantArguments": [
+      "TestDeviceGrantArguments"
+    ],
+    "TestDeviceParameterLocations": [
+      "TestDeviceParameterLocations"
+    ],
+    "TestDeviceRetainedCallbackValues": [
+      "TestLLVMDeviceRetainedCallbackValues"
+    ],
+    "TestDeviceTransferRoundTrip": [
+      "TestDeviceTransferRoundTrip"
+    ],
+    "TestEvaluatorCancellation": [
+      "TestSemanticNativeCancellation",
+      "TestLLVMThreadAdmission",
+      "TestLLVMRuntimeLifetime",
+      "TestLLVMCollectionArgumentLifetime"
+    ],
+    "TestEvaluatorErrorPrecedence": [
+      "TestSemanticNativeErrorPrecedence",
+      "TestRunStoredFallibility",
+      "TestLLVMAdmittedLiteralFailureOrder"
+    ],
+    "TestEvaluatorImmutableResults": [
+      "TestLLVMRetainedImmutableValues",
+      "TestLLVMAdmittedProgramSessions",
+      "TestLLVMProgramControlValueLifetime"
+    ],
+    "TestEvaluatorMatchRegions": [
+      "TestSemanticNativeMatchRegions"
+    ],
+    "TestEvaluatorReadOrder": [
+      "TestSemanticNativeReadOrder"
+    ],
+    "TestFileCommitAuthorization": [
+      "TestFileCommitAuthorization"
+    ],
+    "TestFileCommitFailure": [
+      "TestFileCommitFailure"
+    ],
+    "TestFileCommitOrder": [
+      "TestFileCommitOrder"
+    ],
+    "TestFileDiscovery": [
+      "TestFileDiscovery"
+    ],
+    "TestFileDiscoveryFailures": [
+      "TestLLVMFileDiscoveryFailures"
+    ],
+    "TestFileLanguageLateFailureProgress": [
+      "TestLLVMFileLateFailureProgress"
+    ],
+    "TestFileLanguageSelectionValidation": [
+      "TestFileLanguageSelectionValidation"
+    ],
+    "TestFileOpenPaths": [
+      "TestFileOpenPaths"
+    ],
+    "TestFileOpenPathsResults": [
+      "TestFileOpenPathsResults"
+    ],
+    "TestFileReadCancellation": [
+      "TestLLVMCheckpointFileCancellation"
+    ],
+    "TestFileRemoval": [
+      "TestFileRemoval"
+    ],
+    "TestFileRemovalFailures": [
+      "TestLLVMFileRemovalFailures"
+    ],
+    "TestFileWriteCancellation": [
+      "TestLLVMCheckpointFileCancellation"
+    ],
+    "TestFirstVerifierSlice": [
+      "TestFirstVerifierSlice"
+    ],
+    "TestFloatArithmetic": [
+      "TestFloatArithmetic"
+    ],
+    "TestFloatFailures": [
+      "TestFloatFailures"
+    ],
+    "TestFlowFold": [
+      "TestFlowFold"
+    ],
+    "TestFlowFoldNestedCancellationProgress": [
+      "TestLLVMNestedFoldCancellationProgress"
+    ],
+    "TestFlowFoldRecoverableErrorProgress": [
+      "TestFlowFoldRecoverableErrorProgress",
+      "TestLLVMCollectionArgumentLifetime"
+    ],
+    "TestFlowFoldStepLimitProgress": [
+      "TestFlowFoldStepLimitProgress"
+    ],
+    "TestInspectionRejectsInvalidSource": [
+      "TestInspectionRejectsInvalidSource"
+    ],
+    "TestInspectionResources": [
+      "TestInspectionResources"
+    ],
+    "TestLLVMLoweringBuild": [
+      "TestLLVMLoweringBuild"
+    ],
+    "TestLLVMLoweringCancellation": [
+      "TestLLVMLoweringCancellation"
+    ],
+    "TestLLVMLoweringDerivativePlan": [
+      "TestLLVMLoweringDerivativePlan"
+    ],
+    "TestLLVMLoweringInvocation": [
+      "TestLLVMLoweringInvocation"
+    ],
+    "TestLLVMLoweringPreservesOutput": [
+      "TestLLVMLoweringPreservesOutput"
+    ],
+    "TestLLVMLoweringSourceAliases": [
+      "TestLLVMLoweringSourceAliases"
+    ],
+    "TestLLVMRuntimeRequiresToolchain": [
+      "TestLLVMRuntimeRequiresToolchain",
+      "TestLLVMLocationMetadataAdmission",
+      "TestLLVMLocationMetadataDiagnosticSpan",
+      "TestLLVMCoordinateMetadataAdmission",
+      "TestLLVMCoordinateDiagnosticSpan",
+      "TestLLVMCoordinateArtifactMetadata",
+      "TestLLVMCoordinateReceiptSpans"
+    ],
+    "TestMetalComputeControlledFailures": [
+      "TestLLVMMetalBoundaryFailures",
+      "TestLLVMMetalComputeCancellation"
+    ],
+    "TestMetalComputeNumericFailures": [
+      "TestLLVMMetalNumericFailures"
+    ],
+    "TestMetalComputePrimitives": [
+      "TestLLVMMetalPrimitives"
+    ],
+    "TestMetalComputeProfile": [
+      "TestLLVMMetalNumericProfile",
+      "TestLLVMMetalEmptyProfiles"
+    ],
+    "TestMetalComputeTraining": [
+      "TestLLVMMetalTraining"
+    ],
+    "TestMetalControlledFailures": [
+      "TestLLVMDeviceResources"
+    ],
+    "TestMetalTensorBoundaries": [
+      "TestLLVMMetalTensorBoundaries"
+    ],
+    "TestMetalTrainingGradients": [
+      "TestLLVMMetalTrainingGradients"
+    ],
+    "TestNativeBuildBoundary": [
+      "TestNativeBuildBoundary"
+    ],
+    "TestNativeBuildPaths": [
+      "TestNativeBuildPaths"
+    ],
+    "TestNativeCrossTarget": [
+      "TestNativeCrossTarget"
+    ],
+    "TestNativeEffectBudgetDifferential": [
+      "TestNativeEffectBudgetDifferential"
+    ],
+    "TestNativeMetalSelection": [
+      "TestNativeMetalSelection"
+    ],
+    "TestNativeMetalSoftwareArtifact": [
+      "TestNativeMetalSoftwareArtifact"
+    ],
+    "TestNativeRemovedSourceDiagnostics": [
+      "TestNativeRemovedSourceDiagnostics"
+    ],
+    "TestNativeRuntimeDifferential": [
+      "TestNativeRuntimeDifferential"
+    ],
+    "TestNativeStandalone": [
+      "TestNativeStandalone"
+    ],
+    "TestNativeTensorBudgetDifferential": [
+      "TestNativeTensorBudgetDifferential"
+    ],
+    "TestOptimizerInvalidConfigurations": [
+      "TestOptimizerInvalidConfigurations"
+    ],
+    "TestOptimizerPrimitiveWorkCharges": [
+      "TestLLVMOptimizerWorkCharges"
+    ],
+    "TestOptimizerSchemasAndFailureOrder": [
+      "TestLLVMFailureStopsCommit",
+      "TestOptimizerSchemasAndFailureOrder"
+    ],
+    "TestParametersScaleFailuresAndMetadataSnapshots": [
+      "TestParametersScaleFailuresAndMetadataSnapshots"
+    ],
+    "TestParametersSchemaFailures": [
+      "TestParametersSchemaFailures"
+    ],
+    "TestParametersStopAndIdentity": [
+      "TestParametersStopAndIdentity"
+    ],
+    "TestParserExternalInputs": [
+      "TestParserExternalInputs"
+    ],
+    "TestRunBuiltinCatalog/Autodiff.grad": [
+      "TestRunBuiltinCatalog/Autodiff.grad"
+    ],
+    "TestRunBuiltinCatalog/Autodiff.stop": [
+      "TestRunBuiltinCatalog/Autodiff.stop"
+    ],
+    "TestRunBuiltinCatalog/Bool.new": [
+      "TestRunBuiltinCatalog/Bool.new"
+    ],
+    "TestRunBuiltinCatalog/Bytes.new": [
+      "TestRunBuiltinCatalog/Bytes.new"
+    ],
+    "TestRunBuiltinCatalog/Checkpoint.decode": [
+      "TestRunBuiltinCatalog/Checkpoint.decode"
+    ],
+    "TestRunBuiltinCatalog/Checkpoint.encode": [
+      "TestRunBuiltinCatalog/Checkpoint.encode"
+    ],
+    "TestRunBuiltinCatalog/Device.new": [
+      "TestRunBuiltinCatalog/Device.new"
+    ],
+    "TestRunBuiltinCatalog/Error.new": [
+      "TestRunBuiltinCatalog/Error.new"
+    ],
+    "TestRunBuiltinCatalog/File.Append.new": [
+      "TestRunBuiltinCatalog/File.Append.new"
+    ],
+    "TestRunBuiltinCatalog/File.Path.eq": [
+      "TestRunBuiltinCatalog/File.Path.eq"
+    ],
+    "TestRunBuiltinCatalog/File.Path.new": [
+      "TestRunBuiltinCatalog/File.Path.new"
+    ],
+    "TestRunBuiltinCatalog/File.Remove.new": [
+      "TestRunBuiltinCatalog/File.Remove.new"
+    ],
+    "TestRunBuiltinCatalog/File.Write.new": [
+      "TestRunBuiltinCatalog/File.Write.new"
+    ],
+    "TestRunBuiltinCatalog/File.list": [
+      "TestRunBuiltinCatalog/File.list"
+    ],
+    "TestRunBuiltinCatalog/File.open_paths": [
+      "TestRunBuiltinCatalog/File.open_paths"
+    ],
+    "TestRunBuiltinCatalog/File.read": [
+      "TestRunBuiltinCatalog/File.read"
+    ],
+    "TestRunBuiltinCatalog/Float.add": [
+      "TestRunBuiltinCatalog/Float.add"
+    ],
+    "TestRunBuiltinCatalog/Float.div": [
+      "TestRunBuiltinCatalog/Float.div"
+    ],
+    "TestRunBuiltinCatalog/Float.eq": [
+      "TestRunBuiltinCatalog/Float.eq"
+    ],
+    "TestRunBuiltinCatalog/Float.gt": [
+      "TestRunBuiltinCatalog/Float.gt"
+    ],
+    "TestRunBuiltinCatalog/Float.gte": [
+      "TestRunBuiltinCatalog/Float.gte"
+    ],
+    "TestRunBuiltinCatalog/Float.lt": [
+      "TestRunBuiltinCatalog/Float.lt"
+    ],
+    "TestRunBuiltinCatalog/Float.lte": [
+      "TestRunBuiltinCatalog/Float.lte"
+    ],
+    "TestRunBuiltinCatalog/Float.mul": [
+      "TestRunBuiltinCatalog/Float.mul"
+    ],
+    "TestRunBuiltinCatalog/Float.new": [
+      "TestRunBuiltinCatalog/Float.new"
+    ],
+    "TestRunBuiltinCatalog/Float.sqrt": [
+      "TestRunBuiltinCatalog/Float.sqrt"
+    ],
+    "TestRunBuiltinCatalog/Float.sub": [
+      "TestRunBuiltinCatalog/Float.sub"
+    ],
+    "TestRunBuiltinCatalog/Float.to_int": [
+      "TestRunBuiltinCatalog/Float.to_int"
+    ],
+    "TestRunBuiltinCatalog/Float.to_string": [
+      "TestRunBuiltinCatalog/Float.to_string"
+    ],
+    "TestRunBuiltinCatalog/Flow.fold": [
+      "TestRunBuiltinCatalog/Flow.fold"
+    ],
+    "TestRunBuiltinCatalog/Gradients.add": [
+      "TestRunBuiltinCatalog/Gradients.add"
+    ],
+    "TestRunBuiltinCatalog/Gradients.new": [
+      "TestRunBuiltinCatalog/Gradients.new"
+    ],
+    "TestRunBuiltinCatalog/Gradients.scale": [
+      "TestRunBuiltinCatalog/Gradients.scale"
+    ],
+    "TestRunBuiltinCatalog/Gradients.values": [
+      "TestRunBuiltinCatalog/Gradients.values"
+    ],
+    "TestRunBuiltinCatalog/Gradients.zero": [
+      "TestRunBuiltinCatalog/Gradients.zero"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Client.Request.new": [
+      "TestRunBuiltinCatalog/HTTP.Client.Request.new"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Headers.new": [
+      "TestRunBuiltinCatalog/HTTP.Headers.new"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Headers.values": [
+      "TestRunBuiltinCatalog/HTTP.Headers.values"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Method.new": [
+      "TestRunBuiltinCatalog/HTTP.Method.new"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Response.Bytes.new": [
+      "TestRunBuiltinCatalog/HTTP.Response.Bytes.new"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Response.Text.new": [
+      "TestRunBuiltinCatalog/HTTP.Response.Text.new"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Response.new": [
+      "TestRunBuiltinCatalog/HTTP.Response.new"
+    ],
+    "TestRunBuiltinCatalog/HTTP.Server.new": [
+      "TestRunBuiltinCatalog/HTTP.Server.new"
+    ],
+    "TestRunBuiltinCatalog/HTTP.URL.new": [
+      "TestRunBuiltinCatalog/HTTP.URL.new"
+    ],
+    "TestRunBuiltinCatalog/Int.new": [
+      "TestRunBuiltinCatalog/Int.new"
+    ],
+    "TestRunBuiltinCatalog/Int.to_float": [
+      "TestRunBuiltinCatalog/Int.to_float"
+    ],
+    "TestRunBuiltinCatalog/Int.to_string": [
+      "TestRunBuiltinCatalog/Int.to_string"
+    ],
+    "TestRunBuiltinCatalog/List.filter": [
+      "TestRunBuiltinCatalog/List.filter"
+    ],
+    "TestRunBuiltinCatalog/List.flat_map": [
+      "TestRunBuiltinCatalog/List.flat_map"
+    ],
+    "TestRunBuiltinCatalog/List.fold": [
+      "TestRunBuiltinCatalog/List.fold",
+      "TestLLVMCollectionArgumentLifetime"
+    ],
+    "TestRunBuiltinCatalog/List.length": [
+      "TestRunBuiltinCatalog/List.length"
+    ],
+    "TestRunBuiltinCatalog/List.map": [
+      "TestRunBuiltinCatalog/List.map",
+      "TestCollectionArgumentResults"
+    ],
+    "TestRunBuiltinCatalog/List.new": [
+      "TestRunBuiltinCatalog/List.new"
+    ],
+    "TestRunBuiltinCatalog/List.unfold": [
+      "TestRunBuiltinCatalog/List.unfold"
+    ],
+    "TestRunBuiltinCatalog/Map.get": [
+      "TestRunBuiltinCatalog/Map.get"
+    ],
+    "TestRunBuiltinCatalog/Map.has_key": [
+      "TestRunBuiltinCatalog/Map.has_key"
+    ],
+    "TestRunBuiltinCatalog/Map.new": [
+      "TestRunBuiltinCatalog/Map.new"
+    ],
+    "TestRunBuiltinCatalog/Math.add": [
+      "TestRunBuiltinCatalog/Math.add"
+    ],
+    "TestRunBuiltinCatalog/Math.div": [
+      "TestRunBuiltinCatalog/Math.div"
+    ],
+    "TestRunBuiltinCatalog/Math.eq": [
+      "TestRunBuiltinCatalog/Math.eq"
+    ],
+    "TestRunBuiltinCatalog/Math.gt": [
+      "TestRunBuiltinCatalog/Math.gt"
+    ],
+    "TestRunBuiltinCatalog/Math.gte": [
+      "TestRunBuiltinCatalog/Math.gte"
+    ],
+    "TestRunBuiltinCatalog/Math.lt": [
+      "TestRunBuiltinCatalog/Math.lt"
+    ],
+    "TestRunBuiltinCatalog/Math.lte": [
+      "TestRunBuiltinCatalog/Math.lte"
+    ],
+    "TestRunBuiltinCatalog/Math.max": [
+      "TestRunBuiltinCatalog/Math.max"
+    ],
+    "TestRunBuiltinCatalog/Math.min": [
+      "TestRunBuiltinCatalog/Math.min"
+    ],
+    "TestRunBuiltinCatalog/Math.mod": [
+      "TestRunBuiltinCatalog/Math.mod"
+    ],
+    "TestRunBuiltinCatalog/Math.mul": [
+      "TestRunBuiltinCatalog/Math.mul"
+    ],
+    "TestRunBuiltinCatalog/Math.product": [
+      "TestRunBuiltinCatalog/Math.product"
+    ],
+    "TestRunBuiltinCatalog/Math.sub": [
+      "TestRunBuiltinCatalog/Math.sub"
+    ],
+    "TestRunBuiltinCatalog/Math.sum": [
+      "TestRunBuiltinCatalog/Math.sum"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.AdamW.Config.new": [
+      "TestRunBuiltinCatalog/Optimizer.AdamW.Config.new"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.AdamW.State.new": [
+      "TestRunBuiltinCatalog/Optimizer.AdamW.State.new"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.AdamW.State.to": [
+      "TestRunBuiltinCatalog/Optimizer.AdamW.State.to"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.AdamW.step": [
+      "TestRunBuiltinCatalog/Optimizer.AdamW.step"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.SGD.Config.new": [
+      "TestRunBuiltinCatalog/Optimizer.SGD.Config.new"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.SGD.State.new": [
+      "TestRunBuiltinCatalog/Optimizer.SGD.State.new"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.SGD.State.to": [
+      "TestRunBuiltinCatalog/Optimizer.SGD.State.to"
+    ],
+    "TestRunBuiltinCatalog/Optimizer.SGD.step": [
+      "TestRunBuiltinCatalog/Optimizer.SGD.step"
+    ],
+    "TestRunBuiltinCatalog/Parameters.new": [
+      "TestRunBuiltinCatalog/Parameters.new"
+    ],
+    "TestRunBuiltinCatalog/Parameters.to": [
+      "TestRunBuiltinCatalog/Parameters.to"
+    ],
+    "TestRunBuiltinCatalog/Parameters.values": [
+      "TestRunBuiltinCatalog/Parameters.values"
+    ],
+    "TestRunBuiltinCatalog/Process.Command.new": [
+      "TestRunBuiltinCatalog/Process.Command.new"
+    ],
+    "TestRunBuiltinCatalog/Process.Executable.new": [
+      "TestRunBuiltinCatalog/Process.Executable.new"
+    ],
+    "TestRunBuiltinCatalog/Range.contains": [
+      "TestRunBuiltinCatalog/Range.contains"
+    ],
+    "TestRunBuiltinCatalog/Range.is_empty": [
+      "TestRunBuiltinCatalog/Range.is_empty"
+    ],
+    "TestRunBuiltinCatalog/Range.new": [
+      "TestRunBuiltinCatalog/Range.new"
+    ],
+    "TestRunBuiltinCatalog/Record.merge": [
+      "TestRunBuiltinCatalog/Record.merge"
+    ],
+    "TestRunBuiltinCatalog/Record.new": [
+      "TestRunBuiltinCatalog/Record.new"
+    ],
+    "TestRunBuiltinCatalog/Scalar.eq": [
+      "TestRunBuiltinCatalog/Scalar.eq"
+    ],
+    "TestRunBuiltinCatalog/Scalar.new": [
+      "TestRunBuiltinCatalog/Scalar.new"
+    ],
+    "TestRunBuiltinCatalog/String.FromScalars.new": [
+      "TestRunBuiltinCatalog/String.FromScalars.new"
+    ],
+    "TestRunBuiltinCatalog/String.concat": [
+      "TestRunBuiltinCatalog/String.concat"
+    ],
+    "TestRunBuiltinCatalog/String.eq": [
+      "TestRunBuiltinCatalog/String.eq"
+    ],
+    "TestRunBuiltinCatalog/String.length": [
+      "TestRunBuiltinCatalog/String.length"
+    ],
+    "TestRunBuiltinCatalog/String.lower": [
+      "TestRunBuiltinCatalog/String.lower"
+    ],
+    "TestRunBuiltinCatalog/String.new": [
+      "TestRunBuiltinCatalog/String.new"
+    ],
+    "TestRunBuiltinCatalog/String.upper": [
+      "TestRunBuiltinCatalog/String.upper"
+    ],
+    "TestRunBuiltinCatalog/Tensor.add": [
+      "TestRunBuiltinCatalog/Tensor.add"
+    ],
+    "TestRunBuiltinCatalog/Tensor.broadcast": [
+      "TestRunBuiltinCatalog/Tensor.broadcast"
+    ],
+    "TestRunBuiltinCatalog/Tensor.device": [
+      "TestRunBuiltinCatalog/Tensor.device"
+    ],
+    "TestRunBuiltinCatalog/Tensor.div": [
+      "TestRunBuiltinCatalog/Tensor.div"
+    ],
+    "TestRunBuiltinCatalog/Tensor.dtype": [
+      "TestRunBuiltinCatalog/Tensor.dtype"
+    ],
+    "TestRunBuiltinCatalog/Tensor.matmul": [
+      "TestRunBuiltinCatalog/Tensor.matmul"
+    ],
+    "TestRunBuiltinCatalog/Tensor.mean": [
+      "TestRunBuiltinCatalog/Tensor.mean"
+    ],
+    "TestRunBuiltinCatalog/Tensor.mul": [
+      "TestRunBuiltinCatalog/Tensor.mul"
+    ],
+    "TestRunBuiltinCatalog/Tensor.new": [
+      "TestRunBuiltinCatalog/Tensor.new"
+    ],
+    "TestRunBuiltinCatalog/Tensor.rank": [
+      "TestRunBuiltinCatalog/Tensor.rank"
+    ],
+    "TestRunBuiltinCatalog/Tensor.relu": [
+      "TestRunBuiltinCatalog/Tensor.relu"
+    ],
+    "TestRunBuiltinCatalog/Tensor.reshape": [
+      "TestRunBuiltinCatalog/Tensor.reshape"
+    ],
+    "TestRunBuiltinCatalog/Tensor.shape": [
+      "TestRunBuiltinCatalog/Tensor.shape"
+    ],
+    "TestRunBuiltinCatalog/Tensor.sqrt": [
+      "TestRunBuiltinCatalog/Tensor.sqrt"
+    ],
+    "TestRunBuiltinCatalog/Tensor.sub": [
+      "TestRunBuiltinCatalog/Tensor.sub"
+    ],
+    "TestRunBuiltinCatalog/Tensor.sum": [
+      "TestRunBuiltinCatalog/Tensor.sum"
+    ],
+    "TestRunBuiltinCatalog/Tensor.to": [
+      "TestRunBuiltinCatalog/Tensor.to"
+    ],
+    "TestRunBuiltinCatalog/Tensor.to_float": [
+      "TestRunBuiltinCatalog/Tensor.to_float"
+    ],
+    "TestRunBuiltinCatalog/Tensor.transpose": [
+      "TestRunBuiltinCatalog/Tensor.transpose"
+    ],
+    "TestRunBuiltinCatalog/Tensor.values": [
+      "TestRunBuiltinCatalog/Tensor.values"
+    ],
+    "TestRunBuiltinCatalog/UTF8.Bytes.new": [
+      "TestRunBuiltinCatalog/UTF8.Bytes.new"
+    ],
+    "TestRunBuiltinCatalog/UTF8.String.new": [
+      "TestRunBuiltinCatalog/UTF8.String.new"
+    ],
+    "TestRunExpandedValueLimit": [
+      "TestRunExpandedValueLimit"
+    ],
+    "TestRunFallibleListVariants": [
+      "TestRunFallibleListVariants"
+    ],
+    "TestRunFileReads": [
+      "TestRunFileReads"
+    ],
+    "TestRunHostLimitsAndAuthorization": [
+      "TestRunHostLimitsAndAuthorization"
+    ],
+    "TestRunRecoverableErrors": [
+      "TestRunRecoverableErrors"
+    ],
+    "TestRunResourceLimits": [
+      "TestRunResourceLimits"
+    ],
+    "TestRunStoredFallibility": [
+      "TestRunStoredFallibility"
+    ],
+    "TestRunValues": [
+      "TestRunValues"
+    ],
+    "TestSemanticBuiltinRejections/Autodiff.grad": [
+      "TestSemanticBuiltinRejections/Autodiff.grad"
+    ],
+    "TestSemanticBuiltinRejections/Autodiff.stop": [
+      "TestSemanticBuiltinRejections/Autodiff.stop"
+    ],
+    "TestSemanticBuiltinRejections/Bool.new": [
+      "TestSemanticBuiltinRejections/Bool.new"
+    ],
+    "TestSemanticBuiltinRejections/Bytes.new": [
+      "TestSemanticBuiltinRejections/Bytes.new"
+    ],
+    "TestSemanticBuiltinRejections/Checkpoint.decode": [
+      "TestSemanticBuiltinRejections/Checkpoint.decode"
+    ],
+    "TestSemanticBuiltinRejections/Checkpoint.encode": [
+      "TestSemanticBuiltinRejections/Checkpoint.encode"
+    ],
+    "TestSemanticBuiltinRejections/Device.new": [
+      "TestSemanticBuiltinRejections/Device.new"
+    ],
+    "TestSemanticBuiltinRejections/Error.new": [
+      "TestSemanticBuiltinRejections/Error.new"
+    ],
+    "TestSemanticBuiltinRejections/File.Append.new": [
+      "TestSemanticBuiltinRejections/File.Append.new"
+    ],
+    "TestSemanticBuiltinRejections/File.Path.eq": [
+      "TestSemanticBuiltinRejections/File.Path.eq"
+    ],
+    "TestSemanticBuiltinRejections/File.Path.new": [
+      "TestSemanticBuiltinRejections/File.Path.new"
+    ],
+    "TestSemanticBuiltinRejections/File.Remove.new": [
+      "TestSemanticBuiltinRejections/File.Remove.new"
+    ],
+    "TestSemanticBuiltinRejections/File.Write.new": [
+      "TestSemanticBuiltinRejections/File.Write.new"
+    ],
+    "TestSemanticBuiltinRejections/File.list": [
+      "TestSemanticBuiltinRejections/File.list"
+    ],
+    "TestSemanticBuiltinRejections/File.open_paths": [
+      "TestSemanticBuiltinRejections/File.open_paths"
+    ],
+    "TestSemanticBuiltinRejections/File.read": [
+      "TestSemanticBuiltinRejections/File.read"
+    ],
+    "TestSemanticBuiltinRejections/Float.add": [
+      "TestSemanticBuiltinRejections/Float.add"
+    ],
+    "TestSemanticBuiltinRejections/Float.div": [
+      "TestSemanticBuiltinRejections/Float.div"
+    ],
+    "TestSemanticBuiltinRejections/Float.eq": [
+      "TestSemanticBuiltinRejections/Float.eq"
+    ],
+    "TestSemanticBuiltinRejections/Float.gt": [
+      "TestSemanticBuiltinRejections/Float.gt"
+    ],
+    "TestSemanticBuiltinRejections/Float.gte": [
+      "TestSemanticBuiltinRejections/Float.gte"
+    ],
+    "TestSemanticBuiltinRejections/Float.lt": [
+      "TestSemanticBuiltinRejections/Float.lt"
+    ],
+    "TestSemanticBuiltinRejections/Float.lte": [
+      "TestSemanticBuiltinRejections/Float.lte"
+    ],
+    "TestSemanticBuiltinRejections/Float.mul": [
+      "TestSemanticBuiltinRejections/Float.mul"
+    ],
+    "TestSemanticBuiltinRejections/Float.new": [
+      "TestSemanticBuiltinRejections/Float.new"
+    ],
+    "TestSemanticBuiltinRejections/Float.sqrt": [
+      "TestSemanticBuiltinRejections/Float.sqrt"
+    ],
+    "TestSemanticBuiltinRejections/Float.sub": [
+      "TestSemanticBuiltinRejections/Float.sub"
+    ],
+    "TestSemanticBuiltinRejections/Float.to_int": [
+      "TestSemanticBuiltinRejections/Float.to_int"
+    ],
+    "TestSemanticBuiltinRejections/Float.to_string": [
+      "TestSemanticBuiltinRejections/Float.to_string"
+    ],
+    "TestSemanticBuiltinRejections/Flow.fold": [
+      "TestSemanticBuiltinRejections/Flow.fold"
+    ],
+    "TestSemanticBuiltinRejections/Gradients.add": [
+      "TestSemanticBuiltinRejections/Gradients.add"
+    ],
+    "TestSemanticBuiltinRejections/Gradients.new": [
+      "TestSemanticBuiltinRejections/Gradients.new"
+    ],
+    "TestSemanticBuiltinRejections/Gradients.scale": [
+      "TestSemanticBuiltinRejections/Gradients.scale"
+    ],
+    "TestSemanticBuiltinRejections/Gradients.values": [
+      "TestSemanticBuiltinRejections/Gradients.values"
+    ],
+    "TestSemanticBuiltinRejections/Gradients.zero": [
+      "TestSemanticBuiltinRejections/Gradients.zero"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Client.Request.new": [
+      "TestSemanticBuiltinRejections/HTTP.Client.Request.new"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Headers.new": [
+      "TestSemanticBuiltinRejections/HTTP.Headers.new"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Headers.values": [
+      "TestSemanticBuiltinRejections/HTTP.Headers.values"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Method.new": [
+      "TestSemanticBuiltinRejections/HTTP.Method.new"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Response.Bytes.new": [
+      "TestSemanticBuiltinRejections/HTTP.Response.Bytes.new"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Response.Text.new": [
+      "TestSemanticBuiltinRejections/HTTP.Response.Text.new"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Response.new": [
+      "TestSemanticBuiltinRejections/HTTP.Response.new"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.Server.new": [
+      "TestSemanticBuiltinRejections/HTTP.Server.new"
+    ],
+    "TestSemanticBuiltinRejections/HTTP.URL.new": [
+      "TestSemanticBuiltinRejections/HTTP.URL.new"
+    ],
+    "TestSemanticBuiltinRejections/Int.new": [
+      "TestSemanticBuiltinRejections/Int.new"
+    ],
+    "TestSemanticBuiltinRejections/Int.to_float": [
+      "TestSemanticBuiltinRejections/Int.to_float"
+    ],
+    "TestSemanticBuiltinRejections/Int.to_string": [
+      "TestSemanticBuiltinRejections/Int.to_string"
+    ],
+    "TestSemanticBuiltinRejections/List.filter": [
+      "TestSemanticBuiltinRejections/List.filter"
+    ],
+    "TestSemanticBuiltinRejections/List.flat_map": [
+      "TestSemanticBuiltinRejections/List.flat_map"
+    ],
+    "TestSemanticBuiltinRejections/List.fold": [
+      "TestSemanticBuiltinRejections/List.fold"
+    ],
+    "TestSemanticBuiltinRejections/List.length": [
+      "TestSemanticBuiltinRejections/List.length"
+    ],
+    "TestSemanticBuiltinRejections/List.map": [
+      "TestSemanticBuiltinRejections/List.map"
+    ],
+    "TestSemanticBuiltinRejections/List.new": [
+      "TestSemanticBuiltinRejections/List.new"
+    ],
+    "TestSemanticBuiltinRejections/List.unfold": [
+      "TestSemanticBuiltinRejections/List.unfold"
+    ],
+    "TestSemanticBuiltinRejections/Map.get": [
+      "TestSemanticBuiltinRejections/Map.get"
+    ],
+    "TestSemanticBuiltinRejections/Map.has_key": [
+      "TestSemanticBuiltinRejections/Map.has_key"
+    ],
+    "TestSemanticBuiltinRejections/Map.new": [
+      "TestSemanticBuiltinRejections/Map.new"
+    ],
+    "TestSemanticBuiltinRejections/Math.add": [
+      "TestSemanticBuiltinRejections/Math.add"
+    ],
+    "TestSemanticBuiltinRejections/Math.div": [
+      "TestSemanticBuiltinRejections/Math.div"
+    ],
+    "TestSemanticBuiltinRejections/Math.eq": [
+      "TestSemanticBuiltinRejections/Math.eq"
+    ],
+    "TestSemanticBuiltinRejections/Math.gt": [
+      "TestSemanticBuiltinRejections/Math.gt"
+    ],
+    "TestSemanticBuiltinRejections/Math.gte": [
+      "TestSemanticBuiltinRejections/Math.gte"
+    ],
+    "TestSemanticBuiltinRejections/Math.lt": [
+      "TestSemanticBuiltinRejections/Math.lt"
+    ],
+    "TestSemanticBuiltinRejections/Math.lte": [
+      "TestSemanticBuiltinRejections/Math.lte"
+    ],
+    "TestSemanticBuiltinRejections/Math.max": [
+      "TestSemanticBuiltinRejections/Math.max"
+    ],
+    "TestSemanticBuiltinRejections/Math.min": [
+      "TestSemanticBuiltinRejections/Math.min"
+    ],
+    "TestSemanticBuiltinRejections/Math.mod": [
+      "TestSemanticBuiltinRejections/Math.mod"
+    ],
+    "TestSemanticBuiltinRejections/Math.mul": [
+      "TestSemanticBuiltinRejections/Math.mul"
+    ],
+    "TestSemanticBuiltinRejections/Math.product": [
+      "TestSemanticBuiltinRejections/Math.product"
+    ],
+    "TestSemanticBuiltinRejections/Math.sub": [
+      "TestSemanticBuiltinRejections/Math.sub"
+    ],
+    "TestSemanticBuiltinRejections/Math.sum": [
+      "TestSemanticBuiltinRejections/Math.sum"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.AdamW.Config.new": [
+      "TestSemanticBuiltinRejections/Optimizer.AdamW.Config.new"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.AdamW.State.new": [
+      "TestSemanticBuiltinRejections/Optimizer.AdamW.State.new"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.AdamW.State.to": [
+      "TestSemanticBuiltinRejections/Optimizer.AdamW.State.to"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.AdamW.step": [
+      "TestSemanticBuiltinRejections/Optimizer.AdamW.step"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.SGD.Config.new": [
+      "TestSemanticBuiltinRejections/Optimizer.SGD.Config.new"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.SGD.State.new": [
+      "TestSemanticBuiltinRejections/Optimizer.SGD.State.new"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.SGD.State.to": [
+      "TestSemanticBuiltinRejections/Optimizer.SGD.State.to"
+    ],
+    "TestSemanticBuiltinRejections/Optimizer.SGD.step": [
+      "TestSemanticBuiltinRejections/Optimizer.SGD.step"
+    ],
+    "TestSemanticBuiltinRejections/Parameters.new": [
+      "TestSemanticBuiltinRejections/Parameters.new"
+    ],
+    "TestSemanticBuiltinRejections/Parameters.to": [
+      "TestSemanticBuiltinRejections/Parameters.to"
+    ],
+    "TestSemanticBuiltinRejections/Parameters.values": [
+      "TestSemanticBuiltinRejections/Parameters.values"
+    ],
+    "TestSemanticBuiltinRejections/Process.Command.new": [
+      "TestSemanticBuiltinRejections/Process.Command.new"
+    ],
+    "TestSemanticBuiltinRejections/Process.Executable.new": [
+      "TestSemanticBuiltinRejections/Process.Executable.new"
+    ],
+    "TestSemanticBuiltinRejections/Process.Termination.exit_code": [
+      "TestSemanticBuiltinRejections/Process.Termination.exit_code"
+    ],
+    "TestSemanticBuiltinRejections/Process.Termination.signal": [
+      "TestSemanticBuiltinRejections/Process.Termination.signal"
+    ],
+    "TestSemanticBuiltinRejections/Range.contains": [
+      "TestSemanticBuiltinRejections/Range.contains"
+    ],
+    "TestSemanticBuiltinRejections/Range.is_empty": [
+      "TestSemanticBuiltinRejections/Range.is_empty"
+    ],
+    "TestSemanticBuiltinRejections/Range.new": [
+      "TestSemanticBuiltinRejections/Range.new"
+    ],
+    "TestSemanticBuiltinRejections/Record.merge": [
+      "TestSemanticBuiltinRejections/Record.merge"
+    ],
+    "TestSemanticBuiltinRejections/Record.new": [
+      "TestSemanticBuiltinRejections/Record.new"
+    ],
+    "TestSemanticBuiltinRejections/Scalar.eq": [
+      "TestSemanticBuiltinRejections/Scalar.eq"
+    ],
+    "TestSemanticBuiltinRejections/Scalar.new": [
+      "TestSemanticBuiltinRejections/Scalar.new"
+    ],
+    "TestSemanticBuiltinRejections/String.FromScalars.new": [
+      "TestSemanticBuiltinRejections/String.FromScalars.new"
+    ],
+    "TestSemanticBuiltinRejections/String.concat": [
+      "TestSemanticBuiltinRejections/String.concat"
+    ],
+    "TestSemanticBuiltinRejections/String.eq": [
+      "TestSemanticBuiltinRejections/String.eq"
+    ],
+    "TestSemanticBuiltinRejections/String.length": [
+      "TestSemanticBuiltinRejections/String.length"
+    ],
+    "TestSemanticBuiltinRejections/String.lower": [
+      "TestSemanticBuiltinRejections/String.lower"
+    ],
+    "TestSemanticBuiltinRejections/String.new": [
+      "TestSemanticBuiltinRejections/String.new"
+    ],
+    "TestSemanticBuiltinRejections/String.upper": [
+      "TestSemanticBuiltinRejections/String.upper"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.add": [
+      "TestSemanticBuiltinRejections/Tensor.add"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.broadcast": [
+      "TestSemanticBuiltinRejections/Tensor.broadcast"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.device": [
+      "TestSemanticBuiltinRejections/Tensor.device"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.div": [
+      "TestSemanticBuiltinRejections/Tensor.div"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.dtype": [
+      "TestSemanticBuiltinRejections/Tensor.dtype"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.matmul": [
+      "TestSemanticBuiltinRejections/Tensor.matmul"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.mean": [
+      "TestSemanticBuiltinRejections/Tensor.mean"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.mul": [
+      "TestSemanticBuiltinRejections/Tensor.mul"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.new": [
+      "TestSemanticBuiltinRejections/Tensor.new"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.rank": [
+      "TestSemanticBuiltinRejections/Tensor.rank"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.relu": [
+      "TestSemanticBuiltinRejections/Tensor.relu"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.reshape": [
+      "TestSemanticBuiltinRejections/Tensor.reshape"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.shape": [
+      "TestSemanticBuiltinRejections/Tensor.shape"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.sqrt": [
+      "TestSemanticBuiltinRejections/Tensor.sqrt"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.sub": [
+      "TestSemanticBuiltinRejections/Tensor.sub"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.sum": [
+      "TestSemanticBuiltinRejections/Tensor.sum"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.to": [
+      "TestSemanticBuiltinRejections/Tensor.to"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.to_float": [
+      "TestSemanticBuiltinRejections/Tensor.to_float"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.transpose": [
+      "TestSemanticBuiltinRejections/Tensor.transpose"
+    ],
+    "TestSemanticBuiltinRejections/Tensor.values": [
+      "TestSemanticBuiltinRejections/Tensor.values"
+    ],
+    "TestSemanticBuiltinRejections/UTF8.Bytes.new": [
+      "TestSemanticBuiltinRejections/UTF8.Bytes.new"
+    ],
+    "TestSemanticBuiltinRejections/UTF8.String.new": [
+      "TestSemanticBuiltinRejections/UTF8.String.new"
+    ],
+    "TestSemanticMigrationArithmeticSuccess/Math.div": [
+      "TestSemanticMigrationArithmeticSuccess/Math.div"
+    ],
+    "TestSemanticMigrationArithmeticSuccess/Math.max": [
+      "TestSemanticMigrationArithmeticSuccess/Math.max"
+    ],
+    "TestSemanticMigrationArithmeticSuccess/Math.min": [
+      "TestSemanticMigrationArithmeticSuccess/Math.min"
+    ],
+    "TestSemanticMigrationArithmeticSuccess/Math.mod": [
+      "TestSemanticMigrationArithmeticSuccess/Math.mod"
+    ],
+    "TestSemanticMigrationCheckpointResume": [
+      "TestSemanticMigrationCheckpointResume"
+    ],
+    "TestSemanticMigrationFailurePreventsEffects": [
+      "TestSemanticMigrationFailurePreventsEffects"
+    ],
+    "TestSemanticMigrationStepBoundary": [
+      "TestSemanticMigrationStepBoundary"
+    ],
+    "TestSemanticNativeCancellation": [
+      "TestSemanticNativeCancellation"
+    ],
+    "TestSemanticNativeErrorPrecedence": [
+      "TestSemanticNativeErrorPrecedence"
+    ],
+    "TestSemanticNativeMatchRegions": [
+      "TestSemanticNativeMatchRegions"
+    ],
+    "TestSemanticNativeMetalCheckpointResume": [
+      "TestSemanticNativeMetalCheckpointResume"
+    ],
+    "TestSemanticNativeMetalFailureCleanup": [
+      "TestSemanticNativeMetalFailureCleanup"
+    ],
+    "TestSemanticNativeMetalProfile": [
+      "TestSemanticNativeMetalProfile"
+    ],
+    "TestSemanticNativeReadOrder": [
+      "TestSemanticNativeReadOrder"
+    ],
+    "TestSemanticRuntimeRejections/Checkpoint.encode": [
+      "TestSemanticRuntimeRejections/Checkpoint.encode"
+    ],
+    "TestSemanticRuntimeRejections/Gradients.zero": [
+      "TestSemanticRuntimeRejections/Gradients.zero"
+    ],
+    "TestSemanticRuntimeRejections/Optimizer.AdamW.State.new": [
+      "TestSemanticRuntimeRejections/Optimizer.AdamW.State.new"
+    ],
+    "TestSemanticRuntimeRejections/Optimizer.AdamW.State.to": [
+      "TestSemanticRuntimeRejections/Optimizer.AdamW.State.to"
+    ],
+    "TestSemanticRuntimeRejections/Optimizer.SGD.State.to": [
+      "TestSemanticRuntimeRejections/Optimizer.SGD.State.to"
+    ],
+    "TestSemanticRuntimeRejections/Parameters.to": [
+      "TestSemanticRuntimeRejections/Parameters.to"
+    ],
+    "TestSemanticRuntimeRejections/Tensor.matmul": [
+      "TestSemanticRuntimeRejections/Tensor.matmul"
+    ],
+    "TestSemanticRuntimeRejections/Tensor.relu": [
+      "TestSemanticRuntimeRejections/Tensor.relu"
+    ],
+    "TestSemanticRuntimeRejections/Tensor.sub": [
+      "TestSemanticRuntimeRejections/Tensor.sub"
+    ],
+    "TestSemanticRuntimeRejections/Tensor.to": [
+      "TestSemanticRuntimeRejections/Tensor.to"
+    ],
+    "TestServeGracefulActiveRequest": [
+      "TestServeGracefulActiveRequest"
+    ],
+    "TestServeHTTP": [
+      "TestServeHTTP",
+      "TestAdapterServerFailureContext"
+    ],
+    "TestServeShutdownPendingConnection": [
+      "TestServeShutdownPendingConnection"
+    ],
+    "TestServeStartupFailures": [
+      "TestServeStartupFailures",
+      "TestAdapterServerStartupFailureContext"
+    ],
+    "TestServerPartialStartupCleanup": [
+      "TestLLVMPartialServerStartupCleanup"
+    ],
+    "TestSyntaxStructure": [
+      "TestSyntaxStructure"
+    ],
+    "TestTensorCPUFailures": [
+      "TestTensorCPUFailures"
+    ],
+    "TestTensorCPUOperations": [
+      "TestTensorCPUOperations"
+    ],
+    "TestTensorDynamicFailures": [
+      "TestTensorDynamicFailures"
+    ],
+    "TestTensorLimits": [
+      "TestTensorLimits"
+    ],
+    "TestTensorPrecisionAndHigherRank": [
+      "TestTensorPrecisionAndHigherRank"
+    ],
+    "TestTensorShapeBoundaries": [
+      "TestTensorShapeBoundaries"
+    ],
+    "TestTensorWorkCharges": [
+      "TestLLVMNumericalWorkCharges"
+    ],
+    "TestTypedCommitFailureStopsLaterEffects": [
+      "TestTypedCommitFailureStopsLaterEffects"
+    ],
+    "TestVerifierBuiltinContracts": [
+      "TestVerifierBuiltinContracts"
+    ],
+    "TestVerifierContracts": [
+      "TestVerifierContracts"
+    ],
+    "TestVerifierEdgeContracts": [
+      "TestVerifierEdgeContracts"
+    ],
+    "TestVerifierRejections": [
+      "TestVerifierRejections"
+    ],
+    "TestNativeCanonicalBuild": [
+      "TestNativeCanonicalBuild"
+    ],
+    "TestNativeRejectsBackendSelection": [
+      "TestNativeRejectsBackendSelection"
+    ]
+  }
 }
