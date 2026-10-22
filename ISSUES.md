@@ -956,7 +956,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
 
 ### Standalone compiler and application language
 
-- [ ] [F017] (P1) {P005,I008,I009,I010} Supply a complete offline compiler distribution
+- [x] [F017] (P1) {P005,I008,I009,I010} Supply a complete offline compiler distribution
   Goal:
   Compile and link Lo programs without separately installed development tools.
 
@@ -978,6 +978,27 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Execute copied artifacts without Lo, source, repository files, or compiler tools.
   - Verify relocation, corrupt inputs, cancellation, and preservation of an existing output after failure.
   - Verify software and Metal packaging independently without a physical-device gate.
+
+  Completed on October 20, 2026.
+  The distribution supplies Darwin arm64 and Linux arm64 software packages and a different Darwin Metal package.
+  Each installed frontend verifies its own manifest and uses the packaged LLVM tools.
+  Linux tool execution uses private verified copies of all seven additional libraries.
+  Construction verifies canonical inputs, runtime receipts, source identities, and complete corresponding source materials.
+
+  All four software host-to-target combinations passed offline compilation and independent artifact execution.
+  Darwin acceptance used an operating-system sandbox with denied repository access and network access.
+  Linux acceptance used QEMU TCG without a network interface or external development tools.
+  Both installed compiler hosts passed 500-step XOR training with backpropagation and all four expected classifications.
+  The packaged runtime passed 13 derivative fixtures, finite differences, 200-step training, checkpoints, files, processes, and device grants.
+
+  Relocation, input corruption, cancellation cleanup, and prior output preservation passed.
+  The Darwin Metal package passed executable linkage and kernel admission checks.
+  Physical Metal execution and performance remain unmeasured.
+  Final CI and all 22 distribution tool tests passed.
+  Independent code review found no remaining blocking defect.
+  The [distribution guide](docs/compiler-distribution.md) gives installation, construction, and acceptance commands.
+  The [distribution receipt](docs/evidence/compiler-distribution/validation.json) records package identities and validation scope.
+  I011 retains final semantic and performance qualification after removal of development Go generation.
 
 - [ ] [F018] (P2) {P006,I011} Add modules and explicit visibility
   Goal:
@@ -1085,6 +1106,175 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify navigation and diagnostics across imported modules.
   - Verify source locations for native breakpoints and error traces.
   - Run the test command offline with declared grants and controlled failures.
+
+## BugFixes
+
+- [x] [B001] (P1) Preserve enclosing fold progress after native cancellation
+  Goal:
+  Keep each active fold's progress in the native cancellation diagnostic.
+
+  Requirements:
+  - Preserve outer and inner progress when cancellation stops a nested `Flow.fold`.
+  - Preserve completed removal receipts and prevent later effects.
+  - Keep the interpreter's progress order and values.
+
+  Deliverables:
+  - Correct native cancellation propagation and add a public runtime regression test.
+
+  Validation:
+  - Cancel the third removal within nested folds through an injected dependency.
+  - Verify two progress records with outer state zero and inner state two.
+  - Verify the completed removal receipt and cancellation diagnostic.
+  - Pass the full corpus on both targets and final CI.
+
+  I011 exposed this defect during native fixture migration.
+  The failing diagnostic contained only the inner fold's progress.
+  `TestLLVMNestedFoldCancellationProgress` reproduced that failure before the runtime correction.
+  Focused checks, both current corpora, and final CI passed after the correction.
+  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the source identity and regression results.
+
+- [x] [B002] (P1) Supply the system export for optimized Metal tensor code
+  Goal:
+  Link native tensor programs with the installed Metal compiler package.
+
+  Requirements:
+  - Declare `memset_pattern16` in the Metal system-library input.
+  - Preserve the different software and Metal link inputs.
+  - Keep compilation offline and preserve CPU tensor results without a device grant.
+
+  Deliverables:
+  - Correct the Metal library description and add a public build-and-run regression test.
+
+  Validation:
+  - Reproduce the undefined-symbol failure with the installed Metal compiler.
+  - Compile CPU `Tensor.broadcast` and verify its exact result with an empty command search path.
+  - Verify the Metal build receipt and repeat the offline distribution matrix.
+  - Pass final CI.
+
+  I011 exposed this defect during offline distribution acceptance.
+  The software library description included the export, but the Metal description omitted it.
+  This export is necessary for tensor initialization in the optimized runtime.
+  The new broadcast regression failed before the correction and passed with the corrected installed Metal package.
+  Full offline distribution acceptance and final CI passed.
+  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the package identities and regression result.
+
+- [x] [B003] (P1) Preserve HTTP callback failure context and report each failure once
+  Goal:
+  Keep native HTTP callback diagnostics consistent with the interpreter.
+
+  Requirements:
+  - Preserve the callback's activation receipt and fold progress, including absent or empty evidence.
+  - Do not use startup receipts as callback evidence.
+  - Report the primary callback failure once.
+  - Preserve independent cleanup failures and stop further request admission.
+
+  Deliverables:
+  - Correct failure-context ownership and server failure consumption.
+  - Add public callback, startup, and cleanup regression tests.
+
+  Validation:
+  - Reject unavailable Process activation in an HTTP callback without a false completion receipt.
+  - Preserve a completed callback File receipt before a later failure.
+  - Preserve an HTTP listen receipt before a later startup failure.
+  - Verify independent cleanup errors without duplicate primary errors.
+  - Pass the full corpus on both targets and final CI.
+
+  I011 exposed this defect in the full native CI suite.
+  The callback diagnostic incorrectly retained the startup HTTP listen receipt.
+  Server shutdown also reported the same primary failure as a cleanup failure.
+  Both defects now pass focused regressions on Darwin and Linux.
+  The public cleanup fixture preserves independent cleanup failures and complete resource release.
+  Final CI and both current corpora passed.
+  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the source identity and regression results.
+
+- [x] [B004] (P1) Isolate kernel diagnostics from guest export
+  Goal:
+  Keep kernel diagnostics out of artifact and result bytes.
+
+  Requirements:
+  - Send all guest export records through an isolated virtio port.
+  - Keep kernel diagnostics in the console log.
+  - Reject an absent, truncated, or malformed export without output publication.
+  - Preserve artifact bytes, stream counts, command status, and completion checks.
+  - Keep the existing timeouts and network restrictions.
+
+  Deliverables:
+  - Isolate data transport in the distribution and qualification guest harnesses.
+  - Add public boundary tests with injected console diagnostics and export failures.
+
+  Validation:
+  - Reproduce rejection of artifact data interrupted by a kernel diagnostic.
+  - Pass the isolated transport tests and a real pinned-QEMU smoke test.
+  - Repeat installed compilation, the full corpus, offline acceptance, and final CI.
+
+  I011 exposed this defect twice during offline acceptance.
+  The guest compiler succeeded, but a kernel watchdog message interrupted artifact bytes on the shared console.
+  The receiver correctly rejected the corrupted record.
+  Independent review makes an isolated export channel necessary before another acceptance attempt.
+  The pinned-QEMU smoke test confirmed exact export bytes and isolated kernel diagnostics.
+  Transport checks, installed compilation, both corpora, offline acceptance, and final CI passed.
+  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the transport evidence and current corpus results.
+
+- [x] [B005] (P1) Prevent blocked native fixture output capture
+  Goal:
+  Complete native fixture checks when their output exceeds pipe capacity.
+
+  Requirements:
+  - Replace synchronous output pipes with one shared regular-file capture helper.
+  - Prepare the capture file only for selected host and guest scenarios.
+  - Preserve concurrent readiness pipes.
+  - Read through EOF with explicit overflow and I/O error handling.
+  - Preserve error precedence, cancellation, observation counts, and resource assertions.
+  - Keep runtime semantics and performance thresholds unchanged.
+
+  Deliverables:
+  - Correct all seven synchronous capture fixtures.
+  - Add public regressions with large stdout, large stderr, and trailing content.
+
+  Validation:
+  - Preserve the blocked-process sample and reproduce the failure with a bounded regression.
+  - Pass all affected scenarios on Darwin arm64 and Linux arm64 under QEMU.
+  - Pass fresh final CI.
+
+  I011 exposed an undrained output pipe during final CI.
+  The fixture waits for CLI completion before it reads the pipe.
+  The sampled CLI thread was blocked in output write.
+  The primary agent stopped the owned run and preserved its artifacts.
+  The large-output regression failed before the correction.
+  All 21 affected scenarios then passed on each supported target.
+  Fresh CI exposed the same capture defect in a device resource fixture.
+  The complete inventory found six additional synchronous capture fixtures.
+  Independent review approved one shared helper for all seven fixtures.
+  The second CI run stopped cleanly. Its owned process group is empty.
+  The complete correction passed 178 Darwin and 176 Linux checks, with no failures or skips.
+  The host-to-Linux capture staging check also passed.
+  Fresh final CI and independent correction review passed.
+
+- [x] [B006] (P1) Retain campaign outcomes after cleanup errors
+  Goal:
+  Keep explicit terminal records when owned-process cleanup reports an error.
+
+  Requirements:
+  - Observe owned process-group membership through a bounded process inventory.
+  - Keep observation and signal errors explicit.
+  - Bound cleanup and direct-child reaping after TERM and KILL.
+  - Write the final report even when cleanup or artifact hashing fails.
+  - Preserve the primary failure and any separate cleanup failure.
+
+  Deliverables:
+  - Correct campaign cleanup and finalization with public boundary tests.
+
+  Validation:
+  - Inject observation and signaling failures and verify terminal reports.
+  - Verify cleanup when the leader exits before a descendant that ignores TERM.
+  - Verify that unrelated processes remain active.
+  - Pass focused tooling checks and fresh final CI.
+
+  I011 exposed an EPERM result from the signal-zero group probe after termination.
+  The owned group was absent, but the probe error prevented the driver's final report write.
+  Bounded process inventory now replaces the signal-zero probe.
+  All 25 campaign checks passed, including cleanup, observation, and finalization failures.
+  Fresh final CI and independent correction review passed.
 
 ## Improvements
 
@@ -1418,7 +1608,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [device receipt](docs/evidence/native-devices/validation.json) records source identities, results, and qualification limits.
   F017 and I011 keep the complete compiler distribution and clean-environment acceptance work.
 
-- [ ] [I011] (P1) {F017,I005} Qualify the standalone compiler and remove Go generation
+- [-] [I011] (P1) {F017,I005,B001,B002,B003,B004,B005,B006} Qualify the standalone compiler and remove Go generation
   Goal:
   Replace the current native build path after complete semantic acceptance.
 
@@ -1438,6 +1628,50 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify optimization preserves numeric profiles, charges, errors, and effect order.
   - Verify the declared performance and build-resource contracts.
   - Run final make ci and the explicit clean-environment targets before closure.
+
+  Implementation status:
+  All native executable builds use LLVM and the static Rust runtime.
+  Go generation and its embedded runtime source bundle are removed.
+  Direct Metal assets replace that bundle.
+  The interpreter remains available through explicit execution commands.
+
+  The new packages passed all four offline software host-to-target combinations.
+  The Darwin Metal package, relocation, and nine rejection cases passed.
+  Both installed compiler hosts passed 500-step XOR training.
+  All 56 distribution and runtime tool checks passed.
+
+  Full CI passed 2,624 native cases without failures or skips.
+  The Linux corpus passed 1,414 cases without failures or skips.
+  The strict semantic report passed all 394 references in three lanes with no qualification gaps.
+
+  The reviewed callback allocation changes passed focused preservation checks on both targets.
+  The first full Darwin execution lane passed its callback gate at 2.319 times the reference speed.
+  Startup was its only inconclusive gate.
+  Independent observations showed other compute activity, but did not establish the cause of the variation.
+  The full rejected lane remains in the [historical evidence index](docs/evidence/standalone-compiler/preservation-index.json).
+
+  Campaign9 and campaign11 ended before timing because their obsolete admission rules required a quiet host.
+  Their results remain historical evidence. They do not establish compiler performance.
+  Source, package, and nonperformance evidence identities remained unchanged.
+
+  Current work:
+  The user replaced quiet-host admission with a measurement validity gate.
+  External load is context and cannot prevent measurement or remove samples.
+  Keep the fixed corpus, paired order, sample counts, confidence calculations, and numeric thresholds.
+  Add a maintained serial campaign command and verify both producers under background load.
+  Campaign11 remains closed as historical evidence. Attempt12 did not start.
+  Establish new source identities before a new campaign.
+  Fresh CI exposed a fixture output deadlock and a cleanup finalization error.
+  B005 corrected all seven synchronous capture fixtures and passed both-target checks. B006 focused checks passed.
+  Fresh final CI passed 2,635 native cases without failures or skips and all 197 qualification-tool checks.
+  One complete performance campaign is in progress.
+  The [interim findings](docs/native-qualification-findings.md) preserve the evidence before corrective work.
+  Darwin execution and process lanes passed. All four Darwin HTTP gates are inconclusive.
+  Build observations remain partial. Linux lanes and final audits remain pending.
+  Use the [decision guide](docs/evidence/standalone-compiler/README.md#decisions-from-the-campaign) to interpret each result.
+  Stop I011 performance work when all required gates and the evidence review pass.
+  Full performance acceptance and the evidence audit are not complete.
+  Independent review of the complete qualification is still necessary.
 
 - [ ] [I012] (P2) {F022,F023} Qualify complete application development
   Goal:
