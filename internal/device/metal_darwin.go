@@ -12,15 +12,15 @@ import "C"
 import (
 	"context"
 	"crypto/sha256"
-	_ "embed"
 	"fmt"
 	"math"
 	"runtime"
 	"unsafe"
+
+	metalassets "github.com/MarcoPoloResearchLab/Lo/runtime/metal"
 )
 
-//go:embed metal.metallib
-var metalLibrary []byte
+var metalLibrary = metalassets.Library()
 
 type metalBackend struct{ handle *C.LoMetalSession }
 type metalBuffer struct {

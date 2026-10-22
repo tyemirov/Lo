@@ -16,7 +16,7 @@ func prepareBuildPaths(root string) (buildPaths, error) {
 	if err := validateBuildDirectory(root); err != nil {
 		return buildPaths{}, fmt.Errorf("LO_BUILD_ROOT: %w", err)
 	}
-	names := []string{"work", "go-build", "modules", "gopath", "cache", "clang", "ccache"}
+	names := []string{"work", "cache", "clang", "ccache"}
 	for _, name := range names {
 		path := filepath.Join(root, name)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
