@@ -1,3 +1,4 @@
+#include "capture.h"
 #include "../../runtime/native/include/lo_device_driver.h"
 #include "metal-executor.h"
 extern void *malloc(size_t);
@@ -6,7 +7,7 @@ extern void free(void *);
 extern void *memcpy(void *,const void *,size_t);
 extern int strcmp(const char *,const char *);
 extern int open(const char *,int,...),close(int),unlink(const char *);
-extern int pipe(int *),fcntl(int,int,...),dup2(int,int),kill(int,int),getpid(void);
+extern int fcntl(int,int,...),dup2(int,int),kill(int,int),getpid(void);
 extern long read(int,void *,size_t),write(int,const void *,size_t);
 extern int lo_cli_main(int,const char *const *,const char *const *);
 extern uint64_t lo_runtime_live_contexts(void);
@@ -93,15 +94,9 @@ int main(void) {
         unsigned before_computes=computes,before_allocations=allocations;
         int result;
         if(LO_CASE>=9) {
-            int output[2];if(pipe(output))return 40;
-            int saved_out=fcntl(1,0,3),saved_err=fcntl(2,0,3);
-            if(saved_out<0 || saved_err<0 || dup2(output[1],1)<0 || dup2(output[1],2)<0)return 41;
-            close(output[1]);
+            int capture_error=lo_capture_start();if(capture_error)return capture_error;
             result=lo_cli_main((int)(sizeof(arguments)/sizeof(arguments[0])),arguments,0);
-            if(dup2(saved_out,1)<0 || dup2(saved_err,2)<0)return 42;
-            close(saved_out);close(saved_err);
-            char contents[16384];long length=read(output[0],contents,sizeof(contents)-1);close(output[0]);
-            if(length<0)return 43;contents[length]=0;
+            capture_error=lo_capture_finish();if(capture_error)return capture_error;char *contents=lo_capture_bytes;long length=(long)lo_capture_length;
             if(result!=2 || !model_has(contents,"runtime.cancelled") || model_has(contents,"Device.Lost") || model_has(contents,"\"status\":\"ok\"")) {write(2,contents,(size_t)length);return 44;}
             result=0;
         } else result=lo_cli_main((int)(sizeof(arguments)/sizeof(arguments[0])),arguments,0);
