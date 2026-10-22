@@ -997,7 +997,6 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Final CI and all 22 distribution tool tests passed.
   Independent code review found no remaining blocking defect.
   The [distribution guide](docs/compiler-distribution.md) gives installation, construction, and acceptance commands.
-  The [distribution receipt](docs/evidence/compiler-distribution/validation.json) records package identities and validation scope.
   I011 retains final semantic and performance qualification after removal of development Go generation.
 
 - [ ] [F018] (P2) {P006,I011} Add modules and explicit visibility
@@ -1131,7 +1130,6 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The failing diagnostic contained only the inner fold's progress.
   `TestLLVMNestedFoldCancellationProgress` reproduced that failure before the runtime correction.
   Focused checks, both current corpora, and final CI passed after the correction.
-  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the source identity and regression results.
 
 - [x] [B002] (P1) Supply the system export for optimized Metal tensor code
   Goal:
@@ -1156,7 +1154,6 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   This export is necessary for tensor initialization in the optimized runtime.
   The new broadcast regression failed before the correction and passed with the corrected installed Metal package.
   Full offline distribution acceptance and final CI passed.
-  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the package identities and regression result.
 
 - [x] [B003] (P1) Preserve HTTP callback failure context and report each failure once
   Goal:
@@ -1185,7 +1182,6 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Both defects now pass focused regressions on Darwin and Linux.
   The public cleanup fixture preserves independent cleanup failures and complete resource release.
   Final CI and both current corpora passed.
-  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the source identity and regression results.
 
 - [x] [B004] (P1) Isolate kernel diagnostics from guest export
   Goal:
@@ -1213,7 +1209,6 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Independent review makes an isolated export channel necessary before another acceptance attempt.
   The pinned-QEMU smoke test confirmed exact export bytes and isolated kernel diagnostics.
   Transport checks, installed compilation, both corpora, offline acceptance, and final CI passed.
-  The [nonperformance receipt](docs/evidence/standalone-compiler/nonperformance-validation.json) records the transport evidence and current corpus results.
 
 - [x] [B005] (P1) Prevent blocked native fixture output capture
   Goal:
@@ -1648,10 +1643,9 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The first full Darwin execution lane passed its callback gate at 2.319 times the reference speed.
   Startup was its only inconclusive gate.
   Independent observations showed other compute activity, but did not establish the cause of the variation.
-  The full rejected lane remains in the [historical evidence index](docs/evidence/standalone-compiler/preservation-index.json).
 
   Campaign9 and campaign11 ended before timing because their obsolete admission rules required a quiet host.
-  Their results remain historical evidence. They do not establish compiler performance.
+  They do not establish compiler performance.
   Source, package, and nonperformance evidence identities remained unchanged.
 
   Current work:
@@ -1665,10 +1659,10 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   B005 corrected all seven synchronous capture fixtures and passed both-target checks. B006 focused checks passed.
   Fresh final CI passed 2,635 native cases without failures or skips and all 197 qualification-tool checks.
   One complete performance campaign is in progress.
-  The [interim findings](docs/native-qualification-findings.md) preserve the evidence before corrective work.
+  The [interim findings](docs/native-qualification-findings.md) record the measured results before corrective work.
   Darwin execution and process lanes passed. All four Darwin HTTP gates are inconclusive.
   Build observations remain partial. Linux lanes and final audits remain pending.
-  Use the [decision guide](docs/evidence/standalone-compiler/README.md#decisions-from-the-campaign) to interpret each result.
+  Use the [measurement contract](docs/native-compilation-contract.md#measurement-validity) for acceptance.
   Stop I011 performance work when all required gates and the evidence review pass.
   Full performance acceptance and the evidence audit are not complete.
   Independent review of the complete qualification is still necessary.
