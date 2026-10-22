@@ -299,7 +299,6 @@ I007 through I010 implement the full runtime and adapters.
 F017 supplies and qualifies the installed distribution on both hosts.
 
 I011 passed the current semantic, offline, component, and CI checks after removal of Go generation.
-The [nonperformance receipt](evidence/standalone-compiler/nonperformance-validation.json) records those results and their source identity.
 Performance qualification and final review remain pending.
 The earlier experiments do not satisfy the full standalone compiler criterion.
 The [distribution guide](compiler-distribution.md) defines the installed compiler checks.

@@ -55,7 +55,6 @@ F017 completed installed package acceptance on October 20, 2026.
 Both compiler hosts passed offline builds for both software targets without external development tools.
 The resulting executables passed independent execution without the compiler packages or source files.
 Both hosts also passed 500-step XOR training through installed compilation.
-The [distribution receipt](evidence/compiler-distribution/validation.json) records package identities, environments, and verification scope.
 
 I011 removed Go generation and the embedded runtime source bundle.
 The interpreter remains available through explicit execution commands.
@@ -68,13 +67,11 @@ The strict semantic report passed all 394 required references in three lanes.
 
 The unchanged packages passed offline acceptance, full CI, and all 56 component checks.
 Both installed compiler hosts passed 500-step XOR training.
-The [nonperformance receipt](evidence/standalone-compiler/nonperformance-validation.json) records the source, package identities, results, and scope.
 B001 through B004 are closed after their required checks passed.
 
 Earlier performance attempts did not establish complete acceptance.
 Campaign9 and campaign11 ended before measurement because their obsolete admission rules required a quiet host.
 Their source and package identities remained unchanged.
-The [qualification guide](evidence/standalone-compiler/README.md#historical-quiet-host-campaigns) retains those historical results.
 
 I011 is in progress under the revised measurement contract requested by the user.
 External load is now recorded as context. It cannot prevent measurement or remove samples.
@@ -90,7 +87,6 @@ Fresh full CI passed 2,635 native cases without failures or skips and all 197 qu
 B005 and B006 are closed after their required checks and independent correction reviews passed.
 One complete performance campaign now uses the corrected source identity.
 Full performance acceptance, the evidence audit, and independent review of the complete qualification are not complete.
-The [decision guide](evidence/standalone-compiler/README.md#decisions-from-the-campaign) maps results to their supported next actions.
 The [interim findings](native-qualification-findings.md) record the measured results before corrective work.
 Darwin execution and process lanes passed. The four Darwin HTTP gates are inconclusive.
 The snapshot contains partial build observations. Linux measurements and final audits remain pending.

@@ -13,10 +13,6 @@ The reference implementation is the Lo interpreter.
 Darwin measurements execute natively on arm64. The selected Linux environment is QEMU HVF on arm64.
 Linux measurement has not started at this snapshot.
 
-The [snapshot observations](evidence/standalone-compiler/final/measurement-capture-final/findings-snapshot-1/observations.json.gz) contain exact values and source digests.
-The [preservation index](evidence/standalone-compiler/preservation-index.json) records the archived bytes and their SHA-256 digests.
-These copies preserve the snapshot while the campaign continues.
-
 | Lane | Darwin arm64 | Linux arm64 |
 | --- | --- | --- |
 | Checked execution | Complete. All 15 cases passed. | Not started. |
@@ -34,9 +30,6 @@ The interpreter lane passed 1,741 cases, with 157 native-only exclusions.
 All 197 qualification-tool checks passed.
 These checks include the complete B005 capture correction and B006 campaign cleanup correction.
 
-The [nonperformance receipt](evidence/standalone-compiler/nonperformance-validation.json) retains the earlier full-corpus and offline results.
-The [reuse receipt](evidence/standalone-compiler/nonperformance-reuse.json) records the reviewed source differences and 339 unchanged package files.
-The earlier checks retain their original source identity.
 All four software host-to-target combinations passed offline compilation and copied-artifact execution without Lo.
 Both installed compiler hosts passed 500-step XOR training with final loss `4.251353501009969e-13`.
 The semantic evidence also covers backpropagation and checkpoint resumption.
@@ -66,8 +59,6 @@ These results require no further Darwin execution or launch optimization for the
 They do not establish performance for all workloads or machines.
 The training measurements use CPU execution. They do not establish Metal training throughput.
 
-Evidence: [execution report](evidence/standalone-compiler/final/measurement-capture-final/findings-snapshot-1/darwin-execution.json.gz) and [process report](evidence/standalone-compiler/final/measurement-capture-final/findings-snapshot-1/darwin-process.json.gz).
-
 ## Darwin HTTP Finding
 
 Both HTTP workloads use one client and 200 requests per sample on a persistent loopback connection.
@@ -91,8 +82,6 @@ The next decision concerns measurement precision before a compiler or HTTP runti
 A possible investigation must specify its measurement precision and experiment design before execution.
 No retry, request-count change, sample removal, or HTTP optimization starts as part of this record.
 These sequential workloads do not establish server capacity or production tail latency.
-
-Evidence: [HTTP report](evidence/standalone-compiler/final/measurement-capture-final/findings-snapshot-1/darwin-http.json.gz).
 
 ## Partial Build Finding
 
@@ -118,8 +107,6 @@ This observation supports an investigation of generated module size and time spe
 It does not establish whether Lo lowering, LLVM optimization, linking, or another stage causes the cost.
 No compiler change follows from this observation alone.
 The 180-second, 2 GiB sampled-memory, and 64 MiB artifact limits remain unchanged.
-
-Evidence: [complete partial-record snapshot](evidence/standalone-compiler/final/measurement-capture-final/findings-snapshot-1/darwin-build-partial.json.gz).
 
 ## Design Value And Limits
 

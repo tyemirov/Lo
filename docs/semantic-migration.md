@@ -122,7 +122,6 @@ The October 19 receipt remains the I005 acceptance snapshot.
 The [native lowering receipt](evidence/native-lowering/validation.json) records the I006 checks and their execution limits.
 
 I011 passed the current LLVM corpus, offline, component, and CI checks.
-The [current receipt](evidence/standalone-compiler/nonperformance-validation.json) records 394 required references with no qualification gaps in three lanes.
-It identifies the current source and installed packages.
+These checks verified all 394 references in three lanes without qualification gaps.
 Performance qualification and final review remain pending.
 The earlier receipts remain historical evidence.

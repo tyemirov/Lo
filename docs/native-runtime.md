@@ -28,7 +28,6 @@ F017 supplies the complete installed distribution, including the Linux compiler 
 I011 owns language qualification after removal of Go generation.
 
 Current corpus, offline, component, and CI checks passed.
-The [nonperformance receipt](evidence/standalone-compiler/nonperformance-validation.json) records those results and their source identity.
 Performance qualification and final review remain pending.
 These development commands do not close the installed-distribution acceptance criterion.
 

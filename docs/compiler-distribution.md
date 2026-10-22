@@ -147,8 +147,6 @@ The Darwin Metal package has independent build, execution, and kernel admission 
 Software device tests provide Metal semantic evidence without a physical-device requirement.
 Physical Metal execution and performance remain unmeasured.
 
-The [distribution receipt](evidence/compiler-distribution/validation.json) records the earlier F017 results and scope.
-It does not replace I011 qualification after the compiler changes.
+F017 acceptance does not replace I011 qualification after compiler changes.
 Keep I011 pending until the qualification checks pass.
-The [current nonperformance receipt](evidence/standalone-compiler/nonperformance-validation.json) records the repeated checks after Go generation was removed.
 The [semantic migration contract](semantic-migration.md) defines the I011 corpus requirements.
