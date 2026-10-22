@@ -22,6 +22,7 @@ extern void _exit(int);
 extern int kill(int, int);
 extern int setpgid(int, int);
 extern int usleep(unsigned int);
+extern int *__errno_location(void);
 extern int socket(int, int, int);
 extern int ioctl(int, unsigned long, ...);
 extern int close(int);
@@ -125,6 +126,22 @@ static int loopback(void) {
     return result;
 }
 
+static int stop_case(void) {
+    /* As PID 1, all remaining guest processes belong to this case. */
+    while (1) {
+        if (kill(-1, 9) != 0 && *__errno_location() != 3) return -1;
+        int waited = waitpid(-1, 0, 1);
+        if (waited > 0) continue;
+        if (waited < 0) {
+            int error = *__errno_location();
+            if (error == 10) return 0;
+            if (error != 4) return -1;
+        }
+        /* Repeat the signal for descendants that fork before their parent stops. */
+        if (usleep(10000) != 0 && *__errno_location() != 4) return -1;
+    }
+}
+
 int main(void) {
     if (mount("devtmpfs", "/dev", "devtmpfs", 0, 0) != 0 ||
         mount("proc", "/proc", "proc", 0, 0) != 0) return fail("mount");
@@ -182,13 +199,11 @@ int main(void) {
             }
             if (current - start >= (long long)timeout * 1000000000LL) {
                 timed_out = 1;
-                kill(-child, 9);
-                if (waitpid(child, &status, 0) != child) return fail("case-timeout-wait");
                 break;
             }
             usleep(10000);
         }
-        kill(-child, 9);
+        if (stop_case() != 0) return fail("case-cleanup");
         long long elapsed = now() - start;
         int code = timed_out ? 124 : ((status & 127) == 0 ? (status >> 8) & 255 : 128 + (status & 127));
         if (emit("stdout", output) != 0 || emit("stderr", errors) != 0) return fail("case-stream-limit");

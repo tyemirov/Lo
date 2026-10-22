@@ -187,3 +187,41 @@ def test_public_batch_rejects_bad_export_even_with_valid_console(work: Path, mon
     with pytest.raises(ValueError, match=reason):
         controlled_guest(work, monkeypatch, export, EXPORT)
     assert not (work / 'guest/report.json').exists()
+
+
+@pytest.mark.parametrize('mode,status', [('timeout', 124), ('exit', 7), ('signal', 143)])
+def test_public_batch_reaps_detached_descendants_before_next_case(work: Path, mode: str, status: int) -> None:
+    import batch
+
+    supplied = os.environ.get('LO_NATIVE_PREPARATION')
+    if supplied is None:
+        pytest.skip('LO_NATIVE_PREPARATION selects the prepared software guest')
+    preparation = batch.local(Path(supplied))
+    distribution = preparation / 'distribution'
+    record = json.loads((distribution / 'toolchain.json').read_text())
+    target = record['targets']['linux/arm64']
+    package = work / 'package'
+    (package / 'bin').mkdir(parents=True)
+    executable, obj = package / 'bin/lo', work / 'probe.o'
+    compiler = batch.verified({**record['compiler'], 'path': str(distribution / record['compiler']['path'])})
+    linker = batch.verified({**target['linker'], 'path': str(distribution / target['linker']['path'])})
+    values = {'{object}': str(obj), '{output}': str(executable),
+              '{runtime}': str(batch.local(distribution / target['runtime']['path'])),
+              **{'{input:' + name + '}': str(batch.local(distribution / pin['path']))
+                 for name, pin in target['inputs'].items()}}
+    commands = [[str(compiler), '--target=' + target['triple'], '-c',
+                 str(ROOT / 'testdata/native-qualification/batch-process-cleanup.c'), '-o', str(obj)],
+                [str(linker), *[values.get(arg, arg) for arg in target['link_args']]]]
+    for command in commands:
+        built = subprocess.run(command, cwd=ROOT, stdin=subprocess.DEVNULL, capture_output=True, check=False)
+        assert built.returncode == 0, built.stderr
+    (package / 'toolchain.json').write_text('{}')
+    manifest = work / 'batch.json'
+    cases = [{'id': operation, 'argv': ['/compiler/bin/lo', operation], 'cwd': '/work',
+              'environment': {}, 'stdin': '', 'timeout_seconds': 3, 'outputs': []}
+             for operation in (mode, 'inspect')]
+    manifest.write_text(json.dumps({'files': [], 'cases': cases}))
+    report = batch.run(preparation, package, manifest, work / 'guest')
+    assert [case['status'] for case in report['cases']] == [status, 0]
+    assert (work / 'guest/0.stdout').read_bytes() == b'descendants ready\n'
+    assert (work / 'guest/1.stdout').read_bytes() == b'descendants absent\n'
