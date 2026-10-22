@@ -1,0 +1,341 @@
+{
+  "guard": {
+    "status": 0,
+    "stdout": "filesystem, network, and descendant restrictions verified\n",
+    "stderr": "",
+    "seconds": 0.101
+  },
+  "matrix": [
+    {
+      "host": "darwin/arm64",
+      "target": "darwin/arm64",
+      "compile": {
+        "status": 0,
+        "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-to-darwin/program\",\"target\":\"darwin/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"68eae575dc44d3d07714b4753f7a5fdc88248b0270857c95d1089465882afc6b\",\"device_backend\":\"software\"}\n",
+        "stderr": "",
+        "seconds": 2.105
+      },
+      "execute": {
+        "status": 0,
+        "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}\",\"value\":{\"count\":{\"type\":\"Int\",\"value\":\"3\"},\"error\":{\"type\":\"String\",\"value\":\"Math.DivideByZero\"},\"large\":{\"type\":\"Int\",\"value\":\"123456789012345678901234567891\"},\"tensor\":{\"type\":\"Float\",\"value\":\"6\"},\"text\":{\"type\":\"String\",\"value\":\"λ雪\"}}}}}\n",
+        "stderr": "",
+        "seconds": 0.139
+      },
+      "sha256": "e8de6b589b5bf7d9d263e409a7e7d835bb06ec93ec47132f13f95352a4ded3f6"
+    },
+    {
+      "host": "darwin/arm64",
+      "target": "linux/arm64",
+      "compile": {
+        "status": 0,
+        "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-to-linux/program\",\"target\":\"linux/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"35a7d7d12cc1a89ead0895908bbcb352c251df7715547397bed45a8c3349e284\",\"device_backend\":\"software\"}\n",
+        "stderr": "",
+        "seconds": 1.89
+      },
+      "execute": {
+        "status": 0,
+        "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}\",\"value\":{\"count\":{\"type\":\"Int\",\"value\":\"3\"},\"error\":{\"type\":\"String\",\"value\":\"Math.DivideByZero\"},\"large\":{\"type\":\"Int\",\"value\":\"123456789012345678901234567891\"},\"tensor\":{\"type\":\"Float\",\"value\":\"6\"},\"text\":{\"type\":\"String\",\"value\":\"λ雪\"}}}}}\n",
+        "stderr": "",
+        "seconds": 0.995
+      },
+      "sha256": "c81cdd2cf8c1156053285e28bdf2f1996ddfa407b16dadc3537e93df64b3a88c"
+    },
+    {
+      "host": "linux/arm64",
+      "target": "linux/arm64",
+      "compile": {
+        "status": 0,
+        "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/result/program\",\"target\":\"linux/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"35a7d7d12cc1a89ead0895908bbcb352c251df7715547397bed45a8c3349e284\",\"device_backend\":\"software\"}\n",
+        "stderr": "",
+        "receipt": {
+          "command": "build",
+          "status": "ok",
+          "artifact": "/result/program",
+          "target": "linux/arm64",
+          "abi": "lo-native-1",
+          "codegen": "llvm",
+          "runtime_sha256": "35a7d7d12cc1a89ead0895908bbcb352c251df7715547397bed45a8c3349e284",
+          "device_backend": "software"
+        },
+        "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-linux-program",
+        "artifact_bytes": 14519944,
+        "artifact_sha256": "cf24ffadf1f123c8419afa5ab7a6c855d5a9201a34fa203ff0d87d675407d9cd",
+        "entries": [
+          "/result/program",
+          "/tmp/ccache",
+          "/tmp/clang",
+          "/tmp/cache",
+          "/tmp/gopath",
+          "/tmp/modules",
+          "/tmp/go-build",
+          "/tmp/work"
+        ],
+        "environment": "Linux arm64 QEMU TCG; no network interface; empty PATH and caches",
+        "serial": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-to-linux/serial.log"
+      },
+      "execute": {
+        "status": 0,
+        "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}\",\"value\":{\"count\":{\"type\":\"Int\",\"value\":\"3\"},\"error\":{\"type\":\"String\",\"value\":\"Math.DivideByZero\"},\"large\":{\"type\":\"Int\",\"value\":\"123456789012345678901234567891\"},\"tensor\":{\"type\":\"Float\",\"value\":\"6\"},\"text\":{\"type\":\"String\",\"value\":\"λ雪\"}}}}}\n",
+        "stderr": "",
+        "seconds": 0.986
+      },
+      "sha256": "cf24ffadf1f123c8419afa5ab7a6c855d5a9201a34fa203ff0d87d675407d9cd"
+    },
+    {
+      "host": "linux/arm64",
+      "target": "darwin/arm64",
+      "compile": {
+        "status": 0,
+        "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/result/program\",\"target\":\"darwin/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"68eae575dc44d3d07714b4753f7a5fdc88248b0270857c95d1089465882afc6b\",\"device_backend\":\"software\"}\n",
+        "stderr": "",
+        "receipt": {
+          "command": "build",
+          "status": "ok",
+          "artifact": "/result/program",
+          "target": "darwin/arm64",
+          "abi": "lo-native-1",
+          "codegen": "llvm",
+          "runtime_sha256": "68eae575dc44d3d07714b4753f7a5fdc88248b0270857c95d1089465882afc6b",
+          "device_backend": "software"
+        },
+        "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-darwin-program",
+        "artifact_bytes": 7556672,
+        "artifact_sha256": "5310f16e61a3d085a3db50b2313687324f1191b7970b38b6b69d0de5ac3b972f",
+        "entries": [
+          "/result/program",
+          "/tmp/ccache",
+          "/tmp/clang",
+          "/tmp/cache",
+          "/tmp/gopath",
+          "/tmp/modules",
+          "/tmp/go-build",
+          "/tmp/work"
+        ],
+        "environment": "Linux arm64 QEMU TCG; no network interface; empty PATH and caches",
+        "serial": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-to-darwin/serial.log"
+      },
+      "execute": {
+        "status": 0,
+        "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}\",\"value\":{\"count\":{\"type\":\"Int\",\"value\":\"3\"},\"error\":{\"type\":\"String\",\"value\":\"Math.DivideByZero\"},\"large\":{\"type\":\"Int\",\"value\":\"123456789012345678901234567891\"},\"tensor\":{\"type\":\"Float\",\"value\":\"6\"},\"text\":{\"type\":\"String\",\"value\":\"λ雪\"}}}}}\n",
+        "stderr": "",
+        "seconds": 0.132
+      },
+      "sha256": "5310f16e61a3d085a3db50b2313687324f1191b7970b38b6b69d0de5ac3b972f"
+    }
+  ],
+  "packages": {
+    "darwin": {
+      "archive": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-software.tar",
+      "archive_sha256": "b9eee59a00af4036f534e376bf4580a7a0fdc14e4c10d2561a49777be2b05392",
+      "host": "darwin/arm64",
+      "inventory_sha256": "39ad80e2870f27a1109771e7de09a89f4a0c09b75f4609cc43569cbf325c602c",
+      "package": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-software",
+      "toolchain_sha256": "c0981c6d9bc9c775ab0c6e6803aae7554791a576d17a50049b863c1c3a7313dc",
+      "variant": "software",
+      "frontend_sha256": "7ac36d5dbbbadb2511e754c600cd38ae8400c4aed3859348ca0a0202392df154"
+    },
+    "linux": {
+      "archive": "_scratch/compiler-distribution/packages-final/lo-linux-arm64-software.tar",
+      "archive_sha256": "7c8d78c771cecc0750478ed4a630216b22722328e06cf5a1d03f9f41fac5b18d",
+      "host": "linux/arm64",
+      "inventory_sha256": "1b033502b2a7059318147380d747b3a8d005d4b97881d0d59bba1b60ca876211",
+      "package": "_scratch/compiler-distribution/packages-final/lo-linux-arm64-software",
+      "toolchain_sha256": "fc7b85ee2102e1e76616d89bcdc4477095fefe0a775e2d4102856af5eccc6322",
+      "variant": "software",
+      "frontend_sha256": "2ed76e872633bd8cd430ff75b25274c34dd288525fe5599d7bab2071bb4457e7"
+    },
+    "metal": {
+      "archive": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-metal.tar",
+      "archive_sha256": "e23c3264c2072a18b2e11f6d48208a0422c9462aa1917026beccf4191b2959e0",
+      "host": "darwin/arm64",
+      "inventory_sha256": "8d5b772322769904bd418eb456a867cc953b4c80a9fc297e63f4515be44e348b",
+      "package": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-metal",
+      "toolchain_sha256": "e9eefb08b53230eee2d406e6c26923f30a74484b1a247d33e05f21b2523d0f36",
+      "variant": "metal",
+      "frontend_sha256": "90b2c2cc914c084d29a184b7da44d4afc71e530162b248299b710efcd0e85a1a"
+    }
+  },
+  "metal": {
+    "compile": {
+      "status": 0,
+      "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/metal-build/program\",\"target\":\"darwin/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"0daf77551b7d3421cbb49b4d72e5f00625fbbbc4c4976d9667e1930df8c287b9\",\"device_backend\":\"metal\",\"metal\":{\"profile\":\"metal-fp32\",\"go\":\"go1.27.1\",\"xcode\":\"Xcode 27.1\\nBuild version 27A9275\",\"sdk\":\"27.0\",\"clang\":\"Apple clang version 21.0.0 (clang-2100.3.34.2)\",\"metal_compiler\":\"Apple metal version 32023.921 (metalfe-32023.921.6)\",\"kernel_linker\":\"AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)\",\"deployment_target\":\"27.0\",\"kernel_flags\":[\"-std=metal3.1\",\"-mmacosx-version-min=27.0\",\"-fmetal-math-mode=safe\",\"-fmetal-math-fp32-functions=precise\",\"-ffp-contract=off\"],\"kernel_sha256\":\"d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6\"}}\n",
+      "stderr": "",
+      "seconds": 2.223
+    },
+    "execute": {
+      "status": 0,
+      "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}\",\"value\":{\"count\":{\"type\":\"Int\",\"value\":\"3\"},\"error\":{\"type\":\"String\",\"value\":\"Math.DivideByZero\"},\"large\":{\"type\":\"Int\",\"value\":\"123456789012345678901234567891\"},\"tensor\":{\"type\":\"Float\",\"value\":\"6\"},\"text\":{\"type\":\"String\",\"value\":\"λ雪\"}}}}}\n",
+      "stderr": "",
+      "seconds": 0.129
+    }
+  },
+  "rejections": [
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: read toolchain manifest: open /Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-install/relocated compiler package/toolchain.json: no such file or directory\"}]}\n",
+      "seconds": 0.041,
+      "case": "manifest-missing",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: toolchain manifest SHA-256 mismatch\"}]}\n",
+      "seconds": 0.018,
+      "case": "manifest-corrupt",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: resolve LLVM compiler: lstat /Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-install/relocated compiler package/bin/clang: no such file or directory\"}]}\n",
+      "seconds": 0.019,
+      "case": "compiler-missing",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: admit LLVM compiler: LLVM snapshot \\\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-install/relocated compiler package/bin/clang\\\" SHA-256 mismatch\"}]}\n",
+      "seconds": 0.103,
+      "case": "compiler-corrupt",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: admit LLVM linker: LLVM snapshot \\\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-install/relocated compiler package/bin/ld64.lld\\\" SHA-256 mismatch\"}]}\n",
+      "seconds": 0.165,
+      "case": "linker-corrupt",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: admit Lo runtime archive: LLVM snapshot \\\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-install/relocated compiler package/runtime/aarch64-apple-darwin/liblo_runtime.a\\\" SHA-256 mismatch\"}]}\n",
+      "seconds": 0.178,
+      "case": "runtime-corrupt",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: admit platform input system: LLVM snapshot \\\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-install/relocated compiler package/platform/darwin/libSystem.tbd\\\" SHA-256 mismatch\"}]}\n",
+      "seconds": 0.18,
+      "case": "platform-corrupt",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: admit embedded Metal kernel: LLVM snapshot \\\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/metal-install/relocated compiler package/runtime/aarch64-apple-darwin/metal/metal.metallib\\\" SHA-256 mismatch\"}]}\n",
+      "seconds": 0.176,
+      "case": "kernel-corrupt",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": "{\"diagnostics\":[{\"code\":\"build.toolchain\",\"stage\":\"build\",\"message\":\"build LLVM executable: admit host library libz.so.1: LLVM snapshot \\\"/relocated compiler package/host/lib/libz.so.1\\\" SHA-256 mismatch\"}]}\n",
+      "receipt": null,
+      "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-preserved-program",
+      "artifact_bytes": 17,
+      "artifact_sha256": "26239061ed00d2a3451dde22793b1b71ada2ce778d72bf7051d950c93bea9dc7",
+      "entries": [
+        "/result/program",
+        "/tmp/ccache",
+        "/tmp/clang",
+        "/tmp/cache",
+        "/tmp/gopath",
+        "/tmp/modules",
+        "/tmp/go-build",
+        "/tmp/work"
+      ],
+      "environment": "Linux arm64 QEMU TCG; no network interface; empty PATH and caches",
+      "serial": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-rejection/serial.log",
+      "case": "linux-host-library",
+      "prior_output_preserved": true,
+      "staging_empty": true
+    }
+  ],
+  "relocation": {
+    "compile": {
+      "status": 0,
+      "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/second-relocation-build/program\",\"target\":\"darwin/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"68eae575dc44d3d07714b4753f7a5fdc88248b0270857c95d1089465882afc6b\",\"device_backend\":\"software\"}\n",
+      "stderr": "",
+      "seconds": 1.969
+    },
+    "execute": {
+      "status": 0,
+      "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{count: Int, error: String, large: Int, tensor: Float, text: String}\",\"value\":{\"count\":{\"type\":\"Int\",\"value\":\"3\"},\"error\":{\"type\":\"String\",\"value\":\"Math.DivideByZero\"},\"large\":{\"type\":\"Int\",\"value\":\"123456789012345678901234567891\"},\"tensor\":{\"type\":\"Float\",\"value\":\"6\"},\"text\":{\"type\":\"String\",\"value\":\"λ雪\"}}}}}\n",
+      "stderr": "",
+      "seconds": 0.12
+    }
+  },
+  "training": [
+    {
+      "host": "darwin/arm64",
+      "compile": {
+        "status": 0,
+        "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/darwin-xor-build/program\",\"target\":\"darwin/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"68eae575dc44d3d07714b4753f7a5fdc88248b0270857c95d1089465882afc6b\",\"device_backend\":\"software\"}\n",
+        "stderr": "",
+        "seconds": 2.103
+      },
+      "execute": {
+        "status": 0,
+        "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{initial_loss: Float, loss: Float, parameters: Record{b1: Tensor\\u003cFP32\\u003e, b2: Tensor\\u003cFP32\\u003e, w1: Tensor\\u003cFP32\\u003e, w2: Tensor\\u003cFP32\\u003e}, predictions: Tensor\\u003cFP32\\u003e, steps: Int}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{initial_loss: Float, loss: Float, parameters: Record{b1: Tensor\\u003cFP32\\u003e, b2: Tensor\\u003cFP32\\u003e, w1: Tensor\\u003cFP32\\u003e, w2: Tensor\\u003cFP32\\u003e}, predictions: Tensor\\u003cFP32\\u003e, steps: Int}\",\"value\":{\"initial_loss\":{\"type\":\"Float\",\"value\":\"0.35612499713897705\"},\"loss\":{\"type\":\"Float\",\"value\":\"4.251353501009969e-13\"},\"parameters\":{\"type\":\"Record{b1: Tensor\\u003cFP32\\u003e, b2: Tensor\\u003cFP32\\u003e, w1: Tensor\\u003cFP32\\u003e, w2: Tensor\\u003cFP32\\u003e}\",\"value\":{\"b1\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"2\"],\"device\":\"cpu\",\"values\":[\"-8.399841e-09\",\"-3.0850288e-08\"]}},\"b2\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"1\"],\"device\":\"cpu\",\"values\":[\"6.6410286e-07\"]}},\"w1\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"2\",\"2\"],\"device\":\"cpu\",\"values\":[\"0.8923065\",\"-0.9315243\",\"-0.89230645\",\"0.9315242\"]}},\"w2\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"2\",\"1\"],\"device\":\"cpu\",\"values\":[\"1.1206899\",\"1.073508\"]}}}},\"predictions\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"4\",\"1\"],\"device\":\"cpu\",\"values\":[\"6.6410286e-07\",\"0.9999993\",\"0.9999995\",\"7.2148754e-07\"]}},\"steps\":{\"type\":\"Int\",\"value\":\"500\"}}}}}\n",
+        "stderr": "",
+        "seconds": 0.628
+      }
+    },
+    {
+      "host": "linux/arm64",
+      "compile": {
+        "status": 0,
+        "stdout": "{\"command\":\"build\",\"status\":\"ok\",\"artifact\":\"/result/program\",\"target\":\"linux/arm64\",\"abi\":\"lo-native-1\",\"codegen\":\"llvm\",\"runtime_sha256\":\"35a7d7d12cc1a89ead0895908bbcb352c251df7715547397bed45a8c3349e284\",\"device_backend\":\"software\"}\n",
+        "stderr": "",
+        "receipt": {
+          "command": "build",
+          "status": "ok",
+          "artifact": "/result/program",
+          "target": "linux/arm64",
+          "abi": "lo-native-1",
+          "codegen": "llvm",
+          "runtime_sha256": "35a7d7d12cc1a89ead0895908bbcb352c251df7715547397bed45a8c3349e284",
+          "device_backend": "software"
+        },
+        "artifact": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-xor-program",
+        "artifact_bytes": 15264728,
+        "artifact_sha256": "ab12e73966b06a5c5a9e054d0ae6658613ea410b099edbb65a1201a7d92d1f62",
+        "entries": [
+          "/result/program",
+          "/tmp/ccache",
+          "/tmp/clang",
+          "/tmp/cache",
+          "/tmp/gopath",
+          "/tmp/modules",
+          "/tmp/go-build",
+          "/tmp/work"
+        ],
+        "environment": "Linux arm64 QEMU TCG; no network interface; empty PATH and caches",
+        "serial": "/Users/tyemirov/Development/Research/Lo/_scratch/f017-20261020/acceptance-final/linux-xor-build/serial.log"
+      },
+      "execute": {
+        "status": 0,
+        "stdout": "{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"Record{initial_loss: Float, loss: Float, parameters: Record{b1: Tensor\\u003cFP32\\u003e, b2: Tensor\\u003cFP32\\u003e, w1: Tensor\\u003cFP32\\u003e, w2: Tensor\\u003cFP32\\u003e}, predictions: Tensor\\u003cFP32\\u003e, steps: Int}!\",\"status\":\"ok\",\"value\":{\"type\":\"Record{initial_loss: Float, loss: Float, parameters: Record{b1: Tensor\\u003cFP32\\u003e, b2: Tensor\\u003cFP32\\u003e, w1: Tensor\\u003cFP32\\u003e, w2: Tensor\\u003cFP32\\u003e}, predictions: Tensor\\u003cFP32\\u003e, steps: Int}\",\"value\":{\"initial_loss\":{\"type\":\"Float\",\"value\":\"0.35612499713897705\"},\"loss\":{\"type\":\"Float\",\"value\":\"4.251353501009969e-13\"},\"parameters\":{\"type\":\"Record{b1: Tensor\\u003cFP32\\u003e, b2: Tensor\\u003cFP32\\u003e, w1: Tensor\\u003cFP32\\u003e, w2: Tensor\\u003cFP32\\u003e}\",\"value\":{\"b1\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"2\"],\"device\":\"cpu\",\"values\":[\"-8.399841e-09\",\"-3.0850288e-08\"]}},\"b2\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"1\"],\"device\":\"cpu\",\"values\":[\"6.6410286e-07\"]}},\"w1\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"2\",\"2\"],\"device\":\"cpu\",\"values\":[\"0.8923065\",\"-0.9315243\",\"-0.89230645\",\"0.9315242\"]}},\"w2\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"2\",\"1\"],\"device\":\"cpu\",\"values\":[\"1.1206899\",\"1.073508\"]}}}},\"predictions\":{\"type\":\"Tensor\\u003cFP32\\u003e\",\"value\":{\"dtype\":\"fp32\",\"shape\":[\"4\",\"1\"],\"device\":\"cpu\",\"values\":[\"6.6410286e-07\",\"0.9999993\",\"0.9999995\",\"7.2148754e-07\"]}},\"steps\":{\"type\":\"Int\",\"value\":\"500\"}}}}}\n",
+        "stderr": "",
+        "seconds": 13.329
+      }
+    }
+  ],
+  "status": "passed"
+}

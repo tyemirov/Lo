@@ -2,8 +2,11 @@
 
 Status: shared purity, File/HTTP behavior, Process results, executable registration, and the native host are implemented.
 The selected Darwin 27 arm64 profile passed [native qualification](evidence/process-host-native.json).
-Canonical public acceptance passed all 24 interpreter/generated-native cases, including server callbacks and Process-to-File composition.
-Final stack CI and independent completion review passed.
+The historical Go-generation implementation passed all 24 interpreter and generated-native cases.
+Those cases included server callbacks and Process-to-File composition.
+Its stack CI and independent completion review passed.
+The [native adapter guide](native-adapters.md) defines the current LLVM checks.
+The [compiler plan](standalone-compiler-plan.md) records I011 qualification.
 The [final validation record](evidence/process-enabled-validation.json) preserves the CI log and review outcome.
 Earlier injected lifecycle and registry checkpoints passed CI and independent review.
 Implementation and final stack CI passed. Independent completion review passed.
@@ -34,7 +37,7 @@ The [mac-cleanup plan](mac-cleanup-plan.md) remains an application plan that dep
 This document records implemented adapter contracts and qualification evidence.
 The stage status below separates implemented contracts from selected future work.
 This plan does not authorize operations outside Lo.
-No compatibility aliases, alternate legacy schemas, or unrestricted Process mode belong in the implementation.
+No compatibility aliases, alternative legacy schemas, or unrestricted Process mode belong in the implementation.
 
 ## Source Ownership
 
@@ -44,7 +47,7 @@ No compatibility aliases, alternate legacy schemas, or unrestricted Process mode
 | Catalog and verifier | Shared operation metadata, activation result relation, and transitive callback rules. | `internal/catalog`, `internal/check`, `internal/ir` |
 | Execution | Ordered activation, successful binding publication, failures, and progress. | `internal/eval`, `internal/execution`, `internal/runtimeops` |
 | Inspection | Immediate effects, stored callbacks, calculated authority, and result types. | `internal/inspect` |
-| Native compilation | Equivalent statement lowering, runtime interfaces, and runtime bundle. | `internal/codegen`, `internal/runtimebundle` |
+| Native compilation | Equivalent statement lowering, LLVM emission, and static runtime interfaces. | `internal/nativeplan`, `internal/llvmemit`, `internal/nativebuild`, `runtime/native` |
 | Adapters and host | File receipts, HTTP client/server behavior, Process profiles, and lifecycle. | `internal/adapter`, `internal/runner` |
 | Acceptance | Public CLI contracts, local protocol fixtures, and interpreter/native comparisons. | `tests/integration`, `testdata`, `examples`, `docs/examples` |
 
@@ -94,7 +97,7 @@ The result relation, syntax, both execution backends, inspection, nominal File t
 4. Implement statement parsing, type checking, IR lowering, interpretation, inspection, and native code generation together.
 5. Update the specification, current examples, and existing File acceptance cases to the canonical contract.
 6. Remove the obsolete `Effect` construction paths and type when no canonical target uses them.
-7. Regenerate the runtime bundle through the repository target.
+7. Build the static native runtime through `make build-native-runtime`.
 
 Acceptance depends on equivalent bound and unbound commits except for publication of the successful result.
 Top-level activation failure must stop later effects in both backends.
@@ -368,7 +371,8 @@ No example alone defines the adapter API.
 Use the repository Make targets and their configured local tool state.
 Start each behavior change with its failing public integration fixture.
 Run the smallest affected interpreter and native suites during each stage.
-Serialize checks that regenerate or share the runtime bundle.
+Serialize checks that share runtime distribution outputs.
+Use different output directories for independent runtime builds.
 The validated stages 1–3 checkpoint precedes the approved pure Process phase.
 Run `CI=1 make ci </dev/null` once for all current source changes.
 This CI result does not complete the full adapter plan.

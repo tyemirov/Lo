@@ -81,7 +81,7 @@ DNS work uses a bounded service that keeps worker handles until shutdown.
 Run the adapter checks through real LLVM artifacts:
 
 ```sh
-make test-native-llvm NATIVE_RUNTIME_STATE=_scratch/native-runtime \
+make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run 'TestLLVMFile|TestLLVMLinuxFile|TestLLVMProcess|TestLLVMLinuxProcess|TestLLVMHTTP|TestLLVMLinuxHTTP|TestServe|TestHTTPClient' -timeout 20m -count=1" </dev/null
 ```
 

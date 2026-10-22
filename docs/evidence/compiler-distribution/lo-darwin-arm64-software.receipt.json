@@ -1,0 +1,9 @@
+{
+  "archive": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-software.tar",
+  "archive_sha256": "b9eee59a00af4036f534e376bf4580a7a0fdc14e4c10d2561a49777be2b05392",
+  "host": "darwin/arm64",
+  "inventory_sha256": "39ad80e2870f27a1109771e7de09a89f4a0c09b75f4609cc43569cbf325c602c",
+  "package": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-software",
+  "toolchain_sha256": "c0981c6d9bc9c775ab0c6e6803aae7554791a576d17a50049b863c1c3a7313dc",
+  "variant": "software"
+}

@@ -1,5 +1,9 @@
 # Compiler Implementation Audit
 
+This document records historical implementation evidence before I011.
+The [native compilation contract](native-compilation-contract.md) defines the current LLVM build requirements.
+The [compiler plan](standalone-compiler-plan.md) records the current migration status.
+
 This audit maps the compiler design to source code, public acceptance tests, and recorded validation.
 Its scope is the six stages in [the compiler design](compiler-design.md).
 The audit includes the runtime contracts in specification sections 23.1 through 23.7.

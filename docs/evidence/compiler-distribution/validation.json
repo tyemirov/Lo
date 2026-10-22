@@ -1,0 +1,147 @@
+{
+  "issue": "F017",
+  "date": "2026-10-20",
+  "status": "passed",
+  "backend": "LLVM 21.1.8 and LLD 21.1.8 with precompiled Rust 1.85.1 runtimes",
+  "abi": "lo-native-1",
+  "acceptance_criterion": "On a supported clean machine with no Go installation, an installed Lo distribution can compile and link a representative program offline, and the resulting executable runs without Lo installed.",
+  "supported_hosts": [
+    "darwin/arm64",
+    "linux/arm64"
+  ],
+  "software_targets": [
+    "darwin/arm64",
+    "linux/arm64"
+  ],
+  "environments": {
+    "darwin": "macOS 27.0.1 / Darwin arm64; sandbox excludes source checkout and preparation tools, denies network and external writes; inherited restrictions verified by compiled guard.",
+    "linux": "QEMU 11.1.2 TCG; Linux 6.12.110 / glibc 2.36 arm64; no network interface or host mounts; installed package, source, base libraries and initializer only.",
+    "artifact_execution": "Separate Darwin sandbox or Linux guest contains the artifact and declared OS dependencies, without Lo, the package, source, or compiler tools.",
+    "metal": "Separate Darwin package compiled and executed a CPU representative with Metal linkage; changed kernels rejected. I010 supplies controlled device semantic evidence."
+  },
+  "package_identities": "package-identities.json",
+  "installed_acceptance": "installed-acceptance.json",
+  "source_identity": "source-identity.json",
+  "historical_red_results": "red-results.json",
+  "log_hashes": "logs.json",
+  "review": "review.json",
+  "checks": {
+    "installed_matrix": {
+      "command": "make test-compiler-distributions COMPILER_DISTRIBUTION_OUTPUT=_scratch/compiler-distribution/packages-final COMPILER_DISTRIBUTION_ACCEPTANCE=_scratch/f017-20261020/acceptance-final </dev/null",
+      "exit_code": 0,
+      "software_cells": 4,
+      "xor_hosts": 2,
+      "rejection_cases": 9,
+      "details": "Manifest, tool, linker, runtime, platform, kernel, and Linux library rejection; preserved output; empty staging; second relocation; exported artifact length and SHA-256."
+    },
+    "distribution_tools": {
+      "command": "make test-compiler-distribution-tools </dev/null",
+      "exit_code": 0,
+      "tests": 22,
+      "seconds": 63.94,
+      "log": "distribution-tools.log.gz"
+    },
+    "runtime_regression": {
+      "command": "make test-native-llvm LLVM_TOOLCHAIN=_scratch/compiler-distribution/packages/lo-darwin-arm64-software/toolchain.json TEST_ARGS='-run \"TestAutodiffAnalyticalAndFiniteDifferences|TestCPUTrainingExample|TestXORExamples|TestCheckpointFreshProcess|TestSemanticMigrationCheckpointResume|TestLLVMRuntimeCore|TestLLVMFileAdapters|TestLLVMProcessExecution|TestLLVMDeviceArtifactGrantArguments\" -count=1 -timeout=10m -v' </dev/null",
+      "exit_code": 0,
+      "top_level_tests": 9,
+      "seconds": 471.971,
+      "analytical_and_finite_difference_fixtures": 13,
+      "training_steps": 200,
+      "xor_steps": 500,
+      "xor_repeated_runs": 3,
+      "log": "packaged-runtime-regression.log.gz",
+      "scope": "Development CLI with packaged LLVM inputs. All final packages have identical frontend and manifest bytes to the initial packages used for this regression. Installed CLI isolation is verified separately."
+    },
+    "linux_library_snapshots": {
+      "exit_code": 0,
+      "test": "TestLLVMLinuxHostLibrarySnapshots",
+      "environment": "Network-free Linux arm64 QEMU TCG guest",
+      "seconds": 0.04,
+      "log": "linux-library-snapshot.log.gz"
+    },
+    "deterministic_cleanup": {
+      "tests": [
+        "TestInstalledCompilerExecutionCleanup/tool-failure",
+        "TestInstalledCompilerExecutionCleanup/cancelled"
+      ],
+      "evidence": "Passed in both final CI lanes. A controlled compiler execution witness precedes failure or cancellation. Existing output and empty staging are verified."
+    },
+    "final_ci": {
+      "command": "make ci TEST_ARGS='-timeout=30m -v' </dev/null",
+      "exit_code": 0,
+      "log": "make-ci.log.gz"
+    }
+  },
+  "xor_results": {
+    "darwin/arm64": {
+      "initial_loss": {
+        "type": "Float",
+        "value": "0.35612499713897705"
+      },
+      "loss": {
+        "type": "Float",
+        "value": "4.251353501009969e-13"
+      },
+      "steps": {
+        "type": "Int",
+        "value": "500"
+      },
+      "predictions": {
+        "type": "Tensor<FP32>",
+        "value": {
+          "dtype": "fp32",
+          "shape": [
+            "4",
+            "1"
+          ],
+          "device": "cpu",
+          "values": [
+            "6.6410286e-07",
+            "0.9999993",
+            "0.9999995",
+            "7.2148754e-07"
+          ]
+        }
+      }
+    },
+    "linux/arm64": {
+      "initial_loss": {
+        "type": "Float",
+        "value": "0.35612499713897705"
+      },
+      "loss": {
+        "type": "Float",
+        "value": "4.251353501009969e-13"
+      },
+      "steps": {
+        "type": "Int",
+        "value": "500"
+      },
+      "predictions": {
+        "type": "Tensor<FP32>",
+        "value": {
+          "dtype": "fp32",
+          "shape": [
+            "4",
+            "1"
+          ],
+          "device": "cpu",
+          "values": [
+            "6.6410286e-07",
+            "0.9999993",
+            "0.9999995",
+            "7.2148754e-07"
+          ]
+        }
+      }
+    }
+  },
+  "limits": [
+    "I011 retains the full installed-language corpus qualification and removal of development Go generation.",
+    "The frontend is a prebuilt Go executable. Consumers need no Go installation.",
+    "Physical Metal execution and performance remain unmeasured; software validation is sufficient for acceptance.",
+    "Linux process execution retains its existing unavailable result.",
+    "Artifact application features retain declared capabilities and operating-system dependencies."
+  ]
+}

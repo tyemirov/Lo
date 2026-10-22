@@ -1,0 +1,443 @@
+{
+  "issue": "I011",
+  "status": "passed_within_scope",
+  "scope": "Frozen-source nonperformance acceptance. Performance qualification and final I011 completion review remain pending.",
+  "semantic_source_sha256": "30456a563ea64716d16e3b0d954338fae144fdde5b66a13f570c31c6bbf501e2",
+  "source_candidate": 7,
+  "ci": "passed",
+  "corpora": {
+    "interpreter": {
+      "pass": 1738,
+      "fail": 0,
+      "skip": 153
+    },
+    "llvm:darwin/arm64": {
+      "pass": 2624,
+      "fail": 0,
+      "skip": 0
+    },
+    "llvm:linux/arm64": {
+      "pass": 1414,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "semantic": {
+    "references": 394,
+    "execution_status": "passed",
+    "qualification_status": "passed",
+    "coverage_status": "complete_with_limits",
+    "missing_targets": [],
+    "qualification_gaps": []
+  },
+  "component_checks": {
+    "distribution": 36,
+    "runtime": 20
+  },
+  "ml_required_references": {
+    "TestAutodiffAnalyticalAndFiniteDifferences": {
+      "interpreter": [
+        "TestAutodiffAnalyticalAndFiniteDifferences"
+      ],
+      "llvm:darwin/arm64": [
+        "TestAutodiffAnalyticalAndFiniteDifferences"
+      ],
+      "llvm:linux/arm64": [
+        "TestAutodiffAnalyticalAndFiniteDifferences"
+      ]
+    },
+    "TestMetalComputeTraining": {
+      "interpreter": [
+        "TestMetalComputeTraining"
+      ],
+      "llvm:darwin/arm64": [
+        "TestLLVMMetalTraining"
+      ],
+      "llvm:linux/arm64": [
+        "TestLLVMMetalTraining"
+      ]
+    },
+    "TestMetalTrainingGradients": {
+      "interpreter": [
+        "TestMetalTrainingGradients"
+      ],
+      "llvm:darwin/arm64": [
+        "TestLLVMMetalTrainingGradients"
+      ],
+      "llvm:linux/arm64": [
+        "TestLLVMMetalTrainingGradients"
+      ]
+    },
+    "TestSemanticMigrationCheckpointResume": {
+      "interpreter": [
+        "TestSemanticMigrationCheckpointResume"
+      ],
+      "llvm:darwin/arm64": [
+        "TestSemanticMigrationCheckpointResume"
+      ],
+      "llvm:linux/arm64": [
+        "TestSemanticMigrationCheckpointResume"
+      ]
+    },
+    "TestSemanticNativeMetalCheckpointResume": {
+      "interpreter": [
+        "TestSemanticNativeMetalCheckpointResume"
+      ],
+      "llvm:darwin/arm64": [
+        "TestSemanticNativeMetalCheckpointResume"
+      ],
+      "llvm:linux/arm64": [
+        "TestSemanticNativeMetalCheckpointResume"
+      ]
+    }
+  },
+  "offline": {
+    "software_combinations": 4,
+    "metal": "passed",
+    "relocation": "passed",
+    "copied_artifacts_without_lo": "passed",
+    "negative_cases": [
+      {
+        "case": "manifest-missing",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "manifest-corrupt",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "compiler-missing",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "compiler-corrupt",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "linker-corrupt",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "runtime-corrupt",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "platform-corrupt",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "kernel-corrupt",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      },
+      {
+        "case": "linux-host-library",
+        "status": 2,
+        "prior_output_preserved": true,
+        "staging_empty": true,
+        "diagnostic": "build.toolchain"
+      }
+    ],
+    "xor": {
+      "darwin/arm64": {
+        "steps": "500",
+        "initial_loss": "0.35612499713897705",
+        "loss": "4.251353501009969e-13",
+        "predictions": [
+          "6.6410286e-07",
+          "0.9999993",
+          "0.9999995",
+          "7.2148754e-07"
+        ]
+      },
+      "linux/arm64": {
+        "steps": "500",
+        "initial_loss": "0.35612499713897705",
+        "loss": "4.251353501009969e-13",
+        "predictions": [
+          "6.6410286e-07",
+          "0.9999993",
+          "0.9999995",
+          "7.2148754e-07"
+        ]
+      }
+    }
+  },
+  "packages": {
+    "lo-darwin-arm64-software": {
+      "receipt": {
+        "path": "bin/distributions/lo-darwin-arm64-software.receipt.json",
+        "sha256": "8fe3040319b1cd60760debadc446a0311fa97f96ee01f75ce38ba3768219fabb"
+      },
+      "values": {
+        "archive": "bin/distributions/lo-darwin-arm64-software.tar",
+        "archive_sha256": "e6c698a53184fcebfd48ab4676fea24ef4a76a6cdad172dedef6ac91f4b0dc4d",
+        "host": "darwin/arm64",
+        "inventory_sha256": "b271fe39d23de0f9e5cb09d7cc2bbb54f938bf2d9166fb99d501fd86c43bc788",
+        "package": "bin/distributions/lo-darwin-arm64-software",
+        "toolchain_sha256": "96083c6e8ac1be40be3c1f6891bf7fde077d37aa9f75f9a383566dd993cc84e9",
+        "variant": "software"
+      },
+      "compiler_sha256": "c7d53be0d6205376b8fc8ad3c2bfdac8cbc4a9d3565f02df58161a47d3f37775"
+    },
+    "lo-linux-arm64-software": {
+      "receipt": {
+        "path": "bin/distributions/lo-linux-arm64-software.receipt.json",
+        "sha256": "7394530c76c36f931ba422a901ba7db74366604a2a1002d55a1191725fa9027a"
+      },
+      "values": {
+        "archive": "bin/distributions/lo-linux-arm64-software.tar",
+        "archive_sha256": "f399c301ca39f5ea4e3d6e1d585989eb93d9dbfb3c4a51e7ee5a8a037814cb41",
+        "host": "linux/arm64",
+        "inventory_sha256": "5a2204ae4eeca8c7ac11cc818987b81c3fc0d0cf01ac06126335c0d53f683b68",
+        "package": "bin/distributions/lo-linux-arm64-software",
+        "toolchain_sha256": "9be4c0aa5b63eeb0d84e9df7e6d680d0d5416dffe7d884a768f498c343b2e5c9",
+        "variant": "software"
+      },
+      "compiler_sha256": "fa1816667b7bda7368661311bafbb7c647183a34da0dd298525051dd652e6552"
+    },
+    "lo-darwin-arm64-metal": {
+      "receipt": {
+        "path": "bin/distributions/lo-darwin-arm64-metal.receipt.json",
+        "sha256": "eeabf40ead2d9778cbbeaf582ca908e6998742fd7d2b05f024d164a6fb8ab5a2"
+      },
+      "values": {
+        "archive": "bin/distributions/lo-darwin-arm64-metal.tar",
+        "archive_sha256": "80cf638157fc74ab1708779cc5bb31d0a4864e21d2381d0f6b742c2b065ab59e",
+        "host": "darwin/arm64",
+        "inventory_sha256": "1ed7f1f6ed8c8e435612e2e582f7815fc65fa5ae2e9b964dc077e9e9fe4580dc",
+        "package": "bin/distributions/lo-darwin-arm64-metal",
+        "toolchain_sha256": "6d01eccca5ba35e4d0e9c9eae32d2cc0eb0144366b7205e0e19b2fb447f96b99",
+        "variant": "metal"
+      },
+      "compiler_sha256": "fd6727479f49257842dba69e5406878ce4e70f69df9d6e0da85a22cf7449e4e5"
+    }
+  },
+  "defect_regressions": {
+    "B001": {
+      "TestFlowFoldNestedCancellationProgress": [
+        "TestFlowFoldNestedCancellationProgress"
+      ],
+      "TestLLVMNestedFoldCancellationProgress": [
+        "TestLLVMNestedFoldCancellationProgress",
+        "TestLLVMNestedFoldCancellationProgress/third-removal"
+      ]
+    },
+    "B002": {
+      "TestLLVMMetalBroadcastStandalone": [
+        "TestLLVMMetalBroadcastStandalone"
+      ]
+    },
+    "B003": {
+      "TestAdapterProcessUnavailableInServerCallbacks": [
+        "TestAdapterProcessUnavailableInServerCallbacks",
+        "TestAdapterProcessUnavailableInServerCallbacks/error-callback-false",
+        "TestAdapterProcessUnavailableInServerCallbacks/error-callback-true"
+      ],
+      "TestAdapterServerFailureContext": [
+        "TestAdapterServerFailureContext",
+        "TestAdapterServerFailureContext/callback-write-false",
+        "TestAdapterServerFailureContext/callback-write-true"
+      ],
+      "TestAdapterServerStartupFailureContext": [
+        "TestAdapterServerStartupFailureContext"
+      ],
+      "TestLLVMServerCallbackIndependentCleanup": [
+        "TestLLVMServerCallbackIndependentCleanup",
+        "TestLLVMServerCallbackIndependentCleanup/callback-write-false-and-session-cleanup",
+        "TestLLVMServerCallbackIndependentCleanup/callback-write-true-and-session-cleanup"
+      ]
+    },
+    "B004": {
+      "focused_scope": "Historical public injected-dependency checks and pinned-QEMU transport checks; not a full corpus.",
+      "smoke": {
+        "path": "_scratch/i011-20261020/transport-smoke/report.json",
+        "sha256": "97955fac5796bbe115a24163c9e4f67d63f753f3d57a206d9661b66d9477eb6c"
+      },
+      "real_checks": {
+        "path": "_scratch/i011-20261020/transport-real-checks.json",
+        "sha256": "36af68c069892bc4422f893f4505134a3d86f6395e153e64e27220da2ce5b060"
+      },
+      "focused_logs": [
+        {
+          "path": "_scratch/i011-20261020/fixtures/transport/red.log",
+          "sha256": "866b0a5a4d1ae5e2adf5b29a1bbf46dd559245ec45bf70634208d0f53df00136"
+        },
+        {
+          "path": "_scratch/i011-20261020/fixtures/transport/green.log",
+          "sha256": "8713bf4f0121067551b9a6ee2450f5b5f26a4ad717f39b24cdd3f367d389fcf1"
+        },
+        {
+          "path": "_scratch/i011-20261020/linux/transport/red.log",
+          "sha256": "dc69a58b1f90371571622d51542da617646e13f98f44086cfd95153062ded016"
+        },
+        {
+          "path": "_scratch/i011-20261020/linux/transport/strict-final-green.log",
+          "sha256": "e82c421140484ced9ff733d4c0b48989714cf712ce7d3235e3e601cc4384eda9"
+        }
+      ],
+      "final_corpus_status": "Current source-bound corpora admitted separately by this audit."
+    }
+  },
+  "evidence": [
+    {
+      "source": "_scratch/i011-20261020/frozen-inputs-7.json",
+      "archive": "final/frozen-inputs-7.json.gz",
+      "sha256": "e23e95514deef0c21cd5ca3b9c2a9f7b857417304938bff67112f4b883c1f3a8",
+      "archive_sha256": "e98732d4d036906fc32a35790e43037fa3f7b124c33a245b8f2dc617c9106e46",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-ci.stdout",
+      "archive": "final/final-ci.stdout.gz",
+      "sha256": "c035fe90fba9bb4525936d52c6a7cb757180ef39e13df270a0171230c05f4ee6",
+      "archive_sha256": "01716d0857ffbb0caf87d9b4178676db4afb278928bb39b4485bece994d1cd0a",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-ci.stderr",
+      "archive": "final/final-ci.stderr.gz",
+      "sha256": "59e82884b8c026cf9d68f23a2afe4bff70467792e3a19f22be3f8b04fee309d2",
+      "archive_sha256": "d91f444d1cd93377cf3359c2135049a54020c0a082bbeab6c8317272556514a3",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-corpus-7/darwin/semantic-interpreter.jsonl",
+      "archive": "final/final-corpus-7/darwin/semantic-interpreter.jsonl.gz",
+      "sha256": "ce624519978fb6baba025932830f70fb1f990a48dff3a19b38304ea206312cbf",
+      "archive_sha256": "51726e08f2fe0d6e16cc92820af06a8adb6e422978425042ba2f793261a47e51",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-corpus-7/darwin/semantic-llvm-darwin-arm64.jsonl",
+      "archive": "final/final-corpus-7/darwin/semantic-llvm-darwin-arm64.jsonl.gz",
+      "sha256": "f685249acc8a59531a2a3d9ea32a9f6d2c8ebf054bea0cf407dff654a3a9fad9",
+      "archive_sha256": "bc0b338a69a588421604af032bb475e7173a15b43647a1dc2ffdbc8fa0f21c1c",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-corpus-7/linux/semantic-linux-arm64.jsonl",
+      "archive": "final/final-corpus-7/linux/semantic-linux-arm64.jsonl.gz",
+      "sha256": "b127040b963da26c67edb139724a00c30fa753afbf55e90c668435fba8118757",
+      "archive_sha256": "ffa7e472256dc49984f2d28d28fadd7ee3b5cd86e4b7d01d6d56b37231414d97",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-corpus-7/linux/report.json",
+      "archive": "final/final-corpus-7/linux/report.json.gz",
+      "sha256": "1b0b973be48f00f74c379700f82fffdcd7c020307c9842c6edc037952afb894c",
+      "archive_sha256": "676c6f98d7eba2804f883ad0126851984fb75da4b4a9783ed8a2c5c293504169",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-semantic-report.json",
+      "archive": "final/final-semantic-report.json.gz",
+      "sha256": "4a38abf672289b22f956a62c55d2a9a4c0b3ddead4bfa121cd9ad1ac8611cc62",
+      "archive_sha256": "2bf22ada0359d6e769009d582295fad12944d52c66136381c06bcac6a5930d76",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-component-tools-7.log",
+      "archive": "final/final-component-tools-7.log.gz",
+      "sha256": "cc0658f6eaf4a54ad9252f12bd39223a980552c6ce115bd5fbf09961d8b89ef4",
+      "archive_sha256": "b5599584e6a7ad77298fd93905d9d345ce471ac30c5f02f6dd9d8a9682c5d9de",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-component-tools-7.stderr",
+      "archive": "final/final-component-tools-7.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-offline-7/validation.json",
+      "archive": "final/final-offline-7/validation.json.gz",
+      "sha256": "9c40ca090f18cada186d0350c99a2a842e2f61b8ac401420ed3e4375db822b48",
+      "archive_sha256": "f7e24a617fa67338b2690009ae8c6769b522625103f51dc6911d4af609b262f9",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-offline-7.log",
+      "archive": "final/final-offline-7.log.gz",
+      "sha256": "216713a9619ae5de34597cb963c871b5e7d9549c14db472129502e475b1ffd79",
+      "archive_sha256": "6bc037f21dc0d0ca8ec9c564b75b922dd79dcfe9333e982595b53d0fe8dc7d33",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-offline-7.stderr",
+      "archive": "final/final-offline-7.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-linux-corpus-7.log",
+      "archive": "final/final-linux-corpus-7.log.gz",
+      "sha256": "b573bf3ad40ae168e4c7c4f26f1fa739e13d2de0a07a501227dd78b69b3e418e",
+      "archive_sha256": "58274dff54225b18c1bafae15dd423f50f3d5f110904cfd009072f8f2919629a",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/final-linux-corpus-7.stderr",
+      "archive": "final/final-linux-corpus-7.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/freeze-verify-8-start.log",
+      "archive": "final/freeze-verify-8-start.log.gz",
+      "sha256": "3527db6c8e1d97c29f26e3fde30e25184e6550744044a347b63647e9cbd0cec9",
+      "archive_sha256": "bd5d95fe1e9c1faa72c1ce5e21b2f773a56ed6adc2ab05b98e945b3b5a02f1c6",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/freeze-verify-8-performance.log",
+      "archive": "final/freeze-verify-8-performance.log.gz",
+      "sha256": "3527db6c8e1d97c29f26e3fde30e25184e6550744044a347b63647e9cbd0cec9",
+      "archive_sha256": "bd5d95fe1e9c1faa72c1ce5e21b2f773a56ed6adc2ab05b98e945b3b5a02f1c6",
+      "scope": "final"
+    },
+    {
+      "source": "_scratch/i011-20261020/freeze-inputs-7.py",
+      "archive": "final/freeze-inputs-7.py.gz",
+      "sha256": "a819427499e97674bca5951e57cfe69b5fdf6bea3ee10da79df6c8680209d663",
+      "archive_sha256": "dd8a82291afa547bedd5640add70942c504eb76d28b83937b8e7d86ab4e4985e",
+      "scope": "final"
+    }
+  ],
+  "sealed_inputs": {
+    "archive": "final/campaign-inputs-9.json.gz",
+    "sha256": "6df5da05875f4a102806593da75589ea165b11042874046162779fe76a8c6488",
+    "archive_sha256": "3e50a8eca6db6acf4d74625598b844a37a5db1f8670ceeb05d3c5dded3ead256"
+  },
+  "coverage_limits": [
+    "I005 does not claim every error-kind combination for each operation.",
+    "I005 retains the source-reviewed Optimizer.SGD.State.new constructor exemption.",
+    "Physical Metal execution and performance remain unmeasured. Software device checks supply device acceptance."
+  ]
+}

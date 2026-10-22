@@ -1,5 +1,9 @@
 # Lo Native Compilation Milestone
 
+This document records historical implementation evidence before I011.
+The [native compilation contract](native-compilation-contract.md) defines the current LLVM build requirements.
+The [compiler plan](standalone-compiler-plan.md) records the current migration status.
+
 This milestone adds AOT compilation through generated Go source.
 Lo converts its checked graph into direct functions, local variables, branches, and loops.
 The pinned Go toolchain builds a native executable with the Lo runtime and adapters.

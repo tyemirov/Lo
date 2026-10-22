@@ -1,0 +1,9 @@
+{
+  "archive": "_scratch/compiler-distribution/packages-final/lo-linux-arm64-software.tar",
+  "archive_sha256": "7c8d78c771cecc0750478ed4a630216b22722328e06cf5a1d03f9f41fac5b18d",
+  "host": "linux/arm64",
+  "inventory_sha256": "1b033502b2a7059318147380d747b3a8d005d4b97881d0d59bba1b60ca876211",
+  "package": "_scratch/compiler-distribution/packages-final/lo-linux-arm64-software",
+  "toolchain_sha256": "fc7b85ee2102e1e76616d89bcdc4477095fefe0a775e2d4102856af5eccc6322",
+  "variant": "software"
+}

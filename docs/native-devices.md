@@ -3,7 +3,7 @@
 I010 supplies device resources for the LLVM runtime.
 The [device contract](device-resources.md) owns grants, transfers, failures, and resource limits.
 The [Metal arithmetic contract](metal-arithmetic.md) owns the `metal-fp32` rules.
-The [compiler plan](standalone-compiler-plan.md) owns the remaining distribution work.
+The [compiler plan](standalone-compiler-plan.md) owns distribution qualification and the language evolution sequence.
 
 ## Runtime Boundary
 
@@ -40,7 +40,7 @@ Its link recipe includes separate Foundation, Metal, and Objective-C inputs.
 The software recipe does not include these inputs.
 
 The native producer compiles the Objective-C adapter with the pinned LLVM compiler and declarations maintained inside Lo.
-The producer embeds the verified F014 kernel library in the Metal archive.
+The producer embeds the verified `runtime/metal/metal.metallib` library in the Metal archive.
 The installed compiler needs no Metal compiler or developer SDK to link that archive.
 Artifact metadata records the selected backend, runtime digest, and fixed Metal identity.
 
@@ -52,20 +52,26 @@ Admission checks the kernel bytes, length, and digest in the archive's canonical
 The separate kernel file and artifact metadata must identify those same bytes.
 
 Prepare the pinned inputs as described in the [runtime guide](native-runtime.md).
-The Metal producer requires the existing F014 kernel bundle and its producer receipt from `make build-metal`.
+The kernel files and `bin/lo-metal-build.json` receipt from `make build-metal` are necessary for the Metal producer.
+`runtime/metal/manifest.json` identifies the kernel, source files, and fixed numeric profile.
 Build the distribution with the explicit Metal target:
 
 ```sh
 make build-native-runtime-metal NATIVE_RUNTIME_STATE=_scratch/native-runtime </dev/null
 ```
 
-Compile a Metal program with the prepared distribution:
+Compile a Metal program with the development compiler and prepared runtime distribution:
 
 ```sh
-bin/lo build examples/xor_metal.lo --codegen llvm \
+LO_BUILD_ROOT="$PWD/_scratch/build-state" bin/lo build examples/xor_metal.lo \
   --toolchain _scratch/native-runtime/distribution/toolchain.json \
   --device-backend metal --output bin/xor-metal-llvm --format json </dev/null
 ```
+
+The installed Darwin Metal package supplies the same compile and link inputs.
+Use its `bin/lo` without `--toolchain` after installation.
+No Go, Rust, Xcode, Metal compiler, or developer SDK installation is necessary for installed compilation.
+The [distribution guide](compiler-distribution.md) separates package construction from installed compilation.
 
 Read its build identity with `bin/xor-metal-llvm metadata`.
 Execution requires `bin/xor-metal-llvm run --allow-device metal:0`.
@@ -94,7 +100,7 @@ Physical devices are not an acceptance condition.
 Run the native device and Metal checks with the selected distribution:
 
 ```sh
-make test-native-llvm NATIVE_RUNTIME_STATE=_scratch/native-runtime \
+make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run 'TestDevice|TestLLVM.*Metal|TestLLVM.*Device' -count=1 -timeout=30m" </dev/null
 ```
 

@@ -1,0 +1,28 @@
+{
+  "files": {
+    "Makefile": "a0151a7fec17079314e9bdc42e42c5621cb50472142dc07f34b1445742706456",
+    "cmd/lo/main.go": "714b4fa460beaa860527e7c3d7d3f1c9466d7e5640522942c75c52128bd964c7",
+    "internal/nativebuild/llvm.go": "b09d202d9ceda40e45d6a7a14080b4213a729ad8d852d89826cb7e2d002b4afa",
+    "internal/nativebuild/llvm_executable.go": "c2d385477e3e7188ec5d1ec5c00e96ff5df3baf003b903bb80ddd18fa1cec1e1",
+    "internal/nativebuild/llvm_generation_test.go": "82cd929e00fff96637cf1b305d3e80d437939d83be9a4dbdc8539b369a5bcd35",
+    "internal/nativebuild/llvm_host_libraries_test.go": "d9ff3cd558e273fdb556659e8237bdb5055898111f6c3d6fddaa70735705501d",
+    "internal/nativebuild/llvm_metal.go": "389cdc734abafd59b0f43b65fe1d099982e14f713c8ec573d3a0e4032d3ce1b8",
+    "internal/nativebuild/llvm_publication_test.go": "2ae05aad54e25ddeeadc5e62e6afd854796ba770d3e86ce6656ccd425ec38042",
+    "internal/nativebuild/llvm_snapshot.go": "5e2a3d508dd0542dd38f860274a83b05489dc453378f4682f7ef6d378905b9e4",
+    "internal/nativebuild/llvm_snapshot_darwin.go": "272e79c9614f05a5adbb798223f86eaaa5f02f97d37b7c0df10396e68f48ff19",
+    "internal/nativebuild/llvm_snapshot_linux.go": "4482beaee9659ffe035394e119c073e59e286b26326df4d0dc8761c9f9f65ccb",
+    "internal/nativebuild/llvm_snapshot_other.go": "230d95e819c5ac5a8aac64ed440e472f7b314f60613453a09ce4d3fd5395fbdf",
+    "internal/nativebuild/llvm_snapshot_test.go": "637e12f1ed0e591bda3a4ec945441ce33c91e185d1e57df7bde1e9b02bd80762",
+    "tests/integration/distribution_compiler_test.go": "ff699a5811c7f2dcd9864da61ebc9547634ffe651c3d79476c3d1a995d2e2c8a",
+    "tools/lodistribution/acceptance.py": "f7cb69d5be55345e7c4189ac9fafdae02b1aaf54514078b149692fcc6f0a309a",
+    "tools/lodistribution/guard.c": "4245cdcc342e6f2f49d10dd8a7ad4f97c755bba9c18b726c464430927546c1e4",
+    "tools/lodistribution/guest.py": "329cd0cc20b45b04eca4ff04df13c9df82d3273bf5ef501f444e93a5769cdc23",
+    "tools/lodistribution/guest_init.c": "a7ae9ec40d46f92e7277466c55399a9edf59b035e27886714058a95167de1141",
+    "tools/lodistribution/inputs.lock.json": "293bf8e593899111ee003ddac30c286d43bb9e0515c49c296030f6b3db5e8793",
+    "tools/lodistribution/package.py": "679474796243318ad778e09225b9fc46f19ce4186b3608b6cf0c2db58cfa92cb",
+    "tools/lodistribution/prepare.py": "3d34db193b9c57b06a9d18a5203ae1249c9076972d67712b1accd43a9a1fa9ea",
+    "tools/lodistribution/test_guest.py": "e6ad70e7cf453e5499059966ddb3b0e0661344c7e210a97c479b15baf5fa6ae6",
+    "tools/lodistribution/test_package.py": "c5db74b9c6896f6f686910ec42ab0a175a83f50f7b1d56b57ccd289e9de59a67"
+  },
+  "sha256": "849a0f90fe98e4a9c4eae4f9b47ba4ca75ec9e9512d928cc8f6fbc340be33d7f"
+}

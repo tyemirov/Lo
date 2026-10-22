@@ -1,0 +1,22 @@
+{
+  "distribution-tools.log.gz": {
+    "sha256": "7698c4a157c2812a36c67a44b12d7d0445837e3e9a0fbcd21cdb1ebbe913a9fb",
+    "uncompressed_sha256": "a04508b3e218877db428b5590e0d6a7f237e8d2767c213264f484b118e1caa21"
+  },
+  "installed-acceptance.log.gz": {
+    "sha256": "de203b5f9f5e306ba69735beea6eb18a02f72d9665eeaabbf9493f8d140bffd8",
+    "uncompressed_sha256": "2637e3c0a9bcb77815a9091864b2110c16d242165cd7323cfad3f66e4a92abd0"
+  },
+  "packaged-runtime-regression.log.gz": {
+    "sha256": "45903fd42bbc9e390db79812b38cb9f5413f75e436c09ed4452e3309ce9d2016",
+    "uncompressed_sha256": "e0514cd13583ebe1622e05d2cb78acf1573b99ad518a97061d801ec6e64071b0"
+  },
+  "linux-library-snapshot.log.gz": {
+    "sha256": "d155bda526c712f3105caf2076477360717986225f6096574d1265059f3142dd",
+    "uncompressed_sha256": "3e0197a466ef591a25eda079aac2650b54f6f18910e9cfe0b24c458a7181452e"
+  },
+  "make-ci.log.gz": {
+    "sha256": "179d79e0458e7770a1cf4c63fa6826273cab7d846ff3fada3e8b38ed460c487a",
+    "uncompressed_sha256": "a69cd2c6cfe544740bc8f446ed79678d7f4c8342722dc98b8008c6e08bebd400"
+  }
+}

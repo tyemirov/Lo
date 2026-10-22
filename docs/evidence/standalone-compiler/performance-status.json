@@ -1,0 +1,70 @@
+{
+  "issue": "I011",
+  "status": "measuring",
+  "performance_qualification_complete": false,
+  "acceptance_thresholds": "unchanged",
+  "load_policy": "record external load; do not gate or discard samples",
+  "measurement_contract": "three warmups; ten alternating measured pairs; all samples retained; one owned measurement job",
+  "supported_targets": [
+    "darwin/arm64",
+    "linux/arm64"
+  ],
+  "historical_campaign11": {
+    "path": "_scratch/i011-20261020/measurement-contract/prior-performance-status.json",
+    "sha256": "d02e52bb4f972ab616ab74d813bea209e2e9697b768a16a663884789a230fb7d",
+    "status": "admission-timeout",
+    "measurement_started": false,
+    "archive": "historical/measurement-contract/prior-performance-status.json.gz",
+    "archive_sha256": "14e11f9da13fa798c9ea6deb7a84fc867b068299c0d232ca9725ed294d20d6f0"
+  },
+  "nonperformance_receipt": "docs/evidence/standalone-compiler/nonperformance-validation.json",
+  "required_remaining": [
+    "all eight full lanes and both strict merges",
+    "evidence audit and independent review"
+  ],
+  "scope": "Fresh full CI passed. One complete performance campaign is running. Interim Darwin findings are documented before corrective work.",
+  "source_sha256": "b81dcd1d1928d92fe44c582488c05d4090651a8bf2051576aef0a8b60208d2dc",
+  "nonperformance_reuse": "docs/evidence/standalone-compiler/nonperformance-reuse.json",
+  "background_load_diagnostic": {
+    "path": "_scratch/i011-20261020/measurement-contract-final/load-diagnostic-1/status.json",
+    "status": "passed",
+    "targets": [
+      "darwin/arm64",
+      "linux/arm64"
+    ],
+    "samples_per_target": 10,
+    "qualification_scope": "startup diagnostic only; all owned processes reaped",
+    "archive": "final/measurement-contract-final/load-diagnostic-1/status.json.gz",
+    "sha256": "ceab79f97784af5b8b891c9c11a93cc317b48e5b0e845adf6abde4aa72c73108",
+    "archive_sha256": "49d09e053e7e98da180922173ab31835d01feb0f3c3aabc1271486709c49809d"
+  },
+  "active_validation": "One complete eight-lane serial performance campaign",
+  "validation_status": "_scratch/i011-20261020/measurement-capture-final/validation-status.json",
+  "superseded_source_sha256": "02c7b7dee63dca37cdc0f767972d376a2b6ff0341d301e4312a6ee687640e6c1",
+  "latest_ci_outcome": {
+    "status": "passed",
+    "exit_status": 0,
+    "native": {
+      "pass": 2635,
+      "fail": 0,
+      "skip": 0
+    },
+    "interpreter": {
+      "pass": 1741,
+      "fail": 0,
+      "skip": 157
+    },
+    "qualification_tool_tests": 197
+  },
+  "interim_findings": {
+    "document": "docs/native-qualification-findings.md",
+    "captured_utc": "2026-10-22T02:47:26Z",
+    "observations_archive": "final/measurement-capture-final/findings-snapshot-1/observations.json.gz",
+    "darwin_execution": "pass",
+    "darwin_process": "pass",
+    "darwin_http": "inconclusive: all four gates",
+    "darwin_build": "partial",
+    "linux": "not started at this snapshot",
+    "final_acceptance": false
+  }
+}

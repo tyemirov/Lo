@@ -1,0 +1,22 @@
+{
+  "record_type": "Observed tool results reported by the responsible workers; raw historical logs were not saved.",
+  "installed_frontend": {
+    "command": "make test-integration TEST_ARGS='-run TestInstalledCompilerIdentity -count=1' </dev/null",
+    "result": "Missing, corrupt, and incompatible manifest cases attempted Go with an empty PATH. Conflicting toolchain override reached the supplied manifest instead of rejecting it."
+  },
+  "package_cli": {
+    "result": "Three initial public CLI tests failed because prepare.py and package.py were absent."
+  },
+  "producer_admission": {
+    "result": "Public CLI tests failed because an empty source inventory was accepted, a stale runtime receipt was ignored, ambient GOFLAGS changed the frontend build, and an existing receipt did not prevent construction."
+  },
+  "producer_cleanup": {
+    "result": "A forced receipt-write failure left package output. Current tests inject partial archive and receipt failures, verify complete cleanup, and retry successfully."
+  },
+  "source_binding": {
+    "result": "A changed frontend source member in the corresponding-source archive was accepted. Current tests reject archive drift and source changes after frontend construction."
+  },
+  "export_receiver": {
+    "result": "Missing, empty successful, and truncated artifact exports failed new receiver tests before the byte-count validation change."
+  }
+}

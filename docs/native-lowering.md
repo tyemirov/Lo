@@ -19,7 +19,8 @@ It does not invoke Go, LLVM, a linker, or an SDK.
 Its receipt identifies the output as an LLVM module with the `lo-native-1` ABI.
 Runtime definitions are necessary before the module can become an executable.
 
-Keep the default executable build until I011 qualifies the replacement.
+Executable builds now use LLVM and the precompiled native runtime.
+I011 retains final performance qualification and completion review.
 Do not treat module generation as standalone distribution acceptance.
 The current LLVM emission route accepts the software build configuration.
 It rejects Metal selection without an automatic substitution.

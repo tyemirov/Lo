@@ -1,0 +1,9 @@
+{
+  "archive": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-metal.tar",
+  "archive_sha256": "e23c3264c2072a18b2e11f6d48208a0422c9462aa1917026beccf4191b2959e0",
+  "host": "darwin/arm64",
+  "inventory_sha256": "8d5b772322769904bd418eb456a867cc953b4c80a9fc297e63f4515be44e348b",
+  "package": "_scratch/compiler-distribution/packages-final/lo-darwin-arm64-metal",
+  "toolchain_sha256": "e9eefb08b53230eee2d406e6c26923f30a74484b1a247d33e05f21b2523d0f36",
+  "variant": "metal"
+}

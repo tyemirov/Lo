@@ -2,7 +2,8 @@
 
 Lo compiles source programs into a verified execution graph.
 Static inspection, the interpreter, and native code generation use the same checked graph.
-The reference implementation uses Go.
+The frontend and interpreter use Go.
+Native executables use LLVM and the static Rust runtime.
 This plan defines six implementation stages, their contracts, and their acceptance evidence.
 
 ## Status and Authority
@@ -101,7 +102,7 @@ Design sections:
 
 | Decision | Selected design | Reason |
 | --- | --- | --- |
-| Implementation language | Go | One implementation can contain the compiler, CLI, interpreter, and adapters. |
+| Implementation languages | Go and Rust | Go implements the frontend and interpreter. Rust implements the static native runtime. |
 | First product | Verifier with source diagnostics | Type and boundary checks establish the executable contract. |
 | Compiler output | Checked graph and optional native executable | Inspection, interpreter execution, and code generation use the same resolved program. |
 | Parser | Handwritten recursive descent | The small grammar permits direct control of source spans and diagnostics. |
@@ -120,10 +121,13 @@ Native code generation, optimization passes, and persistent executable artifacts
 
 The [native compilation milestone](native-compilation-plan.md) defines the additional implementation scope under F001.
 It leaves the completed six-stage acceptance scope unchanged.
-`lo build` now generates direct Go functions and standalone artifacts.
+`lo build` emits LLVM modules and links the static native runtime.
+The [standalone compiler plan](standalone-compiler-plan.md) owns I011 qualification and distribution acceptance.
 The [native contract](native-compilation-contract.md) defines the build limits and execution charges.
 
-Shared execution sessions, operation helpers, and adapters serve both execution backends.
+The interpreter and native runtime implement the same language and adapter contracts.
+The interpreter uses the Go packages below.
+`runtime/native` implements the native execution sessions, operations, and adapters.
 `internal/identity` owns flow identities.
 `internal/execution` owns budgets, failures, program entries, and request invocations.
 `internal/derivative` owns the runtime VJP arithmetic without compiler graph dependencies.
@@ -167,11 +171,13 @@ flowchart TD
     Lower --> Graph[Checked execution graph]
     Graph --> Inspect[Inspection report]
     Graph --> Runtime[Interpreter]
-    Graph --> Generate[Direct Go generation]
-    Generate --> Build[Pinned Go toolchain]
+    Graph --> Plan[Native lowering plan]
+    Plan --> Generate[LLVM module emission]
+    Generate --> Build[Packaged LLVM and LLD]
+    RuntimeLibrary[Static Rust runtime] --> Build
     Build --> Native[Native executable]
     Native --> Adapters
-    Runtime --> Adapters[File and HTTP adapters]
+    Runtime --> Adapters[File, Process, and HTTP adapters]
 ```
 
 Each stage gives a representation with more guarantees.
@@ -415,7 +421,8 @@ The [native contract](native-compilation-contract.md#artifact-construction) spec
 
 
 The interpreter evaluates graph regions, and the native backend executes generated code.
-The two backends use shared execution sessions and pass typed requests to the same adapters.
+Each backend preserves execution sessions, budgets, failures, and typed adapter requests.
+The native runtime uses its own ABI implementation of these contracts.
 The adapter interface owns external operations and converts recoverable failures into Lo errors.
 Each Lo error contains the required kind, input record, and trace data.
 
@@ -694,7 +701,9 @@ Each new output must fit the remaining budget before allocation.
 This rule bounds live CPU element payloads through the stricter cumulative value budget.
 Shared reshape storage does not reduce value charges.
 Failed work retains no output buffer in an error snapshot.
-The Go allocator and garbage collector remain outside exact process-memory guarantees.
+The interpreter uses the Go allocator and garbage collector.
+Native values use reference counting.
+The two runtimes do not supply an exact process-memory guarantee.
 F008 implements allocation receipts, explicit transfers, and the combined live resource ledger.
 The [device resource contract](device-resources.md) specifies live limits and allocation lifetime.
 
@@ -712,7 +721,7 @@ A host failure bypasses Lo handlers and prevents result publication.
 
 The two backends check weight before they publish an expression result.
 These budgets bound specified evaluation work and data expansion.
-They do not specify the Go process's exact memory use.
+They do not specify exact process memory use.
 `runtime.limit` reports a budget failure with exit status `2`.
 `runtime.cancelled` reports host cancellation with exit status `2`.
 Neither failure enters a Lo handler.
@@ -956,16 +965,18 @@ Inspection does not need these files to exist.
 
 ## Package Boundaries
 
-The following paths identify the implemented Go package responsibilities.
+The following paths identify the compiler and runtime responsibilities.
 
 | Path | Responsibility |
 | --- | --- |
 | `cmd/lo/` | Source compiler entry point and native build commands. |
 | `internal/runner/` | Runtime arguments, output streams, signals, service lifecycle, and exit status. |
-| `internal/execution/` | Shared execution sessions, budgets, boundaries, failures, and program entries. |
-| `internal/runtimeops/` | Shared runtime operations and value construction. |
-| `internal/codegen/`, `internal/nativebuild/` | Direct Go generation and isolated artifact construction. |
-| `internal/runtimebundle/` | Embedded runtime sources and the content manifest for native builds. |
+| `internal/execution/` | Interpreter execution sessions, budgets, boundaries, failures, and program entries. |
+| `internal/runtimeops/` | Interpreter runtime operations and value construction. |
+| `internal/nativeplan/` | Checked native statements, branches, callbacks, source locations, and work charges. |
+| `internal/llvmemit/`, `internal/nativebuild/` | LLVM emission, verified tool inputs, and isolated artifact construction. |
+| `runtime/native/` | Static Rust runtime, ABI, native values, numerical operations, and adapters. |
+| `runtime/metal/` | Direct Metal kernel source, compiled library, and producer manifest. |
 | `internal/identity/` | Flow identities for the two execution backends. |
 | `internal/autodiff/` | Checked derivative plans. |
 | `internal/derivative/` | Runtime VJP arithmetic without compiler graph dependencies. |
@@ -992,7 +1003,7 @@ The following paths identify the implemented Go package responsibilities.
 The compiler core imports typed catalog definitions.
 Concrete adapter implementations stay outside the compiler core.
 The source CLI selects interpreter execution or native artifact construction through explicit commands.
-The runtime runner connects each execution backend to the adapters.
+Each runtime connects its execution sessions to its adapters.
 The inspector uses the graph without a runtime dependency.
 Private representations prevent unrestricted construction of checked graphs and valid domain values.
 Smart constructors return `(Type, error)` where construction has invariants.
@@ -1334,7 +1345,7 @@ Response validation errors use operation `HTTP.respond`.
 The adapter frame identifies the `port` input field and its type.
 Request errors preserve available method and path bytes in their input record.
 
-The Go HTTP parser rejects malformed protocol input before a Lo request exists.
+Each HTTP parser rejects malformed protocol input before a Lo request exists.
 Those protocol rejections do not enter Lo handlers.
 A request failure that leaves the response connection usable can produce an `onError` response.
 A closed connection cannot guarantee delivery of that response.
@@ -1400,7 +1411,7 @@ Cleanup or shutdown failure produces a host diagnostic and exit status `2`.
 | --- | --- |
 | Active servers | 64 |
 | One request body | 1 MiB |
-| Go HTTP header limit | 64 KiB configuration |
+| HTTP header limit | 64 KiB |
 | Request reads, response writes, and request evaluation | 5 seconds each |
 | Idle connection | 30 seconds |
 | Orderly shutdown | 5 seconds |
