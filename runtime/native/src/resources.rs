@@ -65,10 +65,14 @@ impl Ledger {
             class_bytes: [0; 4],
             peak_bytes: [0; 4],
             entries: BTreeMap::new(),
-            scopes: vec![Some(Scope {
-                parent: None,
-                owned: BTreeSet::new(),
-            })],
+            scopes: {
+                let mut scopes = Vec::with_capacity(2);
+                scopes.push(Some(Scope {
+                    parent: None,
+                    owned: BTreeSet::new(),
+                }));
+                scopes
+            },
             current: 0,
         }
     }

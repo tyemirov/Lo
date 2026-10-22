@@ -1,3 +1,4 @@
+mod metadata;
 mod action;
 mod adapters;
 mod autodiff;

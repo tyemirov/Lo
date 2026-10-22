@@ -1,4 +1,5 @@
 pub use crate::adapters::Session;
+use crate::metadata::{Document, Fields, Location};
 use crate::{action::Action, value::*};
 use serde_json::Value as Json;
 use std::{
@@ -10,6 +11,7 @@ use std::{
     thread::{self, ThreadId},
     time::Instant,
 };
+pub static LIVE_PROGRAMS: AtomicU64 = AtomicU64::new(0);
 pub static LIVE_CONTEXTS: AtomicU64 = AtomicU64::new(0);
 pub const MAX_BYTES: usize = 16 << 20;
 pub const MAX_ITEMS: usize = 1_000_000;
@@ -32,6 +34,7 @@ pub enum Fault {
 }
 #[derive(Clone, Default)]
 pub struct BoundaryDetails {
+    pub context_captured: bool,
     pub process_progress: Option<Json>,
     pub http_progress: Option<Json>,
     pub write_progress: Option<Json>,
@@ -44,6 +47,18 @@ pub struct BoundaryDetails {
 }
 impl BoundaryDetails {
     pub fn merge(&mut self, other: Self) {
+        if other.context_captured {
+            self.context_captured = true;
+            self.last_completed_activation = other.last_completed_activation;
+            self.flow_progress = other.flow_progress;
+        } else {
+            if other.last_completed_activation.is_some() {
+                self.last_completed_activation = other.last_completed_activation;
+            }
+            if !other.flow_progress.is_empty() {
+                self.flow_progress = other.flow_progress;
+            }
+        }
         if other.process_progress.is_some() {
             self.process_progress = other.process_progress;
         }
@@ -58,12 +73,6 @@ impl BoundaryDetails {
         }
         if other.removal_progress.is_some() {
             self.removal_progress = other.removal_progress;
-        }
-        if other.last_completed_activation.is_some() {
-            self.last_completed_activation = other.last_completed_activation;
-        }
-        if !other.flow_progress.is_empty() {
-            self.flow_progress = other.flow_progress;
         }
         self.cleanup_errors.extend(other.cleanup_errors);
         self.cleanup_messages.extend(other.cleanup_messages);
@@ -172,9 +181,28 @@ pub enum Argument {
     Flow(usize),
 }
 #[derive(Clone)]
-pub struct Site {
+pub struct Site(Arc<SiteData>);
+impl std::ops::Deref for Site {
+    type Target = SiteData;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl std::ops::DerefMut for Site {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        Arc::make_mut(&mut self.0)
+    }
+}
+#[derive(Clone)]
+pub enum Literal {
+    Value(Handle),
+    Limit(&'static str),
+}
+#[derive(Clone)]
+pub struct SiteData {
+    pub literal: Option<Literal>,
     pub action: Action,
-    pub raw: Json,
+    pub raw: Location,
     pub typ: Type,
     pub id: u64,
     pub operation: String,
@@ -183,14 +211,24 @@ pub struct Site {
     pub arguments: Vec<Argument>,
 }
 #[derive(Clone)]
-pub struct Flow {
+pub struct Flow(Arc<FlowData>);
+impl std::ops::Deref for Flow {
+    type Target = FlowData;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+pub struct FlowData {
     pub identity: String,
     pub handler: Option<usize>,
     pub name: String,
     pub parameters: Vec<(String, Type)>,
     pub output: Type,
 }
+struct ProgramLifetime;
 pub struct Program {
+    _lifetime: ProgramLifetime,
+    control_null: Handle,
     pub artifact: Option<Json>,
     pub derivatives: Vec<crate::autodiff::Plan>,
     pub sites: Vec<Site>,
@@ -198,6 +236,7 @@ pub struct Program {
     pub has_result: bool,
 }
 pub struct Context {
+    pub control_null: Handle,
     pub session: Arc<Session>,
     pub cancellation: Arc<AtomicBool>,
     pub deadline: Option<Instant>,
@@ -220,21 +259,25 @@ pub struct Context {
     pub flow_progress: Vec<Handle>,
     pub flow_fault_progress: bool,
 }
-fn uint(v: &Json, key: &str) -> Result<usize, String> {
-    v[key]
+fn uint(v: &impl Fields, key: &str) -> Result<usize, String> {
+    v.field(key)
         .as_u64()
         .and_then(|n| usize::try_from(n).ok())
         .ok_or_else(|| format!("invalid metadata {key}"))
 }
-fn string(v: &Json, key: &str) -> Result<String, String> {
-    v[key]
+fn borrowed_string<'a>(v: &'a impl Fields, key: &str) -> Result<&'a str, String> {
+    v.field(key)
         .as_str()
-        .map(str::to_owned)
         .ok_or_else(|| format!("invalid metadata {key}"))
+}
+fn string(v: &impl Fields, key: &str) -> Result<String, String> {
+    borrowed_string(v, key).map(str::to_owned)
 }
 impl Program {
     pub fn parse(data: &[u8], flow_count: usize) -> Result<Self, String> {
-        let v: Json = serde_json::from_slice(data).map_err(|e| format!("program metadata: {e}"))?;
+        let document: Document =
+            serde_json::from_slice(data).map_err(|e| format!("program metadata: {e}"))?;
+        let v = document.root;
         if v["abi"] != "lo-native-1" {
             return Err("program ABI identity mismatch".into());
         }
@@ -255,24 +298,20 @@ impl Program {
             if uint(t, "id")? != i {
                 return Err("noncanonical type identifier".into());
             }
-            let typ = Type::parse(&string(t, "name")?)?;
-            if typ.kind() != string(t, "kind")? {
+            let typ = Type::parse(borrowed_string(t, "name")?)?;
+            if typ.kind() != borrowed_string(t, "kind")? {
                 return Err("type kind mismatch".into());
             }
             types.push(typ)
         }
         let mut sites = vec![];
-        for (i, s) in v["locations"]
-            .as_array()
-            .ok_or("absent metadata locations")?
-            .iter()
-            .enumerate()
-        {
-            if uint(s, "id")? != i {
+        let locations = document.locations.ok_or("absent metadata locations")?;
+        for (i, s) in locations.into_iter().enumerate() {
+            if uint(&s, "id")? != i {
                 return Err("noncanonical location identifier".into());
             }
             let t = types
-                .get(uint(s, "type")?)
+                .get(uint(&s, "type")?)
                 .ok_or("unknown site type")?
                 .clone();
             let labels = s["labels"]
@@ -292,7 +331,7 @@ impl Program {
             {
                 let t = uint(a, "type")?;
                 let f = uint(a, "flow")?;
-                arguments.push(match string(a, "kind")?.as_str() {
+                arguments.push(match borrowed_string(a, "kind")? {
                     "value" if f == 0 => {
                         Argument::Value(types.get(t).ok_or("unknown argument type")?.clone())
                     }
@@ -300,35 +339,38 @@ impl Program {
                     _ => return Err("invalid argument metadata".into()),
                 });
             }
-            let action = Action::parse(&string(s, "action")?)?;
-            let _ = string(s, "file")?;
-            let _ = string(s, "owner")?;
+            let action = Action::parse(borrowed_string(&s, "action")?)?;
+            let _ = borrowed_string(&s, "file")?;
+            let _ = borrowed_string(&s, "owner")?;
             for key in ["text", "float_bits", "field"] {
-                string(s, key)?;
+                borrowed_string(&s, key)?;
             }
             for key in ["start", "end"] {
                 for coordinate in ["offset", "line", "column"] {
-                    let n = uint(&s[key], coordinate)?;
+                    let n = uint(s.coordinate(key), coordinate)?;
                     if coordinate != "offset" && n == 0 {
                         return Err("invalid location coordinate".into());
                     }
                 }
             }
-            if uint(&s["end"], "offset")? < uint(&s["start"], "offset")?
-                || uint(&s["end"], "line")? < uint(&s["start"], "line")?
+            if uint(s.coordinate("end"), "offset")? < uint(s.coordinate("start"), "offset")?
+                || uint(s.coordinate("end"), "line")? < uint(s.coordinate("start"), "line")?
             {
                 return Err("invalid source span".into());
             }
-            sites.push(Site {
+            let operation = string(&s, "operation")?;
+            let flow = uint(&s, "flow")?;
+            sites.push(Site(Arc::new(SiteData {
+                literal: None,
                 action,
-                raw: s.clone(),
                 typ: t,
                 id: i as u64,
-                operation: string(s, "operation")?,
+                operation,
                 labels,
                 arguments,
-                flow: uint(s, "flow")?,
-            });
+                flow,
+                raw: s,
+            })));
         }
         let flows_json = v["flows"].as_array().ok_or("absent metadata flows")?;
         if flows_json.len() != flow_count {
@@ -367,13 +409,13 @@ impl Program {
             {
                 return Err("invalid flow handler".into());
             }
-            flows.push(Flow {
+            flows.push(Flow(Arc::new(FlowData {
                 identity: string(f, "identity")?,
                 handler: f["handler"].as_u64().map(|h| h as usize),
                 name: string(f, "name")?,
                 parameters,
                 output,
-            });
+            })));
         }
         for f in flows_json {
             if let Some(handler) = f["handler"].as_u64() {
@@ -388,7 +430,7 @@ impl Program {
             }
         }
         let derivatives = crate::autodiff::parse(&v["derivatives"], &types, &sites)?;
-        for site in &sites {
+        for site in &mut sites {
             if site.action == Action::FlowRef && site.flow >= flow_count {
                 return Err("invalid flow reference".into());
             }
@@ -451,6 +493,28 @@ impl Program {
                 if !valid {
                     return Err("invalid native literal metadata".into());
                 }
+                site.literal = Some(match site.typ.kind() {
+                    "Int" => {
+                        let number = num_bigint::BigInt::parse_bytes(t.as_bytes(), 10)
+                            .ok_or("invalid native integer metadata")?;
+                        if number.bits() > MAX_BITS {
+                            Literal::Limit("integer bits")
+                        } else {
+                            Literal::Value(int(number))
+                        }
+                    }
+                    "Float" => {
+                        let bits =
+                            u64::from_str_radix(site.raw["float_bits"].as_str().unwrap(), 16)
+                                .map_err(|_| "invalid native Float metadata")?;
+                        Literal::Value(new(atom("Float"), Data::Float(f64::from_bits(bits))))
+                    }
+                    "String" if t.len() > MAX_BYTES => Literal::Limit("string bytes"),
+                    "String" => Literal::Value(text(t)),
+                    "Bool" => Literal::Value(boolean(t == "true")),
+                    "Null" => Literal::Value(new(atom("Null"), Data::Null)),
+                    _ => unreachable!(),
+                });
             }
             if site.action == Action::Project && site.raw["field"].as_str().unwrap().is_empty() {
                 return Err("invalid projection metadata".into());
@@ -476,15 +540,24 @@ impl Program {
                 }
             }
         }
+        let has_result = v["has_result"]
+            .as_bool()
+            .ok_or("invalid program result presence")?;
+        LIVE_PROGRAMS.fetch_add(1, Ordering::Relaxed);
         Ok(Self {
+            _lifetime: ProgramLifetime,
+            control_null: new(atom("Null"), Data::Null),
             artifact: v.get("artifact").cloned(),
             derivatives,
             sites,
             flows,
-            has_result: v["has_result"]
-                .as_bool()
-                .ok_or("invalid program result presence")?,
+            has_result,
         })
+    }
+}
+impl Drop for ProgramLifetime {
+    fn drop(&mut self) {
+        LIVE_PROGRAMS.fetch_sub(1, Ordering::Relaxed);
     }
 }
 impl Context {
@@ -499,6 +572,7 @@ impl Context {
     ) -> Self {
         LIVE_CONTEXTS.fetch_add(1, Ordering::Relaxed);
         Self {
+            control_null: session.program.control_null.clone(),
             cancellation: Arc::new(AtomicBool::new(false)),
             deadline: None,
             observe_cli_cancel,
@@ -564,6 +638,7 @@ impl Context {
         }
         let removal = self.files.last_removal();
         let mut details = BoundaryDetails {
+            context_captured: true,
             last_completed_activation: self.last_activation.clone(),
             flow_progress: self.flow_progress.clone(),
             removal_entries: removal.as_ref().map(|(entries, _)| entries.json()),
@@ -598,14 +673,21 @@ impl Context {
     pub fn add_file_weight(&mut self, weight: u64) {
         self.weight += weight;
     }
-    pub fn entry(&self) -> Result<(), Fault> {
+    fn check_owner(&self) -> Result<(), Fault> {
         if self.owner != thread::current().id() {
             Err(host("context belongs to another thread"))
-        } else if let Some(fault) = &self.fault {
-            Err(fault.clone())
         } else {
             Ok(())
         }
+    }
+    pub fn check_fault(&self) -> Result<(), Fault> {
+        self.fault
+            .as_ref()
+            .map_or(Ok(()), |fault| Err(fault.clone()))
+    }
+    pub fn entry(&self) -> Result<(), Fault> {
+        self.check_owner()?;
+        self.check_fault()
     }
     pub fn step(&mut self) -> Result<(), Fault> {
         self.check_cancel()?;
@@ -616,7 +698,7 @@ impl Context {
         Ok(())
     }
     pub fn check_cancel(&self) -> Result<(), Fault> {
-        self.entry()?;
+        self.check_fault()?;
         let polls = self.cancel_polls.get().saturating_add(1);
         self.cancel_polls.set(polls);
         if self.cancelled

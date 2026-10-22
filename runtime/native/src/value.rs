@@ -13,7 +13,7 @@ pub static LIVE_VALUES: AtomicU64 = AtomicU64::new(0);
 pub type Handle = Arc<Value>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Type {
-    Atom(String),
+    Atom(&'static str),
     Nominal(String, Box<Type>),
     List(Box<Type>),
     Map(Box<Type>, Box<Type>),
@@ -115,50 +115,15 @@ impl Type {
                 };
             }
         }
-        if matches!(
-            s,
-            "Int"
-                | "String"
-                | "Bool"
-                | "Null"
-                | "Scalar"
-                | "Bytes"
-                | "Float"
-                | "Error"
-                | "Record"
-                | "File.Path"
-                | "Tensor<FP32>"
-                | "Device"
-                | "Optimizer.SGD.Config"
-                | "Optimizer.AdamW.Config"
-                | "File.Write"
-                | "File.WriteReceipt"
-                | "File.Entry"
-                | "File.Append"
-                | "File.Remove"
-                | "File.AppendReceipt"
-                | "File.RemoveReceipt"
-                | "HTTP.Headers"
-                | "HTTP.Request"
-                | "HTTP.URL"
-                | "HTTP.Method"
-                | "HTTP.Client.Request"
-                | "HTTP.Response"
-                | "HTTP.Server"
-                | "HTTP.ServerReceipt"
-                | "Process.Executable"
-                | "Process.Command"
-                | "Process.Result"
-                | "Process.Termination"
-        ) {
-            Ok(Self::Atom(s.into()))
+        if let Some(name) = atom_name(s) {
+            Ok(Self::Atom(name))
         } else {
             Err(format!("unsupported native type {s}"))
         }
     }
     pub fn name(&self) -> String {
         match self {
-            Self::Atom(a) => a.clone(),
+            Self::Atom(a) => (*a).to_owned(),
             Self::Nominal(kind, schema) => format!("{kind}<{}>", schema.name()),
             Self::List(a) => format!("List<{}>", a.name()),
             Self::Range(a) => format!("Range<{}>", a.name()),
@@ -184,12 +149,15 @@ impl Type {
             Self::Record(_) => "ExactRecord",
         }
     }
-    pub fn base(&self) -> Type {
-        if let Self::Fallible(t) = self {
-            *t.clone()
+    pub fn base_ref(&self) -> &Self {
+        if let Self::Fallible(base) = self {
+            base
         } else {
-            self.clone()
+            self
         }
+    }
+    pub fn base(&self) -> Self {
+        self.base_ref().clone()
     }
 }
 #[derive(Clone)]
@@ -224,6 +192,7 @@ pub struct Error {
     pub operation: String,
 }
 pub struct Value {
+    contains_storage: bool,
     pub typ: Type,
     pub data: Data,
     pub weight: u64,
@@ -233,8 +202,50 @@ impl Drop for Value {
         LIVE_VALUES.fetch_sub(1, AtomicOrder::Relaxed);
     }
 }
+const ATOM_NAMES: &[&str] = &[
+    "Int",
+    "String",
+    "Bool",
+    "Null",
+    "Scalar",
+    "Bytes",
+    "Float",
+    "Error",
+    "Record",
+    "File.Path",
+    "Tensor<FP32>",
+    "Device",
+    "Optimizer.SGD.Config",
+    "Optimizer.AdamW.Config",
+    "File.Write",
+    "File.WriteReceipt",
+    "File.Entry",
+    "File.Append",
+    "File.Remove",
+    "File.AppendReceipt",
+    "File.RemoveReceipt",
+    "HTTP.Headers",
+    "HTTP.Request",
+    "HTTP.URL",
+    "HTTP.Method",
+    "HTTP.Client.Request",
+    "HTTP.Response",
+    "HTTP.Server",
+    "HTTP.ServerReceipt",
+    "Process.Executable",
+    "Process.Command",
+    "Process.Result",
+    "Process.Termination",
+];
+fn atom_name(name: &str) -> Option<&'static str> {
+    ATOM_NAMES
+        .iter()
+        .copied()
+        .find(|candidate| *candidate == name)
+}
+#[inline]
 pub fn atom(s: &str) -> Type {
-    Type::Atom(s.into())
+    Type::Atom(atom_name(s).unwrap_or_else(|| std::process::abort()))
 }
 fn add_weight(a: u64, b: u64) -> u64 {
     a.saturating_add(b).min(1 << 62)
@@ -273,8 +284,41 @@ pub fn new(typ: Type, data: Data) -> Handle {
                 .chain(e.trace.iter().chain(&e.flow_progress).map(|x| x.weight)),
             ),
         };
+    let contains_storage = match &data {
+        Data::Tensor(_) | Data::Adapter(_) => true,
+        Data::Wrapped(value) | Data::Success(value) | Data::Failure(value) => {
+            value.contains_storage
+        }
+        Data::List(values) => values.iter().any(|value| value.contains_storage),
+        Data::Record(values) => values.values().any(|value| value.contains_storage),
+        Data::Map(values) => values
+            .iter()
+            .any(|(key, value)| key.contains_storage || value.contains_storage),
+        Data::Range(first, last, _, _) => first.contains_storage || last.contains_storage,
+        Data::Error(error) => {
+            error.input.contains_storage
+                || error
+                    .trace
+                    .iter()
+                    .chain(&error.flow_progress)
+                    .any(|value| value.contains_storage)
+        }
+        Data::Int(_)
+        | Data::Float(_)
+        | Data::Text(_)
+        | Data::Bool(_)
+        | Data::Null
+        | Data::Bytes(_)
+        | Data::Flow(_)
+        | Data::Device(_) => false,
+    };
     LIVE_VALUES.fetch_add(1, AtomicOrder::Relaxed);
-    Arc::new(Value { typ, data, weight })
+    Arc::new(Value {
+        typ,
+        data,
+        weight,
+        contains_storage,
+    })
 }
 pub fn int(n: impl Into<BigInt>) -> Handle {
     new(atom("Int"), Data::Int(n.into()))
@@ -304,6 +348,9 @@ pub fn failure(t: &Type, e: Handle) -> Handle {
     new(t.clone(), Data::Failure(e))
 }
 impl Value {
+    pub fn contains_storage(&self) -> bool {
+        self.contains_storage
+    }
     pub fn integer(&self) -> &BigInt {
         if let Data::Int(v) = &self.data {
             v

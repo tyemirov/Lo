@@ -1,3 +1,4 @@
+use crate::metadata::Fields;
 use crate::{
     context::*,
     resources::Class,
@@ -47,8 +48,9 @@ pub struct Tape {
     adjoints: BTreeMap<usize, Tensor>,
 }
 
-fn index(value: &Json, field: &str) -> Result<usize, String> {
-    value[field]
+fn index(value: &impl Fields, field: &str) -> Result<usize, String> {
+    value
+        .field(field)
         .as_u64()
         .and_then(|n| usize::try_from(n).ok())
         .ok_or_else(|| format!("invalid derivative {field}"))

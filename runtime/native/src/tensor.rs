@@ -168,6 +168,9 @@ fn visit_storages(
     Ok(())
 }
 pub fn validate_inputs(c: &Context, values: &[Handle]) -> Result<(), Fault> {
+    if values.iter().all(|value| !value.contains_storage()) {
+        return Ok(());
+    }
     visit_storages(values, |storage| c.resources.validate(storage))
 }
 pub fn host_publishable(value: &Handle) -> bool {
@@ -183,6 +186,9 @@ pub fn host_publishable(value: &Handle) -> bool {
     publishable
 }
 pub fn allocations(values: &[Handle]) -> Vec<u64> {
+    if values.iter().all(|value| !value.contains_storage()) {
+        return vec![];
+    }
     let mut out = vec![];
     if visit_storages(values, |storage| {
         out.push(storage.id);

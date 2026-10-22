@@ -139,7 +139,7 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
                 &format!("{}: {}", error.kind, error.message),
             );
             if let Some(site) = program.sites.get(error.site as usize) {
-                d["span"] = json!({"file":site.raw["file"],"start":site.raw["start"],"end":site.raw["end"]});
+                d["span"] = json!({"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")});
             }
             d["error"] = e.json();
             (d, 1)
@@ -151,7 +151,7 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
             d["message"].as_str().unwrap()
         ));
     }
-    if status == 2 && !context.flow_progress.is_empty() {
+    if status == 2 && !details.context_captured && !context.flow_progress.is_empty() {
         d["flow_progress"] = json!(context
             .flow_progress
             .iter()
@@ -161,8 +161,10 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
     if d["error"]["flow_progress"].is_array() {
         d["flow_progress"] = d["error"]["flow_progress"].clone();
     }
-    if let Some(activation) = &context.last_activation {
-        d["last_completed_activation"] = activation.clone();
+    if !details.context_captured {
+        if let Some(activation) = &context.last_activation {
+            d["last_completed_activation"] = activation.clone();
+        }
     }
     for (key, value) in [
         ("process_progress", details.process_progress),
