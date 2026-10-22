@@ -11,8 +11,24 @@ import (
 )
 
 func TestNativeMetalSelection(t *testing.T) {
+	compiler, _ := controlledLLVMTools(t)
+	raw, err := os.ReadFile(os.Getenv("LO_LLVM_TOOLCHAIN"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var distribution map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &distribution); err != nil {
+		t.Fatal(err)
+	}
+	delete(distribution, "metal")
+	raw, err = json.Marshal(distribution)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest := filepath.Join(t.TempDir(), "software.json")
+	writeLLVMFixture(t, manifest, raw)
 	source := sourceFile(t, "return 1")
-	unavailable := "build.backend-unavailable"
+	unavailable := "build.toolchain"
 	if runtime.GOOS+"/"+runtime.GOARCH != "darwin/arm64" {
 		unavailable = "build.unsupported-target"
 	}
@@ -28,8 +44,8 @@ func TestNativeMetalSelection(t *testing.T) {
 		{"grant", []string{"--device-backend", "metal", "--allow-device", "metal:0"}, "cli.invalid-invocation"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			args := append([]string{"build", source, "--output", filepath.Join(t.TempDir(), "program"), "--format", "json"}, tc.args...)
-			command := exec.Command(binary, args...)
+			args := append([]string{"build", source, "--toolchain", manifest, "--output", filepath.Join(t.TempDir(), "program"), "--format", "json"}, tc.args...)
+			command := exec.Command(compiler, args...)
 			command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 			var stderr bytes.Buffer
 			command.Stderr = &stderr

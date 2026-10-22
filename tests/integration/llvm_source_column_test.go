@@ -1,7 +1,6 @@
 package integration_test
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -41,11 +40,11 @@ func TestLLVMSourceColumnOverflow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	constant := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2})+)"`).FindSubmatch(module)
+	constant := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2}|[^"\\])*)"`).FindSubmatch(module)
 	if constant == nil {
 		t.Fatal("missing runtime metadata")
 	}
-	metadata, err := hex.DecodeString(strings.ReplaceAll(string(constant[1]), `\`, ""))
+	metadata, err := decodeLLVMBytes(constant[1])
 	if err != nil {
 		t.Fatal(err)
 	}

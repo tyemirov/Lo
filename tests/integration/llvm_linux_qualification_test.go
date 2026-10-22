@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -14,6 +15,14 @@ import (
 
 func runLinuxLLVMExecutable(t *testing.T, executable string, arguments ...string) result {
 	t.Helper()
+	return runLinuxLLVMExecutableWithCapture(t, executable, "", arguments...)
+}
+
+func runLinuxLLVMExecutableWithCapture(t *testing.T, executable, capture string, arguments ...string) result {
+	t.Helper()
+	if runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
+		return runExecutableAt(t, filepath.Dir(executable), executable, arguments...)
+	}
 	preparation := os.Getenv("LO_NATIVE_PREPARATION")
 	if preparation == "" {
 		t.Fatal("Linux LLVM qualification requires LO_NATIVE_PREPARATION")
@@ -36,7 +45,12 @@ func runLinuxLLVMExecutable(t *testing.T, executable string, arguments ...string
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Second)
 	defer cancel()
-	args := append([]string{"-B", filepath.Join(repository, "tools/nativeruntime/run.py"), "--preparation", preparation, executable}, arguments...)
+	args := []string{"-B", filepath.Join(repository, "tools/nativeruntime/run.py"), "--preparation", preparation}
+	if capture != "" {
+		args = append(args, "--capture-file", capture)
+	}
+	args = append(args, executable)
+	args = append(args, arguments...)
 	command := exec.CommandContext(ctx, python, args...)
 	command.Dir = repository
 	command.Env = append(os.Environ(), "CI=1", "PYTHONDONTWRITEBYTECODE=1")
@@ -63,7 +77,7 @@ func linuxLLVMArtifact(t *testing.T, source string) string {
 		t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")
 	}
 	artifact := filepath.Join(t.TempDir(), "linux-program")
-	got := runExecutable(t, binary, "build", sourceFile(t, source), "--codegen", "llvm", "--toolchain", manifest, "--target", "linux/arm64", "--output", artifact, "--format", "json")
+	got := runExecutable(t, binary, "build", sourceFile(t, source), "--toolchain", manifest, "--target", "linux/arm64", "--output", artifact, "--format", "json")
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("public Linux LLVM build: %+v", got)
 	}

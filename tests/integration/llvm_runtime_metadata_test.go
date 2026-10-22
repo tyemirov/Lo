@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -17,12 +16,12 @@ func TestLLVMRuntimeRejectsAlteredMetadata(t *testing.T) {
 		number: 5,
 		transform: func(t *testing.T, module []byte) []byte {
 			t.Helper()
-			declaration := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2})+)"`)
+			declaration := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2}|[^"\\])*)"`)
 			match := declaration.FindSubmatch(module)
 			if match == nil {
 				t.Fatal("missing emitted metadata")
 			}
-			data, err := hex.DecodeString(strings.ReplaceAll(string(match[1]), `\`, ""))
+			data, err := decodeLLVMBytes(match[1])
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -175,12 +174,12 @@ func TestLLVMRuntimeRejectsDerivativeContracts(t *testing.T) {
 
 func rewriteLLVMMetadata(t *testing.T, module []byte, edit func(map[string]json.RawMessage)) []byte {
 	t.Helper()
-	declaration := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2})+)"`)
+	declaration := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2}|[^"\\])*)"`)
 	match := declaration.FindSubmatch(module)
 	if match == nil {
 		t.Fatal("missing emitted metadata")
 	}
-	data, err := hex.DecodeString(strings.ReplaceAll(string(match[1]), `\`, ""))
+	data, err := decodeLLVMBytes(match[1])
 	if err != nil {
 		t.Fatal(err)
 	}

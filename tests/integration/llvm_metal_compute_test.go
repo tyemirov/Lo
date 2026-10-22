@@ -321,7 +321,7 @@ func TestLLVMLinuxMetalBoundaryFailures(t *testing.T) {
 
 func llvmMetalCancellationScenarios() []llvmRuntimeScenario {
 	const source = `flow Handle(e:Error)->Int{return 99};flow Main()->Int onError Handle {a=Tensor.to(Tensor.new(List.new(1.0),List.new()),Device.new("metal:0"));unused=Tensor.mul(a,a);effect=File.Write.new(File.Path.new("later"),Bytes.new("unexpected"));commit effect;return 0};return Main()`
-	return []llvmRuntimeScenario{{name: "cancel-during-compute", number: 9, source: source, harness: "testdata/native-runtime/metal-executor.c"}, {name: "lost-and-cancellation-during-compute", number: 10, source: source, harness: "testdata/native-runtime/metal-executor.c"}}
+	return []llvmRuntimeScenario{{name: "cancel-during-compute", captureOutput: true, number: 9, source: source, harness: "testdata/native-runtime/metal-executor.c"}, {name: "lost-and-cancellation-during-compute", captureOutput: true, number: 10, source: source, harness: "testdata/native-runtime/metal-executor.c"}}
 }
 func TestLLVMMetalComputeCancellation(t *testing.T) {
 	runLLVMRuntimeScenarios(t, llvmMetalCancellationScenarios())

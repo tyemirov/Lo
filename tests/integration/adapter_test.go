@@ -13,9 +13,9 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -31,8 +31,8 @@ import (
 func TestFileReadCancellation(t *testing.T) {
 	dir := t.TempDir()
 	name := filepath.Join(dir, "input")
-	if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
-		t.Fatalf("create local pipe: %v, %s", err, output)
+	if err := syscall.Mkfifo(name, uint32(os.ModePerm)); err != nil {
+		t.Fatalf("create local pipe: %v", err)
 	}
 	files, err := adapter.OpenFiles(adapter.FileRoots{Read: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {
@@ -76,8 +76,8 @@ func TestFileWriteCancellation(t *testing.T) {
 		t.Run(operation, func(t *testing.T) {
 			dir := t.TempDir()
 			name := filepath.Join(dir, "output")
-			if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
-				t.Fatalf("create local pipe: %v, %s", err, output)
+			if err := syscall.Mkfifo(name, uint32(os.ModePerm)); err != nil {
+				t.Fatalf("create local pipe: %v", err)
 			}
 			files, err := adapter.OpenFiles(adapter.FileRoots{Write: []string{dir}}, adapter.NativeFileIO())
 			if err != nil {
@@ -174,8 +174,8 @@ func TestFileConcurrentAppendCreation(t *testing.T) {
 func TestFileOpenDoesNotWaitForPipePeer(t *testing.T) {
 	dir := t.TempDir()
 	name := filepath.Join(dir, "input")
-	if output, err := exec.Command("mkfifo", name).CombinedOutput(); err != nil {
-		t.Fatalf("create local pipe: %v, %s", err, output)
+	if err := syscall.Mkfifo(name, uint32(os.ModePerm)); err != nil {
+		t.Fatalf("create local pipe: %v", err)
 	}
 	files, err := adapter.OpenFiles(adapter.FileRoots{Read: []string{dir}}, adapter.NativeFileIO())
 	if err != nil {

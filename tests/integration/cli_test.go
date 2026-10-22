@@ -15,6 +15,7 @@ import (
 var binary string
 var nativeCompiler string
 var repository string
+var fixtureDirectory string
 
 func TestMain(m *testing.M) {
 	if adapter.HandleFileProbe(os.Args[1:]) {
@@ -26,35 +27,51 @@ func TestMain(m *testing.M) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	dir, err := os.MkdirTemp("", "lo-integration-")
+	temporaryRoot := os.Getenv("TMPDIR")
+	resolvedRoot, resolveErr := filepath.EvalSymlinks(temporaryRoot)
+	relativeRoot, relativeErr := filepath.Rel(repository, resolvedRoot)
+	if temporaryRoot == "" || !filepath.IsAbs(temporaryRoot) || resolveErr != nil || relativeErr != nil || relativeRoot == ".." || strings.HasPrefix(relativeRoot, ".."+string(filepath.Separator)) {
+		fmt.Fprintln(os.Stderr, "TMPDIR must declare an existing directory inside Lo")
+		os.Exit(1)
+	}
+	dir, err := os.MkdirTemp(resolvedRoot, "lo-integration-")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	binary = filepath.Join(dir, "lo")
-	prepare := exec.Command("go", "run", "./tools/runtimebundle")
-	prepare.Dir = repository
-	if output, err := prepare.CombinedOutput(); err != nil {
-		fmt.Fprintf(os.Stderr, "prepare runtime bundle: %v\n%s", err, output)
+	resolvedDirectory, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	command := exec.Command("go", "build", "-o", binary, "./cmd/lo")
-	command.Dir = repository
-	if output, err := command.CombinedOutput(); err != nil {
-		fmt.Fprintf(os.Stderr, "build public CLI: %v\n%s", err, output)
-		_ = os.RemoveAll(dir)
+	if relative, err := filepath.Rel(repository, resolvedDirectory); err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		fmt.Fprintln(os.Stderr, "integration workspace must stay inside Lo")
 		os.Exit(1)
 	}
-	nativeCompiler = binary
-	if os.Getenv("LO_TEST_NATIVE_RACE") == "1" {
-		nativeCompiler = filepath.Join(dir, "nativefixture")
-		command := exec.Command("go", "build", "-tags=nativequalification", "-o", nativeCompiler, "./tools/nativefixture")
+	fixtureDirectory = resolvedDirectory
+	binary = os.Getenv("LO_TEST_COMPILER")
+	if binary != "" {
+		binary, err = filepath.EvalSymlinks(binary)
+		if err == nil {
+			binary, err = filepath.Abs(binary)
+		}
+		relative, relativeErr := filepath.Rel(repository, binary)
+		if err != nil || relativeErr != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+			fmt.Fprintln(os.Stderr, "LO_TEST_COMPILER must name a compiler inside Lo")
+			os.Exit(1)
+		}
+	} else {
+		binary = filepath.Join(dir, "lo")
+
+		command := exec.Command("go", "build", "-o", binary, "./cmd/lo")
 		command.Dir = repository
 		if output, err := command.CombinedOutput(); err != nil {
-			fmt.Fprintf(os.Stderr, "build native race harness: %v\n%s", err, output)
+			fmt.Fprintf(os.Stderr, "build public CLI: %v\n%s", err, output)
+			_ = os.RemoveAll(dir)
 			os.Exit(1)
 		}
 	}
+	nativeCompiler = binary
 	status := m.Run()
 	if err := os.RemoveAll(dir); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -82,8 +99,25 @@ func run(t *testing.T, args ...string) result {
 }
 func runExecutable(t *testing.T, executable string, args ...string) result {
 	t.Helper()
+	return runExecutableAt(t, repository, executable, args...)
+}
+
+func runExecutableAt(t *testing.T, directory, executable string, args ...string) result {
+	t.Helper()
+	if executable == binary && os.Getenv("LO_TEST_COMPILER") == "" && len(args) > 0 && args[0] == "build" {
+		selected := false
+		for _, argument := range args {
+			if argument == "--toolchain" || argument == "--emit" {
+				selected = true
+			}
+		}
+		if manifest := os.Getenv("LO_LLVM_TOOLCHAIN"); !selected && manifest != "" {
+			args = append(append([]string{}, args...), "--toolchain", manifest)
+		}
+	}
+
 	command := exec.Command(executable, args...)
-	command.Dir = repository
+	command.Dir = directory
 	var stdout, stderr bytes.Buffer
 	command.Stdout = &stdout
 	command.Stderr = &stderr

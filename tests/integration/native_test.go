@@ -3,7 +3,8 @@ package integration_test
 import (
 	"bytes"
 	"crypto/sha256"
-	"debug/buildinfo"
+	"debug/elf"
+	"debug/macho"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -14,7 +15,6 @@ import (
 	"strings"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/runner"
 	"github.com/MarcoPoloResearchLab/Lo/tests/corpus"
@@ -27,11 +27,14 @@ func TestNativeStandalone(t *testing.T) {
 	if built.status != 0 || built.stderr != "" {
 		t.Fatalf("build native program: %+v", built)
 	}
-	var receipt struct{ Command, Status, Artifact, Target string }
+	var receipt struct {
+		Command, Status, Artifact, Target, Codegen, ABI string
+		Runtime                                         string `json:"runtime_sha256"`
+	}
 	if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil {
 		t.Fatal(err)
 	}
-	if receipt.Command != "build" || receipt.Status != "ok" || receipt.Artifact != artifact || receipt.Target != runtime.GOOS+"/"+runtime.GOARCH {
+	if receipt.Command != "build" || receipt.Status != "ok" || receipt.Artifact != artifact || receipt.Target != runtime.GOOS+"/"+runtime.GOARCH || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-1" || len(receipt.Runtime) != 64 {
 		t.Fatalf("build receipt: %+v", receipt)
 	}
 	if err := os.Remove(source); err != nil {
@@ -45,15 +48,8 @@ func TestNativeStandalone(t *testing.T) {
 	if err := command.Run(); err != nil || stdout.String() != "10\n" || stderr.Len() != 0 {
 		t.Fatalf("standalone result: %v stdout=%s stderr=%s", err, &stdout, &stderr)
 	}
-	symbols, err := exec.Command("go", "tool", "nm", artifact).Output()
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, forbidden := range []string{"eval", "ir", "compiler", "check", "syntax", "resolve", "autodiff", "codegen"} {
-		if bytes.Contains(symbols, []byte("github.com/MarcoPoloResearchLab/Lo/internal/"+forbidden+".")) {
-			t.Fatalf("artifact contains forbidden package %s", forbidden)
-		}
-	}
+	assertNativeObjectTarget(t, artifact, runtime.GOOS)
+
 }
 
 func TestNativeCrossTarget(t *testing.T) {
@@ -66,16 +62,33 @@ func TestNativeCrossTarget(t *testing.T) {
 	if built.status != 0 {
 		t.Fatalf("cross build: %+v", built)
 	}
-	info, err := buildinfo.ReadFile(artifact)
-	if err != nil {
-		t.Fatal(err)
-	}
-	settings := map[string]string{}
-	for _, setting := range info.Settings {
-		settings[setting.Key] = setting.Value
-	}
-	if info.GoVersion != "go1.27.1" || settings["GOOS"] != target || settings["GOARCH"] != "arm64" || settings["CGO_ENABLED"] != "0" {
-		t.Fatalf("artifact build settings: %s %+v", info.GoVersion, settings)
+	assertNativeObjectTarget(t, artifact, target)
+
+}
+
+func assertNativeObjectTarget(t *testing.T, artifact, target string) {
+	t.Helper()
+	switch target {
+	case "darwin":
+		file, err := macho.Open(artifact)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer file.Close()
+		if file.Cpu != macho.CpuArm64 || file.Type != macho.TypeExec {
+			t.Fatalf("unexpected Mach-O target: %+v", file.FileHeader)
+		}
+	case "linux":
+		file, err := elf.Open(artifact)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer file.Close()
+		if file.Machine != elf.EM_AARCH64 || file.Type != elf.ET_EXEC {
+			t.Fatalf("unexpected ELF target: %+v", file.FileHeader)
+		}
+	default:
+		t.Fatalf("unsupported native object target %q", target)
 	}
 }
 
@@ -88,14 +101,25 @@ func buildForTest(t *testing.T, path string) (string, result) {
 	t.Helper()
 	build := func(artifact string) result {
 		args := []string{"build", path, "--output", artifact, "--format", "json"}
-		if os.Getenv("LO_TEST_BACKEND") == "llvm" {
+		if os.Getenv("LO_TEST_BACKEND") == "llvm" && os.Getenv("LO_TEST_COMPILER") == "" {
 			manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 			if manifest == "" {
 				t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")
 			}
-			args = append(args, "--codegen", "llvm", "--toolchain", manifest)
+			args = append(args, "--toolchain", manifest)
 		}
-		return runExecutable(t, nativeCompiler, args...)
+		built := runExecutable(t, nativeCompiler, args...)
+		if built.status == 0 {
+			var receipt struct {
+				Codegen, ABI string
+				Runtime      string `json:"runtime_sha256"`
+			}
+			if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-1" || len(receipt.Runtime) != 64 {
+				t.Fatalf("native fixture requires an LLVM runtime receipt: %+v", built)
+			}
+			t.Logf("LO_NATIVE_RUNTIME=%s", receipt.Runtime)
+		}
+		return built
 	}
 	input := path
 	if !filepath.IsAbs(input) {
@@ -112,10 +136,15 @@ func buildForTest(t *testing.T, path string) (string, result) {
 	if artifact, ok := nativeArtifacts.paths[key]; ok {
 		return artifact, result{status: 0}
 	}
-	artifact := filepath.Join(filepath.Dir(binary), "fixture-"+key)
+	artifact := filepath.Join(t.TempDir(), "fixture-"+key)
 	r := build(artifact)
 	if r.status == 0 {
 		nativeArtifacts.paths[key] = artifact
+		t.Cleanup(func() {
+			nativeArtifacts.Lock()
+			defer nativeArtifacts.Unlock()
+			delete(nativeArtifacts.paths, key)
+		})
 	}
 	return artifact, r
 }
@@ -133,7 +162,7 @@ func runtimeCommand(t *testing.T, args ...string) *exec.Cmd {
 
 func nativeInvocation(args []string) (string, []string, bool) {
 	backend := os.Getenv("LO_TEST_BACKEND")
-	if backend != "native" && backend != "llvm" || len(args) == 0 || args[0] != "run" && args[0] != "serve" {
+	if backend != "llvm" || len(args) == 0 || args[0] != "run" && args[0] != "serve" {
 		return "", nil, false
 	}
 	inv, err := runner.ParseCompiler(args)
@@ -192,28 +221,36 @@ func TestNativeBuildBoundary(t *testing.T) {
 	if err != nil || string(data) != "previous artifact" {
 		t.Fatalf("previous artifact changed: %q %v", data, err)
 	}
-	command := exec.Command(binary, "build", source, "--output", artifact, "--format", "json")
-	command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
-	var stderr bytes.Buffer
-	command.Stderr = &stderr
-	if err = command.Run(); err == nil || diagnostics(t, stderr.String()).Diagnostics[0].Code != "build.toolchain" {
-		t.Fatalf("missing toolchain: %v %s", err, &stderr)
+	if os.Getenv("LO_TEST_COMPILER") != "" {
+		command := exec.Command(binary, "build", source, "--output", artifact, "--format", "json")
+		command.Env = []string{"PATH=", "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
+		if data, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("installed compiler requires no PATH toolchain: %v %s", err, data)
+		}
 	}
-	data, err = os.ReadFile(artifact)
-	if err != nil || string(data) != "previous artifact" {
-		t.Fatal("toolchain failure replaced output")
-	}
+
 }
 
 func TestNativeReproducibleAndIsolated(t *testing.T) {
 	source := sourceFile(t, "return String.new(\"quotes \\\" $() `literal` é\")\n")
+	buildArgs := func(output string) []string {
+		args := []string{"build", source, "--output", output, "--format", "json"}
+		if os.Getenv("LO_TEST_COMPILER") == "" {
+			manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
+			if manifest == "" {
+				t.Fatal("native reproducibility requires LO_LLVM_TOOLCHAIN")
+			}
+			args = append(args, "--toolchain", manifest)
+		}
+		return args
+	}
 	first := filepath.Join(t.TempDir(), "first artifact")
-	r := runExecutable(t, binary, "build", source, "--output", first, "--format", "json")
+	r := runExecutable(t, binary, buildArgs(first)...)
 	if r.status != 0 {
 		t.Fatalf("first build: %+v", r)
 	}
 	second := filepath.Join(t.TempDir(), "second artifact")
-	command := exec.Command(binary, "build", source, "--output", second, "--format", "json")
+	command := exec.Command(binary, buildArgs(second)...)
 	command.Dir = t.TempDir()
 	command.Env = append(os.Environ(), "GOFLAGS=-toolexec=must-not-execute", "GOWORK=/absent/work", "GOPROXY=off", "GOMODCACHE="+t.TempDir(), "CGO_ENABLED=1", "GOOS=invalid", "GOARCH=invalid")
 	if data, err := command.CombinedOutput(); err != nil {
@@ -232,7 +269,7 @@ func TestNativeReproducibleAndIsolated(t *testing.T) {
 	}
 	metadata := runExecutable(t, second, "metadata")
 	var record map[string]string
-	if metadata.status != 0 || json.Unmarshal([]byte(metadata.stdout), &record) != nil || record["source"] != source || record["toolchain"] != "go1.27.1" || len(record["runtime_bundle_sha256"]) != 64 || len(record["source_sha256"]) != 64 {
+	if metadata.status != 0 || json.Unmarshal([]byte(metadata.stdout), &record) != nil || record["source"] != source || record["toolchain"] != "LLVM 21.1.8" || record["compiler"] != "lo-native-llvm-v1" || len(record["runtime_sha256"]) != 64 || len(record["source_sha256"]) != 64 {
 		t.Fatalf("metadata: %+v", metadata)
 	}
 	if err := os.Remove(source); err != nil {
@@ -452,108 +489,10 @@ flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),s
 }
 
 func TestNativeToolchainCancellationAndOutputLimit(t *testing.T) {
-	nativeToolchainFailures(t, binary, nil)
+	nativeToolchainFailures(t)
 }
 
-func nativeToolchainFailures(t *testing.T, compiler string, buildArgs []string) {
+func nativeToolchainFailures(t *testing.T) {
 	t.Helper()
-	helper := filepath.Join(t.TempDir(), "go")
-	command := exec.Command("go", "build", "-o", helper, "./testdata/native_toolchain")
-	command.Dir = repository
-	if output, err := command.CombinedOutput(); err != nil {
-		t.Fatalf("build controlled toolchain: %v %s", err, output)
-	}
-	for _, action := range []string{"cancel", "overflow", "version-overflow", "failure", "artifact-overflow"} {
-		t.Run(action, func(t *testing.T) {
-			state := t.TempDir()
-			artifact := filepath.Join(state, "artifact")
-			file, err := os.Create(artifact)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if _, err = file.WriteString("previous"); err != nil {
-				t.Fatal(err)
-			}
-			if err = file.Close(); err != nil {
-				t.Fatal(err)
-			}
-			args := append([]string{"build", sourceFile(t, "return 1"), "--output", artifact, "--format", "json"}, buildArgs...)
-			command := exec.Command(compiler, args...)
-			command.Env = append(os.Environ(), "PATH="+filepath.Dir(helper)+string(os.PathListSeparator)+os.Getenv("PATH"), "LO_TEST_TOOL_STATE="+state, "LO_TEST_TOOL_ACTION="+action)
-			var stderr bytes.Buffer
-			command.Stderr = &stderr
-			if err := command.Start(); err != nil {
-				t.Fatal(err)
-			}
-			done := make(chan error, 1)
-			go func() { done <- command.Wait() }()
-			if action == "cancel" {
-				deadline := time.After(5 * time.Second)
-				ticker := time.NewTicker(5 * time.Millisecond)
-				defer ticker.Stop()
-			ready:
-				for {
-					select {
-					case err := <-done:
-						t.Fatalf("toolchain exited before cancellation: %v %s", err, &stderr)
-					case <-deadline:
-						_ = command.Process.Kill()
-						t.Fatal("controlled toolchain did not start")
-					case <-ticker.C:
-						if data, err := os.ReadFile(filepath.Join(state, "ready")); err == nil && string(data) == "ready" {
-							break ready
-						}
-					}
-				}
-				if err := command.Process.Signal(os.Interrupt); err != nil {
-					t.Fatal(err)
-				}
-			}
-			select {
-			case err := <-done:
-				if err == nil {
-					t.Fatal("build unexpectedly succeeded")
-				}
-			case <-time.After(5 * time.Second):
-				_ = command.Process.Kill()
-				t.Fatal("build did not stop")
-			}
-			code := "build.cancelled"
-			if action == "failure" {
-				code = "build.failed"
-			}
-			if strings.HasSuffix(action, "overflow") {
-				code = "build.limit"
-			}
-			if d := diagnostics(t, stderr.String()).Diagnostics[0]; d.Code != code {
-				t.Fatalf("diagnostic code %s, want %s", d.Code, code)
-			}
-			data, err := os.ReadFile(artifact)
-			if err != nil || string(data) != "previous" {
-				t.Fatal("failed build replaced artifact")
-			}
-			work, err := os.ReadFile(filepath.Join(state, "work"))
-			if err != nil {
-				t.Fatal(err)
-			}
-			if _, err := os.ReadDir(string(work)); !os.IsNotExist(err) {
-				t.Fatalf("build directory remained: %s %v", work, err)
-			}
-			entries, err := os.ReadDir(state)
-			if err != nil {
-				t.Fatal(err)
-			}
-			for _, entry := range entries {
-				if strings.HasPrefix(entry.Name(), ".lo-artifact-") {
-					t.Fatal("staged artifact remained")
-				}
-			}
-			if action == "cancel" {
-				time.Sleep(800 * time.Millisecond)
-				if _, err := os.ReadFile(filepath.Join(state, "child-survived")); !os.IsNotExist(err) {
-					t.Fatal("compiler child survived group cancellation")
-				}
-			}
-		})
-	}
+	controlledLLVMFailures(t)
 }

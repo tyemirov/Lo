@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"context"
-	"encoding/hex"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -51,11 +50,11 @@ func TestLLVMLoweringBuild(t *testing.T) {
 					t.Fatalf("LLVM module omits %q", required)
 				}
 			}
-			metadataConstant := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2})+)", align 1$`).FindSubmatch(module)
+			metadataConstant := regexp.MustCompile(`(?m)^@lo_program_metadata = constant \[[0-9]+ x i8\] c"((?:\\[0-9A-Fa-f]{2}|[^"\\])*)", align 1$`).FindSubmatch(module)
 			if metadataConstant == nil {
 				t.Fatal("LLVM module omits its program metadata")
 			}
-			metadata, err := hex.DecodeString(strings.ReplaceAll(string(metadataConstant[1]), `\`, ""))
+			metadata, err := decodeLLVMBytes(metadataConstant[1])
 			if err != nil {
 				t.Fatal(err)
 			}

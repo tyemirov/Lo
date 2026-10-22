@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -23,11 +24,11 @@ func TestSemanticCoverageRunIdentity(t *testing.T) {
 	if backend == "" {
 		backend = "interpreter"
 	}
-	if backend != "interpreter" && backend != "native" {
+	if backend != "interpreter" && backend != "llvm" {
 		t.Fatalf("unknown semantic backend %q", backend)
 	}
 	var paths []string
-	for _, directory := range []string{"cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"} {
+	for _, directory := range []string{"cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "runtime", "tools/metalbuild", "tools/nativeruntime", "tools/lodistribution", "tools/loqualification", "testdata", "examples", "docs/examples"} {
 		err := filepath.WalkDir(filepath.Join(repository, directory), func(path string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -35,7 +36,7 @@ func TestSemanticCoverageRunIdentity(t *testing.T) {
 			if entry.IsDir() {
 				return nil
 			}
-			if !slices.Contains([]string{".go", ".py", ".c", ".h", ".m", ".mm", ".metal", ".lo", ".json", ".txt"}, filepath.Ext(path)) {
+			if !slices.Contains([]string{".go", ".py", ".c", ".h", ".m", ".mm", ".metal", ".lo", ".json", ".txt", ".rs", ".toml", ".lock"}, filepath.Ext(path)) {
 				return nil
 			}
 			resolved, err := filepath.EvalSymlinks(path)
@@ -78,7 +79,55 @@ func TestSemanticCoverageRunIdentity(t *testing.T) {
 		fmt.Fprintf(hash, "%s\x00%x\n", filepath.ToSlash(relative), sha256.Sum256(data))
 	}
 	matrix := semanticMatrixBytes(t)
-	identity, err := json.Marshal(map[string]string{"backend": backend, "source_sha256": fmt.Sprintf("%x", hash.Sum(nil)), "matrix_sha256": fmt.Sprintf("%x", sha256.Sum256(matrix))})
+	compilerData, err := os.ReadFile(binary)
+	if err != nil {
+		t.Fatal(err)
+	}
+	compilerPath, err := filepath.Rel(repository, binary)
+	if err != nil {
+		t.Fatal(err)
+	}
+	implementation := "go-interpreter"
+	fields := map[string]string{
+		"backend": backend, "implementation": implementation, "target": runtime.GOOS + "/" + runtime.GOARCH,
+		"compiler": filepath.ToSlash(compilerPath), "compiler_sha256": fmt.Sprintf("%x", sha256.Sum256(compilerData)),
+		"source_sha256": fmt.Sprintf("%x", hash.Sum(nil)), "matrix_sha256": fmt.Sprintf("%x", sha256.Sum256(matrix)),
+	}
+	if backend == "llvm" {
+		fields["implementation"] = "llvm-native"
+		manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
+		if os.Getenv("LO_TEST_COMPILER") != "" {
+			manifest = filepath.Join(filepath.Dir(filepath.Dir(binary)), "toolchain.json")
+		}
+		data, err := os.ReadFile(manifest)
+		if err != nil {
+			t.Fatal(err)
+		}
+		relative, err := filepath.Rel(repository, manifest)
+		if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+			t.Fatalf("toolchain outside repository: %s", manifest)
+		}
+		fields["toolchain"] = filepath.ToSlash(relative)
+		fields["toolchain_sha256"] = fmt.Sprintf("%x", sha256.Sum256(data))
+		var distribution struct {
+			Targets map[string]struct {
+				Runtime struct {
+					Path   string
+					SHA256 string
+				}
+			}
+		}
+		if err := json.Unmarshal(data, &distribution); err != nil {
+			t.Fatal(err)
+		}
+		selected := distribution.Targets[fields["target"]].Runtime
+		runtimeData, err := os.ReadFile(filepath.Join(filepath.Dir(manifest), selected.Path))
+		if err != nil || fmt.Sprintf("%x", sha256.Sum256(runtimeData)) != selected.SHA256 {
+			t.Fatalf("runtime identity mismatch: %v", err)
+		}
+		fields["runtime_sha256"] = selected.SHA256
+	}
+	identity, err := json.Marshal(fields)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,11 +153,12 @@ type semanticContract struct {
 	Boundary string   `json:"boundary"`
 }
 type semanticMatrix struct {
-	Operations []semanticOperation                                     `json:"operations"`
-	CLI        []semanticContract                                      `json:"cli"`
-	Semantics  []semanticContract                                      `json:"semantics"`
-	Profiles   []semanticContract                                      `json:"profiles"`
-	Gaps       []struct{ ID, Scope, Reason, Owner, Acceptance string } `json:"gaps"`
+	NativeTests map[string][]string                                     `json:"native_tests"`
+	Operations  []semanticOperation                                     `json:"operations"`
+	CLI         []semanticContract                                      `json:"cli"`
+	Semantics   []semanticContract                                      `json:"semantics"`
+	Profiles    []semanticContract                                      `json:"profiles"`
+	Gaps        []struct{ ID, Scope, Reason, Owner, Acceptance string } `json:"gaps"`
 }
 
 func semanticMatrixBytes(t *testing.T) []byte {
@@ -174,6 +224,35 @@ func TestSemanticCoverageInventory(t *testing.T) {
 			if !tests[name] {
 				t.Errorf("%s: absent test %s", id, ref)
 			}
+		}
+	}
+	references := map[string]bool{}
+	for _, row := range matrix.Operations {
+		for _, group := range [][]string{row.Positive, row.Negative, row.RuntimeNegative} {
+			for _, ref := range group {
+				references[ref] = true
+			}
+		}
+	}
+	for _, rows := range [][]semanticContract{matrix.CLI, matrix.Semantics, matrix.Profiles} {
+		for _, row := range rows {
+			for _, ref := range row.Tests {
+				references[ref] = true
+			}
+		}
+	}
+	for ref := range references {
+		native, declared := matrix.NativeTests[ref]
+		if !declared {
+			t.Errorf("missing native mapping %s", ref)
+		}
+		if len(native) > 0 {
+			checkRefs(ref, native)
+		}
+	}
+	for ref := range matrix.NativeTests {
+		if !references[ref] {
+			t.Errorf("obsolete native mapping %s", ref)
 		}
 	}
 	operations := map[string]catalog.Operation{}

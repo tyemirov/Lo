@@ -12,7 +12,7 @@ func llvmDeviceResourceScenarios() []llvmRuntimeScenario {
 		if number == 10 {
 			text = retry
 		}
-		scenarios = append(scenarios, llvmRuntimeScenario{name: name, number: number, source: text, harness: "testdata/native-runtime/device-resources.c"})
+		scenarios = append(scenarios, llvmRuntimeScenario{name: name, number: number, source: text, captureOutput: true, harness: "testdata/native-runtime/device-resources.c"})
 	}
 	return scenarios
 }

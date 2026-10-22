@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -20,8 +21,8 @@ func TestLLVMCheckpointFileCancellation(t *testing.T) {
 		t.Run(operation, func(t *testing.T) {
 			directory := t.TempDir()
 			pipe := filepath.Join(directory, "pipe")
-			if data, err := exec.Command("mkfifo", pipe).CombinedOutput(); err != nil {
-				t.Fatalf("create local pipe: %v: %s", err, data)
+			if err := syscall.Mkfifo(pipe, uint32(os.ModePerm)); err != nil {
+				t.Fatalf("create local pipe: %v", err)
 			}
 			peer, err := os.OpenFile(pipe, os.O_RDWR, 0)
 			if err != nil {
