@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: make ci
+    runs-on: xcode-27
+    timeout-minutes: 360
+    env:
+      CI: '1'
+      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
+      GOFLAGS: -mod=readonly
+      GOTOOLCHAIN: local
+      GOENV: 'off'
+      GOWORK: 'off'
+      GOTELEMETRY: 'off'
+      UV_NO_CONFIG: '1'
+      UV_PYTHON_DOWNLOADS: never
+      UV_CACHE_DIR: ${{ github.workspace }}/_scratch/build-state/uv-cache
+      PIP_CACHE_DIR: ${{ github.workspace }}/_scratch/build-state/pip-cache
+      PYTHONPYCACHEPREFIX: ${{ github.workspace }}/_scratch/build-state/python-cache
+    defaults:
+      run:
+        shell: bash --noprofile --norc -euo pipefail {0}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Prepare local tool state
+        run: |
+          exec </dev/null
+          make tool-state
+          printf 'TMPDIR=%s\nTMP=%s\nTEMP=%s\n' \
+            "$PWD/_scratch/build-state/tmp" \
+            "$PWD/_scratch/build-state/tmp" \
+            "$PWD/_scratch/build-state/tmp" >> "$GITHUB_ENV"
+
+      - name: Install Go from go.mod
+        run: |
+          exec </dev/null
+          version="$(awk '$1 == "go" {print $2}' go.mod)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            printf 'go.mod must declare an exact Go patch version; received: %s\n' "$version" >&2
+            exit 1
+          fi
+          archive="go${version}.darwin-arm64.tar.gz"
+          mkdir -p _scratch/ci-tools
+          curl --fail --silent --show-error --location \
+            "https://go.dev/dl/$archive" -o "_scratch/ci-tools/$archive"
+          curl --fail --silent --show-error --location \
+            'https://go.dev/dl/?mode=json&include=all' -o _scratch/ci-tools/go-releases.json
+          python3 -c '
+          import json, sys
+          from pathlib import Path
+          releases = json.loads(Path("_scratch/ci-tools/go-releases.json").read_text())
+          artifact, = [item for release in releases for item in release["files"] if item["filename"] == sys.argv[1]]
+          print(artifact["sha256"] + "  _scratch/ci-tools/" + artifact["filename"])
+          ' "$archive" > _scratch/ci-tools/go.sha256
+          shasum -a 256 --check _scratch/ci-tools/go.sha256
+          tar -xzf "_scratch/ci-tools/$archive" -C _scratch/ci-tools
+          printf '%s\n' "$PWD/_scratch/ci-tools/go/bin" >> "$GITHUB_PATH"
+
+      - name: Prepare Python test tools
+        run: |
+          exec </dev/null
+          python3 -m venv --copies _scratch/ci-tools/python
+          _scratch/ci-tools/python/bin/python3 -m pip install \
+            --disable-pip-version-check --no-input 'uv==0.12.19'
+          printf '%s\n' "$PWD/_scratch/ci-tools/python/bin" >> "$GITHUB_PATH"
+          printf 'UV_PYTHON=%s\n' "$PWD/_scratch/ci-tools/python/bin/python3" >> "$GITHUB_ENV"
+          _scratch/ci-tools/python/bin/uv run \
+            --python "$PWD/_scratch/ci-tools/python/bin/python3" \
+            --with pytest==8.3.5 python -B -c 'import pytest; assert pytest.__version__ == "8.3.5"'
+
+      - name: Prepare pinned compiler inputs
+        run: |
+          exec </dev/null
+          make prepare-native-runtime
+          make prepare-compiler-distribution
+
+      - name: Build compiler distributions
+        run: |
+          exec </dev/null
+          make build
+          make build-metal
+          make package-compiler-distributions
+
+      - name: Run CI
+        run: |
+          exec </dev/null
+          make ci
