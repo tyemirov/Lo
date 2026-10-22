@@ -2,8 +2,6 @@
 package main
 
 import (
-	"archive/zip"
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -30,10 +28,7 @@ const (
 )
 
 // This manifest lists Metal source inputs and kernel compiler options.
-var sources = []string{
-	"internal/device/metal_darwin.go", "internal/device/metal_bridge.h",
-	"internal/device/metal_bridge_darwin.m", "internal/device/metal_types.h", kernelPath, "tools/metalbuild/main.go", "internal/metalconfig/config.go", "tools/runtimebundle/main.go",
-}
+var sources = metalconfig.RuntimeFiles()
 var metalFlags = metalconfig.KernelFlags()
 var goFlags = []string{"build", "-trimpath", "-tags=metal"}
 
@@ -86,14 +81,17 @@ func run(testPattern string, testArgs []string) (result error) {
 		r.Versions[key] = strings.TrimSpace(version)
 	}
 	for _, path := range sources {
+		if path == libraryPath {
+			continue
+		}
 		sum, err := digest(path)
 		if err != nil {
 			return err
 		}
 		r.Sources[path] = sum
 	}
-	// Include the current complete shared runtime identity in the build receipt.
-	for _, path := range []string{"go.mod", "go.sum", "internal/runtimebundle/runtime.zip"} {
+	// Record the frontend module inputs in the producer receipt.
+	for _, path := range []string{"go.mod", "go.sum"} {
 		sum, err := digest(path)
 		if err != nil {
 			return err
@@ -127,10 +125,10 @@ func run(testPattern string, testArgs []string) (result error) {
 		return fmt.Errorf("publish Metal library: %w", err)
 	}
 	identity.KernelSHA256 = r.Library
-	if err := packageRuntime(identity); err != nil {
+	if err := writeManifest(identity); err != nil {
 		return err
 	}
-	for _, path := range []string{"internal/runtimebundle/metal.zip", "internal/runtimebundle/metal-manifest.json"} {
+	for _, path := range []string{libraryPath, metalconfig.ManifestPath} {
 		sum, err := digest(path)
 		if err != nil {
 			return err
@@ -189,45 +187,29 @@ func buildEnvironment(settings []string) []string {
 	return append(env, settings...)
 }
 
-func packageRuntime(identity metalconfig.Identity) error {
+func writeManifest(identity metalconfig.Identity) error {
 	paths := metalconfig.RuntimeFiles()
 	sort.Strings(paths)
 	manifest := metalconfig.Manifest{Identity: identity, Files: map[string]string{}}
-	var archive bytes.Buffer
-	writer := zip.NewWriter(&archive)
 	for _, path := range paths {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("read Metal runtime %s: %w", path, err)
-		}
-		file, err := writer.Create(path)
+		sum, err := digest(path)
 		if err != nil {
 			return err
 		}
-		if _, err := file.Write(data); err != nil {
-			return err
-		}
-		manifest.Files[path] = fmt.Sprintf("%x", sha256.Sum256(data))
-	}
-	if err := writer.Close(); err != nil {
-		return err
+		manifest.Files[path] = sum
 	}
 	data, err := json.MarshalIndent(manifest, "", "  ")
 	if err != nil {
 		return err
 	}
-	for path, data := range map[string][]byte{"internal/runtimebundle/metal.zip": archive.Bytes(), "internal/runtimebundle/metal-manifest.json": append(data, '\n')} {
-		file, err := os.Create(path)
-		if err != nil {
-			return err
-		}
-		_, writeErr := file.Write(data)
-		if err := errors.Join(writeErr, file.Close()); err != nil {
-			return err
-		}
+	file, err := os.Create(metalconfig.ManifestPath)
+	if err != nil {
+		return err
 	}
-	return nil
+	_, writeErr := file.Write(append(data, '\n'))
+	return errors.Join(writeErr, file.Close())
 }
+
 func command(ctx context.Context, env []string, args ...string) (string, error) {
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 	cmd.Env = env

@@ -10,54 +10,54 @@ import shutil
 from pathlib import Path
 import subprocess
 import sys
-import zipfile
 
 from prepare import LOCK, ROOT, RUST_COMPONENTS, digest, local, pin_file, tree_digest
 
 TARGETS = {'darwin/arm64': 'aarch64-apple-darwin', 'linux/arm64': 'aarch64-unknown-linux-gnu'}
 
 
-def metal_bundle() -> tuple[bytes, dict[str, object], dict[str, object]]:
-    archive = local(ROOT / 'internal/runtimebundle/metal.zip')
-    manifest = local(ROOT / 'internal/runtimebundle/metal-manifest.json')
+METAL_FILES = {
+    'internal/device/metal_bridge.h',
+    'internal/device/metal_bridge_darwin.m',
+    'internal/device/metal_darwin.go',
+    'internal/device/metal_types.h',
+    'internal/metalconfig/config.go',
+    'runtime/metal/embed.go',
+    'runtime/metal/kernels.metal',
+    'runtime/metal/metal.metallib',
+    'tools/metalbuild/main.go',
+}
+METAL_LIBRARY = 'runtime/metal/metal.metallib'
+METAL_MANIFEST = 'runtime/metal/manifest.json'
+
+
+def metal_assets() -> tuple[bytes, dict[str, object], dict[str, object]]:
+    manifest = local(ROOT / METAL_MANIFEST)
     producer = local(ROOT / 'bin/lo-metal-build.json')
-    if not all(path.is_file() for path in (archive, manifest, producer)):
-        raise ValueError('Metal requires the prepared F014 kernel bundle and producer receipt from make build-metal')
+    if not all(local(ROOT / name).is_file() for name in (*METAL_FILES, METAL_MANIFEST, 'bin/lo-metal-build.json')):
+        raise ValueError('Metal requires the prepared kernel assets and producer receipt from make build-metal')
     record = json.loads(manifest.read_text())
     receipt = json.loads(producer.read_text())
     if set(record) != {'identity', 'files'}:
-        raise ValueError('Metal bundle manifest has an incorrect field set')
+        raise ValueError('Metal asset manifest has an incorrect field set')
     identity, files = record['identity'], record['files']
-    identity_fields = {'profile', 'go', 'xcode', 'sdk', 'clang', 'metal_compiler', 'kernel_linker',
+    identity_fields = {'profile', 'xcode', 'sdk', 'clang', 'metal_compiler', 'kernel_linker',
                        'deployment_target', 'kernel_flags', 'kernel_sha256'}
-    paths = {'internal/device/metal.metallib', 'internal/device/metal_darwin.go',
-             'internal/device/metal_bridge_darwin.m', 'internal/device/metal_bridge.h',
-             'internal/device/metal_types.h'}
-    if set(identity) != identity_fields or set(files) != paths:
-        raise ValueError('Metal bundle has an incorrect identity or source set')
+    if set(identity) != identity_fields or set(files) != METAL_FILES:
+        raise ValueError('Metal assets have an incorrect identity or source set')
     if identity['profile'] != 'metal-fp32' or identity['deployment_target'] != '27.0':
-        raise ValueError('Metal bundle uses an unsupported numeric profile')
-    verified_sources = paths - {'internal/device/metal.metallib'}
-    verified_sources |= {'internal/device/metal_kernels.metal', 'internal/metalconfig/config.go',
-                         'internal/runtimebundle/metal.zip', 'internal/runtimebundle/metal-manifest.json'}
+        raise ValueError('Metal assets use an unsupported numeric profile')
+    verified_sources = METAL_FILES | {METAL_MANIFEST}
     for name in sorted(verified_sources):
-        path = local(ROOT / name)
-        if digest(path) != receipt['source_sha256'].get(name):
+        source = local(ROOT / name)
+        if digest(source) != receipt['source_sha256'].get(name):
             raise ValueError(f'Metal producer source identity differs: {name}')
-    with zipfile.ZipFile(archive) as supplied:
-        if len(supplied.namelist()) != len(paths) or set(supplied.namelist()) != paths:
-            raise ValueError('Metal bundle archive has an incorrect member set')
-        for name in sorted(paths):
-            data = supplied.read(name)
-            if hashlib.sha256(data).hexdigest() != files[name]:
-                raise ValueError(f'Metal bundle member digest differs: {name}')
-            if name in verified_sources and digest(local(ROOT / name)) != files[name]:
-                raise ValueError(f'Metal bundle source differs: {name}')
-        library = supplied.read('internal/device/metal.metallib')
-    if files['internal/device/metal.metallib'] != identity['kernel_sha256'] or receipt['metallib_sha256'] != identity['kernel_sha256']:
+        if name in METAL_FILES and digest(source) != files[name]:
+            raise ValueError(f'Metal asset source differs: {name}')
+    library = local(ROOT / METAL_LIBRARY).read_bytes()
+    if files[METAL_LIBRARY] != identity['kernel_sha256'] or receipt['metallib_sha256'] != identity['kernel_sha256']:
         raise ValueError('Metal kernel identity differs from its producer receipt')
-    return library, identity, {'archive': pin_file(archive), 'manifest': pin_file(manifest),
-                               'producer': pin_file(producer),
+    return library, identity, {'manifest': pin_file(manifest), 'producer': pin_file(producer),
                                'sources': {name: pin_file(local(ROOT / name)) for name in sorted(verified_sources)}}
 
 
@@ -200,7 +200,7 @@ def prepare_host_linker(preparation: Path, tool_pins: dict[str, dict[str, str]])
 def build(preparation: Path, output: Path, targets: list[str], include_metal: bool = False) -> Path:
     if include_metal and 'darwin/arm64' not in targets:
         raise ValueError('Metal requires the darwin/arm64 runtime target')
-    metal_inputs = metal_bundle() if include_metal else None
+    metal_inputs = metal_assets() if include_metal else None
     receipt = local(preparation / 'rust.json')
     if not receipt.is_file():
         raise ValueError(f'missing prepared Rust receipt: {receipt}')
@@ -326,7 +326,7 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
     if process_sources != {name: pin_file(local(ROOT / 'internal/processhost/native' / name))
                            for name in process_sources}:
         raise ValueError('process source changed during build')
-    if metal_inputs is not None and metal_bundle()[2] != metal_provenance:
+    if metal_inputs is not None and metal_assets()[2] != metal_provenance:
         raise ValueError('Metal producer inputs changed during build')
     manifest.write_text(json.dumps(distribution, indent=2) + '\n')
     provenance = {'runtime_source_sha256': source_digest, 'rust': rust,

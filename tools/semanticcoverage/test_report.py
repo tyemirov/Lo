@@ -20,28 +20,57 @@ class ReportCLI(unittest.TestCase):
         self.workspace = tempfile.TemporaryDirectory(prefix="semantic-report-", dir=base)
         self.addCleanup(self.workspace.cleanup)
         self.directory = Path(self.workspace.name)
+        self.script = self.directory / "tools/semanticcoverage/report.py"
+        self.script.parent.mkdir(parents=True)
+        shutil.copyfile(SCRIPT, self.script)
+        for name in ("cmd/lo/main.go", "runtime/native/src/lib.rs", "runtime/native/Cargo.toml", "runtime/native/Cargo.lock",
+                     "go.mod", "go.sum", "Makefile", "docs/evidence/training-reference-results.json"):
+            item = self.directory / name
+            item.parent.mkdir(parents=True, exist_ok=True)
+            item.write_text("fixture\n")
         self.matrix = self.directory / "matrix.json"
         self.matrix.write_text(json.dumps({
             "operations": [{"operation": "Math.add", "positive": ["TestExample/add"],
                             "negative": ["TestExample/reject"], "runtime_negative": [],
                             "boundary": "cli_interpreter_and_native"}],
-            "cli": [], "semantics": [], "profiles": [], "gaps": []
+            "cli": [], "semantics": [], "profiles": [], "gaps": [],
+            "native_tests": {"TestExample/add": ["TestExample/add"],"TestExample/reject": ["TestExample/reject"]}
         }))
-        self.logs = [self.directory / "interpreter.jsonl", self.directory / "native.jsonl"]
+        self.compiler = self.directory / "lo"
+        self.compiler.write_bytes(b"installed compiler fixture")
+        self.runtime = self.directory / "runtime.a"
+        self.runtime.write_bytes(b"native runtime fixture")
+        self.manifest = self.directory / "toolchain.json"
+        self.manifest.write_text(json.dumps({"host": "darwin/arm64", "targets": {
+            target: {"runtime": {"path": "runtime.a", "sha256": hashlib.sha256(self.runtime.read_bytes()).hexdigest()}}
+            for target in ("darwin/arm64", "linux/arm64")}}))
+        self.logs = [self.directory / "interpreter.jsonl", self.directory / "llvm-darwin.jsonl", self.directory / "llvm-linux.jsonl"]
         for path in self.logs:
             self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"})
 
     def events(self, path: Path, tests: dict[str, str], gates: dict[str, str] | None = None,
-               root: Path = ROOT) -> None:
+               root: Path | None = None) -> None:
+        root = root or self.directory
         package = "github.com/MarcoPoloResearchLab/Lo/tests/integration"
-        paths = []
-        for folder in ("cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "testdata", "examples", "docs/examples"):
-            paths.extend(p for p in (root / folder).rglob("*") if p.suffix in {".go", ".py", ".c", ".h", ".m", ".mm", ".metal", ".lo", ".json", ".txt"} and p.is_file())
-        paths.extend(root / name for name in ("go.mod", "go.sum", "Makefile", "docs/evidence/training-reference-results.json"))
-        identity_text = "".join(str(p.relative_to(root)) + "\0" + hashlib.sha256(p.read_bytes()).hexdigest() + "\n" for p in sorted(paths))
-        identity = {"backend": "interpreter" if path.name.startswith("interpreter") else "native",
-                    "source_sha256": hashlib.sha256(identity_text.encode()).hexdigest(),
+        sys.path.insert(0, str(ROOT / "tools/semanticcoverage"))
+        import report as reporter
+        original_root = reporter.ROOT
+        reporter.ROOT = root
+        try:
+            _, source_hash = reporter.source_identity()
+        finally:
+            reporter.ROOT = original_root
+        backend = "interpreter" if path.name.startswith("interpreter") else "llvm"
+        target = "linux/arm64" if path.name.endswith("linux.jsonl") else "darwin/arm64"
+        identity = {"backend": backend, "implementation": "go-interpreter" if backend == "interpreter" else "llvm-native",
+                    "target": target, "compiler": str(self.compiler.relative_to(root)),
+                    "compiler_sha256": hashlib.sha256(self.compiler.read_bytes()).hexdigest(),
+                    "source_sha256": source_hash,
                     "matrix_sha256": hashlib.sha256(self.matrix.read_bytes()).hexdigest()}
+        if backend == "llvm":
+            identity.update(toolchain=str(self.manifest.relative_to(root)),
+                            toolchain_sha256=hashlib.sha256(self.manifest.read_bytes()).hexdigest(),
+                            runtime_sha256=hashlib.sha256(self.runtime.read_bytes()).hexdigest())
         events = [{"Action": "start", "Package": package},
                   {"Action": "output", "Package": package, "Test": "TestSemanticCoverageRunIdentity",
                    "Output": "LO_SEMANTIC_IDENTITY=" + json.dumps(identity) + "\n"}]
@@ -53,10 +82,11 @@ class ReportCLI(unittest.TestCase):
         events.append({"Action": "pass", "Package": package})
         path.write_text("".join(json.dumps(event) + "\n" for event in events))
 
-    def run_report(self, output: Path | None = None, script: Path = SCRIPT) -> subprocess.CompletedProcess[str]:
+    def run_report(self, output: Path | None = None, script: Path | None = None) -> subprocess.CompletedProcess[str]:
         target = output or self.directory / "report.json"
-        command = [sys.executable, "-B", str(script), "--matrix", str(self.matrix),
-                   "--interpreter", str(self.logs[0]), "--native", str(self.logs[1]),
+        command = [sys.executable, "-B", str(script or self.script), "--matrix", str(self.matrix),
+                   "--interpreter", str(self.logs[0]), "--llvm", "darwin/arm64=" + str(self.logs[1]),
+                   "--llvm", "linux/arm64=" + str(self.logs[2]),
                    "--output", str(target)]
         return subprocess.run(command, cwd=ROOT, stdin=subprocess.DEVNULL,
                               text=True, capture_output=True,
@@ -68,7 +98,7 @@ class ReportCLI(unittest.TestCase):
         report = json.loads((self.directory / "report.json").read_text())
         self.assertEqual(report["execution_status"], "passed")
         self.assertEqual(len(report["references"]), 2)
-        self.assertEqual(report["references"][0]["native"], "pass")
+        self.assertEqual(report["references"][0]["llvm:darwin/arm64"], "pass")
 
     def test_missing_or_skipped_subtest_is_not_coverage(self):
         for status in ["missing", "skip"]:
@@ -78,6 +108,30 @@ class ReportCLI(unittest.TestCase):
             report = json.loads((self.directory / "report.json").read_text())
             self.assertEqual(report["execution_status"], "incomplete")
             self.assertIn("TestExample/reject", result.stderr)
+
+    def test_missing_target_is_not_standalone_qualification(self):
+        self.logs[2].unlink()
+        result = subprocess.run(
+            [sys.executable, "-B", str(self.script), "--matrix", str(self.matrix),
+             "--interpreter", str(self.logs[0]), "--llvm", "darwin/arm64=" + str(self.logs[1]),
+             "--output", str(self.directory / "report.json")], cwd=ROOT,
+            stdin=subprocess.DEVNULL, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        record = json.loads((self.directory / "report.json").read_text())
+        self.assertEqual(record["qualification_status"], "incomplete")
+        self.assertEqual(record["missing_targets"], ["linux/arm64"])
+
+    def test_installed_runtime_mutation_invalidates_evidence(self):
+        self.runtime.write_bytes(b"changed runtime")
+        result = self.run_report()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("runtime identity mismatch", result.stderr)
+
+    def test_installed_compiler_mutation_invalidates_evidence(self):
+        self.compiler.write_bytes(b"changed compiler")
+        result = self.run_report()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("compiler identity mismatch", result.stderr)
 
     def test_output_outside_repository_is_rejected(self):
         result = self.run_report(ROOT.parent / "forbidden-semantic-report.json")
@@ -107,13 +161,19 @@ class ReportCLI(unittest.TestCase):
 
     def test_cli_source_changes_invalidate_evidence(self) -> None:
         script = self.directory / "tools/semanticcoverage/report.py"
-        script.parent.mkdir(parents=True)
+        script.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(SCRIPT, script)
         for name in ("cmd/lo/main.go", "go.mod", "go.sum", "Makefile",
                      "docs/evidence/training-reference-results.json"):
             path = self.directory / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("fixture\n")
+        for name in ("compiler", "runtime", "manifest"):
+            original = getattr(self, name)
+            destination = self.directory / original.name
+            if destination != original:
+                shutil.copyfile(original, destination)
+            setattr(self, name, destination)
         for path in self.logs:
             self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"},
                         root=self.directory)
@@ -128,6 +188,26 @@ class ReportCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("identity mismatch", result.stderr)
         self.assertFalse((self.directory / "report.json").exists())
+
+    def test_rust_runtime_source_changes_invalidate_evidence(self):
+        runtime = self.directory / "runtime/native/src/lib.rs"
+        runtime.write_text("changed runtime source\n")
+        result = self.run_report()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("identity mismatch", result.stderr)
+
+    def test_i011_gap_prevents_qualification(self):
+        matrix = json.loads(self.matrix.read_text())
+        matrix["gaps"] = [{"ID": "native-injected-device-runtime", "Scope": "device", "Reason": "pending",
+                           "Owner": "I011", "Acceptance": "downstream"}]
+        self.matrix.write_text(json.dumps(matrix))
+        for path in self.logs:
+            self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"})
+        result = self.run_report()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        record = json.loads((self.directory / "report.json").read_text())
+        self.assertEqual(record["qualification_status"], "incomplete")
+        self.assertEqual(record["qualification_gaps"], matrix["gaps"])
 
     def test_recorded_gap_blocks_qualification(self):
         matrix = json.loads(self.matrix.read_text())
@@ -175,6 +255,7 @@ class ReportCLI(unittest.TestCase):
         matrix["operations"][0]["runtime_negative"] = ["TestRuntime/failure"]
         for section in ("cli", "semantics", "profiles"):
             matrix[section] = [{"tests": ["Test" + section.title() + "/case"]}]
+        matrix["native_tests"] = {"TestExample/add":["TestExample/add"],"TestExample/reject":["TestExample/reject"]}
         self.matrix.write_text(json.dumps(matrix))
         result = subprocess.run(
             [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
@@ -187,6 +268,7 @@ class ReportCLI(unittest.TestCase):
     def test_selector_rejects_invalid_test_identity(self):
         matrix = json.loads(self.matrix.read_text())
         matrix["operations"][0]["positive"] = [".*"]
+        matrix["native_tests"] = {"TestExample/add":["TestExample/add"],"TestExample/reject":["TestExample/reject"]}
         self.matrix.write_text(json.dumps(matrix))
         result = subprocess.run(
             [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
@@ -209,7 +291,7 @@ class ReportCLI(unittest.TestCase):
 
     def test_runner_cannot_overwrite_its_matrix(self):
         contents = self.matrix.read_text()
-        for name in ("semantic-coverage.json", "semantic-interpreter.jsonl", "semantic-native.jsonl"):
+        for name in ("semantic-coverage.json", "semantic-interpreter.jsonl", "semantic-llvm-darwin-arm64.jsonl"):
             with self.subTest(name=name):
                 matrix = self.directory / name
                 matrix.write_text(contents)
@@ -230,14 +312,20 @@ class ReportCLI(unittest.TestCase):
         for section in ("cli", "semantics", "profiles"):
             for row in matrix[section]:
                 row["tests"] = ["TestSemanticCoverageInventory"]
+        matrix["native_tests"] = {"TestSemanticCoverageInventory":["TestSemanticCoverageInventory"]}
         return matrix
 
     def run_alternate_matrix(self, matrix: dict[str, Any]) -> subprocess.CompletedProcess[str]:
+        for name in ("LO_TEST_COMPILER", "LO_LLVM_TOOLCHAIN"):
+            if not os.environ.get(name):
+                raise ValueError(f"alternate matrix test requires explicit {name}")
         self.matrix.write_text(json.dumps(matrix))
         return subprocess.run(
             [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
              "run", "--matrix", str(self.matrix.relative_to(ROOT)),
-             "--output-root", str(self.directory)],
+             "--output-root", str(self.directory), "--allow-partial",
+             "--compiler", os.environ["LO_TEST_COMPILER"],
+             "--toolchain", os.environ["LO_LLVM_TOOLCHAIN"]],
             cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True,
             env={**os.environ, "LO_SEMANTIC_MATRIX": "missing-inherited-matrix.json"})
 
@@ -248,7 +336,7 @@ class ReportCLI(unittest.TestCase):
         self.assertEqual(report["matrix_sha256"], hashlib.sha256(self.matrix.read_bytes()).hexdigest())
         self.assertEqual(report["source_sha256"]["cmd/lo/main.go"],
                          hashlib.sha256((ROOT / "cmd/lo/main.go").read_bytes()).hexdigest())
-        for lane in ("interpreter", "native"):
+        for lane in ("interpreter", "llvm:darwin/arm64"):
             self.assertEqual(set(report["coverage_gates"][lane].values()), {"pass"})
 
     def test_runner_validates_selected_matrix_inventory(self) -> None:

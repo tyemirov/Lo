@@ -122,6 +122,7 @@ exports:
       - _memcpy
       - _memmove
       - _memset
+      - _memset_pattern16
       - _mkdir
       - _mkfifo
       - _mmap

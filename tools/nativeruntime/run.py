@@ -12,7 +12,7 @@ import tempfile
 from prepare import ROOT, local
 
 
-def run(preparation: Path, executable: Path, arguments: list[str], stdin: bytes) -> int:
+def run(preparation: Path, executable: Path, arguments: list[str], stdin: bytes, capture_file: Path | None = None) -> int:
     if not executable.is_file():
         raise ValueError(f'missing guest executable: {executable}')
     if executable.read_bytes()[:4] != b'\x7fELF':
@@ -26,6 +26,11 @@ def run(preparation: Path, executable: Path, arguments: list[str], stdin: bytes)
         guest = local(work / 'root')
         (guest / 'dev').mkdir(parents=True)
         shutil.copy2(executable, guest / 'probe')
+        if capture_file is not None:
+            selected = local(capture_file)
+            if selected.name != '.lo-native-capture' or not selected.is_file() or selected.read_bytes() != b'':
+                raise ValueError('capture file must be the empty opted-in scenario file')
+            shutil.copyfile(selected, guest / '.lo-native-capture')
         shutil.copy2(local(emulation / 'guest-init'), guest / 'init')
         shutil.copytree(local(preparation / 'linux-sysroot/lib'), guest / 'lib')
         (guest / 'arguments').write_bytes(encoded_arguments)
@@ -58,11 +63,12 @@ def run(preparation: Path, executable: Path, arguments: list[str], stdin: bytes)
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--preparation', required=True, type=Path)
+    parser.add_argument('--capture-file', type=Path)
     parser.add_argument('executable', type=Path)
     parser.add_argument('arguments', nargs=argparse.REMAINDER)
     arguments = parser.parse_args()
     try:
-        return run(local(arguments.preparation), local(arguments.executable), arguments.arguments, sys.stdin.buffer.read())
+        return run(local(arguments.preparation), local(arguments.executable), arguments.arguments, sys.stdin.buffer.read(), local(arguments.capture_file) if arguments.capture_file else None)
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         print(f'native guest: {error}', file=sys.stderr)
         return 1

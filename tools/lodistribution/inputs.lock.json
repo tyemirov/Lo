@@ -1,0 +1,75 @@
+{
+  "elf_dependencies": {
+    "clang-21": [
+      "libm.so.6",
+      "libz.so.1",
+      "libstdc++.so.6",
+      "libgcc_s.so.1",
+      "libc.so.6",
+      "ld-linux-aarch64.so.1"
+    ],
+    "libgcc_s.so.1": [
+      "libc.so.6"
+    ],
+    "libicudata.so.72.1": [],
+    "libicuuc.so.72.1": [
+      "libicudata.so.72",
+      "libstdc++.so.6",
+      "libm.so.6",
+      "libgcc_s.so.1",
+      "libc.so.6",
+      "ld-linux-aarch64.so.1"
+    ],
+    "liblzma.so.5.4.1": [
+      "libc.so.6",
+      "ld-linux-aarch64.so.1"
+    ],
+    "libstdc++.so.6.0.30": [
+      "libm.so.6",
+      "libc.so.6",
+      "libgcc_s.so.1"
+    ],
+    "libxml2.so.2.9.14": [
+      "libicuuc.so.72",
+      "libz.so.1",
+      "liblzma.so.5",
+      "libm.so.6",
+      "libc.so.6",
+      "ld-linux-aarch64.so.1"
+    ],
+    "libz.so.1.2.13": [
+      "libc.so.6",
+      "ld-linux-aarch64.so.1"
+    ],
+    "lld": [
+      "libxml2.so.2",
+      "libm.so.6",
+      "libz.so.1",
+      "libstdc++.so.6",
+      "libgcc_s.so.1",
+      "libc.so.6",
+      "ld-linux-aarch64.so.1"
+    ]
+  },
+  "host_libraries": {
+    "libgcc_s.so.1": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7",
+    "libicudata.so.72": "d0619595f7b31f7ee5210a2a195f0367fc7251e80a0489ce6405c31f6efea23d",
+    "libicuuc.so.72": "7796e0b797561d4e63693dcebf48b69342f96b22069486c83c850772ce8a9d45",
+    "liblzma.so.5": "530e774de0f3fd8754351f387f52db6a0cb134b350e43d80044dea7109400f17",
+    "libstdc++.so.6": "532f3a12d7b8fef6cc7a064ea106b6c4ab2365674b73e743e4a385d4ffb6c8ab",
+    "libxml2.so.2": "630352d8686c5cfb5d4fd061d250f0365e05c220b963b3ba0b9f041110a379e2",
+    "libz.so.1": "ffb1ab496e6eced03ab679075f9f2c415c7728a145cc7f63d614497102d73822"
+  },
+  "tools": {
+    "darwin/arm64": {
+      "clang": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a",
+      "ld.lld": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+      "ld64.lld": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+    },
+    "linux/arm64": {
+      "clang": "470d20e410527de249ca560ef5519b6d7c772cb186c1e0c6af760ece9c794b32",
+      "ld.lld": "a07f1bfbba1961e9ad0433c7b18d3739a922e5ec01f5dc5c038664d85ae76866",
+      "ld64.lld": "a07f1bfbba1961e9ad0433c7b18d3739a922e5ec01f5dc5c038664d85ae76866"
+    }
+  }
+}
