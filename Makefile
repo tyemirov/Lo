@@ -31,6 +31,7 @@ BENCH_COUNT ?= 10
 BENCH_TIME ?= 300ms
 NATIVE_BENCH_WORK ?= $(NATIVE_QUALIFICATION_OUTPUT)/benchmark
 NATIVE_BENCH_LANE ?= all
+NATIVE_QUALIFICATION_TEST_ARGS ?=
 NATIVE_BENCH_ARGS ?=
 NATIVE_LINUX_PACKAGE ?= $(COMPILER_DISTRIBUTION_OUTPUT)/lo-linux-arm64-software
 NATIVE_CAMPAIGN_WORK ?= $(NATIVE_QUALIFICATION_OUTPUT)/campaign
@@ -136,11 +137,11 @@ benchmark-native-baseline: | tool-state
 	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkNativeBaseline -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) </dev/null
 
 benchmark-native: build | tool-state
-	GOMAXPROCS=1 python3 -B scripts/qualify_native.py --binary bin/lo --toolchain "$(LLVM_TOOLCHAIN)" --workdir "$(NATIVE_BENCH_WORK)" --samples $(BENCH_COUNT) --lane "$(NATIVE_BENCH_LANE)" </dev/null
+	GOMAXPROCS=1 python3 -B scripts/qualify_native.py --binary bin/lo --toolchain "$(LLVM_TOOLCHAIN)" --workdir "$(NATIVE_BENCH_WORK)" --lane "$(NATIVE_BENCH_LANE)" </dev/null
 
 .PHONY: benchmark-standalone
 benchmark-standalone: | tool-state
-	GOMAXPROCS=1 python3 -B scripts/qualify_native.py --binary "$(NATIVE_BENCH_COMPILER)" --workdir "$(NATIVE_BENCH_WORK)" --samples $(BENCH_COUNT) --lane "$(NATIVE_BENCH_LANE)" $(NATIVE_BENCH_ARGS) </dev/null
+	GOMAXPROCS=1 python3 -B scripts/qualify_native.py --binary "$(NATIVE_BENCH_COMPILER)" --workdir "$(NATIVE_BENCH_WORK)" --lane "$(NATIVE_BENCH_LANE)" $(NATIVE_BENCH_ARGS) </dev/null
 
 benchmark-training-cli: build | tool-state
 	GOMAXPROCS=1 python3 scripts/benchmark_training.py --binary bin/lo --samples $(BENCH_COUNT) </dev/null
@@ -172,7 +173,7 @@ test-semantic-report: | tool-state
 test-native-qualification-tools: | tool-state
 	$(GO) test ./tools/loqualification/performance-runner </dev/null
 	$(GO) vet ./tools/loqualification/performance-runner </dev/null
-	LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider --basetemp "$(LO_BUILD_ROOT)/qualification-tests" -q tools/loqualification tools/nativebench </dev/null
+	LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider --basetemp "$(LO_BUILD_ROOT)/qualification-tests" -q tools/loqualification tools/nativebench $(NATIVE_QUALIFICATION_TEST_ARGS) </dev/null
 
 test-semantic-migration: $(if $(PROCESS_LAUNCHER),process-launcher) test-semantic-report | tool-state
 	python3 -B tools/semanticcoverage/run.py run --output-root "$(SEMANTIC_OUTPUT)" --compiler "$(SEMANTIC_COMPILER)" --toolchain "$(SEMANTIC_TOOLCHAIN)" $(SEMANTIC_ARGS) </dev/null
@@ -182,7 +183,7 @@ test-native-linux: | tool-state
 	python3 -B tools/loqualification/suite.py --preparation "$(NATIVE_RUNTIME_STATE)" --package "$(COMPILER_DISTRIBUTION_OUTPUT)/lo-linux-arm64-software" --matrix testdata/semantic-migration/matrix.json --work "$(NATIVE_QUALIFICATION_OUTPUT)/linux" --go "$(shell command -v $(GO))" --accelerator "$(LINUX_ACCELERATOR)" </dev/null
 
 benchmark-native-linux: | tool-state
-	python3 -B tools/loqualification/performance.py --preparation "$(NATIVE_RUNTIME_STATE)" --package "$(NATIVE_LINUX_PACKAGE)" --frontend "$(SEMANTIC_COMPILER)" --work "$(NATIVE_BENCH_WORK)" --go "$(shell command -v $(GO))" --accelerator "$(LINUX_ACCELERATOR)" --samples $(BENCH_COUNT) --lane "$(NATIVE_BENCH_LANE)" $(NATIVE_BENCH_ARGS) </dev/null
+	python3 -B tools/loqualification/performance.py --preparation "$(NATIVE_RUNTIME_STATE)" --package "$(NATIVE_LINUX_PACKAGE)" --frontend "$(SEMANTIC_COMPILER)" --work "$(NATIVE_BENCH_WORK)" --go "$(shell command -v $(GO))" --accelerator "$(LINUX_ACCELERATOR)" --lane "$(NATIVE_BENCH_LANE)" $(NATIVE_BENCH_ARGS) </dev/null
 
 .PHONY: prepare-native-lowering test-native-lowering test-native-lowering-tools
 prepare-native-lowering: | tool-state
