@@ -60,7 +60,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `mobile client`: An application for a mobile platform.
 - `mobile store artifact`: A signed `.ipa` or `.aab` file for store publication.
 - `native toolchain`: The platform tools that build and sign a mobile store artifact.
-- `payload`: Structured data that crosses a system boundary.
+- `payload`: Data associated with a message, typed result, or metadata action.
 - `PDF`: A file that uses the Portable Document Format.
 - `PRD`: A product requirement document.
 - `private input channel`: A documented process environment, anonymous pipe, or private file input.
@@ -170,16 +170,25 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `race detector`: Runtime analysis that finds memory access without the required synchronization.
 - `median`: The middle value of ordered measurements, or the mean of the two middle values.
 - `bootstrap interval`: An estimated statistical interval from repeated samples drawn with replacement from the measured values.
-- `paired ratio`: The native elapsed time divided by the reference elapsed time in one measurement pair.
+- `paired ratio`: The native measurement divided by the related reference measurement in one measurement pair.
 - `temporal correlation`: Statistical dependence between measurements made at different times.
 - `measurement drift`: A gradual change in measurements during an experiment.
 - `measurement precision`: The uncertainty of an estimated performance ratio, expressed by its interval width.
+- `clock resolution`: The minimum time difference that a clock can show.
+- `timing control`: An empty measured interval that shows the cost of the diagnostic clocks.
+- `test assertion`: A test condition that compares an observed result with a specified result.
 - `performance regression`: An increase in execution cost relative to a specified reference.
 - `contention`: Competition between processes for a shared computing resource.
 - `allocation profile`: A sampled report of memory allocations attributed to functions.
 - `CPU profile`: A sampled report of processor time attributed to functions.
 
-- `metadata`: Information about a value's type, shape, storage size, or device, separate from its elements.
+- `metadata`: Information about a program or value, including source positions, types, shapes, storage sizes, and devices.
+- `runtime site`: One ordered metadata record that identifies an execution boundary or source construct.
+- `shared source span`: One source span record used by more than one runtime site.
+- `duplicate key`: A JSON object field name used more than once in that object.
+- `coordinate extra`: A JSON field in a source coordinate other than `offset`, `line`, or `column`.
+- `program admission`: Runtime validation before a compiled program can execute.
+- `scratch buffer`: A temporary byte array that a runtime operation uses for successive reads.
 - `axis`: One indexed dimension of a tensor.
 - `row-major layout`: Contiguous tensor storage where the last axis changes fastest.
 - `binary64`: The IEEE 754 format with 53 significant binary digits, used by Lo Float values.
@@ -244,6 +253,8 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `AOT compilation`: Ahead-of-time translation of a program into machine code before program execution.
 - `native executable`: A program artifact with machine code for one operating system and processor architecture.
 - `compiler backend`: The compiler component that converts a checked graph into executable code.
+- `register allocation`: The compiler operation that assigns machine registers to values.
+- `thunk`: A small generated function that executes an operation for a different function.
 - `benchmark`: A repeatable workload that measures execution time or resource use under specified conditions.
 - `baseline`: A recorded benchmark result used to assess a later implementation.
 - `differential test`: A test that compares observable results from two implementations of the same contract.
