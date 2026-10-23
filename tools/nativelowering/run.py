@@ -66,7 +66,7 @@ def main() -> int:
                 cell.mkdir(parents=True)
                 module = cell / 'module.ll'
                 receipt = json.loads(run([str(lo), 'build', str(source), '--emit', 'llvm', '--target', target, '--output', str(module), '--format', 'json']))
-                if any(receipt.get(key) != value for key, value in {'command': 'build', 'status': 'ok', 'target': target, 'emit': 'llvm', 'abi': 'lo-native-1'}.items()) or local(receipt.get('artifact', '')) != module:
+                if any(receipt.get(key) != value for key, value in {'command': 'build', 'status': 'ok', 'target': target, 'emit': 'llvm', 'abi': 'lo-native-2'}.items()) or local(receipt.get('artifact', '')) != module:
                     raise ValueError(f'emission failed: {receipt}')
                 run([tools['opt'], '-passes=verify', '-disable-output', str(module)])
                 for optimization in (0, 2):

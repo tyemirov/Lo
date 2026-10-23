@@ -54,7 +54,7 @@ def stable_identity() -> dict:
                     'tools/nativebench/harness.c.txt': DIGEST,
                     'tools/nativebench/allocation.c.txt': DIGEST},
         'evaluator': {'tools/nativebench/qualification.py': DIGEST},
-        'measurement': {'samples': 10, 'warmup': 3, 'order': 'alternating paired samples',
+        'measurement': {'sample_plan': {'execution': 10, 'process': 10, 'http': 100, 'build': 10}, 'warmup': 3, 'order': 'alternating paired samples',
                         'cache': CACHE,
                         'max_steps': 10000000, 'concurrency': 1, 'limits': LIMITS.copy(),
                         'timer_contract': dict(TIMER_CONTRACT),
@@ -66,7 +66,7 @@ def lane_report(lane: str) -> dict:
     """Use every case and complete raw samples from exactly one timing lane."""
     identity = stable_identity()
     report = {'merge_identity': identity, 'target': identity['target'],
-              'samples': 10, 'warmup': 3, 'max_steps': 10000000, 'concurrency': 1,
+              'sample_plan': {'execution': 10, 'process': 10, 'http': 100, 'build': 10}, 'warmup': 3, 'max_steps': 10000000, 'concurrency': 1,
               'order': 'alternating paired samples', 'cache': identity['measurement']['cache'],
               'measurement_complete': True, 'qualification_complete': False,
               'gates_passed': True, 'gate_failures': [], 'complete_contract': False,
@@ -82,13 +82,13 @@ def lane_report(lane: str) -> dict:
                          'samples': [{'sample': index,
                                       'order': ['native', 'interpreter'] if index % 2 == 0 else ['interpreter', 'native'],
                                       'results': {'interpreter': {'ns': 100.0, 'bytes': 1, 'allocations': 1},
-                                                  'native': {'ns': 40, 'total_ns': 40000000, 'iterations': 1000000, 'batch_size': 64}}} for index in range(10)]}
+                                                  'native': {'ns': 40, 'total_ns': 40000000, 'iterations': 1000000, 'batch_size': 64}}} for index in range(100 if lane == 'http' else 10)]}
                         for name in names]
     elif lane == 'process':
         report[lane] = [{'name': name, 'source_sha256': DIGEST,
                          'samples_ns': [{'sample': index, 'interpreter': 100, 'native': 40,
                                          'order': ['native', 'interpreter'] if index % 2 == 0 else ['interpreter', 'native']}
-                                        for index in range(10)]} for name in names]
+                                        for index in range(100 if lane == 'http' else 10)]} for name in names]
     elif lane == 'http':
         report[lane] = [{'name': name, 'source_sha256': DIGEST, 'requests_per_sample': 200,
                          'concurrency': 1, 'both_servers_alive': True,
@@ -96,7 +96,7 @@ def lane_report(lane: str) -> dict:
                             'order': ['native', 'interpreter'] if index % 2 == 0 else ['interpreter', 'native'],
                             **{backend: {'samples_ns': [1] * 200,
                             'p95_ns': 1, 'elapsed_ns': 300, 'requests_per_second': 200e9 / 300}
-                            for backend in ('interpreter', 'native')}} for index in range(10)]}
+                            for backend in ('interpreter', 'native')}} for index in range(100 if lane == 'http' else 10)]}
                         for name in names]
     else:
         report[lane] = [{'name': name, 'source_sha256': DIGEST, 'phase': phase,
@@ -232,7 +232,7 @@ def test_public_merge_rejects_obsolete_load_admission_contract(work: Path) -> No
 
 
 @pytest.mark.parametrize('subject', ['source', 'reference_source', 'producer', 'harness', 'evaluator', 'compiler',
-    'manifest', 'runtime', 'inventory', 'provenance', 'target', 'environment', 'accelerator', 'samples', 'warmup',
+    'manifest', 'runtime', 'inventory', 'provenance', 'target', 'environment', 'accelerator', 'sample_plan', 'warmup',
     'order', 'cache', 'limits', 'timer_contract', 'reference_go'])
 def test_public_merge_rejects_mixed_provenance(work: Path, subject: str) -> None:
     paths = reports(work)
@@ -360,3 +360,78 @@ def test_public_merge_rejects_matching_noncanonical_contracts(work: Path, proble
     assert result.returncode != 0
     assert 'merge' in result.stderr.lower(), result.stderr
     assert not output.exists()
+
+
+def test_public_merge_uses_complete_lane_sample_plan(work: Path) -> None:
+    """The full plan is common identity; HTTP retains all 100 paired batches."""
+    paths = reports(work)
+    plan = {'execution': 10, 'process': 10, 'http': 100, 'build': 10}
+    output = work / 'plan-merged.json'
+    result = invoke(paths, output)
+    assert result.returncode == 0, result.stderr
+    merged = json.loads(output.read_text())
+    assert merged['sample_plan'] == plan
+    assert 'samples' not in merged
+    for path in paths:
+        original = json.loads(path.read_text())
+        lane = original['lanes'][0]
+        for actual, expected in zip(merged[lane], original[lane], strict=True):
+            for name, value in expected.items():
+                assert actual[name] == value
+
+
+@pytest.mark.parametrize('problem', ['old_scalar', 'missing_lane', 'extra_lane', 'wrong_http',
+                                      'boolean', 'null', 'raw_plan', 'short_http', 'long_http'])
+def test_public_merge_rejects_wrong_sample_plan_or_lane_counts(work: Path, problem: str) -> None:
+    paths = reports(work)
+    def change(report: dict) -> None:
+        plan = report['merge_identity']['measurement']['sample_plan']
+        if problem == 'old_scalar':
+            del report['sample_plan']
+            report['samples'] = 10
+            del report['merge_identity']['measurement']['sample_plan']
+            report['merge_identity']['measurement']['samples'] = 10
+        elif problem == 'missing_lane':
+            del plan['build']
+        elif problem == 'extra_lane':
+            plan['other'] = 10
+        elif problem == 'wrong_http':
+            plan['http'] = 10
+        elif problem == 'boolean':
+            plan['execution'] = True
+        elif problem == 'null':
+            report['merge_identity']['measurement']['sample_plan'] = None
+        elif problem == 'raw_plan':
+            report['sample_plan']['http'] = 10
+        elif problem == 'short_http':
+            report['http'][0]['samples'].pop()
+        else:
+            report['http'][0]['samples'].append(copy.deepcopy(report['http'][0]['samples'][-1]))
+    mutate(paths[2], change)
+    output = work / 'rejected-plan.json'
+    assert invoke(paths, output).returncode == 2
+    assert not output.exists()
+
+
+@pytest.mark.parametrize('gate,ratio', [('pass', 1.0), ('fail', 1.2), ('inconclusive', None)])
+def test_http_precision_plan_recomputes_deterministic_gates_and_retains_raw(work: Path, gate: str, ratio: float | None) -> None:
+    paths = reports(work)
+    def change(report: dict) -> None:
+        for record in report['http']:
+            for i, pair in enumerate(record['samples']):
+                factor = ratio if ratio is not None else (1.0 if i < 50 else 1.2)
+                pair['interpreter'].update(samples_ns=[100] * 200, p95_ns=100,
+                    elapsed_ns=30000, requests_per_second=200e9 / 30000)
+                pair['native'].update(samples_ns=[int(100 * factor)] * 200, p95_ns=int(100 * factor),
+                    elapsed_ns=int(30000 * factor), requests_per_second=200e9 / int(30000 * factor))
+    mutate(paths[2], change)
+    raw = json.loads(paths[2].read_text())['http']
+    outputs = [work / 'first.json', work / 'second.json']
+    for output in outputs:
+        assert invoke(paths, output).returncode == (0 if gate == 'pass' else 1)
+        result = json.loads(output.read_text())
+        assert result['http'][0]['p95']['gate'] == gate
+        assert result['http'][0]['reciprocal_throughput']['gate'] == gate
+        for actual, original in zip(result['http'], raw, strict=True):
+            assert actual['samples'] == original['samples']
+    assert outputs[0].read_bytes() == outputs[1].read_bytes()

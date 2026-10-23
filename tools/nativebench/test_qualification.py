@@ -4,7 +4,7 @@ from __future__ import annotations
 import pytest
 
 def valid_report(lane: str = 'process', name: str = 'startup') -> dict:
-    report = {'samples': 10, 'warmup': 3, 'measurement_complete': True,
+    report = {'sample_plan': {'execution': 10, 'process': 10, 'http': 100, 'build': 10}, 'warmup': 3, 'measurement_complete': True,
               'expected_inventory': {lane: [name]}, 'complete_contract': False,
               'concurrency': 1, 'other_benchmark_jobs': [], 'benchmark_job_observation': 'test census'}
     if lane == 'build':
@@ -156,9 +156,9 @@ def test_report_rejects_invalid_http_observations(mutation: str) -> None:
     report.pop('execution')
     report['expected_inventory'] = {'http': ['echo']}
     pair = lambda index: {'sample': index, 'order': ['native', 'interpreter'] if index % 2 == 0 else ['interpreter', 'native'], **{backend: {'samples_ns': [1.0] * 200,
-                            'elapsed_ns': 300.0, 'p95_ns': 1.0, 'requests_per_second': 666666666.0}
+                            'elapsed_ns': 300.0, 'p95_ns': 1.0, 'requests_per_second': 200e9 / 300}
                             for backend in ('interpreter', 'native')}}
-    report['http'] = [{'name': 'echo', 'samples': [pair(index) for index in range(10)],
+    report['http'] = [{'name': 'echo', 'samples': [pair(index) for index in range(100)],
                        'requests_per_sample': 200, 'concurrency': 1, 'both_servers_alive': True}]
     samples = report['http'][0]['samples']
     if mutation == 'short_pairs':
@@ -220,8 +220,8 @@ def test_exact_full_report_qualifies_and_each_lane_omission_rejects() -> None:
     report['http'] = [{'name': name, 'requests_per_sample': 200, 'concurrency': 1,
                         'both_servers_alive': True, 'samples': [
                             {'sample': index, 'order': ['native', 'interpreter'] if index % 2 == 0 else ['interpreter', 'native'], **{backend: {'samples_ns': [1.0] * 200,
-                                'elapsed_ns': 300.0, 'p95_ns': 1.0, 'requests_per_second': 666666666.0}
-                                for backend in ('interpreter', 'native')}} for index in range(10)]}
+                                'elapsed_ns': 300.0, 'p95_ns': 1.0, 'requests_per_second': 200e9 / 300}
+                                for backend in ('interpreter', 'native')}} for index in range(100)]}
                        for name in inventory['http']]
     qualification.completion(report, 0)
     assert report['measurement_complete'] is True
@@ -273,8 +273,45 @@ def test_report_rejects_incorrect_observed_pair_order(lane: str) -> None:
                            'both_servers_alive': True, 'samples': [
             {'sample': index, 'order': ['native', 'interpreter'] if index % 2 == 0 else ['interpreter', 'native'], **{backend: {'samples_ns': [1] * 200, 'elapsed_ns': 300,
                  'p95_ns': 1, 'requests_per_second': 200e9 / 300} for backend in ('interpreter', 'native')}}
-            for index in range(10)]}]
+            for index in range(100)]}]
     samples = report[lane][0]['samples_ns' if lane == 'process' else 'samples']
     samples[0]['order'] = ['interpreter', 'native']  # Retained index zero follows three warmups.
     with pytest.raises(ValueError, match='order'):
         qualification.evaluate(report)
+
+
+def valid_http_report() -> dict:
+    report = valid_report('execution', 'startup')
+    report.pop('execution')
+    report['expected_inventory'] = {'http': ['echo']}
+    report['http'] = [{'name': 'echo', 'requests_per_sample': 200, 'concurrency': 1,
+                       'both_servers_alive': True, 'samples': [
+        {'sample': index, 'order': ['native', 'interpreter'] if index % 2 == 0 else ['interpreter', 'native'],
+         **{backend: {'samples_ns': list(range(200, 0, -1)), 'elapsed_ns': 21000,
+                      'p95_ns': 190, 'requests_per_second': 200e9 / 21000}
+            for backend in ('interpreter', 'native')}} for index in range(100)]}]
+    return report
+
+
+@pytest.mark.parametrize('mutation', ['wrong_p95', 'elapsed_below_sum', 'wrong_throughput'])
+def test_public_evaluator_rejects_inconsistent_http_metrics(mutation: str) -> None:
+    import qualification
+    report = valid_http_report()
+    timing = report['http'][0]['samples'][0]['native']
+    if mutation == 'wrong_p95':
+        timing['p95_ns'] = 189
+    elif mutation == 'elapsed_below_sum':
+        timing.update(elapsed_ns=20099, requests_per_second=200e9 / 20099)
+    else:
+        timing['requests_per_second'] *= 1.000001
+    with pytest.raises(ValueError, match='HTTP'):
+        qualification.evaluate(report)
+
+
+def test_public_evaluator_accepts_consistent_http_metrics_with_float_roundoff() -> None:
+    import math
+    import qualification
+    report = valid_http_report()
+    timing = report['http'][0]['samples'][0]['native']
+    timing['requests_per_second'] = math.nextafter(timing['requests_per_second'], math.inf)
+    assert qualification.evaluate(report) == []

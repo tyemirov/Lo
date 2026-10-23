@@ -18,7 +18,7 @@ from suite import environment
 
 sys.path.insert(0, str(ROOT / 'tools/nativebench'))
 import qualification
-from qualification import LANES, WARMUP, completion, expected_inventory  # noqa: E402
+from qualification import SAMPLE_PLAN, validate_sample_plan, LANES, WARMUP, completion, expected_inventory  # noqa: E402
 from identity import CACHE, capture_provenance, merge_identity, verify_provenance  # noqa: E402
 
 GUEST_INPUT = '/input/performance'
@@ -38,7 +38,6 @@ class Inputs:
     frontend: Path
     work: Path
     go: str
-    samples: int
     lanes: tuple[str, ...]
     cases: tuple[str, ...]
     accelerator: str = 'tcg'
@@ -121,7 +120,7 @@ def prepare(inputs: Inputs) -> tuple[Path, dict[str, Any]]:
     frozen = capture_provenance(ROOT, inputs.package / 'bin/lo', inputs.package / 'toolchain.json',
                                 'linux/arm64', PRODUCER_SOURCES, tool_paths)
     manifest = json.loads(local(inputs.package / 'toolchain.json').read_text())
-    if manifest['host'] != 'linux/arm64' or manifest['llvm'] != '21.1.8' or manifest['abi'] != 'lo-native-1':
+    if manifest['host'] != 'linux/arm64' or manifest['llvm'] != '21.1.8' or manifest['abi'] != 'lo-native-2':
         raise ValueError('performance requires the installed Linux LLVM distribution')
     resolve(inputs.package, manifest['targets']['linux/arm64']['runtime'])
     if not (inputs.package / 'bin/lo').is_file():
@@ -150,7 +149,7 @@ def prepare(inputs: Inputs) -> tuple[Path, dict[str, Any]]:
             inputs.work / 'runner-build.log')
     payload = inputs.work / 'payload'
     payload.mkdir()
-    config: dict[str, Any] = {'samples': inputs.samples, 'warmup': WARMUP, 'compiler': '/compiler/bin/lo',
+    config: dict[str, Any] = {'sample_plan': dict(SAMPLE_PLAN), 'warmup': WARMUP, 'compiler': '/compiler/bin/lo',
                               'output': GUEST_REPORT, 'execution': [], 'process': [], 'http': [], 'build': []}
     identities: dict[str, Any] = {}
     def selected(case: dict[str, Any]) -> bool:
@@ -210,7 +209,7 @@ def prepare(inputs: Inputs) -> tuple[Path, dict[str, Any]]:
               'frontend_emitter_sha256': digest(inputs.frontend), 'runner_sha256': digest(runner),
               'measurement_source_identity': {'tools/loqualification/performance.py': digest(Path(__file__)),
                                              'tools/nativebench/qualification.py': digest(Path(qualification.__file__))},
-              'payload_identities': identities, 'samples': inputs.samples, 'warmup': WARMUP,
+              'payload_identities': identities, 'sample_plan': dict(SAMPLE_PLAN), 'warmup': WARMUP,
               'lanes': inputs.lanes, 'cases': inputs.cases, 'accelerator': inputs.accelerator,
               'expected_inventory': inventory,
               'batch': str(batch.relative_to(ROOT)),
@@ -241,6 +240,7 @@ def qualify(inputs: Inputs, prepare_only: bool) -> dict[str, Any]:
         raise ValueError(f'performance report missing; inspect {inputs.work / "guest/0.stderr"}')
     verify_provenance(ROOT, identity['frozen_provenance'])
     report = json.loads(exported.read_text())
+    validate_sample_plan(report.get('sample_plan'))
     report.update(identity)
     report['cache'] = CACHE
     report['scope'] = 'diagnostic selection' if inputs.cases else 'full fixed corpus'
@@ -250,7 +250,7 @@ def qualify(inputs: Inputs, prepare_only: bool) -> dict[str, Any]:
         producer_kind='linux-guest',
         producer_tools={'python': platform.python_version(), **identity['frozen_provenance']['tools']},
         producer_sources=PRODUCER_SOURCES,
-        reference_go=identity['reference_go'], samples=inputs.samples)
+        reference_go=identity['reference_go'])
     report['reference_source_identity'] = report['merge_identity']['reference']['source_identity']
     report['measurement_source_identity'] = {**report['merge_identity']['producer']['source_identity'],
                                              **report['merge_identity']['evaluator']}
@@ -265,18 +265,15 @@ def main() -> int:
     for name in ('preparation', 'package', 'frontend', 'work'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--go', default='go')
-    parser.add_argument('--samples', type=int, default=10)
     parser.add_argument('--case', dest='cases', action='append', default=[])
     parser.add_argument('--lane', choices=('execution', 'process', 'http', 'build', 'all'), default='all')
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--accelerator', choices=('tcg', 'hvf'), default='tcg')
     args = parser.parse_args()
-    if not 10 <= args.samples <= 1000:
-        parser.error('at least ten paired samples are required; at most 1000 pairs are permitted')
     try:
         lanes = LANES if args.lane == 'all' else (args.lane,)
         inputs = Inputs(local(args.preparation), local(args.package), local(args.frontend), local(args.work),
-                        args.go, args.samples, lanes, tuple(args.cases), args.accelerator)
+                        args.go, lanes, tuple(args.cases), args.accelerator)
         report = qualify(inputs, args.prepare_only)
         print(json.dumps(report, indent=2))
         return 0 if args.prepare_only or report['gates_passed'] else 1

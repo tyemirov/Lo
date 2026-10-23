@@ -44,14 +44,14 @@ type fixture struct {
 	Work       string `json:"work"`
 }
 type config struct {
-	Samples   int       `json:"samples"`
-	Warmup    int       `json:"warmup"`
-	Compiler  string    `json:"compiler"`
-	Output    string    `json:"output"`
-	Execution []fixture `json:"execution"`
-	Process   []fixture `json:"process"`
-	HTTP      []fixture `json:"http"`
-	Build     []fixture `json:"build"`
+	SamplePlan map[string]int `json:"sample_plan"`
+	Warmup     int            `json:"warmup"`
+	Compiler   string         `json:"compiler"`
+	Output     string         `json:"output"`
+	Execution  []fixture      `json:"execution"`
+	Process    []fixture      `json:"process"`
+	HTTP       []fixture      `json:"http"`
+	Build      []fixture      `json:"build"`
 }
 type observation struct {
 	Status  int
@@ -88,8 +88,17 @@ func readConfig(path string) (config, error) {
 	if decoder.Decode(new(any)) != io.EOF {
 		return c, fmt.Errorf("configuration must contain one JSON object")
 	}
-	if c.Samples < 10 || c.Samples > 1000 || c.Warmup != warmup || !absolute(c.Compiler) || !absolute(c.Output) {
+	if c.Warmup != warmup || !absolute(c.Compiler) || !absolute(c.Output) {
 		return c, fmt.Errorf("configuration requires at least ten pairs, three warmups, and absolute compiler/output paths")
+	}
+	plan := map[string]int{"execution": 10, "process": 10, "http": 100, "build": 10}
+	if len(c.SamplePlan) != len(plan) {
+		return c, fmt.Errorf("configuration requires the complete canonical sample_plan")
+	}
+	for lane, count := range plan {
+		if c.SamplePlan[lane] != count {
+			return c, fmt.Errorf("configuration sample_plan %s requires %d pairs", lane, count)
+		}
 	}
 	names := map[string]bool{}
 	for lane, fixtures := range map[string][]fixture{"execution": c.Execution, "process": c.Process, "http": c.HTTP, "build": c.Build} {
@@ -289,7 +298,7 @@ func execution(c config, f fixture) (map[string]any, error) {
 	}
 
 	var samples []map[string]any
-	for index := 0; index < c.Samples+warmup; index++ {
+	for index := 0; index < c.SamplePlan["execution"]+warmup; index++ {
 		results := map[string]any{}
 		for _, backend := range order(index) {
 			argv := []string{f.Native}
@@ -353,7 +362,7 @@ func process(c config, f fixture) (map[string]any, error) {
 		return nil, err
 	}
 	var pairs []map[string]any
-	for index := 0; index < c.Samples+warmup; index++ {
+	for index := 0; index < c.SamplePlan["process"]+warmup; index++ {
 		pair := map[string]any{}
 		for _, backend := range order(index) {
 			work := filepath.Join(f.Work, backend)
@@ -511,7 +520,7 @@ func httpBenchmark(c config, f fixture) (record map[string]any, returned error) 
 		servers[backend] = child
 	}
 	var samples []map[string]any
-	for index := 0; index < c.Samples+warmup; index++ {
+	for index := 0; index < c.SamplePlan["http"]+warmup; index++ {
 		if err := serversAlive(servers); err != nil {
 			return nil, err
 		}
@@ -551,7 +560,7 @@ func httpBenchmark(c config, f fixture) (record map[string]any, returned error) 
 }
 func builds(c config, f fixture) ([]map[string]any, error) {
 	var records []map[string]any
-	for sample := 0; sample < c.Samples+warmup+1; sample++ {
+	for sample := 0; sample < c.SamplePlan["build"]+warmup+1; sample++ {
 		result, err := build(c, f)
 		if err != nil {
 			return records, err
@@ -689,7 +698,7 @@ func run(c config) (map[string]any, error) {
 // runWithObservations keeps the real runner with injected environment I/O boundaries.
 func runWithObservations(c config, environmentSnapshot func() (map[string]string, error), inventory func(config) ([]string, error), loadSnapshot func() ([]float64, error)) (map[string]any, error) {
 	environment, environmentErr := environmentSnapshot()
-	report := map[string]any{"other_benchmark_jobs": []string{}, "benchmark_job_observation": "Informational /proc process and load snapshots before and after sequential measurement; no load admission.", "measurement_complete": false, "target": "linux/arm64", "samples": c.Samples, "warmup": warmup, "max_steps": 10000000, "concurrency": 1, "order": "alternating paired samples", "clock": "Go monotonic time; native C CLOCK_MONOTONIC", "checked_execution": "program admission before timing; session run, context close, and returned value release inside timing"}
+	report := map[string]any{"other_benchmark_jobs": []string{}, "benchmark_job_observation": "Informational /proc process and load snapshots before and after sequential measurement; no load admission.", "measurement_complete": false, "target": "linux/arm64", "sample_plan": c.SamplePlan, "warmup": warmup, "max_steps": 10000000, "concurrency": 1, "order": "alternating paired samples", "clock": "Go monotonic time; native C CLOCK_MONOTONIC", "checked_execution": "program admission before timing; session run, context close, and returned value release inside timing"}
 	if environmentErr != nil {
 		return report, environmentErr
 	}

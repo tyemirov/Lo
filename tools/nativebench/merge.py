@@ -27,7 +27,7 @@ import sys
 import tempfile
 from typing import Any
 
-from qualification import LANES, WARMUP, completion, expected_inventory, validate_measurements
+from qualification import LANES, WARMUP, completion, expected_inventory, validate_measurements, validate_sample_plan
 from identity import CACHE, HARNESS, LIMITS, LOAD_POLICY, ORDER, TIMER_CONTRACT, validate_environment
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,7 +37,7 @@ PACKAGE_KEYS = {'compiler_sha256', 'manifest_sha256', 'runtime_sha256',
                 'inventory_sha256', 'provenance_sha256'}
 HARNESS_KEYS = set(HARNESS)
 EVALUATOR_KEYS = {'tools/nativebench/qualification.py'}
-MEASUREMENT_KEYS = {'samples', 'warmup', 'order', 'cache', 'max_steps',
+MEASUREMENT_KEYS = {'sample_plan', 'warmup', 'order', 'cache', 'max_steps',
                     'concurrency', 'limits', 'timer_contract', 'load_policy'}
 TIMER_KEYS = set(TIMER_CONTRACT)
 DIGEST = re.compile(r'[0-9a-f]{64}\Z')
@@ -121,9 +121,10 @@ def validate_identity(identity: Any) -> dict[str, Any]:
                 raise ValueError(f'identity has contradictory source digests: {name}')
             known_sources[name] = sha256
     measurement = object_fields(identity['measurement'], MEASUREMENT_KEYS, 'measurement')
-    count = measurement['samples']
-    if type(count) is not int or not 10 <= count <= 1000:
-        raise ValueError('identity samples require ten to one thousand pairs')
+    try:
+        validate_sample_plan(measurement['sample_plan'])
+    except ValueError as error:
+        raise ValueError(f'identity {error}') from error
     if type(measurement['warmup']) is not int or measurement['warmup'] != WARMUP:
         raise ValueError('identity warmup requires three pairs')
     if type(measurement['concurrency']) is not int or measurement['concurrency'] != 1:
@@ -161,7 +162,7 @@ def reject_constant(value: str) -> None:
 def identity_consistency(report: dict[str, Any], identity: dict[str, Any]) -> None:
     """Require raw measurement metadata to identify the admitted contract."""
     measurement = identity['measurement']
-    for name in ('samples', 'warmup', 'order', 'cache', 'max_steps', 'concurrency'):
+    for name in ('sample_plan', 'warmup', 'order', 'cache', 'max_steps', 'concurrency'):
         if name not in report or report[name] != measurement[name]:
             raise ValueError(f'identity disagrees with raw report {name}')
     for name in ('system', 'machine', 'processor'):
@@ -241,7 +242,7 @@ def merge(paths: list[Path]) -> dict[str, Any]:
         raise ValueError(f'missing timing lanes: {sorted(set(LANES) - set(lanes))}')
     measurement = identity['measurement']
     report = {name: copy.deepcopy(measurement[name])
-              for name in ('samples', 'warmup', 'order', 'cache', 'max_steps', 'concurrency')}
+              for name in ('sample_plan', 'warmup', 'order', 'cache', 'max_steps', 'concurrency')}
     report.update({'target': identity['target'], 'accelerator': identity['accelerator'],
                    'merge_identity': copy.deepcopy(identity), 'input_reports': [receipt for _, receipt in admitted],
                    'expected_inventory': expected_inventory(LANES, ()), 'complete_contract': True,

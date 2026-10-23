@@ -37,6 +37,15 @@ def comparison(pairs: list[dict[str, float]]) -> dict[str, Any]:
 
 
 LANES = ('execution', 'process', 'http', 'build')
+SAMPLE_PLAN = {'execution': 10, 'process': 10, 'http': 100, 'build': 10}
+
+
+def validate_sample_plan(value: Any) -> None:
+    if (not isinstance(value, dict) or set(value) != set(SAMPLE_PLAN)
+            or any(type(value[lane]) is not int or value[lane] != count
+                   for lane, count in SAMPLE_PLAN.items())):
+        raise ValueError('sample_plan requires execution=10, process=10, http=100, build=10')
+
 CALLBACK_CASES = tuple(f'{operation}_{size}' for size in (1000, 10000)
                        for operation in ('map', 'filter', 'fold'))
 CORPUS_CASES = ('startup', 'list_sum', *(f'{operation}_{size}' for size in (1000, 10000)
@@ -103,9 +112,11 @@ def validate_measurements(report: dict[str, Any]) -> None:
         raise ValueError('qualification requires owned measurement concurrency one')
     if not isinstance(report.get('other_benchmark_jobs'), list) or not isinstance(report.get('benchmark_job_observation'), str) or not report['benchmark_job_observation'].strip():
         raise ValueError('qualification requires informational process observations')
-    count = report.get('samples')
-    if type(count) is not int or not 10 <= count <= 1000 or report.get('warmup') != WARMUP:
-        raise ValueError('report requires ten or more samples and three warmups')
+    if 'samples' in report:
+        raise ValueError('report requires sample_plan, not scalar samples')
+    validate_sample_plan(report.get('sample_plan'))
+    if type(report.get('warmup')) is not int or report['warmup'] != WARMUP:
+        raise ValueError('report requires three warmups')
     inventory = report.get('expected_inventory')
     if not isinstance(inventory, dict) or not inventory or set(inventory) - set(LANES):
         raise ValueError('report requires its declared expected lane inventory')
@@ -117,6 +128,7 @@ def validate_measurements(report: dict[str, Any]) -> None:
     if {lane for lane in LANES if lane in report} != set(inventory):
         raise ValueError('measured lanes differ from the expected lane inventory')
     for lane, names in inventory.items():
+        count = report['sample_plan'][lane]
         records = report[lane]
         if not isinstance(records, list):
             raise ValueError(f'{lane} requires case records')
@@ -162,6 +174,14 @@ def validate_measurements(report: dict[str, Any]) -> None:
                             raise ValueError('HTTP requires 200 individual request timings')
                         for timing in timings:
                             number(timing, 'http:request timing')
+                        if metric['p95_ns'] != sorted(timings)[189]:
+                            raise ValueError('HTTP p95 differs from the declared request timing estimator')
+                        if metric['elapsed_ns'] < sum(timings):
+                            raise ValueError('HTTP elapsed time is less than its individual request timings')
+                        expected_throughput = 200e9 / metric['elapsed_ns']
+                        if not math.isclose(metric['requests_per_second'], expected_throughput,
+                                            rel_tol=4 * math.ulp(1.0), abs_tol=0.0):
+                            raise ValueError('HTTP throughput differs from request count divided by elapsed time')
 
 
 def callback_statistic(ratios: list[list[float]]) -> float:
