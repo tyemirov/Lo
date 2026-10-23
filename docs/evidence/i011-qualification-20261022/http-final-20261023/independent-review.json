@@ -1,0 +1,37 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "disposition": "no_substantive_blockers_to_I011_B007_B008_closure_under_user_amendment",
+  "verified": [
+    "Both complete stored HTTP reports independently recompute exactly",
+    "All eight gates pass with unchanged thresholds and all100pairs retained",
+    "Strict Linux raw guest export matches stored report and streams",
+    "Three package production inventories differ only in reviewed server drain fix",
+    "Six earlier non-HTTP lanes and correctness/offline/semantic receipts retain original identities",
+    "Fourteen historical archive bindings verified",
+    "Focused acceptance amendment and documentation are accurate"
+  ],
+  "conditions_satisfied_by_primary": [
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/verification.json",
+      "sha256": "8ff4fe1014604c7b328503aa0f95b10b5c096de2762f84df849a73ab5d617d69"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/root-archive-review.json",
+      "sha256": "9f90095968892ec3d9fa99b278413c9a0956568c8c1fa2ec719b697ab3de9e61"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/cleanup.json",
+      "sha256": "e951f5a56bdbcbf61dfaf9ed2815a3cf18695904f5721d77dc14fa1d977d38f7"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/documentation-review.json",
+      "sha256": "4ff601aedfb93490895edce8e6521e1924c1f1a436d8cf9148d4d3ddbf53f2d6"
+    }
+  ],
+  "whole_campaign_claim": false,
+  "latest_full_ci_outcome": "stopped_at_user_request"
+}

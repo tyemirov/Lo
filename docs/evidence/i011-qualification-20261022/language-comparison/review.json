@@ -1,0 +1,11 @@
+{
+  "issue": "I011",
+  "scope": "comparison_diagnostic_only_not_final_I011_review",
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "record_type": "primary_transcription_of_reviewer_findings",
+  "findings": "The evidence supports correcting Lo\u2019s large-literal compilation overhead before closing I011. The gap remains substantial after accounting for empty-program costs.\n\nIndependently verified design/fixture/stream hashes, exact outputs, cleanup, reference materialization checks, and fresh Go user compilation. The original run contains 24 successful Lo/Go observations and 24 retained printf failures; the corrected reference run contains 24 successful observations.\n\nC++10k RSS samples are [0, 0, 41205760]; Rust10k samples are [0, 69976064, 61603840]. Zero means the sampler missed a positive observation. Neither supports a complete three-sample RSS median. Retain raw values and report unavailable comparison data.\n\nThese are descriptive results for one numeric workload and host. Rust/C++ use minimal runtimes and were measured separately; Lo retains additional semantics. The results do not establish general language equivalence or a precise speedup ratio. Proceed to a separately reviewed compact-IR design. Fast register allocation does not resolve structural expansion.",
+  "production_change_approved": false
+}

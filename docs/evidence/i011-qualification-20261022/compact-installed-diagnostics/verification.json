@@ -1,0 +1,14 @@
+{
+  "final_package_archives_verified": 3,
+  "frozen_inputs_verified": 119,
+  "generated_executable_hash_records": 12,
+  "gzip_records_verified": 115,
+  "independent_module_declarations_verified": 6,
+  "manifest": {
+    "bytes": 67559,
+    "sha256": "1369246c955d3da07ae94324d217730271888fdf62652d1439e81dfa04170a57",
+    "source": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/manifest.json"
+  },
+  "source_scratch_retained": true,
+  "state": "passed"
+}

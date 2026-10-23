@@ -1,0 +1,12 @@
+{
+  "state": "all_archives_verified",
+  "manifest_sha256": "50191e92c1e628ecb1344fcc2a5b7ba21a0fcabaaa1f58aaabce7ed5c8823d2f",
+  "records": 40,
+  "linked_records": 5257,
+  "unique_archives": 2531,
+  "hash_only": 124,
+  "historical_source_origins": 2678,
+  "missing": [],
+  "qualification_claim": false,
+  "all_scratch_retained": true
+}

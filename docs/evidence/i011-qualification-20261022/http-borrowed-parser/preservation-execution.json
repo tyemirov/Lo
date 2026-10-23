@@ -1,0 +1,24 @@
+{
+  "state": "green",
+  "command": "CI=1 make -s -f Makefile -f _scratch/i011-20261020/completion-20261022/http-borrowed-parser/preservation.mk i011-http-borrowed-preserve </dev/null",
+  "status": 0,
+  "approved_plan_sha256": "b784788d5f2798e368416816ed4c9cf7c6f1a901616413cf4c2d63da87e87d20",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-borrowed-parser/manifest.json",
+    "sha256": "5b0c9fd47aeb202164cd4516c8449339e2dbefdb5f4f9fb68639d5749d5880ff"
+  },
+  "wrapper": {
+    "path": "_scratch/i011-20261020/completion-20261022/http-borrowed-parser/preservation.mk",
+    "sha256": "de2e393673206847276f79ec502e8ecb57cdf5ff3b64be78da954d83b8a577e2",
+    "source": "HTTP_BORROWED_PRESERVE_WORK := _scratch/i011-20261020/completion-20261022/http-borrowed-parser\n.PHONY: i011-http-borrowed-preserve\ni011-http-borrowed-preserve:\n\tCI=1 PYTHONDONTWRITEBYTECODE=1 python3 -B $(HTTP_BORROWED_PRESERVE_WORK)/preserve.py execute --reviewed-plan-sha256 b784788d5f2798e368416816ed4c9cf7c6f1a901616413cf4c2d63da87e87d20\n"
+  },
+  "verification": {
+    "new_archive_records": 98,
+    "linked_archive_records": 2734,
+    "all_raw_compressed_hashes_bytes_mtime0_verified": true,
+    "missing": []
+  },
+  "scratch_preserved": true,
+  "cleanup_performed": false,
+  "qualification_claim": false
+}

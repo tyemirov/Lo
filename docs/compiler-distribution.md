@@ -6,8 +6,9 @@ No Go, Rust, C compiler, developer SDK, or network access is necessary for insta
 The [native runtime contract](native-runtime-contract.md) owns the ABI, target rules, and operating-system dependencies.
 Development compilation also uses LLVM, without Go source generation.
 
-I011 passed the current corpus, offline, component, and CI checks.
-Performance qualification and final review remain pending.
+I011 retains the earlier corpus, offline, component, and CI results under the user-selected focused acceptance update.
+The final HTTP qualification passed on both targets with unchanged thresholds.
+The [qualification findings](native-qualification-findings.md) identify the separate package identities and evidence.
 
 ## Supported Matrix
 
@@ -148,5 +149,5 @@ Software device tests provide Metal semantic evidence without a physical-device 
 Physical Metal execution and performance remain unmeasured.
 
 F017 acceptance does not replace I011 qualification after compiler changes.
-Keep I011 pending until the qualification checks pass.
+The focused I011 acceptance update does not change the installed-distribution contract.
 The [semantic migration contract](semantic-migration.md) defines the I011 corpus requirements.

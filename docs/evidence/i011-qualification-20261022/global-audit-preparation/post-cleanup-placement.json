@@ -1,0 +1,38 @@
+{
+  "command": "CI=1 make -f Makefile -f docs/evidence/i011-qualification-20261022/global-audit-preparation/final-audit.mk i011-final-post-cleanup-audit </dev/null",
+  "copies": [
+    {
+      "bytes": 21886,
+      "copy": "docs/evidence/i011-qualification-20261022/global-audit-preparation/audit-origin-reviewed.py",
+      "copy_sha256": "4588286dcf8fa95d27b88e774fa4ede6bfb958338b4976c33b43a083a3f5cb0a",
+      "original": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/audit-origin-reviewed.py",
+      "original_sha256": "4588286dcf8fa95d27b88e774fa4ede6bfb958338b4976c33b43a083a3f5cb0a"
+    },
+    {
+      "bytes": 795,
+      "copy": "docs/evidence/i011-qualification-20261022/global-audit-preparation/origin-review.json",
+      "copy_sha256": "15819255165d6577ffb8aa9c2dd1602c2a9eacd95689e0a22a11246d7be66a94",
+      "original": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/origin-review.json",
+      "original_sha256": "15819255165d6577ffb8aa9c2dd1602c2a9eacd95689e0a22a11246d7be66a94"
+    }
+  ],
+  "existing_archives": "Exact source bytes already preserved in global-audit-preparation manifest; existing manifest and archives unchanged.",
+  "i011_complete": false,
+  "issue": "I011",
+  "prerequisites": [
+    "Actual final gates and scratch cleanup",
+    "Additive completion.json with reviewed gate evidence"
+  ],
+  "qualification_claim": false,
+  "root_resolution": ".",
+  "state": "post_cleanup_entry_point_placed_not_executed",
+  "validation": [
+    "Exact original/copy bytes and reviewed hashes",
+    "WORK.parents[3] resolves repository root",
+    "AST syntax only; auditor not imported or executed"
+  ],
+  "wrapper": {
+    "path": "docs/evidence/i011-qualification-20261022/global-audit-preparation/final-audit.mk",
+    "sha256": "fc21d4ea8ee96e06287fe1f4e617979f4e17defb1c82f9e4a8e6e9bda9e34cfc"
+  }
+}

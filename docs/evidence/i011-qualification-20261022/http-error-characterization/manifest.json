@@ -1,0 +1,566 @@
+{
+  "issue": "I011",
+  "kind": "HTTP_error_input_preproduction_characterization",
+  "qualification_claim": false,
+  "records": [
+    {
+      "source": "Makefile",
+      "raw_bytes": 13377,
+      "raw_sha256": "16073195430b5acf6af15c66bc658e04efd86ecb9b719f5b3031615d1797a575",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0000.gz",
+      "compressed_bytes": 2645,
+      "compressed_sha256": "b56c74afe6bfd078f321a4b5854a900363d599c83d656f77e25d4e33bfd69b4e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-runtime/build-receipt.json",
+      "raw_bytes": 9573,
+      "raw_sha256": "0016d05be2c985d9f5099e280fb2151e5b37322e4c820388430da8e1f6eaff7a",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0001.gz",
+      "compressed_bytes": 2944,
+      "compressed_sha256": "2804bcc330d11b3217eac28b8926b60284d83d803aed845b83bb29ff175d968f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-runtime/toolchain.json",
+      "raw_bytes": 6107,
+      "raw_sha256": "8dfbad8bd749858683fb64d544488a1fb6822736b99f8b6b99759b72fccd12b0",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0002.gz",
+      "compressed_bytes": 1901,
+      "compressed_sha256": "b5a4ba377dba469fa14a305b5c08132af5336a554293adfa4bcc66e9c4cd84f1"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/compile.log",
+      "raw_bytes": 1046,
+      "raw_sha256": "ef43489466c6f39b6df56872839902d27a9802f3afca6a24c437be978efd9a31",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0003.gz",
+      "compressed_bytes": 264,
+      "compressed_sha256": "a616566d9b60bd742e2b181c823b32f0bceaea1597c6567f6e665ae1540733af"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/darwin-baseline-dup2.log",
+      "raw_bytes": 2783,
+      "raw_sha256": "26e133d77cd2109e11411b73fa30e867ef3fbdab8573d87499c22dd7c0680f84",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0004.gz",
+      "compressed_bytes": 650,
+      "compressed_sha256": "a2d6f73bc4980f054df765c97c58d0294b3d67f787904dfe70bb62c7918aa182"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/darwin-baseline.log",
+      "raw_bytes": 8975,
+      "raw_sha256": "2aeda316956231347839b2bea5eb8f2dce84841b933873f5a657ce19dceeef17",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0005.gz",
+      "compressed_bytes": 1038,
+      "compressed_sha256": "7e21352aaf72407737350833d6af10e2f3fd9fcc4d24173464ec3e8e40b90c6f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/design.json",
+      "raw_bytes": 1546,
+      "raw_sha256": "1af57bedf6e29c3273b1a0881243c8c2598e804a9682983a0d21d70239fd536b",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0006.gz",
+      "compressed_bytes": 844,
+      "compressed_sha256": "0b69a2746d670280625e326ff67fc699f0d3a536d8d665634e579b9082dcc808"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/fixture-link-failure.c",
+      "raw_bytes": 5588,
+      "raw_sha256": "9a0d7eb6eac8a060bbc3412f5c147990259bd2916b6129055f5f58e3a43b6f1d",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0007.gz",
+      "compressed_bytes": 1880,
+      "compressed_sha256": "74f4d20e2067e64b35f26ec5d4ee9fbfea5c5ccb0abde1cad917a5346b8a4ed6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/focused.mk",
+      "raw_bytes": 1155,
+      "raw_sha256": "7b3cc1ad6eb41313c941c8b3c35d66ce8f524710a6dedd2f48ca7d95c23ab2d5",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0008.gz",
+      "compressed_bytes": 540,
+      "compressed_sha256": "f99c3bd82b505d8b84ecd84da138b170cd190a21ff7146900e0bdbcde0369e3a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/format.log",
+      "raw_bytes": 914,
+      "raw_sha256": "af71613360a77893b18019212d90dc34c3667d8629d1cda35f412b0b14fa5d4c",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0009.gz",
+      "compressed_bytes": 194,
+      "compressed_sha256": "026ec90e841aee4d7be549897f879db340970f847b21c02e7612fed146f37d03"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/input-after.json",
+      "raw_bytes": 2362,
+      "raw_sha256": "2c44bd7f70a5ec84e7848caf131337b2e3904f21afa0ee76dec3d63f754ff7a1",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0010.gz",
+      "compressed_bytes": 951,
+      "compressed_sha256": "878eac0e8431cdadb83693b6f105fcee6fe5e0fa49630ed68d4a343dd0df97ba"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/input-before.json",
+      "raw_bytes": 2362,
+      "raw_sha256": "ea233cdda5c64024aa149b13561d987fa230f6319953e03e8ba2e758a8ba2e9c",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0011.gz",
+      "compressed_bytes": 954,
+      "compressed_sha256": "ad26696b481d60695e33ed52b346bed06789520427873693a8c998999c1ea097"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/batch.json",
+      "raw_bytes": 4456390,
+      "raw_sha256": "61fd057a877eb4dfa01907e4b5f534508a9f6ab2752d10b0e0af96c7ef8061b1",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0012.gz",
+      "compressed_bytes": 330037,
+      "compressed_sha256": "eed6281afccc2e09b88a3b977c44fbd6fd5bd68f8f0d67749d3c6687fc52ff53"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/control-build.log",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0013.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/control-link.log",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0014.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/development-build.log",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0015.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/0.stderr",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0016.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/0.stdout",
+      "raw_bytes": 1610,
+      "raw_sha256": "8c08cb40b237650a62e62ccb79474f36851ced429f71367a16e3ba1491535075",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0017.gz",
+      "compressed_bytes": 287,
+      "compressed_sha256": "a1206228c03b8122653523c10c163f4a8dcb0b536a4cbbe4bb8af9c98f11c632"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/export.log",
+      "raw_bytes": 3392,
+      "raw_sha256": "bc206ad1d7535f33deecd6d425e734fc25717d8d6e8b76ff66ade8d77dd0c011",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0018.gz",
+      "compressed_bytes": 416,
+      "compressed_sha256": "e4e3cea34a69902698c0733357a5f27910fe57e8c7544af4927347dc6352dbbc"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/qemu.stderr",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0019.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/report.json",
+      "raw_bytes": 1948,
+      "raw_sha256": "880fee0b3ff414096dd73489fcf308f3ef14e15e3751ccfd6bc21052c9b731ca",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0020.gz",
+      "compressed_bytes": 819,
+      "compressed_sha256": "7272a13be195157526ecdd4398eae55fd3689e61257450fe07660601ea7c2c52"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/serial.log",
+      "raw_bytes": 35,
+      "raw_sha256": "1f220279150efb68cf9ce9e7c437e9672079355c2bb26a9a7d03fa4b4423c166",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0021.gz",
+      "compressed_bytes": 53,
+      "compressed_sha256": "b027cc2a3f3c647195fd7038186185b7c8d8de21e80e799c6d09768374159c28"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/inputs/fixtures.json",
+      "raw_bytes": 417,
+      "raw_sha256": "c687e53054e479cd458518d8fc70b7132fb190b521ea8f213889088b640e8550",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0022.gz",
+      "compressed_bytes": 249,
+      "compressed_sha256": "9ce337f8491b26bfdfb868bfd8b9b0eeb68ab4ad6f84825f2850a95ad048ac10"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/probe-build.log",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0023.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/report.json",
+      "raw_bytes": 2678,
+      "raw_sha256": "4e5a3e22cb2416d6c77d38373331f87f70d245b94ac721c7b04a96a35d57d8d7",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0024.gz",
+      "compressed_bytes": 1101,
+      "compressed_sha256": "38bde2111aadeb5ff98672288220137ce3da4107c9eabe5bd01b6f309b6a85cc"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/semantic-linux-arm64.jsonl",
+      "raw_bytes": 10316,
+      "raw_sha256": "15c79562372d2388b0e16f0f602bbe663e09377c6f842f31ed4733098f7dc65d",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0025.gz",
+      "compressed_bytes": 806,
+      "compressed_sha256": "774a7c70b2914ba2e1911f10c135381a7dcb1c58431fa94f55878c28070a7c78"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/test-build.log",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0026.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline.log",
+      "raw_bytes": 3595,
+      "raw_sha256": "c9337ccf7115609e00fbc71d342bab761561ff5f58d34f851fe40cd208def51a",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0027.gz",
+      "compressed_bytes": 1290,
+      "compressed_sha256": "20b9db7c2e7ce6af140b6fb1f848d541098992e72e1acea64e17f75f4d5fc246"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/preservation-setup-failure.json",
+      "raw_bytes": 315,
+      "raw_sha256": "7d30652a9e1f6b043f4c93e3a5b6792a0752a976b9e2ec01d69a71746f3a9741",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0028.gz",
+      "compressed_bytes": 214,
+      "compressed_sha256": "eccb26605bd46662908075338c7aa60ff04cc354e44bb271e29e968fe08a2137"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/preserve.py",
+      "raw_bytes": 5245,
+      "raw_sha256": "5466cbc12664ecc4fd1b9bfa7e2e9b2e1547e14136ab42a6417690ff23dcac42",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0029.gz",
+      "compressed_bytes": 2149,
+      "compressed_sha256": "80ce13ae77ffcf4b8f368dd81e09372f9df654a224db00e532c2534bb28f288a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/result.json",
+      "raw_bytes": 8530,
+      "raw_sha256": "de102424fa32385429139d29c265af9e1521a956539674ce2ead882703d150fc",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0030.gz",
+      "compressed_bytes": 2126,
+      "compressed_sha256": "560f0eedfb5ae17531a4ef282b7b3f4c9a98abfd1fc0e43e145461bc43715179"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/sources/testdata/native-qualification/http-error-input.c",
+      "raw_bytes": 5609,
+      "raw_sha256": "fc02572067d258c36e4b0a8bfa6470f7954c26f7cf401589fb96186febd6b992",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0031.gz",
+      "compressed_bytes": 1885,
+      "compressed_sha256": "736271af7afc634b50f887404aa4e520852889b48e4e8e7b0394fa5befce9576"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/sources/tests/integration/llvm_http_error_input_test.go",
+      "raw_bytes": 6716,
+      "raw_sha256": "336d5f79d7ae4d105af9c065029d1990a3a93eccd5d5ec293b4c7a0640fc390d",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0032.gz",
+      "compressed_bytes": 2476,
+      "compressed_sha256": "a8cf603c8897b04e5d69a45ff76d08d53517398c7ece5023a06838e282b491f8"
+    },
+    {
+      "source": "_scratch/native-runtime/tools.json",
+      "raw_bytes": 2314,
+      "raw_sha256": "086d639fc2b9bdf4766bf08c4ce359ee1c815336ee67b2556d7071b7c800900a",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0033.gz",
+      "compressed_bytes": 769,
+      "compressed_sha256": "2bb9d1a26201eb301b79b036410bc4501ab45a3db700e16e8cefe40b283a0671"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/inventory.json",
+      "raw_bytes": 11024,
+      "raw_sha256": "6181641dd32ff75a005bef3237223d24ce61698fce60d714baa73a94f5f336e3",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0034.gz",
+      "compressed_bytes": 3517,
+      "compressed_sha256": "7010b1fb5a0636d6215a76f0d26d4c22cebad68f9738751b20670cb580669def"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/provenance.json",
+      "raw_bytes": 435455,
+      "raw_sha256": "35dfd1df74db84fc14f275287260493983fd014614df79e3f2b211d9859ecbb9",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0035.gz",
+      "compressed_bytes": 137775,
+      "compressed_sha256": "84e3036962dc0f78719fc16b923748d6671311f2ce467d41191f8d757596eb2d"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/toolchain.json",
+      "raw_bytes": 3451,
+      "raw_sha256": "3a42fc7dd2696c67fb52851e20a5dc26872cc994247184fccdbaf71d1df471f4",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0036.gz",
+      "compressed_bytes": 1164,
+      "compressed_sha256": "852651ad327667d8461fb16ed4686e99f47b0e9296cb7e30c745d4e315183e00"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software.receipt.json",
+      "raw_bytes": 488,
+      "raw_sha256": "dc51e47cc9051bcfeb3af03622a843a7b8fd7269fec4ac59a8340c56ac8e0f9b",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0037.gz",
+      "compressed_bytes": 292,
+      "compressed_sha256": "9baa6c93d1ffc26875f304e132802ee020b2b011406857162755c6fc93b9c885"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/inventory.json",
+      "raw_bytes": 13734,
+      "raw_sha256": "7b97cfa0cbea9ff19490924106301d7eab29c95b58f023793ffb3ca3062660cb",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0038.gz",
+      "compressed_bytes": 4689,
+      "compressed_sha256": "c418b470558a9018f9e990af55234da8a464258be6ea6a77887da56c9fff23e6"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/provenance.json",
+      "raw_bytes": 441688,
+      "raw_sha256": "345492385834cfbb7de7251e1f8e117b88689d1d337569630245ec344f54949e",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0039.gz",
+      "compressed_bytes": 139025,
+      "compressed_sha256": "4fc9bd844c4d294f3ea3d1fdf9ead6f21b6cb1e938c0e9ba53c5bbc23d3a5351"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/toolchain.json",
+      "raw_bytes": 4521,
+      "raw_sha256": "360b0d2369819a4fa0cee08d2fbd228be56d97cb532b713c9a938152c34b0c1e",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0040.gz",
+      "compressed_bytes": 1513,
+      "compressed_sha256": "508aeb82ac9ded3d13224d06d95b9a3d956746bfe7835ae616f36e12f6d2c763"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software.receipt.json",
+      "raw_bytes": 485,
+      "raw_sha256": "d1c28b66b91221242417f7ffad1493f2a29f945e15082ef7f92e99553bfb60bb",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0041.gz",
+      "compressed_bytes": 292,
+      "compressed_sha256": "b55f419834c67a261bb7e2c99de2a2a841f4516b5eb47e55f18056724307241d"
+    },
+    {
+      "source": "testdata/native-qualification/http-error-input.c",
+      "raw_bytes": 5609,
+      "raw_sha256": "fc02572067d258c36e4b0a8bfa6470f7954c26f7cf401589fb96186febd6b992",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0042.gz",
+      "compressed_bytes": 1885,
+      "compressed_sha256": "736271af7afc634b50f887404aa4e520852889b48e4e8e7b0394fa5befce9576"
+    },
+    {
+      "source": "tests/integration/llvm_http_error_input_test.go",
+      "raw_bytes": 6716,
+      "raw_sha256": "336d5f79d7ae4d105af9c065029d1990a3a93eccd5d5ec293b4c7a0640fc390d",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0043.gz",
+      "compressed_bytes": 2476,
+      "compressed_sha256": "a8cf603c8897b04e5d69a45ff76d08d53517398c7ece5023a06838e282b491f8"
+    },
+    {
+      "source": "tests/integration/llvm_lifetime_test.go",
+      "raw_bytes": 11238,
+      "raw_sha256": "4b1f7facc05114f61821805f47f6dfafe13ee2a973e0dbaede61eabe5916ce9a",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0044.gz",
+      "compressed_bytes": 3370,
+      "compressed_sha256": "59ffbcbc7ba4208a4a20be66ff05e484a975e82be75d88df216f936615b03d1b"
+    },
+    {
+      "source": "tests/integration/llvm_runtime_test.go",
+      "raw_bytes": 7842,
+      "raw_sha256": "26696646789eceed5499fd3e4557ea6d9810abe84ad748cf08c16fd9e6fdf07e",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0045.gz",
+      "compressed_bytes": 2573,
+      "compressed_sha256": "1c85ef3305b883656c88f1a5dd53ef85896ee89b3e41ef2afeedbcb8059d3a70"
+    },
+    {
+      "source": "tools/loqualification/batch.py",
+      "raw_bytes": 21206,
+      "raw_sha256": "49fad4375d655ec95a063639ef36220029d5a9b41ac6501d01c281516c623dfd",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0046.gz",
+      "compressed_bytes": 5972,
+      "compressed_sha256": "2da77b34ca00988687274eb5bad80893cd8ac919b533f89f8138a60610b5fb8a"
+    },
+    {
+      "source": "tools/loqualification/suite.py",
+      "raw_bytes": 7899,
+      "raw_sha256": "a3d6f26d0eb2f84d688c664becc82cab155da937c62a0a631d11678dfceb9e15",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0047.gz",
+      "compressed_bytes": 2883,
+      "compressed_sha256": "30f363da16ce5bdce06a9d9ce6fb9a10fc3d8c9e11aa051b47d77444b1e0408b"
+    },
+    {
+      "source": "tools/semanticcoverage/report.py",
+      "raw_bytes": 11973,
+      "raw_sha256": "d892f2bc5b2f1c7cddb72688c4f6d59f220b0ddf1a4f0e56d735abdd10cdd91b",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0048.gz",
+      "compressed_bytes": 3683,
+      "compressed_sha256": "1f2933f0e6b88d2e429c5ed9ca73ff89a66db10e84fc9bccfa938eddf2159721"
+    },
+    {
+      "source": "tools/semanticcoverage/run.py",
+      "raw_bytes": 4816,
+      "raw_sha256": "fe155efa570aee72c42f1a088a5af4ed984ee3bab75c3aa9e35b5224585efcd0",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0049.gz",
+      "compressed_bytes": 1845,
+      "compressed_sha256": "d4ec8f93506e5523a77f621ce8eaa95f0de24f52230d183d571ad380048e52bf"
+    }
+  ],
+  "hash_only": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/init",
+      "raw_bytes": 13976,
+      "raw_sha256": "1869aee18095e0dbbc22224c3ec40b43b42df6ccf4db521419e8ee9e0696b26c",
+      "reason": "derived executable/object/guest archive; reconstruct using preserved commands and declared inputs"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/init.o",
+      "raw_bytes": 14856,
+      "raw_sha256": "a4639109dd4b6a7b6e48b65d97e0cb222180c8c1ff530f2f9b4968d96a304a3f",
+      "reason": "derived executable/object/guest archive; reconstruct using preserved commands and declared inputs"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/inputs/fileprobe",
+      "raw_bytes": 3825443,
+      "raw_sha256": "51e616c95aba4ab110def1210b65a2bab2879949610902d8bb0fb2f16c32658a",
+      "reason": "derived executable/object/guest archive; reconstruct using preserved commands and declared inputs"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/inputs/integration.test",
+      "raw_bytes": 19399385,
+      "raw_sha256": "6ef57f271727dedd002ca4ace9e689fd298d9201e73caccbad6e1803da52508c",
+      "reason": "derived executable/object/guest archive; reconstruct using preserved commands and declared inputs"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/inputs/lo-development",
+      "raw_bytes": 13497085,
+      "raw_sha256": "68baba27d5a10e98cdfeaa5b7fa80daf5b39a7d86d0cc76b66388209ec207e8f",
+      "reason": "derived executable/object/guest archive; reconstruct using preserved commands and declared inputs"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/inputs/native-toolchain",
+      "raw_bytes": 11104,
+      "raw_sha256": "df993bc49d6ef01c65eb06f3684fcf589c1a00597ab1adb8ccefda922dd58dc6",
+      "reason": "derived executable/object/guest archive; reconstruct using preserved commands and declared inputs"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/inputs/native-toolchain.o",
+      "raw_bytes": 9720,
+      "raw_sha256": "fa6c4a4aaae31d9bc4ebec9db4bfaaf950312cffb5baf2dbf88f0c754db5bda9",
+      "reason": "derived executable/object/guest archive; reconstruct using preserved commands and declared inputs"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/bin/lo",
+      "raw_bytes": 13872258,
+      "raw_sha256": "0b4efb00a29e49d7983975ab79eed01801c078ed9214d4b3d06e49cb2a2d41b6",
+      "reason": "immutable derived package compiler; declared receipt/inventory/provenance preserved"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/bin/lo",
+      "raw_bytes": 13425925,
+      "raw_sha256": "690d81cf695c8098bdbdf7fc6350fc73a10b97b968492d8c4fc04e2c314ab799",
+      "reason": "immutable derived package compiler; declared receipt/inventory/provenance preserved"
+    }
+  ],
+  "prior_evidence": [
+    {
+      "manifest": "docs/evidence/i011-qualification-20261022/compact-nonpass/manifest.json",
+      "sha256": "4ee968b1aeee86ee115288c0dc05d4f2c64349d7265fb0d2e20d04a87edaa848",
+      "immutable_input_links": []
+    },
+    {
+      "manifest": "docs/evidence/i011-qualification-20261022/compact-orchestration/manifest.json",
+      "sha256": "cee9289f2e1f8d6e6469addc9fb98a0e38f98ba3248dd8958fd7de538b1db687",
+      "immutable_input_links": []
+    }
+  ],
+  "results": {
+    "Darwin": "10 cases pass, package elapsed3.379s",
+    "Linux": "10 cases pass, test elapsed1.86s; maintained HVF suite"
+  },
+  "setup_failure": "Original fixture dup symbol unavailable in declared Darwin SDK; original fixture/log retained. Supported dup2 correction passed both targets. No production regression or SDK edit.",
+  "limits": [
+    "Trusted callback retains actual Error and delegates generated handler; trusted second entry transfers Error to ordinary CLI formatter.",
+    "CLI cancellation state stays set after serve; dump entry executes no generated polls. No legal Lo persistence claim.",
+    "Explicit expected request bytes/kind/message; response input established independently by public interpreter constructor.",
+    "No full CI, performance measurement, or qualification claim."
+  ],
+  "excluded_groups": [
+    "guest/root derived filesystem copies; reconstructed through maintained suite and immutable inputs",
+    "derived executable/object/archive contents retained identity-only"
+  ],
+  "missing_evidence": [],
+  "archive_format": "gzip filename empty, mtime0; raw/compressed SHA256 and byte lengths verified",
+  "immutable_input_records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-runtime/build-receipt.json",
+      "sha256": "0016d05be2c985d9f5099e280fb2151e5b37322e4c820388430da8e1f6eaff7a",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0001.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-runtime/toolchain.json",
+      "sha256": "8dfbad8bd749858683fb64d544488a1fb6822736b99f8b6b99759b72fccd12b0",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0002.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/bin/lo",
+      "sha256": "0b4efb00a29e49d7983975ab79eed01801c078ed9214d4b3d06e49cb2a2d41b6",
+      "archive": null,
+      "identity_only_reason": "immutable derived package compiler; declared receipt/inventory/provenance preserved"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/toolchain.json",
+      "sha256": "3a42fc7dd2696c67fb52851e20a5dc26872cc994247184fccdbaf71d1df471f4",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0036.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/inventory.json",
+      "sha256": "6181641dd32ff75a005bef3237223d24ce61698fce60d714baa73a94f5f336e3",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0034.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/provenance.json",
+      "sha256": "35dfd1df74db84fc14f275287260493983fd014614df79e3f2b211d9859ecbb9",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0035.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software.receipt.json",
+      "sha256": "dc51e47cc9051bcfeb3af03622a843a7b8fd7269fec4ac59a8340c56ac8e0f9b",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0037.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/bin/lo",
+      "sha256": "690d81cf695c8098bdbdf7fc6350fc73a10b97b968492d8c4fc04e2c314ab799",
+      "archive": null,
+      "identity_only_reason": "immutable derived package compiler; declared receipt/inventory/provenance preserved"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/toolchain.json",
+      "sha256": "360b0d2369819a4fa0cee08d2fbd228be56d97cb532b713c9a938152c34b0c1e",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0040.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/inventory.json",
+      "sha256": "7b97cfa0cbea9ff19490924106301d7eab29c95b58f023793ffb3ca3062660cb",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0038.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/provenance.json",
+      "sha256": "345492385834cfbb7de7251e1f8e117b88689d1d337569630245ec344f54949e",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0039.gz",
+      "identity_only_reason": null
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software.receipt.json",
+      "sha256": "d1c28b66b91221242417f7ffad1493f2a29f945e15082ef7f92e99553bfb60bb",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/0041.gz",
+      "identity_only_reason": null
+    }
+  ]
+}

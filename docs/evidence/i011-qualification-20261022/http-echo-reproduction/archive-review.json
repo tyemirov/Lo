@@ -1,0 +1,16 @@
+{
+  "reviewer": "/root/literal_status_characterization",
+  "archives_verified": 108,
+  "binary_identities_verified": 5,
+  "raw_guest_exports_verified": 4,
+  "guest_statuses": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "active_owned_helpers": 0,
+  "coverage": "All necessary small sources, config, corrections, logs, and results are archived. Binary identities and derived guest artifacts remain outside the archive payloads.",
+  "canonical_progress_stderr": "http echo complete\n",
+  "blocking_findings": []
+}

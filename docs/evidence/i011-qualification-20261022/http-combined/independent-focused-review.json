@@ -1,0 +1,26 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "requested_role": "mpr-architect",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "recorded_by": "primary agent from reviewer report",
+  "state": "passed",
+  "receipt_sha256": "b0ee56a605bb66beee702b1e1a291093e98d553dbf1c179ebab5cf7bbbc8e945",
+  "linux_report_sha256": "2e83007a8fd1cb5084a2af4c351d01021706c6d94bdfaf89561ffbdf9f0813e2",
+  "linux_batch_sha256": "f18281cb5740a7a2d710aae28a29a681d892b11bb981a53f1241267a2ba4cbe4",
+  "results": {
+    "each_target": {
+      "top_level_passes": 9,
+      "subtest_passes": 25,
+      "error_input_cases": 10,
+      "failures": 0,
+      "skips": 0
+    }
+  },
+  "scope": "Raw logs, strict Linux exports, batch and fixture identities, fresh package provenance, admitted runtime hashes, current source hashes, and the qualification freeze all match.",
+  "pending": [
+    "full qualification"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "issue": "I011",
+  "timing": "post-start capture",
+  "captured_utc": "2026-10-23T06:14:12.362063+00:00",
+  "run_start_utc": "2026-10-23T06:07:26.882578+00:00",
+  "observed_state": "running",
+  "observed_jobs": [
+    {
+      "name": "ci",
+      "status": null
+    }
+  ],
+  "initial_freeze_covers_scripts": false,
+  "scope": "Exact scratch orchestration bytes captured after run start. This is not a pre-run freeze claim.",
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final-run.py",
+      "bytes": 9480,
+      "sha256": "90d50821508e47dad59272fd286ef0579269942cc3be7b3a16e48347f189d78e",
+      "archive": "docs/evidence/i011-qualification-20261022/compact-orchestration/compact-final-run.py.gz",
+      "archive_sha256": "8c21759f8a74e19d7b29568222c294cc5b3dc5995feb6055f478ef16eef821ee"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final.mk",
+      "bytes": 855,
+      "sha256": "8eaf35384b0cc93939e29fdb7dda2bb9ff05fb16254d27709f5aa220eab3fbec",
+      "archive": "docs/evidence/i011-qualification-20261022/compact-orchestration/compact-final.mk.gz",
+      "archive_sha256": "243b9ab5d2c3698ed31b084e839671609c80b86a67e0d78705c5447174044da6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/audit-compact-final.py",
+      "bytes": 21040,
+      "sha256": "d9d900658110483693d97afa85e65e8e889c3deab6605a49d3b289dcddfb648e",
+      "archive": "docs/evidence/i011-qualification-20261022/compact-orchestration/audit-compact-final.py.v2.gz",
+      "archive_sha256": "189890d13bafb94656244eb0cf44483265a702b83f820aa2f2e8eb92d1449aeb",
+      "captured_utc": "2026-10-23T06:16:03.742429+00:00"
+    }
+  ],
+  "prior_capture": {
+    "archive": "docs/evidence/i011-qualification-20261022/compact-orchestration/manifest.v1.json.gz",
+    "sha256": "b3253ba142deee8db2104ddb5a7cc1ef240ffee820e3b65f61dbc1433e6b8448",
+    "archive_sha256": "120069aa6c6b7c1e1b232560238c25fc17c9a705a90465c947816d24400bb4ed"
+  },
+  "revisions": [
+    {
+      "captured_utc": "2026-10-23T06:16:03.742429+00:00",
+      "reason": "Add test2json -t to match the producing conversion mode.",
+      "prior_audit": {
+        "source": "_scratch/i011-20261020/completion-20261022/audit-compact-final.py",
+        "bytes": 21035,
+        "sha256": "0b79a7b5578320dd196c790280b1f61b315e7607db8f7208b701b959be867657",
+        "archive": "docs/evidence/i011-qualification-20261022/compact-orchestration/audit-compact-final.py.gz",
+        "archive_sha256": "74f0588b4cb2b1b491e2d7f220e092eea69806dd1e172b2c574bb3b9acd953e7"
+      }
+    }
+  ]
+}

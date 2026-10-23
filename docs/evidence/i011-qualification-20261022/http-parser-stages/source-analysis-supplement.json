@@ -1,0 +1,19 @@
+{
+  "kind": "additive-independent-source-analysis",
+  "base_manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-parser-stages/manifest.json",
+    "sha256": "e9a18f135555003142c7b5d1a8073dd892c460f74f46dcf35006d070028d61fd"
+  },
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-parser-stages-audit/source-analysis.json",
+      "sha256": "4e1341ddaf482f165d179df5e85463eba4d420d26ebc2376fdd620d889a9268b",
+      "bytes": 1793,
+      "archive": "docs/evidence/i011-qualification-20261022/http-parser-stages/payload/4e1341ddaf482f165d179df5e85463eba4d420d26ebc2376fdd620d889a9268b.gz",
+      "archive_sha256": "ae21947834ab021b99fb33bbcd58bfd897e6170dca7929547141c10c8640122c",
+      "archive_bytes": 1007
+    }
+  ],
+  "qualification_claim": false,
+  "scope": "Read-only mechanicalsource review afterrawaudit; no originalscript/source/report/archive rewrite orremeasurement."
+}

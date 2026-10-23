@@ -1,0 +1,18 @@
+{
+  "inventory": {
+    "path": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/inventory.json",
+    "sha256": "d9448d087c695403851e8e931b26067299ebf12a119873110a68cd7c3de25363",
+    "bytes": 36937013
+  },
+  "archive": {
+    "path": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/inventory.json.gz",
+    "sha256": "d1e758d65e534d8c7a4349d699379d9ecc65baaf9b6cec663aea135817215416",
+    "bytes": 3272808
+  },
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/manifest.json",
+    "sha256": "c19f143a4c1f1c11722a42ddfab1d99f64d183755f163fa6f0c7bac7f7b979fc",
+    "bytes": 91334
+  },
+  "state": "proposal_only_no_deletion"
+}

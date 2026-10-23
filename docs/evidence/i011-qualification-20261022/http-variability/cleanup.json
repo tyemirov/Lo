@@ -1,0 +1,13 @@
+{
+  "absence_verified": true,
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-variability/manifest.json",
+    "sha256": "2e64d9a9ad46f9250fd6d639cfdee2bf4f2cab02b8f520b8b9a1a95588a44f45"
+  },
+  "path": "_scratch/i011-20261020/completion-20261022/http-variability",
+  "primary_authorization": "Root verified all eight archives and six immutable links, then authorized this exact removal.",
+  "records_verified_before_removal": 8,
+  "removed": true,
+  "scope": "Only the exact owned http-variability scratch directory."
+}

@@ -1,0 +1,42 @@
+{
+  "issue": "I011",
+  "state": "focused_workspace_removed_after_preservation",
+  "removed_path": "_scratch/i011-20261020/completion-20261022/http-final-20261023",
+  "verified_absent": true,
+  "covered_files_checked": 40,
+  "manifest_sha256": "bd43091ac8528b7968f2c80b1f16c40b9eeb634c514903a33c6609caea804752",
+  "regenerable_exclusions": [
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/generated",
+      "reason": "Regenerable guest/cache/unselected generated corpus; actual HTTP payloads and raw streams retained."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/host-home",
+      "reason": "Regenerable guest/cache/unselected generated corpus; actual HTTP payloads and raw streams retained."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/root",
+      "reason": "Regenerable guest/cache/unselected generated corpus; actual HTTP payloads and raw streams retained."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/init",
+      "reason": "Regenerable guest boot/input artifact."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/init.o",
+      "reason": "Regenerable guest boot/input artifact."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/root.cpio.gz",
+      "reason": "Regenerable guest boot/input artifact."
+    }
+  ],
+  "retained": [
+    "Original corrected compiler packages and runtime under oversized-request-fix",
+    "Earlier prepared artifacts and historical workspaces outside the focused HTTP workspace",
+    "Shared repository tool caches",
+    "All durable evidence"
+  ],
+  "retention_reason": "Keep prepared compiler distributions and historical reproduction inputs; the focused HTTP task does not delete unrelated earlier workspaces.",
+  "finished_utc": "2026-10-23T21:38:54.164968+00:00"
+}

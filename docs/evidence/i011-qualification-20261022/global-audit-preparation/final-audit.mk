@@ -1,0 +1,3 @@
+.PHONY: i011-final-post-cleanup-audit
+i011-final-post-cleanup-audit: | tool-state
+	CI=1 python3 -B docs/evidence/i011-qualification-20261022/global-audit-preparation/audit-origin-reviewed.py --latest-manifest docs/evidence/i011-qualification-20261022/completion-specialized/manifest.json --source-sha256 627be1a75c70ee397c0dd068e76200599db53532193135e830a0b6f1d35700e0 --origin-review docs/evidence/i011-qualification-20261022/global-audit-preparation/origin-review.json --origin-review-sha256 15819255165d6577ffb8aa9c2dd1602c2a9eacd95689e0a22a11246d7be66a94 --completion-receipt docs/evidence/i011-qualification-20261022/completion.json --output docs/evidence/i011-qualification-20261022/global-audit-preparation/final-report.json </dev/null

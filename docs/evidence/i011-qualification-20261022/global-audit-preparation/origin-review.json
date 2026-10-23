@@ -1,0 +1,20 @@
+{
+  "issue": "I011",
+  "classifications": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/final-global-audit/audit.py",
+      "sha256": "78d90aa2c0a253dbc1239dab15bd2db01531963e4dbf9e2093d52af9664cf87e",
+      "disposition": "reviewed_detector_source"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/audit.py",
+      "sha256": "9122fc7670958c829cdb1ff27b9cd907cb44babca74851498a8fcbe1cc22479c",
+      "disposition": "reviewed_detector_source"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/reviewed-preparation.json",
+      "sha256": "82ef6b55570bc8cd1f0bdcf06d19f323fddb71bc189cf30ea406ab58909625f7",
+      "disposition": "reviewed_detector_source"
+    }
+  ]
+}

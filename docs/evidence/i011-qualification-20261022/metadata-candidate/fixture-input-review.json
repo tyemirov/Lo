@@ -1,0 +1,16 @@
+{
+  "issue": "B008",
+  "parent_issue": "I011",
+  "qualification_claim": false,
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "failure": "The Metal stale-inventory fixture selected a software-only runtime and raised KeyError before invoking the package CLI.",
+  "repeat": "The same fixture-input failure occurred in the earlier I011 continuation.",
+  "decision": "Keep the fixture unchanged. Build a fresh ABI2 Metal runtime through the declared Make target and select it explicitly.",
+  "rejected_alternative": "Do not synthesize a Metal record in the fixture receipt.",
+  "preservation": "Keep the original failed run and interrupted alternate-test run distinct. The worker restored its one-line test change.",
+  "prevention": "Bind the selected runtime path, receipt, manifest, real Metal inventory, and artifact hashes in the runner preflight.",
+  "remaining": "Run the unchanged distribution tool tests with the validated ABI2 Metal runtime input."
+}

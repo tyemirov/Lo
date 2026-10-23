@@ -1,0 +1,9 @@
+{
+  "reviewer": "/root",
+  "manifest_sha256": "bd43091ac8528b7968f2c80b1f16c40b9eeb634c514903a33c6609caea804752",
+  "new_records_verified": 25,
+  "linked_records_verified": 214,
+  "result": "all compressed and raw byte identities match",
+  "http_gates_passed": 8,
+  "whole_campaign_claim": false
+}

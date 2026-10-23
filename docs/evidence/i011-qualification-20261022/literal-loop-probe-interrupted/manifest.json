@@ -1,0 +1,304 @@
+{
+  "issue": "B007",
+  "parent_issue": "I011",
+  "phase": "interrupted_instrumented_diagnostic",
+  "qualification_claim": false,
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/case-inputs.json",
+      "bytes": 554084,
+      "sha256": "de5befe35e8e286895299f8f4a9ba6305873928e24f90c78be73dea1f9907cda",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/000.gz",
+      "archive_sha256": "9eca863681abf69cdd74769cc53404a1e7cece854c0e7d763ee526bde5a73a84"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/compile.stderr",
+      "bytes": 116,
+      "sha256": "6021f33487b85f8a9c5f9471588485ff4234e50e83be3e5c4c6e23dd0c32b455",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/001.gz",
+      "archive_sha256": "1699c2359f8214b2d8db609ad47af218ce6315643ee60fd1fccfefe6dde89ab6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/compile.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/002.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/disassembly.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/003.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/disassembly.stdout",
+      "bytes": 47538,
+      "sha256": "d67e8dfe75107383a9a698da718fdc17f25ac139257dcaf83bbcb883a8a92c6a",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/004.gz",
+      "archive_sha256": "375a1203cec78c93752fe8d6cecbe2334ca1c6e048e0ce08a2d25a0c50390273"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/emission.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/005.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/emission.stdout",
+      "bytes": 272,
+      "sha256": "08267dc1c0717905183493f0961c75ddb34b68c0603e861816308d6e0429127b",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/006.gz",
+      "archive_sha256": "146299089cc267a6cf12fd3c65723244b2dbe8c3ac54a891e12008c42a40ba8c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/execute.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/007.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/execute.stdout",
+      "bytes": 74,
+      "sha256": "14102e3eb87e552cdae7f4470c68707b24042cc8c158cb3638dc9bdb2da7f250",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/008.gz",
+      "archive_sha256": "a41dddf76c618a343457f09bdbff2913e5ddaf87aa1d12044b27964e26740d4f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/link.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/009.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/link.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/010.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/program.ll",
+      "bytes": 18673897,
+      "sha256": "5624f2fec81bd885feac9b9fb893fe86f7538220f0770ed4a8fa8329394fbdfd",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/011.gz",
+      "archive_sha256": "33022892401ae6458a64f04e4d60ee80a2c0f148b8c2f7482496174838cb5bc3"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/program.su",
+      "bytes": 796,
+      "sha256": "e443c673126cbda8b2a9187d1c87d05146e0f9f624a5a6f2528833a67b9b5b95",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/012.gz",
+      "archive_sha256": "64b231678c43cf744c6c6c80cdc631ed91a44fbb588b31f51f5e61c86e7a9357"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-multiple_groups/emission.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/013.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-multiple_groups/emission.stdout",
+      "bytes": 274,
+      "sha256": "66f3a7a730f3380c6cc8298acc84fd8f7d502ac189da237be1b635195f1ae7c5",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/014.gz",
+      "archive_sha256": "ef7d40e9fac6521642a129a90100eff15b7513f093fd74f5970fb4578ca15406"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-multiple_groups/program.ll",
+      "bytes": 36172261,
+      "sha256": "c5288eb256eda810d3d11c890ffeb544be6b9dca13ac2a61f4a42c13e5c22bca",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/015.gz",
+      "archive_sha256": "7cefb7bb856cbae5a5a1c6b79c06ff1fe6f5453594d0380fff1fbaa2f1c9594f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/compile.stderr",
+      "bytes": 116,
+      "sha256": "6021f33487b85f8a9c5f9471588485ff4234e50e83be3e5c4c6e23dd0c32b455",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/016.gz",
+      "archive_sha256": "1699c2359f8214b2d8db609ad47af218ce6315643ee60fd1fccfefe6dde89ab6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/compile.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/017.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/disassembly.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/018.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/disassembly.stdout",
+      "bytes": 54871,
+      "sha256": "929e53988ee02fe095c3088c3608c05cf8ddc75438ca696cc9c54bf0a95fa061",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/019.gz",
+      "archive_sha256": "bcc5bf0384cd9af04a7e1d0e1a92da1ddecb77f3f529a326268e018137714623"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/emission.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/020.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/emission.stdout",
+      "bytes": 272,
+      "sha256": "64828c4b1be5efb464eb59d8f1875c923350e80f28ca9daa63ed10e8f7869d32",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/021.gz",
+      "archive_sha256": "8113f96566049dfcdbee6a541d1c4db7b3f34c75fdb4a4b4223e3d3d8cf807aa"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/execute.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/022.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/execute.stdout",
+      "bytes": 73,
+      "sha256": "577b1a1451ecb14e6873982df10bdf1df1ec9638a3cfa3147c8644b5d1317318",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/023.gz",
+      "archive_sha256": "a86ae08348d6ebee97c8e3a19b48a5b59d923c269e0d56ac68fd3d220783f2e2"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/link.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/024.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/link.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/025.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/program.ll",
+      "bytes": 18806323,
+      "sha256": "dbd80d152e68889be34bb1eba79fd0bd095b3a7746deda6b30425beaffd99b7d",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/026.gz",
+      "archive_sha256": "7504bcf1a75e273d8a67bc03223f74b95875a25769cea372ac53b6f3aca77219"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/program.su",
+      "bytes": 824,
+      "sha256": "0499c967d65c81deae40f19c55e42fb4f6ca766211eff4a6760ed6138fedbbaa",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/027.gz",
+      "archive_sha256": "b27d9862e9eea9b9e65115c2e9620e364fcac09e46b2749bb1297da856e1ee3f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/design.json",
+      "bytes": 558877,
+      "sha256": "8a62485426188038c3700b22ab4c905cd88af3738c617ac310965b092a88012c",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/028.gz",
+      "archive_sha256": "0b70cc75bd09abd4a08ee75a311daa6f71792b0e54db4e116025f48a6890af94"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/emitter_build.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/029.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/emitter_build.stdout",
+      "bytes": 1009,
+      "sha256": "2658fe02ea1d0bde2ebd6c817498a50e5f5193b1875df91ecedafaa0ce6aebee",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/030.gz",
+      "archive_sha256": "770b03484e58b75ed8c35c36fb3075d427b487962ccdd9c1db9eede016c189ce"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/report.json",
+      "bytes": 49438,
+      "sha256": "b89a7a524e53c1b728f683b8e5298414bb1e35cf19bb90987190c94aa9601888",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/031.gz",
+      "archive_sha256": "b50847b5e81bfad18b0d94e4a98485a19302c3df3c1857b464eb635c31b4891d"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/emitter/main.go",
+      "bytes": 3774,
+      "sha256": "f1c7f0fe58e12e441b3707c88aed5594fe097c0c19a725187da80e23a911bef7",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/032.gz",
+      "archive_sha256": "62ada3d53c5fc916680746d8ab83728a87c400453857e7f3a0cff61ca6cac37e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/multiple_groups.lo",
+      "bytes": 58517,
+      "sha256": "a6331dfd1b20de4a6ab063b9937b746804567543c663e2c351cfafb17489cf76",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/033.gz",
+      "archive_sha256": "46504e53e91c9dad7d33fb75e3fac4fac168b0ea81cb2a640fa503bcd0824416"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/probe-interruption.json",
+      "bytes": 723,
+      "sha256": "5f58410a51731edc6c4bbe6d968fa610bdbc89298b501666ca5067d933f674fc",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/034.gz",
+      "archive_sha256": "3f52dac5cf8ec60bc8cbe2e1c53b3a42b0f3cce704aac713ed9d3c3ddd9bbf95"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/profile.mk",
+      "bytes": 1190,
+      "sha256": "d2d7a1fe9629f0f8db2058aded518d9731127ef0058222ace3504e78019a98ce",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/035.gz",
+      "archive_sha256": "ab388d7f0ad5b0705d069bb9e72429e6bdb6d120900dd1e2c8c78fe82eee728e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/profile.py",
+      "bytes": 29870,
+      "sha256": "788ed74ca59a0fd6cd4842a3eb974ca56b043dd15123882622c520927dcd6237",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-probe-interrupted/036.gz",
+      "archive_sha256": "e5e32f4b23ba026a99a007d6f90b1c2f4894130b299b05efa6bffa8ae86e5ea1"
+    }
+  ],
+  "omitted_binaries": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/program",
+      "bytes": 17521168,
+      "sha256": "342e8a53fa0d9486d921ad5b05e6104813f3ba42da4335eb5dd2ce7181e18a56",
+      "reason": "Binary or cache artifact; retained hash only."
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-map_10000/program.o",
+      "bytes": 14448056,
+      "sha256": "1d81c28e797fe34624bb2fc888cc4ae2970c4dd8639544de30c7b5a0de5c998b",
+      "reason": "Binary or cache artifact; retained hash only."
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/program",
+      "bytes": 17636800,
+      "sha256": "0be5ebcef6797da0a0fb50b827a36580a28d828f6b1fdf4b46915ff569b185ae",
+      "reason": "Binary or cache artifact; retained hash only."
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/b007/darwin-arm64-records_10000/program.o",
+      "bytes": 14572536,
+      "sha256": "4f55a781a1b2bf2ce5cc32adeeb99c2ea32d5803fd5a9254b48a67d733c31dda",
+      "reason": "Binary or cache artifact; retained hash only."
+    }
+  ],
+  "outcome": "The driver spent about51seconds scanning metadata per completed10k case. Root interrupted during the third case. This is not a compiler timeout.",
+  "completed_cases": [
+    "Darwin records_10000",
+    "Darwin map_10000"
+  ],
+  "limits": [
+    "Original reports and driver stay unchanged.",
+    "Compiler-stage totals exclude IR inspection. Whole diagnostic elapsed time includes the scanner defect.",
+    "Short stages captured only initial sampled RSS. These lower bounds do not establish memory qualification.",
+    "The remaining four target/case builds did not complete. No campaign qualification follows."
+  ]
+}

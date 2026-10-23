@@ -1,0 +1,45 @@
+{
+  "issue": "I011",
+  "scope": "Changed final qualification status, focused acceptance amendment, result summary and historical status corrections.",
+  "authority": "User-approved manual review of I011 documentation against verified official STE reference.",
+  "official_reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+  "files": [
+    {
+      "path": "ISSUES.md",
+      "sha256": "7c82c4885183674c919103d3b2ff66f4e51310728eae3efd307f061c7585c18f"
+    },
+    {
+      "path": "docs/native-qualification-findings.md",
+      "sha256": "9428cbddef29f1c91659ea367e8aa179f3d7f3202367e8787e1a1af900a59a8f"
+    },
+    {
+      "path": "docs/native-compilation-contract.md",
+      "sha256": "8a83c22a5be54f6f4e8ef9dabe3fdeed8dec75dafe0d40d4b5bf4f79f5d0189c"
+    },
+    {
+      "path": "docs/standalone-compiler-plan.md",
+      "sha256": "bb0ba1f8512ac648ee808340a81775d85a88c9fa615b655184d8360d8c6724a1"
+    },
+    {
+      "path": "docs/compiler-distribution.md",
+      "sha256": "f53a7affbd2e702652ef0c2252764a6e654eab8da8a05a39aa02e739a2cda03b"
+    },
+    {
+      "path": "docs/native-runtime-contract.md",
+      "sha256": "3a474c91d21cb47be4420c157ff3292039dd98714175d88fadde1ed0139332c8"
+    },
+    {
+      "path": "docs/semantic-migration.md",
+      "sha256": "098d3e94dac4cae4b3fc347c89bcb892e7bd246cf125133e94a21ccd32ced744"
+    }
+  ],
+  "checks": [
+    "Changed prose reviewed against Part 1 and Part 2",
+    "Facts checked against raw HTTP, delta and archive audit receipts",
+    "Historical outcomes and source identities retained",
+    "No current full CI or complete campaign pass claimed",
+    "git diff --check passed"
+  ],
+  "findings": [],
+  "full_document_compliance_claim": false
+}

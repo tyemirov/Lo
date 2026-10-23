@@ -1,0 +1,11 @@
+{
+  "source": "_scratch/i011-20261020/completion-20261022/http-buffer-characterization/linux-baseline/guest/root/workspace/docs/native-qualification-findings.md",
+  "sha256": "e4905f07fa9306a0c36f820fa8a70dc5eb298cd79581cd8401ff4ce60b68fe42",
+  "bytes": 38989,
+  "archive": "docs/evidence/i011-qualification-20261022/http-borrowed-parser/cleanup-support/e4905f07fa9306a0c36f820fa8a70dc5eb298cd79581cd8401ff4ce60b68fe42.md.gz",
+  "archive_sha256": "c0c59744d62f306050897940fa508cc96b1b9bbe1ab0e3e9eaadd4314eae687c",
+  "archive_bytes": 11846,
+  "archive_format": "gzip filename empty, mtime0",
+  "historical_source_only": true,
+  "original_manifest_unchanged": true
+}

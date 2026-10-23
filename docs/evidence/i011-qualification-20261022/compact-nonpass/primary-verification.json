@@ -1,0 +1,20 @@
+{
+  "issue": "I011",
+  "reviewer": "primary agent",
+  "manifest_sha256": "4ee968b1aeee86ee115288c0dc05d4f2c64349d7265fb0d2e20d04a87edaa848",
+  "verified_gzip_records": 3499,
+  "checks": [
+    "archive SHA-256",
+    "decoded SHA-256 and byte count",
+    "gzip mtime zero",
+    "nonpass audit source review: exact allowed Linux process and HTTP inconclusive set; pass-only scripts unchanged"
+  ],
+  "qualification_claim": false,
+  "i011_complete": false,
+  "task_pending": [
+    "Linux process and HTTP performance resolution",
+    "final changed-prose manual language review",
+    "independent completion review",
+    "owned scratch cleanup"
+  ]
+}

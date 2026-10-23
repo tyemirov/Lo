@@ -1,0 +1,1356 @@
+{
+  "issue": "I011",
+  "state": "historical_sources_preserved_all_archives_verified",
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/older-derived-cleanup/inventory.json",
+      "sha256": "e946e51489bfa8e9e5d8f77ca8b0061988d71bb7c7c51e8de722a4724a596006",
+      "bytes": 34975736,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/e946e51489bfa8e9e5d8f77ca8b0061988d71bb7c7c51e8de722a4724a596006.gz",
+      "archive_sha256": "7d75d4cb70b0ecb5fd2bcaf1eb8eeb5a870f9e0987c7e731fef4c620d5263fd6",
+      "archive_bytes": 2846758
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/prepare.py",
+      "sha256": "cb6a7c6ccd99d429418f8460b47a52f1b4c88ecbcd6350b5cef45ed6d299896b",
+      "bytes": 9520,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cb6a7c6ccd99d429418f8460b47a52f1b4c88ecbcd6350b5cef45ed6d299896b.gz",
+      "archive_sha256": "0ab495b3923e627b0cd8a2e4b01d9c8b5704f7703d792f9faab4b55fa93f9f09",
+      "archive_bytes": 2946
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/prepare-initial-report-schema.py",
+      "sha256": "0aff30d118809d16b43c9b0eb977e77ccfbb5943da15763dc16a39b411ae83e9",
+      "bytes": 8622,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/0aff30d118809d16b43c9b0eb977e77ccfbb5943da15763dc16a39b411ae83e9.gz",
+      "archive_sha256": "f91b0134e0640b21c8075c7ec8cf8ca4a5ffc873e8459521219acd92dc88fc17",
+      "archive_bytes": 2781
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/preparation-initial-report-schema.log",
+      "sha256": "ed3e5189f7e8a39fa5b5ab99ebf2b86d986c4810af439b70545f5b826a7650b6",
+      "bytes": 574,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ed3e5189f7e8a39fa5b5ab99ebf2b86d986c4810af439b70545f5b826a7650b6.gz",
+      "archive_sha256": "f13daeb79bd084070bf0193783b580f0b932d2b017a54fbebd1c46a7946f4711",
+      "archive_bytes": 284
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/prepare-initial-relative-archive.py",
+      "sha256": "df99d03c9387f8c85a6b5d0f7d8131e0682c2617bea63428ec432336777e1892",
+      "bytes": 8806,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/df99d03c9387f8c85a6b5d0f7d8131e0682c2617bea63428ec432336777e1892.gz",
+      "archive_sha256": "9eb6b8bab3aebf413e4c705ce8a534921b4021d7774ff255fcabf727c7502a8e",
+      "archive_bytes": 2828
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/preparation-initial-relative-archive.log",
+      "sha256": "6bd6265889159119c2b1af040e8cac1fcacd4b5528b1e44c8031e42c51c2406f",
+      "bytes": 1378,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6bd6265889159119c2b1af040e8cac1fcacd4b5528b1e44c8031e42c51c2406f.gz",
+      "archive_sha256": "b56863f1f729b26ef19e92525a0e7a6c9f823d96628ce613d1e2d4542f3145a6",
+      "archive_bytes": 577
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d",
+      "bytes": 32461,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d.gz",
+      "archive_sha256": "ab4101516aec69a76f9885801ae8ab3fb09abf2129007f16bbaded017404ac5c",
+      "archive_bytes": 10832
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/ISSUES.md",
+      "sha256": "5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857",
+      "bytes": 114632,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857.gz",
+      "archive_sha256": "5c614f45b8158985e671c7eb52dd02013db03661ed717c19ed171e0af4b317e5",
+      "archive_bytes": 33508
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d",
+      "bytes": 8295,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d.gz",
+      "archive_sha256": "0c847b39a30b78779d4f041c71cd67cc5131539022f6562132f673efdb679ddc",
+      "archive_bytes": 3350
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038",
+      "bytes": 15580,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038.gz",
+      "archive_sha256": "3503624764913866dd97ea73e95fe0adb3299dfa71a0faa47fbacf7a3e868541",
+      "archive_bytes": 5840
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/action.rs",
+      "sha256": "76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1",
+      "bytes": 3438,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1.gz",
+      "archive_sha256": "3f2571495a20ba0a33c31fae0cc8ae5b786d3fef038e7796893ea8b95b3dc8bd",
+      "archive_bytes": 889
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/autodiff.rs",
+      "sha256": "733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd",
+      "bytes": 30905,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd.gz",
+      "archive_sha256": "b76b3d2d0b6e2d5b2c29fdd60d887bc0680d41a20f6fede7ddf7627b4568aea0",
+      "archive_bytes": 5962
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/cli.rs",
+      "sha256": "55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31",
+      "bytes": 23499,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31.gz",
+      "archive_sha256": "61490d669535c5eb8bfa30fb7fa224cd67fcd9a6e4d98ece962ef60445e92241",
+      "archive_bytes": 5277
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/collections.rs",
+      "sha256": "c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be",
+      "bytes": 10182,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be.gz",
+      "archive_sha256": "47bab0f6a16736b59ecc51d8530bc6917aad461a29fec9a67cb3ce555eaaf5cb",
+      "archive_bytes": 2728
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/exports.rs",
+      "sha256": "594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c",
+      "bytes": 26424,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c.gz",
+      "archive_sha256": "23beb9c35533db2de72f668fd78a7c3f579e1ce1d52278e05d80052d93f702d9",
+      "archive_bytes": 6054
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/file_entries.rs",
+      "sha256": "d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112",
+      "bytes": 32481,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112.gz",
+      "archive_sha256": "20a28e93e9a1d8172c606e41b072e24a627cefcf640ca97a18ce8bf5ef30fd5e",
+      "archive_bytes": 6803
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/files.rs",
+      "sha256": "bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e",
+      "bytes": 31910,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e.gz",
+      "archive_sha256": "862f93b6ff3c8557824e8a9035b7647fe44f319c99dc57313cf7158d52d85593",
+      "archive_bytes": 7081
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06",
+      "bytes": 41742,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06.gz",
+      "archive_sha256": "67b3445f797f337da5822a2b1c58dd38de24202103f05a369495724c861f4520",
+      "archive_bytes": 9521
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/process.rs",
+      "sha256": "7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404",
+      "bytes": 48987,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404.gz",
+      "archive_sha256": "f58b890e81aee4c053b12f24705e1b9eb17098df610c16e0f0a18bb44fb0c59e",
+      "archive_bytes": 10534
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/tests/integration/llvm_literal_sequence_test.go",
+      "sha256": "6f58c1c1e9043d4dbf7f2f3720bed0e8dd31f74b0ac87d056120bf3bcc73e50b",
+      "bytes": 9858,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6f58c1c1e9043d4dbf7f2f3720bed0e8dd31f74b0ac87d056120bf3bcc73e50b.gz",
+      "archive_sha256": "83f35359f88a7c70f13eeb6a22d360642ccd09ad20674f26de75ad3165999fbf",
+      "archive_bytes": 3227
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/tools/lodistribution/package.py",
+      "sha256": "6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef",
+      "bytes": 20462,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef.gz",
+      "archive_sha256": "c96561326aaeba5eb3ea953b9d9005cd7ea7fe33762f9c6540a9ae62fc85060d",
+      "archive_bytes": 5682
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/tools/loqualification/performance.py",
+      "sha256": "ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6",
+      "bytes": 17307,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6.gz",
+      "archive_sha256": "bb1b6fe7b589cf2b4d3892677cf28438bf336b3681c8f649e2ccd2def8e64ee3",
+      "archive_bytes": 5155
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/tools/nativelowering/run.py",
+      "sha256": "1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db",
+      "bytes": 8699,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db.gz",
+      "archive_sha256": "ad56d20be932cba618acb12e9a536dae67ca1b001d6d00888e746137fd64e5f4",
+      "archive_bytes": 3056
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/tools/nativeruntime/build.py",
+      "sha256": "546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c",
+      "bytes": 22434,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c.gz",
+      "archive_sha256": "be78b21e8ba032199d6fce431dbfe3ffbed4a729ae751403921d0b8b82847d54",
+      "archive_bytes": 5587
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d",
+      "bytes": 32461,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d.gz",
+      "archive_sha256": "ab4101516aec69a76f9885801ae8ab3fb09abf2129007f16bbaded017404ac5c",
+      "archive_bytes": 10832
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/ISSUES.md",
+      "sha256": "5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857",
+      "bytes": 114632,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857.gz",
+      "archive_sha256": "5c614f45b8158985e671c7eb52dd02013db03661ed717c19ed171e0af4b317e5",
+      "archive_bytes": 33508
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d",
+      "bytes": 8295,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d.gz",
+      "archive_sha256": "0c847b39a30b78779d4f041c71cd67cc5131539022f6562132f673efdb679ddc",
+      "archive_bytes": 3350
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "72d977bc3d29cc2d3e977f074f3b0f849716d0e233fa7c626b99eec6bf49d356",
+      "bytes": 15978,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/72d977bc3d29cc2d3e977f074f3b0f849716d0e233fa7c626b99eec6bf49d356.gz",
+      "archive_sha256": "a1344c063e37dad66a4841695b272be75847ba6d14ae0146f9bcaf4e755cd25f",
+      "archive_bytes": 5975
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/internal/llvmemit/emit.go",
+      "sha256": "613536d71138bc90832a1d1204fe06fa5274207757b601c66dff2c208edb30f1",
+      "bytes": 28053,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/613536d71138bc90832a1d1204fe06fa5274207757b601c66dff2c208edb30f1.gz",
+      "archive_sha256": "624a8a1f02d19d730c8217c8b6bb2cee63fd83f062f821d6d8ab750cf0afba2f",
+      "archive_bytes": 6976
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/internal/nativeplan/verify.go",
+      "sha256": "6c259d2a5ba880ae71e2d536e4eadfcf0d1f6d0c3442d68b7d1fac3d2a1d8f9e",
+      "bytes": 21834,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6c259d2a5ba880ae71e2d536e4eadfcf0d1f6d0c3442d68b7d1fac3d2a1d8f9e.gz",
+      "archive_sha256": "75faafe109edbebd2522eec578760a8f7fe5c8e6713df6ca0f617fe9297469cd",
+      "archive_bytes": 5506
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/action.rs",
+      "sha256": "76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1",
+      "bytes": 3438,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1.gz",
+      "archive_sha256": "3f2571495a20ba0a33c31fae0cc8ae5b786d3fef038e7796893ea8b95b3dc8bd",
+      "archive_bytes": 889
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/autodiff.rs",
+      "sha256": "733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd",
+      "bytes": 30905,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd.gz",
+      "archive_sha256": "b76b3d2d0b6e2d5b2c29fdd60d887bc0680d41a20f6fede7ddf7627b4568aea0",
+      "archive_bytes": 5962
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/cli.rs",
+      "sha256": "55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31",
+      "bytes": 23499,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31.gz",
+      "archive_sha256": "61490d669535c5eb8bfa30fb7fa224cd67fcd9a6e4d98ece962ef60445e92241",
+      "archive_bytes": 5277
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/collections.rs",
+      "sha256": "c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be",
+      "bytes": 10182,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be.gz",
+      "archive_sha256": "47bab0f6a16736b59ecc51d8530bc6917aad461a29fec9a67cb3ce555eaaf5cb",
+      "archive_bytes": 2728
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/exports.rs",
+      "sha256": "594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c",
+      "bytes": 26424,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c.gz",
+      "archive_sha256": "23beb9c35533db2de72f668fd78a7c3f579e1ce1d52278e05d80052d93f702d9",
+      "archive_bytes": 6054
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/file_entries.rs",
+      "sha256": "d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112",
+      "bytes": 32481,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112.gz",
+      "archive_sha256": "20a28e93e9a1d8172c606e41b072e24a627cefcf640ca97a18ce8bf5ef30fd5e",
+      "archive_bytes": 6803
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/files.rs",
+      "sha256": "bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e",
+      "bytes": 31910,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e.gz",
+      "archive_sha256": "862f93b6ff3c8557824e8a9035b7647fe44f319c99dc57313cf7158d52d85593",
+      "archive_bytes": 7081
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06",
+      "bytes": 41742,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06.gz",
+      "archive_sha256": "67b3445f797f337da5822a2b1c58dd38de24202103f05a369495724c861f4520",
+      "archive_bytes": 9521
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/process.rs",
+      "sha256": "7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404",
+      "bytes": 48987,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404.gz",
+      "archive_sha256": "f58b890e81aee4c053b12f24705e1b9eb17098df610c16e0f0a18bb44fb0c59e",
+      "archive_bytes": 10534
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/tests/integration/llvm_literal_sequence_test.go",
+      "sha256": "8f5bb475d318e9c0af225be7ea807f2965a3aa10d73f8b1066429f79a82ed422",
+      "bytes": 13825,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/8f5bb475d318e9c0af225be7ea807f2965a3aa10d73f8b1066429f79a82ed422.gz",
+      "archive_sha256": "8619c7b4e0f9e03d92735583efa26d7e9d39f1ef096a272b38bee52125adb866",
+      "archive_bytes": 4082
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/tools/lodistribution/package.py",
+      "sha256": "6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef",
+      "bytes": 20462,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef.gz",
+      "archive_sha256": "c96561326aaeba5eb3ea953b9d9005cd7ea7fe33762f9c6540a9ae62fc85060d",
+      "archive_bytes": 5682
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/tools/loqualification/performance.py",
+      "sha256": "ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6",
+      "bytes": 17307,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6.gz",
+      "archive_sha256": "bb1b6fe7b589cf2b4d3892677cf28438bf336b3681c8f649e2ccd2def8e64ee3",
+      "archive_bytes": 5155
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/tools/nativelowering/run.py",
+      "sha256": "1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db",
+      "bytes": 8699,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db.gz",
+      "archive_sha256": "ad56d20be932cba618acb12e9a536dae67ca1b001d6d00888e746137fd64e5f4",
+      "archive_bytes": 3056
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/tools/nativeruntime/build.py",
+      "sha256": "546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c",
+      "bytes": 22434,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c.gz",
+      "archive_sha256": "be78b21e8ba032199d6fce431dbfe3ffbed4a729ae751403921d0b8b82847d54",
+      "archive_bytes": 5587
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d",
+      "bytes": 32461,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d.gz",
+      "archive_sha256": "ab4101516aec69a76f9885801ae8ab3fb09abf2129007f16bbaded017404ac5c",
+      "archive_bytes": 10832
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/ISSUES.md",
+      "sha256": "9a083035d9f213ec17835676391ab908cdad6b863d310174cdf3648fa2c97a37",
+      "bytes": 115622,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/9a083035d9f213ec17835676391ab908cdad6b863d310174cdf3648fa2c97a37.gz",
+      "archive_sha256": "a37edc961aca665246b863c729d4ac39be138f9e1f1974d21e004b40382b6a79",
+      "archive_bytes": 33824
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "36e119e3e6d6c4bfe8651f0fd9abe9cefa9dc8efdcd0bb1a6c2e1c0ab2436dc2",
+      "bytes": 8427,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/36e119e3e6d6c4bfe8651f0fd9abe9cefa9dc8efdcd0bb1a6c2e1c0ab2436dc2.gz",
+      "archive_sha256": "99d0055c1d44309fa738e4089247b5082e8e44c6b1058744441cf32c27d4d827",
+      "archive_bytes": 3388
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "ac9ec223cc1761bc336caf78a16ff1106bae8d534c0e5f5de89454d5af8ce95e",
+      "bytes": 18734,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ac9ec223cc1761bc336caf78a16ff1106bae8d534c0e5f5de89454d5af8ce95e.gz",
+      "archive_sha256": "b99884ea4b6266361d73087ab624834a50c0ccf8057f33e5875ebdefc6275fa3",
+      "archive_bytes": 6775
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/docs/native-runtime-contract.md",
+      "sha256": "9c1b52c770abe48d76c60def127be54cfc5e8bef09e43cffbf95f1714882779e",
+      "bytes": 19407,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/9c1b52c770abe48d76c60def127be54cfc5e8bef09e43cffbf95f1714882779e.gz",
+      "archive_sha256": "f2b8975dfb4880c592d26e1d716e610536ccd19ccc7f637a9ca117aff7e0ef5f",
+      "archive_bytes": 7239
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d",
+      "bytes": 32461,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d.gz",
+      "archive_sha256": "ab4101516aec69a76f9885801ae8ab3fb09abf2129007f16bbaded017404ac5c",
+      "archive_bytes": 10832
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/ISSUES.md",
+      "sha256": "5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857",
+      "bytes": 114632,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857.gz",
+      "archive_sha256": "5c614f45b8158985e671c7eb52dd02013db03661ed717c19ed171e0af4b317e5",
+      "archive_bytes": 33508
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d",
+      "bytes": 8295,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d.gz",
+      "archive_sha256": "0c847b39a30b78779d4f041c71cd67cc5131539022f6562132f673efdb679ddc",
+      "archive_bytes": 3350
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038",
+      "bytes": 15580,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038.gz",
+      "archive_sha256": "3503624764913866dd97ea73e95fe0adb3299dfa71a0faa47fbacf7a3e868541",
+      "archive_bytes": 5840
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/internal/nativeplan/verify.go",
+      "sha256": "224205dbefa3aafc4b7964ab6ab8a609313a7bed3c3747f936e8712a33382c5a",
+      "bytes": 21955,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/224205dbefa3aafc4b7964ab6ab8a609313a7bed3c3747f936e8712a33382c5a.gz",
+      "archive_sha256": "dfdbe057a37b0e6a0c7be0cfb27afc122bc8e1aa12cebfb9c9c94477f554eae6",
+      "archive_bytes": 5549
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/action.rs",
+      "sha256": "76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1",
+      "bytes": 3438,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1.gz",
+      "archive_sha256": "3f2571495a20ba0a33c31fae0cc8ae5b786d3fef038e7796893ea8b95b3dc8bd",
+      "archive_bytes": 889
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/autodiff.rs",
+      "sha256": "733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd",
+      "bytes": 30905,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd.gz",
+      "archive_sha256": "b76b3d2d0b6e2d5b2c29fdd60d887bc0680d41a20f6fede7ddf7627b4568aea0",
+      "archive_bytes": 5962
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/cli.rs",
+      "sha256": "55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31",
+      "bytes": 23499,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31.gz",
+      "archive_sha256": "61490d669535c5eb8bfa30fb7fa224cd67fcd9a6e4d98ece962ef60445e92241",
+      "archive_bytes": 5277
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/collections.rs",
+      "sha256": "c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be",
+      "bytes": 10182,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be.gz",
+      "archive_sha256": "47bab0f6a16736b59ecc51d8530bc6917aad461a29fec9a67cb3ce555eaaf5cb",
+      "archive_bytes": 2728
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/exports.rs",
+      "sha256": "594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c",
+      "bytes": 26424,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c.gz",
+      "archive_sha256": "23beb9c35533db2de72f668fd78a7c3f579e1ce1d52278e05d80052d93f702d9",
+      "archive_bytes": 6054
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/file_entries.rs",
+      "sha256": "d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112",
+      "bytes": 32481,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112.gz",
+      "archive_sha256": "20a28e93e9a1d8172c606e41b072e24a627cefcf640ca97a18ce8bf5ef30fd5e",
+      "archive_bytes": 6803
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/files.rs",
+      "sha256": "bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e",
+      "bytes": 31910,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e.gz",
+      "archive_sha256": "862f93b6ff3c8557824e8a9035b7647fe44f319c99dc57313cf7158d52d85593",
+      "archive_bytes": 7081
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06",
+      "bytes": 41742,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06.gz",
+      "archive_sha256": "67b3445f797f337da5822a2b1c58dd38de24202103f05a369495724c861f4520",
+      "archive_bytes": 9521
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/process.rs",
+      "sha256": "7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404",
+      "bytes": 48987,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404.gz",
+      "archive_sha256": "f58b890e81aee4c053b12f24705e1b9eb17098df610c16e0f0a18bb44fb0c59e",
+      "archive_bytes": 10534
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/tests/integration/llvm_literal_sequence_test.go",
+      "sha256": "38fce6a1fc07dd4f5bf13072ae46ca6e8eb1b9bf042fc3024404e4c2186e82de",
+      "bytes": 12981,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/38fce6a1fc07dd4f5bf13072ae46ca6e8eb1b9bf042fc3024404e4c2186e82de.gz",
+      "archive_sha256": "b2a83b0be4364faa064df50ba24c4290f20fca744d420e5201a621fe66455d4a",
+      "archive_bytes": 3966
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/tools/lodistribution/package.py",
+      "sha256": "6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef",
+      "bytes": 20462,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef.gz",
+      "archive_sha256": "c96561326aaeba5eb3ea953b9d9005cd7ea7fe33762f9c6540a9ae62fc85060d",
+      "archive_bytes": 5682
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/tools/loqualification/performance.py",
+      "sha256": "ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6",
+      "bytes": 17307,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6.gz",
+      "archive_sha256": "bb1b6fe7b589cf2b4d3892677cf28438bf336b3681c8f649e2ccd2def8e64ee3",
+      "archive_bytes": 5155
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/tools/nativelowering/run.py",
+      "sha256": "1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db",
+      "bytes": 8699,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db.gz",
+      "archive_sha256": "ad56d20be932cba618acb12e9a536dae67ca1b001d6d00888e746137fd64e5f4",
+      "archive_bytes": 3056
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/tools/nativeruntime/build.py",
+      "sha256": "546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c",
+      "bytes": 22434,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c.gz",
+      "archive_sha256": "be78b21e8ba032199d6fce431dbfe3ffbed4a729ae751403921d0b8b82847d54",
+      "archive_bytes": 5587
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "b21c06a060de916d7a3de58f29578ba61b8d2f3d8d5a49a4ca9ae6b35e26735e",
+      "bytes": 32374,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/b21c06a060de916d7a3de58f29578ba61b8d2f3d8d5a49a4ca9ae6b35e26735e.gz",
+      "archive_sha256": "a22c5269225fcc2b5b26c973e856c245ab500ac7bfc5f72ae947f6bd2d0f55c9",
+      "archive_bytes": 10806
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/ISSUES.md",
+      "sha256": "1d4a83a8962aa7257436dbeb036a86526cb1f833baec8effcb99dbc5bed96dec",
+      "bytes": 110948,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1d4a83a8962aa7257436dbeb036a86526cb1f833baec8effcb99dbc5bed96dec.gz",
+      "archive_sha256": "14c6ff17902a698f20e8a7d7a6c479f8ac0fdd86be6b071cb270239ba26344b7",
+      "archive_bytes": 32474
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d",
+      "bytes": 8295,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d.gz",
+      "archive_sha256": "0c847b39a30b78779d4f041c71cd67cc5131539022f6562132f673efdb679ddc",
+      "archive_bytes": 3350
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "18cf733d5cc328322a0534355ac0c3bd06b7fc434e4cb6d4073f99cf4fe0b45b",
+      "bytes": 13820,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/18cf733d5cc328322a0534355ac0c3bd06b7fc434e4cb6d4073f99cf4fe0b45b.gz",
+      "archive_sha256": "b65397c12b2413311caf1fb95ba42d36f215dacf92681864c41c9ba0e81b92e4",
+      "archive_bytes": 5256
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/docs/native-runtime-contract.md",
+      "sha256": "382b67f3b377fa63f97eb839292ba9ae461149a2791cfef6dc2a3c6ed453587c",
+      "bytes": 16756,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/382b67f3b377fa63f97eb839292ba9ae461149a2791cfef6dc2a3c6ed453587c.gz",
+      "archive_sha256": "f9f891104226fd4aa432e1624400cd69c78401c85ce5b70abda5f8543b1296c9",
+      "archive_bytes": 6301
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/action.rs",
+      "sha256": "76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1",
+      "bytes": 3438,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1.gz",
+      "archive_sha256": "3f2571495a20ba0a33c31fae0cc8ae5b786d3fef038e7796893ea8b95b3dc8bd",
+      "archive_bytes": 889
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/autodiff.rs",
+      "sha256": "733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd",
+      "bytes": 30905,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd.gz",
+      "archive_sha256": "b76b3d2d0b6e2d5b2c29fdd60d887bc0680d41a20f6fede7ddf7627b4568aea0",
+      "archive_bytes": 5962
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/cli.rs",
+      "sha256": "55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31",
+      "bytes": 23499,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31.gz",
+      "archive_sha256": "61490d669535c5eb8bfa30fb7fa224cd67fcd9a6e4d98ece962ef60445e92241",
+      "archive_bytes": 5277
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/collections.rs",
+      "sha256": "c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be",
+      "bytes": 10182,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be.gz",
+      "archive_sha256": "47bab0f6a16736b59ecc51d8530bc6917aad461a29fec9a67cb3ce555eaaf5cb",
+      "archive_bytes": 2728
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/exports.rs",
+      "sha256": "594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c",
+      "bytes": 26424,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c.gz",
+      "archive_sha256": "23beb9c35533db2de72f668fd78a7c3f579e1ce1d52278e05d80052d93f702d9",
+      "archive_bytes": 6054
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/file_entries.rs",
+      "sha256": "d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112",
+      "bytes": 32481,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112.gz",
+      "archive_sha256": "20a28e93e9a1d8172c606e41b072e24a627cefcf640ca97a18ce8bf5ef30fd5e",
+      "archive_bytes": 6803
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/files.rs",
+      "sha256": "bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e",
+      "bytes": 31910,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e.gz",
+      "archive_sha256": "862f93b6ff3c8557824e8a9035b7647fe44f319c99dc57313cf7158d52d85593",
+      "archive_bytes": 7081
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06",
+      "bytes": 41742,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06.gz",
+      "archive_sha256": "67b3445f797f337da5822a2b1c58dd38de24202103f05a369495724c861f4520",
+      "archive_bytes": 9521
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/process.rs",
+      "sha256": "7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404",
+      "bytes": 48987,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404.gz",
+      "archive_sha256": "f58b890e81aee4c053b12f24705e1b9eb17098df610c16e0f0a18bb44fb0c59e",
+      "archive_bytes": 10534
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/tools/lodistribution/package.py",
+      "sha256": "6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef",
+      "bytes": 20462,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef.gz",
+      "archive_sha256": "c96561326aaeba5eb3ea953b9d9005cd7ea7fe33762f9c6540a9ae62fc85060d",
+      "archive_bytes": 5682
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/tools/loqualification/performance.py",
+      "sha256": "ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6",
+      "bytes": 17307,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6.gz",
+      "archive_sha256": "bb1b6fe7b589cf2b4d3892677cf28438bf336b3681c8f649e2ccd2def8e64ee3",
+      "archive_bytes": 5155
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/tools/nativelowering/run.py",
+      "sha256": "1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db",
+      "bytes": 8699,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db.gz",
+      "archive_sha256": "ad56d20be932cba618acb12e9a536dae67ca1b001d6d00888e746137fd64e5f4",
+      "archive_bytes": 3056
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/tools/nativeruntime/build.py",
+      "sha256": "546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c",
+      "bytes": 22434,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c.gz",
+      "archive_sha256": "be78b21e8ba032199d6fce431dbfe3ffbed4a729ae751403921d0b8b82847d54",
+      "archive_bytes": 5587
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "b21c06a060de916d7a3de58f29578ba61b8d2f3d8d5a49a4ca9ae6b35e26735e",
+      "bytes": 32374,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/b21c06a060de916d7a3de58f29578ba61b8d2f3d8d5a49a4ca9ae6b35e26735e.gz",
+      "archive_sha256": "a22c5269225fcc2b5b26c973e856c245ab500ac7bfc5f72ae947f6bd2d0f55c9",
+      "archive_bytes": 10806
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/ISSUES.md",
+      "sha256": "1d4a83a8962aa7257436dbeb036a86526cb1f833baec8effcb99dbc5bed96dec",
+      "bytes": 110948,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1d4a83a8962aa7257436dbeb036a86526cb1f833baec8effcb99dbc5bed96dec.gz",
+      "archive_sha256": "14c6ff17902a698f20e8a7d7a6c479f8ac0fdd86be6b071cb270239ba26344b7",
+      "archive_bytes": 32474
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d",
+      "bytes": 8295,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d.gz",
+      "archive_sha256": "0c847b39a30b78779d4f041c71cd67cc5131539022f6562132f673efdb679ddc",
+      "archive_bytes": 3350
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "18cf733d5cc328322a0534355ac0c3bd06b7fc434e4cb6d4073f99cf4fe0b45b",
+      "bytes": 13820,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/18cf733d5cc328322a0534355ac0c3bd06b7fc434e4cb6d4073f99cf4fe0b45b.gz",
+      "archive_sha256": "b65397c12b2413311caf1fb95ba42d36f215dacf92681864c41c9ba0e81b92e4",
+      "archive_bytes": 5256
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/docs/native-runtime-contract.md",
+      "sha256": "382b67f3b377fa63f97eb839292ba9ae461149a2791cfef6dc2a3c6ed453587c",
+      "bytes": 16756,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/382b67f3b377fa63f97eb839292ba9ae461149a2791cfef6dc2a3c6ed453587c.gz",
+      "archive_sha256": "f9f891104226fd4aa432e1624400cd69c78401c85ce5b70abda5f8543b1296c9",
+      "archive_bytes": 6301
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/action.rs",
+      "sha256": "76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1",
+      "bytes": 3438,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1.gz",
+      "archive_sha256": "3f2571495a20ba0a33c31fae0cc8ae5b786d3fef038e7796893ea8b95b3dc8bd",
+      "archive_bytes": 889
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/autodiff.rs",
+      "sha256": "733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd",
+      "bytes": 30905,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd.gz",
+      "archive_sha256": "b76b3d2d0b6e2d5b2c29fdd60d887bc0680d41a20f6fede7ddf7627b4568aea0",
+      "archive_bytes": 5962
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/cli.rs",
+      "sha256": "55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31",
+      "bytes": 23499,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31.gz",
+      "archive_sha256": "61490d669535c5eb8bfa30fb7fa224cd67fcd9a6e4d98ece962ef60445e92241",
+      "archive_bytes": 5277
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/collections.rs",
+      "sha256": "c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be",
+      "bytes": 10182,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be.gz",
+      "archive_sha256": "47bab0f6a16736b59ecc51d8530bc6917aad461a29fec9a67cb3ce555eaaf5cb",
+      "archive_bytes": 2728
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/exports.rs",
+      "sha256": "594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c",
+      "bytes": 26424,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c.gz",
+      "archive_sha256": "23beb9c35533db2de72f668fd78a7c3f579e1ce1d52278e05d80052d93f702d9",
+      "archive_bytes": 6054
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/file_entries.rs",
+      "sha256": "d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112",
+      "bytes": 32481,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112.gz",
+      "archive_sha256": "20a28e93e9a1d8172c606e41b072e24a627cefcf640ca97a18ce8bf5ef30fd5e",
+      "archive_bytes": 6803
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/files.rs",
+      "sha256": "bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e",
+      "bytes": 31910,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e.gz",
+      "archive_sha256": "862f93b6ff3c8557824e8a9035b7647fe44f319c99dc57313cf7158d52d85593",
+      "archive_bytes": 7081
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06",
+      "bytes": 41742,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06.gz",
+      "archive_sha256": "67b3445f797f337da5822a2b1c58dd38de24202103f05a369495724c861f4520",
+      "archive_bytes": 9521
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/process.rs",
+      "sha256": "7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404",
+      "bytes": 48987,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404.gz",
+      "archive_sha256": "f58b890e81aee4c053b12f24705e1b9eb17098df610c16e0f0a18bb44fb0c59e",
+      "archive_bytes": 10534
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/tools/lodistribution/package.py",
+      "sha256": "6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef",
+      "bytes": 20462,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef.gz",
+      "archive_sha256": "c96561326aaeba5eb3ea953b9d9005cd7ea7fe33762f9c6540a9ae62fc85060d",
+      "archive_bytes": 5682
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/tools/loqualification/performance.py",
+      "sha256": "ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6",
+      "bytes": 17307,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6.gz",
+      "archive_sha256": "bb1b6fe7b589cf2b4d3892677cf28438bf336b3681c8f649e2ccd2def8e64ee3",
+      "archive_bytes": 5155
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/tools/nativelowering/run.py",
+      "sha256": "1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db",
+      "bytes": 8699,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db.gz",
+      "archive_sha256": "ad56d20be932cba618acb12e9a536dae67ca1b001d6d00888e746137fd64e5f4",
+      "archive_bytes": 3056
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/tools/nativeruntime/build.py",
+      "sha256": "546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c",
+      "bytes": 22434,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c.gz",
+      "archive_sha256": "be78b21e8ba032199d6fce431dbfe3ffbed4a729ae751403921d0b8b82847d54",
+      "archive_bytes": 5587
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/report.json",
+      "sha256": "29fab83fc463f88aecb1c8d396618a4f25930cec184d9195e5d842cdcdf866ba",
+      "bytes": 1945,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/29fab83fc463f88aecb1c8d396618a4f25930cec184d9195e5d842cdcdf866ba.gz",
+      "archive_sha256": "4fe3a3cb3d84ad485c28d1178f08d3a7689a98d436e536fe10c79456c8495de4",
+      "archive_bytes": 833
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d",
+      "bytes": 32461,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d.gz",
+      "archive_sha256": "ab4101516aec69a76f9885801ae8ab3fb09abf2129007f16bbaded017404ac5c",
+      "archive_bytes": 10832
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/ISSUES.md",
+      "sha256": "5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857",
+      "bytes": 114632,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857.gz",
+      "archive_sha256": "5c614f45b8158985e671c7eb52dd02013db03661ed717c19ed171e0af4b317e5",
+      "archive_bytes": 33508
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d",
+      "bytes": 8295,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d.gz",
+      "archive_sha256": "0c847b39a30b78779d4f041c71cd67cc5131539022f6562132f673efdb679ddc",
+      "archive_bytes": 3350
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038",
+      "bytes": 15580,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038.gz",
+      "archive_sha256": "3503624764913866dd97ea73e95fe0adb3299dfa71a0faa47fbacf7a3e868541",
+      "archive_bytes": 5840
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/internal/nativeplan/metadata_projection_test.go",
+      "sha256": "00fed72b68be6825527da9fed3dd9af637910646f95257ad26c0624cdcf36884",
+      "bytes": 13236,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/00fed72b68be6825527da9fed3dd9af637910646f95257ad26c0624cdcf36884.gz",
+      "archive_sha256": "30f5fd9fb1238bfa8fe74f0636a4c7af5100179ba904309e96860e6db5db6c24",
+      "archive_bytes": 4133
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/action.rs",
+      "sha256": "76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1",
+      "bytes": 3438,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1.gz",
+      "archive_sha256": "3f2571495a20ba0a33c31fae0cc8ae5b786d3fef038e7796893ea8b95b3dc8bd",
+      "archive_bytes": 889
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/autodiff.rs",
+      "sha256": "733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd",
+      "bytes": 30905,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd.gz",
+      "archive_sha256": "b76b3d2d0b6e2d5b2c29fdd60d887bc0680d41a20f6fede7ddf7627b4568aea0",
+      "archive_bytes": 5962
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/cli.rs",
+      "sha256": "55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31",
+      "bytes": 23499,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31.gz",
+      "archive_sha256": "61490d669535c5eb8bfa30fb7fa224cd67fcd9a6e4d98ece962ef60445e92241",
+      "archive_bytes": 5277
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/collections.rs",
+      "sha256": "c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be",
+      "bytes": 10182,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be.gz",
+      "archive_sha256": "47bab0f6a16736b59ecc51d8530bc6917aad461a29fec9a67cb3ce555eaaf5cb",
+      "archive_bytes": 2728
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/exports.rs",
+      "sha256": "594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c",
+      "bytes": 26424,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c.gz",
+      "archive_sha256": "23beb9c35533db2de72f668fd78a7c3f579e1ce1d52278e05d80052d93f702d9",
+      "archive_bytes": 6054
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/file_entries.rs",
+      "sha256": "d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112",
+      "bytes": 32481,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112.gz",
+      "archive_sha256": "20a28e93e9a1d8172c606e41b072e24a627cefcf640ca97a18ce8bf5ef30fd5e",
+      "archive_bytes": 6803
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/files.rs",
+      "sha256": "bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e",
+      "bytes": 31910,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e.gz",
+      "archive_sha256": "862f93b6ff3c8557824e8a9035b7647fe44f319c99dc57313cf7158d52d85593",
+      "archive_bytes": 7081
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06",
+      "bytes": 41742,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06.gz",
+      "archive_sha256": "67b3445f797f337da5822a2b1c58dd38de24202103f05a369495724c861f4520",
+      "archive_bytes": 9521
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/process.rs",
+      "sha256": "7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404",
+      "bytes": 48987,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404.gz",
+      "archive_sha256": "f58b890e81aee4c053b12f24705e1b9eb17098df610c16e0f0a18bb44fb0c59e",
+      "archive_bytes": 10534
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/tests/integration/llvm_literal_sequence_test.go",
+      "sha256": "544783a6945ef35597e9688b69e0b3f77a9edc479b8bff223b7c5103d1a71e98",
+      "bytes": 10765,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/544783a6945ef35597e9688b69e0b3f77a9edc479b8bff223b7c5103d1a71e98.gz",
+      "archive_sha256": "6fd1eb3a6622f8fe9bfc6ceb1b84f73f74e79bc0c3ff47dc50ee5e38ac48cb8a",
+      "archive_bytes": 3405
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/tools/lodistribution/package.py",
+      "sha256": "6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef",
+      "bytes": 20462,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef.gz",
+      "archive_sha256": "c96561326aaeba5eb3ea953b9d9005cd7ea7fe33762f9c6540a9ae62fc85060d",
+      "archive_bytes": 5682
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/tools/loqualification/performance.py",
+      "sha256": "ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6",
+      "bytes": 17307,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6.gz",
+      "archive_sha256": "bb1b6fe7b589cf2b4d3892677cf28438bf336b3681c8f649e2ccd2def8e64ee3",
+      "archive_bytes": 5155
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/tools/nativelowering/run.py",
+      "sha256": "1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db",
+      "bytes": 8699,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db.gz",
+      "archive_sha256": "ad56d20be932cba618acb12e9a536dae67ca1b001d6d00888e746137fd64e5f4",
+      "archive_bytes": 3056
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/tools/nativeruntime/build.py",
+      "sha256": "546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c",
+      "bytes": 22434,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c.gz",
+      "archive_sha256": "be78b21e8ba032199d6fce431dbfe3ffbed4a729ae751403921d0b8b82847d54",
+      "archive_bytes": 5587
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/report.json",
+      "sha256": "14beb444f8cb71b055295ff854f16d832e285262785b749a955282df471aac5c",
+      "bytes": 1980,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/14beb444f8cb71b055295ff854f16d832e285262785b749a955282df471aac5c.gz",
+      "archive_sha256": "ff650a44c94fdb26af49b44c26d972092389f346f0d592e9d23beb2087f2831e",
+      "archive_bytes": 837
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/.mprlab/TERMINOLOGY.md",
+      "sha256": "d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d",
+      "bytes": 32461,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d914790963355945c32ca8ed92381155a1225a0249717bdf3a35448bb379ed0d.gz",
+      "archive_sha256": "ab4101516aec69a76f9885801ae8ab3fb09abf2129007f16bbaded017404ac5c",
+      "archive_bytes": 10832
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/ISSUES.md",
+      "sha256": "5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857",
+      "bytes": 114632,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/5ffeac02ec97c5089dacdcf9dfc768f268d4702f1619017a07c4b8c99b0da857.gz",
+      "archive_sha256": "5c614f45b8158985e671c7eb52dd02013db03661ed717c19ed171e0af4b317e5",
+      "archive_bytes": 33508
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/docs/native-backend-experiment.md",
+      "sha256": "ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d",
+      "bytes": 10561,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ee7c3e525f7e0fc951f1de176c7d63c5d5e9ef635fdd7198dbd243c645d6df7d.gz",
+      "archive_sha256": "a8decfe73df854c9f067394e3c62c10df1063f831d449baa2e5fb83bab5d2baf",
+      "archive_bytes": 4087
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/docs/native-lowering.md",
+      "sha256": "cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d",
+      "bytes": 8295,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cf231ac6b53dce39c08b9cbde3ed2d2b2c10d0543091252b90019039ce9c957d.gz",
+      "archive_sha256": "0c847b39a30b78779d4f041c71cd67cc5131539022f6562132f673efdb679ddc",
+      "archive_bytes": 3350
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/docs/native-qualification-findings.md",
+      "sha256": "70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038",
+      "bytes": 15580,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/70aecc86b87e63821963d28f84a02483b9a102a7f8f2a501fbb36c9c204aa038.gz",
+      "archive_sha256": "3503624764913866dd97ea73e95fe0adb3299dfa71a0faa47fbacf7a3e868541",
+      "archive_bytes": 5840
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/docs/standalone-compiler-plan.md",
+      "sha256": "fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86",
+      "bytes": 22572,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/fa729c0d91cdcc13fa16be6bbfe2aa8abf92c60db04b885fad15b4496e13ca86.gz",
+      "archive_sha256": "bdd06320ca8f4562d99b65016bfce3f13c9f2c010bc6aa21c9e6aa25d6daeea6",
+      "archive_bytes": 7931
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/action.rs",
+      "sha256": "76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1",
+      "bytes": 3438,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/76cff25c204e391492cdb2cf9505df70ccc6e7f8baaf1cf25ea7ea254101a8b1.gz",
+      "archive_sha256": "3f2571495a20ba0a33c31fae0cc8ae5b786d3fef038e7796893ea8b95b3dc8bd",
+      "archive_bytes": 889
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/autodiff.rs",
+      "sha256": "733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd",
+      "bytes": 30905,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/733450a8b6994d09923804d197efec507fe7b47673f307d4587054b04c58fbdd.gz",
+      "archive_sha256": "b76b3d2d0b6e2d5b2c29fdd60d887bc0680d41a20f6fede7ddf7627b4568aea0",
+      "archive_bytes": 5962
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/cli.rs",
+      "sha256": "55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31",
+      "bytes": 23499,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/55b438c1cfa5b9b0185dfa5dc2954ccadb7ac9c117a0c3b83bc138064b025f31.gz",
+      "archive_sha256": "61490d669535c5eb8bfa30fb7fa224cd67fcd9a6e4d98ece962ef60445e92241",
+      "archive_bytes": 5277
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/collections.rs",
+      "sha256": "c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be",
+      "bytes": 10182,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/c64910ad81dac7b80aabb7e36a5985fe03f2ea27b685caab2126c7da4709c0be.gz",
+      "archive_sha256": "47bab0f6a16736b59ecc51d8530bc6917aad461a29fec9a67cb3ce555eaaf5cb",
+      "archive_bytes": 2728
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/exports.rs",
+      "sha256": "594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c",
+      "bytes": 26424,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/594a0f889634c2b7811759919d797caaefa3241e93ae2f97de8b0a292223247c.gz",
+      "archive_sha256": "23beb9c35533db2de72f668fd78a7c3f579e1ce1d52278e05d80052d93f702d9",
+      "archive_bytes": 6054
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/file_entries.rs",
+      "sha256": "d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112",
+      "bytes": 32481,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/d6b181f3984d4141ebe421e42581a871bfbb38da50473d7c29260f240f4fa112.gz",
+      "archive_sha256": "20a28e93e9a1d8172c606e41b072e24a627cefcf640ca97a18ce8bf5ef30fd5e",
+      "archive_bytes": 6803
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/files.rs",
+      "sha256": "bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e",
+      "bytes": 31910,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/bc54c6daaf0cd930ed72c51328caa1bc07a5567f99bca863e604e0179b393b2e.gz",
+      "archive_sha256": "862f93b6ff3c8557824e8a9035b7647fe44f319c99dc57313cf7158d52d85593",
+      "archive_bytes": 7081
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06",
+      "bytes": 41742,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/cfdee18c2fcf9fbe10b1ff554e3bdd79fbd50a8911642e4edf45f22a6b491a06.gz",
+      "archive_sha256": "67b3445f797f337da5822a2b1c58dd38de24202103f05a369495724c861f4520",
+      "archive_bytes": 9521
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/process.rs",
+      "sha256": "7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404",
+      "bytes": 48987,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/7f420a26ccda99d2be757c5f868e63cef732147434b93d3805e7b9a897f02404.gz",
+      "archive_sha256": "f58b890e81aee4c053b12f24705e1b9eb17098df610c16e0f0a18bb44fb0c59e",
+      "archive_bytes": 10534
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/tools/lodistribution/package.py",
+      "sha256": "6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef",
+      "bytes": 20462,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/6108039d21649f80868ecde491a459363bdad27bc71e42aca364531ee770aeef.gz",
+      "archive_sha256": "c96561326aaeba5eb3ea953b9d9005cd7ea7fe33762f9c6540a9ae62fc85060d",
+      "archive_bytes": 5682
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/tools/loqualification/performance.py",
+      "sha256": "ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6",
+      "bytes": 17307,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/ca9001e0f97d5f14ac0b8e558f63322314ca821540e5a7c7ab01a6c7724c6ea6.gz",
+      "archive_sha256": "bb1b6fe7b589cf2b4d3892677cf28438bf336b3681c8f649e2ccd2def8e64ee3",
+      "archive_bytes": 5155
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/tools/nativelowering/run.py",
+      "sha256": "1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db",
+      "bytes": 8699,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1649a077cf5f0ca5c00fd2f78511cb5465d7b873a2dc58104a7cf544ee8193db.gz",
+      "archive_sha256": "ad56d20be932cba618acb12e9a536dae67ca1b001d6d00888e746137fd64e5f4",
+      "archive_bytes": 3056
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/tools/nativeruntime/build.py",
+      "sha256": "546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c",
+      "bytes": 22434,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/546640de955b6dd50298fa42e79a8d8ebb4c4977d355082a620bfc84b5d1856c.gz",
+      "archive_sha256": "be78b21e8ba032199d6fce431dbfe3ffbed4a729ae751403921d0b8b82847d54",
+      "archive_bytes": 5587
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/report.json",
+      "sha256": "29fab83fc463f88aecb1c8d396618a4f25930cec184d9195e5d842cdcdf866ba",
+      "bytes": 1945,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/29fab83fc463f88aecb1c8d396618a4f25930cec184d9195e5d842cdcdf866ba.gz",
+      "archive_sha256": "4fe3a3cb3d84ad485c28d1178f08d3a7689a98d436e536fe10c79456c8495de4",
+      "archive_bytes": 833
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/report.json",
+      "sha256": "14beb444f8cb71b055295ff854f16d832e285262785b749a955282df471aac5c",
+      "bytes": 1980,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/14beb444f8cb71b055295ff854f16d832e285262785b749a955282df471aac5c.gz",
+      "archive_sha256": "ff650a44c94fdb26af49b44c26d972092389f346f0d592e9d23beb2087f2831e",
+      "archive_bytes": 837
+    }
+  ],
+  "prior_manifests": [
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-baseline/manifest.json",
+      "bytes": 12340,
+      "sha256": "174797af375eb041b8890633039a4edbdc654b6d811926b5b0744612c4254192"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-red/manifest.json",
+      "bytes": 10364,
+      "sha256": "960e9676fd245ce324315b4bfea9379dbcf68762a1d5153dcaf8023f37be6972"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-implementation/manifest.json",
+      "bytes": 248264,
+      "sha256": "98379daaff5376616bcab068c82296facd70b195ce2e60b88ace669d14c092ea"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-row/manifest.json",
+      "bytes": 288216,
+      "sha256": "54e2683c8408b1eccc533abb4a1de517defa69639640ee99dbea7aafd3635599"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/literal-characterization/manifest.json",
+      "bytes": 3487626,
+      "sha256": "3aefb40146f9d91c3142e8e7bf925c51ccd29b101992295bb06419f6a5efb810"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/manifest.json",
+      "bytes": 16591,
+      "sha256": "954a945fd82de5cc3c359b99edafae8a23f50b72e8a8193e3c03b75329ef677d"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/manifest.json",
+      "bytes": 9471,
+      "sha256": "702af326b963bd300112c1d4fb7426d552d0ce16c7154a4faa7a273d5656c56d"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/literal-status-characterization/manifest.json",
+      "bytes": 5790,
+      "sha256": "3cf48b6db7b11b22295c94fff7b3e9426655a2a1f36563b78523d75d10683977"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/failed-continuation/manifest.json",
+      "bytes": 780701,
+      "sha256": "b14c85b85cfd7f7694e7d0836e092572c3e3d35c0fcc483c84dd615178069069"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-borrowed-parser/manifest.json",
+      "bytes": 1507746,
+      "sha256": "5b0c9fd47aeb202164cd4516c8449339e2dbefdb5f4f9fb68639d5749d5880ff"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/specialized-nonpass/manifest.json",
+      "bytes": 1934503,
+      "sha256": "25e1dace7f8a599fbaa27e8d5a2c9d338b07bff6b0f0fb6fdcca399426259e1e"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-storage-flags/manifest.json",
+      "sha256": "50191e92c1e628ecb1344fcc2a5b7ba21a0fcabaaa1f58aaabce7ed5c8823d2f",
+      "bytes": 3935855
+    }
+  ],
+  "no_official_STE_inputs": true,
+  "no_qualification_claim": true,
+  "original_inventory": {
+    "path": "_scratch/i011-20261020/completion-20261022/older-derived-cleanup/inventory.json",
+    "sha256": "e946e51489bfa8e9e5d8f77ca8b0061988d71bb7c7c51e8de722a4724a596006",
+    "bytes": 34975736
+  },
+  "original_scratch_retained": true
+}

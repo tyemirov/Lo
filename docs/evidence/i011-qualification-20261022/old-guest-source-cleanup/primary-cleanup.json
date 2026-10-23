@@ -1,0 +1,25 @@
+{
+  "issue": "I011",
+  "state": "ten_derived_paths_removed_and_verified_absent",
+  "time_utc": "2026-10-23T17:27:51.718009+00:00",
+  "inventory_sha256": "57cc53cb10a850b75f4108e3e09e088186ff7e43be4711b9f193cfb702fe245b",
+  "selected_paths": [
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root.cpio.gz"
+  ],
+  "verified_selected_files": 50259,
+  "verified_retained_bindings": 7128,
+  "verified_new_archive_records": 174,
+  "logical_bytes_removed": 10342807104,
+  "script_sha256": "356e35e1f30812d964999d0e1f069ab1b3c12bdf314d32e17ea98d3c9e48d08a",
+  "script_archive_sha256": "94a5a100d3b243e4004181ce61c3eee5834a312a1676a6c6e917d185c94319e2",
+  "qualification_claim": false
+}

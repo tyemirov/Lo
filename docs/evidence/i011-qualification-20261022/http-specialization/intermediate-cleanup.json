@@ -1,0 +1,11 @@
+{
+  "state": "completed",
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-linux/guest/root",
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-linux/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-linux/guest/root",
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-linux/guest/root.cpio.gz"
+  ],
+  "manifest_sha256": "d76998a371d0f4120f67e877fabdd9d3d72b94cdb2a6e718e3e0f28f5f308eeb",
+  "review_sha256": "98812881730eb29bfbef93e4ff56db0fb0e953e6ea473d0b87c24b885cf9dfc9"
+}

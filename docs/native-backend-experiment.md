@@ -1,8 +1,10 @@
 # Native Backend Experiment
 
 I004 verifies native toolchain feasibility for the [standalone compiler plan](standalone-compiler-plan.md).
-All four current backend and target cells passed on October 19, 2026.
-The experiment does not compile Lo source or replace the current Go generator.
+All four backend and target cells completed their acceptance checks on October 19, 2026.
+The experiment uses bounded fixtures rather than Lo source.
+The current compiler uses LLVM and the static Rust runtime.
+I011 removed Go generation.
 The [runtime contract](native-runtime-contract.md) records the selected replacement design.
 
 ## Current Results
@@ -170,19 +172,19 @@ Those links used Apple and GNU linkers, an Apple SDK, and a prepared Linux devel
 They did not qualify LLD or generated-to-runtime calls.
 They do not supply current acceptance evidence.
 
-The [current compiler baseline](evidence/native-backends/current-lo-no-go.json) records the existing missing-Go diagnostic.
-The existing `lo build` returned status `2` with `build.toolchain` when `PATH` excluded Go.
-That check confirms the current tool lookup.
-It does not verify an operating system without Go installed.
+The [historical compiler baseline](evidence/native-backends/current-lo-no-go.json) records the former missing-Go diagnostic.
+The former `lo build` returned status `2` with `build.toolchain` when `PATH` excluded Go.
+That historical check does not describe the current installed compiler.
 
 ## Remaining Acceptance
 
 I004's bounded experiment criteria have current passing evidence.
 The [final repository validation](evidence/compiler-evolution/validation.json) passed on October 19, 2026.
 The I004 acceptance checks passed.
-I006 must connect the selected backend to Lo lowering.
-I007 through I010 must implement full runtime semantics and adapters.
 
-F017 must qualify both installed host distributions with empty caches and no undeclared development tools.
-I011 must pass the full corpus and execute copied artifacts without Lo installed.
-The user's standalone compiler criterion is open until those checks pass.
+I006 connected LLVM to Lo lowering.
+I007 through I010 implemented runtime values, numerical operations, adapters, and device execution.
+F017 completed offline acceptance for both installed compiler hosts.
+I011 owns semantic and performance qualification after removal of Go generation.
+
+The [compiler plan](standalone-compiler-plan.md) records the current status.

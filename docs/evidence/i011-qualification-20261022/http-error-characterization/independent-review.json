@@ -1,0 +1,13 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "recorded_by": "/root",
+  "provenance": "Verbatim reviewer message received through native collaboration; root transcription.",
+  "manifest_sha256": "55172aaa33fade37a4f9d7a4079c07a0255c2ffa9d98c40498b4191f266b658a",
+  "report": "HTTP Error.input characterization review: no blocking finding. The wrapper retains the actual borrowed OnError argument exactly once, publishes it atomically, delegates the same generated callback with unchanged context/arguments/count/site/result pointer, joins serve before inspecting it, then transfers that retained owner to the trusted dump entry; final live program/context/value/storage counters must all be zero. The transform identifies OnError through metadata/table position and preserves its implementation; the fixture's three-flow scope makes its textual rewriting bounded. Request cases assert exact decoded method/path Bytes (including invalid UTF-8 and query exclusion), kind/message, body-limit/EOF errors; response cases independently obtain canonical response field encoding via interpreter and test duplicate headers/non-ASCII body/status restrictions. Confirmed all 26 result-record hashes, exact current source snapshots, identical ten passing case names on Darwin and Linux, and strict Linux raw export re-admission. Only fixture dup\u2192dup2 changes between retained failure and green inputs. Keep the documented limitation: the second CLI formatter uses a trusted replacement entry with no generated cancellation polls; this does not establish legal cross-session language persistence or wider cancellation semantics. No test/build was run during review.",
+  "blocking_findings": [],
+  "qualification_claim": false
+}

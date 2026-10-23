@@ -1,0 +1,32 @@
+{
+  "state": "all_ten_candidates_eligible_no_deletion",
+  "inventory": {
+    "path": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/inventory-final.json",
+    "sha256": "57cc53cb10a850b75f4108e3e09e088186ff7e43be4711b9f193cfb702fe245b",
+    "bytes": 36939705
+  },
+  "inventory_archive": {
+    "path": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/inventory-final.json.gz",
+    "sha256": "f9cb60d488694b9341cb85ca7ad23721ba319c8ebbd02f42dc4ecd85ee4aae20",
+    "bytes": 3273246
+  },
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/manifest.json",
+    "sha256": "c19f143a4c1f1c11722a42ddfab1d99f64d183755f163fa6f0c7bac7f7b979fc",
+    "bytes": 91334
+  },
+  "supplemental_manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/supplemental-manifest.json",
+    "sha256": "d075ba9ee76117107793def4509f63890858b05f607c8d3443c8b5497c06334c",
+    "bytes": 8528
+  },
+  "selected_paths": 10,
+  "logical_bytes": 10342807104,
+  "missing": [],
+  "prior_inventory_unchanged": {
+    "path": "_scratch/i011-20261020/completion-20261022/older-derived-cleanup/inventory.json",
+    "sha256": "e946e51489bfa8e9e5d8f77ca8b0061988d71bb7c7c51e8de722a4724a596006",
+    "bytes": 34975736
+  },
+  "all_original_scratch_retained": true
+}

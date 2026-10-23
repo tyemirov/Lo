@@ -1,0 +1,90 @@
+{
+  "issue": "I011",
+  "state": "applied; focused and full qualification pending",
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-after-client.rs",
+      "bytes": 26252,
+      "sha256": "3acbd219c573f38f47f714257531b059bf7fea6166d468794634895f13d6f6bf",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/3acbd219c573f38f47f714257531b059bf7fea6166d468794634895f13d6f6bf.gz",
+      "archive_sha256": "ab3fe0e6546762517b4dfc1601d9baeb0c0017203a0233a5a07ad14b7bd145dd"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-after-server.rs",
+      "bytes": 41697,
+      "sha256": "6c48c4d9aaa3784524a13e318f8176c841d681b9cc69ad31398d3aaf8ecc12cc",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/6c48c4d9aaa3784524a13e318f8176c841d681b9cc69ad31398d3aaf8ecc12cc.gz",
+      "archive_sha256": "aca3e86f1d7ae934ce3c7ab5c910a82092f1cf69aac20d37879d48833115dd09"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-before-client.rs",
+      "bytes": 26349,
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-before-server.rs",
+      "bytes": 41592,
+      "sha256": "1e607895ee1b7adcc701a6f7c80ffa43c9a6d69ea4569e1fcc2e89766a350cec",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/1e607895ee1b7adcc701a6f7c80ffa43c9a6d69ea4569e1fcc2e89766a350cec.gz",
+      "archive_sha256": "827cf4c1b6cc59e25b19e04a7aa18a73ffd8b854e322f83530476d5ec7d30eb3"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-format-apply.mk",
+      "bytes": 301,
+      "sha256": "d58bb8036337eb166d1ff1166c0439bc9902d32f22c02556caabb5807e0a068a",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/d58bb8036337eb166d1ff1166c0439bc9902d32f22c02556caabb5807e0a068a.gz",
+      "archive_sha256": "50ef7f3bd6c788436fc8cfe54e44b3c6ef1238918c14cef52e4a41f58151e5b6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-format-corrected.log",
+      "bytes": 1104,
+      "sha256": "e140afb0694996bcccd92869095e9230dc329fc8f482f267456fc73c8438c835",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/e140afb0694996bcccd92869095e9230dc329fc8f482f267456fc73c8438c835.gz",
+      "archive_sha256": "607ee500bb9a238c4b28316f49e7238a2957474efd115752b9a5596f00c45abe"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-format.log",
+      "bytes": 2257,
+      "sha256": "fc5c34d7d2408b45d1a229484685601361e757106dee7ea0e29bc7f8a31f43b5",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/fc5c34d7d2408b45d1a229484685601361e757106dee7ea0e29bc7f8a31f43b5.gz",
+      "archive_sha256": "e266c766190641044b79036e5091cbdeab9184d8aad34f66d1a29f5e1c601c59"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-format.mk",
+      "bytes": 192,
+      "sha256": "056517d1ec6a691bc48c2a793c253e52c6f183f014dc428690f5110cd59d4485",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/056517d1ec6a691bc48c2a793c253e52c6f183f014dc428690f5110cd59d4485.gz",
+      "archive_sha256": "e1dea3f4cfd3e99284576c8331bce8680317733e66c85c3205c644ea7d907988"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-formatted.patch",
+      "bytes": 5185,
+      "sha256": "24e9089681fae4c11db054dbcc449ea8f2260b1903b21dd43165ad85689b9eea",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/24e9089681fae4c11db054dbcc449ea8f2260b1903b21dd43165ad85689b9eea.gz",
+      "archive_sha256": "306bb5b10c7a0760343d24e3c8761f5b80d20c49624b0c776aa80bb478a1c120"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined-receipt.json",
+      "bytes": 2158,
+      "sha256": "0de268b21670f7fb43930967ccefceb500bc036c253cbd94b1025d6218cea276",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/0de268b21670f7fb43930967ccefceb500bc036c253cbd94b1025d6218cea276.gz",
+      "archive_sha256": "9a2815bdb6a9d02dac487a05adc6d5db3cd42d835ec65daa718c74d2737aab49"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/combined.patch",
+      "bytes": 5035,
+      "sha256": "0d3c45507893ab11513984b9f3544affa99ec79b98a0ed21ea6b12d554951f7e",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/0d3c45507893ab11513984b9f3544affa99ec79b98a0ed21ea6b12d554951f7e.gz",
+      "archive_sha256": "5f4a0805a51e738f3bcf6e97af866e8a094b8a98e43c2c42e7389dbe2d6052ca"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/format-only.patch",
+      "bytes": 1069,
+      "sha256": "a4bc940dabb470a34db3378c8591644b4abe9a2470715a36cf6589d2c59ac030",
+      "archive": "docs/evidence/i011-qualification-20261022/http-combined/a4bc940dabb470a34db3378c8591644b4abe9a2470715a36cf6589d2c59ac030.gz",
+      "archive_sha256": "61c5bb936c61642a4787f6e00b08a24b5f3cd114910b4a084790aca433dcf8ed"
+    }
+  ]
+}

@@ -1,0 +1,566 @@
+{
+  "candidates": [
+    {
+      "bytes": 946561024,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-build/guest/root",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-build/guest/root",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 439266775,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-build/guest/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-build/guest/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 1370533888,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-execution/guest/root",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-execution/guest/root",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 604984404,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-execution/guest/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-execution/guest/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 946335744,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-http/guest/root",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-http/guest/root",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 439257166,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-http/guest/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-http/guest/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 946548736,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-process/guest/root",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-process/guest/root",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 439269051,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-process/guest/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/campaign/linux-process/guest/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 1654898688,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/corpus/linux/guest/root",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/corpus/linux/guest/root",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 919035960,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/corpus/linux/guest/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/corpus/linux/guest/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 440803328,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/bin",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/bin",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 741376,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/notices",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/notices",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 2428928,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/platform",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/platform",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 48697344,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/runtime",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/runtime",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 125239296,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/source",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/darwin-install/second relocated installation/source",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 685809664,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/bin",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/bin",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 770048,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/notices",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/notices",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 2428928,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/platform",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/platform",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 48697344,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/runtime",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/runtime",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 156884992,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/source",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-install/relocated compiler package/source",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 433632887,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 685809664,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/bin",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/bin",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 770048,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/notices",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/notices",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 2428928,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/platform",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/platform",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 48697344,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/runtime",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/runtime",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 156884992,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/source",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-rejection/root/relocated compiler package/source",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 433632896,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 685809664,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/bin",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/bin",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 770048,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/notices",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/notices",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 2428928,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/platform",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/platform",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 48697344,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/runtime",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/runtime",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 156884992,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/source",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-darwin/root/relocated compiler package/source",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 433632903,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 685809664,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/bin",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/bin",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 770048,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/notices",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/notices",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 2428928,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/platform",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/platform",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 48697344,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/runtime",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/runtime",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 156884992,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/source",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-to-linux/root/relocated compiler package/source",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 433632955,
+      "kind": "derived_guest",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root.cpio.gz",
+        "reason": "Derived guest image; batch declarations and exported results are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root.cpio.gz",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "file bytes"
+    },
+    {
+      "bytes": 685809664,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/bin",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/bin",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 770048,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/notices",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/notices",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 2428928,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/platform",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/platform",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 48697344,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/runtime",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/runtime",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 156884992,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/source",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/linux-xor-build/root/relocated compiler package/source",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 440803328,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/bin",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/bin",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 741376,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/notices",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/notices",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 2465792,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/platform",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/platform",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 69148672,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/runtime",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/runtime",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    },
+    {
+      "bytes": 125239296,
+      "kind": "copied_package_contents",
+      "manifest_exclusion": {
+        "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/source",
+        "reason": "Derived guest snapshot, copied package contents, or cache; original identities are retained."
+      },
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final/offline/metal-install/relocated compiler package/source",
+      "raw_evidence_retained": "All campaign/offline batch/report/export/serial/streams verified in durable manifest; parent paths are not cleanup candidates.",
+      "size_method": "du allocated bytes, hardlink sums may overstate reclaim"
+    }
+  ],
+  "cleanup_performed": false,
+  "issue": "I011",
+  "limits": [
+    "No deletion performed. Root authority required for each exact path.",
+    "Hardlinks and retained duplicates may reduce actual reclaimed bytes."
+  ],
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/specialized-nonpass/manifest.json",
+    "sha256": "25e1dace7f8a599fbaa27e8d5a2c9d338b07bff6b0f0fb6fdcca399426259e1e"
+  },
+  "nominal_bytes": 16170486693,
+  "protected": [
+    "Raw exports/serial/streams/batch/reports",
+    "Packages/originalselectedruntime",
+    "Source snapshots and shared caches",
+    "Other task work",
+    "All paths outside exact candidate list"
+  ],
+  "state": "exact_cleanup_candidates_only_not_authorized",
+  "verification": {
+    "path": "_scratch/i011-20261020/completion-20261022/specialized-nonpass-archive-verification.json",
+    "sha256": "404ff3c3b81d02fe227d61a9eef32b4fad3487576f7cfa73b0a9b669e4ff46c0"
+  }
+}

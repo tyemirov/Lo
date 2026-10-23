@@ -1,0 +1,31 @@
+{
+  "issue": "I011",
+  "state": "passed",
+  "comparison": "The earlier and current ABI2 campaigns use the same evaluator, producer, harness, and benchmark source identities.",
+  "old_frozen_sha256": "2640394d0ca47759472106f1ecd1da866c10097fb23314f9f73928bcfccd8537",
+  "new_frozen_sha256": "f833cd24010b9aa52a151f73d019072ebeb0bdf02a35d54017b95fb2e78d850c",
+  "changed_files": [],
+  "qualification_claim": false,
+  "initial_semantic_source_subset": {
+    "tools/loqualification/performance.py": "a1b4a3d92eef85e8a3d74c1c01b60f20ae035fbaa2aab8ebd0828796e5d03ef2"
+  },
+  "files": {
+    "tools/nativebench/campaign.py": "3bdaac749198f14e85b16753fd9877e0152215fbbf25ebf2e74e21770dd28143",
+    "tools/nativebench/merge.py": "2157c46d28d3f89d2cb79d20af1c032e6dc8411cc89bdb0a45acd594cce2236c",
+    "tools/nativebench/qualification.py": "1d1cdb35d911cea937d545ce19a38cb95cf891e8f058f9a01cec0c044ea4905f",
+    "tools/nativebench/allocation.c.txt": "e3ab782356f5c9a7d257c03e2fe3d9724fe0cd4ab2ef8a7bc56c4d8a8835b9f0",
+    "tools/nativebench/harness.c.txt": "caa582ccee64197be9a37c712d18a84778dd732c7acb134bae9951328d8d2d2a",
+    "tools/nativebench/main.go": "dd2867d5d597e3b391ffa6f3daf61ecc630a7fdd8b8f525ef842013480878725",
+    "scripts/qualify_native.py": "71982d718b1e4716321c99079cf69ce86e10aa8f0f03603f07164ba66cd91440",
+    "tools/nativebench/identity.py": "923e0516d232bac1f7cbc6cf4a4118b179d0b60800413429ac09368a34c2e2fb",
+    "tools/nativecorpus/main.go": "2689361fbec4e42a579cfff09d2d934fc21473691086b842d9ee84f93b461db2",
+    "tools/loqualification/batch.py": "49fad4375d655ec95a063639ef36220029d5a9b41ac6501d01c281516c623dfd",
+    "tools/loqualification/batch_init.c": "43556f3025d20f519fa1fd1e05f7a26111dffe4d6e1793870f9010ca9de70e65",
+    "tools/loqualification/performance-runner/main.go": "ab3a9f34b9d88d3881a588e4ce945bcb2a088372da457de842d9d0d9190034c9",
+    "tools/loqualification/performance.py": "a1b4a3d92eef85e8a3d74c1c01b60f20ae035fbaa2aab8ebd0828796e5d03ef2",
+    "tools/loqualification/suite.py": "a3d6f26d0eb2f84d688c664becc82cab155da937c62a0a631d11678dfceb9e15",
+    "Makefile": "16073195430b5acf6af15c66bc658e04efd86ecb9b719f5b3031615d1797a575"
+  },
+  "full_campaign_source_identity_equal": false,
+  "scope": "The listed measurement files are unchanged. Product source and package identities differ because of the reviewed runtime changes."
+}

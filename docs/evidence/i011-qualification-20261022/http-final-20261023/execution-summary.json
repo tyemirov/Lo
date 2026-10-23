@@ -1,0 +1,44 @@
+{
+  "state": "complete_I011_B007_B008_closed",
+  "workspace": "_scratch/i011-20261020/completion-20261022/http-final-20261023",
+  "owner": "/root",
+  "packages": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages",
+  "scope": "User explicitly selects only HTTP qualification on both targets. Do not run full CI or other performance lanes.",
+  "sample_plan": {
+    "execution": 10,
+    "process": 10,
+    "http": 100,
+    "build": 10
+  },
+  "warmup": 3,
+  "requests": 200,
+  "threshold_ratio": 1.1,
+  "confidence": 0.95,
+  "retries": 0,
+  "reviewer": "/root/i011_completion_review",
+  "evidence": "docs/evidence/i011-qualification-20261022/http-final-20261023",
+  "acceptance_amendment": {
+    "authority": "User explicitly selected HTTP-only qualification on both targets and prohibited rerunning the whole suite.",
+    "recorded_utc": "2026-10-23T21:30:41.971615+00:00",
+    "outcomes_inspected": false,
+    "timing_started": true,
+    "reviewer": "/root/i011_completion_review",
+    "basis": "Use earlier f26 full correctness, offline and passing non-HTTP evidence under reviewed change impact; use fresh complete HTTP lanes on both targets.",
+    "constraints": [
+      "All eight HTTP gates must pass unchanged limits",
+      "Keep earlier source/package identities explicit",
+      "Do not merge historical lanes or samples",
+      "Do not claim a new complete campaign or full CI pass",
+      "Preserve interrupted CI and all prior nonpasses",
+      "Final raw evidence audit and independent review remain required"
+    ]
+  },
+  "delta_audit": {
+    "owner": "/root/literal_status_characterization",
+    "workspace": "_scratch/i011-20261020/completion-20261022/http-final-20261023/delta-audit",
+    "scope": "Read-only comparison and evidence links; no tests or measurements."
+  },
+  "evidence_owner": "/root/http_measurement_integrity",
+  "evidence_workspace": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit",
+  "completion": "docs/evidence/i011-qualification-20261022/completion.json"
+}

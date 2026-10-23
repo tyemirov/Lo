@@ -1,0 +1,271 @@
+{
+  "archive_format": "gzip_mtime_zero",
+  "build_run_or_timing_results": false,
+  "cleanup_authorized": false,
+  "derived_subtrees": [],
+  "historical_input_identities": {
+    "current_inputs_revalidated": false,
+    "field_counts": {
+      "executed_helpers": 50,
+      "frontend_inputs": 721,
+      "go": 2,
+      "maintained_originals": 2681,
+      "module_inventory": 580,
+      "qualified_evidence": 22,
+      "qualified_semantic_originals": 2744,
+      "qualified_semantic_source_sha256": null,
+      "rust_files": 140
+    },
+    "semantic_source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+    "sha256": "df5beeabadf02a609747bb7b31cec32608d96b285eab685ac3008b50a217ef48",
+    "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/qualified-bindings.json"
+  },
+  "i011_complete": false,
+  "issue": "I011",
+  "limits": [
+    "The preparation stopped before build or timing.",
+    "Historical bindings do not establish execution or current input identity.",
+    "No source, package, cache or original preparation changed."
+  ],
+  "official_reference_screen": {
+    "detector": "_scratch/i011-20261020/completion-20261022/final-storage-preservation/audit-origin-reviewed.py",
+    "detector_sha256": "378f7293e232453e7e6d124f653e0ab092e3d4e7296f5e77a54b9c266cda840f",
+    "path_pdf_magic_and_text_signature_candidates": []
+  },
+  "original_subdirectories": [],
+  "originals_retained": true,
+  "prior_evidence": [
+    {
+      "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/manifest.json",
+      "sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20"
+    }
+  ],
+  "qualification_claim": false,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/e33afa3dfc0d8894582a4471fd7f9b9fcc6d0cd355f46d50092df81f1c6acc4c.gz",
+      "archive_bytes": 2722,
+      "archive_sha256": "f873b37e3fb38a1538ee4d378379d95ab4b3f6336aece3b855215a0f71a7be53",
+      "bytes": 6962,
+      "sha256": "e33afa3dfc0d8894582a4471fd7f9b9fcc6d0cd355f46d50092df81f1c6acc4c",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/analyze.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/a92c9576720c72ec6e6206e64b77eeb8450ffa6b717c9aa8ab14f8458f947247.gz",
+      "archive_bytes": 162,
+      "archive_sha256": "7a27215b333a9492ea90593db3fdb96c36732e9bc15d0025005e6dc7d00f3345",
+      "bytes": 179,
+      "sha256": "a92c9576720c72ec6e6206e64b77eeb8450ffa6b717c9aa8ab14f8458f947247",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/bindings-preparation.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/52074b3a467e932a93ecb71fe2bcdf25d0ee5a88b39f5df840ad7d64a027ce43.gz",
+      "archive_bytes": 2273,
+      "archive_sha256": "5e2e4851a6d04165704d230534bb396792e32ebd49fd0fb129e3eb7784534059",
+      "bytes": 6163,
+      "sha256": "52074b3a467e932a93ecb71fe2bcdf25d0ee5a88b39f5df840ad7d64a027ce43",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/bindings.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/5295098501ea24ab7015335d507a3361183d7756c09062a62dd0a4e347f6b2c7.gz",
+      "archive_bytes": 6614,
+      "archive_sha256": "787603fb08ba33b3bdab95c20726a06deb9a9955980306b463e615f5c88521d6",
+      "bytes": 19256,
+      "sha256": "5295098501ea24ab7015335d507a3361183d7756c09062a62dd0a4e347f6b2c7",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/build.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/fb455a9fec01c69f328150e62cf70c945a34f1aa2c85364506ff54744009e9fd.gz",
+      "archive_bytes": 1538,
+      "archive_sha256": "9a85f1db63ea46ec349934059e6b5d66754d12354e3c18bf093488b01da990e0",
+      "bytes": 3224,
+      "sha256": "fb455a9fec01c69f328150e62cf70c945a34f1aa2c85364506ff54744009e9fd",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/check_preparation.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/94f0494d2a8a497518b8ac466f7c8c51b473f35a0f66f7e4ef7925ea80a69c64.gz",
+      "archive_bytes": 3410,
+      "archive_sha256": "782dc4982143fa80fab6939942881535ab7519daac8ad8f02423a95564f3db52",
+      "bytes": 8723,
+      "sha256": "94f0494d2a8a497518b8ac466f7c8c51b473f35a0f66f7e4ef7925ea80a69c64",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/client.go"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/af745014a964fb4e87ec5acf031b75f2ccfa99070389dac648cfaa70a5c57561.gz",
+      "archive_bytes": 7932,
+      "archive_sha256": "d8165f8bf7ad04df54e12c5e32a6a30aadb384ad18b2e101745698be4d09be1a",
+      "bytes": 26271,
+      "sha256": "af745014a964fb4e87ec5acf031b75f2ccfa99070389dac648cfaa70a5c57561",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/client.rs.before"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/3079bf8a9376bb132d1fc265465247b7abd731eb80f7b4216f65d27c227bacf7.gz",
+      "archive_bytes": 167,
+      "archive_sha256": "f959f182fa0d844e5cfeaaf2cd053c0cfc5f8e49b667b58733591ae96abd3041",
+      "bytes": 232,
+      "sha256": "3079bf8a9376bb132d1fc265465247b7abd731eb80f7b4216f65d27c227bacf7",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/computed.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/90e3c4a8c60e30c52d7fb4b83fd3181965149ef2602dade9b18b2f15ffc54899.gz",
+      "archive_bytes": 9860,
+      "archive_sha256": "47c32a20463023d5bb3b6581b0a69f4e6c6874d1b747cfd2ead5e01e090084fc",
+      "bytes": 36355,
+      "sha256": "90e3c4a8c60e30c52d7fb4b83fd3181965149ef2602dade9b18b2f15ffc54899",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/context.rs.before"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/1cc84ce00c87a2b29af52824a21f4acffeb2754f7a5b924358fbad2c30d9fab9.gz",
+      "archive_bytes": 175,
+      "archive_sha256": "bfdf469452f2ba00912392d205fed5cdf19db4ebd60986a9d9159e521984559a",
+      "bytes": 270,
+      "sha256": "1cc84ce00c87a2b29af52824a21f4acffeb2754f7a5b924358fbad2c30d9fab9",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/echo.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/41fd1798d7cdc215d83166e53395b9ac943530481585aef886716e0e1feb1408.gz",
+      "archive_bytes": 607,
+      "archive_sha256": "84d868b1d8bb9c780bb241cf89fec9766ad72e2fce041394b6d5c4af66ba19f4",
+      "bytes": 2589,
+      "sha256": "41fd1798d7cdc215d83166e53395b9ac943530481585aef886716e0e1feb1408",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/expected-test-inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/48004c7d5927e66cdd80be391784e4f1691df789d0a0a4871607c51254fb01b9.gz",
+      "archive_bytes": 2384,
+      "archive_sha256": "74db9a6b778907d7435ad9595614aa5174f7bb205fdace3dab2c38af7e7df390",
+      "bytes": 6142,
+      "sha256": "48004c7d5927e66cdd80be391784e4f1691df789d0a0a4871607c51254fb01b9",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/frontends.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/d5ff5eccfd5c16716759c75aa2eb01018099db3cfd57ad30ae24411103c563d7.gz",
+      "archive_bytes": 1559,
+      "archive_sha256": "54a75f77894b9cedc556f382a4e674c04e730520468d2e8c2aae1a44a1f4d39a",
+      "bytes": 3341,
+      "sha256": "d5ff5eccfd5c16716759c75aa2eb01018099db3cfd57ad30ae24411103c563d7",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/inspect_refill.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/2b8ea2aa6dc24180afcaf878f249a9091173bb91df5aa867fc4dc1b5f78914dc.gz",
+      "archive_bytes": 1449,
+      "archive_sha256": "1e8bfdc70cb91eac174d6f2063d0bf66477a948cac64179f2f7ca96213286ad5",
+      "bytes": 4414,
+      "sha256": "2b8ea2aa6dc24180afcaf878f249a9091173bb91df5aa867fc4dc1b5f78914dc",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/instrument.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/52ea1da43af5b635f5efa4591f5f17a0470982d98f36d70816469761895ed92e.gz",
+      "archive_bytes": 902,
+      "archive_sha256": "467d24c5ff5b22880ee90f2c59f63389afba2a45c3b1d0cb5a4a8642d825f638",
+      "bytes": 2483,
+      "sha256": "52ea1da43af5b635f5efa4591f5f17a0470982d98f36d70816469761895ed92e",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/main.c"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/47d1238b02206a9b3e756ef98b1e62e2e37677e6dd3e42a23b775aed8a553f1c.gz",
+      "archive_bytes": 3733,
+      "archive_sha256": "75890c0ee29693aefb61dbd8c3ef4734f6509c841bfe6066c6dbbaffaa93885c",
+      "bytes": 10295,
+      "sha256": "47d1238b02206a9b3e756ef98b1e62e2e37677e6dd3e42a23b775aed8a553f1c",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/measure.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/41ddad894600824e5cfdff628b71d7cd40894cc9e8a9697a4a762734f05728d9.gz",
+      "archive_bytes": 778,
+      "archive_sha256": "c8a0a2f6cdc2396edc628998f64820be7d7b3d0d3ccd1c2419f614e56c8308b4",
+      "bytes": 1686,
+      "sha256": "41ddad894600824e5cfdff628b71d7cd40894cc9e8a9697a4a762734f05728d9",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/parse_correctness.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/f1251b16662b688b243ba834c8a60c015062e91dd94e9f6be9b73381534ee857.gz",
+      "archive_bytes": 449,
+      "archive_sha256": "6d0121187256b1fabb1d417a43e76083cf960a72e468bc12d5e1c13593008a88",
+      "bytes": 733,
+      "sha256": "f1251b16662b688b243ba834c8a60c015062e91dd94e9f6be9b73381534ee857",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/preparation-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/67e7de411f39de4c5a74c44f3eb886b71d2e6711517a5ca1d2fcd277d4125887.gz",
+      "archive_bytes": 964,
+      "archive_sha256": "2020ee2907592257c2cb95422c17bf4f414bff37f27444676c5e822d1bd20900",
+      "bytes": 3430,
+      "sha256": "67e7de411f39de4c5a74c44f3eb886b71d2e6711517a5ca1d2fcd277d4125887",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/probe-binding.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/e5a5a0063d00824e4016da1547fea484ee477f281989a3f956b954540adb02ca.gz",
+      "archive_bytes": 4412,
+      "archive_sha256": "484d0cf1f6fefd271881ed2835eb69e8c40305e9ea85f1580d30ab64981d06be",
+      "bytes": 14382,
+      "sha256": "e5a5a0063d00824e4016da1547fea484ee477f281989a3f956b954540adb02ca",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/probe.patch"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/14b58dcc1eaa3d59d8952b56e075a3c3668079964e6d112b9d92354c0cef8d3a.gz",
+      "archive_bytes": 2993,
+      "archive_sha256": "70c00f27bfda62d5380559861cbec0d90317762a820bc23bb7fa4ec5795a80ec",
+      "bytes": 9907,
+      "sha256": "14b58dcc1eaa3d59d8952b56e075a3c3668079964e6d112b9d92354c0cef8d3a",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/probe.rs.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/342e2e07ad6498523f710dca32597fe7a10c26f967307330805fc5aa941e14ad.gz",
+      "archive_bytes": 779,
+      "archive_sha256": "b5c82c5b9c9cc0fd1209f2e24a11118e9c8f008d7f6e893801c25638bfc0c5fd",
+      "bytes": 2534,
+      "sha256": "342e2e07ad6498523f710dca32597fe7a10c26f967307330805fc5aa941e14ad",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/profile.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/12243e23ba8895b1baaf272821143f2620549b7e403c8394e4f60059e78ed6f2.gz",
+      "archive_bytes": 2840,
+      "archive_sha256": "3e2fa0de7966f16134c68f974ca7ac56c2a116c72d2224ebb7114f6972dae42e",
+      "bytes": 5944,
+      "sha256": "12243e23ba8895b1baaf272821143f2620549b7e403c8394e4f60059e78ed6f2",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/protocol.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/df5beeabadf02a609747bb7b31cec32608d96b285eab685ac3008b50a217ef48.gz",
+      "archive_bytes": 343649,
+      "archive_sha256": "eb31e4e12079bbf7a9ca808501a0999639d946bfff541a242da78109e1870a22",
+      "bytes": 943408,
+      "sha256": "df5beeabadf02a609747bb7b31cec32608d96b285eab685ac3008b50a217ef48",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/qualified-bindings.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/a857242f5cf445acfbc324c02d228c663463ce1f7cdeee3de07319bd993404ff.gz",
+      "archive_bytes": 14796,
+      "archive_sha256": "a40401adb84e2a4ec1d1f93f9b615310561f5e2938a3f420d3d7438d77cd1c7c",
+      "bytes": 52898,
+      "sha256": "a857242f5cf445acfbc324c02d228c663463ce1f7cdeee3de07319bd993404ff",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/server.instrumented.rs"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/06a874568ea44b87e3cc1173ef51dd4ab49460ac9f09788c6dd043cde6de6257.gz",
+      "archive_bytes": 11640,
+      "archive_sha256": "080b99a4924dbd68a96c1a41b97a4676a5ae21c6d18b52bd25f13545f288a030",
+      "bytes": 41751,
+      "sha256": "06a874568ea44b87e3cc1173ef51dd4ab49460ac9f09788c6dd043cde6de6257",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/server.rs.before"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/5257cbd62205dbec226cd17d06940832d4e7b41c99481112bf90d2ebf28dd167.gz",
+      "archive_bytes": 9399,
+      "archive_sha256": "cdc001dd89e130386b3b139fed0829c4284eae55bf0d74fe3c7bbeafafd25d06",
+      "bytes": 33947,
+      "sha256": "5257cbd62205dbec226cd17d06940832d4e7b41c99481112bf90d2ebf28dd167",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/value.rs.before"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/stopped-http-transport-profile/payload/42cb00dbb6df11fba7606011d90444e173b4984136fa8333d68dc95c389845d5.gz",
+      "archive_bytes": 3179,
+      "archive_sha256": "7d4adc812cf437e7c0a75e61408b403b50f78bb5f4b9d724cfafc65c41546934",
+      "bytes": 9020,
+      "sha256": "42cb00dbb6df11fba7606011d90444e173b4984136fa8333d68dc95c389845d5",
+      "source": "_scratch/i011-20261020/completion-20261022/http-storage-transport-profile/views.py"
+    }
+  ],
+  "state": "stopped_unexecuted_preparation_preserved"
+}

@@ -1,0 +1,49 @@
+{
+  "issue": "B008",
+  "parent_issue": "I011",
+  "qualification_claim": false,
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "outcome": "No remaining blocking findings in the scoped Go encoder review.",
+  "sources": [
+    {
+      "path": "internal/nativeplan/metadata.go",
+      "sha256": "40906f2a9585b9cb0e69ebbc261dbee80915222e038d3106c8a2e0fabb15b82e"
+    },
+    {
+      "path": "internal/nativeplan/metadata_test.go",
+      "sha256": "5e2d0f6e3d88608876f370aadf5f102ae8d7a4a63df168868eb7a9a95f5d2515"
+    },
+    {
+      "path": "internal/nativeplan/metadata_projection_test.go",
+      "sha256": "9d81c82f759335b02325e327e8a5697114173b893e48e6d3b6d688b596872758"
+    },
+    {
+      "path": "internal/nativeplan/lower.go",
+      "sha256": "4632033b6ff5cd99ec4d7442f546f49a7604e6a71fb1f6b3720e915a9b919179"
+    },
+    {
+      "path": "internal/nativeplan/verify.go",
+      "sha256": "827f3856dd615ede2841c0d616be1acea2693641f871526ca2af0d121ab577f6"
+    },
+    {
+      "path": "internal/llvmemit/emit.go",
+      "sha256": "4a9952b4d167b3c45bb025f97b20c90ba69b761a34d8ad71d3b6361005928015"
+    }
+  ],
+  "verified": [
+    "Deterministic file and span interning.",
+    "Safe early lower-bound accounting and complete final 64 MiB byte cap.",
+    "Chunked string escaping, all payloads, and Body derivative provenance.",
+    "Unchanged B007 behavior against its archived source snapshot.",
+    "Artifact insertion at exactly 64 MiB and rejection at one byte above the cap.",
+    "Cancellation checks before and after JSON validation, then every 4096 input bytes."
+  ],
+  "limit": "json.Valid uses one uninterrupted syntax validation pass.",
+  "remaining": [
+    "Fresh public both-target validation.",
+    "Final packages, offline acceptance, CI, corpora, performance qualification, audit, and completion review."
+  ]
+}

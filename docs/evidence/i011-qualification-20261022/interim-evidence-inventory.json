@@ -1,0 +1,186 @@
+{
+  "changed_markdown_files": [
+    ".mprlab/TERMINOLOGY.md",
+    "ISSUES.md",
+    "docs/native-backend-experiment.md",
+    "docs/native-lowering.md",
+    "docs/native-qualification-findings.md",
+    "docs/native-runtime-contract.md",
+    "docs/standalone-compiler-plan.md"
+  ],
+  "compressed_bytes": 238667089,
+  "declared_archive_paths": 10481,
+  "declared_archive_references": 14231,
+  "decoded_bytes": 1611127024,
+  "durable_json_references": 14296,
+  "durable_link_hashes_checked": 57,
+  "excluded_or_omitted_entries": 8190,
+  "existing_review_receipts": [
+    "docs/evidence/i011-qualification-20261022/admission-profile/primary-verification.json",
+    "docs/evidence/i011-qualification-20261022/admission-profile/review.json",
+    "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/review.json",
+    "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/verification.json",
+    "docs/evidence/i011-qualification-20261022/compact-nonpass/primary-verification.json",
+    "docs/evidence/i011-qualification-20261022/compact-nonpass/review-addendum.json",
+    "docs/evidence/i011-qualification-20261022/http-combined/independent-code-review.json",
+    "docs/evidence/i011-qualification-20261022/http-combined/independent-focused-review.json",
+    "docs/evidence/i011-qualification-20261022/http-error-characterization/independent-review.json",
+    "docs/evidence/i011-qualification-20261022/http-error-characterization/lazy-input-review.json",
+    "docs/evidence/i011-qualification-20261022/http-error-characterization/primary-verification.json",
+    "docs/evidence/i011-qualification-20261022/http-hotpath-profile/independent-evidence-review.json",
+    "docs/evidence/i011-qualification-20261022/http-hotpath-profile/primary-verification.json",
+    "docs/evidence/i011-qualification-20261022/http-reader-comparison/independent-evidence-review.json",
+    "docs/evidence/i011-qualification-20261022/http-reader-comparison/primary-verification.json",
+    "docs/evidence/i011-qualification-20261022/language-comparison/review.json",
+    "docs/evidence/i011-qualification-20261022/literal-loop-candidate/review.json",
+    "docs/evidence/i011-qualification-20261022/literal-loop-probe/review.json",
+    "docs/evidence/i011-qualification-20261022/metadata-candidate/encoder-review.json",
+    "docs/evidence/i011-qualification-20261022/metadata-candidate/fixture-input-review.json",
+    "docs/evidence/i011-qualification-20261022/metadata-candidate/runtime-review.json",
+    "docs/evidence/i011-qualification-20261022/metadata-row/independent-evidence-review.json",
+    "docs/evidence/i011-qualification-20261022/metadata-row/primary-verification.json"
+  ],
+  "findings": [],
+  "gzip_explicit_zero_timestamp_paths": 3941,
+  "gzip_files": 12863,
+  "gzip_nonzero_timestamps": [],
+  "identity_only_entries": 1446,
+  "inventory_completed_unix_ns": 1792751094160228000,
+  "json_files": 57,
+  "limitations": [
+    "Changing maintained prose is checked for link existence only, not historical content hashes.",
+    "All gzip CRCs and declared hashes are checked; official STE absence uses source path inventory and PDF magic, with no candidate present.",
+    "One historical unindexed plan gzip is valid but has no declared manifest identity; it is not used for a completion claim."
+  ],
+  "manifest_relative_archive_paths": 2381,
+  "manifest_relative_archive_references": 2381,
+  "markdown_evidence_links": [
+    {
+      "exists": true,
+      "source": "docs/native-lowering.md",
+      "target": "docs/evidence/i011-qualification-20261022/metadata-implementation/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/compact-nonpass/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/admission-profile/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/metadata-row/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/http-hotpath-profile/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/http-hotpath-profile/supplement-raw-exports.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/http-reader-comparison/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/http-combined/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/http-resolution.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/failed-continuation/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/literal-profile/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/language-comparison/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/language-comparison/summary.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/literal-status-characterization/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/literal-characterization/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/gradient-reachability-correction.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/dwarf-decision.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/literal-loop-probe/manifest.json"
+    },
+    {
+      "exists": true,
+      "source": "docs/native-qualification-findings.md",
+      "target": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/manifest.json"
+    }
+  ],
+  "official_STE_archive_path_candidates": [],
+  "pdf_payloads": [],
+  "remaining_scope": "Final qualification and final independent completion review remain primary authority; this inventory does not establish I011 completion.",
+  "scope": "Read-only cross-set inventory; historical source paths are not compared with current source bytes. Explicit identity-only artifacts and excluded regenerable guests are not missing evidence.",
+  "started_unix_ns": 1792750953147820000,
+  "true_qualification_completion_claims": [],
+  "undeclared_gzip_files": [
+    "docs/evidence/i011-qualification-20261022/plan-before-literal-profile.md.gz"
+  ],
+  "unindexed_valid_artifacts": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/plan-before-literal-profile.md.gz",
+      "classification": "Historical plan; no required result or completion claim depends on this artifact.",
+      "compressed_bytes": 2618,
+      "compressed_sha256": "d75fbedbf9bd9cc3d802421340e2aaaca2c662807ff47beb1418da6e0e01bbf7",
+      "raw_bytes": 5863,
+      "raw_sha256": "a455a956771deb7210d2ae22285ca5bbb6a80137afd7927429e6d00fe87b60cd"
+    }
+  ],
+  "verified_declared_archive_paths": 12862,
+  "verified_declared_archive_references": 16612,
+  "verified_gzip_payloads": 12863
+}

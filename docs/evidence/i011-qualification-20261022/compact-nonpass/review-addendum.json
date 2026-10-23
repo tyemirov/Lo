@@ -1,0 +1,27 @@
+{
+  "issue": "I011",
+  "manifest_sha256": "4ee968b1aeee86ee115288c0dc05d4f2c64349d7265fb0d2e20d04a87edaa848",
+  "kind": "review_transcription_addendum",
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "review_result": "No blocker to using the preserved inconclusive campaign as the immutable baseline.",
+  "verified_scope": [
+    "targeted archived audit/preserver/status/freeze bindings",
+    "eight lane and two merge reports",
+    "offline and semantic evidence",
+    "representation of all2741frozen source files",
+    "32transitiveJSONlinks",
+    "raw CI/Linuxexport/batch evidence",
+    "exact seven inconclusive gates and status2",
+    "pass-only scripts unchanged"
+  ],
+  "transcription_corrections": {
+    "duplicate_detection": "The recommendation is to preserve duplicate-key behavior: last value wins.",
+    "exact_final_text": "The saved text is the opening paragraph excerpt, not the complete final report."
+  },
+  "frozen_archives_changed": false,
+  "qualification_claim": false,
+  "i011_complete": false
+}

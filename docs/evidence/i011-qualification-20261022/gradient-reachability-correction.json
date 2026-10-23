@@ -1,0 +1,29 @@
+{
+  "issue": "B007",
+  "parent_issue": "I011",
+  "kind": "correction_of_preimplementation_reachability_inference",
+  "original_record": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/manifest.json",
+  "original_claim": "The six-owner ranges observed for synthetic derivative List.new were direct integer literal groups eligible for compact lowering.",
+  "corrected_fact": "They are reference evaluation triples (step, Alias, charge). Autodiff emits literal nodes separately and rebuilds every built-in call argument as an ir.Reference. Synthetic derivative List.new cannot satisfy current all-direct-IntLiteral eligibility.",
+  "proof": [
+    "internal/autodiff/plan.go builder.emit returns ir.NewReference.",
+    "The ir.Literal case uses builder.emit.",
+    "Built-in reconstruction uses args[position].ref.",
+    "Only internal/nativeplan/gradient.go emits explicit Release instructions."
+  ],
+  "decision": "Remove group-aware explicit Release emission. Reject virtual group slots in Release and LiteralSequence in Flow==-2 synthetic derivative functions. Keep grouped ReleaseAll cleanup. Ordinary source Loss functions can still compact direct integer lists.",
+  "review": {
+    "agent": "/root/i011_completion_review",
+    "role": "mpr-architect",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "high",
+    "actual_pair_telemetry": null,
+    "outcome": "confirmed_source_proof; previous generalized Release recommendation withdrawn"
+  },
+  "preservation": "Original baseline, failed fixture runs, receipts and earlier design snapshot stay unchanged. The runtime lifetime checks remain useful; they do not prove an eligible compact group in a synthetic derivative.",
+  "sources": {
+    "internal/autodiff/plan.go": "5e4e5e51033e5073e174911d3bd455bc2d572bbac4484dabf4d541f7a381f777",
+    "internal/nativeplan/gradient.go": "89aabf8acca82a402bfed12a4c6adeb0d1953a8d77f5d1ab131387b259c47df5"
+  },
+  "qualification_claim": false
+}

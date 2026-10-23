@@ -1,0 +1,27 @@
+{
+  "issue": "B008",
+  "parent_issue": "I011",
+  "qualification_claim": false,
+  "audit": "primary agent verified every archived and decoded hash, deterministic gzip timestamp, all 105 source bindings, and the reviewed-source hashes.",
+  "archives": 325,
+  "missing_evidence": [],
+  "references": [
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-implementation/manifest.json",
+      "sha256": "98379daaff5376616bcab068c82296facd70b195ce2e60b88ace669d14c092ea"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-candidate/runtime-review.json",
+      "sha256": "5b561411daab647afba0c90b5b4a5b7e19a0a09f67491e01b35f6497f2d81134"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-candidate/encoder-review.json",
+      "sha256": "6e64391b20dddc0072244bea530e3ab363b522290ee787e584f2ef6605521fdb"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/metadata-candidate/fixture-input-review.json",
+      "sha256": "a5e70ffb1a48c4e913586b958e7aae08582eecd1fe4145418752036fd5f886f2"
+    }
+  ],
+  "remaining": "Full I011 evidence audit and review by another agent."
+}

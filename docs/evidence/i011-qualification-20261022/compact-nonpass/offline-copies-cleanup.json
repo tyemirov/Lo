@@ -1,0 +1,22 @@
+{
+  "state": "completed",
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/darwin-install/second relocated installation/bin",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/darwin-install/second relocated installation/source",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-install/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-install/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-rejection/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-rejection/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-to-darwin/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-to-darwin/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-to-linux/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-to-linux/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-xor-build/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-xor-build/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/metal-install/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/metal-install/relocated compiler package/source"
+  ],
+  "inventory_sha256": "8aaf8376ee31b2d2782062c48693bc5b62e61e11e592aefd3ade2fb26bd21608",
+  "reason": "Remove regenerable copied compiler directories after durable evidence verification. Keep original packages and all raw records.",
+  "remaining": []
+}

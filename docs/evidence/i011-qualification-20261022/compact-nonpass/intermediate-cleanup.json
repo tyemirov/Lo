@@ -1,0 +1,22 @@
+{
+  "issue": "I011",
+  "reason": "Regenerable guest snapshots removed after evidence audit; raw results, logs, source identities, and archives kept.",
+  "manifest_sha256": "4ee968b1aeee86ee115288c0dc05d4f2c64349d7265fb0d2e20d04a87edaa848",
+  "removed_and_absent": [
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-build/guest/root",
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-build/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-execution/guest/root",
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-execution/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-http/guest/root",
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-http/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-process/guest/root",
+    "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-process/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/corpus/linux/guest/root",
+    "_scratch/i011-20261020/completion-20261022/compact-final/corpus/linux/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-rejection/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-to-darwin/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-to-linux/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-final/offline/linux-xor-build/root.cpio.gz"
+  ],
+  "final_task_cleanup_complete": false
+}

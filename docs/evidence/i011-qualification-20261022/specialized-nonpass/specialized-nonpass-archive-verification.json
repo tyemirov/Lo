@@ -1,0 +1,35 @@
+{
+  "corrected_focused": "10top/27sub both targets; raw and evidence hashes verified",
+  "expected_gate_failures": [
+    {
+      "gate_failures": [
+        "http:echo:reciprocal_throughput:inconclusive",
+        "http:computed:reciprocal_throughput:inconclusive"
+      ],
+      "lane": "http",
+      "target": "linux"
+    }
+  ],
+  "frozen_package_files_verified": 333,
+  "gzip_records_verified": 3545,
+  "hash_only_verified": 427,
+  "i011_complete": false,
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/specialized-nonpass/manifest.json",
+    "sha256": "25e1dace7f8a599fbaa27e8d5a2c9d338b07bff6b0f0fb6fdcca399426259e1e"
+  },
+  "missing_required_inputs": [],
+  "qualification_claim": false,
+  "raw_lanes_canonically_recomputed": 8,
+  "remaining_limits": [
+    "Valid inconclusive performance is not qualification completion.",
+    "Excluded regenerable groups are explicit, not archived payloads."
+  ],
+  "source_review_sha256": "63fe013eeab30467f7070cdcffeca1e9a6d5e1cedcb2b28a5faf8e115d9cd44f",
+  "source_sha256": "627be1a75c70ee397c0dd068e76200599db53532193135e830a0b6f1d35700e0",
+  "state": "passed_archive_and_valid_nonpass_verification",
+  "target_merges_canonically_recomputed": 2,
+  "transitive_links_verified": 86,
+  "unexpected_omissions": []
+}

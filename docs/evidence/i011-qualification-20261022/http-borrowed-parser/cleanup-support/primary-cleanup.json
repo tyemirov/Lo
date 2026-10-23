@@ -1,0 +1,15 @@
+{
+  "state": "four_derived_paths_removed_and_absent",
+  "inventory_archive": "cleanup-inventory.json.gz",
+  "inventory_sha256": "7a419842c2db76a2defec314bdd0a543bc1963b7d5ecfcbcae5bbcf753e1c940",
+  "inventory_archive_sha256": "a1cffa8046375bb4867b8fea92b748e314e90c0c2cef36ce1660fcf50737d44a",
+  "supplement_sha256": "56f8d212e823f3a98d0c3153d76be057228ac6a53868c1f4b94b1e99e746519f",
+  "files_verified": 26953,
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-parser/trace-run/linux-result/guest/root",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-parser/trace-run/linux-result/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/http-buffer-characterization/linux-baseline/guest/root",
+    "_scratch/i011-20261020/completion-20261022/http-buffer-characterization/linux-baseline/guest/root.cpio.gz"
+  ],
+  "i011_complete": false
+}

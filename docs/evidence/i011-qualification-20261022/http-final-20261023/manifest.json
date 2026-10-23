@@ -1,0 +1,2490 @@
+{
+  "archive_format": "Content-addressed gzip with empty filename,mtime0; raw and packed lengths and SHA256.",
+  "audit_source": {
+    "bytes": 436467,
+    "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/audit-results.json",
+    "sha256": "9e73b531be5f6804bc981b2cf283cd45cbdd815fc431da47cd9f9ed08310d310"
+  },
+  "delta_comparison_archive_links": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/4300e0ed44348020832595d998d984ccea1c1f22f5365c53ec3d79622bf07e32.gz",
+      "archive_sha256": "87e7b473e54bf131521f44f84dbfc74480f9c84b27de54648664764ddd628b5f",
+      "bytes": 4749798,
+      "kind": "final_validation",
+      "sha256": "4300e0ed44348020832595d998d984ccea1c1f22f5365c53ec3d79622bf07e32",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/ci.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/fc4c76261bf7c548efda476a77d445e14d8ba2f7add8bf1254f42588b3093660.gz",
+      "archive_sha256": "a61f26a2e0b7a2546fb24ada9bbd079df8d2a190b3b1dbc761c1e79d4ba48faa",
+      "bytes": 13735,
+      "kind": "final_validation",
+      "sha256": "fc4c76261bf7c548efda476a77d445e14d8ba2f7add8bf1254f42588b3093660",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/linux-corpus.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/9b65d7ae0e1ba598a7bef85885f93414527a5af196fd58b0c73552dbbfc48c1c.gz",
+      "archive_sha256": "d1b3147a86f8c451602b1e803badd502da5e4fe16a4ff0d63d539e08247611e9",
+      "bytes": 199,
+      "kind": "final_validation",
+      "sha256": "9b65d7ae0e1ba598a7bef85885f93414527a5af196fd58b0c73552dbbfc48c1c",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/component-tools.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e1fcb0b52e71de8bcfbf787c8efe441826fa28bf5334b1cbb739c36f7c039593.gz",
+      "archive_sha256": "07a3d1e300099421914edacfff50493a9d9a313d8456d79284fa540086563dff",
+      "bytes": 156,
+      "kind": "final_validation",
+      "sha256": "e1fcb0b52e71de8bcfbf787c8efe441826fa28bf5334b1cbb739c36f7c039593",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/offline.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23c5c19fea218939c449dee7b7767431d6db56a23036cee5d9a99f0ccd5db729.gz",
+      "archive_sha256": "793766a52a11a653c9a9f8c37533d96ce53c0e31efad3c2c3b514c2498c51816",
+      "bytes": 241,
+      "kind": "final_validation",
+      "sha256": "23c5c19fea218939c449dee7b7767431d6db56a23036cee5d9a99f0ccd5db729",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/semantic-report.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/5d52b3292830a3c45827483b9e3c775c591ed97e3f9b51f06f39586edc87367d.gz",
+      "archive_sha256": "3f1aa54e1a083bf1ea238cde5553e82588686b1a58c37f4548631cfcd5126b2e",
+      "bytes": 134527,
+      "kind": "final_validation",
+      "sha256": "5d52b3292830a3c45827483b9e3c775c591ed97e3f9b51f06f39586edc87367d",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/darwin-execution/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/f9cc9e047ee675cb52801f5a62387017b03625357d7d366444491d8d51d00fa3.gz",
+      "archive_sha256": "22d414883b104fa5cea5ed4b1b9f21eb3c4cfe5369c92e27badcd6514f1c1e2b",
+      "bytes": 73995,
+      "kind": "final_validation",
+      "sha256": "f9cc9e047ee675cb52801f5a62387017b03625357d7d366444491d8d51d00fa3",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/darwin-process/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7670830fe172e801dc84b61602665f0ea1e512ab4c673d95e6a5f8d477f3c162.gz",
+      "archive_sha256": "b07a98f67662f96e0be3c794efb655d1d125f328a63a07da76b8ad6c5c6ec86c",
+      "bytes": 126874,
+      "kind": "final_validation",
+      "sha256": "7670830fe172e801dc84b61602665f0ea1e512ab4c673d95e6a5f8d477f3c162",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/darwin-build/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6a8b8da8bf8ed85e1e39b350318cfb0c4cacfe388f2d916696e2740ce6be1e45.gz",
+      "archive_sha256": "12c813db4dd2481a2cda8d33df24e00c028993eab0753e7131778a7c8711ce52",
+      "bytes": 161255,
+      "kind": "final_validation",
+      "sha256": "6a8b8da8bf8ed85e1e39b350318cfb0c4cacfe388f2d916696e2740ce6be1e45",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/linux-execution/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/b56e6e9ff4b873832754b166efabe8fc107e45b1dfdabc8db4413e745ab88d81.gz",
+      "archive_sha256": "9186b1d210bf5ae144b5eb114cf36749b1be6d4433cfb20562ad45612d9ef94a",
+      "bytes": 105466,
+      "kind": "final_validation",
+      "sha256": "b56e6e9ff4b873832754b166efabe8fc107e45b1dfdabc8db4413e745ab88d81",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/linux-process/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/465d2f9164c25b382095657be3bb31e0fb73d66541ff8b89b10dfc269fce4152.gz",
+      "archive_sha256": "572ae368328372550a1044ebe1b462ddbc793ea582d3f1db39aee7842fb8fc15",
+      "bytes": 142246,
+      "kind": "final_validation",
+      "sha256": "465d2f9164c25b382095657be3bb31e0fb73d66541ff8b89b10dfc269fce4152",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/linux-build/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/259601324250ac3a9d1a3a2d5d5402cdb0ff74def3a14cfd05b3232261402aba.gz",
+      "archive_sha256": "bd3f5e23445b2a5423732a049929c2672bcb48ed45929858c8338c42356d216f",
+      "bytes": 23893,
+      "kind": "final_validation",
+      "sha256": "259601324250ac3a9d1a3a2d5d5402cdb0ff74def3a14cfd05b3232261402aba",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/offline/validation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/81a6d2b8fb6fb91769b176f84c49701453f0ff48fbd33d14cbc25d16bc92b406.gz",
+      "archive_sha256": "e3aaca291f10d735b93703fec06fe88afd9534754d8f5da21c3980522b5c4901",
+      "bytes": 566828,
+      "kind": "final_validation",
+      "sha256": "81a6d2b8fb6fb91769b176f84c49701453f0ff48fbd33d14cbc25d16bc92b406",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-final/semantic-report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40aef098ec88f1d1b6a5078dc9cc0c3abef212ea1283b2d3a1a4d9e591c98c1b.gz",
+      "archive_sha256": "01043c6744ac36c3d70719074899e39b4b9310d1e3c98144955cc0de6bd9132b",
+      "bytes": 9169,
+      "kind": "orchestration_or_audit",
+      "sha256": "40aef098ec88f1d1b6a5078dc9cc0c3abef212ea1283b2d3a1a4d9e591c98c1b",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-audit.json"
+    }
+  ],
+  "directory_identities": [
+    {
+      "kind": "verified_directory_inventory_identity",
+      "path": "_scratch/native-runtime/emulation/lib",
+      "sha256": "c942b6d755df5e10d0e8aa85c36d75ab2d014eb285df043fb0d69bd113ddfb6a"
+    },
+    {
+      "kind": "verified_directory_inventory_identity",
+      "path": "_scratch/native-runtime/linux-sysroot/lib",
+      "sha256": "7d3f8083ce45e61e4a24f20701e43222b56c8c06143419e57dbb53f1779ecaf0"
+    }
+  ],
+  "excluded_groups": [
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/generated",
+      "reason": "Regenerable guest/cache/unselected generated corpus; actual HTTP payloads and raw streams retained."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/host-home",
+      "reason": "Regenerable guest/cache/unselected generated corpus; actual HTTP payloads and raw streams retained."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/root",
+      "reason": "Regenerable guest/cache/unselected generated corpus; actual HTTP payloads and raw streams retained."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/init",
+      "reason": "Regenerable guest boot/input artifact."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/init.o",
+      "reason": "Regenerable guest boot/input artifact."
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/root.cpio.gz",
+      "reason": "Regenerable guest boot/input artifact."
+    }
+  ],
+  "external_tool_identities_reported_not_reread_outside_Lo": {
+    "/opt/homebrew/Cellar/go/1.27.1/libexec/bin/go": "548608a910c46de32c65a3934f461b1787acf6ddd371044826068d8503b8509b",
+    "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/bin/python3.14": "87d4df53fd91304be5bac391fb204643c36b7df2023c04a0953bcbc7d4fdf634"
+  },
+  "hash_only": [
+    {
+      "bytes": 2986432,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "6f7e030e141f17ae7c2118b9d826f5d4a104581b459b579db70f8918dca9f85c",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin/http_computed"
+    },
+    {
+      "bytes": 2986368,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "86750586797fe30781f87a083888f07cd54ec5d0784a2000d34ca1e2e8d4a6db",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin/http_echo"
+    },
+    {
+      "bytes": 9727967,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "1bb063f3b71a4db6c8d6a2eb43aef5c706b01e7e9a62f5d89f66cfda569342a2",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/performance-runner"
+    },
+    {
+      "bytes": 173534464,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/bin/clang"
+    },
+    {
+      "bytes": 126695856,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/bin/ld.lld"
+    },
+    {
+      "bytes": 126695856,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/bin/ld64.lld"
+    },
+    {
+      "bytes": 13872258,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "50ad920322edb5b82db0d44bb83432b280c6090069563a7816ea649483738caf",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/bin/lo"
+    },
+    {
+      "bytes": 1944,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/linux/crt1.o"
+    },
+    {
+      "bytes": 1328,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/linux/crti.o"
+    },
+    {
+      "bytes": 872,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/linux/crtn.o"
+    },
+    {
+      "bytes": 1651408,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "e4ac8ae1d81e4865e3aadedb962879cf9415903b3f2ba81ec75e9962b86ab8b0",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/linux/libc.so.6"
+    },
+    {
+      "bytes": 5346,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/linux/libc_nonshared.a"
+    },
+    {
+      "bytes": 133448,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/linux/libgcc_s.so.1"
+    },
+    {
+      "bytes": 591960,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "3c4cb3be0b974edf05f023f85ab15107fb5afc2687163593d0d4cf8e80c17b39",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/linux/libm.so.6"
+    },
+    {
+      "bytes": 20407264,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "c47c57a6ad35e67eaae88c1254926f5500d8974e07358ae0dada9092e74b2a0a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/runtime/aarch64-apple-darwin/liblo_runtime.a"
+    },
+    {
+      "bytes": 28283932,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "cf9d4a87c884b9c306c828496f55a6f87fb6ec533eca5a6f674b38a28882e62a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/runtime/aarch64-unknown-linux-gnu/liblo_runtime.a"
+    },
+    {
+      "bytes": 1675204,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "59f7f7763a0c355e3f27ff9e7ac80d06382b29939361a87e7b139226bfe7402e",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/source/gcc-12_12.2.0-14+deb12u1.debian.tar.xz"
+    },
+    {
+      "bytes": 87090343,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "b8298be16aeeb96a889c6afed0a8e2241b47452e89cc81fe65ea849d5c740fcb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/source/gcc-12_12.2.0.orig.tar.gz"
+    },
+    {
+      "bytes": 918488,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "cf4ac9cd98185452cae3ef34e2e4ee12753e3d93fd0c62c61396d4a47eec902f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/source/glibc_2.36-9+deb12u14.debian.tar.xz"
+    },
+    {
+      "bytes": 19363988,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a543c02070d46ccaf866957efd13f10c924daa74c86a90a0254db09a92a708ee",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/source/glibc_2.36.orig.tar.xz"
+    },
+    {
+      "bytes": 16138789,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "f8167e6c9f88c93d817bc10d62f67dc58b3cb783e409e579af7990dc62cc2e05",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/source/lo-source.tar.gz"
+    },
+    {
+      "bytes": 310958768,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "470d20e410527de249ca560ef5519b6d7c772cb186c1e0c6af760ece9c794b32",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/bin/clang"
+    },
+    {
+      "bytes": 180708928,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a07f1bfbba1961e9ad0433c7b18d3739a922e5ec01f5dc5c038664d85ae76866",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/bin/ld.lld"
+    },
+    {
+      "bytes": 180708928,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a07f1bfbba1961e9ad0433c7b18d3739a922e5ec01f5dc5c038664d85ae76866",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/bin/ld64.lld"
+    },
+    {
+      "bytes": 13425925,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "8def25dc3fb4a9d92aac5fbc7188906e9429a089935b0483a3459c3a26da4d0d",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/bin/lo"
+    },
+    {
+      "bytes": 133448,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/host/lib/libgcc_s.so.1"
+    },
+    {
+      "bytes": 31262336,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "d0619595f7b31f7ee5210a2a195f0367fc7251e80a0489ce6405c31f6efea23d",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/host/lib/libicudata.so.72"
+    },
+    {
+      "bytes": 2099352,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "7796e0b797561d4e63693dcebf48b69342f96b22069486c83c850772ce8a9d45",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/host/lib/libicuuc.so.72"
+    },
+    {
+      "bytes": 198584,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "530e774de0f3fd8754351f387f52db6a0cb134b350e43d80044dea7109400f17",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/host/lib/liblzma.so.5"
+    },
+    {
+      "bytes": 2174296,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "532f3a12d7b8fef6cc7a064ea106b6c4ab2365674b73e743e4a385d4ffb6c8ab",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/host/lib/libstdc++.so.6"
+    },
+    {
+      "bytes": 1708736,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "630352d8686c5cfb5d4fd061d250f0365e05c220b963b3ba0b9f041110a379e2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/host/lib/libxml2.so.2"
+    },
+    {
+      "bytes": 133520,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "ffb1ab496e6eced03ab679075f9f2c415c7728a145cc7f63d614497102d73822",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/host/lib/libz.so.1"
+    },
+    {
+      "bytes": 1944,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/linux/crt1.o"
+    },
+    {
+      "bytes": 1328,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/linux/crti.o"
+    },
+    {
+      "bytes": 872,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/linux/crtn.o"
+    },
+    {
+      "bytes": 1651408,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "e4ac8ae1d81e4865e3aadedb962879cf9415903b3f2ba81ec75e9962b86ab8b0",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/linux/libc.so.6"
+    },
+    {
+      "bytes": 5346,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/linux/libc_nonshared.a"
+    },
+    {
+      "bytes": 133448,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/linux/libgcc_s.so.1"
+    },
+    {
+      "bytes": 591960,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "3c4cb3be0b974edf05f023f85ab15107fb5afc2687163593d0d4cf8e80c17b39",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/linux/libm.so.6"
+    },
+    {
+      "bytes": 20407264,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "c47c57a6ad35e67eaae88c1254926f5500d8974e07358ae0dada9092e74b2a0a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/runtime/aarch64-apple-darwin/liblo_runtime.a"
+    },
+    {
+      "bytes": 28283932,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "cf9d4a87c884b9c306c828496f55a6f87fb6ec533eca5a6f674b38a28882e62a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/runtime/aarch64-unknown-linux-gnu/liblo_runtime.a"
+    },
+    {
+      "bytes": 1675204,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "59f7f7763a0c355e3f27ff9e7ac80d06382b29939361a87e7b139226bfe7402e",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/gcc-12_12.2.0-14+deb12u1.debian.tar.xz"
+    },
+    {
+      "bytes": 87090343,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "b8298be16aeeb96a889c6afed0a8e2241b47452e89cc81fe65ea849d5c740fcb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/gcc-12_12.2.0.orig.tar.gz"
+    },
+    {
+      "bytes": 918488,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "cf4ac9cd98185452cae3ef34e2e4ee12753e3d93fd0c62c61396d4a47eec902f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/glibc_2.36-9+deb12u14.debian.tar.xz"
+    },
+    {
+      "bytes": 19363988,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a543c02070d46ccaf866957efd13f10c924daa74c86a90a0254db09a92a708ee",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/glibc_2.36.orig.tar.xz"
+    },
+    {
+      "bytes": 63620,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "bd6b27fc0a18f6044a47cd96c7d687720b95e4f592718bf8e34c6391b7753a1d",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/icu_72.1-3+deb12u1.debian.tar.xz"
+    },
+    {
+      "bytes": 26303933,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a2d2d38217092a7ed56635e34467f92f976b370e20182ad325edea6681a71d68",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/icu_72.1.orig.tar.gz"
+    },
+    {
+      "bytes": 56668,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "f33a99a0018cbb94aadc3bf26661e401cb90dff856aa170faf7239151ee9b9ac",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/libxml2_2.9.14+dfsg-1.3~deb12u6.debian.tar.xz"
+    },
+    {
+      "bytes": 2351200,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "4fe913dec8b1ab89d13b489b419a8203176ea39e931eaa0d25b17eafb9c279e9",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/libxml2_2.9.14+dfsg.orig.tar.xz"
+    },
+    {
+      "bytes": 16138789,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "3a7694323af999508c9e2cdd224dc8a735918e88020be032b9765e9dce3f66dd",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/lo-source.tar.gz"
+    },
+    {
+      "bytes": 93600,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "3e162db2b76480c7e157f4c2f6ff9a426fc023f262d4dc3287530b36e2843ebe",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/xz-utils_5.4.1-1+deb12u1.debian.tar.xz"
+    },
+    {
+      "bytes": 1485272,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "5d9827aa1875b21c288f78864bb26d2650b436ea8d2cad364e4921eb6266a5a5",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/xz-utils_5.4.1.orig.tar.xz"
+    },
+    {
+      "bytes": 15700,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "f66cf3d4f2d7defcd4d1fd1fb0a11ee39f1e01b42ec7d059c9dc5c1695133c44",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/zlib_1.2.13.dfsg-1.debian.tar.xz"
+    },
+    {
+      "bytes": 1239825,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "71feb7947e3c00ef125f83b79a4e529bde31171e5babe48b391f06758d1ab0a1",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/zlib_1.2.13.dfsg.orig.tar.bz2"
+    },
+    {
+      "bytes": 34832992,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "3110ad419d9290422443a9f6a31cc5140abe3bb01483a302c69a1a88bbd4bbb3",
+      "source": "_scratch/native-runtime/emulation/qemu-system-aarch64"
+    },
+    {
+      "bytes": 1944,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc",
+      "source": "_scratch/native-runtime/linux-sysroot/usr/lib/aarch64-linux-gnu/crt1.o"
+    },
+    {
+      "bytes": 1328,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5",
+      "source": "_scratch/native-runtime/linux-sysroot/usr/lib/aarch64-linux-gnu/crti.o"
+    },
+    {
+      "bytes": 872,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5",
+      "source": "_scratch/native-runtime/linux-sysroot/usr/lib/aarch64-linux-gnu/crtn.o"
+    },
+    {
+      "bytes": 5346,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f",
+      "source": "_scratch/native-runtime/linux-sysroot/usr/lib/aarch64-linux-gnu/libc_nonshared.a"
+    },
+    {
+      "bytes": 173534464,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a",
+      "source": "_scratch/native-runtime/tools/bin/clang"
+    },
+    {
+      "bytes": 126695856,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+      "source": "_scratch/native-runtime/tools/bin/ld.lld"
+    },
+    {
+      "bytes": 9630208,
+      "reason": "Original executable/tool/runtime binary identity only; no binary copied.",
+      "sha256": "dd37c4460f933ec909ff022c34944ff7e1a5300aff99750e3bdc02cd4074c332",
+      "source": "_scratch/native-runtime/vmlinuz-virt"
+    }
+  ],
+  "http_gates_passed": 8,
+  "i011_complete": false,
+  "issue": "I011",
+  "linked_records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/4b8ecf3b9b7d8d3d971207c0e88f6cb1f5a155161b51071e85c9c7e9efb9e4e2.gz",
+      "archive_bytes": 172,
+      "archive_sha256": "6c0e2847ca9fb2ac504ce72ebda152cd527f6885f66af69a22b13298a6c2b9b9",
+      "bytes": 248,
+      "sha256": "4b8ecf3b9b7d8d3d971207c0e88f6cb1f5a155161b51071e85c9c7e9efb9e4e2",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin/http_computed.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/1cc84ce00c87a2b29af52824a21f4acffeb2754f7a5b924358fbad2c30d9fab9.gz",
+      "archive_bytes": 174,
+      "archive_sha256": "4c706f9b810c6ca5ee16e1d249dce297828ea64f58bf6008761531eea448f6b9",
+      "bytes": 270,
+      "sha256": "1cc84ce00c87a2b29af52824a21f4acffeb2754f7a5b924358fbad2c30d9fab9",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin/http_echo.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/87127dc138f9a2b1439ad833653c61da85044ddcddb41ca996216f132d2322e0.gz",
+      "archive_bytes": 1696,
+      "archive_sha256": "55cad860355add4f3f5d265bc8c66ddfee170b7ac6b2576d98c228422fb6ed6a",
+      "bytes": 180292,
+      "sha256": "87127dc138f9a2b1439ad833653c61da85044ddcddb41ca996216f132d2322e0",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/corpus.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/c528ba02b39880f1357f51dee70e41c1ef03e3a70c7a03055c080532b9635f58.gz",
+      "archive_bytes": 53,
+      "archive_sha256": "8b375251c885db2a0f1a6b444803ff512d6be2709425a237d12851e20e76719f",
+      "bytes": 33,
+      "sha256": "c528ba02b39880f1357f51dee70e41c1ef03e3a70c7a03055c080532b9635f58",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/go-version.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/5003262fd67e0fb5f7e7d9cd1ae2a63d25633b4ceb8d6fb6016afb3f1026c158.gz",
+      "archive_bytes": 49,
+      "archive_sha256": "f76c09b644dc1b52ca042693ba8375d78caee454bcdd9858d36baab71a02133f",
+      "bytes": 42,
+      "sha256": "5003262fd67e0fb5f7e7d9cd1ae2a63d25633b4ceb8d6fb6016afb3f1026c158",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/0.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/qemu.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/3079bf8a9376bb132d1fc265465247b7abd731eb80f7b4216f65d27c227bacf7.gz",
+      "archive_bytes": 166,
+      "archive_sha256": "4ceb98382946a89f9c6807d1ed4f9ade50dd71ae13d5ac3fd8bd388cd535e763",
+      "bytes": 232,
+      "sha256": "3079bf8a9376bb132d1fc265465247b7abd731eb80f7b4216f65d27c227bacf7",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/payload/http/computed/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/1cc84ce00c87a2b29af52824a21f4acffeb2754f7a5b924358fbad2c30d9fab9.gz",
+      "archive_bytes": 174,
+      "archive_sha256": "4c706f9b810c6ca5ee16e1d249dce297828ea64f58bf6008761531eea448f6b9",
+      "bytes": 270,
+      "sha256": "1cc84ce00c87a2b29af52824a21f4acffeb2754f7a5b924358fbad2c30d9fab9",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/payload/http/echo/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/runner-build.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/df3f594fa07db88ff0a4f449f7da4d160e891b788449248d036a5383684867db.gz",
+      "archive_bytes": 3916,
+      "archive_sha256": "9a257877573ca3469b4c1c833890892137b9f53661f7c734890de46a1b25713c",
+      "bytes": 16679,
+      "sha256": "df3f594fa07db88ff0a4f449f7da4d160e891b788449248d036a5383684867db",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/focused-results.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/b322cb03d96cb8a9176aa70e49d16f4f0abdc6b06821cadf74d02d4b49b3b56d.gz",
+      "archive_bytes": 3853,
+      "archive_sha256": "15b13dc7af8b6a0a407857ac0bc245eeff91983753df835162f445e22136af1a",
+      "bytes": 11940,
+      "sha256": "b322cb03d96cb8a9176aa70e49d16f4f0abdc6b06821cadf74d02d4b49b3b56d",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-metal/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/c80933ca09c433703c4e0cd58abe4cd0bc229aca7c0e0dc67e4ac9fc06af7523.gz",
+      "archive_bytes": 137772,
+      "archive_sha256": "cf6b833539941264f4171c0f957052ef01f90755b4a517a2b73b394f5ff7c011",
+      "bytes": 435452,
+      "sha256": "c80933ca09c433703c4e0cd58abe4cd0bc229aca7c0e0dc67e4ac9fc06af7523",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-metal/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/1a43b1bc8fccaac0810138bbbe099472bd0eb227ec154bf2fb25a1eb85bed027.gz",
+      "archive_bytes": 1927,
+      "archive_sha256": "8525075d1cd9886f8bcaa5400929c538565a6a81a24e74112ef4fb9517757121",
+      "bytes": 6131,
+      "sha256": "1a43b1bc8fccaac0810138bbbe099472bd0eb227ec154bf2fb25a1eb85bed027",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-metal/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/cc508d3611a963b0aaf7351d958f47219b61721b45afa5e259d3c08454a7d2cb.gz",
+      "archive_bytes": 3515,
+      "archive_sha256": "135dee9fa23acf0c8aefb5193501edbc987bc3abd096cee9ce7012a2c0233c90",
+      "bytes": 11024,
+      "sha256": "cc508d3611a963b0aaf7351d958f47219b61721b45afa5e259d3c08454a7d2cb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6.gz",
+      "archive_bytes": 6802,
+      "archive_sha256": "5b497d3e5d5013caefd934d2c4f5c1f6779a16f53d62c99662397f6bbb526464",
+      "bytes": 17984,
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/GPL-2.0.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad.gz",
+      "archive_bytes": 779,
+      "archive_sha256": "863e184b7081af5ca3edec0cc890fc86e1cc72f7edc73aac312621e01d5c8ad4",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/Go-LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95.gz",
+      "archive_bytes": 9334,
+      "archive_sha256": "59e77d124c901d99f68a60da5680bd25b7ddfc54fa30548498f721b4232a095c",
+      "bytes": 26419,
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/LGPL-2.1.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee.gz",
+      "archive_bytes": 5217,
+      "archive_sha256": "b1a42ec54bbfacd995852b9832f7b0fab00406a58a51c2a33533422519cafd9a",
+      "bytes": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/LLVM-LICENSE.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d408970373d62d6e3ce132e6302b7ac90ba5638d5fdb17b838da69db75ead135.gz",
+      "archive_bytes": 3978,
+      "archive_sha256": "9c2eff372f508dfa3bf6b21dcf435c2bc687558a4af213d0ff65eef274d636bf",
+      "bytes": 11365,
+      "sha256": "d408970373d62d6e3ce132e6302b7ac90ba5638d5fdb17b838da69db75ead135",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/Lo-LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/base64/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7.gz",
+      "archive_bytes": 652,
+      "archive_sha256": "b0880f8008e1096e6466ca773d8fdf6ddb79efb270dff32e44cdeac9b618fda7",
+      "bytes": 1076,
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/base64/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/bitflags/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/bitflags/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/cfg-if/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397.gz",
+      "archive_bytes": 646,
+      "archive_sha256": "af5759c5085ea3ecc7f12e6c5d1c18cf9f257aa96e288208761164f440a22669",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/cfg-if/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/core-foundation/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3.gz",
+      "archive_bytes": 653,
+      "archive_sha256": "8283d8ab5da5af81b35f2424303ca11a635a5e00cf251aca61c8163088552ed6",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/core-foundation/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/core-foundation-sys/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3.gz",
+      "archive_bytes": 653,
+      "archive_sha256": "8283d8ab5da5af81b35f2424303ca11a635a5e00cf251aca61c8163088552ed6",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/core-foundation-sys/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf.gz",
+      "archive_bytes": 3941,
+      "archive_sha256": "e249b66a52f1f61840c0dc6b5fcea5c14e24b9fbc9d25620239b317fb3abfb95",
+      "bytes": 10849,
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/getrandom/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737.gz",
+      "archive_bytes": 673,
+      "archive_sha256": "249e022923fcdfdfb493fff848c19a323c0fd9fb2991163a56b890145ddc6b35",
+      "bytes": 1130,
+      "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/getrandom/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/itoa/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/itoa/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/libc/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e.gz",
+      "archive_bytes": 644,
+      "archive_sha256": "9ad85380ef9a4ddd5115e75c15166c9ef15d80bdccf017b1a0c70511cf76aa56",
+      "bytes": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/libc/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f.gz",
+      "archive_bytes": 111,
+      "archive_sha256": "c20a1a9aa65183366529688c94966641b0b0787ebe45b90ec7c0159bd31a30d6",
+      "bytes": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/memchr/COPYING"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f.gz",
+      "archive_bytes": 654,
+      "archive_sha256": "5b7036e4d249e964fa802ea84d2598d3b0a60f54f989e73ee1cfdc66f5393a0a",
+      "bytes": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/memchr/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/num-bigint/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/num-bigint/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/num-integer/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/num-integer/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/num-traits/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/num-traits/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/once_cell/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/once_cell/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/openssl-probe/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397.gz",
+      "archive_bytes": 646,
+      "archive_sha256": "af5759c5085ea3ecc7f12e6c5d1c18cf9f257aa96e288208761164f440a22669",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/openssl-probe/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a.gz",
+      "archive_bytes": 260,
+      "archive_sha256": "6db47271357b162924446d256fd505c16bbf715eb3b18e74097092a6b243848e",
+      "bytes": 499,
+      "sha256": "b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ring/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d.gz",
+      "archive_bytes": 4853,
+      "archive_sha256": "dee8a719012242bbbcff08515651c9a258b68fda37ece3726dbd475de47c34e1",
+      "bytes": 14870,
+      "sha256": "005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ring/LICENSE-BoringSSL"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f.gz",
+      "archive_bytes": 471,
+      "archive_sha256": "c72b2eba6892a71a9d0350d295f3a5749760729422b0d6977b80fce4be5d720d",
+      "bytes": 731,
+      "sha256": "f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ring/LICENSE-other-bits"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6ee2ed6c77710de911761acd5fc1ad1da00f476beb1a7ef27e78c2d1858deafc.gz",
+      "archive_bytes": 620,
+      "archive_sha256": "5ab9c1a2468cb918d58222ee13d0e022755a03bb89795b17b16aa472f99f73df",
+      "bytes": 1022,
+      "sha256": "6ee2ed6c77710de911761acd5fc1ad1da00f476beb1a7ef27e78c2d1858deafc",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/9eacbcb81be660840c714a560a9d65ba07913db98dd4baf969f78dd499fdd60f.gz",
+      "archive_bytes": 408,
+      "archive_sha256": "5b22a4ae617aa1aa0e5014dc4ceead9816964ab80b6d8f21d90e0608528dd1aa",
+      "bytes": 638,
+      "sha256": "9eacbcb81be660840c714a560a9d65ba07913db98dd4baf969f78dd499fdd60f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ring/third_party/fiat/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4.gz",
+      "archive_bytes": 508,
+      "archive_sha256": "bca0ea81d798c35291155f4274e1033cd43dafb962623a08f4139e6628ca4810",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls/LICENSE-ISC"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c.gz",
+      "archive_bytes": 668,
+      "archive_sha256": "c4820e6a1c6f3907a7c5c13a2ba2ed65c6f0d5fa647ef19f8f4d7a7de73e647d",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d75967ce788187f83c3bd3328210974acfc443d4dc44909f1d7e34f21623a0c6.gz",
+      "archive_bytes": 212,
+      "archive_sha256": "07abd44fa8b64e9e0479d32a4845381775a24b8fa9910168e1551d6fc3a0767d",
+      "bytes": 286,
+      "sha256": "d75967ce788187f83c3bd3328210974acfc443d4dc44909f1d7e34f21623a0c6",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4.gz",
+      "archive_bytes": 508,
+      "archive_sha256": "bca0ea81d798c35291155f4274e1033cd43dafb962623a08f4139e6628ca4810",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE-ISC"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c.gz",
+      "archive_bytes": 668,
+      "archive_sha256": "c4820e6a1c6f3907a7c5c13a2ba2ed65c6f0d5fa647ef19f8f4d7a7de73e647d",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742.gz",
+      "archive_bytes": 3946,
+      "archive_sha256": "427f950d134c23a0bbc78d89e530725949868422f1c218136f3a603a4716398b",
+      "bytes": 10835,
+      "sha256": "45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls-pki-types/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639.gz",
+      "archive_bytes": 661,
+      "archive_sha256": "735ff569513f3c3ce271d89384587d5d42582dea6883c879bfddb1c61ab24a50",
+      "bytes": 1080,
+      "sha256": "9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls-pki-types/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a.gz",
+      "archive_bytes": 576,
+      "archive_sha256": "7ae04485900c9e17a47d36e10ae68f804211db63f53ca17a273d6c6337aaeb90",
+      "bytes": 916,
+      "sha256": "5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/rustls-webpki/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ryu/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566.gz",
+      "archive_bytes": 770,
+      "archive_sha256": "d0b964d34e4dc8be663fe2016a10fc1e301ae614f7ed9c8fff9a8e9ca8d35e37",
+      "bytes": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/ryu/LICENSE-BOOST"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/security-framework/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69.gz",
+      "archive_bytes": 658,
+      "archive_sha256": "eefd77870e2fd0c6f1e2db9bea261c711cf057fbbcbb3b49325a88757354ffe0",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/security-framework/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/security-framework-sys/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69.gz",
+      "archive_bytes": 658,
+      "archive_sha256": "eefd77870e2fd0c6f1e2db9bea261c711cf057fbbcbb3b49325a88757354ffe0",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/security-framework-sys/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/serde/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/serde/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/serde_core/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/serde_core/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/serde_json/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/serde_json/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b.gz",
+      "archive_bytes": 830,
+      "archive_sha256": "4c1dfd6f3faa9a86de45d00ba15507f976c3efc2a14ee6c76870069b01a4acf8",
+      "bytes": 1582,
+      "sha256": "d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/subtle/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621.gz",
+      "archive_bytes": 481,
+      "archive_sha256": "3a9ca4d37ee8c34ca9b9799aa537f258f52432d2ce1ba7cd114288b9ab992ed9",
+      "bytes": 769,
+      "sha256": "7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/untrusted/LICENSE.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30.gz",
+      "archive_bytes": 3968,
+      "archive_sha256": "e4d7a35e0ed07a95e6fc0da1f3c96c45af0d6c58854c58fefe711858add243de",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/zeroize/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b.gz",
+      "archive_bytes": 663,
+      "archive_sha256": "8b1585091d03e9245a2bca497dc4fc716d3307994cad2d0f47eda6cede7e91f4",
+      "bytes": 1082,
+      "sha256": "8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/crates/zeroize/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/da8191658b3452ce9caf31638ba61dab31a38c619fa39df119812e050f592fd3.gz",
+      "archive_bytes": 13623,
+      "archive_sha256": "d17d2bd5de18be01910f94f4bac5186d4b2df6bb07254d276e310aa5fb9d6a4c",
+      "bytes": 68194,
+      "sha256": "da8191658b3452ce9caf31638ba61dab31a38c619fa39df119812e050f592fd3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/debian/gcc-12-base-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987.gz",
+      "archive_bytes": 6133,
+      "archive_sha256": "65233d9780d29d078a720e416a433ee95c6a6ac11fdf0ca583566c385f26370a",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/debian/libc6-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987.gz",
+      "archive_bytes": 6133,
+      "archive_sha256": "65233d9780d29d078a720e416a433ee95c6a6ac11fdf0ca583566c385f26370a",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/glibc/libc6-copyright"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987.gz",
+      "archive_bytes": 6133,
+      "archive_sha256": "65233d9780d29d078a720e416a433ee95c6a6ac11fdf0ca583566c385f26370a",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/glibc/libc6-dev-copyright"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad.gz",
+      "archive_bytes": 779,
+      "archive_sha256": "863e184b7081af5ca3edec0cc890fc86e1cc72f7edc73aac312621e01d5c8ad4",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/golang-x-sys-LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241.gz",
+      "archive_bytes": 188,
+      "archive_sha256": "3889c11ca5c61a36e8ebb59ad054051c379386806537e9b8dca16db28169cc62",
+      "bytes": 303,
+      "sha256": "54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/llvm/include/llvm/Support/LICENSE.TXT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292.gz",
+      "archive_bytes": 6702,
+      "archive_sha256": "c2428244632482c517ff6fcd0a2cc2682ca4b055d02da0206449320622a00258",
+      "bytes": 20759,
+      "sha256": "252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/rust/rust-std/COPYRIGHT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/rust/rust-std/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/notices/rust/rust-std/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991.gz",
+      "archive_bytes": 837,
+      "archive_sha256": "fa03c02ed475f3a52f32dbf856b4d7da9149d091429fcc1d69aff0f23761e184",
+      "bytes": 2969,
+      "sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/darwin/CoreFoundation.tbd"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf.gz",
+      "archive_bytes": 2166,
+      "archive_sha256": "bb188cf9ffd9e60be1f617bc754949e2db2ac6a142d5e3f8128a467e4fdb222a",
+      "bytes": 11874,
+      "sha256": "eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/darwin/Security.tbd"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/f18931a0ac32b389f8ecf660a1fdd7d07cac5ddf8e78fe9aac757e577a99b94c.gz",
+      "archive_bytes": 1356,
+      "archive_sha256": "0f15b3a110e885a717de9bdb7a5838f04d99455ef598136f51b748d67807ea28",
+      "bytes": 5168,
+      "sha256": "f18931a0ac32b389f8ecf660a1fdd7d07cac5ddf8e78fe9aac757e577a99b94c",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/platform/darwin/libSystem.tbd"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/8a01c76ccbeb16da9a7e598a3ff141dde69a8b09936ec4fb1a3d4f329ccb4bfe.gz",
+      "archive_bytes": 137775,
+      "archive_sha256": "6f1076341ff6700be552f94aa8353266c14c0e5d94290be82bb241f8a96591a6",
+      "bytes": 435455,
+      "sha256": "8a01c76ccbeb16da9a7e598a3ff141dde69a8b09936ec4fb1a3d4f329ccb4bfe",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/3aed0b189189c744dc9f4b74798a51d3e512ea85e492568db788a927c88e20ba.gz",
+      "archive_bytes": 4534,
+      "archive_sha256": "ea6efcd7acb38058851fe52e93df6a97949057dd1154236784b7d08375570a34",
+      "bytes": 27330,
+      "sha256": "3aed0b189189c744dc9f4b74798a51d3e512ea85e492568db788a927c88e20ba",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/source/gcc-12_12.2.0-14+deb12u1.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/cfe1f0b8dc1fa211ce5a45b3725cc38b29f88667f1140ebdca6de35cf9c6f1fd.gz",
+      "archive_bytes": 2865,
+      "archive_sha256": "8015d5566156d4cf812bc269c642700ff5d3ad95e91e604427059f336d6738e6",
+      "bytes": 9765,
+      "sha256": "cfe1f0b8dc1fa211ce5a45b3725cc38b29f88667f1140ebdca6de35cf9c6f1fd",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/source/glibc_2.36-9+deb12u14.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/fe3c3af8c3a88837092d0befcec394daa7f05db04559eea04b0f73aaed5c9739.gz",
+      "archive_bytes": 1161,
+      "archive_sha256": "bfd086f7f62c9e8caaef63afc0385fd1e1dea20656ba9fecadadb23bbde022e3",
+      "bytes": 3451,
+      "sha256": "fe3c3af8c3a88837092d0befcec394daa7f05db04559eea04b0f73aaed5c9739",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/c58ec9764941fe53bbf5cac4acb9859c087bdfc82b3eb25fc87b0946c62ecadf.gz",
+      "archive_bytes": 4683,
+      "archive_sha256": "36d643b348762c8aa67ef296ab83a2ad82cc63ce130807f926b4dc470ed0b285",
+      "bytes": 13734,
+      "sha256": "c58ec9764941fe53bbf5cac4acb9859c087bdfc82b3eb25fc87b0946c62ecadf",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6.gz",
+      "archive_bytes": 6802,
+      "archive_sha256": "5b497d3e5d5013caefd934d2c4f5c1f6779a16f53d62c99662397f6bbb526464",
+      "bytes": 17984,
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/GPL-2.0.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad.gz",
+      "archive_bytes": 779,
+      "archive_sha256": "863e184b7081af5ca3edec0cc890fc86e1cc72f7edc73aac312621e01d5c8ad4",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/Go-LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95.gz",
+      "archive_bytes": 9334,
+      "archive_sha256": "59e77d124c901d99f68a60da5680bd25b7ddfc54fa30548498f721b4232a095c",
+      "bytes": 26419,
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/LGPL-2.1.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee.gz",
+      "archive_bytes": 5217,
+      "archive_sha256": "b1a42ec54bbfacd995852b9832f7b0fab00406a58a51c2a33533422519cafd9a",
+      "bytes": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/LLVM-LICENSE.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d408970373d62d6e3ce132e6302b7ac90ba5638d5fdb17b838da69db75ead135.gz",
+      "archive_bytes": 3978,
+      "archive_sha256": "9c2eff372f508dfa3bf6b21dcf435c2bc687558a4af213d0ff65eef274d636bf",
+      "bytes": 11365,
+      "sha256": "d408970373d62d6e3ce132e6302b7ac90ba5638d5fdb17b838da69db75ead135",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/Lo-LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/base64/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7.gz",
+      "archive_bytes": 652,
+      "archive_sha256": "b0880f8008e1096e6466ca773d8fdf6ddb79efb270dff32e44cdeac9b618fda7",
+      "bytes": 1076,
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/base64/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/bitflags/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/bitflags/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/cfg-if/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397.gz",
+      "archive_bytes": 646,
+      "archive_sha256": "af5759c5085ea3ecc7f12e6c5d1c18cf9f257aa96e288208761164f440a22669",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/cfg-if/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/core-foundation/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3.gz",
+      "archive_bytes": 653,
+      "archive_sha256": "8283d8ab5da5af81b35f2424303ca11a635a5e00cf251aca61c8163088552ed6",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/core-foundation/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/core-foundation-sys/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3.gz",
+      "archive_bytes": 653,
+      "archive_sha256": "8283d8ab5da5af81b35f2424303ca11a635a5e00cf251aca61c8163088552ed6",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/core-foundation-sys/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf.gz",
+      "archive_bytes": 3941,
+      "archive_sha256": "e249b66a52f1f61840c0dc6b5fcea5c14e24b9fbc9d25620239b317fb3abfb95",
+      "bytes": 10849,
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/getrandom/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737.gz",
+      "archive_bytes": 673,
+      "archive_sha256": "249e022923fcdfdfb493fff848c19a323c0fd9fb2991163a56b890145ddc6b35",
+      "bytes": 1130,
+      "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/getrandom/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/itoa/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/itoa/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/libc/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e.gz",
+      "archive_bytes": 644,
+      "archive_sha256": "9ad85380ef9a4ddd5115e75c15166c9ef15d80bdccf017b1a0c70511cf76aa56",
+      "bytes": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/libc/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f.gz",
+      "archive_bytes": 111,
+      "archive_sha256": "c20a1a9aa65183366529688c94966641b0b0787ebe45b90ec7c0159bd31a30d6",
+      "bytes": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/memchr/COPYING"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f.gz",
+      "archive_bytes": 654,
+      "archive_sha256": "5b7036e4d249e964fa802ea84d2598d3b0a60f54f989e73ee1cfdc66f5393a0a",
+      "bytes": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/memchr/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/num-bigint/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/num-bigint/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/num-integer/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/num-integer/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/num-traits/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb.gz",
+      "archive_bytes": 651,
+      "archive_sha256": "b541f045aa9ad6bd8bf38f375b13fe5002719e73e515596e52154d084d55023e",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/num-traits/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/once_cell/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/once_cell/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/openssl-probe/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397.gz",
+      "archive_bytes": 646,
+      "archive_sha256": "af5759c5085ea3ecc7f12e6c5d1c18cf9f257aa96e288208761164f440a22669",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/openssl-probe/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a.gz",
+      "archive_bytes": 260,
+      "archive_sha256": "6db47271357b162924446d256fd505c16bbf715eb3b18e74097092a6b243848e",
+      "bytes": 499,
+      "sha256": "b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ring/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d.gz",
+      "archive_bytes": 4853,
+      "archive_sha256": "dee8a719012242bbbcff08515651c9a258b68fda37ece3726dbd475de47c34e1",
+      "bytes": 14870,
+      "sha256": "005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ring/LICENSE-BoringSSL"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f.gz",
+      "archive_bytes": 471,
+      "archive_sha256": "c72b2eba6892a71a9d0350d295f3a5749760729422b0d6977b80fce4be5d720d",
+      "bytes": 731,
+      "sha256": "f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ring/LICENSE-other-bits"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6ee2ed6c77710de911761acd5fc1ad1da00f476beb1a7ef27e78c2d1858deafc.gz",
+      "archive_bytes": 620,
+      "archive_sha256": "5ab9c1a2468cb918d58222ee13d0e022755a03bb89795b17b16aa472f99f73df",
+      "bytes": 1022,
+      "sha256": "6ee2ed6c77710de911761acd5fc1ad1da00f476beb1a7ef27e78c2d1858deafc",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/9eacbcb81be660840c714a560a9d65ba07913db98dd4baf969f78dd499fdd60f.gz",
+      "archive_bytes": 408,
+      "archive_sha256": "5b22a4ae617aa1aa0e5014dc4ceead9816964ab80b6d8f21d90e0608528dd1aa",
+      "bytes": 638,
+      "sha256": "9eacbcb81be660840c714a560a9d65ba07913db98dd4baf969f78dd499fdd60f",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ring/third_party/fiat/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4.gz",
+      "archive_bytes": 508,
+      "archive_sha256": "bca0ea81d798c35291155f4274e1033cd43dafb962623a08f4139e6628ca4810",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls/LICENSE-ISC"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c.gz",
+      "archive_bytes": 668,
+      "archive_sha256": "c4820e6a1c6f3907a7c5c13a2ba2ed65c6f0d5fa647ef19f8f4d7a7de73e647d",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d75967ce788187f83c3bd3328210974acfc443d4dc44909f1d7e34f21623a0c6.gz",
+      "archive_bytes": 212,
+      "archive_sha256": "07abd44fa8b64e9e0479d32a4845381775a24b8fa9910168e1551d6fc3a0767d",
+      "bytes": 286,
+      "sha256": "d75967ce788187f83c3bd3328210974acfc443d4dc44909f1d7e34f21623a0c6",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4.gz",
+      "archive_bytes": 508,
+      "archive_sha256": "bca0ea81d798c35291155f4274e1033cd43dafb962623a08f4139e6628ca4810",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE-ISC"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c.gz",
+      "archive_bytes": 668,
+      "archive_sha256": "c4820e6a1c6f3907a7c5c13a2ba2ed65c6f0d5fa647ef19f8f4d7a7de73e647d",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742.gz",
+      "archive_bytes": 3946,
+      "archive_sha256": "427f950d134c23a0bbc78d89e530725949868422f1c218136f3a603a4716398b",
+      "bytes": 10835,
+      "sha256": "45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls-pki-types/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639.gz",
+      "archive_bytes": 661,
+      "archive_sha256": "735ff569513f3c3ce271d89384587d5d42582dea6883c879bfddb1c61ab24a50",
+      "bytes": 1080,
+      "sha256": "9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls-pki-types/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a.gz",
+      "archive_bytes": 576,
+      "archive_sha256": "7ae04485900c9e17a47d36e10ae68f804211db63f53ca17a273d6c6337aaeb90",
+      "bytes": 916,
+      "sha256": "5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/rustls-webpki/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ryu/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566.gz",
+      "archive_bytes": 770,
+      "archive_sha256": "d0b964d34e4dc8be663fe2016a10fc1e301ae614f7ed9c8fff9a8e9ca8d35e37",
+      "bytes": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/ryu/LICENSE-BOOST"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/security-framework/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69.gz",
+      "archive_bytes": 658,
+      "archive_sha256": "eefd77870e2fd0c6f1e2db9bea261c711cf057fbbcbb3b49325a88757354ffe0",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/security-framework/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2.gz",
+      "archive_bytes": 3940,
+      "archive_sha256": "5ef72d810e3f1183414291c246ee46d41cc9505640f7159e18273634d6c1dc56",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/security-framework-sys/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69.gz",
+      "archive_bytes": 658,
+      "archive_sha256": "eefd77870e2fd0c6f1e2db9bea261c711cf057fbbcbb3b49325a88757354ffe0",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/security-framework-sys/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/serde/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/serde/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/serde_core/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/serde_core/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/serde_json/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/serde_json/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b.gz",
+      "archive_bytes": 830,
+      "archive_sha256": "4c1dfd6f3faa9a86de45d00ba15507f976c3efc2a14ee6c76870069b01a4acf8",
+      "bytes": 1582,
+      "sha256": "d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/subtle/LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621.gz",
+      "archive_bytes": 481,
+      "archive_sha256": "3a9ca4d37ee8c34ca9b9799aa537f258f52432d2ce1ba7cd114288b9ab992ed9",
+      "bytes": 769,
+      "sha256": "7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/untrusted/LICENSE.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30.gz",
+      "archive_bytes": 3968,
+      "archive_sha256": "e4d7a35e0ed07a95e6fc0da1f3c96c45af0d6c58854c58fefe711858add243de",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/zeroize/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b.gz",
+      "archive_bytes": 663,
+      "archive_sha256": "8b1585091d03e9245a2bca497dc4fc716d3307994cad2d0f47eda6cede7e91f4",
+      "bytes": 1082,
+      "sha256": "8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/crates/zeroize/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/da8191658b3452ce9caf31638ba61dab31a38c619fa39df119812e050f592fd3.gz",
+      "archive_bytes": 13623,
+      "archive_sha256": "d17d2bd5de18be01910f94f4bac5186d4b2df6bb07254d276e310aa5fb9d6a4c",
+      "bytes": 68194,
+      "sha256": "da8191658b3452ce9caf31638ba61dab31a38c619fa39df119812e050f592fd3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/debian/gcc-12-base-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987.gz",
+      "archive_bytes": 6133,
+      "archive_sha256": "65233d9780d29d078a720e416a433ee95c6a6ac11fdf0ca583566c385f26370a",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/debian/libc6-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/5bbff5f646ce750ac0a347e7f91793279b7422a1119820b5f75d98879c201c68.gz",
+      "archive_bytes": 1191,
+      "archive_sha256": "609e1dcaa62d003f80b124d54bf978dc903d448af798d228bc7721ef03185516",
+      "bytes": 2214,
+      "sha256": "5bbff5f646ce750ac0a347e7f91793279b7422a1119820b5f75d98879c201c68",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/debian/libicu72-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8.gz",
+      "archive_bytes": 4987,
+      "archive_sha256": "987742b22c408d796ce252f84ed23553bbada2de9038707e1724bf49524fe45c",
+      "bytes": 15465,
+      "sha256": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/debian/liblzma5-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/ee746b96cfa5be73c3ea3e4cfb1285e9b315d4c9267f99b2ee9c5d911d9fe3f4.gz",
+      "archive_bytes": 1428,
+      "archive_sha256": "fa221ea58f1bbb95ab69e680f239b453f667684a816a97809ed979c03e4fdf3e",
+      "bytes": 3067,
+      "sha256": "ee746b96cfa5be73c3ea3e4cfb1285e9b315d4c9267f99b2ee9c5d911d9fe3f4",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/debian/libxml2-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/9e5b96d63773a5d177ba264254390f792be07e41748ebd94730981c6cac31cc6.gz",
+      "archive_bytes": 1379,
+      "archive_sha256": "eba6dec96f11520753636cbdd478fb5498df7e24cd4466ab13e3baa05a0823ea",
+      "bytes": 2927,
+      "sha256": "9e5b96d63773a5d177ba264254390f792be07e41748ebd94730981c6cac31cc6",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/debian/zlib1g-copyright.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987.gz",
+      "archive_bytes": 6133,
+      "archive_sha256": "65233d9780d29d078a720e416a433ee95c6a6ac11fdf0ca583566c385f26370a",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/glibc/libc6-copyright"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987.gz",
+      "archive_bytes": 6133,
+      "archive_sha256": "65233d9780d29d078a720e416a433ee95c6a6ac11fdf0ca583566c385f26370a",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/glibc/libc6-dev-copyright"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad.gz",
+      "archive_bytes": 779,
+      "archive_sha256": "863e184b7081af5ca3edec0cc890fc86e1cc72f7edc73aac312621e01d5c8ad4",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/golang-x-sys-LICENSE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241.gz",
+      "archive_bytes": 188,
+      "archive_sha256": "3889c11ca5c61a36e8ebb59ad054051c379386806537e9b8dca16db28169cc62",
+      "bytes": 303,
+      "sha256": "54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/llvm/include/llvm/Support/LICENSE.TXT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292.gz",
+      "archive_bytes": 6702,
+      "archive_sha256": "c2428244632482c517ff6fcd0a2cc2682ca4b055d02da0206449320622a00258",
+      "bytes": 20759,
+      "sha256": "252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/rust/rust-std/COPYRIGHT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_bytes": 3554,
+      "archive_sha256": "e726ef8a26ab7a21f35ae9b322ad8715198cd2033aed92d7d7c5c299da70a4e5",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/rust/rust-std/LICENSE-APACHE"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_bytes": 619,
+      "archive_sha256": "14090324ab4c6c582b0204de31772ad67eefe048e5cbf1a7ee7624d37079fa51",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/notices/rust/rust-std/LICENSE-MIT"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991.gz",
+      "archive_bytes": 837,
+      "archive_sha256": "fa03c02ed475f3a52f32dbf856b4d7da9149d091429fcc1d69aff0f23761e184",
+      "bytes": 2969,
+      "sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/darwin/CoreFoundation.tbd"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf.gz",
+      "archive_bytes": 2166,
+      "archive_sha256": "bb188cf9ffd9e60be1f617bc754949e2db2ac6a142d5e3f8128a467e4fdb222a",
+      "bytes": 11874,
+      "sha256": "eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/darwin/Security.tbd"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/f18931a0ac32b389f8ecf660a1fdd7d07cac5ddf8e78fe9aac757e577a99b94c.gz",
+      "archive_bytes": 1356,
+      "archive_sha256": "0f15b3a110e885a717de9bdb7a5838f04d99455ef598136f51b748d67807ea28",
+      "bytes": 5168,
+      "sha256": "f18931a0ac32b389f8ecf660a1fdd7d07cac5ddf8e78fe9aac757e577a99b94c",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/platform/darwin/libSystem.tbd"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/9a54e916060aaca6cf946f4aafcf9167c41ec74b3e715e855d50605c8edc390c.gz",
+      "archive_bytes": 139027,
+      "archive_sha256": "13b3e037684ae36e75cee272d327a3951f41d4e1f8c226a7041e73e5fab2bb7b",
+      "bytes": 441688,
+      "sha256": "9a54e916060aaca6cf946f4aafcf9167c41ec74b3e715e855d50605c8edc390c",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/3aed0b189189c744dc9f4b74798a51d3e512ea85e492568db788a927c88e20ba.gz",
+      "archive_bytes": 4534,
+      "archive_sha256": "ea6efcd7acb38058851fe52e93df6a97949057dd1154236784b7d08375570a34",
+      "bytes": 27330,
+      "sha256": "3aed0b189189c744dc9f4b74798a51d3e512ea85e492568db788a927c88e20ba",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/gcc-12_12.2.0-14+deb12u1.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/cfe1f0b8dc1fa211ce5a45b3725cc38b29f88667f1140ebdca6de35cf9c6f1fd.gz",
+      "archive_bytes": 2865,
+      "archive_sha256": "8015d5566156d4cf812bc269c642700ff5d3ad95e91e604427059f336d6738e6",
+      "bytes": 9765,
+      "sha256": "cfe1f0b8dc1fa211ce5a45b3725cc38b29f88667f1140ebdca6de35cf9c6f1fd",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/glibc_2.36-9+deb12u14.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/8fd50a21664422b2dd5df4e20175dce3396c89a3a85363db26dd4529bba62a92.gz",
+      "archive_bytes": 1457,
+      "archive_sha256": "3cc15e743c5574f41eae9510f6fc934b64b4f06c4f045886c20df6078ac70cb9",
+      "bytes": 2284,
+      "sha256": "8fd50a21664422b2dd5df4e20175dce3396c89a3a85363db26dd4529bba62a92",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/icu_72.1-3+deb12u1.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/87b6ff610d587292cec0444fa8cbbfb12994cb89bade40578f5ba6470de245c7.gz",
+      "archive_bytes": 538,
+      "archive_sha256": "bdf479c110e9b7b18fc58a52ef22afe8221081e15eb42ceee2d24293965f35f1",
+      "bytes": 659,
+      "sha256": "87b6ff610d587292cec0444fa8cbbfb12994cb89bade40578f5ba6470de245c7",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/icu_72.1.orig.tar.gz.asc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d86ce3efb1b75d2781f72f5cdd187474c148a915d610295c85162681bb070a65.gz",
+      "archive_bytes": 1742,
+      "archive_sha256": "c3db289e653dac2ddc943bd1b90dd3fcecbab043474b2514f4fab4a52f74d1ef",
+      "bytes": 2974,
+      "sha256": "d86ce3efb1b75d2781f72f5cdd187474c148a915d610295c85162681bb070a65",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/libxml2_2.9.14+dfsg-1.3~deb12u6.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/38f98e356f7e7e89b0920d39c55dd5f3d1a9f2684bff83c8b4890561e1832e94.gz",
+      "archive_bytes": 1478,
+      "archive_sha256": "2eec1be8e213653e733237108d88fa93b6c59daad6773aa17cd76080c7524edb",
+      "bytes": 2515,
+      "sha256": "38f98e356f7e7e89b0920d39c55dd5f3d1a9f2684bff83c8b4890561e1832e94",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/xz-utils_5.4.1-1+deb12u1.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/4b0c7707114996092a5f75a98333de2102db83a27218e4903b8fb7c24a8d0233.gz",
+      "archive_bytes": 669,
+      "archive_sha256": "07c45e34ca1d54dda2bc71fc8ed021ba6149be7b8bfad7080cce44c013163afa",
+      "bytes": 833,
+      "sha256": "4b0c7707114996092a5f75a98333de2102db83a27218e4903b8fb7c24a8d0233",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/xz-utils_5.4.1.orig.tar.xz.asc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/3fa1e6b2fc525062aa88207dda52fed8e045373c809d362fe8a2bfbf7cf515a8.gz",
+      "archive_bytes": 1215,
+      "archive_sha256": "ea2d72cc166f7702e2cd1668a163ce2d0ffd3e0bd12ab09fd69d47c3da1a1571",
+      "bytes": 2399,
+      "sha256": "3fa1e6b2fc525062aa88207dda52fed8e045373c809d362fe8a2bfbf7cf515a8",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/source/zlib_1.2.13.dfsg-1.dsc"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/f28afd06f354c86e4087f844847ec90f09b38393853f07ed6602cb790d8ff08e.gz",
+      "archive_bytes": 1511,
+      "archive_sha256": "458e0924574bf8cf18ea7d235cb986b53fe729dcda28f24ce3b996c3bd63972b",
+      "bytes": 4521,
+      "sha256": "f28afd06f354c86e4087f844847ec90f09b38393853f07ed6602cb790d8ff08e",
+      "source": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/5cf55ca26059b40b102e4113b07d8b5b66af8602bd12215cdbcb17c2c93ec66f.gz",
+      "archive_bytes": 2056,
+      "archive_sha256": "caf669d880992cf6728068e2f8761512dee981edf09aa01f973117e73372762f",
+      "bytes": 4782,
+      "sha256": "5cf55ca26059b40b102e4113b07d8b5b66af8602bd12215cdbcb17c2c93ec66f",
+      "source": "_scratch/i011-20261020/completion-20261022/precision-tooling/focused-validation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/086d639fc2b9bdf4766bf08c4ce359ee1c815336ee67b2556d7071b7c800900a.gz",
+      "archive_bytes": 769,
+      "archive_sha256": "2bb9d1a26201eb301b79b036410bc4501ab45a3db700e16e8cefe40b283a0671",
+      "bytes": 2314,
+      "sha256": "086d639fc2b9bdf4766bf08c4ce359ee1c815336ee67b2556d7071b7c800900a",
+      "source": "_scratch/native-runtime/tools.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/141471985e6b8a9bdc02622544a0125c9da5beee9e38b54d6fb3facaf613d6ba.gz",
+      "archive_bytes": 3850,
+      "archive_sha256": "a72214b4e39344df2afb0204489ab043232c6c521c7279ab5e654fbda52fa3f2",
+      "bytes": 11940,
+      "sha256": "141471985e6b8a9bdc02622544a0125c9da5beee9e38b54d6fb3facaf613d6ba",
+      "source": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-metal/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/34ba416fe876cbea7020087fd9cf4cfb0e0c62dc1efc19bae6dc04de1ddc346e.gz",
+      "archive_bytes": 137769,
+      "archive_sha256": "14beb6eaef63d7fb14ac235efa9070ab78938c3022ee87c347eca3b308ecee27",
+      "bytes": 435452,
+      "sha256": "34ba416fe876cbea7020087fd9cf4cfb0e0c62dc1efc19bae6dc04de1ddc346e",
+      "source": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-metal/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/00a9313902eddff2484944e390a5d2771a4bd2b4a8fe6820ceb81e9ab82f8f30.gz",
+      "archive_bytes": 1930,
+      "archive_sha256": "c9be5925bdcbdec6808d139cbf630583875708332fd3faf5dedf0ba96a51b24d",
+      "bytes": 6131,
+      "sha256": "00a9313902eddff2484944e390a5d2771a4bd2b4a8fe6820ceb81e9ab82f8f30",
+      "source": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-metal/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/5fa51b8e4636e58c42bd4ebede4ffb0a3b1fd07ad0e36c09733f5f57f21ef59d.gz",
+      "archive_bytes": 3508,
+      "archive_sha256": "598cec58d9d8b58f7691a4af31670656698ef5196ebdfcb5fd437ec42d5d000e",
+      "bytes": 11024,
+      "sha256": "5fa51b8e4636e58c42bd4ebede4ffb0a3b1fd07ad0e36c09733f5f57f21ef59d",
+      "source": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-software/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/3a82b89c5ffaa43dc4f4f3b6c19e8b14fc0533ae91bf172468dd7f4ae434d104.gz",
+      "archive_bytes": 137771,
+      "archive_sha256": "95f72134211ba59580a0841fbd96b7b71d530d8b20d56b64c1a866773983da7b",
+      "bytes": 435455,
+      "sha256": "3a82b89c5ffaa43dc4f4f3b6c19e8b14fc0533ae91bf172468dd7f4ae434d104",
+      "source": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-software/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/71b5f409b522c7fe751a2c5f8504ebec86e36aba86d9c5a456f7a44c5765555b.gz",
+      "archive_bytes": 1163,
+      "archive_sha256": "097e15d0ab3fae6cb5e70f35531413aa6433fb85f079fb01a972a08506cce838",
+      "bytes": 3451,
+      "sha256": "71b5f409b522c7fe751a2c5f8504ebec86e36aba86d9c5a456f7a44c5765555b",
+      "source": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-software/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/0744421e2e0d41ed398755d86f8d2ff00bf487db29e4fa74cee173766123e3d4.gz",
+      "archive_bytes": 4680,
+      "archive_sha256": "66205dbc0963a7bc8cf23a79bccc77093eb95471772853f1b4cabc6b9673fbbb",
+      "bytes": 13734,
+      "sha256": "0744421e2e0d41ed398755d86f8d2ff00bf487db29e4fa74cee173766123e3d4",
+      "source": "bin/distributions-i011-storage-20261023/lo-linux-arm64-software/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/4bcb90097e412f46e5c55f8a21026106b2aeed9b48ab2f024d4c9a04540a2786.gz",
+      "archive_bytes": 139024,
+      "archive_sha256": "6cfb326d80d21e767fc1db6abb22282a56badf199a6e95586b4230f5026c1984",
+      "bytes": 441688,
+      "sha256": "4bcb90097e412f46e5c55f8a21026106b2aeed9b48ab2f024d4c9a04540a2786",
+      "source": "bin/distributions-i011-storage-20261023/lo-linux-arm64-software/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/41c32b36d9664617ee7e4c64b22cc778a55b6e828aff31b21cab03fb9191b914.gz",
+      "archive_bytes": 1513,
+      "archive_sha256": "1da279a3705066a68453143684ac77557dcdfa952aa53c7552461456e1f375df",
+      "bytes": 4521,
+      "sha256": "41c32b36d9664617ee7e4c64b22cc778a55b6e828aff31b21cab03fb9191b914",
+      "source": "bin/distributions-i011-storage-20261023/lo-linux-arm64-software/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/7ab9ad98f0fd2096d0a68334452e42aeb73cd6c86667799b2acbf0e8465c7cc1.gz",
+      "archive_bytes": 7307,
+      "archive_sha256": "cbb49209b4ac88ade43c435f6129b9518a7314b723b99ee8636d45688081c5d6",
+      "bytes": 25541,
+      "sha256": "7ab9ad98f0fd2096d0a68334452e42aeb73cd6c86667799b2acbf0e8465c7cc1",
+      "source": "scripts/qualify_native.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/oversized-request-fix/payload/4174311e50a018a9306a590ab11752f0c5bf3243d033321e4b8754065eeaa43d.gz",
+      "archive_bytes": 1302,
+      "archive_sha256": "cf136db592cf8e7e159e9710ef1dacd832b3dc3fab129fdad95225d5d25ff598",
+      "bytes": 3067,
+      "sha256": "4174311e50a018a9306a590ab11752f0c5bf3243d033321e4b8754065eeaa43d",
+      "source": "tests/integration/llvm_http_oversized_test.go"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/3d34db193b9c57b06a9d18a5203ae1249c9076972d67712b1accd43a9a1fa9ea.gz",
+      "archive_bytes": 3876,
+      "archive_sha256": "8f2923d115f53df5d62f72f1cf550c7777865a776055f7cb0cc91c3d0b14fb49",
+      "bytes": 13231,
+      "sha256": "3d34db193b9c57b06a9d18a5203ae1249c9076972d67712b1accd43a9a1fa9ea",
+      "source": "tools/lodistribution/prepare.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/49fad4375d655ec95a063639ef36220029d5a9b41ac6501d01c281516c623dfd.gz",
+      "archive_bytes": 5972,
+      "archive_sha256": "2da77b34ca00988687274eb5bad80893cd8ac919b533f89f8138a60610b5fb8a",
+      "bytes": 21206,
+      "sha256": "49fad4375d655ec95a063639ef36220029d5a9b41ac6501d01c281516c623dfd",
+      "source": "tools/loqualification/batch.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/43556f3025d20f519fa1fd1e05f7a26111dffe4d6e1793870f9010ca9de70e65.gz",
+      "archive_bytes": 2866,
+      "archive_sha256": "f002fb65e37b9a921ea2f21245a1c05d47be7eed39821a6208911ae0e73f5e62",
+      "bytes": 10194,
+      "sha256": "43556f3025d20f519fa1fd1e05f7a26111dffe4d6e1793870f9010ca9de70e65",
+      "source": "tools/loqualification/batch_init.c"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/3394f1af0eb5acffc0a5819f451b5946cc06a93253897f5ab38a3034d99c8bbe.gz",
+      "archive_bytes": 7356,
+      "archive_sha256": "1ba485cb8b67877c775e8c8bce4be35611198b3e478c9584b18807387065d11e",
+      "bytes": 25894,
+      "sha256": "3394f1af0eb5acffc0a5819f451b5946cc06a93253897f5ab38a3034d99c8bbe",
+      "source": "tools/loqualification/performance-runner/main.go"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/dfe7afe7a2b6b2e8d7f35e6d9bc6bf6da99c08b64fd2a42f7b633a68ae7b7400.gz",
+      "archive_bytes": 5103,
+      "archive_sha256": "ca42478db76f6c16cf820258f2705325430f5c006b40e49479b4115d62c1a0d9",
+      "bytes": 17156,
+      "sha256": "dfe7afe7a2b6b2e8d7f35e6d9bc6bf6da99c08b64fd2a42f7b633a68ae7b7400",
+      "source": "tools/loqualification/performance.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/a3d6f26d0eb2f84d688c664becc82cab155da937c62a0a631d11678dfceb9e15.gz",
+      "archive_bytes": 2883,
+      "archive_sha256": "30f363da16ce5bdce06a9d9ce6fb9a10fc3d8c9e11aa051b47d77444b1e0408b",
+      "bytes": 7899,
+      "sha256": "a3d6f26d0eb2f84d688c664becc82cab155da937c62a0a631d11678dfceb9e15",
+      "source": "tools/loqualification/suite.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3ab782356f5c9a7d257c03e2fe3d9724fe0cd4ab2ef8a7bc56c4d8a8835b9f0.gz",
+      "archive_bytes": 1165,
+      "archive_sha256": "e17c340a1edc52791a7256ef0b1081a3a0e30dac5bef727193547523576c1e22",
+      "bytes": 3562,
+      "sha256": "e3ab782356f5c9a7d257c03e2fe3d9724fe0cd4ab2ef8a7bc56c4d8a8835b9f0",
+      "source": "tools/nativebench/allocation.c.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/caa582ccee64197be9a37c712d18a84778dd732c7acb134bae9951328d8d2d2a.gz",
+      "archive_bytes": 1335,
+      "archive_sha256": "e77f6f12c294f5b7453aac6faeac3021328bebe831922504485f4a9d15cbffc4",
+      "bytes": 3936,
+      "sha256": "caa582ccee64197be9a37c712d18a84778dd732c7acb134bae9951328d8d2d2a",
+      "source": "tools/nativebench/harness.c.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/6017ed8170bfa180ed8ae025f925ac0f461dd08be4773eb84d69301f80dffbf2.gz",
+      "archive_bytes": 3315,
+      "archive_sha256": "9bc24cb14fdfd499fa71252df831cf7326bc8715d3b3bc17ff18255a2426fe5c",
+      "bytes": 11132,
+      "sha256": "6017ed8170bfa180ed8ae025f925ac0f461dd08be4773eb84d69301f80dffbf2",
+      "source": "tools/nativebench/identity.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/dd2867d5d597e3b391ffa6f3daf61ecc630a7fdd8b8f525ef842013480878725.gz",
+      "archive_bytes": 1225,
+      "archive_sha256": "6ebb1c251392c62c6cc8b67d29da17757c4599b512e118db4ae11377d26358c4",
+      "bytes": 3294,
+      "sha256": "dd2867d5d597e3b391ffa6f3daf61ecc630a7fdd8b8f525ef842013480878725",
+      "source": "tools/nativebench/main.go"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/payload/125cf45325b97f26670fef920d6777d392e4a36109a1b9fe7acddd4c55c5b074.gz",
+      "archive_bytes": 4152,
+      "archive_sha256": "b9c719b46f9d5b643996832c53cd8eec2ebc2ed44d8dcbb8609ffc0328d7a0fa",
+      "bytes": 14950,
+      "sha256": "125cf45325b97f26670fef920d6777d392e4a36109a1b9fe7acddd4c55c5b074",
+      "source": "tools/nativebench/qualification.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/2689361fbec4e42a579cfff09d2d934fc21473691086b842d9ee84f93b461db2.gz",
+      "archive_bytes": 180,
+      "archive_sha256": "9e30c7e8c16fa869ff84af6e64c107fe4fd26147bd2bf15cfb24cc539b3a9d19",
+      "bytes": 207,
+      "sha256": "2689361fbec4e42a579cfff09d2d934fc21473691086b842d9ee84f93b461db2",
+      "source": "tools/nativecorpus/main.go"
+    }
+  ],
+  "prior_samples_kept_separate": true,
+  "qualification_complete": false,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/b3a89284708d15d8b666bf5a42da3cd7168c859761b40fa23cc533e037bdde36.gz",
+      "archive_bytes": 490,
+      "archive_sha256": "3069135f71058a3dc95160bf8e760b4d0bf6045c4921870b1af3b64ef7658ee8",
+      "bytes": 815,
+      "sha256": "b3a89284708d15d8b666bf5a42da3cd7168c859761b40fa23cc533e037bdde36",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/acceptance-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/d8126f40533049bbed339ec6dd901ac68263ff6f8f7236c8545c12b1dded459c.gz",
+      "archive_bytes": 199572,
+      "archive_sha256": "86cfdb781016ad0c33c128d5eecb27e273a4ccc5d1fc2ae5c4295ccee368744e",
+      "bytes": 1829140,
+      "sha256": "d8126f40533049bbed339ec6dd901ac68263ff6f8f7236c8545c12b1dded459c",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin/partial.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/9b5a7e99088902a7f4d5ccad6bbe7731081e50c1b6c200e716842566bec80595.gz",
+      "archive_bytes": 199691,
+      "archive_sha256": "5cdcb9673c0fd0b5131e4c7aade40642627530d97ff0e611c7309666bae02864",
+      "bytes": 1829437,
+      "sha256": "9b5a7e99088902a7f4d5ccad6bbe7731081e50c1b6c200e716842566bec80595",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/9b5a7e99088902a7f4d5ccad6bbe7731081e50c1b6c200e716842566bec80595.gz",
+      "archive_bytes": 199691,
+      "archive_sha256": "5cdcb9673c0fd0b5131e4c7aade40642627530d97ff0e611c7309666bae02864",
+      "bytes": 1829437,
+      "sha256": "9b5a7e99088902a7f4d5ccad6bbe7731081e50c1b6c200e716842566bec80595",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/darwin.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/7b89ae2ded0c35884b06e1d8af1a6600abab47593da61741d89d6ea5a7828ef3.gz",
+      "archive_bytes": 7226,
+      "archive_sha256": "a565319a0cd2428cdb123d80a0d8529f1af7bfd8c1357acc44649bf33c744635",
+      "bytes": 27996,
+      "sha256": "7b89ae2ded0c35884b06e1d8af1a6600abab47593da61741d89d6ea5a7828ef3",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/delta-audit/delta-reuse-audit.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/846a055cbdfaa0ca08060b1cec0794e62ff97caffa133ee612c3bfaa12171e7c.gz",
+      "archive_bytes": 22887,
+      "archive_sha256": "014db1efa3943382d40aa099c1b91eb96c48d41cb152b87d1e24914d63179778",
+      "bytes": 132706,
+      "sha256": "846a055cbdfaa0ca08060b1cec0794e62ff97caffa133ee612c3bfaa12171e7c",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/delta-audit/historical-temp-disposition.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/9e73b531be5f6804bc981b2cf283cd45cbdd815fc431da47cd9f9ed08310d310.gz",
+      "archive_bytes": 137687,
+      "archive_sha256": "c412d9c251efaaadca1295080df4302003c9996de080192d55e7914694fb1ab4",
+      "bytes": 436467,
+      "sha256": "9e73b531be5f6804bc981b2cf283cd45cbdd815fc431da47cd9f9ed08310d310",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/audit-results.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/9069e7f02ec2c76b1cbc6bf5f2e9c50652921a482ee3a4368d6a7556694f3bfd.gz",
+      "archive_bytes": 3141,
+      "archive_sha256": "5a4fc0c9437b90440c0c41598223e8a52947f426ea68eeb255d0222c64f49526",
+      "bytes": 8923,
+      "sha256": "9069e7f02ec2c76b1cbc6bf5f2e9c50652921a482ee3a4368d6a7556694f3bfd",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/audit.initial-file-only-input.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/100120880bdac38fb5ed221b9a4c7839eea869f4ce22b773e634d687648e79bf.gz",
+      "archive_bytes": 3199,
+      "archive_sha256": "9595f1bd0d2048f0f2e46f9663981456f3bb330defd9b4c81e3f08de010024bf",
+      "bytes": 9091,
+      "sha256": "100120880bdac38fb5ed221b9a4c7839eea869f4ce22b773e634d687648e79bf",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/audit.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/77d4e460a2476b08311e23d030773eebf49482d03c739f2ed797ef9b36daf7d2.gz",
+      "archive_bytes": 198,
+      "archive_sha256": "9b2ad76d9771c6234ada4d9b71c12be81c13fd76abbb9d45b1e70a5fb689edb1",
+      "bytes": 345,
+      "sha256": "77d4e460a2476b08311e23d030773eebf49482d03c739f2ed797ef9b36daf7d2",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/evidence.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/22d946390514a70520005395bc3330e2c2d7f5d101a3622e452e1dabbf671a28.gz",
+      "archive_bytes": 427,
+      "archive_sha256": "f7aeffd99632d5b39c05dc772b41983e9024796485b99838a1708664ccfcfe20",
+      "bytes": 703,
+      "sha256": "22d946390514a70520005395bc3330e2c2d7f5d101a3622e452e1dabbf671a28",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/input-adapter-correction.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/daaf9acd529025c8f8cfa546d9ec36f727e9dbc1afc2d6ba993a3555e7be8df8.gz",
+      "archive_bytes": 3422,
+      "archive_sha256": "8999631b8dcc933c14721cbc8088db75c62b35b39e3bd13925a9267a92ff73a6",
+      "bytes": 9071,
+      "sha256": "daaf9acd529025c8f8cfa546d9ec36f727e9dbc1afc2d6ba993a3555e7be8df8",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/preserve.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/4864faf79d3f0acc4cbb64c1950f4096a3b3ef05ffae935ac02b05d7a5eea130.gz",
+      "archive_bytes": 319,
+      "archive_sha256": "d7060b8183c8e7b78a420c5e77ed51b97ad900cd5c50b36af2318e4297161d36",
+      "bytes": 942,
+      "sha256": "4864faf79d3f0acc4cbb64c1950f4096a3b3ef05ffae935ac02b05d7a5eea130",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/batch.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/d92de1efc1378745f1fe7f2c7f7c2cd052242199eefb171d29b23500f51f2ad1.gz",
+      "archive_bytes": 200,
+      "archive_sha256": "94079f8c99632a4a1f8cc5509b4a19dfc7b789499eefbdcee2c80102c8f68e38",
+      "bytes": 1955,
+      "sha256": "d92de1efc1378745f1fe7f2c7f7c2cd052242199eefb171d29b23500f51f2ad1",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/generator.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/ddcfbb51f54df07c787bca36826891cf31083dc19270251924086160f42789d9.gz",
+      "archive_bytes": 198036,
+      "archive_sha256": "37ebc10368133f062c4bf88ea1f932edb5f36b7d9f5e72d9a864dba27bb397d4",
+      "bytes": 1787968,
+      "sha256": "ddcfbb51f54df07c787bca36826891cf31083dc19270251924086160f42789d9",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/0.file0"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/7cbced4b0ac3a446ea7653b7fd17ea18488d686a52385c6dbda75cd8e2709120.gz",
+      "archive_bytes": 172734,
+      "archive_sha256": "7f2d1711d522d6dcf5d4b2fbf3033075cfc6ae7a7ed58a79ae39adb6aa5ee688",
+      "bytes": 534999,
+      "sha256": "7cbced4b0ac3a446ea7653b7fd17ea18488d686a52385c6dbda75cd8e2709120",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/0.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/dc3f1b39ca8f2b7a1fc8e9c8e3c0210e931df713d7784e72003ec2ac66620e74.gz",
+      "archive_bytes": 442670,
+      "archive_sha256": "fe6a86be6b895bfd435828609c00ce89b5590535010c7e83acd0b3dcec1a15e9",
+      "bytes": 4664002,
+      "sha256": "dc3f1b39ca8f2b7a1fc8e9c8e3c0210e931df713d7784e72003ec2ac66620e74",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/export.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/b9a8e85acebaa186e37a22fe4de09be23b8c5eaac8698f87c8a3041003ba66eb.gz",
+      "archive_bytes": 824,
+      "archive_sha256": "8c3e2d2fae852744e82e503d7271c8629f2e047b1f8feb46df5dcec913213254",
+      "bytes": 1971,
+      "sha256": "b9a8e85acebaa186e37a22fe4de09be23b8c5eaac8698f87c8a3041003ba66eb",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/2ffd6f2c800d4f9640a4516b4ea63ecd7ad2d11f739e26557980d58cf9f2f596.gz",
+      "archive_bytes": 53,
+      "archive_sha256": "9af299a1f45091ef0510934c7a67b0526bbc4e3b2a5206843cf4b4415000dc13",
+      "bytes": 35,
+      "sha256": "2ffd6f2c800d4f9640a4516b4ea63ecd7ad2d11f739e26557980d58cf9f2f596",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/guest/serial.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/56f9e660e8866aee62868693e3ac43c704a1c1cce9743fc0a6e9a5a22dbb949f.gz",
+      "archive_bytes": 419,
+      "archive_sha256": "8bbe2eaae2d8bd941494cf2116a468d3dc1c9e7c178339e163b1494106e4d714",
+      "bytes": 1046,
+      "sha256": "56f9e660e8866aee62868693e3ac43c704a1c1cce9743fc0a6e9a5a22dbb949f",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/payload/config.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/780ce9ad57337413841a78d2075593563017b752e40c6969feb636e8d1ff79d0.gz",
+      "archive_bytes": 12039,
+      "archive_sha256": "14034ba357a4015849298976d300567d1b4ad5fad75f9cd558a4b067ed34a92d",
+      "bytes": 48189,
+      "sha256": "780ce9ad57337413841a78d2075593563017b752e40c6969feb636e8d1ff79d0",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/9ed9df676064f617ed1a47309660392f7cf0a4371561a3daa4199b1559b40160.gz",
+      "archive_bytes": 212769,
+      "archive_sha256": "161ac40f208dd91086cd203933904f629c3f97fe696b627d414e0da5b833b62c",
+      "bytes": 1861128,
+      "sha256": "9ed9df676064f617ed1a47309660392f7cf0a4371561a3daa4199b1559b40160",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/9ed9df676064f617ed1a47309660392f7cf0a4371561a3daa4199b1559b40160.gz",
+      "archive_bytes": 212769,
+      "archive_sha256": "161ac40f208dd91086cd203933904f629c3f97fe696b627d414e0da5b833b62c",
+      "bytes": 1861128,
+      "sha256": "9ed9df676064f617ed1a47309660392f7cf0a4371561a3daa4199b1559b40160",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/linux.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/5c67e2baf273d583d43f5a4c122d886e8470b2226d50e1d3a1bbb389dcf69a61.gz",
+      "archive_bytes": 1213,
+      "archive_sha256": "43613c33aa2769a285f9729b6de964900658ca87111bf1ef21b9f86ed517c1e4",
+      "bytes": 2925,
+      "sha256": "5c67e2baf273d583d43f5a4c122d886e8470b2226d50e1d3a1bbb389dcf69a61",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/run.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/13126dd5d890fd7734a3956af5bb71622755b12acde30c0e6c85bdad363db92f.gz",
+      "archive_bytes": 827,
+      "archive_sha256": "a0d68e2e90b746d3d37ebfef811abcfc277a9f742f56c8ffc72859a8ec626c8d",
+      "bytes": 2441,
+      "sha256": "13126dd5d890fd7734a3956af5bb71622755b12acde30c0e6c85bdad363db92f",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/status.json"
+    }
+  ],
+  "scope_amendment": {
+    "bytes": 815,
+    "path": "_scratch/i011-20261020/completion-20261022/http-final-20261023/acceptance-scope.json",
+    "sha256": "b3a89284708d15d8b666bf5a42da3cd7168c859761b40fa23cc533e037bdde36"
+  },
+  "scope_timing": "User selected HTTP-only scope before timing. Formal receipt was written after timing began and before any outcomes were inspected; no claim that the receipt preceded run completion.",
+  "source_sha256": "581218bdf95a91db62e227cc5798caf40a4377072884e74720547b00937d03c2",
+  "state": "selected_HTTP_lanes_passed_audited_preserved",
+  "transitive_evidence": [
+    {
+      "bytes": 3299417,
+      "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/manifest.json",
+      "sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20"
+    },
+    {
+      "bytes": 219102,
+      "path": "docs/evidence/i011-qualification-20261022/oversized-request-fix/manifest.json",
+      "sha256": "a961544bf80a3fac8b391552042bc08ef1adae34dfd614856dfa63906f2a4018"
+    },
+    {
+      "bytes": 1821628,
+      "path": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/manifest.json",
+      "sha256": "abd67f6e1b5c4867bf3491c49df76c769c45e5e10425cb22d04bce241f5f707c"
+    },
+    {
+      "bytes": 3299417,
+      "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/manifest.json",
+      "sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20"
+    }
+  ],
+  "whole_campaign_claim": false
+}

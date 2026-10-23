@@ -1,0 +1,11 @@
+{
+  "issue": "I011",
+  "manifest": "docs/evidence/i011-qualification-20261022/specialized-nonpass/manifest.json",
+  "manifest_sha256": "25e1dace7f8a599fbaa27e8d5a2c9d338b07bff6b0f0fb6fdcca399426259e1e",
+  "records_verified": 3545,
+  "transitive_links_verified": 86,
+  "gzip_mtime_zero": true,
+  "current_raw_sources_verified": true,
+  "performance_status": "valid_inconclusive",
+  "i011_complete": false
+}

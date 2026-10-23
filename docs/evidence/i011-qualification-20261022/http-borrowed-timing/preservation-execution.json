@@ -1,0 +1,26 @@
+{
+  "state": "green",
+  "command": "CI=1 make -s -f Makefile -f _scratch/i011-20261020/completion-20261022/http-borrowed-timing-audit/preservation.mk i011-http-borrowed-timing-preserve </dev/null",
+  "status": 0,
+  "reviewed_plan_sha256": "951b3f475b9a944a132f67ff3eff5e145660ef49ec9520df7a3fe3510abfb6b7",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-borrowed-timing/manifest.json",
+    "sha256": "bf5b4749c4b4734b3b14fd20d23615e80472d2cb2b6193b4b6ecc69044195f53"
+  },
+  "verification": {
+    "records": 106,
+    "linked": 2748,
+    "all_raw_compressed_hashes_bytes_mtime0_verified": true,
+    "missing": []
+  },
+  "wrapper": {
+    "path": "_scratch/i011-20261020/completion-20261022/http-borrowed-timing-audit/preservation.mk",
+    "sha256": "57eb8a384a138d2bc4d9ded682590d9996264e81dc1d2347c1c1d7ff964d7a6f",
+    "source": "HTTP_BORROWED_TIMING_AUDIT := _scratch/i011-20261020/completion-20261022/http-borrowed-timing-audit\n.PHONY: i011-http-borrowed-timing-preserve\ni011-http-borrowed-timing-preserve:\n\tCI=1 PYTHONDONTWRITEBYTECODE=1 python3 -B $(HTTP_BORROWED_TIMING_AUDIT)/preserve.py execute --reviewed-plan-sha256 951b3f475b9a944a132f67ff3eff5e145660ef49ec9520df7a3fe3510abfb6b7\n"
+  },
+  "frozen_changes": false,
+  "cleanup_performed": false,
+  "scratch_retained": true,
+  "diagnostic_screen": "insufficient_support_or_regression",
+  "qualification_claim": false
+}

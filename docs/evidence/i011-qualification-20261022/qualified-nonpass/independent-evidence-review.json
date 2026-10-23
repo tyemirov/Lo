@@ -1,0 +1,35 @@
+{
+  "actual_pair_telemetry": null,
+  "cleanup_scope": "Only the 14 listed derived guest roots and images. Keep all raw logs, reports, exports, source and package inputs.",
+  "gate_failures": [
+    "linux:http:echo:reciprocal_throughput:inconclusive"
+  ],
+  "i011_complete": false,
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/qualified-nonpass/manifest.json",
+    "sha256": "e17946e1eeafeb50516a409af5b4c013b03aa0975b78db175acb7ed8b1162e7f"
+  },
+  "performance_outcome": "valid_inconclusive",
+  "requested_effort": "high",
+  "requested_model": "gpt-6-astra",
+  "reviewer": "/root/i011_completion_review",
+  "scope": "Independent audit of the valid inconclusive campaign, not issue completion.",
+  "state": "no_blocking_findings",
+  "verified": {
+    "archived_records": 3523,
+    "audit_execution_records": 4,
+    "driver_jobs_terminal": 6,
+    "interpreter_exclusions": 164,
+    "interpreter_passes": 1742,
+    "native_passes": 2733,
+    "native_skips": 0,
+    "offline_exports": 4,
+    "package_files": 333,
+    "recomputed_lanes": 8,
+    "recomputed_merges": 2,
+    "semantic_references": 394,
+    "strict_linux_batch_exports": 6,
+    "transitive_links": 60
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "issue": "I011",
+  "authorization": "Allow manual review for I011 documentation",
+  "scope": "I011_final_documentation_only",
+  "replaced_commands": [
+    "prepare-ste-reference",
+    "check-ste"
+  ],
+  "reason": "installed_commands_resolve_to_another_repository",
+  "reference": {
+    "path": "_scratch/i011-20261020/ste-reference/ASD-STE100_ISSUE9.pdf",
+    "sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "issue": 9,
+    "source": "retained_official_verified_reference"
+  },
+  "unchanged_gates": [
+    "performance",
+    "correctness"
+  ],
+  "external_repository_access": false
+}

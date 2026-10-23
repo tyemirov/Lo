@@ -1,0 +1,14 @@
+{
+  "immutable_input_links": 6,
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-variability/manifest.json",
+    "sha256": "2e64d9a9ad46f9250fd6d639cfdee2bf4f2cab02b8f520b8b9a1a95588a44f45"
+  },
+  "new_measurements": false,
+  "production_changes": false,
+  "qualification_claim": false,
+  "records": 8,
+  "scratch_retained": true,
+  "state": "every_raw_and_compressed_identity_verified"
+}

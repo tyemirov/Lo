@@ -1,0 +1,193 @@
+{
+  "qualification_claim": false,
+  "records": [
+    {
+      "case": "records_10000",
+      "target": "darwin/arm64",
+      "build_host": "darwin/arm64",
+      "whole_elapsed_until_link_ns": 764871791,
+      "build_stage_wall_ns_sum": 592533916,
+      "emission_OS_child_HWM_bytes": 163856384,
+      "LLVM_OS_child_HWM_bytes": 101138432,
+      "artifact_bytes": 17636800,
+      "frames": [
+        [
+          "lo_literals_lo_entry_6",
+          96
+        ],
+        [
+          "lo_entry",
+          320560
+        ]
+      ],
+      "helpers": [
+        {
+          "symbol": "_lo_literals_lo_entry_6",
+          "instruction_count": 75,
+          "call_count": 4
+        }
+      ]
+    },
+    {
+      "case": "map_10000",
+      "target": "darwin/arm64",
+      "build_host": "darwin/arm64",
+      "whole_elapsed_until_link_ns": 835674291,
+      "build_stage_wall_ns_sum": 589254958,
+      "emission_OS_child_HWM_bytes": 144228352,
+      "LLVM_OS_child_HWM_bytes": 102121472,
+      "artifact_bytes": 17521168,
+      "frames": [
+        [
+          "lo_literals_lo_entry_6",
+          96
+        ],
+        [
+          "lo_entry",
+          320560
+        ]
+      ],
+      "helpers": [
+        {
+          "symbol": "_lo_literals_lo_entry_6",
+          "instruction_count": 75,
+          "call_count": 4
+        }
+      ]
+    },
+    {
+      "case": "multiple_groups",
+      "target": "darwin/arm64",
+      "build_host": "darwin/arm64",
+      "whole_elapsed_until_link_ns": 1624817667,
+      "build_stage_wall_ns_sum": 1360086208,
+      "emission_OS_child_HWM_bytes": 288473088,
+      "LLVM_OS_child_HWM_bytes": 156385280,
+      "artifact_bytes": 30928592,
+      "frames": [
+        [
+          "lo_literals_lo_entry_6",
+          96
+        ],
+        [
+          "lo_literals_lo_entry_10",
+          96
+        ],
+        [
+          "lo_entry",
+          640800
+        ]
+      ],
+      "helpers": [
+        {
+          "symbol": "_lo_literals_lo_entry_6",
+          "instruction_count": 75,
+          "call_count": 4
+        },
+        {
+          "symbol": "_lo_literals_lo_entry_10",
+          "instruction_count": 75,
+          "call_count": 4
+        }
+      ]
+    },
+    {
+      "case": "records_10000",
+      "target": "linux/arm64",
+      "build_host": "darwin/arm64",
+      "whole_elapsed_until_link_ns": 2091177208,
+      "build_stage_wall_ns_sum": 1835378041,
+      "emission_OS_child_HWM_bytes": 138166272,
+      "LLVM_OS_child_HWM_bytes": 103006208,
+      "artifact_bytes": 23022384,
+      "frames": [
+        [
+          "lo_literals_lo_entry_6",
+          96
+        ],
+        [
+          "lo_entry",
+          320560
+        ]
+      ],
+      "helpers": [
+        {
+          "symbol": "lo_literals_lo_entry_6",
+          "instruction_count": 76,
+          "call_count": 4
+        }
+      ]
+    },
+    {
+      "case": "map_10000",
+      "target": "linux/arm64",
+      "build_host": "darwin/arm64",
+      "whole_elapsed_until_link_ns": 2298440582,
+      "build_stage_wall_ns_sum": 2119597375,
+      "emission_OS_child_HWM_bytes": 160088064,
+      "LLVM_OS_child_HWM_bytes": 100876288,
+      "artifact_bytes": 22898824,
+      "frames": [
+        [
+          "lo_literals_lo_entry_6",
+          96
+        ],
+        [
+          "lo_entry",
+          320560
+        ]
+      ],
+      "helpers": [
+        {
+          "symbol": "lo_literals_lo_entry_6",
+          "instruction_count": 76,
+          "call_count": 4
+        }
+      ]
+    },
+    {
+      "case": "multiple_groups",
+      "target": "linux/arm64",
+      "build_host": "darwin/arm64",
+      "whole_elapsed_until_link_ns": 1890378958,
+      "build_stage_wall_ns_sum": 1700348833,
+      "emission_OS_child_HWM_bytes": 317456384,
+      "LLVM_OS_child_HWM_bytes": 154419200,
+      "artifact_bytes": 36210312,
+      "frames": [
+        [
+          "lo_literals_lo_entry_6",
+          96
+        ],
+        [
+          "lo_literals_lo_entry_10",
+          96
+        ],
+        [
+          "lo_entry",
+          640800
+        ]
+      ],
+      "helpers": [
+        {
+          "symbol": "lo_literals_lo_entry_6",
+          "instruction_count": 76,
+          "call_count": 4
+        },
+        {
+          "symbol": "lo_literals_lo_entry_10",
+          "instruction_count": 76,
+          "call_count": 4
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "One instrumented build per case. No statistical performance ratio.",
+    "Linux code is cross-compiled on Darwin and executes in maintained Linux HVF guest.",
+    "The diagnostic emitter exits before LLVM compilation. These are not installed-compiler process-tree measurements.",
+    "OS child high-water RSS differs from sampled process-tree RSS and is not summed.",
+    "The linked runtime remains immutable ABI1. Current whole-tree context can include unbuilt ABI2 source.",
+    "The interrupted predecessor remains failed and is not combined with this experiment."
+  ]
+}

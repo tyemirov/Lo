@@ -1,0 +1,21 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "requested_role": "mpr-architect",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "recorded_by": "primary agent from reviewer reports",
+  "state": "scoped_findings_resolved",
+  "scope": "ABI2 and compact-loop contract facts, historical and current qualification status, metric definitions, evidence links, and unchanged measurement files.",
+  "findings_resolved": [
+    "Distinguish p95 ratios from reciprocal throughput ratios.",
+    "Identify earlier ABI1 and compact ABI2 results separately from the current source.",
+    "Name the current parser and HTTP changes in the compiler plan status."
+  ],
+  "verified_local_links": 97,
+  "unchanged_measurement_files": 15,
+  "remaining_findings": [],
+  "manual_language_review": "Owned by the primary agent. This review does not replace it.",
+  "completion_review": "Pending full qualification results and final outcome documentation."
+}

@@ -1,0 +1,103 @@
+{
+  "issue": "B007",
+  "parent_issue": "I011",
+  "phase": "ordinary_lowering_characterization",
+  "qualification_claim": false,
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/validation.json",
+      "bytes": 2223,
+      "sha256": "38b4428794f85a9540735d472da8ba2490c923077085e1a4c8d9095180b05d6a",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/000.gz",
+      "archive_sha256": "1243ed8d627922b4b35b1ad79b37a628da749778f9f6d74572fbd30713f1b3af"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/baseline-input-sha256.json",
+      "bytes": 1669,
+      "sha256": "33eeb56db9c8df8ed68521df65cd3b98b69ccfbc8c6b643b295ab3fd6d6bbb7d",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/001.gz",
+      "archive_sha256": "b42c0a241886eeca25688b2d3cd1153cd49ebe3d9a06634fbb537424b67ad8da"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/focused.mk",
+      "bytes": 965,
+      "sha256": "e250599f1e73e856224f43d23247096e104a81d477220e102a104a7f4f2015c2",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/002.gz",
+      "archive_sha256": "bde1cda32adc00c0500a7f2dbc1b4807e3b12080ff989526028c4bbad7685c91"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/darwin.log",
+      "bytes": 1775,
+      "sha256": "bf8385021b4c342891a72aa42e67e2e864d0deddc59417d4ee53f88ebabc6c9d",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/003.gz",
+      "archive_sha256": "dba3d98a35a63237d4efc3d7c202b093a3426230f1d6177b4dd228a96aaf38c5"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/linux.log",
+      "bytes": 3573,
+      "sha256": "9b8698ed1954f9f9b9353e6a4f799e4ee83dc238084ff8c33808e340761a6864",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/004.gz",
+      "archive_sha256": "0e000456a2d269be69c190081bdd5edcf749fc8e18eb12c75a0c54d4ae677dc4"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/linux/report.json",
+      "bytes": 2656,
+      "sha256": "c4493a170bc8faf52ae1139636a4a508dddce3d0e3404175d8f1ea8f954ea47f",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/005.gz",
+      "archive_sha256": "758f9bc59fd2ef16bdb96fa1f19d6121dea0930b2cb877c89728ff8785650eb8"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/linux/semantic-linux-arm64.jsonl",
+      "bytes": 2337,
+      "sha256": "6b255582e06e789335ddcdc51cfd570bc9bd096a8ee8a02fb76060999bec8910",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/006.gz",
+      "archive_sha256": "ee9fd15af95b6f1f97158dcd5c285075b91253937fedbaaaa374ec098742a99e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/linux/guest/0.stdout",
+      "bytes": 328,
+      "sha256": "465da71cb491ae79433439b11221fe2a8ef45ef16748f9a61642de3763fcbd48",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/007.gz",
+      "archive_sha256": "1d8da9e5cff7f3020e92e1d7e082cf65c1be2e5b661ea9a3948491762cbcdb6e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/linux/guest/0.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/008.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/linux/guest/serial.log",
+      "bytes": 35,
+      "sha256": "b6d426d07e99f9a82bbafd7fd9a70e09803682101d32f0760d779269b039f36c",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/009.gz",
+      "archive_sha256": "b2446358927edc057a6ef28bd9a02c406fb2b0fb967e8b751b3ef6d12d4dbc83"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-status-characterization/linux/guest/export.log",
+      "bytes": 826,
+      "sha256": "a5b5c0e7fe5dff0aa6b33972ae5ba01649478d43e9bf144c0013130cbfa1b8d0",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/010.gz",
+      "archive_sha256": "d08f747f854a92816961b08c92d7e3e414ef9bd0956bd2da2be5e96dee2bbc8a"
+    },
+    {
+      "source": "tests/integration/llvm_literal_sequence_status_test.go",
+      "bytes": 1473,
+      "sha256": "4710d42d4f3d8ac2e44b2338815ea611ae6ef238c30f9f68c63ffe355dd89b08",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/011.gz",
+      "archive_sha256": "f5e7a054c02ee08500fc1373cc22a1a7f02c4adaeab5886d9b304ab12d19f956"
+    },
+    {
+      "source": "testdata/native-qualification/literal-sequence-status.c",
+      "bytes": 5958,
+      "sha256": "32fe82b7e3139058a0bfad67f50d295f2def4989f1ac138fa1e74d5a0d3c8275",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-status-characterization/012.gz",
+      "archive_sha256": "3ba908be73d4d41978abcc69e2ee41ba1849532969afd72124a0179fbd431550"
+    }
+  ],
+  "limits": [
+    "The baseline packages use ABI1. This record is characterization, not final I011 qualification.",
+    "Large binary packages and guest/test executables are identified by retained hashes, not copied."
+  ]
+}

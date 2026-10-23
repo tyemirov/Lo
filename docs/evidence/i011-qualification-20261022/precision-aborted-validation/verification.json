@@ -1,0 +1,38 @@
+{
+  "all_scratch_retained": true,
+  "ci_status": 2,
+  "downstream_path_absence": {
+    "campaign": true,
+    "corpus": true,
+    "offline": true
+  },
+  "failed_test": "TestServeRequestBoundary",
+  "frozen_original_coverage": 2759,
+  "gzip_records": 3066,
+  "hash_only": 80,
+  "historical_links": 140,
+  "i011_complete": false,
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/manifest.json",
+    "sha256": "abd67f6e1b5c4867bf3491c49df76c769c45e5e10425cb22d04bce241f5f707c"
+  },
+  "new_measurements": false,
+  "original_package_archives_and_receipts": 6,
+  "performance_started": false,
+  "primary_source_capture_review": {
+    "basis": "Primary confirmed exact expected original hashes, raw/compressed sizes and digests before source edits.",
+    "records_independently_decompressed_verified": 2759,
+    "reviewer": "/root",
+    "source_capture_sha256": "1dfaae837ff7c57655fb1467df16b7ad1e769e498f808f3535a8efe4fcd900fe"
+  },
+  "qualification_claim": false,
+  "state": "all_aborted_attempt_archives_and_original_identities_verified",
+  "subsequent_jobs_not_started": [
+    "linux-corpus",
+    "component-tools",
+    "offline",
+    "semantic-report",
+    "performance"
+  ]
+}

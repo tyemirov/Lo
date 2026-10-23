@@ -1,0 +1,17 @@
+{
+  "delta_archive_links": 14,
+  "hash_only": 62,
+  "http_gates_passed": 8,
+  "i011_complete": false,
+  "issue": "I011",
+  "linked_records": 214,
+  "manifest": {
+    "bytes": 159505,
+    "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/manifest.json",
+    "sha256": "bd43091ac8528b7968f2c80b1f16c40b9eeb634c514903a33c6609caea804752"
+  },
+  "new_records": 25,
+  "qualification_complete": false,
+  "state": "all_declared_archives_reopened_verified",
+  "whole_campaign_claim": false
+}

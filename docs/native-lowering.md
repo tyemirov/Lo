@@ -16,7 +16,7 @@ bin/lo build program.lo --emit llvm --target darwin/arm64 --output program.ll --
 The other supported target is `linux/arm64`.
 The command uses the checked Lo graph without Go source generation.
 It does not invoke Go, LLVM, a linker, or an SDK.
-Its receipt identifies the output as an LLVM module with the `lo-native-1` ABI.
+Its receipt identifies the output as an LLVM module with the `lo-native-2` ABI.
 Runtime definitions are necessary before the module can become an executable.
 
 Executable builds now use LLVM and the precompiled native runtime.
@@ -43,6 +43,8 @@ Flow calls keep parameter order, handler identity, and source context.
 Built-in calls keep result types, argument positions, labels, and callback identities.
 Each call site has a unique metadata identity, including sites with the same source span.
 Lo runtime metadata keeps the complete source position.
+The [metadata contract](native-runtime-contract.md#program-metadata) uses shared source spans and keeps every runtime site.
+
 LLVM debug metadata uses column zero when the column exceeds 65,535.
 This follows the [LLVM debug-location rule](https://llvm.org/doxygen/DebugInfoMetadata_8cpp_source.html).
 
@@ -153,8 +155,10 @@ The production runtime must implement arbitrary-precision integers under I007.
 ## Recorded Results
 
 The [execution receipt](evidence/native-lowering/execution.json) records the October 20, 2026 component run.
+That recorded run used `lo-native-1`.
 All 11 fixtures passed at O0 and O2.
 The 44 object cells include both supported targets and their source maps.
+
 The Darwin executables passed 132 budget, cancellation, and value-charge cases.
 Two more cases verified rejection of an invalid status with an unusable payload pointer.
 Every executed case ended with zero live fixture values, resource scopes, and active flows.
@@ -162,3 +166,6 @@ Every executed case ended with zero live fixture values, resource scopes, and ac
 The fixtures include argument order, lazy matches, stored failures, handlers, callbacks, folds, and successful fallible-flow returns.
 The public build tests also passed with an empty tool search path.
 The [validation receipt](evidence/native-lowering/validation.json) records package tests, harness tests, CI, review, and source identities.
+
+The ABI2 fixture passed all 44 object cells during B008 checks.
+The [implementation record](evidence/i011-qualification-20261022/metadata-implementation/manifest.json) contains that new component evidence.

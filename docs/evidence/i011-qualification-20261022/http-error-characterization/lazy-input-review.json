@@ -1,0 +1,25 @@
+{
+  "issue": "I011",
+  "state": "reviewed scratch patch; not applied",
+  "reviewer": "/root/i011_completion_review",
+  "recorded_by": "/root",
+  "provenance": "Verbatim native collaboration reviewer result recorded by root.",
+  "report": "The exact lazy-input patch matches the approved design; no blocking findings. It preserves all five request error branches, both response error branches, invalid UTF-8 bytes, and field ownership. Branch order, polling, charges, and callbacks remain unchanged. Apply separately after Reader A/B, then rerun the ten characterization cases and required HTTP checks on both targets. No build or production edit performed during review.",
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/lazy-input.patch",
+      "bytes": 3377,
+      "sha256": "147867909c30922a7ac42415075390d30bab6f2568df220dc76c79b304867453",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/lazy-lazy-input.patch.gz",
+      "archive_sha256": "435187f6288f28cf2b2d052d4d83d481c5ce676f0c5365f79329b001b121d0da"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-error-characterization/lazy-input/receipt.json",
+      "bytes": 954,
+      "sha256": "2e5c6b45b58fc0219d02f7187031a2246280d8523fdb85cac682448863a34edf",
+      "archive": "docs/evidence/i011-qualification-20261022/http-error-characterization/lazy-receipt.json.gz",
+      "archive_sha256": "822e2fdd4a34a2794e962175e2ccceb2f8de86ad8e447cc48e4712fdbb95d7d6"
+    }
+  ],
+  "qualification_claim": false
+}

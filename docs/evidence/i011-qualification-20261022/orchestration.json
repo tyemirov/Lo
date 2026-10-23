@@ -1,0 +1,36 @@
+{
+  "issue": "I011",
+  "source_sha256": "4eda492e14c4e218369aa69ea62b10d386ef3cdec9bf8d2f86ec8ffecc8654fd",
+  "reviewer": "/root/i011_completion_review",
+  "pipeline_review": "no_blocking_findings",
+  "final_audit_required": [
+    "outer_Make_status_matches_recomputed_campaign_outcome",
+    "all_records_and_identities_validated_independently"
+  ],
+  "records": [
+    {
+      "original_path": ".mprlab/XC22-PLAN.md",
+      "original_sha256": "3e2cd0e3d74f3464b5f16f18a9478e69d2e9db1ae12f890a70ff29d4cc6cc73b",
+      "archive": "docs/evidence/i011-qualification-20261022/orchestration-XC22-PLAN.md.gz",
+      "archive_sha256": "ce3063e45b10fcdacaa0444a1a8d85ee5ea9f64060dc6174de026409ab5ac085"
+    },
+    {
+      "original_path": "_scratch/i011-20261020/completion-20261022/final-run.py",
+      "original_sha256": "ab7d122c9676710f4102a11e4fbefff1bdad66f1b5f39d42b246b2836c6a7fb1",
+      "archive": "docs/evidence/i011-qualification-20261022/orchestration-final-run.py.gz",
+      "archive_sha256": "9ed4714ab82b20574710b21f1e07a19cef56101b72c12e2a943c3afeb7f2c950"
+    },
+    {
+      "original_path": "_scratch/i011-20261020/completion-20261022/task.mk",
+      "original_sha256": "10b8b51defd43f267aaff7ff175b1082982317c54958a1c28f614f837a0fa8fb",
+      "archive": "docs/evidence/i011-qualification-20261022/orchestration-task.mk.gz",
+      "archive_sha256": "6248c777bb0fb0f55fa638a4ed203dff21f094ba2919a2c0bde539ebd7c846ad"
+    },
+    {
+      "original_path": "_scratch/i011-20261020/completion-20261022/final/frozen.json",
+      "original_sha256": "e1849b0902daa417f90bb453d11f1a8a5ee7ce1d280eb40d683fd7c7995298c9",
+      "archive": "docs/evidence/i011-qualification-20261022/orchestration-frozen.json.gz",
+      "archive_sha256": "684ec71622eca740c3dd091de806854d150d0057cdc0b86cc57ed95867f905a1"
+    }
+  ]
+}
