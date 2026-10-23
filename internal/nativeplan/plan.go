@@ -9,7 +9,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 )
 
-const ABIIdentity = "lo-native-1"
+const ABIIdentity = "lo-native-2"
 const MaxModuleBytes = 64 << 20
 
 var ErrUnsupported = errors.New("unsupported native lowering")
@@ -47,6 +47,7 @@ func (p *verifiedPlan) Snapshot() Module {
 			for k := range b.Instructions {
 				b.Instructions[k].Inputs = slices.Clone(b.Instructions[k].Inputs)
 				b.Instructions[k].Predecessors = slices.Clone(b.Instructions[k].Predecessors)
+				b.Instructions[k].Literals = slices.Clone(b.Instructions[k].Literals)
 			}
 		}
 	}
@@ -128,7 +129,13 @@ const (
 	ReleaseAll
 	Release
 	TapeLeave
+	LiteralSequence
 )
+
+// LiteralTriple preserves the three original runtime sites for one Int argument.
+type LiteralTriple struct {
+	Step, Literal, Charge uint64
+}
 
 type Instruction struct {
 	Kind           Opcode
@@ -141,6 +148,8 @@ type Instruction struct {
 	CallerLocation bool
 	Payload        bool
 	Index          uint64
+	OwnedBase      ValueID
+	Literals       []LiteralTriple
 }
 
 type TerminatorKind uint8
