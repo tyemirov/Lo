@@ -139,7 +139,7 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
                 &format!("{}: {}", error.kind, error.message),
             );
             if let Some(site) = program.sites.get(error.site as usize) {
-                d["span"] = json!({"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")});
+                d["span"] = site.source_record();
             }
             d["error"] = e.json();
             (d, 1)

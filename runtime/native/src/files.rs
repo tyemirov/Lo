@@ -930,7 +930,7 @@ fn commit_inner(context: &mut Context, site: &Site, target: &Handle) -> Outcome 
     );
     context.last_activation = Some(serde_json::json!({
         "operation": operation,
-        "span": {"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")},
+        "span": site.source_record(),
         "receipt":receipt.json()
     }));
     context.charge(&receipt)?;

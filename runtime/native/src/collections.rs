@@ -138,7 +138,7 @@ fn callback_failure(
     if let Some(state) = state {
         fields.push(("state".into(), state));
     }
-    let owner = site.raw["owner"].as_str().unwrap();
+    let owner = &site.owner;
     let framed = frame(cause, owner, &site.operation, record(fields));
     let Data::Error(original) = &framed.data else {
         std::process::abort()

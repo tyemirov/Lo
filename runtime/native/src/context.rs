@@ -1,5 +1,5 @@
 pub use crate::adapters::Session;
-use crate::metadata::{Document, Fields, Location};
+use crate::metadata::{Document, Fields, SourceSpan};
 use crate::{action::Action, value::*};
 use serde_json::Value as Json;
 use std::{
@@ -202,13 +202,62 @@ pub enum Literal {
 pub struct SiteData {
     pub literal: Option<Literal>,
     pub action: Action,
-    pub raw: Location,
+    pub span: Arc<SourceSpan>,
+    pub owner: String,
+    pub payload: SitePayload,
     pub typ: Type,
     pub id: u64,
     pub operation: String,
     pub labels: Vec<String>,
     pub flow: usize,
     pub arguments: Vec<Argument>,
+}
+#[derive(Clone)]
+pub struct DerivativeOrigin {
+    pub plan: usize,
+    pub node: usize,
+    pub frame: usize,
+}
+#[derive(Clone)]
+pub enum SitePayload {
+    Empty,
+    Body(DerivativeOrigin),
+    Literal {
+        text: String,
+        float_bits: Option<String>,
+    },
+    Project(String),
+    Operation,
+    Derivative(DerivativeOrigin),
+}
+impl SiteData {
+    pub fn source_record(&self) -> Json {
+        self.span.source_record()
+    }
+    pub fn derivative_origin(&self) -> Option<&DerivativeOrigin> {
+        match &self.payload {
+            SitePayload::Body(origin) | SitePayload::Derivative(origin) => Some(origin),
+            _ => None,
+        }
+    }
+    pub fn derivative(&self) -> &DerivativeOrigin {
+        match self.derivative_origin() {
+            Some(origin) => origin,
+            None => std::process::abort(),
+        }
+    }
+    pub fn project_field(&self) -> &str {
+        match &self.payload {
+            SitePayload::Project(field) => field,
+            _ => std::process::abort(),
+        }
+    }
+    fn literal_source(&self) -> (&str, Option<&str>) {
+        match &self.payload {
+            SitePayload::Literal { text, float_bits } => (text, float_bits.as_deref()),
+            _ => std::process::abort(),
+        }
+    }
 }
 #[derive(Clone)]
 pub struct Flow(Arc<FlowData>);
@@ -273,12 +322,78 @@ fn borrowed_string<'a>(v: &'a impl Fields, key: &str) -> Result<&'a str, String>
 fn string(v: &impl Fields, key: &str) -> Result<String, String> {
     borrowed_string(v, key).map(str::to_owned)
 }
+fn closed(value: &Json, keys: &[&str], subject: &str) -> Result<(), String> {
+    let fields = value
+        .as_object()
+        .ok_or_else(|| format!("invalid metadata {subject}"))?;
+    for key in fields.keys() {
+        if !keys.contains(&key.as_str()) {
+            return Err(format!("unknown {subject} metadata field {key}"));
+        }
+    }
+    Ok(())
+}
+fn derivative_origin(value: &Json) -> Result<DerivativeOrigin, String> {
+    Ok(DerivativeOrigin {
+        plan: uint(value, "derivative_plan")?,
+        node: uint(value, "derivative_node")?,
+        frame: uint(value, "derivative_frame")?,
+    })
+}
+fn operation_metadata(
+    value: &Json,
+    types: &[Type],
+    flow_count: usize,
+) -> Result<(String, Vec<String>, Vec<Argument>), String> {
+    let operation = string(value, "operation")?;
+    let labels = value["labels"]
+        .as_array()
+        .ok_or("invalid site labels")?
+        .iter()
+        .map(|label| {
+            label
+                .as_str()
+                .map(str::to_owned)
+                .ok_or("invalid label".to_owned())
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let mut arguments = Vec::new();
+    for argument in value["arguments"]
+        .as_array()
+        .ok_or("absent argument metadata")?
+    {
+        let typ = uint(argument, "type")?;
+        let flow = uint(argument, "flow")?;
+        arguments.push(match borrowed_string(argument, "kind")? {
+            "value" if flow == 0 => {
+                Argument::Value(types.get(typ).ok_or("unknown argument type")?.clone())
+            }
+            "flow" if typ == 0 && flow < flow_count => Argument::Flow(flow),
+            _ => return Err("invalid argument metadata".into()),
+        });
+    }
+    Ok((operation, labels, arguments))
+}
 impl Program {
     pub fn parse(data: &[u8], flow_count: usize) -> Result<Self, String> {
         let document: Document =
             serde_json::from_slice(data).map_err(|e| format!("program metadata: {e}"))?;
         let v = document.root;
-        if v["abi"] != "lo-native-1" {
+        closed(
+            &v,
+            &[
+                "abi",
+                "has_result",
+                "source",
+                "types",
+                "files",
+                "flows",
+                "derivatives",
+                "artifact",
+            ],
+            "program",
+        )?;
+        if v["abi"] != "lo-native-2" {
             return Err("program ABI identity mismatch".into());
         }
         if !v["source"]["path"].is_string()
@@ -304,72 +419,141 @@ impl Program {
             }
             types.push(typ)
         }
-        let mut sites = vec![];
-        let locations = document.locations.ok_or("absent metadata locations")?;
-        for (i, s) in locations.into_iter().enumerate() {
-            if uint(&s, "id")? != i {
-                return Err("noncanonical location identifier".into());
+        let files = v["files"]
+            .as_array()
+            .ok_or("absent metadata files")?
+            .iter()
+            .map(|file| {
+                file.as_str()
+                    .map(Arc::<str>::from)
+                    .ok_or("invalid metadata file".to_owned())
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        let mut spans = Vec::new();
+        for span in document.spans.ok_or("absent metadata spans")? {
+            if let Some(key) = span.unknown_fields.iter().next() {
+                return Err(format!("unknown span metadata field {key}"));
             }
-            let t = types
-                .get(uint(&s, "type")?)
-                .ok_or("unknown site type")?
-                .clone();
-            let labels = s["labels"]
-                .as_array()
-                .ok_or("invalid site labels")?
-                .iter()
-                .map(|x| {
-                    x.as_str()
-                        .map(str::to_owned)
-                        .ok_or("invalid label".to_string())
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-            let mut arguments = vec![];
-            for a in s["arguments"]
-                .as_array()
-                .ok_or("absent argument metadata")?
-            {
-                let t = uint(a, "type")?;
-                let f = uint(a, "flow")?;
-                arguments.push(match borrowed_string(a, "kind")? {
-                    "value" if f == 0 => {
-                        Argument::Value(types.get(t).ok_or("unknown argument type")?.clone())
-                    }
-                    "flow" if t == 0 && f < flow_count => Argument::Flow(f),
-                    _ => return Err("invalid argument metadata".into()),
-                });
-            }
-            let action = Action::parse(borrowed_string(&s, "action")?)?;
-            let _ = borrowed_string(&s, "file")?;
-            let _ = borrowed_string(&s, "owner")?;
-            for key in ["text", "float_bits", "field"] {
-                borrowed_string(&s, key)?;
-            }
-            for key in ["start", "end"] {
-                for coordinate in ["offset", "line", "column"] {
-                    let n = uint(s.coordinate(key), coordinate)?;
-                    if coordinate != "offset" && n == 0 {
+            let file_index = span
+                .file_index
+                .as_u64()
+                .and_then(|index| usize::try_from(index).ok())
+                .ok_or("invalid metadata file_index")?;
+            let file = files.get(file_index).ok_or("unknown span file")?.clone();
+            for coordinate in [&span.start, &span.end] {
+                for key in ["offset", "line", "column"] {
+                    let value = uint(coordinate, key)?;
+                    if key != "offset" && value == 0 {
                         return Err("invalid location coordinate".into());
                     }
                 }
             }
-            if uint(s.coordinate("end"), "offset")? < uint(s.coordinate("start"), "offset")?
-                || uint(s.coordinate("end"), "line")? < uint(s.coordinate("start"), "line")?
+            if uint(&span.end, "offset")? < uint(&span.start, "offset")?
+                || uint(&span.end, "line")? < uint(&span.start, "line")?
             {
                 return Err("invalid source span".into());
             }
-            let operation = string(&s, "operation")?;
-            let flow = uint(&s, "flow")?;
+            spans.push(Arc::new(SourceSpan {
+                file,
+                start: span.start,
+                end: span.end,
+            }));
+        }
+        let mut sites = Vec::new();
+        for (index, row) in document
+            .locations
+            .as_ref()
+            .ok_or("absent metadata locations")?
+            .iter()
+            .enumerate()
+        {
+            if !row.object {
+                return Err("invalid metadata site".into());
+            }
+            if let Some(key) = row.unknown_fields.iter().next() {
+                return Err(format!("unknown site metadata field {key}"));
+            }
+            let span = spans
+                .get(uint(row, "span")?)
+                .ok_or("unknown site span")?
+                .clone();
+            let action = Action::parse(borrowed_string(row, "action")?)?;
+            let typ = types
+                .get(uint(row, "type")?)
+                .ok_or("unknown site type")?
+                .clone();
+            let owner = string(row, "owner")?;
+            let flow = uint(row, "flow")?;
+            let value = row.field("payload");
+            let mut operation = String::new();
+            let mut labels = Vec::new();
+            let mut arguments = Vec::new();
+            let payload = match action {
+                Action::Body => {
+                    closed(
+                        value,
+                        &["derivative_plan", "derivative_node", "derivative_frame"],
+                        "payload",
+                    )?;
+                    SitePayload::Body(derivative_origin(value)?)
+                }
+                Action::Literal => {
+                    if typ.kind() == "Float" {
+                        closed(value, &["text", "float_bits"], "payload")?;
+                    } else {
+                        closed(value, &["text"], "payload")?;
+                    }
+                    let text = string(value, "text")?;
+                    let float_bits = if typ.kind() == "Float" {
+                        Some(string(value, "float_bits")?)
+                    } else {
+                        None
+                    };
+                    SitePayload::Literal { text, float_bits }
+                }
+                Action::Project => {
+                    closed(value, &["field"], "payload")?;
+                    SitePayload::Project(string(value, "field")?)
+                }
+                Action::Operation => {
+                    closed(value, &["operation", "labels", "arguments"], "payload")?;
+                    (operation, labels, arguments) = operation_metadata(value, &types, flow_count)?;
+                    SitePayload::Operation
+                }
+                action if action.is_derivative() => {
+                    closed(
+                        value,
+                        &[
+                            "derivative_plan",
+                            "derivative_node",
+                            "derivative_frame",
+                            "operation",
+                            "labels",
+                            "arguments",
+                        ],
+                        "payload",
+                    )?;
+                    let origin = derivative_origin(value)?;
+                    (operation, labels, arguments) = operation_metadata(value, &types, flow_count)?;
+                    SitePayload::Derivative(origin)
+                }
+                _ => {
+                    closed(value, &[], "payload")?;
+                    SitePayload::Empty
+                }
+            };
             sites.push(Site(Arc::new(SiteData {
                 literal: None,
                 action,
-                typ: t,
-                id: i as u64,
+                span,
+                owner,
+                payload,
+                typ,
+                id: index as u64,
                 operation,
                 labels,
                 arguments,
                 flow,
-                raw: s,
             })));
         }
         let flows_json = v["flows"].as_array().ok_or("absent metadata flows")?;
@@ -470,7 +654,7 @@ impl Program {
                 return Err("invalid native action result type".into());
             }
             if site.action == Action::Literal {
-                let t = site.raw["text"].as_str().unwrap();
+                let (t, float_bits) = site.literal_source();
                 let valid = match site.typ.kind() {
                     "Int" => {
                         let digits = t
@@ -482,7 +666,7 @@ impl Program {
                     "Bool" => t == "true" || t == "false",
                     "Null" => t == "null",
                     "Float" => {
-                        let bits = site.raw["float_bits"].as_str().unwrap();
+                        let bits = float_bits.unwrap();
                         bits.len() == 16
                             && u64::from_str_radix(bits, 16)
                                 .is_ok_and(|b| f64::from_bits(b).is_finite())
@@ -504,9 +688,8 @@ impl Program {
                         }
                     }
                     "Float" => {
-                        let bits =
-                            u64::from_str_radix(site.raw["float_bits"].as_str().unwrap(), 16)
-                                .map_err(|_| "invalid native Float metadata")?;
+                        let bits = u64::from_str_radix(float_bits.unwrap(), 16)
+                            .map_err(|_| "invalid native Float metadata")?;
                         Literal::Value(new(atom("Float"), Data::Float(f64::from_bits(bits))))
                     }
                     "String" if t.len() > MAX_BYTES => Literal::Limit("string bytes"),
@@ -516,7 +699,7 @@ impl Program {
                     _ => unreachable!(),
                 });
             }
-            if site.action == Action::Project && site.raw["field"].as_str().unwrap().is_empty() {
+            if site.action == Action::Project && site.project_field().is_empty() {
                 return Err("invalid projection metadata".into());
             }
             if site.action.is_derivative() {

@@ -1,88 +1,8 @@
 use serde::de::{self, Deserialize, Deserializer, MapAccess, SeqAccess, Visitor};
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json::Value as Json;
-use std::{fmt, ops::Index};
+use std::{collections::BTreeSet, fmt, sync::Arc};
 
-const KEYS: [&str; 15] = [
-    "action",
-    "arguments",
-    "derivative_frame",
-    "derivative_node",
-    "derivative_plan",
-    "field",
-    "file",
-    "float_bits",
-    "flow",
-    "id",
-    "labels",
-    "operation",
-    "owner",
-    "text",
-    "type",
-];
-fn slot(key: &str) -> Option<usize> {
-    match key {
-        "action" => Some(0),
-        "arguments" => Some(1),
-        "derivative_frame" => Some(2),
-        "derivative_node" => Some(3),
-        "derivative_plan" => Some(4),
-        "field" => Some(5),
-        "file" => Some(6),
-        "float_bits" => Some(7),
-        "flow" => Some(8),
-        "id" => Some(9),
-        "labels" => Some(10),
-        "operation" => Some(11),
-        "owner" => Some(12),
-        "text" => Some(13),
-        "type" => Some(14),
-        _ => None,
-    }
-}
-#[derive(Clone)]
-pub struct Location(Option<Box<LocationValues>>);
-#[derive(Clone)]
-struct LocationValues {
-    fields: [Json; KEYS.len()],
-    coordinates: [Coordinate; 2],
-}
-impl Default for LocationValues {
-    fn default() -> Self {
-        Self {
-            fields: std::array::from_fn(|_| Json::Null),
-            coordinates: std::array::from_fn(|_| Coordinate::default()),
-        }
-    }
-}
-impl Location {
-    pub fn coordinate(&self, key: &str) -> &Coordinate {
-        static NULL: Coordinate = Coordinate::Other(Json::Null);
-        let index = match key {
-            "start" => 0,
-            "end" => 1,
-            _ => return &NULL,
-        };
-        self.0
-            .as_ref()
-            .map_or(&NULL, |values| &values.coordinates[index])
-    }
-}
-impl Default for Location {
-    fn default() -> Self {
-        Self(None)
-    }
-}
-impl Index<&str> for Location {
-    type Output = Json;
-    fn index(&self, key: &str) -> &Json {
-        static NULL: Json = Json::Null;
-        self.0
-            .as_ref()
-            .and_then(|values| slot(key).map(|index| &values.fields[index]))
-            .unwrap_or(&NULL)
-    }
-}
 pub trait Fields {
     fn field(&self, key: &str) -> &Json;
 }
@@ -91,43 +11,7 @@ impl Fields for Json {
         &self[key]
     }
 }
-impl Fields for Location {
-    fn field(&self, key: &str) -> &Json {
-        &self[key]
-    }
-}
-enum Key {
-    Field(usize),
-    Coordinate(usize),
-    Unknown,
-}
-impl Key {
-    fn from_name(key: &str) -> Self {
-        match key {
-            "start" => Self::Coordinate(0),
-            "end" => Self::Coordinate(1),
-            _ => slot(key).map_or(Self::Unknown, Self::Field),
-        }
-    }
-}
-impl<'de> Deserialize<'de> for Key {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        struct KeyVisitor;
-        impl<'de> Visitor<'de> for KeyVisitor {
-            type Value = Key;
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.write_str("an object key")
-            }
-            fn visit_str<E: de::Error>(self, value: &str) -> Result<Key, E> {
-                Ok(Key::from_name(value))
-            }
-            fn visit_string<E: de::Error>(self, value: String) -> Result<Key, E> {
-                self.visit_str(&value)
-            }
-        }
-        d.deserialize_str(KeyVisitor)
-    }
-}
+
 // Non-object/array shapes still parse their entire JSON value. Validation remains in Program::parse.
 macro_rules! scalar_visits {
     ($value:expr) => {
@@ -319,114 +203,295 @@ impl<'de> Deserialize<'de> for Coordinate {
     }
 }
 
-impl<'de> Deserialize<'de> for Location {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        struct LocationVisitor;
-        impl<'de> Visitor<'de> for LocationVisitor {
-            type Value = Location;
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.write_str("a JSON value")
+#[derive(Clone)]
+pub struct SourceSpan {
+    pub file: Arc<str>,
+    pub start: Coordinate,
+    pub end: Coordinate,
+}
+impl SourceSpan {
+    pub fn source_record(&self) -> Json {
+        serde_json::json!({"file":self.file.as_ref(),"start":self.start,"end":self.end})
+    }
+}
+#[derive(Default)]
+pub struct SpanRecord {
+    pub file_index: Json,
+    pub start: Coordinate,
+    pub end: Coordinate,
+    pub unknown_fields: BTreeSet<String>,
+}
+impl<'de> Deserialize<'de> for SpanRecord {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct SpanVisitor;
+        impl<'de> Visitor<'de> for SpanVisitor {
+            type Value = SpanRecord;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a JSON value")
             }
-            scalar_visits!(Location::default());
-            fn visit_seq<A: SeqAccess<'de>>(self, seq: A) -> Result<Location, A::Error> {
-                Json::deserialize(de::value::SeqAccessDeserializer::new(seq))?;
-                Ok(Location::default())
+            scalar_visits!(SpanRecord::default());
+            fn visit_seq<A: SeqAccess<'de>>(self, sequence: A) -> Result<Self::Value, A::Error> {
+                Json::deserialize(de::value::SeqAccessDeserializer::new(sequence))?;
+                Ok(SpanRecord::default())
             }
-            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Location, A::Error> {
-                let mut location = Location::default();
-                while let Some(key) = map.next_key::<Key>()? {
-                    match key {
-                        Key::Field(index) => {
-                            let value = map.next_value::<Json>()?;
-                            location
-                                .0
-                                .get_or_insert_with(|| Box::new(LocationValues::default()))
-                                .fields[index] = value;
-                        }
-                        Key::Coordinate(index) => {
-                            let value = map.next_value::<Coordinate>()?;
-                            location
-                                .0
-                                .get_or_insert_with(|| Box::new(LocationValues::default()))
-                                .coordinates[index] = value;
-                        }
-                        Key::Unknown => {
+            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
+                let mut span = SpanRecord::default();
+                while let Some(key) = map.next_key::<String>()? {
+                    match key.as_str() {
+                        "file_index" => span.file_index = map.next_value()?,
+                        "start" => span.start = map.next_value()?,
+                        "end" => span.end = map.next_value()?,
+                        _ => {
                             map.next_value::<Json>()?;
+                            span.unknown_fields.insert(key);
                         }
                     }
                 }
-                Ok(location)
+                Ok(span)
             }
         }
-        d.deserialize_any(LocationVisitor)
+        deserializer.deserialize_any(SpanVisitor)
     }
 }
-struct Locations(Option<Vec<Location>>);
-impl<'de> Deserialize<'de> for Locations {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        struct LocationsVisitor;
-        impl<'de> Visitor<'de> for LocationsVisitor {
-            type Value = Locations;
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.write_str("a JSON value")
+struct Spans(Option<Vec<SpanRecord>>);
+impl<'de> Deserialize<'de> for Spans {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct SpansVisitor;
+        impl<'de> Visitor<'de> for SpansVisitor {
+            type Value = Spans;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a JSON value")
             }
-            scalar_visits!(Locations(None));
-            fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Locations, A::Error> {
-                let mut locations = Vec::new();
-                while let Some(location) = seq.next_element()? {
-                    locations.push(location);
+            scalar_visits!(Spans(None));
+            fn visit_seq<A: SeqAccess<'de>>(
+                self,
+                mut sequence: A,
+            ) -> Result<Self::Value, A::Error> {
+                let mut spans = Vec::new();
+                while let Some(span) = sequence.next_element()? {
+                    spans.push(span);
                 }
-                Ok(Locations(Some(locations)))
+                Ok(Spans(Some(spans)))
             }
-            fn visit_map<A: MapAccess<'de>>(self, map: A) -> Result<Locations, A::Error> {
+            fn visit_map<A: MapAccess<'de>>(self, map: A) -> Result<Self::Value, A::Error> {
                 Json::deserialize(de::value::MapAccessDeserializer::new(map))?;
-                Ok(Locations(None))
+                Ok(Spans(None))
             }
         }
-        d.deserialize_any(LocationsVisitor)
+        deserializer.deserialize_any(SpansVisitor)
     }
 }
-pub struct Document {
-    pub root: Json,
-    pub locations: Option<Vec<Location>>,
+fn row_slot(key: &str) -> Option<usize> {
+    match key {
+        "span" => Some(0),
+        "action" => Some(1),
+        "type" => Some(2),
+        "owner" => Some(3),
+        "flow" => Some(4),
+        "payload" => Some(5),
+        _ => None,
+    }
 }
-impl Default for Document {
+pub struct RowRecord {
+    pub object: bool,
+    values: [Json; 6],
+    pub unknown_fields: BTreeSet<String>,
+}
+impl Default for RowRecord {
     fn default() -> Self {
         Self {
-            root: Json::Null,
-            locations: None,
+            object: false,
+            values: std::array::from_fn(|_| Json::Null),
+            unknown_fields: BTreeSet::new(),
         }
     }
 }
+impl Fields for RowRecord {
+    fn field(&self, key: &str) -> &Json {
+        static NULL: Json = Json::Null;
+        row_slot(key)
+            .map(|index| &self.values[index])
+            .unwrap_or(&NULL)
+    }
+}
+enum RowKey {
+    Known(usize),
+    Extra(String),
+}
+impl<'de> Deserialize<'de> for RowKey {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct KeyVisitor;
+        impl<'de> Visitor<'de> for KeyVisitor {
+            type Value = RowKey;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("an object key")
+            }
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                Ok(match row_slot(value) {
+                    Some(index) => RowKey::Known(index),
+                    None => RowKey::Extra(value.into()),
+                })
+            }
+            fn visit_string<E: de::Error>(self, value: String) -> Result<Self::Value, E> {
+                Ok(match row_slot(&value) {
+                    Some(index) => RowKey::Known(index),
+                    None => RowKey::Extra(value),
+                })
+            }
+        }
+        deserializer.deserialize_str(KeyVisitor)
+    }
+}
+impl<'de> Deserialize<'de> for RowRecord {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct RowVisitor;
+        impl<'de> Visitor<'de> for RowVisitor {
+            type Value = RowRecord;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a JSON value")
+            }
+            scalar_visits!(RowRecord::default());
+            fn visit_seq<A: SeqAccess<'de>>(self, sequence: A) -> Result<Self::Value, A::Error> {
+                Json::deserialize(de::value::SeqAccessDeserializer::new(sequence))?;
+                Ok(RowRecord::default())
+            }
+            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
+                let mut row = RowRecord {
+                    object: true,
+                    ..RowRecord::default()
+                };
+                while let Some(key) = map.next_key::<RowKey>()? {
+                    let value = map.next_value::<Json>()?;
+                    match key {
+                        RowKey::Known(index) => row.values[index] = value,
+                        RowKey::Extra(key) => {
+                            row.unknown_fields.insert(key);
+                        }
+                    }
+                }
+                Ok(row)
+            }
+        }
+        deserializer.deserialize_any(RowVisitor)
+    }
+}
+struct Rows(Option<Vec<RowRecord>>);
+impl<'de> Deserialize<'de> for Rows {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct RowsVisitor;
+        impl<'de> Visitor<'de> for RowsVisitor {
+            type Value = Rows;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a JSON value")
+            }
+            scalar_visits!(Rows(None));
+            fn visit_seq<A: SeqAccess<'de>>(
+                self,
+                mut sequence: A,
+            ) -> Result<Self::Value, A::Error> {
+                let mut rows = Vec::new();
+                while let Some(row) = sequence.next_element()? {
+                    rows.push(row);
+                }
+                Ok(Rows(Some(rows)))
+            }
+            fn visit_map<A: MapAccess<'de>>(self, map: A) -> Result<Self::Value, A::Error> {
+                Json::deserialize(de::value::MapAccessDeserializer::new(map))?;
+                Ok(Rows(None))
+            }
+        }
+        deserializer.deserialize_any(RowsVisitor)
+    }
+}
+#[derive(Default)]
+pub struct Document {
+    pub root: Json,
+    pub spans: Option<Vec<SpanRecord>>,
+    pub locations: Option<Vec<RowRecord>>,
+}
 impl<'de> Deserialize<'de> for Document {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         struct DocumentVisitor;
         impl<'de> Visitor<'de> for DocumentVisitor {
             type Value = Document;
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.write_str("a JSON value")
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a JSON value")
             }
             scalar_visits!(Document::default());
-            fn visit_seq<A: SeqAccess<'de>>(self, seq: A) -> Result<Document, A::Error> {
-                Json::deserialize(de::value::SeqAccessDeserializer::new(seq))?;
+            fn visit_seq<A: SeqAccess<'de>>(self, sequence: A) -> Result<Self::Value, A::Error> {
+                Json::deserialize(de::value::SeqAccessDeserializer::new(sequence))?;
                 Ok(Document::default())
             }
-            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Document, A::Error> {
+            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
                 let mut root = serde_json::Map::new();
+                let mut spans = None;
                 let mut locations = None;
                 while let Some(key) = map.next_key::<String>()? {
-                    if key == "locations" {
-                        locations = map.next_value::<Locations>()?.0;
+                    if key == "spans" {
+                        spans = map.next_value::<Spans>()?.0;
+                    } else if key == "locations" {
+                        locations = map.next_value::<Rows>()?.0;
                     } else {
                         root.insert(key, map.next_value::<Json>()?);
                     }
                 }
                 Ok(Document {
                     root: Json::Object(root),
+                    spans,
                     locations,
                 })
             }
         }
-        d.deserialize_any(DocumentVisitor)
+        deserializer.deserialize_any(DocumentVisitor)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn duplicate_root_span_and_coordinate_keys_use_last_value() {
+        let document: Document = serde_json::from_str(r#"{"spans":false,"spans":[{"file_index":false,"file_index":0,"start":{"column":false,"col\u0075mn":7,"extra":false,"extr\u0061":null},"end":{}}]}"#).unwrap();
+        let span = &document.spans.unwrap()[0];
+        assert_eq!(span.file_index, Json::from(0));
+        assert_eq!(span.start.field("column"), &Json::from(7));
+        assert_eq!(span.start.field("extra"), &Json::Null);
+    }
+    #[test]
+    fn unknown_fields_and_overwritten_values_are_fully_parsed() {
+        for data in [
+            r#"{"unknown":1e999}"#,
+            r#"{"spans":[{"unknown":1e999}],"spans":[]}"#,
+        ] {
+            assert!(serde_json::from_str::<Document>(data)
+                .err()
+                .unwrap()
+                .to_string()
+                .starts_with("number out of range"));
+        }
+    }
+    #[test]
+    fn span_unknown_field_is_retained_for_later_semantic_rejection() {
+        let document: Document =
+            serde_json::from_str(r#"{"spans":[{"unknown":{"nested":[null,true]}}]}"#).unwrap();
+        assert!(document.spans.unwrap()[0]
+            .unknown_fields
+            .contains("unknown"));
+    }
+    #[test]
+    fn source_records_preserve_coordinate_extension_values() {
+        let coordinate: Coordinate = serde_json::from_str(
+            r#"{"offset":0,"line":1,"column":2,"extra":[null,{"κ":"é界"},18446744073709551615]}"#,
+        )
+        .unwrap();
+        let span = SourceSpan {
+            file: Arc::from("exact/λ.lo"),
+            start: coordinate.clone(),
+            end: coordinate,
+        };
+        let record = span.source_record();
+        assert_eq!(record["file"], "exact/λ.lo");
+        assert_eq!(record["start"]["extra"][2].as_u64(), Some(u64::MAX));
+        assert_eq!(record["start"], record["end"]);
     }
 }

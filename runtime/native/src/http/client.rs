@@ -300,7 +300,8 @@ pub fn exchange(
             connection: &mut connection,
             context,
             deadline,
-            pending: vec![],
+            valid: 0,
+            scratch: [0; 8192],
             offset: 0,
             idle_header: false,
             strict_crlf: true,
@@ -412,34 +413,33 @@ pub fn framing(headers: &[(String, Vec<u8>)]) -> Result<Framing, Fault> {
 }
 pub trait ReadWrite: Read + Write {}
 impl<T: Read + Write> ReadWrite for T {}
-pub struct Reader<'a> {
-    pub connection: &'a mut dyn ReadWrite,
+pub struct Reader<'a, T: ReadWrite> {
+    pub connection: &'a mut T,
     pub context: &'a Context,
     pub deadline: Instant,
-    pub pending: Vec<u8>,
+    pub valid: usize,
+    pub scratch: [u8; 8192],
     pub offset: usize,
     pub idle_header: bool,
     pub strict_crlf: bool,
 }
-impl Reader<'_> {
+impl<T: ReadWrite> Reader<'_, T> {
     fn byte(&mut self) -> Result<Option<u8>, Fault> {
         loop {
             cancelled(self.context, self.deadline)?;
-            if self.offset < self.pending.len() {
-                let b = self.pending[self.offset];
+            if self.offset < self.valid {
+                let b = self.scratch[self.offset];
                 self.offset += 1;
                 return Ok(Some(b));
             }
-            let mut buffer = [0u8; 8192];
-            match self.connection.read(&mut buffer) {
+            match self.connection.read(&mut self.scratch) {
                 Ok(0) => return Ok(None),
                 Ok(n) => {
                     if self.idle_header {
                         self.deadline = Instant::now() + Duration::from_secs(5);
                         self.idle_header = false;
                     }
-                    self.pending.clear();
-                    self.pending.extend_from_slice(&buffer[..n]);
+                    self.valid = n;
                     self.offset = 0
                 }
                 Err(e) if retry(&e) => continue,

@@ -1418,7 +1418,7 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
         ("stderr_bytes".into(), int(r.stderr_size)),
     ]);
     context.last_activation = Some(
-        json!({"operation":"Process.run","span":{"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")},"result_type":"Process.Result","process":completed.json()}),
+        json!({"operation":"Process.run","span":site.source_record(),"result_type":"Process.Result","process":completed.json()}),
     );
     context.charge(&receipt)?;
     Ok(receipt)

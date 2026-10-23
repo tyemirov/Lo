@@ -146,7 +146,7 @@ pub unsafe fn call(
         crate::tensor::validate_inputs(&*c, &a)?;
         if let Some(op) = operation {
             if op.starts_with("lo_derivative_") {
-                if op.strip_prefix("lo_") != s.raw["action"].as_str() {
+                if op.strip_prefix("lo_") != Some(s.action.as_str()) {
                     return Err(host("derivative helper metadata mismatch"));
                 }
                 return crate::autodiff::execute(&mut *c, &s, &a);
@@ -259,7 +259,7 @@ fn validate_helper(symbol: &str, s: &Site, a: &[Handle]) -> Result<(), Fault> {
                 && s.typ == Type::Fallible(Box::new(atom("Record")))
         }
         "lo_project" => {
-            let field = s.raw["field"].as_str().unwrap();
+            let field = s.project_field();
             let typ = match &a[0].data {
                 Data::Record(fields) => fields.get(field).map(|v| v.typ.clone()),
                 Data::Wrapped(v) => v.fields().get(field).map(|v| v.typ.clone()),
@@ -399,9 +399,7 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
             Ok(new(s.typ.clone(), Data::List(output)))
         }
         Action::Project => {
-            let field = s.raw["field"]
-                .as_str()
-                .ok_or_else(|| host("projection field"))?;
+            let field = s.project_field();
             if let Data::Error(e) = &a[0].data {
                 return match field {
                     "kind" => Ok(text(&e.kind)),
@@ -428,7 +426,7 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
         Action::Commit => crate::adapters::commit(c, s, &a[0]),
         _ => Err(host(format!(
             "invalid runtime action {}",
-            s.raw["action"].as_str().unwrap()
+            s.action.as_str()
         ))),
     }
 }
