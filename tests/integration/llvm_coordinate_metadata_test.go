@@ -17,7 +17,7 @@ func TestLLVMCoordinateMetadataAdmission(t *testing.T) {
 }
 func coordinateMetadataCases() []locationMetadataCase {
 	var cases []locationMetadataCase
-	first := func(root map[string]any) map[string]any { return root["locations"].([]any)[0].(map[string]any) }
+	first := func(root map[string]any) map[string]any { return root["spans"].([]any)[0].(map[string]any) }
 	add := func(name, message string, edit func(map[string]any)) {
 		cases = append(cases, locationMetadataCase{name, message, func(root map[string]any) []byte { edit(first(root)); return locationMetadataJSON(root) }})
 	}
@@ -26,7 +26,7 @@ func coordinateMetadataCases() []locationMetadataCase {
 	}
 	appendCoordinate := func(root, site map[string]any, key, value string) []byte {
 		data := string(locationMetadataJSON(site))
-		return locationMetadataFirst(root, data[:len(data)-1]+fmt.Sprintf(",%q:%s}", key, value))
+		return locationMetadataFirstSpan(root, data[:len(data)-1]+fmt.Sprintf(",%q:%s}", key, value))
 	}
 	for _, key := range []string{"start", "end"} {
 		add("missing-"+key, "invalid metadata offset", func(site map[string]any) { delete(site, key) })
@@ -50,7 +50,7 @@ func coordinateMetadataCases() []locationMetadataCase {
 		}
 		raw(key+"-duplicate-valid-last", "", func(root, site map[string]any) []byte {
 			data := string(locationMetadataJSON(site))
-			return locationMetadataFirst(root, fmt.Sprintf("{%q:null,", key)+data[1:])
+			return locationMetadataFirstSpan(root, fmt.Sprintf("{%q:null,", key)+data[1:])
 		})
 		raw(key+"-duplicate-invalid-last", "invalid metadata offset", func(root, site map[string]any) []byte { return appendCoordinate(root, site, key, "null") })
 		raw(key+"-escaped-key", "", func(root, site map[string]any) []byte {
@@ -59,7 +59,7 @@ func coordinateMetadataCases() []locationMetadataCase {
 			if key == "end" {
 				spelling = `\u0065nd`
 			}
-			return locationMetadataFirst(root, strings.Replace(data, fmt.Sprintf("%q:", key), `"`+spelling+`":`, 1))
+			return locationMetadataFirstSpan(root, strings.Replace(data, fmt.Sprintf("%q:", key), `"`+spelling+`":`, 1))
 		})
 		for _, field := range []string{"offset", "line", "column"} {
 			raw(key+"-"+field+"-duplicate-valid-last", "", func(root, site map[string]any) []byte {
@@ -110,7 +110,7 @@ func coordinateMetadataCases() []locationMetadataCase {
 		site["end"].(map[string]any)["line"] = "bad"
 	})
 	raw("json-before-semantic-error", "program metadata: number out of range", func(root, site map[string]any) []byte {
-		site["id"] = "bad"
+		site["file_index"] = "bad"
 		coordinate := string(locationMetadataJSON(site["end"]))
 		return appendCoordinate(root, site, "end", coordinate[:len(coordinate)-1]+`,"unknown":1e999}`)
 	})
@@ -136,7 +136,7 @@ func coordinateMetadataCases() []locationMetadataCase {
 	})
 	raw("duplicate-coordinate-earlier-json-error", "program metadata: number out of range", func(root, site map[string]any) []byte {
 		data := string(locationMetadataJSON(site))
-		return locationMetadataFirst(root, `{"start":{"extra":1e999},`+data[1:])
+		return locationMetadataFirstSpan(root, `{"start":{"extra":1e999},`+data[1:])
 	})
 	for depth := 122; depth <= 129; depth++ {
 		nested := strings.Repeat("[", depth) + "0" + strings.Repeat("]", depth)
@@ -161,7 +161,7 @@ func coordinateMetadataExtras(t *testing.T, module []byte) []byte {
 	t.Helper()
 	return rewriteLLVMMetadata(t, module, func(metadata map[string]json.RawMessage) {
 		var sites []map[string]json.RawMessage
-		if err := json.Unmarshal(metadata["locations"], &sites); err != nil {
+		if err := json.Unmarshal(metadata["spans"], &sites); err != nil {
 			t.Fatal(err)
 		}
 		for _, site := range sites {
@@ -178,7 +178,7 @@ func coordinateMetadataExtras(t *testing.T, module []byte) []byte {
 				site[key] = json.RawMessage(`{"offset":null,"line":"bad","column":0,` + encoded[1:len(encoded)-1] + `,"a_before":true,"a_b\u0065fore":null}`)
 			}
 		}
-		metadata["locations"] = json.RawMessage(locationMetadataJSON(sites))
+		metadata["spans"] = json.RawMessage(locationMetadataJSON(sites))
 	})
 }
 func verifyCoordinateSpan(t *testing.T, span json.RawMessage) {

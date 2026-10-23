@@ -38,7 +38,7 @@ func TestLLVMLoweringBuild(t *testing.T) {
 			if receipt.Command != "build" || receipt.Status != "ok" || receipt.Artifact != output || receipt.Target != target {
 				t.Fatalf("LLVM build receipt: %+v", receipt)
 			}
-			if receipt.Emit != "llvm" || receipt.ABI != "lo-native-1" {
+			if receipt.Emit != "llvm" || receipt.ABI != "lo-native-2" {
 				t.Fatalf("module receipt omits artifact kind or ABI: %+v", receipt)
 			}
 			module, err := os.ReadFile(output)
@@ -59,19 +59,18 @@ func TestLLVMLoweringBuild(t *testing.T) {
 				t.Fatal(err)
 			}
 			var description struct {
-				ABI       string
-				Locations []struct{ Action, Text string }
+				ABI string
 			}
 			if err := json.Unmarshal(metadata, &description); err != nil {
 				t.Fatal(err)
 			}
 			found := false
-			for _, location := range description.Locations {
+			for _, location := range metadataLocations(t, metadata) {
 				if location.Action == "literal" && location.Text == "123456789012345678901234567890" {
 					found = true
 				}
 			}
-			if description.ABI != "lo-native-1" || !found {
+			if description.ABI != "lo-native-2" || !found {
 				t.Fatalf("metadata lost the ABI or full integer literal: %+v", description)
 			}
 		})

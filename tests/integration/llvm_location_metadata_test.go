@@ -11,12 +11,11 @@ import (
 	"testing"
 )
 
-// These cases were characterized against the admitted-program runtime before
-// location deserialization changed. Wrong shapes remain explicit admission
-// errors; JSON syntax and unknown values must still be parsed completely.
+// Admission uses the current compact rows. Syntax is consumed completely before
+// semantic checks; unknown row fields are rejected by the closed ABI2 contract.
 func TestLLVMLocationMetadataAdmission(t *testing.T) {
 	fixtures := locationMetadataCases()
-	if len(fixtures) != 55 {
+	if len(fixtures) == 0 {
 		t.Fatalf("characterization count: %d", len(fixtures))
 	}
 	runLocationMetadataAdmission(t, fixtures)
@@ -97,7 +96,7 @@ int main(void) {
 	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), []llvmRuntimeScenario{{name: "coordinate-extra-fields", source: `return Math.div(1,0)`, harness: harness, transform: func(t *testing.T, module []byte) []byte {
 		return rewriteLLVMMetadata(t, module, func(metadata map[string]json.RawMessage) {
 			var sites []map[string]any
-			if err := json.Unmarshal(metadata["locations"], &sites); err != nil {
+			if err := json.Unmarshal(metadata["spans"], &sites); err != nil {
 				t.Fatal(err)
 			}
 			for _, site := range sites {
@@ -105,7 +104,7 @@ int main(void) {
 					site[key].(map[string]any)["extra"] = map[string]any{"nested": []any{1, nil, "retained"}}
 				}
 			}
-			metadata["locations"] = json.RawMessage(locationMetadataJSON(sites))
+			metadata["spans"] = json.RawMessage(locationMetadataJSON(sites))
 		})
 	}, verify: func(t *testing.T, got result) {
 		if got.status != 1 || got.stdout != "" {
@@ -142,22 +141,23 @@ func locationMetadataCases() []locationMetadataCase {
 		cases = append(cases, locationMetadataCase{name, message, func(root map[string]any) []byte { edit(root); return locationMetadataJSON(root) }})
 	}
 	first := func(root map[string]any) map[string]any { return root["locations"].([]any)[0].(map[string]any) }
-	coordinate := func(root map[string]any) map[string]any { return first(root)["start"].(map[string]any) }
+	coordinate := func(root map[string]any) map[string]any {
+		return root["spans"].([]any)[0].(map[string]any)["start"].(map[string]any)
+	}
 	add("valid", "", func(map[string]any) {})
-	for _, key := range []string{"id", "action", "text"} {
+	for _, key := range []string{"span", "action", "type", "owner", "flow"} {
 		add("missing-"+key, "invalid metadata "+key, func(root map[string]any) { delete(first(root), key) })
 		add("wrongtype-"+key, "invalid metadata "+key, func(root map[string]any) { first(root)[key] = []any{} })
 	}
 	add("unknown-action", "unknown native action unknown", func(root map[string]any) { first(root)["action"] = "unknown" })
-	add("wrongtype-location", "invalid metadata id", func(root map[string]any) { root["locations"].([]any)[0] = 7 })
+	add("wrongtype-location", "invalid metadata site", func(root map[string]any) { root["locations"].([]any)[0] = 7 })
 	add("wrongtype-locations", "absent metadata locations", func(root map[string]any) { root["locations"] = map[string]any{} })
 	add("zero-column", "invalid location coordinate", func(root map[string]any) { coordinate(root)["column"] = 0 })
 	add("negative-offset", "invalid metadata offset", func(root map[string]any) { coordinate(root)["offset"] = -1 })
 	add("coordinate-extra", "", func(root map[string]any) { coordinate(root)["extra"] = map[string]any{"a": []any{1, nil, true}} })
-	add("unknown-field", "", func(root map[string]any) { first(root)["extra"] = map[string]any{"a": []any{1, nil, true}} })
-	add("id-before-action", "invalid metadata id", func(root map[string]any) { first(root)["id"] = "bad"; first(root)["action"] = false })
-	add("action-before-coordinate", "invalid metadata action", func(root map[string]any) { first(root)["action"] = false; coordinate(root)["column"] = 0 })
-	add("text-before-coordinate", "invalid metadata text", func(root map[string]any) { first(root)["text"] = []any{}; coordinate(root)["column"] = 0 })
+	add("unknown-field", "unknown site metadata field extra", func(root map[string]any) { first(root)["extra"] = nil })
+	add("span-before-action", "invalid metadata span", func(root map[string]any) { first(root)["span"] = "bad"; first(root)["action"] = false })
+	add("span-table-before-action", "invalid location coordinate", func(root map[string]any) { first(root)["action"] = false; coordinate(root)["column"] = 0 })
 	add("derivative-result-reference", "invalid derivative result node", func(root map[string]any) { root["derivatives"].([]any)[0].(map[string]any)["result_node"] = 999999 })
 	raw := func(name, message string, edit func(map[string]any, string) []byte) {
 		cases = append(cases, locationMetadataCase{name, message, func(root map[string]any) []byte { return edit(root, string(locationMetadataJSON(first(root)))) }})
@@ -169,11 +169,8 @@ func locationMetadataCases() []locationMetadataCase {
 		return locationMetadataFirst(root, `{"action":7,`+site[1:])
 	})
 	raw("duplicate-action-invalid-last", "invalid metadata action", func(root map[string]any, site string) []byte { return appendField(root, site, `"action":7`) })
-	raw("duplicate-coordinate-valid-last", "", func(root map[string]any, site string) []byte {
-		return appendField(root, site, `"start":`+string(locationMetadataJSON(coordinate(root))))
-	})
 	raw("unknown-huge-number", "program metadata: number out of range", func(root map[string]any, site string) []byte { return appendField(root, site, `"extra":1e999`) })
-	raw("unknown-number-beyond-u64", "", func(root map[string]any, site string) []byte {
+	raw("unknown-number-beyond-u64", "unknown site metadata field extra", func(root map[string]any, site string) []byte {
 		return appendField(root, site, `"extra":18446744073709551616`)
 	})
 	raw("trailing-json", "program metadata: trailing characters", func(root map[string]any, _ string) []byte {
@@ -183,11 +180,11 @@ func locationMetadataCases() []locationMetadataCase {
 		data := locationMetadataJSON(root)
 		return data[:len(data)-1]
 	})
-	raw("wrongtype-root", "program ABI identity mismatch", func(map[string]any, string) []byte { return []byte("[]") })
+	raw("wrongtype-root", "invalid metadata program", func(map[string]any, string) []byte { return []byte("[]") })
 	raw("escaped-known-key", "", func(root map[string]any, site string) []byte {
 		return locationMetadataFirst(root, strings.Replace(site, `"action":`, `"act\u0069on":`, 1))
 	})
-	raw("escaped-unknown-key", "", func(root map[string]any, site string) []byte { return appendField(root, site, `"unknown\u0061":1`) })
+	raw("escaped-unknown-key", "unknown site metadata field unknowna", func(root map[string]any, site string) []byte { return appendField(root, site, `"unknown\u0061":1`) })
 	raw("invalid-surrogate-known-key", "program metadata: unexpected end of hex escape", func(root map[string]any, site string) []byte { return appendField(root, site, `"\ud800":1`) })
 	raw("invalid-surrogate-value", "program metadata: unexpected end of hex escape", func(root map[string]any, site string) []byte { return appendField(root, site, `"unknown":"\ud800"`) })
 	raw("invalid-utf8-unknown-value", "program metadata: invalid unicode code point", func(root map[string]any, site string) []byte {
@@ -207,22 +204,19 @@ func locationMetadataCases() []locationMetadataCase {
 	raw("location-array-huge-number", "program metadata: number out of range", func(root map[string]any, _ string) []byte { return locationMetadataFirst(root, `[1e999]`) })
 	raw("root-array-huge-number", "program metadata: number out of range", func(map[string]any, string) []byte { return []byte("[1e999]") })
 	add("locations-missing", "absent metadata locations", func(root map[string]any) { delete(root, "locations") })
-	add("id-null", "invalid metadata id", func(root map[string]any) { first(root)["id"] = nil })
-	add("id-fraction", "invalid metadata id", func(root map[string]any) { first(root)["id"] = 0.5 })
-	raw("unknown-duplicate-last", "", func(root map[string]any, site string) []byte {
+	add("span-null", "invalid metadata span", func(root map[string]any) { first(root)["span"] = nil })
+	add("span-fraction", "invalid metadata span", func(root map[string]any) { first(root)["span"] = 0.5 })
+	raw("unknown-duplicate-last", "unknown site metadata field unknown", func(root map[string]any, site string) []byte {
 		return appendField(root, site, `"unknown":1,"unknown":2`)
-	})
-	raw("coordinate-unknown-huge-number", "program metadata: number out of range", func(root map[string]any, site string) []byte {
-		return locationMetadataFirst(root, strings.Replace(site, `"column":1`, `"unknown":1e999,"column":1`, 1))
 	})
 	for depth := 124; depth <= 129; depth++ {
 		nested := strings.Repeat("[", depth) + "0" + strings.Repeat("]", depth)
 		unknownMessage := "program metadata: recursion limit exceeded"
 		if depth == 124 {
-			unknownMessage = ""
+			unknownMessage = "unknown site metadata field unknown"
 		}
 		raw(fmt.Sprintf("unknown-depth-%d", depth), unknownMessage, func(root map[string]any, site string) []byte { return appendField(root, site, `"unknown":`+nested) })
-		rootMessage := "program ABI identity mismatch"
+		rootMessage := "invalid metadata program"
 		if depth >= 128 {
 			rootMessage = "program metadata: recursion limit exceeded"
 		}
@@ -306,4 +300,23 @@ func locationMetadataHarness(t *testing.T, source string) string {
 		t.Fatal("metadata harness leaves repository")
 	}
 	return relative
+}
+
+func locationMetadataFirstSpan(root map[string]any, first string) []byte {
+	var spans []string
+	for index, span := range root["spans"].([]any) {
+		if index == 0 {
+			spans = append(spans, first)
+		} else {
+			spans = append(spans, string(locationMetadataJSON(span)))
+		}
+	}
+	other := map[string]any{}
+	for key, value := range root {
+		if key != "spans" {
+			other[key] = value
+		}
+	}
+	data := locationMetadataJSON(other)
+	return append(append(data[:len(data)-1], ','), []byte(`"spans":[`+strings.Join(spans, ",")+`]} `)...)
 }

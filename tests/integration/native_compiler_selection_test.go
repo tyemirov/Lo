@@ -25,7 +25,7 @@ func TestNativeCanonicalBuild(t *testing.T) {
 		t.Fatalf("canonical build without Go or backend selection: %v %s", err, &stderr)
 	}
 	var receipt struct{ Codegen, ABI string }
-	if err := json.Unmarshal(stdout.Bytes(), &receipt); err != nil || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-1" {
+	if err := json.Unmarshal(stdout.Bytes(), &receipt); err != nil || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-2" {
 		t.Fatalf("canonical receipt: %s %v", &stdout, err)
 	}
 	if err := os.Remove(input); err != nil {

@@ -121,7 +121,7 @@ return List.fold(List.new(1,2,3),123456789012345678901234567890,Add)`)
 	if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil {
 		t.Fatal(err)
 	}
-	if receipt.Codegen != "llvm" || receipt.ABI != "lo-native-1" || len(receipt.Runtime) != 64 {
+	if receipt.Codegen != "llvm" || receipt.ABI != "lo-native-2" || len(receipt.Runtime) != 64 {
 		t.Fatalf("LLVM build identity: %+v", receipt)
 	}
 	if err := os.Remove(input); err != nil {
@@ -164,19 +164,11 @@ return List.map(List.new(1,2),Twice)`)
 	var metadata struct {
 		Types []struct{ Name string }
 		Flows []struct{ Name string }
-		Sites []struct {
-			Operation string
-			Arguments []struct {
-				Kind string
-				Type uint64
-				Flow uint64
-			}
-		} `json:"locations"`
 	}
 	if err := json.Unmarshal(data, &metadata); err != nil {
 		t.Fatal(err)
 	}
-	for _, site := range metadata.Sites {
+	for _, site := range metadataLocations(t, data) {
 		if site.Operation != "List.map" {
 			continue
 		}
