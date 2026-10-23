@@ -18,7 +18,7 @@ import sys
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools/nativebench"))
-from qualification import LANES, completion, comparison, expected_inventory  # noqa: E402
+from qualification import SAMPLE_PLAN, LANES, completion, comparison, expected_inventory  # noqa: E402
 from identity import CACHE, DiagnosticCompiler, capture_provenance, merge_identity, verify_provenance  # noqa: E402
 
 WARMUP = 3
@@ -297,7 +297,8 @@ def http_bench(config: Config) -> list[dict]:
                         if response.status != 200 or body != (b"fixed varied payload 123" if name == "echo" else b"10"):
                             raise RuntimeError(f"HTTP response {response.status}: {body!r}")
                         times.append(time.perf_counter_ns() - before)
-                    pair[backend] = {"samples_ns": times, "elapsed_ns": time.perf_counter_ns()-start, "p95_ns": sorted(times)[189], "requests_per_second": 200e9/(time.perf_counter_ns()-start)}
+                    elapsed = time.perf_counter_ns() - start
+                    pair[backend] = {"samples_ns": times, "elapsed_ns": elapsed, "p95_ns": sorted(times)[189], "requests_per_second": 200e9/elapsed}
                 if any(server.poll() is not None for server in servers.values()):
                     raise RuntimeError("both HTTP servers must remain alive")
                 if index >= WARMUP:
@@ -370,18 +371,15 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--workdir", type=Path, required=True)
-    parser.add_argument("--samples", type=int, default=10)
     parser.add_argument("--toolchain", type=Path)
     parser.add_argument("--case")
     parser.add_argument("--lane", choices=["execution", "process", "http", "build", "all"], default="all")
     args = parser.parse_args()
-    if not 10 <= args.samples <= 1000:
-        parser.error("ten to one thousand samples are required")
     root, work = Path(__file__).resolve().parents[1], args.workdir.resolve()
     if not work.is_relative_to(root):
         parser.error("--workdir must be inside the repository for generated benchmark packages")
     work.mkdir(parents=True, exist_ok=False)
-    config = Config(root, work, args.binary.resolve(), args.samples, args.case, args.toolchain.resolve() if args.toolchain else None)
+    config = Config(root, work, args.binary.resolve(), SAMPLE_PLAN["execution"], args.case, args.toolchain.resolve() if args.toolchain else None)
     manifest_path = config.toolchain or config.binary.parent.parent / "toolchain.json"
     diagnostic = None
     go_path = shutil.which("go")
@@ -394,7 +392,7 @@ def main() -> None:
         config = replace(config, provenance=frozen)
     except DiagnosticCompiler as error:
         diagnostic = str(error)
-    report = {"system": platform.platform(), "machine": platform.machine(), "processor": processor_identity(root), "go": capture(["go", "version"], root), "binary_sha256": hashlib.sha256(config.binary.read_bytes()).hexdigest(), "samples": args.samples, "warmup": WARMUP, "max_steps": int(STEPS), "concurrency": 1, "cache": CACHE, "order": "alternating paired samples", "scope": "diagnostic selection" if args.case else "full fixed corpus"}
+    report = {"system": platform.platform(), "machine": platform.machine(), "processor": processor_identity(root), "go": capture(["go", "version"], root), "binary_sha256": hashlib.sha256(config.binary.read_bytes()).hexdigest(), "sample_plan": dict(SAMPLE_PLAN), "warmup": WARMUP, "max_steps": int(STEPS), "concurrency": 1, "cache": CACHE, "order": "alternating paired samples", "scope": "diagnostic selection" if args.case else "full fixed corpus"}
     manifest_path = config.toolchain or config.binary.parent.parent / "toolchain.json"
     report["toolchain_sha256"] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
     report["toolchain"] = json.loads(manifest_path.read_text())
@@ -425,7 +423,7 @@ def main() -> None:
             accelerator="none", producer_kind="darwin-native" if target == "darwin/arm64" else "linux-native",
             producer_tools={"python": platform.python_version(), **config.provenance["tools"]},
             producer_sources=PRODUCER_SOURCES,
-            reference_go=report["go"], samples=config.samples)
+            reference_go=report["go"])
         report["reference_source_identity"] = report["merge_identity"]["reference"]["source_identity"]
         report["measurement_source_identity"] = {**report["merge_identity"]["producer"]["source_identity"], **report["merge_identity"]["evaluator"]}
     except DiagnosticCompiler as error:
@@ -434,7 +432,7 @@ def main() -> None:
         report["merge_ineligible"] = str(error)
     for lane, measure in (("execution", execution), ("process", process), ("http", http_bench), ("build", builds)):
         if lane in report["expected_inventory"]:
-            report[lane] = measure(config)
+            report[lane] = measure(replace(config, samples=SAMPLE_PLAN[lane]))
             verify_inputs(config)
             (work / "partial.json").write_text(json.dumps(report, indent=2) + "\n")
     verify_inputs(config)
