@@ -16,7 +16,7 @@
     },
     {
       "archive": "vmlinuz-virt",
-      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/aarch64/netboot/vmlinuz-virt",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/aarch64/netboot-3.22.6/vmlinuz-virt",
       "sha256": "dd37c4460f933ec909ff022c34944ff7e1a5300aff99750e3bdc02cd4074c332",
       "bytes": 9630208
     },
