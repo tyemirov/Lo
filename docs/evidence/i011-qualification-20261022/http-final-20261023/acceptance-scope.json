@@ -1,0 +1,16 @@
+{
+  "authority": "User explicitly selected HTTP-only qualification on both targets and prohibited rerunning the whole suite.",
+  "recorded_utc": "2026-10-23T21:30:41.971615+00:00",
+  "outcomes_inspected": false,
+  "timing_started": true,
+  "reviewer": "/root/i011_completion_review",
+  "basis": "Use earlier f26 full correctness, offline and passing non-HTTP evidence under reviewed change impact; use fresh complete HTTP lanes on both targets.",
+  "constraints": [
+    "All eight HTTP gates must pass unchanged limits",
+    "Keep earlier source/package identities explicit",
+    "Do not merge historical lanes or samples",
+    "Do not claim a new complete campaign or full CI pass",
+    "Preserve interrupted CI and all prior nonpasses",
+    "Final raw evidence audit and independent review remain required"
+  ]
+}

@@ -1,0 +1,295 @@
+{
+  "issue": "B007",
+  "parent_issue": "I011",
+  "phase": "ordinary_lowering_preproduction_baselines_and_expected_structural_failure",
+  "qualification_claim": false,
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/focused.mk",
+      "bytes": 3963,
+      "sha256": "904d22f60e30e777862d9f53ee4b4416813348c04cdf4f3abbbb5e54dd24c308",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/000.gz",
+      "archive_sha256": "d1d6c3804bb0ed648559e96febbb0f32a27737db71970d34dece3ffab8a6ae15"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/gradient-existing-baseline.log",
+      "bytes": 1903,
+      "sha256": "1a9cbc4db8df309e2f4a75fc41b61ff04c7cb23c20ff327a7e03f54d92830c65",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/001.gz",
+      "archive_sha256": "6454a5d541cc4b14c0266d1cce4f1d14f1d2ca11d37b7f89e1aff5633d7fb727"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/gradient-plan-baseline-final.log",
+      "bytes": 1201,
+      "sha256": "3328b9c7953b74c13653ea351a82c286992ecc83ce66ce356b474ea51ff47d9d",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/002.gz",
+      "archive_sha256": "a8d25ca165fb20e663ae27f4b39bba54b10d4506aba5d3a737681522d16b03df"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/gradient-plan-baseline.log",
+      "bytes": 1201,
+      "sha256": "d6fbffb4101647eb834234a720b0d298013a86bcf3a62eecb552a5591d13e015",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/003.gz",
+      "archive_sha256": "11e29f8e6052acb28d2ca76870fd68fde4db8799c10a28df99459ee109ce76bd"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/grouped-darwin-baseline-final.log",
+      "bytes": 2411,
+      "sha256": "c1754f3f73d8c02bcf4d5f41980006d54c67b568f2a7ad59f5e5980e26557ee0",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/004.gz",
+      "archive_sha256": "b3317e09f976100764de0a1472d7bc3ad2784ab4bf808df50dfca24e53e5c692"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/grouped-darwin-baseline.log",
+      "bytes": 2573,
+      "sha256": "27546524cbb37ee79bc38e061b345fe554069c66fce14d2479b5ee2d43788f8c",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/005.gz",
+      "archive_sha256": "1a5a2e1f02794664c26c8013f7a9c92311576915dfbf148af530d60202a687d6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/grouped-linux-baseline-final.log",
+      "bytes": 3642,
+      "sha256": "279637557ea9a9fc03439ac2b09e946468b7be46ed7b982525cdc5c26b91d3d1",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/006.gz",
+      "archive_sha256": "a58d24358817af868a61869b1addb35361317a0ec0b47b5c305c1508dd1a899c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/grouped-prefix-darwin.log",
+      "bytes": 2518,
+      "sha256": "3aa44969584fff3e97630447eacf84a1dc1a211955221c9107676d2aaf07e209",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/007.gz",
+      "archive_sha256": "36a8fb796341c3eb83e4b76b12dd93fa052c581ea644c50c876f9cea14ed0298"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/grouped-prefix-linux.log",
+      "bytes": 3691,
+      "sha256": "38758bcc7651c81101ee9e024ea6afc292672b89923bcc389eb4c652559f4494",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/008.gz",
+      "archive_sha256": "c299fd5cb5220e8b904fe21b81f0e5f8550aed11f1ffea3adc71b2d2d34794c0"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/batch.json",
+      "bytes": 2100389,
+      "sha256": "5da773051fc46fc04e6da616dbc1f9d6166e81a18a43361c9beb80498ed48a0d",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/009.gz",
+      "archive_sha256": "7c6fa9a2db9664b8ce6eac4df8786ad11088ca9b115af69dff9b8af7c6cb697a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/0.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/010.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/0.stdout",
+      "bytes": 1233,
+      "sha256": "ca02c813e1f01b92e1f1a1cb23951fe8fcc31d7e743dcae8f0cc48e0bac8463f",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/011.gz",
+      "archive_sha256": "d103b3f4b9fcba63eef449150a5be181ad086b6d01de624b13ffa137ec6e451e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/export.log",
+      "bytes": 2638,
+      "sha256": "ae5061c872cc42e9781c990b5be81ebe2442d84fb78cf70896a5e4be0047b9c3",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/012.gz",
+      "archive_sha256": "1dc9fc2b3ae3deaa54f717f6c56c180c4d72a1f6cb4d19d62c35249ba384d796"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/serial.log",
+      "bytes": 35,
+      "sha256": "99751a32b4991614098d71e8f6b8ed3123030d1b43223d4aaec2b1e17aecf524",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/013.gz",
+      "archive_sha256": "b020c8d3b023d053ec068666060835b82bd1fdaeee0246da1b28a92a43af4c9e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/report.json",
+      "bytes": 2704,
+      "sha256": "266cf6691022af42e89a247c4e4da32fba2e625c55948626ef42bbe021e1bfe4",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/014.gz",
+      "archive_sha256": "3dc024a14f125b5b89ea6f7ba12cdda04b3d58f6c461b936eec1082603e8e982"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/semantic-linux-arm64.jsonl",
+      "bytes": 6765,
+      "sha256": "3a355c28e7dc9a7daa92ceab6c230055375608aaf986a0462b73878598755950",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/015.gz",
+      "archive_sha256": "c1a18f1fa7ffc2a8b227e2727e36432b1f6f19f9e9516aa778aaade698954380"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/batch.json",
+      "bytes": 2100417,
+      "sha256": "52fdde63ddcbc0645a4a3e13e38505828fce0064bd28cc2992c36da38d7be9cd",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/016.gz",
+      "archive_sha256": "4362cf6ae82f4ef2261fd238ba677f027d0fb2332908a800f85773786296e8de"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/0.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/017.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/0.stdout",
+      "bytes": 1340,
+      "sha256": "cf52c9d1a99ae06027c7cb7bd51be16bc1b943f73e617ad0e63621d49f1f9e8e",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/018.gz",
+      "archive_sha256": "e94b813e327d3fb5ac763a05def8141f714462029b1d333427c2c322f5a1399c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/export.log",
+      "bytes": 2852,
+      "sha256": "1660b40906c857af134af74f3ab3eae3329ed88c82995ce320c51738bdd9c204",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/019.gz",
+      "archive_sha256": "40b15f3f77db84563ae5031f10cabccbd74bc526b9789a5db401d228a67cfa7e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/serial.log",
+      "bytes": 35,
+      "sha256": "f6497d1f993f3321b3e1aaefc8a1a9eb943df98472906fb3ed1e3912d301cbd7",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/020.gz",
+      "archive_sha256": "ef35623bd3fb42a622bf7dfeb3a8cb4cf5e357a05aebd9e4ce626352d2dffed7"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/report.json",
+      "bytes": 2746,
+      "sha256": "36d02eb3213dbb5000900362a6e90b1e5dde3e2ca254bf6e9aae5e3ed4555313",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/021.gz",
+      "archive_sha256": "defc31cc3f98716f619275ae07656399b0c866e21757b2fedfced918cba3995a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/semantic-linux-arm64.jsonl",
+      "bytes": 7060,
+      "sha256": "2466b1ecafefadd36f769669ef29a1c0ae1a1db1762fd28263dac8e4b6efd60e",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/022.gz",
+      "archive_sha256": "1097a29710ddfb51c3cced8159303249ac152fb1fb1fd2c1f03072780f71af13"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/preproduction-receipts.json",
+      "bytes": 7323,
+      "sha256": "64e7d9860d6e478cda8d997db4f104890d9a8091d283e8d6b2327f2b16fe4a61",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/023.gz",
+      "archive_sha256": "d5cbbcb315c2b5dc3b3e9eb764268dd6fa3cb83d255ece308c3b38c033828521"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/structural-red.log",
+      "bytes": 2952,
+      "sha256": "5edf8c19e1d82ce02437096e4800676d7f165d2be3a470813b856acc36ccff84",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/024.gz",
+      "archive_sha256": "1830baa18823c4da11670ae7084900441f77ee44aa0769ebda540075b0ed469f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-sequence-design.json",
+      "bytes": 37592,
+      "sha256": "b8474a1bd5d2c410c7e402e47c6c81944c89430bc25b371863cfdaf93f9e835f",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/025.gz",
+      "archive_sha256": "bbac41826362b17fda20809720efac114051869f8d2e54413cda54373ebc8dec"
+    },
+    {
+      "source": "bin/distributions-i011-20261022/lo-darwin-arm64-metal/toolchain.json",
+      "bytes": 6131,
+      "sha256": "182378032d0e20575a9d340a4fd477ed937aa421eb03896e70c2e4d8578eed53",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/026.gz",
+      "archive_sha256": "e074dc7bae395b153d23b95d0bde029a805bd5f1955782d8c81df816aa79ff0d"
+    },
+    {
+      "source": "bin/distributions-i011-20261022/lo-linux-arm64-software/toolchain.json",
+      "bytes": 4521,
+      "sha256": "02af472240fa81aa0b5e75d320299a796479c431f476e54fa82042e824696f26",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/027.gz",
+      "archive_sha256": "211e89c3759201f067700a55e2799b255c2b1cf68ebc5a3cf2b8b2cdcf7ab91d"
+    },
+    {
+      "source": "docs/evidence/i011-qualification-20261022/dwarf-decision.json",
+      "bytes": 707,
+      "sha256": "77034908c1657a088c25517f9cc1b8425ed96c3bb6c86456ff90f32e8978d2ab",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/028.gz",
+      "archive_sha256": "571edf7c551d80d75cfaee70fc314da4e07dbfafb5533794d5d5c0bf11864846"
+    },
+    {
+      "source": "docs/native-runtime-contract.md",
+      "bytes": 17213,
+      "sha256": "6f851ea9910c6ac16ff34c8d31c19020a54a81bf0955ab73cefb6820132cf5f0",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/029.gz",
+      "archive_sha256": "ccbfeb6ca20cb008f0fd4937e61060cf9b3e712c588e416a340a097492155adf"
+    },
+    {
+      "source": "internal/llvmemit/emit.go",
+      "bytes": 20366,
+      "sha256": "7075113bffa0c1546787e96ddb406f0e5d537928f326ed7b5f35a0d7f409c1e3",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/030.gz",
+      "archive_sha256": "492e67b970ecc1e1d601374b0cad3cbcda6ad912c9aa2509421a997f496bfa87"
+    },
+    {
+      "source": "internal/llvmemit/literal_sequence_integration_test.go",
+      "bytes": 2469,
+      "sha256": "751ae7775da648129a88d4596bc0a52c95d4d0139455fc5820e1042058d98800",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/031.gz",
+      "archive_sha256": "05f32b5259a95401e0d9dec01293b8cfa2b19d778f42cf4740f0e89999e13c07"
+    },
+    {
+      "source": "internal/nativeplan/gradient.go",
+      "bytes": 10898,
+      "sha256": "89aabf8acca82a402bfed12a4c6adeb0d1953a8d77f5d1ab131387b259c47df5",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/032.gz",
+      "archive_sha256": "d15c55d2b9eb5bebdab741386f891b5ba1b471e1cb336b2a3bb41e1516fba62d"
+    },
+    {
+      "source": "testdata/native-qualification/literal-sequence-status.c",
+      "bytes": 5958,
+      "sha256": "32fe82b7e3139058a0bfad67f50d295f2def4989f1ac138fa1e74d5a0d3c8275",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/033.gz",
+      "archive_sha256": "3ba908be73d4d41978abcc69e2ee41ba1849532969afd72124a0179fbd431550"
+    },
+    {
+      "source": "testdata/native-qualification/literal-sequence.c",
+      "bytes": 5753,
+      "sha256": "21cb7fa4d9ec03aae0c724b9ac74c51f60546c6f546d27f107534327c30d033a",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/034.gz",
+      "archive_sha256": "46c7214da47114fb49df780b914623175bc12eff56e4392af9e18f226694fba1"
+    },
+    {
+      "source": "testdata/native-runtime/numerical.c",
+      "bytes": 5234,
+      "sha256": "76a40983f3cbeff02d1542bee361b2ba7ed43e55d9aea4d1badbb5cb2dfbe209",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/035.gz",
+      "archive_sha256": "269d6cbdda4ef4282b63ae75019d244a6e079052a5eaeb432ad5671f757e1bb4"
+    },
+    {
+      "source": "tests/integration/llvm_literal_sequence_status_test.go",
+      "bytes": 1473,
+      "sha256": "4710d42d4f3d8ac2e44b2338815ea611ae6ef238c30f9f68c63ffe355dd89b08",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/036.gz",
+      "archive_sha256": "f5e7a054c02ee08500fc1373cc22a1a7f02c4adaeab5886d9b304ab12d19f956"
+    },
+    {
+      "source": "tests/integration/llvm_literal_sequence_test.go",
+      "bytes": 13037,
+      "sha256": "157e91fbf6facce0aa31a26e91f93b87575cfc27131429f072d4ccee6dd466fe",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-preproduction/037.gz",
+      "archive_sha256": "c7adb2e90462aa90f4eba864aa76a4a03c5e76f7a6c9fda578a91187bff1f591"
+    }
+  ],
+  "postbaseline_changed_sources": [
+    {
+      "source": "internal/nativeplan/plan.go",
+      "baseline_sha256": "9e6749ee573e4a7aa4d791fb9a9092a4fbe438a6098c26c91cb00d41ce689aad",
+      "reason": "Source changed after frozen preproduction receipt; baseline hash is retained."
+    },
+    {
+      "source": "internal/nativeplan/lower.go",
+      "baseline_sha256": "acd940266c189f5cf0526d6d5070ccb0d7ab8d22661a11194385b09afed7a0dd",
+      "reason": "Source changed after frozen preproduction receipt; baseline hash is retained."
+    },
+    {
+      "source": "internal/nativeplan/verify.go",
+      "baseline_sha256": "6b9ad13eb30cab2301d80567293823eb03a350ae9183eb935f6fc1e08c3d039e",
+      "reason": "Source changed after frozen preproduction receipt; baseline hash is retained."
+    }
+  ],
+  "limits": [
+    "Both failed and corrected test-fixture runs are retained.",
+    "Large binaries are identified by hashes. This record is not final qualification."
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "issue": "I011",
+  "related_issues_closed": [
+    "B007",
+    "B008"
+  ],
+  "i011_complete": true,
+  "completion_utc": "2026-10-23T21:39:56.034503+00:00",
+  "acceptance_mode": "explicit_user_selected_focused_HTTP_requalification_with_reviewed_prior_evidence",
+  "current_source_sha256": "581218bdf95a91db62e227cc5798caf40a4377072884e74720547b00937d03c2",
+  "prior_source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+  "http_gates_passed": 8,
+  "highest_HTTP_confidence_upper_bound": 1.03290901258226,
+  "HTTP_ratio_limit": 1.1,
+  "thresholds_changed": false,
+  "new_whole_campaign_claim": false,
+  "latest_full_ci_outcome": "stopped_at_user_request",
+  "reused_prior_evidence": [
+    "Full correctness and semantic coverage",
+    "Offline distribution acceptance on all four software host-to-target combinations",
+    "Metal, relocation, rejection and installed training acceptance",
+    "Six non-HTTP performance lanes"
+  ],
+  "limits": [
+    "Non-HTTP and offline checks retain earlier package identities and were not repeated on the final packages.",
+    "The historical full campaign remains inconclusive.",
+    "The two final HTTP reports remain qualification_complete=false; no report or samples were merged.",
+    "Historical prepared artifacts and workspaces outside the focused task remain retained."
+  ],
+  "evidence": [
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/manifest.json",
+      "sha256": "bd43091ac8528b7968f2c80b1f16c40b9eeb634c514903a33c6609caea804752"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/verification.json",
+      "sha256": "8ff4fe1014604c7b328503aa0f95b10b5c096de2762f84df849a73ab5d617d69"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/root-archive-review.json",
+      "sha256": "9f90095968892ec3d9fa99b278413c9a0956568c8c1fa2ec719b697ab3de9e61"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/final-supplement.json",
+      "sha256": "29b4970804a44b8e0f424c1ce91d4f75eb39d385dfda39e68efbe2c4149ee8cd"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/audit-results.json",
+      "sha256": "9e73b531be5f6804bc981b2cf283cd45cbdd815fc431da47cd9f9ed08310d310"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/delta-reuse-audit.json",
+      "sha256": "7b89ae2ded0c35884b06e1d8af1a6600abab47593da61741d89d6ea5a7828ef3"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/acceptance-scope.json",
+      "sha256": "b3a89284708d15d8b666bf5a42da3cd7168c859761b40fa23cc533e037bdde36"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/cleanup.json",
+      "sha256": "e951f5a56bdbcbf61dfaf9ed2815a3cf18695904f5721d77dc14fa1d977d38f7"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/documentation-review.json",
+      "sha256": "4ff601aedfb93490895edce8e6521e1924c1f1a436d8cf9148d4d3ddbf53f2d6"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/independent-review.json",
+      "sha256": "d2f7c2a1d0078bda110637698061c97e0b29f1eaa93e62bed17013c09ff15494"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/manifest.json",
+      "sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/oversized-request-fix/manifest.json",
+      "sha256": "a961544bf80a3fac8b391552042bc08ef1adae34dfd614856dfa63906f2a4018"
+    },
+    {
+      "path": "docs/evidence/i011-qualification-20261022/precision-aborted-validation/manifest.json",
+      "sha256": "abd67f6e1b5c4867bf3491c49df76c769c45e5e10425cb22d04bce241f5f707c"
+    }
+  ]
+}

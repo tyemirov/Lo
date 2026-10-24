@@ -132,7 +132,7 @@ def test_campaign_runs_eight_serial_lanes_and_both_strict_merges(campaign_inputs
         assert run['status'] == 0 and len(run['report_sha256']) == 64
         assert len(run['stdout_sha256']) == len(run['stderr_sha256']) == 64
     config = json.loads((work / 'output/config.json').read_text())
-    assert config['samples'] == 10 and config['warmup'] == 3
+    assert config['sample_plan'] == {'execution': 10, 'process': 10, 'http': 100, 'build': 10} and config['warmup'] == 3
     assert config['inputs'] and config['source_identity']
     assert invoke(campaign_inputs).returncode != 0
 

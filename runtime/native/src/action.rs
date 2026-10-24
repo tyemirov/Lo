@@ -57,6 +57,48 @@ impl Action {
                 | Self::DerivativeHostFailure
         )
     }
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::DerivativeCall => "derivative_call",
+            Self::DerivativeNode => "derivative_node",
+            Self::DerivativeEnter => "derivative_enter",
+            Self::DerivativeSnapshot => "derivative_snapshot",
+            Self::DerivativeRetain => "derivative_retain",
+            Self::DerivativeLoss => "derivative_loss",
+            Self::DerivativeZero => "derivative_zero",
+            Self::DerivativeSeed => "derivative_seed",
+            Self::DerivativeReverse => "derivative_reverse",
+            Self::DerivativeFinish => "derivative_finish",
+            Self::DerivativeFailure => "derivative_failure",
+            Self::DerivativeHostFailure => "derivative_host_failure",
+            Self::Flow => "flow",
+            Self::Body => "body",
+            Self::Parameter => "parameter",
+            Self::StatementStep => "statement_step",
+            Self::ExpressionStep => "expression_step",
+            Self::ScopeEnter => "scope_enter",
+            Self::FlowEnter => "flow_enter",
+            Self::Literal => "literal",
+            Self::FlowRef => "flow_ref",
+            Self::FlowCall => "flow_call",
+            Self::Operation => "operation",
+            Self::ChargeValue => "charge_value",
+            Self::Reference => "reference",
+            Self::Project => "project",
+            Self::Cause => "cause",
+            Self::Commit => "commit",
+            Self::Match => "match",
+            Self::Predicate => "predicate",
+            Self::Case => "case",
+            Self::MatchResult => "match_result",
+            Self::ConvertSuccess => "convert_success",
+            Self::ConvertFailure => "convert_failure",
+            Self::ConvertPropagate => "convert_propagate",
+            Self::ConvertRecordView => "convert_record_view",
+            Self::ConvertScalarListView => "convert_scalar_list_view",
+            Self::ConvertFallibleRecordView => "convert_fallible_record_view",
+        }
+    }
     pub fn parse(s: &str) -> Result<Self, String> {
         Ok(match s {
             "derivative_call" => Self::DerivativeCall,

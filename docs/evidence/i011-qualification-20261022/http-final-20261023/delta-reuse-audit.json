@@ -1,0 +1,593 @@
+{
+  "acceptance_basis": "explicit_user_HTTP_only_selection_and_primary_one_off_delta_acceptance",
+  "focused_current_delta_checks": {
+    "darwin": {
+      "elapsed_seconds": 80.706,
+      "make_status": 0,
+      "stderr_bytes": 0,
+      "subtests": 33,
+      "top_tests": 13
+    },
+    "linux": {
+      "accelerator": "hvf",
+      "elapsed_ns": 21478643927,
+      "guest_status": 0,
+      "maintained_batch_receive_verified": true,
+      "make_status": 0,
+      "stderr_bytes": 0,
+      "subtests": 33,
+      "top_tests": 13
+    },
+    "new_test_old_runtime_red": {
+      "declared_body_bytes": 1048577,
+      "make_status": 2,
+      "native_package_status": 1,
+      "platform": "darwin/arm64",
+      "runtime": "old_storage_immutable",
+      "uploaded_bytes_before_EPIPE": 266240
+    },
+    "receipt": {
+      "bytes": 16679,
+      "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/focused-results.json",
+      "sha256": "df3f594fa07db88ff0a4f449f7da4d160e891b788449248d036a5383684867db"
+    },
+    "source_sha256": "581218bdf95a91db62e227cc5798caf40a4377072884e74720547b00937d03c2"
+  },
+  "fresh_HTTP": "Both targets and all eight gates reported passed by primary; independent raw HTTP audit and final disposition remain separate. No active HTTP result was read here.",
+  "historical_reuse": {
+    "correctness_jobs": [
+      {
+        "job": "ci",
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "status": 0,
+        "stderr_sha256": "f8ed9c8663f37297ee26b0a06fb81ca08d3fad0b09c8a581e4b8c9fb917e923c",
+        "stdout_archive": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/4300e0ed44348020832595d998d984ccea1c1f22f5365c53ec3d79622bf07e32.gz",
+          "archive_sha256": "87e7b473e54bf131521f44f84dbfc74480f9c84b27de54648664764ddd628b5f",
+          "bytes": 4749798,
+          "kind": "final_validation",
+          "sha256": "4300e0ed44348020832595d998d984ccea1c1f22f5365c53ec3d79622bf07e32",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/ci.stdout"
+        }
+      },
+      {
+        "job": "linux-corpus",
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "status": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_archive": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/fc4c76261bf7c548efda476a77d445e14d8ba2f7add8bf1254f42588b3093660.gz",
+          "archive_sha256": "a61f26a2e0b7a2546fb24ada9bbd079df8d2a190b3b1dbc761c1e79d4ba48faa",
+          "bytes": 13735,
+          "kind": "final_validation",
+          "sha256": "fc4c76261bf7c548efda476a77d445e14d8ba2f7add8bf1254f42588b3093660",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/linux-corpus.stdout"
+        }
+      },
+      {
+        "job": "component-tools",
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "status": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_archive": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/9b65d7ae0e1ba598a7bef85885f93414527a5af196fd58b0c73552dbbfc48c1c.gz",
+          "archive_sha256": "d1b3147a86f8c451602b1e803badd502da5e4fe16a4ff0d63d539e08247611e9",
+          "bytes": 199,
+          "kind": "final_validation",
+          "sha256": "9b65d7ae0e1ba598a7bef85885f93414527a5af196fd58b0c73552dbbfc48c1c",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/component-tools.stdout"
+        }
+      },
+      {
+        "job": "offline",
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "status": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_archive": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e1fcb0b52e71de8bcfbf787c8efe441826fa28bf5334b1cbb739c36f7c039593.gz",
+          "archive_sha256": "07a3d1e300099421914edacfff50493a9d9a313d8456d79284fa540086563dff",
+          "bytes": 156,
+          "kind": "final_validation",
+          "sha256": "e1fcb0b52e71de8bcfbf787c8efe441826fa28bf5334b1cbb739c36f7c039593",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/offline.stdout"
+        }
+      },
+      {
+        "job": "semantic-report",
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "status": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_archive": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/23c5c19fea218939c449dee7b7767431d6db56a23036cee5d9a99f0ccd5db729.gz",
+          "archive_sha256": "793766a52a11a653c9a9f8c37533d96ce53c0e31efad3c2c3b514c2498c51816",
+          "bytes": 241,
+          "kind": "final_validation",
+          "sha256": "23c5c19fea218939c449dee7b7767431d6db56a23036cee5d9a99f0ccd5db729",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/semantic-report.stdout"
+        }
+      }
+    ],
+    "non_http_lanes": [
+      {
+        "archive_record": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/5d52b3292830a3c45827483b9e3c775c591ed97e3f9b51f06f39586edc87367d.gz",
+          "archive_sha256": "3f1aa54e1a083bf1ea238cde5553e82588686b1a58c37f4548631cfcd5126b2e",
+          "bytes": 134527,
+          "kind": "final_validation",
+          "sha256": "5d52b3292830a3c45827483b9e3c775c591ed97e3f9b51f06f39586edc87367d",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/darwin-execution/report.json"
+        },
+        "gate_failures": [],
+        "lane": "execution",
+        "samples": 10,
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "target": "darwin",
+        "warmup": 3
+      },
+      {
+        "archive_record": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/f9cc9e047ee675cb52801f5a62387017b03625357d7d366444491d8d51d00fa3.gz",
+          "archive_sha256": "22d414883b104fa5cea5ed4b1b9f21eb3c4cfe5369c92e27badcd6514f1c1e2b",
+          "bytes": 73995,
+          "kind": "final_validation",
+          "sha256": "f9cc9e047ee675cb52801f5a62387017b03625357d7d366444491d8d51d00fa3",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/darwin-process/report.json"
+        },
+        "gate_failures": [],
+        "lane": "process",
+        "samples": 10,
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "target": "darwin",
+        "warmup": 3
+      },
+      {
+        "archive_record": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7670830fe172e801dc84b61602665f0ea1e512ab4c673d95e6a5f8d477f3c162.gz",
+          "archive_sha256": "b07a98f67662f96e0be3c794efb655d1d125f328a63a07da76b8ad6c5c6ec86c",
+          "bytes": 126874,
+          "kind": "final_validation",
+          "sha256": "7670830fe172e801dc84b61602665f0ea1e512ab4c673d95e6a5f8d477f3c162",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/darwin-build/report.json"
+        },
+        "gate_failures": [],
+        "lane": "build",
+        "samples": 10,
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "target": "darwin",
+        "warmup": 3
+      },
+      {
+        "archive_record": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6a8b8da8bf8ed85e1e39b350318cfb0c4cacfe388f2d916696e2740ce6be1e45.gz",
+          "archive_sha256": "12c813db4dd2481a2cda8d33df24e00c028993eab0753e7131778a7c8711ce52",
+          "bytes": 161255,
+          "kind": "final_validation",
+          "sha256": "6a8b8da8bf8ed85e1e39b350318cfb0c4cacfe388f2d916696e2740ce6be1e45",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/linux-execution/report.json"
+        },
+        "gate_failures": [],
+        "lane": "execution",
+        "samples": 10,
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "target": "linux",
+        "warmup": 3
+      },
+      {
+        "archive_record": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/b56e6e9ff4b873832754b166efabe8fc107e45b1dfdabc8db4413e745ab88d81.gz",
+          "archive_sha256": "9186b1d210bf5ae144b5eb114cf36749b1be6d4433cfb20562ad45612d9ef94a",
+          "bytes": 105466,
+          "kind": "final_validation",
+          "sha256": "b56e6e9ff4b873832754b166efabe8fc107e45b1dfdabc8db4413e745ab88d81",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/linux-process/report.json"
+        },
+        "gate_failures": [],
+        "lane": "process",
+        "samples": 10,
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "target": "linux",
+        "warmup": 3
+      },
+      {
+        "archive_record": {
+          "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/465d2f9164c25b382095657be3bb31e0fb73d66541ff8b89b10dfc269fce4152.gz",
+          "archive_sha256": "572ae368328372550a1044ebe1b462ddbc793ea582d3f1db39aee7842fb8fc15",
+          "bytes": 142246,
+          "kind": "final_validation",
+          "sha256": "465d2f9164c25b382095657be3bb31e0fb73d66541ff8b89b10dfc269fce4152",
+          "source": "_scratch/i011-20261020/completion-20261022/storage-final/campaign/linux-build/report.json"
+        },
+        "gate_failures": [],
+        "lane": "build",
+        "samples": 10,
+        "source_sha256": "f26d0b99e160cc84ecfdb3f511d2a13930c7a9794eca16130573620427d878ca",
+        "target": "linux",
+        "warmup": 3
+      }
+    ],
+    "offline": {
+      "archive": {
+        "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/259601324250ac3a9d1a3a2d5d5402cdb0ff74def3a14cfd05b3232261402aba.gz",
+        "archive_sha256": "bd3f5e23445b2a5423732a049929c2672bcb48ed45929858c8338c42356d216f",
+        "bytes": 23893,
+        "kind": "final_validation",
+        "sha256": "259601324250ac3a9d1a3a2d5d5402cdb0ff74def3a14cfd05b3232261402aba",
+        "source": "_scratch/i011-20261020/completion-20261022/storage-final/offline/validation.json"
+      },
+      "host_target_combinations": [
+        [
+          "darwin/arm64",
+          "darwin/arm64"
+        ],
+        [
+          "darwin/arm64",
+          "linux/arm64"
+        ],
+        [
+          "linux/arm64",
+          "linux/arm64"
+        ],
+        [
+          "linux/arm64",
+          "darwin/arm64"
+        ]
+      ],
+      "status": "passed"
+    },
+    "semantic": {
+      "archive": {
+        "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/81a6d2b8fb6fb91769b176f84c49701453f0ff48fbd33d14cbc25d16bc92b406.gz",
+        "archive_sha256": "e3aaca291f10d735b93703fec06fe88afd9534754d8f5da21c3980522b5c4901",
+        "bytes": 566828,
+        "kind": "final_validation",
+        "sha256": "81a6d2b8fb6fb91769b176f84c49701453f0ff48fbd33d14cbc25d16bc92b406",
+        "source": "_scratch/i011-20261020/completion-20261022/storage-final/semantic-report.json"
+      },
+      "qualification_gaps": [],
+      "references": 394
+    }
+  },
+  "i011_complete": false,
+  "issue": "I011",
+  "measurement_and_test_changes": [
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "18eea9bbd9fb2f4681fbfa9c18f7a2ff8b87bcf52fd086f587ebfc6f73fa2354",
+      "path": "Makefile",
+      "prior_sha256": "16073195430b5acf6af15c66bc658e04efd86ecb9b719f5b3031615d1797a575"
+    },
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "7ab9ad98f0fd2096d0a68334452e42aeb73cd6c86667799b2acbf0e8465c7cc1",
+      "path": "scripts/qualify_native.py",
+      "prior_sha256": "71982d718b1e4716321c99079cf69ce86e10aa8f0f03603f07164ba66cd91440"
+    },
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "6d676f854b6d552b43c2c8b092f67fa4600aec10fa5239cdb0413092891679af",
+      "path": "tools/nativebench/campaign.py",
+      "prior_sha256": "3bdaac749198f14e85b16753fd9877e0152215fbbf25ebf2e74e21770dd28143"
+    },
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "6017ed8170bfa180ed8ae025f925ac0f461dd08be4773eb84d69301f80dffbf2",
+      "path": "tools/nativebench/identity.py",
+      "prior_sha256": "923e0516d232bac1f7cbc6cf4a4118b179d0b60800413429ac09368a34c2e2fb"
+    },
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "c2d3024044cff6f735219e590ee97bf386d1b1cbe558bdd40277f76139542eb3",
+      "path": "tools/nativebench/merge.py",
+      "prior_sha256": "2157c46d28d3f89d2cb79d20af1c032e6dc8411cc89bdb0a45acd594cce2236c"
+    },
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "125cf45325b97f26670fef920d6777d392e4a36109a1b9fe7acddd4c55c5b074",
+      "path": "tools/nativebench/qualification.py",
+      "prior_sha256": "1d1cdb35d911cea937d545ce19a38cb95cf891e8f058f9a01cec0c044ea4905f"
+    },
+    {
+      "classification": "test",
+      "current_sha256": "3cd3a90e994df381fb139ca62b19898d9139d4e2273dbc84a2cd2e6e5fc09384",
+      "path": "tools/nativebench/test_campaign.py",
+      "prior_sha256": "f6d12ea934d954f0c68869f6d0e8e4f1349115ae7722f9cbe75f6f08d67bf13a"
+    },
+    {
+      "classification": "test",
+      "current_sha256": "f7e963f0209992f9d72b2da11dbce8e743671ca2766980358ef07e8e5e6c40af",
+      "path": "tools/nativebench/test_identity.py",
+      "prior_sha256": "95aaeac672ebc5bcb337e611553bd454885afb085613dc955a9d2d258ed23839"
+    },
+    {
+      "classification": "test",
+      "current_sha256": "2f222b10838d6b6465aa3269d15c642373fbda51403ad72d35b9c36f4727e3f2",
+      "path": "tools/nativebench/test_measurements.py",
+      "prior_sha256": "c002810cf5de911d47b8502c12328e6e5bb0843c78092307101020d7340a9fb1"
+    },
+    {
+      "classification": "test",
+      "current_sha256": "2a1db741dd1e2d82db72324ee37c1a0f3175a0d4b8768ed4ae4cd827fbf5fcd9",
+      "path": "tools/nativebench/test_merge.py",
+      "prior_sha256": "79d7b480d8b8c47d0e459f0e40abdc8161fbe2b35b8be2bc0c078759f0f9ae4a"
+    },
+    {
+      "classification": "test",
+      "current_sha256": "2504169787358a3a6b22d194beef49241218beadf22cc8217f53a929dce384fa",
+      "path": "tools/nativebench/test_qualification.py",
+      "prior_sha256": "0cc81486abbddb7f41921a8f794366c8b8ad5584b7d3b69bb81b588387a4ac89"
+    },
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "dfe7afe7a2b6b2e8d7f35e6d9bc6bf6da99c08b64fd2a42f7b633a68ae7b7400",
+      "path": "tools/loqualification/performance.py",
+      "prior_sha256": "a1b4a3d92eef85e8a3d74c1c01b60f20ae035fbaa2aab8ebd0828796e5d03ef2"
+    },
+    {
+      "classification": "test",
+      "current_sha256": "c83e717832d2b0a3c957fec3a22a09a7eda6a37a2af72d51322b303e0fe9db6f",
+      "path": "tools/loqualification/test_performance.py",
+      "prior_sha256": "07e6bd4c0b59497f9ca4045779f9188927e4f1a940fd1597918674afdc3b0ddb"
+    },
+    {
+      "classification": "measurement_or_orchestration",
+      "current_sha256": "3394f1af0eb5acffc0a5819f451b5946cc06a93253897f5ab38a3034d99c8bbe",
+      "path": "tools/loqualification/performance-runner/main.go",
+      "prior_sha256": "ab3a9f34b9d88d3881a588e4ce945bcb2a088372da457de842d9d0d9190034c9"
+    },
+    {
+      "classification": "test",
+      "current_sha256": "53d9e9f82e436fe0db9a35046bdeba51d94f154dd8e65292dba00290504a3bd0",
+      "path": "tools/loqualification/performance-runner/main_test.go",
+      "prior_sha256": "c20b4c0d50ab5655b111405b679e278667ddbfcea14af54f495bf47af1b4b019"
+    }
+  ],
+  "new_public_test": {
+    "bytes": 3067,
+    "path": "tests/integration/llvm_http_oversized_test.go",
+    "sha256": "4174311e50a018a9306a590ab11752f0c5bf3243d033321e4b8754065eeaa43d"
+  },
+  "no_merged_report_created": true,
+  "no_tests_builds_or_timing_run": true,
+  "packages": [
+    {
+      "candidate_compiler_sha256_declared": "50ad920322edb5b82db0d44bb83432b280c6090069563a7816ea649483738caf",
+      "candidate_metadata": [
+        {
+          "bytes": 3451,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/toolchain.json",
+          "sha256": "fe3c3af8c3a88837092d0befcec394daa7f05db04559eea04b0f73aaed5c9739"
+        },
+        {
+          "bytes": 11024,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/inventory.json",
+          "sha256": "cc508d3611a963b0aaf7351d958f47219b61721b45afa5e259d3c08454a7d2cb"
+        },
+        {
+          "bytes": 435455,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-software/provenance.json",
+          "sha256": "8a01c76ccbeb16da9a7e598a3ff141dde69a8b09936ec4fb1a3d4f329ccb4bfe"
+        }
+      ],
+      "candidate_runtime_hashes": {
+        "darwin/arm64": "c47c57a6ad35e67eaae88c1254926f5500d8974e07358ae0dada9092e74b2a0a",
+        "linux/arm64": "cf9d4a87c884b9c306c828496f55a6f87fb6ec533eca5a6f674b38a28882e62a"
+      },
+      "changed_package_members": [
+        "bin/lo",
+        "provenance.json",
+        "runtime/aarch64-apple-darwin/liblo_runtime.a",
+        "runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+        "source/lo-source.tar.gz",
+        "toolchain.json"
+      ],
+      "frontend_paths": 153,
+      "frontend_source_and_producer_unchanged": true,
+      "name": "lo-darwin-arm64-software",
+      "prior_compiler_sha256_declared": "05bb0f492eed4a318afdaf4c9f3156b82a9d5e0e4c20d00a26e21a3c4c2d938f",
+      "prior_metadata": [
+        {
+          "bytes": 3451,
+          "path": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-software/toolchain.json",
+          "sha256": "71b5f409b522c7fe751a2c5f8504ebec86e36aba86d9c5a456f7a44c5765555b"
+        },
+        {
+          "bytes": 11024,
+          "path": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-software/inventory.json",
+          "sha256": "5fa51b8e4636e58c42bd4ebede4ffb0a3b1fd07ad0e36c09733f5f57f21ef59d"
+        },
+        {
+          "bytes": 435455,
+          "path": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-software/provenance.json",
+          "sha256": "3a82b89c5ffaa43dc4f4f3b6c19e8b14fc0533ae91bf172468dd7f4ae434d104"
+        }
+      ],
+      "prior_runtime_hashes": {
+        "darwin/arm64": "9bd65d33890c37f3f35232dd6ec37e82a2ec54cb9b1d21b249c29f18089f7d24",
+        "linux/arm64": "07896f5df64b8af8adc54b11c03d2c6f2c81620c0aeb180473dc5d305518a570"
+      },
+      "production_delta": [
+        "runtime/native/src/http/server.rs"
+      ],
+      "production_paths": 2848
+    },
+    {
+      "candidate_compiler_sha256_declared": "8def25dc3fb4a9d92aac5fbc7188906e9429a089935b0483a3459c3a26da4d0d",
+      "candidate_metadata": [
+        {
+          "bytes": 4521,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/toolchain.json",
+          "sha256": "f28afd06f354c86e4087f844847ec90f09b38393853f07ed6602cb790d8ff08e"
+        },
+        {
+          "bytes": 13734,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/inventory.json",
+          "sha256": "c58ec9764941fe53bbf5cac4acb9859c087bdfc82b3eb25fc87b0946c62ecadf"
+        },
+        {
+          "bytes": 441688,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-linux-arm64-software/provenance.json",
+          "sha256": "9a54e916060aaca6cf946f4aafcf9167c41ec74b3e715e855d50605c8edc390c"
+        }
+      ],
+      "candidate_runtime_hashes": {
+        "darwin/arm64": "c47c57a6ad35e67eaae88c1254926f5500d8974e07358ae0dada9092e74b2a0a",
+        "linux/arm64": "cf9d4a87c884b9c306c828496f55a6f87fb6ec533eca5a6f674b38a28882e62a"
+      },
+      "changed_package_members": [
+        "bin/lo",
+        "provenance.json",
+        "runtime/aarch64-apple-darwin/liblo_runtime.a",
+        "runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+        "source/lo-source.tar.gz",
+        "toolchain.json"
+      ],
+      "frontend_paths": 153,
+      "frontend_source_and_producer_unchanged": true,
+      "name": "lo-linux-arm64-software",
+      "prior_compiler_sha256_declared": "b368ef658b8e6429bbf5438dd59434f002a94b75d635ff0026ba41824703343b",
+      "prior_metadata": [
+        {
+          "bytes": 4521,
+          "path": "bin/distributions-i011-storage-20261023/lo-linux-arm64-software/toolchain.json",
+          "sha256": "41c32b36d9664617ee7e4c64b22cc778a55b6e828aff31b21cab03fb9191b914"
+        },
+        {
+          "bytes": 13734,
+          "path": "bin/distributions-i011-storage-20261023/lo-linux-arm64-software/inventory.json",
+          "sha256": "0744421e2e0d41ed398755d86f8d2ff00bf487db29e4fa74cee173766123e3d4"
+        },
+        {
+          "bytes": 441688,
+          "path": "bin/distributions-i011-storage-20261023/lo-linux-arm64-software/provenance.json",
+          "sha256": "4bcb90097e412f46e5c55f8a21026106b2aeed9b48ab2f024d4c9a04540a2786"
+        }
+      ],
+      "prior_runtime_hashes": {
+        "darwin/arm64": "9bd65d33890c37f3f35232dd6ec37e82a2ec54cb9b1d21b249c29f18089f7d24",
+        "linux/arm64": "07896f5df64b8af8adc54b11c03d2c6f2c81620c0aeb180473dc5d305518a570"
+      },
+      "production_delta": [
+        "runtime/native/src/http/server.rs"
+      ],
+      "production_paths": 2848
+    },
+    {
+      "candidate_compiler_sha256_declared": "ae3190b996220a8cc2d6badd05e128f87e0cd61e8763c290981d90d19fd0eaf2",
+      "candidate_metadata": [
+        {
+          "bytes": 6131,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-metal/toolchain.json",
+          "sha256": "1a43b1bc8fccaac0810138bbbe099472bd0eb227ec154bf2fb25a1eb85bed027"
+        },
+        {
+          "bytes": 11940,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-metal/inventory.json",
+          "sha256": "b322cb03d96cb8a9176aa70e49d16f4f0abdc6b06821cadf74d02d4b49b3b56d"
+        },
+        {
+          "bytes": 435452,
+          "path": "_scratch/i011-20261020/completion-20261022/oversized-request-fix/packages/lo-darwin-arm64-metal/provenance.json",
+          "sha256": "c80933ca09c433703c4e0cd58abe4cd0bc229aca7c0e0dc67e4ac9fc06af7523"
+        }
+      ],
+      "candidate_runtime_hashes": {
+        "darwin/arm64": "c47c57a6ad35e67eaae88c1254926f5500d8974e07358ae0dada9092e74b2a0a",
+        "linux/arm64": "cf9d4a87c884b9c306c828496f55a6f87fb6ec533eca5a6f674b38a28882e62a"
+      },
+      "changed_package_members": [
+        "bin/lo",
+        "provenance.json",
+        "runtime/aarch64-apple-darwin/liblo_runtime.a",
+        "runtime/aarch64-apple-darwin/metal/liblo_runtime.a",
+        "runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+        "source/lo-source.tar.gz",
+        "toolchain.json"
+      ],
+      "frontend_paths": 153,
+      "frontend_source_and_producer_unchanged": true,
+      "name": "lo-darwin-arm64-metal",
+      "prior_compiler_sha256_declared": "b22b87855c1c0ac783eb5480975b0d49cba378c08c51012389d99a9ec10870e0",
+      "prior_metadata": [
+        {
+          "bytes": 6131,
+          "path": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-metal/toolchain.json",
+          "sha256": "00a9313902eddff2484944e390a5d2771a4bd2b4a8fe6820ceb81e9ab82f8f30"
+        },
+        {
+          "bytes": 11940,
+          "path": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-metal/inventory.json",
+          "sha256": "141471985e6b8a9bdc02622544a0125c9da5beee9e38b54d6fb3facaf613d6ba"
+        },
+        {
+          "bytes": 435452,
+          "path": "bin/distributions-i011-storage-20261023/lo-darwin-arm64-metal/provenance.json",
+          "sha256": "34ba416fe876cbea7020087fd9cf4cfb0e0c62dc1efc19bae6dc04de1ddc346e"
+        }
+      ],
+      "prior_runtime_hashes": {
+        "darwin/arm64": "9bd65d33890c37f3f35232dd6ec37e82a2ec54cb9b1d21b249c29f18089f7d24",
+        "linux/arm64": "07896f5df64b8af8adc54b11c03d2c6f2c81620c0aeb180473dc5d305518a570"
+      },
+      "production_delta": [
+        "runtime/native/src/http/server.rs"
+      ],
+      "production_paths": 2848
+    }
+  ],
+  "precision_tool_checks": {
+    "bytes": 4782,
+    "path": "_scratch/i011-20261020/completion-20261022/precision-tooling/focused-validation.json",
+    "sha256": "5cf55ca26059b40b102e4113b07d8b5b66af8602bd12215cdbcb17c2c93ec66f"
+  },
+  "prior_audit_archive": {
+    "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/40aef098ec88f1d1b6a5078dc9cc0c3abef212ea1283b2d3a1a4d9e591c98c1b.gz",
+    "archive_sha256": "01043c6744ac36c3d70719074899e39b4b9310d1e3c98144955cc0de6bd9132b",
+    "bytes": 9169,
+    "kind": "orchestration_or_audit",
+    "sha256": "40aef098ec88f1d1b6a5078dc9cc0c3abef212ea1283b2d3a1a4d9e591c98c1b",
+    "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-audit.json"
+  },
+  "prior_f26_manifest": {
+    "bytes": 3299417,
+    "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/manifest.json",
+    "sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20"
+  },
+  "prior_state_unchanged": {
+    "expected_gate_failures": [
+      {
+        "gate_failures": [
+          "http:echo:p95:inconclusive",
+          "http:echo:reciprocal_throughput:inconclusive"
+        ],
+        "lane": "http",
+        "target": "linux"
+      }
+    ],
+    "performance_outcome": "inconclusive"
+  },
+  "production": {
+    "after_sha256": "8f9a6d472e002e4ac64631997b10a82e2535cab1e0c6457b68b3155fa749afd7",
+    "before_sha256": "06a874568ea44b87e3cc1173ef51dd4ab49460ac9f09788c6dd043cde6de6257",
+    "exact_patch": "--- prior_f26/runtime/native/src/http/server.rs\n+++ candidate/runtime/native/src/http/server.rs\n@@ -437,11 +437,10 @@\n             let _ = stream.stream.shutdown(Shutdown::Write);\n             let deadline = Instant::now() + Duration::from_millis(500);\n             let mut buffer = [0u8; 8192];\n-            let mut drained = 0;\n-            while Instant::now() < deadline && drained < (256 << 10) {\n+            while Instant::now() < deadline {\n                 match stream.reader.read(&mut buffer) {\n                     Ok(0) => break,\n-                    Ok(count) => drained += count,\n+                    Ok(_) => {}\n                     Err(error)\n                         if matches!(\n                             error.kind(),\n",
+    "exact_source_delta": "runtime/native/src/http/server.rs",
+    "unchanged": [
+      "500ms absolute drain deadline",
+      "8192byte discard buffer",
+      "50ms socket timeouts",
+      "request body admission limit",
+      "error kinds/input/trace/order",
+      "response half-close/keepalive",
+      "polls/cancellation"
+    ],
+    "unexpected_changes": []
+  },
+  "qualification_claim": false,
+  "scope_limits": [
+    "Package source maps and metadata compared; large package binaries/tars were not rehashed.",
+    "Historical correctness/offline/nonHTTP results retain original f26 source/package identity.",
+    "Current full suite/offline/nonHTTP reruns are intentionally not claimed.",
+    "New binary runtime/toolchain/frontend pin identities differ; source equivalence plus focused HTTP checks support the explicitly authorized delta reuse.",
+    "Historical scalar-samples reports are not fed to the current merger or relabeled as current samples."
+  ],
+  "state": "bounded_delta_source_and_prior_evidence_audited"
+}

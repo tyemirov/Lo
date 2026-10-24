@@ -3,7 +3,6 @@ package nativeplan
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"math"
 	"math/big"
@@ -36,27 +35,29 @@ type flowMetadata struct {
 	Location   uint64              `json:"location"`
 }
 type programMetadata struct {
-	ABI       string `json:"abi"`
-	HasResult bool   `json:"has_result"`
-	Source    struct {
-		Path   string `json:"path"`
-		SHA256 string `json:"sha256"`
-	} `json:"source"`
+	ABI         string               `json:"abi"`
+	HasResult   bool                 `json:"has_result"`
+	Source      sourceMetadata       `json:"source"`
 	Types       []typeMetadata       `json:"types"`
 	Locations   []Location           `json:"locations"`
 	Flows       []flowMetadata       `json:"flows"`
 	Derivatives []derivativeMetadata `json:"derivatives"`
 }
 type lowering struct {
-	ctx              context.Context
-	program          ir.Program
-	metadata         programMetadata
-	typeIDs          map[string]uint64
-	flowIDs          map[identity.FlowID]uint64
-	flows            map[identity.FlowID]ir.Flow
-	approximateBytes int
-	err              error
-	synthetic        []Function
+	ctx                context.Context
+	program            ir.Program
+	metadata           programMetadata
+	typeIDs            map[string]uint64
+	flowIDs            map[identity.FlowID]uint64
+	flows              map[identity.FlowID]ir.Flow
+	metadataLowerBound int
+	files              []string
+	spans              []metadataSpan
+	siteSpans          []uint64
+	fileIDs            map[string]uint64
+	spanIDs            map[metadataSpanKey]uint64
+	err                error
+	synthetic          []Function
 }
 type functionBuilder struct {
 	l             *lowering
@@ -81,7 +82,7 @@ func Lower(ctx context.Context, program ir.Program) (Plan, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, fmt.Errorf("native lowering: %w", err)
 	}
-	l := &lowering{ctx: ctx, program: program, typeIDs: map[string]uint64{}, flowIDs: map[identity.FlowID]uint64{}, flows: map[identity.FlowID]ir.Flow{}}
+	l := &lowering{ctx: ctx, program: program, typeIDs: map[string]uint64{}, flowIDs: map[identity.FlowID]uint64{}, flows: map[identity.FlowID]ir.Flow{}, files: []string{}, spans: []metadataSpan{}, fileIDs: map[string]uint64{}, spanIDs: map[metadataSpanKey]uint64{}}
 	l.metadata.ABI = ABIIdentity
 	l.metadata.HasResult = program.ResultType() != nil
 	l.metadata.Source.Path = program.Source().Path()
@@ -135,7 +136,7 @@ func Lower(ctx context.Context, program ir.Program) (Plan, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, fmt.Errorf("native lowering: %w", err)
 	}
-	metadata, err := json.Marshal(l.metadata)
+	metadata, err := l.encodeMetadata()
 	if err != nil {
 		return nil, fmt.Errorf("native metadata: %w", err)
 	}
@@ -173,11 +174,11 @@ func (l *lowering) site(span source.Span, action string, t types.Type, owner str
 		return 0
 	}
 	id := uint64(len(l.metadata.Locations))
+	l.siteSpans = append(l.siteSpans, l.internSpan(span))
 	l.metadata.Locations = append(l.metadata.Locations, Location{ID: id, File: span.File(), Start: span.Start(), End: span.End(), Action: action, Type: l.typeID(t), Labels: []string{}, Owner: owner, Arguments: []ArgumentMetadata{}})
-	l.approximateBytes += len(span.File()) + len(action) + len(owner) + 200
-	if l.approximateBytes > MaxModuleBytes && l.err == nil {
-		l.err = fmt.Errorf("%w: metadata exceeds %d bytes", ErrLimit, MaxModuleBytes)
-	}
+	l.accountMetadata(len(`{"span":0,"action":"","type":0,"owner":"","flow":0,"payload":{}}`))
+	l.accountMetadata(len(action))
+	l.accountMetadata(len(owner))
 	return id
 }
 func (b *functionBuilder) site(span source.Span, action string, t types.Type) uint64 {
@@ -250,6 +251,9 @@ func (b *functionBuilder) invalid(site uint64, exit BlockID) BlockID {
 }
 func (b *functionBuilder) checked(symbol string, args []ValueID, site uint64, recoverable bool, caller bool) ValueID {
 	result, value := b.raw(symbol, args, site, caller)
+	return b.checkedResult(result, value, site, recoverable)
+}
+func (b *functionBuilder) checkedResult(result ResultID, value ValueID, site uint64, recoverable bool) ValueID {
 	ok := b.block()
 	failure := b.failure(result, b.errorExit)
 	unknown := b.invalid(site, b.errorExit)
@@ -505,6 +509,10 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 			b.l.err = err
 			return 0
 		}
+		if literals := integerListLiterals(expr); len(literals) != 0 {
+			result = b.literalSequence(expr, literals)
+			break
+		}
 		args := make([]ValueID, len(expr.Arguments()))
 		metadata := make([]ArgumentMetadata, len(expr.Arguments()))
 		for _, argument := range expr.Arguments() {
@@ -578,6 +586,74 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 	}
 	b.checked(ChargeSymbol, []ValueID{result}, b.site(span, "charge_value", expression.Type()), false, false)
 	return result
+}
+
+func integerListLiterals(call ir.BuiltinCall) []ir.Literal {
+	if call.Operation().Name() != "List.new" || len(call.Arguments()) == 0 || len(call.Labels()) != 0 {
+		return nil
+	}
+	literals := make([]ir.Literal, len(call.Arguments()))
+	for index, argument := range call.Arguments() {
+		value, ok := argument.(ir.ValueArgument)
+		if !ok || value.Position() != index {
+			return nil
+		}
+		literal, ok := value.Value().(ir.Literal)
+		if !ok || literal.Type().Kind() != types.IntKind {
+			return nil
+		}
+		literals[index] = literal
+	}
+	return literals
+}
+
+func (b *functionBuilder) literalSequence(call ir.BuiltinCall, literals []ir.Literal) ValueID {
+	count := uint64(len(literals))
+	// Reserve exactly the former step/literal/charge owners. The final List.new
+	// owner is a separate ordinary result immediately after this range.
+	if count > uint64(math.MaxUint32)/3 || uint64(len(b.f.Values))+3*count >= uint64(math.MaxUint32) {
+		b.l.err = fmt.Errorf("%w: literal ownership range", ErrLimit)
+		return 0
+	}
+	base := ValueID(len(b.f.Values) + 1)
+	triples := make([]LiteralTriple, len(literals))
+	arguments := make([]ArgumentMetadata, len(literals))
+	for index, literal := range literals {
+		span := literal.Span()
+		step := b.site(span, "expression_step", literal.Type())
+		if b.l.err != nil {
+			return 0
+		}
+		site := b.site(span, "literal", literal.Type())
+		if b.l.err != nil {
+			return 0
+		}
+		b.l.metadata.Locations[site].Text = literal.Text()
+		if _, ok := new(big.Int).SetString(literal.Text(), 10); !ok {
+			b.l.err = fmt.Errorf("native lowering: invalid integer literal")
+			return 0
+		}
+		charge := b.site(span, "charge_value", literal.Type())
+		if b.l.err != nil {
+			return 0
+		}
+		triples[index] = LiteralTriple{Step: step, Literal: site, Charge: charge}
+		arguments[index] = ArgumentMetadata{Kind: "value", Type: b.l.typeID(literal.Type())}
+		for phase := 0; phase < 3; phase++ {
+			b.value(true)
+		}
+	}
+	site := b.site(call.Span(), "operation", call.Type())
+	metadata := &b.l.metadata.Locations[site]
+	metadata.Operation = "List.new"
+	metadata.Labels = append([]string{}, call.Labels()...)
+	metadata.Arguments = arguments
+	b.f.Results++
+	result := ResultID(b.f.Results)
+	value := b.value(true)
+	b.resultValues[result] = value
+	b.instruction(Instruction{Kind: LiteralSequence, Symbol: OperationSymbol("List.new"), Result: result, Value: value, Site: site, OwnedBase: base, Literals: triples})
+	return b.checkedResult(result, value, site, false)
 }
 
 func validateArguments(op catalog.Operation, args []ir.Argument, flows map[identity.FlowID]ir.Flow) error {

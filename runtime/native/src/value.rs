@@ -285,7 +285,15 @@ pub fn new(typ: Type, data: Data) -> Handle {
             ),
         };
     let contains_storage = match &data {
-        Data::Tensor(_) | Data::Adapter(_) => true,
+        Data::Tensor(_) => true,
+        Data::Adapter(crate::adapters::AdapterValue::Http(crate::http::Value::Headers {
+            fields,
+            ..
+        })) => fields.values().any(|value| value.contains_storage),
+        Data::Adapter(crate::adapters::AdapterValue::Http(crate::http::Value::Fields(fields))) => {
+            fields.contains_storage
+        }
+        Data::Adapter(_) => true,
         Data::Wrapped(value) | Data::Success(value) | Data::Failure(value) => {
             value.contains_storage
         }
@@ -862,5 +870,82 @@ fn snapshot_type(t: &Type) -> Type {
             Type::Record(fields)
         }
         _ => t.clone(),
+    }
+}
+
+#[cfg(test)]
+mod http_storage_flags_tests {
+    use super::*;
+    use crate::{context::{Context, Fault, Program}, http, tensor};
+    use std::sync::Arc;
+
+    fn checked<T>(result: Result<T, Fault>) -> T {
+        result.unwrap_or_else(|fault| panic!("{}", fault.message()))
+    }
+
+    fn context() -> Context {
+        let metadata = br#"{"abi":"lo-native-2","has_result":false,"source":{"path":"http-storage-flags.lo","sha256":"0000000000000000000000000000000000000000000000000000000000000000"},"types":[],"files":[],"spans":[],"locations":[],"flows":[],"derivatives":[]}"#;
+        Context::new(Arc::new(Program::parse(metadata, 0).unwrap()), 1000)
+    }
+
+    fn adapter(headers: bool, fields: Handle) -> Handle {
+        if headers {
+            http::wrap("HTTP.Headers", http::Value::Headers {
+                entries: fields.fields()["entries"].clone(),
+                fields: fields.fields().clone(),
+            })
+        } else {
+            http::wrap("HTTP.Request", http::Value::Fields(fields))
+        }
+    }
+
+    #[test]
+    fn http_exposed_fields_without_storage_have_false_flag() {
+        let mut context = context();
+        for headers in [true, false] {
+            let fields = record([("entries".into(), record([("text".into(), text("plain"))]))]);
+            let value = adapter(headers, fields);
+            assert!(!value.contains_storage());
+            assert!(tensor::allocations(&[value.clone()]).is_empty());
+            checked(tensor::validate_inputs(&context, &[value]));
+        }
+        let headers = http::headers(vec![("x-test".into(), b"plain".to_vec())]).unwrap();
+        assert!(!headers.contains_storage());
+        assert!(tensor::allocations(&[headers]).is_empty());
+        assert_eq!(context.resources.live, 0);
+        checked(context.close());
+    }
+
+    #[test]
+    fn http_nested_storage_retains_ids_and_ledger_rejection() {
+        let mut owner = context();
+        let mut foreign = context();
+        let tensor = tensor::value(checked(tensor::construct(
+            &mut owner, &checked(tensor::Shape::new(vec![1])), vec![1.0],
+        )));
+        let storage_id = tensor::data(&tensor).storage.id;
+        let aliases = new(Type::List(Box::new(tensor.typ.clone())), Data::List(vec![tensor.clone(), tensor.clone()]));
+        let nested = record([("aliases".into(), aliases)]);
+        let fields = record([("entries".into(), text("scalar entries")), ("nested".into(), nested)]);
+        let expected = tensor::allocations(&[fields.clone()]);
+        assert_eq!(expected, vec![storage_id]);
+        for headers in [true, false] {
+            let value = adapter(headers, fields.clone());
+            assert!(value.contains_storage());
+            assert_eq!(tensor::allocations(&[value.clone()]), expected);
+            checked(tensor::validate_inputs(&owner, &[value.clone()]));
+            let fault = tensor::validate_inputs(&foreign, &[value.clone()]).err().expect("foreign storage accepted");
+            assert_eq!(fault.message(), "tensor allocation belongs to another invocation or a released scope");
+            assert!(tensor::host_publishable(&value));
+        }
+        assert_eq!(owner.resources.live, 4);
+        checked(owner.close());
+        assert_eq!(owner.resources.live, 0);
+        for headers in [true, false] {
+            let value = adapter(headers, fields.clone());
+            assert_eq!(tensor::allocations(&[value.clone()]), expected);
+            assert!(tensor::validate_inputs(&owner, &[value]).is_err());
+        }
+        checked(foreign.close());
     }
 }

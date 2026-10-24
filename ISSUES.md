@@ -1271,6 +1271,95 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   All 25 campaign checks passed, including cleanup, observation, and finalization failures.
   Fresh final CI and independent correction review passed.
 
+- [x] [B007] (P1) {F017} Reduce large-literal compiler control flow
+  Goal:
+  Compiler cost decreases for large integer lists without a language behavior change.
+
+  Requirements:
+  - Keep every logical step, value charge, cancellation poll, source site, and first error order.
+  - Keep current owned-handle lifetimes and release order, including derivative temporary releases.
+  - Keep the last list operation and its own value charge.
+  - Resolve the DWARF mapping decision before a production code change.
+  - Keep the current performance limits and installed toolchain contract.
+
+  Deliverables:
+  - Add one verified representation for direct integer literal sequences.
+  - Limit register allocation work per function as the list length increases.
+  - Add public behavior checks and structural compiler checks.
+
+  Validation:
+  - Record current behavior before the refactor through real runtime calls on both targets.
+  - Verify unchanged event order, step boundaries, cancellation, source sites, and full cleanup.
+  - Reject invalid sequence descriptors and ownership ranges.
+  - Measure the fixed large-list cases on both targets without retries or removed samples.
+  - Compare time, sampled memory, and executable size with the recorded baselines.
+  - Complete I011 qualification after the last compiler change.
+
+  The Darwin comparison recorded a 51.453-second median for 10,000 items.
+  LLVM register allocation accounts for most measured compiler time in the different stage profiles.
+  The selected design uses a private loop for direct integer literal sequences.
+  The user approved the compact-helper DWARF limitation on October 22, 2026.
+
+  Five new public characterization tests completed on both targets before compiler changes.
+  The status fixture completed 70 cases on each target.
+  The design also keeps the same temporary releases in derivative code.
+  Synthetic derivative lists use references and do not qualify for compact loops.
+  The evidence record corrects the earlier direct-literal claim and keeps the initial receipts.
+
+  The compact implementation passed focused checks and review by a different agent.
+  Six diagnostic builds completed with correct results across both targets.
+  The Darwin 10,000-item map build took 0.836 seconds through linking.
+  This diagnostic excludes the installed compiler parent and does not complete I011 qualification.
+  B008 addresses the runtime metadata cost.
+  The subsequent complete campaign passed the fixed build cases on both targets.
+  B007 closed with I011 under the reviewed focused acceptance update on October 23, 2026.
+
+- [x] [B008] (P1) {F017} Compact runtime metadata without information loss
+  Goal:
+  Program metadata uses less space without loss of source or execution information.
+
+  Requirements:
+  - Define one canonical `lo-native-2` schema and reject `lo-native-1`.
+  - Keep unchanged source coordinates, coordinate extras, owner, flow, literal values, and operation arguments.
+  - Keep JSON syntax precedence, behavior for duplicate keys, and deferred literal failures.
+  - Keep typed shared source spans after admission.
+  - Keep all compiler dependencies inside the installed distribution.
+
+  Deliverables:
+  - Add shared file and source span tables with payloads for each action.
+  - Replace the producer, parser, runtime consumers, and active ABI records together.
+  - Add checks for unchanged source records and admission behavior.
+
+  Validation:
+  - Record current coordinate, error, receipt, callback, and derivative behavior before code changes.
+  - Verify unchanged meaningful field values and public source records after compaction.
+  - Verify table indices, payload shapes, literal limits, and malformed JSON precedence.
+  - Measure metadata and executable bytes for the same fixed 1,000-item and 10,000-item programs.
+  - Complete offline acceptance, both corpora, CI, and I011 performance qualification after the last change.
+
+  Before compaction, the large-list profiles contained about 14 MB of runtime metadata.
+  The architecture review approved all 38 action mappings and all 17 initial fields.
+  Current behavior checks passed on both targets before metadata changes.
+  Fixed source fixtures keep hashes for the initial fields and tables.
+
+  The new ABI tests recorded 23 expected failures and 20 passes on each target.
+  The same C harness passed four current-ABI controls on each target.
+  The new runtime parser passed four focused tests in the Linux HVF guest.
+  Review of the parser and typed consumers found no blocking issue.
+  The Go encoder passed the initial field and table hashes across all 38 actions.
+
+  Encoder review found no blocking issue.
+  New software distributions passed 31 selected public tests on each target.
+  All 43 ABI2 admission cases passed on both targets.
+  The C oracle passed 44 cells, and the runtime, distribution, and lowering tools passed 60 checks.
+
+  The new distributions passed full correctness and offline checks.
+  All eight performance lanes completed, with Linux process and HTTP results at `inconclusive`.
+  This change does not depend on the B007 DWARF decision.
+  The subsequent complete campaign passed correctness, offline acceptance, and all non-HTTP lanes.
+  The final focused HTTP run passed all eight gates with unchanged thresholds.
+  B008 closed with I011 under the reviewed focused acceptance update on October 23, 2026.
+
 ## Improvements
 
 - [ ] [I001] (P1) {F007,F010} Qualify deterministic training with a small complete MVP
@@ -1603,7 +1692,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [device receipt](docs/evidence/native-devices/validation.json) records source identities, results, and qualification limits.
   F017 and I011 keep the complete compiler distribution and clean-environment acceptance work.
 
-- [-] [I011] (P1) {F017,I005,B001,B002,B003,B004,B005,B006} Qualify the standalone compiler and remove Go generation
+- [x] [I011] (P1) {F017,I005,B001,B002,B003,B004,B005,B006,B007,B008} Qualify the standalone compiler and remove Go generation
   Goal:
   Replace the current native build path after complete semantic acceptance.
 
@@ -1622,7 +1711,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Compile offline and execute copied artifacts in a second environment without Lo or compiler tools.
   - Verify optimization preserves numeric profiles, charges, errors, and effect order.
   - Verify the declared performance and build-resource contracts.
-  - Run final make ci and the explicit clean-environment targets before closure.
+  - Apply the user-selected focused acceptance update below for final validation.
 
   Implementation status:
   All native executable builds use LLVM and the static Rust runtime.
@@ -1635,7 +1724,8 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Both installed compiler hosts passed 500-step XOR training.
   All 56 distribution and runtime tool checks passed.
 
-  Full CI passed 2,624 native cases without failures or skips.
+  The earlier ABI1 validation completed full CI with 2,635 native checks and no failures or skips.
+  The qualification tools completed 204 checks.
   The Linux corpus passed 1,414 cases without failures or skips.
   The strict semantic report passed all 394 references in three lanes with no qualification gaps.
 
@@ -1649,23 +1739,129 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Source, package, and nonperformance evidence identities remained unchanged.
 
   Current work:
-  The user replaced quiet-host admission with a measurement validity gate.
+  The maintained campaign uses the measurement validity gate selected by the user.
   External load is context and cannot prevent measurement or remove samples.
-  Keep the fixed corpus, paired order, sample counts, confidence calculations, and numeric thresholds.
-  Add a maintained serial campaign command and verify both producers under background load.
-  Campaign11 remains closed as historical evidence. Attempt12 did not start.
-  Establish new source identities before a new campaign.
-  Fresh CI exposed a fixture output deadlock and a cleanup finalization error.
-  B005 corrected all seven synchronous capture fixtures and passed both-target checks. B006 focused checks passed.
-  Fresh final CI passed 2,635 native cases without failures or skips and all 197 qualification-tool checks.
-  One complete performance campaign is in progress.
-  The [interim findings](docs/native-qualification-findings.md) record the measured results before corrective work.
-  Darwin execution and process lanes passed. All four Darwin HTTP gates are inconclusive.
-  Build observations remain partial. Linux lanes and final audits remain pending.
-  Use the [measurement contract](docs/native-compilation-contract.md#measurement-validity) for acceptance.
-  Stop I011 performance work when all required gates and the evidence review pass.
-  Full performance acceptance and the evidence audit are not complete.
-  Independent review of the complete qualification is still necessary.
+  The fixed corpus, paired order, sample counts, confidence calculations, and numeric thresholds stay unchanged.
+  B005 and B006 completed their corrections and necessary checks.
+
+  The HTTP producer now calculates elapsed time and throughput from one clock interval.
+  Its validator checks those values and p95 latency against the raw measurements.
+  The runtime uses one HTTP reader buffer instead of an 8 KiB zero fill per read.
+  Focused HTTP checks completed on both targets.
+  All eight HTTP intervals were below the limit in the fixed 100-pair diagnostic.
+
+  The new ten-pair campaign completed the Darwin execution, process, and HTTP lanes within the limits.
+  Its Darwin build lane stopped at a 180-second `records_10000` timeout.
+  The Linux performance lanes did not start.
+  The incomplete campaign and its raw results stay in the evidence record.
+  No timeout increase or automatic retry removes that result.
+
+  Large-literal profiles identify LLVM register allocation as the largest measured compiler cost.
+  A diagnostic allocator change decreases time but keeps high memory costs and increases executable size.
+  The user also specified compiler costs that are “reasonable: comparable to other compiled languages.”
+  The fixed diagnostics recorded a 51.453-second Lo median for 10,000 items on Darwin.
+  The Go, Rust, and C++ medians were 0.272, 0.466, and 0.645 seconds.
+  The references have different runtime and semantic costs.
+
+  The records keep different experiment identities, empty-program baselines, raw samples, and all failed reference links.
+  B007 contains the compact lowering work.
+  B008 contains the metadata compaction work.
+  Before compaction, runtime metadata accounted for about 14 MB of the large-literal artifact.
+  The selected fixes keep the qualification limits unchanged.
+
+  The installed ABI2 Darwin diagnostic recorded a 2.224-second median for the initial 10,000-item comparison source.
+  Its median sampled process-tree RSS was 143,835,136 bytes, and its executable size was 7,661,024 bytes.
+  All 12 fixed observations passed.
+
+  The new distributions passed CI, both corpora, strict semantic coverage, and offline acceptance.
+  All eight performance lanes completed.
+  All Darwin lanes and the Linux execution and build lanes passed.
+  Linux process and HTTP results have the status `inconclusive`.
+  A different agent calculated the results again from the raw measurements and found no measurement defect.
+
+  The full build campaign measured the 10,000-item map at 2.125 seconds on Darwin and 0.612 seconds on Linux.
+  Maximum sampled process-tree RSS was 156,237,824 and 160,452,608 bytes, respectively.
+  Executables contained 7,661,040 and 13,112,408 bytes, respectively.
+
+  The program admission diagnostic led to a parser with fixed row fields.
+  All 60 admission cases and 31 public tests passed on both targets after this change.
+  The HTTP diagnostics led to direct buffer reads and error record construction only on error branches.
+  The combined HTTP changes passed nine public tests and 25 subtests on each target.
+  Review by a different agent verified the raw results and source, runtime, and package identities.
+
+  The new distributions passed full CI, both corpora, strict semantic coverage, and offline acceptance.
+  The full campaign completed with seven passing lanes and one inconclusive Linux echo throughput gate.
+  Linux process qualification now passes.
+  The echo throughput ratio is 1.079 with a 95% interval of 1.067 to 1.145.
+  The unchanged limit is 1.1.
+  A fixed diagnostic measured eight request stages on both targets.
+  The result led to HTTP reader type selection without changes to method bodies.
+
+  Generated code on both targets removes the connection read call through a table.
+  A test assertion now accepts both possible progress states when cancellation follows server receipt.
+  Ten focused tests and 27 subtests passed on each target, including the exact read cancellation check.
+  The new full campaign passed correctness, offline acceptance, and seven performance lanes.
+  Both Linux HTTP p95 gates passed, but echo and computed-response throughput remain inconclusive.
+  Their 95% intervals are 1.043 to 1.111 and 0.983 to 1.127, respectively.
+  The limit stays at 1.1.
+  Further HTTP investigation is necessary before I011 closure.
+
+  The runtime now checks HTTP child values for tensor storage.
+  Both targets passed 33 focused public tests and 69 subtests.
+  Full CI passed 2,738 native checks without failures or skips.
+  The new distributions passed the Linux corpus, strict semantic coverage, component checks, and offline acceptance.
+  The complete campaign passed seven performance lanes.
+  Linux computed-response HTTP passed, but echo latency and throughput remain inconclusive.
+  Their 95% intervals are 0.775 to 1.167 and 0.988 to 1.217, respectively.
+  The limit stays at 1.1.
+  The raw audit confirmed all eight lane reports and both target reports.
+  Focused Linux echo checks found no consistent benefit from `TCP_NODELAY`.
+  The canonical short check recorded CPU totals of 115.619 ms for native Lo and 160.630 ms for the interpreter.
+  These totals cover each server's complete lifetime.
+  Its elapsed times varied, and the checks did not establish a cause for the earlier inconclusive result.
+  A different agent verified the short check and found no justification for a production fix.
+  Those focused checks made no production change and did not include a qualification campaign.
+  All acceptance thresholds remain unchanged.
+
+  The next campaign declares 100 HTTP pairs and ten pairs for each other lane on both targets.
+  This change increases measurement precision within the existing minimum of ten pairs.
+  Batch sizes, warmups, the estimator, and all acceptance thresholds stay unchanged.
+  Every lane must use the same complete sample plan and fixed inputs.
+  No historical lane, removed sample, adaptive extension, or automatic retry can supply acceptance.
+  More precise results can pass or fail.
+
+  Full CI for that measurement change passed 2,737 native checks and failed `TestServeRequestBoundary`.
+  An oversized request produced `broken pipe` instead of the required `413` response.
+  No new performance lane started.
+  The runtime closed rejected uploads after it read only 256 KiB of the remaining body.
+  The correction removes that byte cutoff and keeps the existing deadline, buffer, body limit, and socket timeouts.
+
+  The new regression failed against the old runtime and passed after the correction.
+  Both targets passed 13 focused tests and 33 subtests.
+  A different agent verified the source change and raw results.
+  The user stopped the subsequent full CI run and selected the focused HTTP checks for this correction.
+
+  Acceptance update, October 23, 2026:
+  The user selected HTTP-only qualification on both targets and prohibited another full suite run.
+  For I011 closure, use the earlier correctness, offline, and non-HTTP results after review of the subsequent changes.
+  Keep those results associated with their original sources and packages.
+  Require all eight fresh HTTP gates to pass with unchanged thresholds.
+  This selection replaces the final full-suite rerun requirement for I011.
+
+  Keep the new HTTP reports separate from the earlier campaign.
+  Do not combine historical samples or claim a new complete campaign passed.
+  Preserve the earlier inconclusive results and the user-stopped CI result.
+  Complete the evidence audit and review by a different agent before closure.
+
+  The [findings](docs/native-qualification-findings.md) record completed checks, failed campaigns, profiles, and their limits.
+  The final HTTP-only run passed all eight gates on both targets with unchanged thresholds.
+  Each case retained 100 measured pairs after three warmup pairs.
+  The highest confidence interval upper bound was 1.033, below the 1.1 limit.
+  Both native software packages contain only the reviewed HTTP correction since the earlier accepted production sources.
+  The earlier correctness, offline, and six non-HTTP lane results retain their original identities.
+  The final evidence audit and review by a different agent passed.
+  I011 closed on October 23, 2026, under the user-selected focused acceptance update.
+  The [completion record](docs/evidence/i011-qualification-20261022/completion.json) binds the evidence and its limits.
 
 - [ ] [I012] (P2) {F022,F023} Qualify complete application development
   Goal:

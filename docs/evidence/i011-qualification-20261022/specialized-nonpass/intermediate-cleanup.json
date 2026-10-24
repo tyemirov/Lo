@@ -1,0 +1,10 @@
+{
+  "issue": "I011",
+  "status": "removed_exact_reviewed_derived_paths",
+  "inventory": "docs/evidence/i011-qualification-20261022/specialized-nonpass/specialized-nonpass-cleanup-inventory.json",
+  "inventory_sha256": "c4d3ce5aea50210965ce6887c2f28d993075cecdc1c4fdc19285e8a2ab5af04f",
+  "paths_removed": 49,
+  "raw_evidence_preserved": true,
+  "original_packages_and_runtime_retained": true,
+  "i011_complete": false
+}

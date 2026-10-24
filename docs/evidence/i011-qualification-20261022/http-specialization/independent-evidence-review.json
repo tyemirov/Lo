@@ -1,0 +1,25 @@
+{
+  "issue": "I011",
+  "review": "Independent HTTP specialization preservation and focused-evidence audit",
+  "manifest_sha256": "d76998a371d0f4120f67e877fabdd9d3d72b94cdb2a6e718e3e0f28f5f308eeb",
+  "focused_receipt_sha256": "611c247c9e1293c85913daaf45ef8413c536a323ad6101fb07302cc9dd6498b9",
+  "result": "no blocking findings",
+  "verified": [
+    "All158 archive records,105 unique gzip payloads and22 identity-only binaries match recorded hashes and lengths; gzip timestamps are zero.",
+    "Corrected raw logs contain exactly10 top-level passes,27 subtest passes and10 ErrorInputs on each target, including deterministic recv cancellation coverage.",
+    "Both Linux exports strictly decode matching streams and elapsed times: original failure status1 remains preserved; corrected status0 elapsed17120585092ns.",
+    "The original write-request,false,unknown cancellation failure remains distinct from the typed assertion correction.",
+    "Reviewed source snapshots, patches, optimized-code comparison and package/runtime receipts are preserved and consistently bound.",
+    "All three package provenance records bind the specialized runtime and reviewed Reader source.",
+    "No performance qualification or I011 completion is claimed."
+  ],
+  "cleanup_recommended_only": [
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-linux/guest/root",
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-linux/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-linux/guest/root",
+    "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-linux/guest/root.cpio.gz"
+  ],
+  "cleanup_limits": "Retain all packages, raw logs, exports, receipts, inputs and active specialized-final outputs. Cleanup remains under primary authority.",
+  "qualification_claim": false,
+  "reviewer_actions": "Read-only verification; no edits, tests or timing."
+}

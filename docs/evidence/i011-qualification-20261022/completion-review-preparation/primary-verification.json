@@ -1,0 +1,9 @@
+{
+  "issue": "I011",
+  "manifest_sha256": "a04be070ae763f16f6f547fad065a85039a4ec57f3c4d10df460f8e6d08e9494",
+  "verified_records": 193,
+  "unique_archives": 168,
+  "source_bytes_match": true,
+  "qualification_claim": false,
+  "result": "passed"
+}

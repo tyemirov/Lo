@@ -1,0 +1,39 @@
+{
+  "kind": "parser-stage-post-preservation-verification",
+  "state": "all_declared_archives_and_identities_verified",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-parser-stages/manifest.json",
+    "sha256": "e9a18f135555003142c7b5d1a8073dd892c460f74f46dcf35006d070028d61fd"
+  },
+  "source_analysis_supplement": {
+    "path": "docs/evidence/i011-qualification-20261022/http-parser-stages/source-analysis-supplement.json",
+    "sha256": "60a934d6fccded9534a545274fafd6baa7988de3b2562e8120248050c83259e1"
+  },
+  "main_records": 66,
+  "linked_records": 2906,
+  "supplement_records": 1,
+  "hash_only_identities": 459,
+  "raw_and_packed_hashes_lengths_mtime0_filenameflag_verified": true,
+  "freeze_inputs_covered": 3346,
+  "fixed_raw_cells": 4,
+  "prior_manifests_verified": 7,
+  "historical_value_source": "Exact oldvalue.rs raw03bc7bdd... linkedfromdurablepayload andactualexecutedsnapshot, independent ofanylatermaintainededit.",
+  "all_original_scratch_retained": true,
+  "qualification_claim": false,
+  "production_adoption": false,
+  "commands": [
+    {
+      "target": "i011-http-parser-stages-independent-audit",
+      "status": 0
+    },
+    {
+      "target": "i011-http-parser-stages-preservation-plan",
+      "status": 0
+    },
+    {
+      "target": "i011-http-parser-stages-preservation-execute",
+      "status": 0
+    }
+  ],
+  "primary_independent_preservation_review": "pending"
+}

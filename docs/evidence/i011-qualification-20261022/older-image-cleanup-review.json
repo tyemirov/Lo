@@ -1,0 +1,13 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "inventory_sha256": "46a9a1b6bf109a26dc7235000bb4afaf8f5ea4830c0cecfc5ea2817548da2f86",
+  "result": "all75 authoritative archive links match compressed and decoded hashes, lengths, and current raw bytes",
+  "preflight_failures": [
+    "Initial resolver treated manifest-relative archive paths as repository-relative. No mutation occurred.",
+    "Corrected resolver then compared raw hashes with null because candidate6 uses source_sha256 and source_bytes. No mutation occurred."
+  ],
+  "correction": "Independent review used authoritative fields in each declared manifest. Original inventory and records remain unchanged.",
+  "recommendation": "Remove only the ten exact image files. Retain all sibling input roots and raw/durable records. No specialized paths.",
+  "image_hashing": "Not required for regenerable images whose input roots remain; no image hashing in independent review."
+}

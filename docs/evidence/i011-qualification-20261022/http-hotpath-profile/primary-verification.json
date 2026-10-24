@@ -1,0 +1,18 @@
+{
+  "issue": "I011",
+  "reviewer": "/root",
+  "manifest_sha256": "b85fe2dedd1ee008b7107ab18b4daf8fcd80ebf49f38462d4f66a8b972461110",
+  "archives_verified": 2787,
+  "checks": [
+    "archive SHA-256",
+    "decoded length and SHA-256",
+    "zero gzip timestamp",
+    "archive paths inside Lo"
+  ],
+  "qualification_claim": false,
+  "supplement": {
+    "path": "docs/evidence/i011-qualification-20261022/http-hotpath-profile/supplement-raw-exports.json",
+    "sha256": "1e36308fddbcfc413f6b309b581930c03ba45e2a3cfe45aa617702088aeffa37",
+    "archives_verified": 9
+  }
+}

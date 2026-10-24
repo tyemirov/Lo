@@ -19,7 +19,7 @@ from typing import Any, Callable
 
 from identity import LOAD_POLICY, file_identity, package_provenance, source_provenance
 from merge import admit, local, merge
-from qualification import LANES, WARMUP, completion
+from qualification import SAMPLE_PLAN, LANES, WARMUP, completion
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PACKAGES = ROOT / '_scratch/compiler-distribution/packages'
@@ -180,7 +180,7 @@ def snapshot(args: argparse.Namespace) -> dict[str, Any]:
 def command(args: argparse.Namespace, target: str, lane: str, work: Path) -> list[str]:
     return ['make', '--no-print-directory',
             'benchmark-standalone' if target == 'darwin' else 'benchmark-native-linux',
-            'BENCH_COUNT=10', f'NATIVE_BENCH_LANE={lane}', f'NATIVE_BENCH_WORK={work}',
+            f'NATIVE_BENCH_LANE={lane}', f'NATIVE_BENCH_WORK={work}',
             f'NATIVE_BENCH_COMPILER={args.darwin_package / "bin/lo"}',
             f'COMPILER_DISTRIBUTION_OUTPUT={args.linux_package.parent}',
             f'NATIVE_LINUX_PACKAGE={args.linux_package}',
@@ -201,7 +201,7 @@ def run(args: argparse.Namespace, popen: Callable[..., subprocess.Popen[Any]]) -
     active: dict[str, Any] | None = None
     try:
         frozen = snapshot(args)
-        config = {'samples': 10, 'warmup': WARMUP, 'concurrency': 1,
+        config = {'sample_plan': dict(SAMPLE_PLAN), 'warmup': WARMUP, 'concurrency': 1,
                   'load_policy': LOAD_POLICY,
                   'accelerator': args.accelerator,
                   'paths': {name: str(getattr(args, name)) for name in
@@ -265,7 +265,7 @@ def run(args: argparse.Namespace, popen: Callable[..., subprocess.Popen[Any]]) -
                         or identity['producer']['source_identity'] != declared['producer']['source_identity']
                         or identity['reference']['source_identity'] != declared['reference']['source_identity']):
                     raise ValueError(f'{target} {lane}: report differs from predeclared provenance')
-                if identity['measurement']['samples'] != 10 or identity['measurement']['warmup'] != 3:
+                if identity['measurement']['sample_plan'] != SAMPLE_PLAN or identity['measurement']['warmup'] != 3:
                     raise ValueError(f'{target} {lane}: sample contract differs')
                 completion(measured, 0)
                 if not measured['measurement_complete']:

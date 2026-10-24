@@ -1,0 +1,17 @@
+{
+  "issue": "I011",
+  "supporting_issue": "B007",
+  "question": "May compact literal loops use the enclosing List.new location in DWARF debug information?",
+  "user_answer": "Allow compact loops; document the DWARF limitation (Recommended)",
+  "decision": "approved",
+  "scope": "private compact integer literal helper DWARF locations only",
+  "retained_requirements": [
+    "original runtime item sites and error records",
+    "evaluation order",
+    "steps and value charges",
+    "cancellation polling",
+    "existing cleanup and ownership points"
+  ],
+  "contract": "docs/native-runtime-contract.md",
+  "contract_sha256_after_edit": "6f851ea9910c6ac16ff34c8d31c19020a54a81bf0955ab73cefb6820132cf5f0"
+}

@@ -1,0 +1,7 @@
+{
+  "reviewer": "/root",
+  "manifest_sha256": "abd67f6e1b5c4867bf3491c49df76c769c45e5e10425cb22d04bce241f5f707c",
+  "verified_records": 3066,
+  "scope": "all compressed records reopened and both byte identities verified; historical CI remains invalid and no performance started",
+  "i011_complete": false
+}

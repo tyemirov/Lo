@@ -1,0 +1,2876 @@
+{
+  "issue": "B008",
+  "parent_issue": "I011",
+  "kind": "public_ABI_admission_stage_diagnostic",
+  "qualification_claim": false,
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build.log",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1249,
+      "raw_sha256": "bfaccca71c21bf71a0cb0e60dc2d3b4368cd4c007ab7d45db3bbe2b28e1aa695",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0000.gz",
+      "compressed_bytes": 341,
+      "compressed_sha256": "f14c4908c30ad062aaed17ee63d19bfbb9f225cddd1c1acbe594eb29c6053ff7"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/compile_harness.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 997,
+      "raw_sha256": "adb4d5f87ab7287caaa3e896f85a5f6a838ace9b628a8588bd85cbffa1797040",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0001.gz",
+      "compressed_bytes": 404,
+      "compressed_sha256": "6658b15fec7cfd9d748d803be7f20335eca6a564980efa6ba5c46947f0b2cb67"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/compile_harness.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0002.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/compile_harness.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0003.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/compile_module.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 919,
+      "raw_sha256": "9eb8a8c933223ad85ff0bdfd19bb160aa67ac8fce7cc59f778228bbf9ad74254",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0004.gz",
+      "compressed_bytes": 356,
+      "compressed_sha256": "71209c3eb9c9c59fe7188d93abc3d6e2aeb38f422934d0b09a0f20c387d5aafe"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/compile_module.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 116,
+      "raw_sha256": "6021f33487b85f8a9c5f9471588485ff4234e50e83be3e5c4c6e23dd0c32b455",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0005.gz",
+      "compressed_bytes": 119,
+      "compressed_sha256": "1699c2359f8214b2d8db609ad47af218ce6315643ee60fd1fccfefe6dde89ab6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/compile_module.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0006.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/emit.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 878,
+      "raw_sha256": "d7a73be0ef49d62578343ff73dd1041aa57c3bc30b8a8f47b503d7057e28ecf5",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0007.gz",
+      "compressed_bytes": 356,
+      "compressed_sha256": "417204015648d384613367b9751d6002b1f852ba0db7c2fd14530d0dacbffb1c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/emit.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0008.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/emit.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 242,
+      "raw_sha256": "4a15a6dc2a0edd05c76fb556e2c10670fad4b2e8926f39e46c43314f6ae43e4a",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0009.gz",
+      "compressed_bytes": 195,
+      "compressed_sha256": "d1e38896a30dd2662bf636d34b90d9ef059c622e05b8f6afd1b0b702bb0af9cf"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/link.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1589,
+      "raw_sha256": "7d8cdf95958fd7fcc190f36ae69d29d74b6ba64439c3b4a173c194e3d2748522",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0010.gz",
+      "compressed_bytes": 404,
+      "compressed_sha256": "82a51cce3a1518a2126ddafa5ea45a92585a9cf420b798a20d556f6485b4b889"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/link.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0011.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/link.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0012.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/program.ll",
+      "kind": "diagnostic_record",
+      "raw_bytes": 14516,
+      "raw_sha256": "071bfef1450a6c07e1484713b7d90e4065871e53df129cc8cd70fa4ea8406f2e",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0013.gz",
+      "compressed_bytes": 2820,
+      "compressed_sha256": "1b890bdaa3adb0b1156f5a27a0da187632c8ed25c61f52d107796951d6214edc"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/compile_harness.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1005,
+      "raw_sha256": "18cfa7161f44d61c6018f8d35b8677e85bac402db5ea3b999d0b829716ea75e7",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0014.gz",
+      "compressed_bytes": 405,
+      "compressed_sha256": "4a3580d39c1230b01d93a611d2b58d59b19f852fb84c11de70a8d31fba26ad2f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/compile_harness.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0015.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/compile_harness.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0016.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/compile_module.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 931,
+      "raw_sha256": "3f5bfefa096b86338e3cd53f979f0bd40c1672ec304cbfeb6305827059c85a03",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0017.gz",
+      "compressed_bytes": 357,
+      "compressed_sha256": "9165f3ff1188bc5cfddc1f92d1be64b6df4b912c08b9e3381adea6163b9e606e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/compile_module.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 116,
+      "raw_sha256": "6021f33487b85f8a9c5f9471588485ff4234e50e83be3e5c4c6e23dd0c32b455",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0018.gz",
+      "compressed_bytes": 119,
+      "compressed_sha256": "1699c2359f8214b2d8db609ad47af218ce6315643ee60fd1fccfefe6dde89ab6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/compile_module.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0019.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/emit.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 888,
+      "raw_sha256": "b1c938ff10680ed89ca9e71e3c542556421b58fff0ee924a1b938710f19cc2af",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0020.gz",
+      "compressed_bytes": 356,
+      "compressed_sha256": "fb3af9df3c9cf1df8677a50f06271ecc0955ada2937fac129ecda76ede010c57"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/emit.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0021.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/emit.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 245,
+      "raw_sha256": "9f43f4541c27cbe8a49f4e5c483c30de47870cde539034e9957295c12a545fa1",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0022.gz",
+      "compressed_bytes": 198,
+      "compressed_sha256": "cad582f3507c8dd4e10dbf009462c6cc5626c68aec797165a997dfdb8170c037"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/link.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1604,
+      "raw_sha256": "7ca83b60a11fb04307e85284184e0224f049d0e9dc72dfe0d91c355815a02e55",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0023.gz",
+      "compressed_bytes": 406,
+      "compressed_sha256": "0736816f544de748fb5e6b165b4189b6a2aab391fd0040388f7483b864aa3185"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/link.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0024.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/link.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0025.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/program.ll",
+      "kind": "diagnostic_record",
+      "raw_bytes": 711303,
+      "raw_sha256": "7a0eb233fc8d9eb9742e6ee7494603461e8f3f5b30dec4c790e5829c93d513dc",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0026.gz",
+      "compressed_bytes": 41702,
+      "compressed_sha256": "96bca2d596b0fc9308b88c1a6b8f3b41c77ece64851236da5f60c6d72c76c9ae"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/compile_harness.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1007,
+      "raw_sha256": "9266d05384fcb40ae70aefd9e4bf99fcef16a13f04b09c739693dd995f17cb42",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0027.gz",
+      "compressed_bytes": 405,
+      "compressed_sha256": "a505c923f0da6b4195e940df151904b38bf4ee49825091f7abf75834b0651175"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/compile_harness.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0028.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/compile_harness.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0029.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/compile_module.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 935,
+      "raw_sha256": "13b37fe71b4a33d20bde4a7c637ec28dcb93285b6f2359f094850a4e7bb7fcc7",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0030.gz",
+      "compressed_bytes": 358,
+      "compressed_sha256": "55c7717a53a747bd78e507ca2416296a31b104ad500ea60e78cf9cf1d6dc7343"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/compile_module.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 116,
+      "raw_sha256": "6021f33487b85f8a9c5f9471588485ff4234e50e83be3e5c4c6e23dd0c32b455",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0031.gz",
+      "compressed_bytes": 119,
+      "compressed_sha256": "1699c2359f8214b2d8db609ad47af218ce6315643ee60fd1fccfefe6dde89ab6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/compile_module.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0032.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/emit.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 893,
+      "raw_sha256": "f365c632dc196563953ab9cae556fde24962f317e9626de5b3ce1fddfec9888c",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0033.gz",
+      "compressed_bytes": 357,
+      "compressed_sha256": "ec002bd0c96b8cc2e1392aca4b8f1fd94afac273baf41e09f5a4ae07df7f1a4a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/emit.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0034.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/emit.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 246,
+      "raw_sha256": "e43d0c140481a0fbaf0a88f9abec57acf9dd9a193dc2c7264b69de5395327e86",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0035.gz",
+      "compressed_bytes": 198,
+      "compressed_sha256": "63b57466b6af1957025984163c522246bc01be16f54c2108f03a5556f70160d8"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/link.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1609,
+      "raw_sha256": "9bde4fd5ace7c2905f5ac42092d89c7fa2ff5e170389348aeb7e0fff737bb666",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0036.gz",
+      "compressed_bytes": 407,
+      "compressed_sha256": "471f1dd71ec7b92b9b54da0eeb64d71d16b5cff5f70b56c5368ceb6214539d74"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/link.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0037.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/link.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0038.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/program.ll",
+      "kind": "diagnostic_record",
+      "raw_bytes": 6679036,
+      "raw_sha256": "05f02fdc500d3fbf542d3881dfa8d6f45f1309e80e6eddc4e92dc9b63378a3c0",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0039.gz",
+      "compressed_bytes": 308466,
+      "compressed_sha256": "14c15c534737589056609030522be2a97881587ec762ffa5b84d7a3345251efd"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/compile_harness.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 966,
+      "raw_sha256": "ff605258069daa82785da2dbca5df52f6cf8d80b836210fcb69e4673fd0ee044",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0040.gz",
+      "compressed_bytes": 393,
+      "compressed_sha256": "3ebe54961eae3782c074d88934e01459c964979465b31cf5879b96217a9db293"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/compile_harness.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0041.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/compile_harness.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0042.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/compile_module.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 887,
+      "raw_sha256": "4147f6e41a15c3665cef65038d014853fbd864a0e4a3873b55e3a6cd01fcec12",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0043.gz",
+      "compressed_bytes": 346,
+      "compressed_sha256": "a774abd81dd544b99f687790d96f5e328b728877434db69a2704c5f813703fa2"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/compile_module.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0044.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/compile_module.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0045.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/emit.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 874,
+      "raw_sha256": "c743ffcbecc2dd603199dd395a31ae046cf66e900f105fbfbfa794c659955474",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0046.gz",
+      "compressed_bytes": 356,
+      "compressed_sha256": "614fc84677670e8878a4c47e3320b776b06c570918f1f5ed0bed2f3dd494e784"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/emit.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0047.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/emit.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 240,
+      "raw_sha256": "bafb50d5c6d476fb7d5fd0168bb172a707bd6336b58525a1fd6a07f1aefc0fbd",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0048.gz",
+      "compressed_bytes": 195,
+      "compressed_sha256": "015a48206af55c281666942ade7329b497b10db6765f0e37c0660412d3128e10"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/link.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 2097,
+      "raw_sha256": "b35c97f96ac7ed334b7da1fd028b706717a46406cd01731989e2658931401fa7",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0049.gz",
+      "compressed_bytes": 424,
+      "compressed_sha256": "d625b2e8aeeab78d23c96df7c6b30f47412665df2b4644427769bfd545f052de"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/link.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0050.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/link.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0051.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/program.ll",
+      "kind": "diagnostic_record",
+      "raw_bytes": 14520,
+      "raw_sha256": "8eb8069f375e540ded8e69a13971cfea8bf315620a8ce6f966f3704b1ee4d676",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0052.gz",
+      "compressed_bytes": 2820,
+      "compressed_sha256": "df2ea340c9497c882b4d2478294c185d181e155a85dee04d98b0bc42f05f17bf"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/compile_harness.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 974,
+      "raw_sha256": "fa4de2e3b5f285d59368086d3168b3d47073d8be2c6bdc5aa70223d657c04cae",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0053.gz",
+      "compressed_bytes": 394,
+      "compressed_sha256": "0d189b324d422bb0774fe967ea63f3b9ffc79c4f264f4e06f028a6c4fdf37b8d"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/compile_harness.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0054.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/compile_harness.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0055.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/compile_module.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 899,
+      "raw_sha256": "ab7170801f064fad8ed08ab4f28c7b854eba85a63b64c41578123efdce25f984",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0056.gz",
+      "compressed_bytes": 348,
+      "compressed_sha256": "c25f7827fe3e18db45759cd988dbd59ee8fbfe5334af9ae59880838fbe87de35"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/compile_module.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0057.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/compile_module.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0058.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/emit.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 884,
+      "raw_sha256": "05960355ba8cd09c6c2eee0a40efc46e2d88bc8fb06f0df0d13cf647558a0a97",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0059.gz",
+      "compressed_bytes": 355,
+      "compressed_sha256": "63b790c801af5ee06974657e26681bb092f871cf5c5e53c54f1e1e324ddf7028"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/emit.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0060.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/emit.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 243,
+      "raw_sha256": "8b8f3283b773aac090ac2e7ec499d918f234de856ce6d28f700bc9d752ef70f2",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0061.gz",
+      "compressed_bytes": 196,
+      "compressed_sha256": "e9701af6de527dbeffe9f3564b6b09e36c09bc14d238fc8d918a74c6ba84a7ec"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/link.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 2111,
+      "raw_sha256": "a7efebab91018fc1bc58d4c34ca212272b35392dca8d5b3e3f082db3980c3f73",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0062.gz",
+      "compressed_bytes": 423,
+      "compressed_sha256": "7f414d91574ef8b62738d294a94e9ddafd687c2f1437ed15b1b8d6f21ba4e4ba"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/link.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0063.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/link.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0064.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/program.ll",
+      "kind": "diagnostic_record",
+      "raw_bytes": 711307,
+      "raw_sha256": "486f278ff9234b36e4f830d1ae33dbae60b21d51e4f231ea1ee538dbfe896bcc",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0065.gz",
+      "compressed_bytes": 41703,
+      "compressed_sha256": "6dcfd81f928f3a3808b3597bd64e7fb1798a81cdf7aa2eda73e3df3e9ab154d6"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/compile_harness.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 976,
+      "raw_sha256": "c82a7dd049a1052fae8609be2a6f0c7f6997c8eb4fec7c732c0e9706be8e8b5a",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0066.gz",
+      "compressed_bytes": 395,
+      "compressed_sha256": "70bb0cbdd0d784107f4d7d7d1c966b1b95140089b4538bd25943e11b133cb931"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/compile_harness.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0067.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/compile_harness.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0068.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/compile_module.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 903,
+      "raw_sha256": "e544eefb9cbd1bd5977c9214d23f84cbc0c9b5b62025773bf9a7da7e9b56bd8c",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0069.gz",
+      "compressed_bytes": 348,
+      "compressed_sha256": "8b9a75ef6d39c2bedf086d60bbdbc20de7bec3d1a8e7b6636a1544fde252dbc7"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/compile_module.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0070.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/compile_module.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0071.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/emit.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 889,
+      "raw_sha256": "5c8ca047fce45b025bb58ab1de0b16e4b802d37956b45876bea60856ae617aa0",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0072.gz",
+      "compressed_bytes": 357,
+      "compressed_sha256": "cc1a134ff2ac91a2b0aa46d19f59a8825b52b7349fe8ac6fecc8b9a2f60eaf36"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/emit.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0073.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/emit.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 244,
+      "raw_sha256": "c1673d706425c719ba5175bfca574053cebd87aa0c56f859d431bd87c935605a",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0074.gz",
+      "compressed_bytes": 197,
+      "compressed_sha256": "86cfd20fbd4467ba75c4ea95cc0644a049491d2a0fdd2290b37ab079adf009a4"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/link.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 2116,
+      "raw_sha256": "8659ba6952d9da604f69f499b9ccba42052263237345de9eb8f0d4995793a331",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0075.gz",
+      "compressed_bytes": 426,
+      "compressed_sha256": "38da8fdf2b498a6d0f903312a38a0bf4c7e40c4252a4f3f7ebb893728afc2ef4"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/link.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0076.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/link.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0077.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/program.ll",
+      "kind": "diagnostic_record",
+      "raw_bytes": 6679040,
+      "raw_sha256": "4c0147516aba72da9e982f507248cf6d0a0e670e08907ad7db550508ec88a0c3",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0078.gz",
+      "compressed_bytes": 308467,
+      "compressed_sha256": "c99c0a409cc85e6114a67826175da4b7b71a587ca1261c2e214f946abd5d0107"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/build/report.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 37535,
+      "raw_sha256": "9554add95aa3c1883f1dffdca4ba83277f22d5bdd36536bef027fe2b62a96588",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0079.gz",
+      "compressed_bytes": 2671,
+      "compressed_sha256": "a16d5878d9819b088e165417ada7c9f08e10c576f099716c29d7d009ac410326"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/completion.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 3895,
+      "raw_sha256": "7b1dffe75722b1fc2e51b7c08e27d97adb73a4f94bc4e9118ca83482141d8979",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0080.gz",
+      "compressed_bytes": 1237,
+      "compressed_sha256": "dd71d30b89cc1aa8fb2dcc32a3e761b2c4da33d7e7e72c55c5dd2474bd04ecf9"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/design.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 9569,
+      "raw_sha256": "8bc4f2960021fe026ac6f942522b7e2caab1c9a157f15e33e1b2d053266e1c24",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0081.gz",
+      "compressed_bytes": 3122,
+      "compressed_sha256": "9dc91d560cf8ed949e4bad7d9f4e765893ebc7b9e77cfffcb39b2f8704ac7285"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/focused.mk",
+      "kind": "frozen_input_record",
+      "raw_bytes": 560,
+      "raw_sha256": "cbe3afa4b18ff6c8750c89769288a560822e7098bb008bcb8101106ced914d06",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0082.gz",
+      "compressed_bytes": 166,
+      "compressed_sha256": "a8e551415cce30dac395fbde7e64f4a9cc71911647abbe97f6057a4ac05f9fb8"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/input-bindings.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 41762,
+      "raw_sha256": "94c04d61c07713fb72e6a26e5da1ad1401e639b954fb7b5e692131aaac1f0e09",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0083.gz",
+      "compressed_bytes": 6623,
+      "compressed_sha256": "0ebc056541eaf3d06518f26bf717468334b886637c941f3573171cb6e6e5d99f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/preserve.py",
+      "kind": "diagnostic_record",
+      "raw_bytes": 5844,
+      "raw_sha256": "7ae0a84845c5d5c28c5a98399f9b968fa711d1592d4666611121230c5f22fe40",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0085.gz",
+      "compressed_bytes": 2297,
+      "compressed_sha256": "e392d25915775982055f52f7c326f05e72760d1c1e34d2bd001f89635d7d573c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/profile.py",
+      "kind": "frozen_input_record",
+      "raw_bytes": 12397,
+      "raw_sha256": "f38b26e8bd4538ee8f11d9051955c6b64b43df4877a186b15ce1fc1a458b1b51",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0086.gz",
+      "compressed_bytes": 3968,
+      "compressed_sha256": "080416a716cade521b9713dfdb9f1c2cb9d301ae192907a33910a6552494b40f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/empty-profile.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 477,
+      "raw_sha256": "e00378cfdd13b2c8fb46cc0224fd675f7298943a1a16064a124e9ed71a57defe",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0087.gz",
+      "compressed_bytes": 240,
+      "compressed_sha256": "29cec1ce05648eeffa286469c7d94baf4b481fa375b4adac7a999bece815d814"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/empty-profile.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0088.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/empty-profile.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 4783,
+      "raw_sha256": "97da908c96ae32fc85e7e19ce537f85ee17bbaa9eee6bd6cfb9361e01fc4b48e",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0089.gz",
+      "compressed_bytes": 340,
+      "compressed_sha256": "c5a0a7f03738156a9ea1b2aced060ed5b3eea0b6c22f5cca7f4f6d16b3e8dfbf"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/empty-verify.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 492,
+      "raw_sha256": "2e7b540cf1139cac120b2e832f2bfd8f45870c9d419d6c01bd61c6bc696aad48",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0090.gz",
+      "compressed_bytes": 247,
+      "compressed_sha256": "365bcbaea9e8f92c8c011873d7ff8f568aa15935a22fde1fd686baa5b194daf9"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/empty-verify.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0091.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/empty-verify.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 2,
+      "raw_sha256": "10159baf262b43a92d95db59dae1f72c645127301661e0a3ce4e38b295a97c58",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0092.gz",
+      "compressed_bytes": 22,
+      "compressed_sha256": "5acd32e535a3e9cd9c39eec05d5a753184882350c6eaabd57aecf3a610cc64c5"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_1000-profile.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 487,
+      "raw_sha256": "12c885b608a47dd43c3ce4681762910715bb0c48cdd461b1bd088de540fa7fd4",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0093.gz",
+      "compressed_bytes": 242,
+      "compressed_sha256": "b366543042dafa5ab2346d0f003be764f63d3d5924313a3d1f46a03cca383b1c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_1000-profile.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0094.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_1000-profile.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 4927,
+      "raw_sha256": "749d86803683d9bb40b3730fefad65758bb71651ba78e088ff5b7e689b0451e6",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0095.gz",
+      "compressed_bytes": 386,
+      "compressed_sha256": "dd81cdebc14f18c1feb743d0c567a3c7f2e8bff7fb6466a0ed77b22bde956d5d"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_1000-verify.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 501,
+      "raw_sha256": "75027b2cb9e41368fde61093488b04404f4145ae59e5ea509acaaa7de2c4aeea",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0096.gz",
+      "compressed_bytes": 249,
+      "compressed_sha256": "cf812dea5a9e6417c9198dee2f042c945d6f1d1c9089d3272de9efcc5959d203"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_1000-verify.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0097.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_1000-verify.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 7,
+      "raw_sha256": "aee106d0edc84531ba3392ec36ba3807517f918c1de7c50955e56dcbdd0915dd",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0098.gz",
+      "compressed_bytes": 27,
+      "compressed_sha256": "76dd2023f1c0fd82003dc03696f6ccce715b08c2724fe7b67548d86439f8b21d"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_10000-profile.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 491,
+      "raw_sha256": "c0880b1e4507b9017bc395de0dd2d2802cd64936bf471925f064163495ff5a6f",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0099.gz",
+      "compressed_bytes": 243,
+      "compressed_sha256": "35031f5136e4a300c07794bf35c3c84365a7384db3f1de907b3c397fc515af5a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_10000-profile.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0100.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_10000-profile.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 4940,
+      "raw_sha256": "351aad630de105cbfd16d7e996b922eb78a6af8ad30337a238af04821c7b219a",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0101.gz",
+      "compressed_bytes": 396,
+      "compressed_sha256": "1b80fcebc6e0496043b4d2f58a590f99779d3a5b59b9ebbba2c3957630d52b9b"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_10000-verify.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 504,
+      "raw_sha256": "ffca5739b0ed74b082ff3647a26300154030bd67d1a58138fdc952532ecf2687",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0102.gz",
+      "compressed_bytes": 251,
+      "compressed_sha256": "bca5003d5c29efd6301eff1c350a4e8862aefc098bfa4784c37074a766e2440e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_10000-verify.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0103.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/map_10000-verify.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 8,
+      "raw_sha256": "3c276bd9369380d19e2f37dc5e2bbb831a8bbb00cfe4dd2728c545a544ee08ed",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0104.gz",
+      "compressed_bytes": 28,
+      "compressed_sha256": "c7008a2a9f6176144dccd1863ee0e023878ec8dcbce1534e3834cffbae283cb0"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-darwin-arm64/report.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 32574,
+      "raw_sha256": "fd8901644b1819811db44d795f3b37360e2238273b0bda4981f30ef3a082b8c9",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0105.gz",
+      "compressed_bytes": 1985,
+      "compressed_sha256": "580ad553d8c8fc4fad50d5520e8b3c613e66b57d9915ec2198ebbabf72556468"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/batch.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1951,
+      "raw_sha256": "38e8fe498cc76e33ec4ed68db776da38c8b58384601630181a006b2642d4c0d4",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0106.gz",
+      "compressed_bytes": 339,
+      "compressed_sha256": "532c9421eb4f75d61c64e879959a8a563856989d1a0cb1639edb2562fdaf282e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/0.stderr",
+      "kind": "guest_raw_result",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0107.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/0.stdout",
+      "kind": "guest_raw_result",
+      "raw_bytes": 2,
+      "raw_sha256": "10159baf262b43a92d95db59dae1f72c645127301661e0a3ce4e38b295a97c58",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0108.gz",
+      "compressed_bytes": 22,
+      "compressed_sha256": "5acd32e535a3e9cd9c39eec05d5a753184882350c6eaabd57aecf3a610cc64c5"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/1.stderr",
+      "kind": "guest_raw_result",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0109.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/1.stdout",
+      "kind": "guest_raw_result",
+      "raw_bytes": 4771,
+      "raw_sha256": "73b00d2c3c9d16ad592d0a85ffbfae921e6c5b70c8a719acbe36153e568375df",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0110.gz",
+      "compressed_bytes": 408,
+      "compressed_sha256": "2298ac220d3c2a0459e5b3e862eda278b99f5d88738bdea6998896fc44ed292d"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/2.stderr",
+      "kind": "guest_raw_result",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0111.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/2.stdout",
+      "kind": "guest_raw_result",
+      "raw_bytes": 7,
+      "raw_sha256": "aee106d0edc84531ba3392ec36ba3807517f918c1de7c50955e56dcbdd0915dd",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0112.gz",
+      "compressed_bytes": 27,
+      "compressed_sha256": "76dd2023f1c0fd82003dc03696f6ccce715b08c2724fe7b67548d86439f8b21d"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/3.stderr",
+      "kind": "guest_raw_result",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0113.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/3.stdout",
+      "kind": "guest_raw_result",
+      "raw_bytes": 4927,
+      "raw_sha256": "f6386bc54b0abc9f91206d4969fe6309f785f0ee2fa9e812c3647d5f6b6aae05",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0114.gz",
+      "compressed_bytes": 458,
+      "compressed_sha256": "f9137ca2c17d98ca14301d9b8540081cd3a0e544a9564b7f8d894da695848ec2"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/4.stderr",
+      "kind": "guest_raw_result",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0115.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/4.stdout",
+      "kind": "guest_raw_result",
+      "raw_bytes": 8,
+      "raw_sha256": "3c276bd9369380d19e2f37dc5e2bbb831a8bbb00cfe4dd2728c545a544ee08ed",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0116.gz",
+      "compressed_bytes": 28,
+      "compressed_sha256": "c7008a2a9f6176144dccd1863ee0e023878ec8dcbce1534e3834cffbae283cb0"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/5.stderr",
+      "kind": "guest_raw_result",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0117.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/5.stdout",
+      "kind": "guest_raw_result",
+      "raw_bytes": 4941,
+      "raw_sha256": "1eb34e0b51de9944abf36db739d1d012389aaa4161056804646dc8c0d2120540",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0118.gz",
+      "compressed_bytes": 461,
+      "compressed_sha256": "c469e761921c343b6a133b61fa2b43a899a9b9b7a89fe015100791eabf9e535a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/export.log",
+      "kind": "guest_raw_result",
+      "raw_bytes": 30282,
+      "raw_sha256": "74a9edbe91d0ff22e465f8f2a36d2c1f0a2d82ca65cb31c0cbc8fd08c12fb2da",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0119.gz",
+      "compressed_bytes": 1562,
+      "compressed_sha256": "82a7e2ac57ca9e43e8a021af82679ee261f92da80244747a33597ef18886cdd1"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/qemu.stderr",
+      "kind": "guest_raw_result",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0120.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/report.json",
+      "kind": "guest_raw_result",
+      "raw_bytes": 5445,
+      "raw_sha256": "d533531841c66c6165af90036bdb4b599a51b3f74b7805996e065ab51020d657",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0121.gz",
+      "compressed_bytes": 1095,
+      "compressed_sha256": "a1379cfbf4a1095e1440396df8b8d85fc3491d40581d11ae401aafcb620b56dd"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/serial.log",
+      "kind": "guest_raw_result",
+      "raw_bytes": 35,
+      "raw_sha256": "d050253ca3a39411e349ab16fb8dc9bdab147821483436b0017b4fbbb7f77867",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0122.gz",
+      "compressed_bytes": 53,
+      "compressed_sha256": "96ce7aa9748183351f335b14b526151b609a273ae1e7cd6441efd5673ae398c5"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/maintained_batch.command.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 1033,
+      "raw_sha256": "43f2d46101c50497b4e70715a2bfad618e09a24729f27599084941e89b8d7a0a",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0123.gz",
+      "compressed_bytes": 386,
+      "compressed_sha256": "cd1b57913cda3208716e44943219830a2aff0a31b1e4d4e58015b0ea26816b45"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/maintained_batch.stderr",
+      "kind": "diagnostic_record",
+      "raw_bytes": 0,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0124.gz",
+      "compressed_bytes": 20,
+      "compressed_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/maintained_batch.stdout",
+      "kind": "diagnostic_record",
+      "raw_bytes": 4237,
+      "raw_sha256": "25437b40bdeed969d78b5d23c5bcd617e993a117f4ca180b9f91559abb32d863",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0125.gz",
+      "compressed_bytes": 1047,
+      "compressed_sha256": "f887edb7c9a2dad97f64df8a7446478ddfce9da126db8c8b6962c022ff1630c0"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/report.json",
+      "kind": "diagnostic_record",
+      "raw_bytes": 29561,
+      "raw_sha256": "3e9ca493f1d007de7e9b5fa3db75285e41200893921ad011722f33e7b89a9104",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0126.gz",
+      "compressed_bytes": 2100,
+      "compressed_sha256": "e131457e5c6d2d427d2e020fa70639b4f56fd47dfcca74f66ed3b024fd7e44e8"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/run.log",
+      "kind": "diagnostic_record",
+      "raw_bytes": 5479,
+      "raw_sha256": "74ebb9665817739c9d8bf56b183fb763bf5bbac1d11b55ea0dec414606197265",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0127.gz",
+      "compressed_bytes": 1499,
+      "compressed_sha256": "3b48461ddf8099968594dafe999b01b0871d591b5faff51155f106c144092eaf"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/admission-profile/stages.c",
+      "kind": "frozen_input_record",
+      "raw_bytes": 4758,
+      "raw_sha256": "b427df1d8f0f67f9e1be12ac670c5a18e8ffcf38cf4db75bc225d04b63f0d15e",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0128.gz",
+      "compressed_bytes": 1519,
+      "compressed_sha256": "6dce42c70d335c66ac5262116a816137c07e54eacc0e004a6a95de84d73234fb"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-process/payload/process/map_1000/source.lo",
+      "kind": "frozen_input_record",
+      "raw_bytes": 3013,
+      "raw_sha256": "c51799989292cc7270831221f3fe786b82a971e1447a8fa32078ee7d1ddeb2b5",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0129.gz",
+      "compressed_bytes": 299,
+      "compressed_sha256": "5dcdf86a2773e885fcac526a5865e42a5b14e63a9f4f72c101c665605a86d6c2"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-process/payload/process/map_10000/source.lo",
+      "kind": "frozen_input_record",
+      "raw_bytes": 29211,
+      "raw_sha256": "292ad36f025dbd444ab71c454cd9f1e0a0621cb12f0a167e103f9055921302bc",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0130.gz",
+      "compressed_bytes": 438,
+      "compressed_sha256": "06db89adf29f94fdebc187efe62a39d8f2d45b75656d58a8635fb692f6c90c2c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final/campaign/linux-process/payload/process/startup/source.lo",
+      "kind": "frozen_input_record",
+      "raw_bytes": 9,
+      "raw_sha256": "4336023f72dee9bfa682ee0e6cb6384369e92d47b1e99acf621fa88d5b874515",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0131.gz",
+      "compressed_bytes": 29,
+      "compressed_sha256": "83856ae94d86b779060765afdfa6fa5abfc37b88bfd91be448816f64e91f0e84"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/corrected_profile.py",
+      "kind": "frozen_input_record",
+      "raw_bytes": 33471,
+      "raw_sha256": "c29d8698055cd58a0b9ca4b87ce4bf730be015fe086816834e7ef1eb6ad1157c",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0132.gz",
+      "compressed_bytes": 9167,
+      "compressed_sha256": "0aec8ed1590a66006673c855c1cd83b06360981c27c529bc52da525dde7365f9"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-runtime/build-receipt.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 9573,
+      "raw_sha256": "0016d05be2c985d9f5099e280fb2151e5b37322e4c820388430da8e1f6eaff7a",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0133.gz",
+      "compressed_bytes": 2944,
+      "compressed_sha256": "2804bcc330d11b3217eac28b8926b60284d83d803aed845b83bb29ff175d968f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/compact-runtime/toolchain.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 6107,
+      "raw_sha256": "8dfbad8bd749858683fb64d544488a1fb6822736b99f8b6b99759b72fccd12b0",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0134.gz",
+      "compressed_bytes": 1901,
+      "compressed_sha256": "b5a4ba377dba469fa14a305b5c08132af5336a554293adfa4bcc66e9c4cd84f1"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module_sizes.py",
+      "kind": "frozen_input_record",
+      "raw_bytes": 16621,
+      "raw_sha256": "087fe930efe1cbf28692949dcbe896954503b5cc432dd9c851d8cd01a0bbf0b1",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0135.gz",
+      "compressed_bytes": 4754,
+      "compressed_sha256": "8a67af77dc1c2c1e3aaf5e6036bf51c8141926c18e24e78002d3c405a4901457"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison/fixtures/empty/program.lo",
+      "kind": "frozen_input_record",
+      "raw_bytes": 9,
+      "raw_sha256": "4336023f72dee9bfa682ee0e6cb6384369e92d47b1e99acf621fa88d5b874515",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0136.gz",
+      "compressed_bytes": 29,
+      "compressed_sha256": "83856ae94d86b779060765afdfa6fa5abfc37b88bfd91be448816f64e91f0e84"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison/fixtures/map_1000/program.lo",
+      "kind": "frozen_input_record",
+      "raw_bytes": 3013,
+      "raw_sha256": "c51799989292cc7270831221f3fe786b82a971e1447a8fa32078ee7d1ddeb2b5",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0137.gz",
+      "compressed_bytes": 299,
+      "compressed_sha256": "5dcdf86a2773e885fcac526a5865e42a5b14e63a9f4f72c101c665605a86d6c2"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison/fixtures/map_10000/program.lo",
+      "kind": "frozen_input_record",
+      "raw_bytes": 29211,
+      "raw_sha256": "292ad36f025dbd444ab71c454cd9f1e0a0621cb12f0a167e103f9055921302bc",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0138.gz",
+      "compressed_bytes": 438,
+      "compressed_sha256": "06db89adf29f94fdebc187efe62a39d8f2d45b75656d58a8635fb692f6c90c2c"
+    },
+    {
+      "source": "_scratch/native-runtime/platform.json",
+      "kind": "guest_platform_inventory",
+      "raw_bytes": 11125,
+      "raw_sha256": "791d0ede5e5d299248b6f80af62b9f3e473da960f46ee46e9c5413d08a9117df",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0139.gz",
+      "compressed_bytes": 3289,
+      "compressed_sha256": "c3b83e76928553309e618acd969e97fe8611285c6529c0393e6881e5bce8965f"
+    },
+    {
+      "source": "_scratch/native-runtime/rust.json",
+      "kind": "runtime_tool_inventory",
+      "raw_bytes": 1864,
+      "raw_sha256": "7e7f5619a6639f07f17d5d5bd835c84080ea4f8ddefac124a92dc8f92a228958",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0140.gz",
+      "compressed_bytes": 714,
+      "compressed_sha256": "e8e91d83f240714701ad75c0a948dc11de18233696ddc59cb4b02ad7c3b47535"
+    },
+    {
+      "source": "_scratch/native-runtime/tools.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 2314,
+      "raw_sha256": "086d639fc2b9bdf4766bf08c4ce359ee1c815336ee67b2556d7071b7c800900a",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0141.gz",
+      "compressed_bytes": 769,
+      "compressed_sha256": "2bb9d1a26201eb301b79b036410bc4501ab45a3db700e16e8cefe40b283a0671"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software.receipt.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 488,
+      "raw_sha256": "dc51e47cc9051bcfeb3af03622a843a7b8fd7269fec4ac59a8340c56ac8e0f9b",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0142.gz",
+      "compressed_bytes": 292,
+      "compressed_sha256": "9baa6c93d1ffc26875f304e132802ee020b2b011406857162755c6fc93b9c885"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/inventory.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 11024,
+      "raw_sha256": "6181641dd32ff75a005bef3237223d24ce61698fce60d714baa73a94f5f336e3",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0143.gz",
+      "compressed_bytes": 3517,
+      "compressed_sha256": "7010b1fb5a0636d6215a76f0d26d4c22cebad68f9738751b20670cb580669def"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/darwin/CoreFoundation.tbd",
+      "kind": "frozen_input_record",
+      "raw_bytes": 2969,
+      "raw_sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0144.gz",
+      "compressed_bytes": 837,
+      "compressed_sha256": "fa03c02ed475f3a52f32dbf856b4d7da9149d091429fcc1d69aff0f23761e184"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/darwin/Security.tbd",
+      "kind": "frozen_input_record",
+      "raw_bytes": 11874,
+      "raw_sha256": "eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0145.gz",
+      "compressed_bytes": 2166,
+      "compressed_sha256": "bb188cf9ffd9e60be1f617bc754949e2db2ac6a142d5e3f8128a467e4fdb222a"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/darwin/libSystem.tbd",
+      "kind": "frozen_input_record",
+      "raw_bytes": 5168,
+      "raw_sha256": "f18931a0ac32b389f8ecf660a1fdd7d07cac5ddf8e78fe9aac757e577a99b94c",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0146.gz",
+      "compressed_bytes": 1356,
+      "compressed_sha256": "0f15b3a110e885a717de9bdb7a5838f04d99455ef598136f51b748d67807ea28"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/provenance.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 435455,
+      "raw_sha256": "35dfd1df74db84fc14f275287260493983fd014614df79e3f2b211d9859ecbb9",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0147.gz",
+      "compressed_bytes": 137775,
+      "compressed_sha256": "84e3036962dc0f78719fc16b923748d6671311f2ce467d41191f8d757596eb2d"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/toolchain.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 3451,
+      "raw_sha256": "3a42fc7dd2696c67fb52851e20a5dc26872cc994247184fccdbaf71d1df471f4",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0148.gz",
+      "compressed_bytes": 1164,
+      "compressed_sha256": "852651ad327667d8461fb16ed4686e99f47b0e9296cb7e30c745d4e315183e00"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software.receipt.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 485,
+      "raw_sha256": "d1c28b66b91221242417f7ffad1493f2a29f945e15082ef7f92e99553bfb60bb",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0149.gz",
+      "compressed_bytes": 292,
+      "compressed_sha256": "b55f419834c67a261bb7e2c99de2a2a841f4516b5eb47e55f18056724307241d"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/inventory.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 13734,
+      "raw_sha256": "7b97cfa0cbea9ff19490924106301d7eab29c95b58f023793ffb3ca3062660cb",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0150.gz",
+      "compressed_bytes": 4689,
+      "compressed_sha256": "c418b470558a9018f9e990af55234da8a464258be6ea6a77887da56c9fff23e6"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/darwin/CoreFoundation.tbd",
+      "kind": "frozen_input_record",
+      "raw_bytes": 2969,
+      "raw_sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0151.gz",
+      "compressed_bytes": 837,
+      "compressed_sha256": "fa03c02ed475f3a52f32dbf856b4d7da9149d091429fcc1d69aff0f23761e184"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/darwin/Security.tbd",
+      "kind": "frozen_input_record",
+      "raw_bytes": 11874,
+      "raw_sha256": "eba2537ae53d33113aa4f3f8f2c7be5de4e79cdda60fc8d3d62e3bf54c86cccf",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0152.gz",
+      "compressed_bytes": 2166,
+      "compressed_sha256": "bb188cf9ffd9e60be1f617bc754949e2db2ac6a142d5e3f8128a467e4fdb222a"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/darwin/libSystem.tbd",
+      "kind": "frozen_input_record",
+      "raw_bytes": 5168,
+      "raw_sha256": "f18931a0ac32b389f8ecf660a1fdd7d07cac5ddf8e78fe9aac757e577a99b94c",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0153.gz",
+      "compressed_bytes": 1356,
+      "compressed_sha256": "0f15b3a110e885a717de9bdb7a5838f04d99455ef598136f51b748d67807ea28"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/provenance.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 441688,
+      "raw_sha256": "345492385834cfbb7de7251e1f8e117b88689d1d337569630245ec344f54949e",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0154.gz",
+      "compressed_bytes": 139025,
+      "compressed_sha256": "4fc9bd844c4d294f3ea3d1fdf9ead6f21b6cb1e938c0e9ba53c5bbc23d3a5351"
+    },
+    {
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/toolchain.json",
+      "kind": "frozen_input_record",
+      "raw_bytes": 4521,
+      "raw_sha256": "360b0d2369819a4fa0cee08d2fbd228be56d97cb532b713c9a938152c34b0c1e",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0155.gz",
+      "compressed_bytes": 1513,
+      "compressed_sha256": "508aeb82ac9ded3d13224d06d95b9a3d956746bfe7835ae616f36e12f6d2c763"
+    },
+    {
+      "source": "tools/loqualification/batch.py",
+      "kind": "frozen_input_record",
+      "raw_bytes": 21206,
+      "raw_sha256": "49fad4375d655ec95a063639ef36220029d5a9b41ac6501d01c281516c623dfd",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0156.gz",
+      "compressed_bytes": 5972,
+      "compressed_sha256": "2da77b34ca00988687274eb5bad80893cd8ac919b533f89f8138a60610b5fb8a"
+    },
+    {
+      "source": "tools/loqualification/batch_init.c",
+      "kind": "frozen_input_record",
+      "raw_bytes": 10194,
+      "raw_sha256": "43556f3025d20f519fa1fd1e05f7a26111dffe4d6e1793870f9010ca9de70e65",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0157.gz",
+      "compressed_bytes": 2866,
+      "compressed_sha256": "f002fb65e37b9a921ea2f21245a1c05d47be7eed39821a6208911ae0e73f5e62"
+    },
+    {
+      "source": "tools/nativebench/campaign.py",
+      "kind": "frozen_input_record",
+      "raw_bytes": 20618,
+      "raw_sha256": "3bdaac749198f14e85b16753fd9877e0152215fbbf25ebf2e74e21770dd28143",
+      "archive": "docs/evidence/i011-qualification-20261022/admission-profile/0158.gz",
+      "compressed_bytes": 5529,
+      "compressed_sha256": "16d281a3dcd6e6aad103dcc24cf8104785de7ca106a4936053010af327c65e08"
+    }
+  ],
+  "hash_only": [
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/init",
+      "bytes": 13976,
+      "sha256": "1869aee18095e0dbbc22224c3ec40b43b42df6ccf4db521419e8ee9e0696b26c",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/init.o",
+      "bytes": 14856,
+      "sha256": "a4639109dd4b6a7b6e48b65d97e0cb222180c8c1ff530f2f9b4968d96a304a3f",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/stages",
+      "bytes": 2975296,
+      "sha256": "5c60ba3ab8bb07fe4b38dee7275081c6d0f5729b7d7ab42bec1e492951325024",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/stages.o",
+      "bytes": 23904,
+      "sha256": "dcc5eb9d54fd0202bf7cf80ec629c7750abe3e50420005e6f952dde8fb5f1111",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/empty/program.o",
+      "bytes": 5696,
+      "sha256": "66fc658acb6d07bddd1b6bb89a07a63a4087fe6fd655304154b27c8273fbfe27",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/stages",
+      "bytes": 3454800,
+      "sha256": "ec061bf9ac378441c767569c359c31f1abd5a241178d940a74e9e9c5c09a0784",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/stages.o",
+      "bytes": 32112,
+      "sha256": "4d4b194cbff1ef4c53e8710e2f6db3dae4b0c89678844ba1bd05bd1dcb4870b9",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_1000/program.o",
+      "bytes": 472080,
+      "sha256": "ff9311ebbe62c54bbc7c146a89d2987a8c1cfd14439355b083025650bad2f6f6",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/stages",
+      "bytes": 7665360,
+      "sha256": "01565d8f1d4f85ffb73f48659fe8c182e6ffbd21e207bbf19cf4bec3b03ce107",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/stages.o",
+      "bytes": 26216,
+      "sha256": "5e2c925f0afbb85cfaae68512e28c84ac083c8be5a95b1972258dcfee628685f",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/darwin-arm64/map_10000/program.o",
+      "bytes": 4655664,
+      "sha256": "ec69bac1b8ae30391923933c72f0dcca817ea2f6d3170ad15d9fbdda70fb13e4",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/stages",
+      "bytes": 8480728,
+      "sha256": "72793d08fe07796932b5870477a4710c17994242a4b46351a3dab2cbbf4592ad",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/stages.o",
+      "bytes": 31792,
+      "sha256": "b0fd7889c8b556e9efda8329c3813bf2963cdca18215f1df5939ee9b76c01eb1",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/empty/program.o",
+      "bytes": 7160,
+      "sha256": "4b97ea1e54116a91b3ec0a24b250efabfb070e24b36f2c376e447586d3cef052",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/stages",
+      "bytes": 8950456,
+      "sha256": "5d96d4fb4d2509c2611512fe6b43b76b84720dff166ae9ff27489e0fcac996b4",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/stages.o",
+      "bytes": 41896,
+      "sha256": "167f969e0539235fe238b9dd8c35545406e6133046fa8eb65ea8728ad43d638d",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_1000/program.o",
+      "bytes": 475248,
+      "sha256": "63ef54272af6b5f873a6a71582139f94558d913e1a5626d95893014b9f5df013",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/stages",
+      "bytes": 13131160,
+      "sha256": "894d51aea5a18cbf7c47d179b5baa1b64e729c6870ef7927937f8721bbaeb6f3",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/stages.o",
+      "bytes": 34992,
+      "sha256": "ffdda9a05846d5ab7bd7554be15fcb8c7609153213a25883580b2e4cae0c889a",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/admission-profile/build/linux-arm64/map_10000/program.o",
+      "bytes": 4658832,
+      "sha256": "a30a19b7c83c24be067a1e5818db9bba36f67d33a52b87d827a4b1c526dfbe42",
+      "not_preserved_reason": "derived_binary_or_object; commands_and_hashes_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/bin/clang",
+      "bytes": 173534464,
+      "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/bin/ld.lld",
+      "bytes": 126695856,
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/bin/ld64.lld",
+      "bytes": 126695856,
+      "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/bin/lo",
+      "bytes": 13872258,
+      "sha256": "0b4efb00a29e49d7983975ab79eed01801c078ed9214d4b3d06e49cb2a2d41b6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/GPL-2.0.txt",
+      "bytes": 17984,
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/Go-LICENSE",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/LGPL-2.1.txt",
+      "bytes": 26419,
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/LLVM-LICENSE.txt",
+      "bytes": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/Lo-LICENSE",
+      "bytes": 11365,
+      "sha256": "d408970373d62d6e3ce132e6302b7ac90ba5638d5fdb17b838da69db75ead135",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/base64/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/base64/LICENSE-MIT",
+      "bytes": 1076,
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/bitflags/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/bitflags/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/cfg-if/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/cfg-if/LICENSE-MIT",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/core-foundation-sys/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/core-foundation-sys/LICENSE-MIT",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/core-foundation/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/core-foundation/LICENSE-MIT",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/getrandom/LICENSE-APACHE",
+      "bytes": 10849,
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/getrandom/LICENSE-MIT",
+      "bytes": 1130,
+      "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/itoa/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/itoa/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/libc/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/libc/LICENSE-MIT",
+      "bytes": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/memchr/COPYING",
+      "bytes": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/memchr/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/num-bigint/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/num-bigint/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/num-integer/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/num-integer/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/num-traits/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/num-traits/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/once_cell/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/once_cell/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/openssl-probe/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/openssl-probe/LICENSE-MIT",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ring/LICENSE",
+      "bytes": 499,
+      "sha256": "b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ring/LICENSE-BoringSSL",
+      "bytes": 14870,
+      "sha256": "005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ring/LICENSE-other-bits",
+      "bytes": 731,
+      "sha256": "f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-MIT",
+      "bytes": 1022,
+      "sha256": "6ee2ed6c77710de911761acd5fc1ad1da00f476beb1a7ef27e78c2d1858deafc",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ring/third_party/fiat/LICENSE",
+      "bytes": 638,
+      "sha256": "9eacbcb81be660840c714a560a9d65ba07913db98dd4baf969f78dd499fdd60f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE",
+      "bytes": 286,
+      "sha256": "d75967ce788187f83c3bd3328210974acfc443d4dc44909f1d7e34f21623a0c6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE-ISC",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls-native-certs/LICENSE-MIT",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls-pki-types/LICENSE-APACHE",
+      "bytes": 10835,
+      "sha256": "45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls-pki-types/LICENSE-MIT",
+      "bytes": 1080,
+      "sha256": "9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls-webpki/LICENSE",
+      "bytes": 916,
+      "sha256": "5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls/LICENSE-ISC",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/rustls/LICENSE-MIT",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ryu/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/ryu/LICENSE-BOOST",
+      "bytes": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/security-framework-sys/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/security-framework-sys/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/security-framework/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/security-framework/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/serde/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/serde/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/serde_core/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/serde_core/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/serde_json/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/serde_json/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/subtle/LICENSE",
+      "bytes": 1582,
+      "sha256": "d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/untrusted/LICENSE.txt",
+      "bytes": 769,
+      "sha256": "7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/zeroize/LICENSE-APACHE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/crates/zeroize/LICENSE-MIT",
+      "bytes": 1082,
+      "sha256": "8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/debian/gcc-12-base-copyright.txt",
+      "bytes": 68194,
+      "sha256": "da8191658b3452ce9caf31638ba61dab31a38c619fa39df119812e050f592fd3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/debian/libc6-copyright.txt",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/glibc/libc6-copyright",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/glibc/libc6-dev-copyright",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/golang-x-sys-LICENSE",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/llvm/include/llvm/Support/LICENSE.TXT",
+      "bytes": 303,
+      "sha256": "54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/rust/rust-std/COPYRIGHT",
+      "bytes": 20759,
+      "sha256": "252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/rust/rust-std/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/notices/rust/rust-std/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/linux/crt1.o",
+      "bytes": 1944,
+      "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/linux/crti.o",
+      "bytes": 1328,
+      "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/linux/crtn.o",
+      "bytes": 872,
+      "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/linux/libc.so.6",
+      "bytes": 1651408,
+      "sha256": "e4ac8ae1d81e4865e3aadedb962879cf9415903b3f2ba81ec75e9962b86ab8b0",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/linux/libc_nonshared.a",
+      "bytes": 5346,
+      "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/linux/libgcc_s.so.1",
+      "bytes": 133448,
+      "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/platform/linux/libm.so.6",
+      "bytes": 591960,
+      "sha256": "3c4cb3be0b974edf05f023f85ab15107fb5afc2687163593d0d4cf8e80c17b39",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/runtime/aarch64-apple-darwin/liblo_runtime.a",
+      "bytes": 20408048,
+      "sha256": "6311a0df8dc4f9db94d02b1c920b003961e562ab33a5b5d1d3b463abe263810b",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+      "bytes": 28290580,
+      "sha256": "38106887a38927ec6bbbfd403f5f435d2eb8ad4c05be224b052f910d2f8237c6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/source/gcc-12_12.2.0-14+deb12u1.debian.tar.xz",
+      "bytes": 1675204,
+      "sha256": "59f7f7763a0c355e3f27ff9e7ac80d06382b29939361a87e7b139226bfe7402e",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/source/gcc-12_12.2.0-14+deb12u1.dsc",
+      "bytes": 27330,
+      "sha256": "3aed0b189189c744dc9f4b74798a51d3e512ea85e492568db788a927c88e20ba",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/source/gcc-12_12.2.0.orig.tar.gz",
+      "bytes": 87090343,
+      "sha256": "b8298be16aeeb96a889c6afed0a8e2241b47452e89cc81fe65ea849d5c740fcb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/source/glibc_2.36-9+deb12u14.debian.tar.xz",
+      "bytes": 918488,
+      "sha256": "cf4ac9cd98185452cae3ef34e2e4ee12753e3d93fd0c62c61396d4a47eec902f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/source/glibc_2.36-9+deb12u14.dsc",
+      "bytes": 9765,
+      "sha256": "cfe1f0b8dc1fa211ce5a45b3725cc38b29f88667f1140ebdca6de35cf9c6f1fd",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/source/glibc_2.36.orig.tar.xz",
+      "bytes": 19363988,
+      "sha256": "a543c02070d46ccaf866957efd13f10c924daa74c86a90a0254db09a92a708ee",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/source/lo-source.tar.gz",
+      "bytes": 16138466,
+      "sha256": "9b224b0b23bf962c0f75e3835caa09ef05db5d087f014e08816dc87ae1729b30",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/bin/clang",
+      "bytes": 310958768,
+      "sha256": "470d20e410527de249ca560ef5519b6d7c772cb186c1e0c6af760ece9c794b32",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/bin/ld.lld",
+      "bytes": 180708928,
+      "sha256": "a07f1bfbba1961e9ad0433c7b18d3739a922e5ec01f5dc5c038664d85ae76866",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/bin/ld64.lld",
+      "bytes": 180708928,
+      "sha256": "a07f1bfbba1961e9ad0433c7b18d3739a922e5ec01f5dc5c038664d85ae76866",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/bin/lo",
+      "bytes": 13425925,
+      "sha256": "690d81cf695c8098bdbdf7fc6350fc73a10b97b968492d8c4fc04e2c314ab799",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/host/lib/libgcc_s.so.1",
+      "bytes": 133448,
+      "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/host/lib/libicudata.so.72",
+      "bytes": 31262336,
+      "sha256": "d0619595f7b31f7ee5210a2a195f0367fc7251e80a0489ce6405c31f6efea23d",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/host/lib/libicuuc.so.72",
+      "bytes": 2099352,
+      "sha256": "7796e0b797561d4e63693dcebf48b69342f96b22069486c83c850772ce8a9d45",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/host/lib/liblzma.so.5",
+      "bytes": 198584,
+      "sha256": "530e774de0f3fd8754351f387f52db6a0cb134b350e43d80044dea7109400f17",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/host/lib/libstdc++.so.6",
+      "bytes": 2174296,
+      "sha256": "532f3a12d7b8fef6cc7a064ea106b6c4ab2365674b73e743e4a385d4ffb6c8ab",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/host/lib/libxml2.so.2",
+      "bytes": 1708736,
+      "sha256": "630352d8686c5cfb5d4fd061d250f0365e05c220b963b3ba0b9f041110a379e2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/host/lib/libz.so.1",
+      "bytes": 133520,
+      "sha256": "ffb1ab496e6eced03ab679075f9f2c415c7728a145cc7f63d614497102d73822",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/GPL-2.0.txt",
+      "bytes": 17984,
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/Go-LICENSE",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/LGPL-2.1.txt",
+      "bytes": 26419,
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/LLVM-LICENSE.txt",
+      "bytes": 15141,
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/Lo-LICENSE",
+      "bytes": 11365,
+      "sha256": "d408970373d62d6e3ce132e6302b7ac90ba5638d5fdb17b838da69db75ead135",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/base64/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/base64/LICENSE-MIT",
+      "bytes": 1076,
+      "sha256": "0dd882e53de11566d50f8e8e2d5a651bcf3fabee4987d70f306233cf39094ba7",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/bitflags/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/bitflags/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/cfg-if/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/cfg-if/LICENSE-MIT",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/core-foundation-sys/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/core-foundation-sys/LICENSE-MIT",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/core-foundation/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/core-foundation/LICENSE-MIT",
+      "bytes": 1067,
+      "sha256": "62065228e42caebca7e7d7db1204cbb867033de5982ca4009928915e4095f3a3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/getrandom/LICENSE-APACHE",
+      "bytes": 10849,
+      "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/getrandom/LICENSE-MIT",
+      "bytes": 1130,
+      "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/itoa/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/itoa/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/libc/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/libc/LICENSE-MIT",
+      "bytes": 1066,
+      "sha256": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/memchr/COPYING",
+      "bytes": 126,
+      "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/memchr/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/num-bigint/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/num-bigint/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/num-integer/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/num-integer/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/num-traits/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/num-traits/LICENSE-MIT",
+      "bytes": 1071,
+      "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/once_cell/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/once_cell/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/openssl-probe/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/openssl-probe/LICENSE-MIT",
+      "bytes": 1057,
+      "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ring/LICENSE",
+      "bytes": 499,
+      "sha256": "b3d734001a94efff3579978d953391aa7115f877657d25eb54037a43875d078a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ring/LICENSE-BoringSSL",
+      "bytes": 14870,
+      "sha256": "005fc765ddc5115da796cca915baa9557abae13ff35e0a47c47affc56f6c414d",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ring/LICENSE-other-bits",
+      "bytes": 731,
+      "sha256": "f025ccfb7dfb6bdfedc75ca0f67acc69e6fb4998143d834f7c2f38a29989680f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ring/src/polyfill/once_cell/LICENSE-MIT",
+      "bytes": 1022,
+      "sha256": "6ee2ed6c77710de911761acd5fc1ad1da00f476beb1a7ef27e78c2d1858deafc",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ring/third_party/fiat/LICENSE",
+      "bytes": 638,
+      "sha256": "9eacbcb81be660840c714a560a9d65ba07913db98dd4baf969f78dd499fdd60f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE",
+      "bytes": 286,
+      "sha256": "d75967ce788187f83c3bd3328210974acfc443d4dc44909f1d7e34f21623a0c6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE-ISC",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls-native-certs/LICENSE-MIT",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls-pki-types/LICENSE-APACHE",
+      "bytes": 10835,
+      "sha256": "45fd05c4865e7c350b98ad7ac50e1b15462d49af4a91e9b0c9dd933dc9a69742",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls-pki-types/LICENSE-MIT",
+      "bytes": 1080,
+      "sha256": "9117d922e667125508dde62b02c1f57ed22f5ad21eb536aa2e2d99e1c796e639",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls-webpki/LICENSE",
+      "bytes": 916,
+      "sha256": "5b698ca13897be3afdb7174256fa1574f8c6892b8bea1a66dd6469d3fe27885a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls/LICENSE-ISC",
+      "bytes": 775,
+      "sha256": "7cfafc877eccc46c0e346ccbaa5c51bb6b894d2b818e617d970211e232785ad4",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/rustls/LICENSE-MIT",
+      "bytes": 1082,
+      "sha256": "709e3175b4212f7b13aa93971c9f62ff8c69ec45ad8c6532a7e0c41d7a7d6f8c",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ryu/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/ryu/LICENSE-BOOST",
+      "bytes": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/security-framework-sys/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/security-framework-sys/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/security-framework/LICENSE-APACHE",
+      "bytes": 10847,
+      "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/security-framework/LICENSE-MIT",
+      "bytes": 1081,
+      "sha256": "91e934255ba3b2f21103d68c5581c23ef34aa95c4628e4405b8c901935e11c69",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/serde/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/serde/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/serde_core/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/serde_core/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/serde_json/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/serde_json/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/subtle/LICENSE",
+      "bytes": 1582,
+      "sha256": "d1fc1bc0d155df60b2e7705b6b2ae02a05c96f948e1cec6e2fb86360b09f346b",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/untrusted/LICENSE.txt",
+      "bytes": 769,
+      "sha256": "7abd9b6960dcf7d4d0a48606a5b71bfe37d472db68d70637f3a58a56785f1621",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/zeroize/LICENSE-APACHE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/crates/zeroize/LICENSE-MIT",
+      "bytes": 1082,
+      "sha256": "8c7516d4b27b1e495be5e38b612298b63de48d05f49cdac94f70f3cd70f8864b",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/debian/gcc-12-base-copyright.txt",
+      "bytes": 68194,
+      "sha256": "da8191658b3452ce9caf31638ba61dab31a38c619fa39df119812e050f592fd3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/debian/libc6-copyright.txt",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/debian/libicu72-copyright.txt",
+      "bytes": 2214,
+      "sha256": "5bbff5f646ce750ac0a347e7f91793279b7422a1119820b5f75d98879c201c68",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/debian/liblzma5-copyright.txt",
+      "bytes": 15465,
+      "sha256": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/debian/libxml2-copyright.txt",
+      "bytes": 3067,
+      "sha256": "ee746b96cfa5be73c3ea3e4cfb1285e9b315d4c9267f99b2ee9c5d911d9fe3f4",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/debian/zlib1g-copyright.txt",
+      "bytes": 2927,
+      "sha256": "9e5b96d63773a5d177ba264254390f792be07e41748ebd94730981c6cac31cc6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/glibc/libc6-copyright",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/glibc/libc6-dev-copyright",
+      "bytes": 25467,
+      "sha256": "40c7e1f2118531f038ca22999bd976901254e1bc5cd1b0f0211bdd064c599987",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/golang-x-sys-LICENSE",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/llvm/include/llvm/Support/LICENSE.TXT",
+      "bytes": 303,
+      "sha256": "54cbc326a78b9400065bfc5830a57fdcdaf808286d4ac35d8a9e324aa77b7241",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/rust/rust-std/COPYRIGHT",
+      "bytes": 20759,
+      "sha256": "252b04f034f7383e09401dc700c8b933e3e38818eaa8b2f09dd247542be92292",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/rust/rust-std/LICENSE-APACHE",
+      "bytes": 9723,
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/notices/rust/rust-std/LICENSE-MIT",
+      "bytes": 1023,
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/linux/crt1.o",
+      "bytes": 1944,
+      "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/linux/crti.o",
+      "bytes": 1328,
+      "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/linux/crtn.o",
+      "bytes": 872,
+      "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/linux/libc.so.6",
+      "bytes": 1651408,
+      "sha256": "e4ac8ae1d81e4865e3aadedb962879cf9415903b3f2ba81ec75e9962b86ab8b0",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/linux/libc_nonshared.a",
+      "bytes": 5346,
+      "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/linux/libgcc_s.so.1",
+      "bytes": 133448,
+      "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/platform/linux/libm.so.6",
+      "bytes": 591960,
+      "sha256": "3c4cb3be0b974edf05f023f85ab15107fb5afc2687163593d0d4cf8e80c17b39",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/runtime/aarch64-apple-darwin/liblo_runtime.a",
+      "bytes": 20408048,
+      "sha256": "6311a0df8dc4f9db94d02b1c920b003961e562ab33a5b5d1d3b463abe263810b",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+      "bytes": 28290580,
+      "sha256": "38106887a38927ec6bbbfd403f5f435d2eb8ad4c05be224b052f910d2f8237c6",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/gcc-12_12.2.0-14+deb12u1.debian.tar.xz",
+      "bytes": 1675204,
+      "sha256": "59f7f7763a0c355e3f27ff9e7ac80d06382b29939361a87e7b139226bfe7402e",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/gcc-12_12.2.0-14+deb12u1.dsc",
+      "bytes": 27330,
+      "sha256": "3aed0b189189c744dc9f4b74798a51d3e512ea85e492568db788a927c88e20ba",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/gcc-12_12.2.0.orig.tar.gz",
+      "bytes": 87090343,
+      "sha256": "b8298be16aeeb96a889c6afed0a8e2241b47452e89cc81fe65ea849d5c740fcb",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/glibc_2.36-9+deb12u14.debian.tar.xz",
+      "bytes": 918488,
+      "sha256": "cf4ac9cd98185452cae3ef34e2e4ee12753e3d93fd0c62c61396d4a47eec902f",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/glibc_2.36-9+deb12u14.dsc",
+      "bytes": 9765,
+      "sha256": "cfe1f0b8dc1fa211ce5a45b3725cc38b29f88667f1140ebdca6de35cf9c6f1fd",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/glibc_2.36.orig.tar.xz",
+      "bytes": 19363988,
+      "sha256": "a543c02070d46ccaf866957efd13f10c924daa74c86a90a0254db09a92a708ee",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/icu_72.1-3+deb12u1.debian.tar.xz",
+      "bytes": 63620,
+      "sha256": "bd6b27fc0a18f6044a47cd96c7d687720b95e4f592718bf8e34c6391b7753a1d",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/icu_72.1-3+deb12u1.dsc",
+      "bytes": 2284,
+      "sha256": "8fd50a21664422b2dd5df4e20175dce3396c89a3a85363db26dd4529bba62a92",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/icu_72.1.orig.tar.gz",
+      "bytes": 26303933,
+      "sha256": "a2d2d38217092a7ed56635e34467f92f976b370e20182ad325edea6681a71d68",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/icu_72.1.orig.tar.gz.asc",
+      "bytes": 659,
+      "sha256": "87b6ff610d587292cec0444fa8cbbfb12994cb89bade40578f5ba6470de245c7",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/libxml2_2.9.14+dfsg-1.3~deb12u6.debian.tar.xz",
+      "bytes": 56668,
+      "sha256": "f33a99a0018cbb94aadc3bf26661e401cb90dff856aa170faf7239151ee9b9ac",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/libxml2_2.9.14+dfsg-1.3~deb12u6.dsc",
+      "bytes": 2974,
+      "sha256": "d86ce3efb1b75d2781f72f5cdd187474c148a915d610295c85162681bb070a65",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/libxml2_2.9.14+dfsg.orig.tar.xz",
+      "bytes": 2351200,
+      "sha256": "4fe913dec8b1ab89d13b489b419a8203176ea39e931eaa0d25b17eafb9c279e9",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/lo-source.tar.gz",
+      "bytes": 16138466,
+      "sha256": "c15bafb5771d683cdf2d2f39593d5088b7264769aac722750af92526b3484b67",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/xz-utils_5.4.1-1+deb12u1.debian.tar.xz",
+      "bytes": 93600,
+      "sha256": "3e162db2b76480c7e157f4c2f6ff9a426fc023f262d4dc3287530b36e2843ebe",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/xz-utils_5.4.1-1+deb12u1.dsc",
+      "bytes": 2515,
+      "sha256": "38f98e356f7e7e89b0920d39c55dd5f3d1a9f2684bff83c8b4890561e1832e94",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/xz-utils_5.4.1.orig.tar.xz",
+      "bytes": 1485272,
+      "sha256": "5d9827aa1875b21c288f78864bb26d2650b436ea8d2cad364e4921eb6266a5a5",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/xz-utils_5.4.1.orig.tar.xz.asc",
+      "bytes": 833,
+      "sha256": "4b0c7707114996092a5f75a98333de2102db83a27218e4903b8fb7c24a8d0233",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/zlib_1.2.13.dfsg-1.debian.tar.xz",
+      "bytes": 15700,
+      "sha256": "f66cf3d4f2d7defcd4d1fd1fb0a11ee39f1e01b42ec7d059c9dc5c1695133c44",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/zlib_1.2.13.dfsg-1.dsc",
+      "bytes": 2399,
+      "sha256": "3fa1e6b2fc525062aa88207dda52fed8e045373c809d362fe8a2bfbf7cf515a8",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    },
+    {
+      "path": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/source/zlib_1.2.13.dfsg.orig.tar.bz2",
+      "bytes": 1239825,
+      "sha256": "71feb7947e3c00ef125f83b79a4e529bde31171e5babe48b391f06758d1ab0a1",
+      "not_preserved_reason": "binary_archive_or_nonessential_package_text; input_and_package_inventories_preserved"
+    }
+  ],
+  "missing_evidence": [],
+  "load_context": {
+    "captured": false,
+    "limitation": "No load context was captured. No retrospective load claim is made."
+  },
+  "sampling": {
+    "warmup": 3,
+    "measured": 10,
+    "all_samples_retained": true,
+    "adaptive_batching": false,
+    "retries": 0
+  },
+  "input_binding": {
+    "approved_design_sha256": "8bc4f2960021fe026ac6f942522b7e2caab1c9a157f15e33e1b2d053266e1c24",
+    "frozen_inputs_sha256": "94c04d61c07713fb72e6a26e5da1ad1401e639b954fb7b5e692131aaac1f0e09",
+    "completion_sha256": "7b1dffe75722b1fc2e51b7c08e27d97adb73a4f94bc4e9118ca83482141d8979"
+  },
+  "excluded_groups": [
+    {
+      "paths": "guest/root/**; host-home/**; root.cpio.gz; caches; VM_images",
+      "reason": "duplicate_or_large_execution_inputs"
+    },
+    {
+      "paths": "official_STE_PDF_text_dictionary",
+      "reason": "not_redistributed"
+    }
+  ],
+  "limits": {
+    "raw_record_bytes": 67108864,
+    "command_stdout_stderr_bytes": 1048576,
+    "metadata_or_artifact_bytes": 67108864,
+    "guest_memory_mib": 8192,
+    "case_timeout_seconds": 120
+  },
+  "archive_format": {
+    "type": "gzip",
+    "mtime": 0,
+    "filename": ""
+  },
+  "summary": {
+    "records": 158,
+    "raw_bytes": 16248229,
+    "compressed_bytes": 1090217,
+    "hash_only": 233
+  },
+  "preservation_receipt": "post_run_receipt_excluded; empty_self_capture_removed; timed_inputs_unchanged"
+}

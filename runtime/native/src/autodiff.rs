@@ -85,12 +85,12 @@ pub fn parse(value: &Json, types: &[Type], sites: &[Site]) -> Result<Vec<Plan>, 
         let location = index(record, "location")?;
         if sites
             .get(location)
-            .map(|site| site.raw["action"] == "derivative_call" && site.typ == output)
+            .map(|site| site.action.as_str() == "derivative_call" && site.typ == output)
             != Some(true)
         {
             return Err("invalid derivative call location".into());
         }
-        if index(&sites[location].raw, "derivative_plan")? != id {
+        if sites[location].derivative().plan != id {
             return Err("derivative call plan mismatch".into());
         }
         let mut arguments = Vec::new();
@@ -118,7 +118,7 @@ pub fn parse(value: &Json, types: &[Type], sites: &[Site]) -> Result<Vec<Plan>, 
             let location = index(record, "location")?;
             if sites
                 .get(location)
-                .map(|site| site.raw["action"] == "derivative_node")
+                .map(|site| site.action.as_str() == "derivative_node")
                 != Some(true)
             {
                 return Err("invalid derivative node location".into());
@@ -319,29 +319,29 @@ pub fn parse(value: &Json, types: &[Type], sites: &[Site]) -> Result<Vec<Plan>, 
         let mut reverse_sites = BTreeSet::new();
         let mut snapshots = BTreeSet::new();
         let mut seeds = 0;
-        for site in sites
-            .iter()
-            .filter(|site| site.raw["derivative_plan"].as_u64() == Some(id as u64))
-        {
-            match site.raw["action"].as_str() {
-                Some("derivative_zero") => {
-                    if !zeros.insert(index(&site.raw, "derivative_node")?) {
+        for site in sites.iter().filter(|site| {
+            site.derivative_origin()
+                .is_some_and(|origin| origin.plan == id)
+        }) {
+            match site.action.as_str() {
+                "derivative_zero" => {
+                    if !zeros.insert(site.derivative().node) {
                         return Err("duplicate derivative zero site".into());
                     }
                 }
-                Some("derivative_seed") => {
+                "derivative_seed" => {
                     seeds += 1;
-                    if index(&site.raw, "derivative_node")? != result_node {
+                    if site.derivative().node != result_node {
                         return Err("derivative seed result mismatch".into());
                     }
                 }
-                Some("derivative_reverse") => {
-                    if !reverse_sites.insert(index(&site.raw, "derivative_node")?) {
+                "derivative_reverse" => {
+                    if !reverse_sites.insert(site.derivative().node) {
                         return Err("duplicate derivative reverse site".into());
                     }
                 }
-                Some("derivative_snapshot") => {
-                    if !snapshots.insert(index(&site.raw, "derivative_frame")?) {
+                "derivative_snapshot" => {
+                    if !snapshots.insert(site.derivative().frame) {
                         return Err("duplicate derivative snapshot site".into());
                     }
                 }
@@ -374,9 +374,7 @@ pub fn parse(value: &Json, types: &[Type], sites: &[Site]) -> Result<Vec<Plan>, 
 }
 
 pub fn admit_site(site: &Site, plans: &[Plan]) -> Result<(), String> {
-    let action = site.raw["action"]
-        .as_str()
-        .ok_or("invalid derivative action")?;
+    let action = site.action.as_str();
     let expected_operation = if action == "derivative_call" {
         "Autodiff.grad"
     } else {
@@ -388,9 +386,9 @@ pub fn admit_site(site: &Site, plans: &[Plan]) -> Result<(), String> {
     {
         return Err("derivative action identity mismatch".into());
     }
-    let plan = index(&site.raw, "derivative_plan")?;
+    let plan = site.derivative().plan;
     let plan = plans.get(plan).ok_or("unknown derivative plan")?;
-    let node = index(&site.raw, "derivative_node")?;
+    let node = site.derivative().node;
     match action {
         "derivative_call" | "derivative_enter" | "derivative_loss" | "derivative_finish"
             if node == 0 =>
@@ -414,7 +412,7 @@ pub fn admit_site(site: &Site, plans: &[Plan]) -> Result<(), String> {
             if node > 0 && node <= plan.nodes.len() =>
         {
             if action == "derivative_snapshot" {
-                let invocation = index(&site.raw, "derivative_frame")?;
+                let invocation = site.derivative().frame;
                 if !plan.nodes[node - 1]
                     .frames
                     .iter()
@@ -456,7 +454,7 @@ pub fn admit_site(site: &Site, plans: &[Plan]) -> Result<(), String> {
         return Err("invalid derivative zero helper".into());
     }
     if action == "derivative_snapshot" {
-        let invocation = index(&site.raw, "derivative_frame")?;
+        let invocation = site.derivative().frame;
         let frame = plan.nodes[node - 1]
             .frames
             .iter()
@@ -508,7 +506,7 @@ fn argument_types(
     match action {
         "derivative_enter" | "derivative_host_failure" => vec![],
         "derivative_snapshot" => {
-            let invocation = site.raw["derivative_frame"].as_u64().unwrap() as usize;
+            let invocation = site.derivative().frame;
             plan.nodes[node - 1]
                 .frames
                 .iter()
@@ -546,11 +544,11 @@ fn argument_types(
 }
 
 pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
-    let plan_id = index(&site.raw, "derivative_plan").map_err(host)?;
+    let plan_id = site.derivative().plan;
     let program = context.program.clone();
     let plan = &program.derivatives[plan_id];
-    let node_id = index(&site.raw, "derivative_node").map_err(host)?;
-    let action = site.raw["action"].as_str().unwrap();
+    let node_id = site.derivative().node;
+    let action = site.action.as_str();
     let expected = argument_types(context, &plan, site, node_id, action);
     if args.len() != expected.len()
         || args
@@ -591,7 +589,7 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
                 if args.len() != site.labels.len() {
                     return Err(host("derivative snapshot arity"));
                 }
-                let invocation = index(&site.raw, "derivative_frame").map_err(host)?;
+                let invocation = site.derivative().frame;
                 if context
                     .tapes
                     .last()

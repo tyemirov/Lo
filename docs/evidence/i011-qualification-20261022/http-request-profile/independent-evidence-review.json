@@ -1,0 +1,29 @@
+{
+  "issue": "I011",
+  "review": "Independent preservation audit of completed HTTP phase diagnostic",
+  "manifest_sha256": "26945dfc77e95076228ebb6d3739466e7013f5e146374da8112bc565b4c92de6",
+  "result": "no blocking findings",
+  "verified": {
+    "archive_records": 9519,
+    "unique_gzip_archives": 3645,
+    "unique_decoded_bytes": 276537104,
+    "identity_only_binary_records": 257,
+    "transitive_binding_checks": 6857
+  },
+  "checks": [
+    "Every archive matches its compressed SHA256, decoded SHA256 and byte length; gzip timestamps are zero.",
+    "All 257 identity-only binaries match their recorded current bytes and hashes.",
+    "Frozen source, package, producer, correctness, stage-stream, artifact and summary references resolve to matching preserved records.",
+    "Archived Linux correctness and both measurement exports strictly decode matching status, elapsed time and stream bytes; serial logs are retained.",
+    "The full successful source snapshot is preserved independently of current production edits.",
+    "The failed preparation retains its log, original identities and2677-file partial snapshot, with exactly the documented four omitted vendored files.",
+    "Draft, correction, authorization and review histories remain separate and preserved."
+  ],
+  "limits": [
+    "Binary tools and artifacts explicitly marked identity-only are not archived byte-for-byte.",
+    "This receipt validates diagnostic preservation, not compiler qualification or endpoint improvement.",
+    "No files were written and no builds, tests or timings were executed."
+  ],
+  "qualification_claim": false,
+  "i011_complete": false
+}

@@ -19,14 +19,14 @@ def work(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def test_performance_rejects_fewer_than_ten_pairs(work: Path) -> None:
+def test_performance_rejects_obsolete_scalar_sample_selection(work: Path) -> None:
     command = [sys.executable, '-B', str(SCRIPT), '--preparation', '_scratch/native-runtime',
                '--package', '_scratch/compiler-distribution/packages/lo-linux-arm64-software',
                '--frontend', 'bin/lo', '--work', str(work / 'run'), '--samples', '9']
     result = subprocess.run(command, cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
                             capture_output=True, text=True, check=False)
     assert result.returncode == 2
-    assert 'at least ten paired samples' in result.stderr
+    assert 'unrecognized arguments: --samples 9' in result.stderr
     assert not (work / 'run').exists()
 
 
@@ -40,7 +40,7 @@ def test_precompiled_runner_rejects_unknown_configuration_fields(work: Path) -> 
     assert built.returncode == 0, built.stderr
     source = work / 'config.json'
     output = work / 'report.json'
-    source.write_text(json.dumps({'samples': 10, 'warmup': 3, 'compiler': '/compiler/bin/lo',
+    source.write_text(json.dumps({'sample_plan': {'execution': 10, 'process': 10, 'http': 100, 'build': 10}, 'warmup': 3, 'compiler': '/compiler/bin/lo',
                                  'output': str(output), 'undeclared': True}))
     result = subprocess.run([str(binary), '--config', str(source)], cwd=ROOT, env=env,
                             stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False)
@@ -49,7 +49,7 @@ def test_precompiled_runner_rejects_unknown_configuration_fields(work: Path) -> 
     assert not output.exists()
 
 
-@pytest.mark.parametrize('mutation', ['duplicate', 'empty', 'samples', 'warmup'])
+@pytest.mark.parametrize('mutation', ['duplicate', 'empty', 'sample_plan', 'warmup'])
 def test_runner_rejects_invalid_measurement_configuration(work: Path, mutation: str) -> None:
     binary = work / 'runner'
     env = dict(os.environ, CGO_ENABLED='0')
@@ -60,7 +60,7 @@ def test_runner_rejects_invalid_measurement_configuration(work: Path, mutation: 
     assert result.returncode == 0, result.stderr
     fixture = {'name': 'startup', 'source': '/input/source.lo', 'source_sha256': '1' * 64,
                'work': '/work/startup', 'artifact': '/work/startup/program'}
-    config = {'samples': 10, 'warmup': 3, 'compiler': '/compiler/bin/lo',
+    config = {'sample_plan': {'execution': 10, 'process': 10, 'http': 100, 'build': 10}, 'warmup': 3, 'compiler': '/compiler/bin/lo',
               'output': str(work / 'report.json'), 'process': [fixture]}
     if mutation == 'duplicate':
         config['process'].append(fixture)
@@ -92,7 +92,7 @@ def test_public_qualification_retains_informational_guest_context(work: Path, mo
                'after': {'other_benchmark_jobs': ['after-owned-load'], 'load_average_1_5_15': [9, 8, 7]}}
     exported = output / 'guest/0.file0'
     exported.parent.mkdir()
-    exported.write_text(json.dumps({'other_benchmark_jobs': ['before-owned-load', 'after-owned-load'],
+    exported.write_text(json.dumps({'sample_plan': {'execution': 10, 'process': 10, 'http': 100, 'build': 10}, 'other_benchmark_jobs': ['before-owned-load', 'after-owned-load'],
         'benchmark_context': context, 'benchmark_job_observation': 'Informational before and after snapshots',
         'measurement_complete': True, 'environment': {'execution': 'controlled-guest'}}))
     identity = {'frozen_provenance': {'tools': {}}, 'reference_go': 'controlled Go'}
@@ -103,7 +103,7 @@ def test_public_qualification_retains_informational_guest_context(work: Path, mo
     def finish(report, status):
         report['gates_passed'] = gate_passed
     monkeypatch.setattr(module, 'completion', finish)
-    inputs = module.Inputs(work, work, work, output, 'go', 10, ('execution',), ())
+    inputs = module.Inputs(work, work, work, output, 'go', ('execution',), ())
     report = module.qualify(inputs, False)
     assert report['benchmark_context'] == context
     assert report['other_benchmark_jobs'] == ['before-owned-load', 'after-owned-load']

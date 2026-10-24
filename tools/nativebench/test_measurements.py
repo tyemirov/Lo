@@ -56,7 +56,7 @@ def test_execution_producer_records_canonical_order_before_serialization(tmp_pat
     monkeypatch.setattr(qualify_native, 'measured', lambda *args: (1, '7'))
     config = qualify_native.Config(ROOT, tmp_path, package / 'program', 10, 'startup')
     records = qualify_native.execution(config)
-    report = {'execution': records, 'samples': 10, 'warmup': 3, 'concurrency': 1,
+    report = {'execution': records, 'sample_plan': {'execution': 10, 'process': 10, 'http': 100, 'build': 10}, 'warmup': 3, 'concurrency': 1,
               'other_benchmark_jobs': [], 'benchmark_job_observation': 'controlled producer test',
               'expected_inventory': {'execution': ['startup']}, 'complete_contract': False,
               'measurement_complete': True}
@@ -122,7 +122,10 @@ def test_process_producer_emits_exact_order(tmp_path: Path, monkeypatch: pytest.
         assert sample['order'] == observed[offset:offset+2]
 
 
-def test_http_producer_emits_exact_order(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_http_producer_emits_consistent_timings_and_exact_order(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from itertools import count
+    clock = count()
+    monkeypatch.setattr(qualify_native.time, 'perf_counter_ns', lambda: next(clock))
     observed = []
     class Server:
         returncode = None
@@ -152,3 +155,9 @@ def test_http_producer_emits_exact_order(tmp_path: Path, monkeypatch: pytest.Mon
     for sample in records[0]['samples']:
         offset = (sample['sample'] + 3) * 400
         assert sample['order'] == [observed[offset], observed[offset+200]]
+        for backend in ('interpreter', 'native'):
+            metric = sample[backend]
+            assert metric['samples_ns'] == [1] * 200
+            assert metric['elapsed_ns'] == 401
+            assert metric['p95_ns'] == 1
+            assert metric['requests_per_second'] == 200e9 / metric['elapsed_ns']

@@ -1,0 +1,1234 @@
+{
+  "archive_format": {
+    "compression_level": 9,
+    "filename": "",
+    "identities": "raw and compressed byte counts and SHA256; gzip round trips verified",
+    "kind": "gzip",
+    "mtime": 0
+  },
+  "diagnostic_outcomes": {
+    "installed_observations": 12,
+    "installed_state": "complete",
+    "public_module_observations": 6,
+    "public_module_state": "complete"
+  },
+  "final_package_bindings": [
+    {
+      "immutable_tar": {
+        "bytes": 638894080,
+        "bytes_preserved_here": false,
+        "meaning": "immutable final package archive retained at its recorded repository path",
+        "sha256": "3d913241a155739c2c98b6ea04d9ad90b1e9950ddac8d62e32ffcd11182e58d0",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal.tar"
+      },
+      "inventory": {
+        "bytes": 11940,
+        "sha256": "601fd60f8733f6185c0824bbbc2387679732dbf0d40e629a2deb8d6dcd1db7de",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal/inventory.json"
+      },
+      "package": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal",
+      "provenance": {
+        "bytes": 435452,
+        "sha256": "b11260560945514e2bd1b01c7b7582ae7f5f83ddc64595e5cab185abb36daca5",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal/provenance.json"
+      },
+      "receipt": {
+        "bytes": 479,
+        "sha256": "c802c896ad4a45e2fe03afe2361ca240c9f250d56435e0e8c308225b4500c93f",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal.receipt.json"
+      },
+      "toolchain": {
+        "bytes": 6131,
+        "sha256": "fa785e16301bf2996a1c254761ec793ab84da86b4a195eac2632173b3927690e",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal/toolchain.json"
+      },
+      "used_by_this_diagnostic": false
+    },
+    {
+      "immutable_tar": {
+        "bytes": 618393600,
+        "bytes_preserved_here": false,
+        "meaning": "immutable final package archive retained at its recorded repository path",
+        "sha256": "35dd8c8e74cf40a69fb2d89627e8e17cb419ea546e58d01505507c7341a1bf8f",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software.tar"
+      },
+      "inventory": {
+        "bytes": 11024,
+        "sha256": "6181641dd32ff75a005bef3237223d24ce61698fce60d714baa73a94f5f336e3",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/inventory.json"
+      },
+      "package": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software",
+      "provenance": {
+        "bytes": 435455,
+        "sha256": "35dfd1df74db84fc14f275287260493983fd014614df79e3f2b211d9859ecbb9",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/provenance.json"
+      },
+      "receipt": {
+        "bytes": 488,
+        "sha256": "dc51e47cc9051bcfeb3af03622a843a7b8fd7269fec4ac59a8340c56ac8e0f9b",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software.receipt.json"
+      },
+      "toolchain": {
+        "bytes": 3451,
+        "sha256": "3a42fc7dd2696c67fb52851e20a5dc26872cc994247184fccdbaf71d1df471f4",
+        "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/toolchain.json"
+      },
+      "used_by_this_diagnostic": true
+    },
+    {
+      "immutable_tar": {
+        "bytes": 932812800,
+        "bytes_preserved_here": false,
+        "meaning": "immutable final package archive retained at its recorded repository path",
+        "sha256": "eb3612b4ad80a06dff8be999f335e7f968226068f52b05b9fdd729570873da26",
+        "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software.tar"
+      },
+      "inventory": {
+        "bytes": 13734,
+        "sha256": "7b97cfa0cbea9ff19490924106301d7eab29c95b58f023793ffb3ca3062660cb",
+        "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/inventory.json"
+      },
+      "package": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software",
+      "provenance": {
+        "bytes": 441688,
+        "sha256": "345492385834cfbb7de7251e1f8e117b88689d1d337569630245ec344f54949e",
+        "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/provenance.json"
+      },
+      "receipt": {
+        "bytes": 485,
+        "sha256": "d1c28b66b91221242417f7ffad1493f2a29f945e15082ef7f92e99553bfb60bb",
+        "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software.receipt.json"
+      },
+      "toolchain": {
+        "bytes": 4521,
+        "sha256": "360b0d2369819a4fa0cee08d2fbd228be56d97cb532b713c9a938152c34b0c1e",
+        "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/toolchain.json"
+      },
+      "used_by_this_diagnostic": false
+    }
+  ],
+  "generated_executables_hash_only": [
+    {
+      "bytes": 7661024,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "483ad236148ec48438c9eb95f1d00f9547fa8866ef2c865bfe38f1742c48fb53",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_10000-lo/program"
+    },
+    {
+      "bytes": 2970960,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "518175d2c9466ffddbe68c81ff5ac1bb5ec188ade5caefe12d4d0d6848122147",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-empty-lo/program"
+    },
+    {
+      "bytes": 2970960,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "518175d2c9466ffddbe68c81ff5ac1bb5ec188ade5caefe12d4d0d6848122147",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-empty-lo/program"
+    },
+    {
+      "bytes": 7661024,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "483ad236148ec48438c9eb95f1d00f9547fa8866ef2c865bfe38f1742c48fb53",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_10000-lo/program"
+    },
+    {
+      "bytes": 3433952,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "26dfc5f818c415f53c563799ef355f245ae6a4dfea056605d948083756b2d424",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_1000-lo/program"
+    },
+    {
+      "bytes": 3433952,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "26dfc5f818c415f53c563799ef355f245ae6a4dfea056605d948083756b2d424",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_1000-lo/program"
+    },
+    {
+      "bytes": 3433952,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "26dfc5f818c415f53c563799ef355f245ae6a4dfea056605d948083756b2d424",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_1000-lo/program"
+    },
+    {
+      "bytes": 2970960,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "518175d2c9466ffddbe68c81ff5ac1bb5ec188ade5caefe12d4d0d6848122147",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-empty-lo/program"
+    },
+    {
+      "bytes": 2970960,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "518175d2c9466ffddbe68c81ff5ac1bb5ec188ade5caefe12d4d0d6848122147",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-empty-lo/program"
+    },
+    {
+      "bytes": 7661024,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "483ad236148ec48438c9eb95f1d00f9547fa8866ef2c865bfe38f1742c48fb53",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_10000-lo/program"
+    },
+    {
+      "bytes": 7661024,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "483ad236148ec48438c9eb95f1d00f9547fa8866ef2c865bfe38f1742c48fb53",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_10000-lo/program"
+    },
+    {
+      "bytes": 3433952,
+      "bytes_preserved": false,
+      "reason": "generated executable; exact bytes identified but not copied into durable evidence",
+      "sha256": "26dfc5f818c415f53c563799ef355f245ae6a4dfea056605d948083756b2d424",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_1000-lo/program"
+    }
+  ],
+  "historical_reference": {
+    "classification_unchanged": true,
+    "manifest": {
+      "bytes": 264440,
+      "sha256": "99f4f50967e4d0dbc07a452550f11183717df5ff9b553e1020d5bfd3ce0d670a",
+      "source": "docs/evidence/i011-qualification-20261022/language-comparison/manifest.json"
+    }
+  },
+  "implementation_and_historical_manifest_bindings": [
+    {
+      "bytes": 9471,
+      "sha256": "702af326b963bd300112c1d4fb7426d552d0ce16c7154a4faa7a273d5656c56d",
+      "source": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/manifest.json"
+    },
+    {
+      "bytes": 50421,
+      "sha256": "c712bf1986f7051cc04142b6bd194c1d565ac723dad47e4919bcd6cd589e5692",
+      "source": "docs/evidence/i011-qualification-20261022/literal-loop-probe/manifest.json"
+    },
+    {
+      "bytes": 248264,
+      "sha256": "98379daaff5376616bcab068c82296facd70b195ce2e60b88ace669d14c092ea",
+      "source": "docs/evidence/i011-qualification-20261022/metadata-implementation/manifest.json"
+    },
+    {
+      "bytes": 264440,
+      "sha256": "99f4f50967e4d0dbc07a452550f11183717df5ff9b553e1020d5bfd3ce0d670a",
+      "source": "docs/evidence/i011-qualification-20261022/language-comparison/manifest.json"
+    }
+  ],
+  "independent_module_sizes": [
+    {
+      "case": "empty",
+      "module": {
+        "bytes": 14391,
+        "sha256": "1c7e236d5d7439a1f99153009a743d630cec05ab4aa69fd95d0ae15ffd6f9f8e",
+        "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-empty/program.ll"
+      },
+      "parser": "exact global LHS and bounded canonical array-type prefix; no payload regex",
+      "program_metadata_bytes_independent_parse": 1873,
+      "target": "darwin/arm64"
+    },
+    {
+      "case": "map_1000",
+      "module": {
+        "bytes": 711188,
+        "sha256": "9f6ef78bc221c8f9bfbc3c612b820530692ebb5267ab7710584fa6f05cbb7cd6",
+        "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_1000/program.ll"
+      },
+      "parser": "exact global LHS and bounded canonical array-type prefix; no payload regex",
+      "program_metadata_bytes_independent_parse": 439136,
+      "target": "darwin/arm64"
+    },
+    {
+      "case": "map_10000",
+      "module": {
+        "bytes": 6678921,
+        "sha256": "459d27a2de7828ca6a6413191be51a91ad762b065b777a26a4fee1f1c1452243",
+        "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_10000/program.ll"
+      },
+      "parser": "exact global LHS and bounded canonical array-type prefix; no payload regex",
+      "program_metadata_bytes_independent_parse": 4406704,
+      "target": "darwin/arm64"
+    },
+    {
+      "case": "empty",
+      "module": {
+        "bytes": 14395,
+        "sha256": "6164b3f737a887813824cde3b294e8de7c6d01812cf777591bf1ac9bc1c4ebab",
+        "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-empty/program.ll"
+      },
+      "parser": "exact global LHS and bounded canonical array-type prefix; no payload regex",
+      "program_metadata_bytes_independent_parse": 1872,
+      "target": "linux/arm64"
+    },
+    {
+      "case": "map_1000",
+      "module": {
+        "bytes": 711192,
+        "sha256": "75d7765fad8824ee27f42579d07a246f03d273704c26e322bd486c18aa03b66e",
+        "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_1000/program.ll"
+      },
+      "parser": "exact global LHS and bounded canonical array-type prefix; no payload regex",
+      "program_metadata_bytes_independent_parse": 439135,
+      "target": "linux/arm64"
+    },
+    {
+      "case": "map_10000",
+      "module": {
+        "bytes": 6678925,
+        "sha256": "9efc3d9366f3277ceebe21a4e49fa6b89e499dfba133fa711a1196b5a4c19ec7",
+        "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_10000/program.ll"
+      },
+      "parser": "exact global LHS and bounded canonical array-type prefix; no payload regex",
+      "program_metadata_bytes_independent_parse": 4406703,
+      "target": "linux/arm64"
+    }
+  ],
+  "issue": "I011",
+  "limits": [
+    "Installed build observations ran only on Darwin arm64.",
+    "Both module target triples were emitted by the Darwin-host public CLI; no Linux-host build costs were measured.",
+    "These diagnostics do not complete final I011 qualification.",
+    "Historical Go/Rust/C++ observations remain historical; no pooled samples or precise cross-time speedup ratio is claimed.",
+    "No historical 1000-item ABI1 metadata size is assumed.",
+    "Sampled parent and descendant RSS is a sparse lower bound; child high-water RSS is separate.",
+    "Generated executable bytes are not preserved here; exact hashes and sizes are retained.",
+    "Full emitted modules, source copies, receipts, streams, and frozen identities are preserved; package binaries and guest images are not copied here."
+  ],
+  "phase": "installed_ABI2_compact_diagnostics",
+  "qualification_claim": false,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/000.gz",
+      "archive_bytes": 9167,
+      "archive_sha256": "0aec8ed1590a66006673c855c1cd83b06360981c27c529bc52da525dde7365f9",
+      "bytes": 33471,
+      "sha256": "c29d8698055cd58a0b9ca4b87ce4bf730be015fe086816834e7ef1eb6ad1157c",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-profile/corrected_profile.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/001.gz",
+      "archive_bytes": 29,
+      "archive_sha256": "83856ae94d86b779060765afdfa6fa5abfc37b88bfd91be448816f64e91f0e84",
+      "bytes": 9,
+      "sha256": "4336023f72dee9bfa682ee0e6cb6384369e92d47b1e99acf621fa88d5b874515",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison/fixtures/empty/program.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/002.gz",
+      "archive_bytes": 299,
+      "archive_sha256": "5dcdf86a2773e885fcac526a5865e42a5b14e63a9f4f72c101c665605a86d6c2",
+      "bytes": 3013,
+      "sha256": "c51799989292cc7270831221f3fe786b82a971e1447a8fa32078ee7d1ddeb2b5",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison/fixtures/map_1000/program.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/003.gz",
+      "archive_bytes": 438,
+      "archive_sha256": "06db89adf29f94fdebc187efe62a39d8f2d45b75656d58a8635fb692f6c90c2c",
+      "bytes": 29211,
+      "sha256": "292ad36f025dbd444ab71c454cd9f1e0a0621cb12f0a167e103f9055921302bc",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison/fixtures/map_10000/program.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/004.gz",
+      "archive_bytes": 3357,
+      "archive_sha256": "9b40867df81881c776cf40f19caeafdb7b077da8ea596001a46968f981a774c0",
+      "bytes": 8471,
+      "sha256": "8ceadb50ab6926993b75ebdf831649cfe92b9a3a1aeca496745a0494caf751ee",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison/plan.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/005.gz",
+      "archive_bytes": 4280,
+      "archive_sha256": "54e91496cf2c797c0de3368b394b70f5621e04c30538a4199b1336a3a48a4b78",
+      "bytes": 14549,
+      "sha256": "fbdb2b40615cb7e9ff4c0ad0c47da26c3c4aeb6e72ee219bce8a6dea8d93539a",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/compare.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/006.gz",
+      "archive_bytes": 189,
+      "archive_sha256": "bbc5faa3ec7f00eec1222709392fea8ec5e8f51d6e97455123b5ebf215564255",
+      "bytes": 372,
+      "sha256": "206efd041561d434b697d614482a5e6afdb24ba302bfc98269377849a2f9b0f7",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/comparison.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/007.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/008.gz",
+      "archive_bytes": 122,
+      "archive_sha256": "85e2f82eb17d34b66f7f4fe51a9ec3ad84d54fbc830a68c735a7184cbe04c7dc",
+      "bytes": 131,
+      "sha256": "3c224d2d92986c824f9a1808c536a824c656a9c09d70f88c4891560a79689387",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/009.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/010.gz",
+      "archive_bytes": 123,
+      "archive_sha256": "317b7177483020328c352749c0524c80947858497874644a600086673de6358d",
+      "bytes": 131,
+      "sha256": "3a25d09348b6d1bef3629615a87a3332898e3ae883cf15d45889715835baea24",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/011.gz",
+      "archive_bytes": 944,
+      "archive_sha256": "32d2e916893913212d5ad09f9d4dba2505160682dd763b6d0757e6e175089ee9",
+      "bytes": 1792,
+      "sha256": "1c5b336b610377bb288e25e689944c4dfeacc26ef9e8960199beede4d2ad31ab",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-size-plan.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/012.gz",
+      "archive_bytes": 2807,
+      "archive_sha256": "057ac710ef456697baefcfc02dff2ad6432fc34d7e52d21bfbae6247aa0cb396",
+      "bytes": 14391,
+      "sha256": "1c7e236d5d7439a1f99153009a743d630cec05ab4aa69fd95d0ae15ffd6f9f8e",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-empty/program.ll"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/013.gz",
+      "archive_bytes": 213,
+      "archive_sha256": "6f7578a39b41e004f0e08324c0ef47cc17657ae7a5abc066762a6deea3d63d8b",
+      "bytes": 284,
+      "sha256": "6f9cb856b26b45ec7ded409ea47e63095ec60720415b13839bebd3c229b81be5",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-empty/receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/014.gz",
+      "archive_bytes": 29,
+      "archive_sha256": "83856ae94d86b779060765afdfa6fa5abfc37b88bfd91be448816f64e91f0e84",
+      "bytes": 9,
+      "sha256": "4336023f72dee9bfa682ee0e6cb6384369e92d47b1e99acf621fa88d5b874515",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-empty/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/015.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-empty/stderr.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/016.gz",
+      "archive_bytes": 206,
+      "archive_sha256": "3d4a6c202c846da5f735ce877f67480f73de156cc789790b1f4c3ba44573423f",
+      "bytes": 259,
+      "sha256": "959e4699c0a1d03c820d13432916592564f4810a37e4bf3995cedbced9a665a5",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-empty/stdout.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/017.gz",
+      "archive_bytes": 41655,
+      "archive_sha256": "8ded33ae831368e5a78fc935bc907ae4adfaf68ab45e329c8e5ff7885f45e8dc",
+      "bytes": 711188,
+      "sha256": "9f6ef78bc221c8f9bfbc3c612b820530692ebb5267ab7710584fa6f05cbb7cd6",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_1000/program.ll"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/018.gz",
+      "archive_bytes": 216,
+      "archive_sha256": "2928469dff3fe391499ea842957a661c7b4e23bc5b21210331c415b5653dde2f",
+      "bytes": 287,
+      "sha256": "cb9f7ae22c2bec98fc77046ee0d4e474ca77884838164279394ec5c409420f2f",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_1000/receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/019.gz",
+      "archive_bytes": 299,
+      "archive_sha256": "5dcdf86a2773e885fcac526a5865e42a5b14e63a9f4f72c101c665605a86d6c2",
+      "bytes": 3013,
+      "sha256": "c51799989292cc7270831221f3fe786b82a971e1447a8fa32078ee7d1ddeb2b5",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_1000/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/020.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_1000/stderr.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/021.gz",
+      "archive_bytes": 209,
+      "archive_sha256": "8dd8d0a46a5a0f863927dd9eed3f0737740822780c59d225c7a14f67a95ce22e",
+      "bytes": 262,
+      "sha256": "b00f2708d1e94fb303278a12f8da0cd62217f233219eaae54dd4999cf3a9f261",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_1000/stdout.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/022.gz",
+      "archive_bytes": 308424,
+      "archive_sha256": "8a8715ae2a8d4c0c8d2f2aefb40e430b07ac2aee41f71f38fd71dc799a54ffb9",
+      "bytes": 6678921,
+      "sha256": "459d27a2de7828ca6a6413191be51a91ad762b065b777a26a4fee1f1c1452243",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_10000/program.ll"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/023.gz",
+      "archive_bytes": 217,
+      "archive_sha256": "9f0b2e54a3c1696ea3def082eda6a35637276f930808b980fb4c417da9277b0f",
+      "bytes": 288,
+      "sha256": "84c33a8200b0d91c15bb12531df2091620410dc1f0ada4115fa95709837e9e89",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_10000/receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/024.gz",
+      "archive_bytes": 438,
+      "archive_sha256": "06db89adf29f94fdebc187efe62a39d8f2d45b75656d58a8635fb692f6c90c2c",
+      "bytes": 29211,
+      "sha256": "292ad36f025dbd444ab71c454cd9f1e0a0621cb12f0a167e103f9055921302bc",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_10000/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/025.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_10000/stderr.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/026.gz",
+      "archive_bytes": 210,
+      "archive_sha256": "5bcee81d70c36a289da8e819f2c23cd61a7207c790678cdbb2f9ca88aa4f3e76",
+      "bytes": 263,
+      "sha256": "9d9fbdab7eb620e5933ad66b99e0d73ac52fa8ed7a5a9d308f0ed5f0bdc2702d",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/darwin-arm64-map_10000/stdout.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/027.gz",
+      "archive_bytes": 133592,
+      "archive_sha256": "29645c293789061c71e9d8acf25614f087004e22088cf9bf5aa337135b4ec809",
+      "bytes": 389249,
+      "sha256": "1200c3178973e41b5c83257efc633913f23fd459ee8b92c6410c349dbc0bb614",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/design.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/028.gz",
+      "archive_bytes": 2809,
+      "archive_sha256": "82cfde734181bf29a86096ce96d42af29db8641130b65e6a136a71657540a1fa",
+      "bytes": 14395,
+      "sha256": "6164b3f737a887813824cde3b294e8de7c6d01812cf777591bf1ac9bc1c4ebab",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-empty/program.ll"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/029.gz",
+      "archive_bytes": 213,
+      "archive_sha256": "bea3ebc5b7ecf73786c6c5db79d15a6ad5c208303a4e7990f2fe64be748d10fb",
+      "bytes": 282,
+      "sha256": "29aa6aeea79a0937f97d13bf9b46c2ddf44e819fa44ecd349297b568bd6617c6",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-empty/receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/030.gz",
+      "archive_bytes": 29,
+      "archive_sha256": "83856ae94d86b779060765afdfa6fa5abfc37b88bfd91be448816f64e91f0e84",
+      "bytes": 9,
+      "sha256": "4336023f72dee9bfa682ee0e6cb6384369e92d47b1e99acf621fa88d5b874515",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-empty/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/031.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-empty/stderr.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/032.gz",
+      "archive_bytes": 206,
+      "archive_sha256": "e5f62cfd99872c99e18a2a271f81af42fdcf34c89e6d018c4d134c19ecd350bd",
+      "bytes": 257,
+      "sha256": "f51b052887ebbd3afc2238444baa755c81c5c8a2a97cc8e8ef60eb6204b37beb",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-empty/stdout.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/033.gz",
+      "archive_bytes": 41660,
+      "archive_sha256": "bd9db3e0997e2019c8a0142c00ebb43f5fec3b0e0d04ee3043f8e5cb1b0d7dc8",
+      "bytes": 711192,
+      "sha256": "75d7765fad8824ee27f42579d07a246f03d273704c26e322bd486c18aa03b66e",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_1000/program.ll"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/034.gz",
+      "archive_bytes": 215,
+      "archive_sha256": "b807bc657b2578604a645a27951e588a19f7fa00b9e31a6197b14ad81e4eb733",
+      "bytes": 285,
+      "sha256": "a5f4ee9266a154f0a6b8176808778f7821602a8fc466b91acd60f8affe8a8ca1",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_1000/receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/035.gz",
+      "archive_bytes": 299,
+      "archive_sha256": "5dcdf86a2773e885fcac526a5865e42a5b14e63a9f4f72c101c665605a86d6c2",
+      "bytes": 3013,
+      "sha256": "c51799989292cc7270831221f3fe786b82a971e1447a8fa32078ee7d1ddeb2b5",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_1000/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/036.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_1000/stderr.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/037.gz",
+      "archive_bytes": 208,
+      "archive_sha256": "f5ae3765a600c8472e13eef6c15461fea0b54c1b6e96398a56fab307f9a4bc00",
+      "bytes": 260,
+      "sha256": "b47c62308e40268faa74b55730f3b58578539f2760b658b1f9060c048290fdc3",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_1000/stdout.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/038.gz",
+      "archive_bytes": 308429,
+      "archive_sha256": "4a503d90ecd431a5b2cd4b47ea032701cbaf7acc2f12d933495071ea371765d0",
+      "bytes": 6678925,
+      "sha256": "9efc3d9366f3277ceebe21a4e49fa6b89e499dfba133fa711a1196b5a4c19ec7",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_10000/program.ll"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/039.gz",
+      "archive_bytes": 216,
+      "archive_sha256": "6314210e8219eb18e4936a3b13a4afdae62f7408c91497e7fe106a6fa3f9f1e3",
+      "bytes": 286,
+      "sha256": "90ce4e02020c3f9a160a266c8180de435635e469c612a816e0ec8194c459651c",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_10000/receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/040.gz",
+      "archive_bytes": 438,
+      "archive_sha256": "06db89adf29f94fdebc187efe62a39d8f2d45b75656d58a8635fb692f6c90c2c",
+      "bytes": 29211,
+      "sha256": "292ad36f025dbd444ab71c454cd9f1e0a0621cb12f0a167e103f9055921302bc",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_10000/source.lo"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/041.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_10000/stderr.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/042.gz",
+      "archive_bytes": 208,
+      "archive_sha256": "faa52abaac8b5dd2804f01e0436de5f2fc3677e755221616c80ca3dd60fc22e4",
+      "bytes": 261,
+      "sha256": "165371a4b8972fb106add409caad55dff19d91ca0bb7ff54a794acaac7c31b3d",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/linux-arm64-map_10000/stdout.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/043.gz",
+      "archive_bytes": 2694,
+      "archive_sha256": "63f91f9a9a6c2c8240787de66c802f96cd959679b56c4a76740ea459de1f0136",
+      "bytes": 25254,
+      "sha256": "bccfe21f482be71943b6e6318b7d5e9da4143505002221d1f5e217d5fdb0cf78",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/044.gz",
+      "archive_bytes": 200,
+      "archive_sha256": "35cf384ae7f6e9b107eea0aa34d9d70c13656f733bd8f14c4a931a335c2af01e",
+      "bytes": 370,
+      "sha256": "f723a7fdc7a904b861478d1094fe51e5cf349d3328589ee5ebb545ccf82a15d4",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module-sizes.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/045.gz",
+      "archive_bytes": 4754,
+      "archive_sha256": "8a67af77dc1c2c1e3aaf5e6036bf51c8141926c18e24e78002d3c405a4901457",
+      "bytes": 16621,
+      "sha256": "087fe930efe1cbf28692949dcbe896954503b5cc432dd9c851d8cd01a0bbf0b1",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/module_sizes.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/046.gz",
+      "archive_bytes": 134273,
+      "archive_sha256": "5a46a77f9004f95b427b2ae9ff5fc7efefeb46786a5815f1c82bdfdbd4749e13",
+      "bytes": 394339,
+      "sha256": "fa585cfd52aa511339579ae5672f641f8cf429465ccf7bb3593bfd51c63975ca",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/design.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/047.gz",
+      "archive_bytes": 5935,
+      "archive_sha256": "55c29f5b4a55ff35e42f4cad138fc92cb902f048b236eacbc520611b8e54761f",
+      "bytes": 88784,
+      "sha256": "23045c974126323fd81bb831efac1fff3596872260793c54052a85289a0d66fb",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/report.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/048.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-empty-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/049.gz",
+      "archive_bytes": 282,
+      "archive_sha256": "dc866d909475bedf8ee82be0ea2702ece7ba6e97ceef4a7620170b23aa25cd94",
+      "bytes": 368,
+      "sha256": "3e422faf0a73d52e70a4a152f0b070e4a2efd2d947edfafb409f0970c3793185",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-empty-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/050.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-empty-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/051.gz",
+      "archive_bytes": 81,
+      "archive_sha256": "f1165c20d3d6b8a66a09d114dcb0e70582be3e53e11c83a5cd250003fd48b076",
+      "bytes": 68,
+      "sha256": "70470b085e0ac2251942aa896de8a86e282abd97769501e4d200ff0d34820475",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-empty-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/052.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_1000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/053.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "fbaa225f9a2a876daa73e0faa4ff845285476dfb93f73346b060d3cae1d84f2c",
+      "bytes": 371,
+      "sha256": "d5e741cfd60a2c820cac923b2e3468fc88dc6da81f4b91479ecd7a733488ed83",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_1000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/054.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_1000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/055.gz",
+      "archive_bytes": 86,
+      "archive_sha256": "be74228bf87e60f53a1990d17eaeb7b8c5abd0592db2198bc1322de0f27cf38e",
+      "bytes": 73,
+      "sha256": "5bbb2d5b99cc7846f32b1222eb25585401f13b7d1c25c232cdc659456afeff67",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_1000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/056.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_10000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/057.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "bedd1fdb711080a5e2abf0cc64ee96831490db2961fbc6e04dddedc8b00c3170",
+      "bytes": 372,
+      "sha256": "0a4aff0942c6dc90113757b09e7072d0abc6430d471684667f68a9d973a7de4b",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_10000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/058.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_10000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/059.gz",
+      "archive_bytes": 87,
+      "archive_sha256": "a41dddf76c618a343457f09bdbff2913e5ddaf87aa1d12044b27964e26740d4f",
+      "bytes": 74,
+      "sha256": "14102e3eb87e552cdae7f4470c68707b24042cc8c158cb3638dc9bdb2da7f250",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round0-map_10000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/060.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-empty-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/061.gz",
+      "archive_bytes": 282,
+      "archive_sha256": "2b3edd093508bd83699cdcf5814a243d23355cb0541e12c15ef219f7dc127d89",
+      "bytes": 368,
+      "sha256": "14a11d81e247a7197387ff749a762f411e7c7cfbb1492241c2bf27748e2f294b",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-empty-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/062.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-empty-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/063.gz",
+      "archive_bytes": 81,
+      "archive_sha256": "f1165c20d3d6b8a66a09d114dcb0e70582be3e53e11c83a5cd250003fd48b076",
+      "bytes": 68,
+      "sha256": "70470b085e0ac2251942aa896de8a86e282abd97769501e4d200ff0d34820475",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-empty-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/064.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_1000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/065.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "0f8a473e327eb9b8d5daa94b1f215dcdaeda571ae5c144eb40fe47065653dda7",
+      "bytes": 371,
+      "sha256": "59a7da12ed855e3137d848337ebe7006c0f17f40e2bea22567e938d578ae7a37",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_1000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/066.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_1000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/067.gz",
+      "archive_bytes": 86,
+      "archive_sha256": "be74228bf87e60f53a1990d17eaeb7b8c5abd0592db2198bc1322de0f27cf38e",
+      "bytes": 73,
+      "sha256": "5bbb2d5b99cc7846f32b1222eb25585401f13b7d1c25c232cdc659456afeff67",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_1000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/068.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_10000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/069.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "f3b34ec70abad6d1a76faad211aa2ade02de691eb33937d4b8115591be72d90c",
+      "bytes": 372,
+      "sha256": "266712098c2038a1beb5cb35ed61229f37e6c7fb49a95a743295cf970e00c505",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_10000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/070.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_10000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/071.gz",
+      "archive_bytes": 87,
+      "archive_sha256": "a41dddf76c618a343457f09bdbff2913e5ddaf87aa1d12044b27964e26740d4f",
+      "bytes": 74,
+      "sha256": "14102e3eb87e552cdae7f4470c68707b24042cc8c158cb3638dc9bdb2da7f250",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round1-map_10000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/072.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-empty-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/073.gz",
+      "archive_bytes": 282,
+      "archive_sha256": "e812bc242b7c62b54ee4a9802323c6e71978ec6cf019584aa7b1b5d604b44353",
+      "bytes": 368,
+      "sha256": "f1f4f38efa0048f9dd773269832fb88b88b1786cb2e06720b34a4e17d689ea5a",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-empty-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/074.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-empty-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/075.gz",
+      "archive_bytes": 81,
+      "archive_sha256": "f1165c20d3d6b8a66a09d114dcb0e70582be3e53e11c83a5cd250003fd48b076",
+      "bytes": 68,
+      "sha256": "70470b085e0ac2251942aa896de8a86e282abd97769501e4d200ff0d34820475",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-empty-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/076.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_1000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/077.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "85b4f7388024dc653860efde5e38b179728474e157043b7678be10b8955c56a2",
+      "bytes": 371,
+      "sha256": "9bf1069fafda9ce0a2d06535da9a620e0a158b5a77bff90e50809b410e80bfea",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_1000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/078.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_1000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/079.gz",
+      "archive_bytes": 86,
+      "archive_sha256": "be74228bf87e60f53a1990d17eaeb7b8c5abd0592db2198bc1322de0f27cf38e",
+      "bytes": 73,
+      "sha256": "5bbb2d5b99cc7846f32b1222eb25585401f13b7d1c25c232cdc659456afeff67",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_1000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/080.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_10000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/081.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "09e309f7dfd2f1cfa2f2def9d27074586dc98e44f066b380350fefd1d8ea178b",
+      "bytes": 372,
+      "sha256": "79c0811f6c6c134efee69d01c2853f6e9ca584dbcfd2d3dc27b650e1b5d63727",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_10000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/082.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_10000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/083.gz",
+      "archive_bytes": 87,
+      "archive_sha256": "a41dddf76c618a343457f09bdbff2913e5ddaf87aa1d12044b27964e26740d4f",
+      "bytes": 74,
+      "sha256": "14102e3eb87e552cdae7f4470c68707b24042cc8c158cb3638dc9bdb2da7f250",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round2-map_10000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/084.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-empty-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/085.gz",
+      "archive_bytes": 282,
+      "archive_sha256": "a8f33bc4ce6c66257ec23847d159d7401450598523f862e0d676d640b88444ea",
+      "bytes": 368,
+      "sha256": "202f06bf0fd560ce1bdca8c57954a787d3b006bf3ad1eb88ddbfb731074b65d3",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-empty-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/086.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-empty-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/087.gz",
+      "archive_bytes": 81,
+      "archive_sha256": "f1165c20d3d6b8a66a09d114dcb0e70582be3e53e11c83a5cd250003fd48b076",
+      "bytes": 68,
+      "sha256": "70470b085e0ac2251942aa896de8a86e282abd97769501e4d200ff0d34820475",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-empty-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/088.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_1000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/089.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "aa095d75b6c0144754fd2d9fc7903f2bf854db5fd555d0ffcbed8aca8bd11cf1",
+      "bytes": 371,
+      "sha256": "841cdff6c940233bf09a98e8204f3d34af4aee7529afea08ff731529a90ede0a",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_1000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/090.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_1000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/091.gz",
+      "archive_bytes": 86,
+      "archive_sha256": "be74228bf87e60f53a1990d17eaeb7b8c5abd0592db2198bc1322de0f27cf38e",
+      "bytes": 73,
+      "sha256": "5bbb2d5b99cc7846f32b1222eb25585401f13b7d1c25c232cdc659456afeff67",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_1000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/092.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_10000-lo/build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/093.gz",
+      "archive_bytes": 284,
+      "archive_sha256": "12da9fb0915aab2f8560a2853aedb74b9072788a5708a479d8ee601b03293538",
+      "bytes": 372,
+      "sha256": "9969372023c04f7292fadad346f727881a553dcee4cd99e2b3411da707875f1e",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_10000-lo/build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/094.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_10000-lo/execute.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/095.gz",
+      "archive_bytes": 87,
+      "archive_sha256": "a41dddf76c618a343457f09bdbff2913e5ddaf87aa1d12044b27964e26740d4f",
+      "bytes": 74,
+      "sha256": "14102e3eb87e552cdae7f4470c68707b24042cc8c158cb3638dc9bdb2da7f250",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/observations/round3-map_10000-lo/execute.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/096.gz",
+      "archive_bytes": 1134,
+      "archive_sha256": "477794c6ad387f6af14a405ddb850f4e923bacefb9252373ad5f7a9024ce17f9",
+      "bytes": 2307,
+      "sha256": "b4eb9fa1f5b48ad7f1f733ecda73bcae302c30f725aa00541fd84f56ddd26c64",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/plan.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/097.gz",
+      "archive_bytes": 3942,
+      "archive_sha256": "67ffb2a69f80b8414419bbcc3877648ce5e4166748a4021da62b65be30c8e0b3",
+      "bytes": 12914,
+      "sha256": "e05bcc39af26e17689489fc9b8045d763b3fa2f6a1dbfcbda406f4f28ae87229",
+      "source": "_scratch/i011-20261020/completion-20261022/language-comparison-compact/preserve.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/098.gz",
+      "archive_bytes": 3853,
+      "archive_sha256": "605b5b44eed54b60173cd3a3023f8dc3c6545678143e76d38bbec17dc7504d42",
+      "bytes": 11940,
+      "sha256": "601fd60f8733f6185c0824bbbc2387679732dbf0d40e629a2deb8d6dcd1db7de",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/099.gz",
+      "archive_bytes": 137773,
+      "archive_sha256": "ac40f3f6e5990863c8c10e6f8d64c647bbb27b83fec9ba77df61b9c47a4b62a5",
+      "bytes": 435452,
+      "sha256": "b11260560945514e2bd1b01c7b7582ae7f5f83ddc64595e5cab185abb36daca5",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/100.gz",
+      "archive_bytes": 1930,
+      "archive_sha256": "0dc5910c051ea7cf363359e2fd64a94a128b24327f900f688b2c84599f90e347",
+      "bytes": 6131,
+      "sha256": "fa785e16301bf2996a1c254761ec793ab84da86b4a195eac2632173b3927690e",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/101.gz",
+      "archive_bytes": 289,
+      "archive_sha256": "c524c81cd2cb0c605e8fb968c3cf1cb5e7ac0cdc438788a771fc8696ae190a2f",
+      "bytes": 479,
+      "sha256": "c802c896ad4a45e2fe03afe2361ca240c9f250d56435e0e8c308225b4500c93f",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-metal.receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/102.gz",
+      "archive_bytes": 3517,
+      "archive_sha256": "7010b1fb5a0636d6215a76f0d26d4c22cebad68f9738751b20670cb580669def",
+      "bytes": 11024,
+      "sha256": "6181641dd32ff75a005bef3237223d24ce61698fce60d714baa73a94f5f336e3",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/103.gz",
+      "archive_bytes": 137775,
+      "archive_sha256": "84e3036962dc0f78719fc16b923748d6671311f2ce467d41191f8d757596eb2d",
+      "bytes": 435455,
+      "sha256": "35dfd1df74db84fc14f275287260493983fd014614df79e3f2b211d9859ecbb9",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/104.gz",
+      "archive_bytes": 1164,
+      "archive_sha256": "852651ad327667d8461fb16ed4686e99f47b0e9296cb7e30c745d4e315183e00",
+      "bytes": 3451,
+      "sha256": "3a42fc7dd2696c67fb52851e20a5dc26872cc994247184fccdbaf71d1df471f4",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/105.gz",
+      "archive_bytes": 292,
+      "archive_sha256": "9baa6c93d1ffc26875f304e132802ee020b2b011406857162755c6fc93b9c885",
+      "bytes": 488,
+      "sha256": "dc51e47cc9051bcfeb3af03622a843a7b8fd7269fec4ac59a8340c56ac8e0f9b",
+      "source": "bin/distributions-i011-compact-20261022/lo-darwin-arm64-software.receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/106.gz",
+      "archive_bytes": 4689,
+      "archive_sha256": "c418b470558a9018f9e990af55234da8a464258be6ea6a77887da56c9fff23e6",
+      "bytes": 13734,
+      "sha256": "7b97cfa0cbea9ff19490924106301d7eab29c95b58f023793ffb3ca3062660cb",
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/107.gz",
+      "archive_bytes": 139025,
+      "archive_sha256": "4fc9bd844c4d294f3ea3d1fdf9ead6f21b6cb1e938c0e9ba53c5bbc23d3a5351",
+      "bytes": 441688,
+      "sha256": "345492385834cfbb7de7251e1f8e117b88689d1d337569630245ec344f54949e",
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/provenance.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/108.gz",
+      "archive_bytes": 1513,
+      "archive_sha256": "508aeb82ac9ded3d13224d06d95b9a3d956746bfe7835ae616f36e12f6d2c763",
+      "bytes": 4521,
+      "sha256": "360b0d2369819a4fa0cee08d2fbd228be56d97cb532b713c9a938152c34b0c1e",
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software/toolchain.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/109.gz",
+      "archive_bytes": 292,
+      "archive_sha256": "b55f419834c67a261bb7e2c99de2a2a841f4516b5eb47e55f18056724307241d",
+      "bytes": 485,
+      "sha256": "d1c28b66b91221242417f7ffad1493f2a29f945e15082ef7f92e99553bfb60bb",
+      "source": "bin/distributions-i011-compact-20261022/lo-linux-arm64-software.receipt.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/110.gz",
+      "archive_bytes": 5529,
+      "archive_sha256": "16d281a3dcd6e6aad103dcc24cf8104785de7ca106a4936053010af327c65e08",
+      "bytes": 20618,
+      "sha256": "3bdaac749198f14e85b16753fd9877e0152215fbbf25ebf2e74e21770dd28143",
+      "source": "tools/nativebench/campaign.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/111.gz",
+      "archive_bytes": 3315,
+      "archive_sha256": "07e902c89e54add341c536065dca1de6f89583fd961c96e6872f94afe773d138",
+      "bytes": 11148,
+      "sha256": "923e0516d232bac1f7cbc6cf4a4118b179d0b60800413429ac09368a34c2e2fb",
+      "source": "tools/nativebench/identity.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/112.gz",
+      "archive_bytes": 4403,
+      "archive_sha256": "10b67adde84e623b174f7c645ee77794f87820adf034277ea048d076e9021246",
+      "bytes": 15834,
+      "sha256": "2157c46d28d3f89d2cb79d20af1c032e6dc8411cc89bdb0a45acd594cce2236c",
+      "source": "tools/nativebench/merge.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/113.gz",
+      "archive_bytes": 4011,
+      "archive_sha256": "7e5c184b14b67bfe4db7abd8c6100a5723dc8500f6a4054f74ae199933990d19",
+      "bytes": 14405,
+      "sha256": "1d1cdb35d911cea937d545ce19a38cb95cf891e8f058f9a01cec0c044ea4905f",
+      "source": "tools/nativebench/qualification.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/compact-installed-diagnostics/114.gz",
+      "archive_bytes": 3683,
+      "archive_sha256": "1f2933f0e6b88d2e429c5ed9ca73ff89a66db10e84fc9bccfa938eddf2159721",
+      "bytes": 11973,
+      "sha256": "d892f2bc5b2f1c7cddb72688c4f6d59f220b0ddf1a4f0e56d735abdd10cdd91b",
+      "source": "tools/semanticcoverage/report.py"
+    }
+  ],
+  "related_issues": [
+    "B007",
+    "B008"
+  ],
+  "transitive_binding": "Each preserved design contains exact frozen input hashes and current tree context. Final package receipts bind exact tar, inventory, and toolchain hashes; preserved inventories bind package tools and runtimes. Linked implementation and historical manifests retain their own source and archive bindings."
+}

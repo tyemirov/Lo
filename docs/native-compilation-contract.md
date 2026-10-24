@@ -111,7 +111,10 @@ Complete this campaign's other builds and tests before timing starts.
 Unrelated host activity does not prevent a run.
 
 Use the maintained campaign command to run all eight lanes serially and merge both target reports.
-This command declares ten measured pairs before execution.
+This command declares 100 HTTP pairs and ten pairs for each other lane before execution.
+Both targets use the same complete sample plan.
+Each lane report identifies that plan and contains exactly its declared sample count.
+The merge command rejects a different plan or an incorrect sample count.
 It retains the command status, logs, input identities, load context, and complete gate outcome.
 Its repository lock prevents two campaign commands from running together.
 
@@ -142,6 +145,10 @@ The Linux command uses the installed compiler inside a guest without external ne
 The final report for each target must include all four lanes.
 It must set `qualification_complete` to `true`.
 A diagnostic case selection does not satisfy qualification.
+
+For I011 only, the user selected [focused acceptance](native-qualification-findings.md#focused-i011-acceptance) on October 23, 2026.
+That acceptance combines reviewed earlier evidence with fresh HTTP qualification on both targets.
+It does not create a complete campaign report or change these numeric thresholds.
 
 Set `NATIVE_BENCH_LANE` to run `execution`, `process`, `http`, or `build` independently.
 Use a new work directory for each lane.

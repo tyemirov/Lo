@@ -121,7 +121,8 @@ I006 adds LLVM module emission tests to the current matrix.
 The October 19 receipt remains the I005 acceptance snapshot.
 The [native lowering receipt](evidence/native-lowering/validation.json) records the I006 checks and their execution limits.
 
-I011 passed the current LLVM corpus, offline, component, and CI checks.
+I011 retains the earlier LLVM corpus, offline, component, and CI results under the user-selected focused acceptance update.
 These checks verified all 394 references in three lanes without qualification gaps.
-Performance qualification and final review remain pending.
+The final HTTP qualification passed on both targets with unchanged thresholds.
+The [qualification findings](native-qualification-findings.md) identify the separate source identities and acceptance limits.
 The earlier receipts remain historical evidence.

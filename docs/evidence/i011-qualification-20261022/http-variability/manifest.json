@@ -1,0 +1,135 @@
+{
+  "all_original_scratch_retained": true,
+  "archive_format": "Content-addressed gzip with empty filename and mtime0; raw and packed SHA256 plus byte counts.",
+  "command_receipts": [
+    {
+      "command": "make -f Makefile -f _scratch/i011-20261020/completion-20261022/http-variability/analysis.mk i011-http-existing-variability </dev/null",
+      "final_status": 0,
+      "first_error": "KeyError:p95_ns",
+      "first_status": 2,
+      "receipt_origin": "Recorded in-session tool outcomes; full command streams were not saved as files.",
+      "second_error": "TypeError:lifetime CPU object absent at report root",
+      "second_status": 2
+    }
+  ],
+  "i011_complete": false,
+  "issue": "I011",
+  "limits": [
+    "Historical source trees and binaries are not copied. Exact input archive/manifests remain linked.",
+    "Descriptive order and drift association does not identify a cause.",
+    "Existing diagnostic/screen/full-campaign observations remain separate; no sample pooling or exclusions."
+  ],
+  "new_measurements": false,
+  "production_changes": false,
+  "qualification_claim": false,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/8b181867022b9802be1a33cb00cc8bacca3ff3c6eb3aa63d98de025171426c05.gz",
+      "archive_bytes": 356,
+      "archive_sha256": "fb85cd6899b40a0fc67a680097958dd52a97eb6c578ebc49e58535d01da16889",
+      "bytes": 532,
+      "sha256": "8b181867022b9802be1a33cb00cc8bacca3ff3c6eb3aa63d98de025171426c05",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/analysis-correction.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/95284298a1f9f6e163ad8fdc43641f11a59157fb246a30d0d4c4468d1d48e2c8.gz",
+      "archive_bytes": 150,
+      "archive_sha256": "47bbe780b0c27db4c77f79bdb64e8695e24bb85269333187287aac3147f0508a",
+      "bytes": 183,
+      "sha256": "95284298a1f9f6e163ad8fdc43641f11a59157fb246a30d0d4c4468d1d48e2c8",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/analysis.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/2ed18edd9fe4280f64b49a2a33424fd729dff8c9237cb142b738fd8d3d3353ad.gz",
+      "archive_bytes": 2450,
+      "archive_sha256": "22810ce1bb6c98d2657c70197bc9fea0490b97b728206a3c5c86ad6df079ce8b",
+      "bytes": 5969,
+      "sha256": "2ed18edd9fe4280f64b49a2a33424fd729dff8c9237cb142b738fd8d3d3353ad",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/analyze.first-correction.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/c66c33393fb069aa567e345427aadd43067f7ca7ceb1ce70ecc006d065fe1f77.gz",
+      "archive_bytes": 2431,
+      "archive_sha256": "328ba4f1e672a2b2e86374888f37a61a9a1bcc2d4dc5b55314e9444b8625ac76",
+      "bytes": 5927,
+      "sha256": "c66c33393fb069aa567e345427aadd43067f7ca7ceb1ce70ecc006d065fe1f77",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/analyze.initial.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/fca7cbdcf8322948f5ae5ee19ee9e934305a0f6cbf6b1782e1fbd18596cb6558.gz",
+      "archive_bytes": 2450,
+      "archive_sha256": "34316fa05046969f204e750daa0e4edf09c7c37f6d7c55c27e380de7f80baa82",
+      "bytes": 5980,
+      "sha256": "fca7cbdcf8322948f5ae5ee19ee9e934305a0f6cbf6b1782e1fbd18596cb6558",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/analyze.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/a2eeca7e506afa681b4edd4960c54a62ed204ff4c49b97bfce8243d3521b7788.gz",
+      "archive_bytes": 3473,
+      "archive_sha256": "fa18a26f55863d465d4bc9c755139799caef55d474f0580c2790ef210ac836de",
+      "bytes": 8735,
+      "sha256": "a2eeca7e506afa681b4edd4960c54a62ed204ff4c49b97bfce8243d3521b7788",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/findings.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/36f3d2695078d5c3612bd704d1e511a621ed88f338d5f1e70aeaf57479321539.gz",
+      "archive_bytes": 264,
+      "archive_sha256": "b9e2f492d6e618b8c28995f5df9b79125a33d7c78e6a33f9b000e8b0d6505078",
+      "bytes": 338,
+      "sha256": "36f3d2695078d5c3612bd704d1e511a621ed88f338d5f1e70aeaf57479321539",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/lifetime-path-correction.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-variability/payload/691d39ee626d11d8ab5eca666e42901c08e5ecfd1628a438946564f468f98159.gz",
+      "archive_bytes": 7689,
+      "archive_sha256": "21d839bef4cc4eae90712487dba89d1b86cd3b65bcf0073b27b6d588e6fcca3f",
+      "bytes": 36862,
+      "sha256": "691d39ee626d11d8ab5eca666e42901c08e5ecfd1628a438946564f468f98159",
+      "source": "_scratch/i011-20261020/completion-20261022/http-variability/results.json"
+    }
+  ],
+  "schema_corrections": [
+    "The47-pair diagnostic omits p95_ns; local analysis derives sorted index189/200 from the unchanged raw timings.",
+    "Canonical-short lifetimeCPU resides in its single HTTP record; local analysis reads that actual location."
+  ],
+  "scope": "Read-only analysis of retained storage-full HTTP and echo-reproduction data.",
+  "state": "preserved_and_all_archives_verified",
+  "transitive_evidence": [
+    {
+      "bytes": 13709,
+      "kind": "immutable_existing_input_archive_or_manifest",
+      "path": "docs/evidence/i011-qualification-20261022/http-echo-reproduction/files/canonical-short/result.json.gz",
+      "sha256": "4298cdc42b59147a7501686850ff5b0b02ed0f45ef3b75e0339abf8c224ae279"
+    },
+    {
+      "bytes": 53890,
+      "kind": "immutable_existing_input_archive_or_manifest",
+      "path": "docs/evidence/i011-qualification-20261022/http-echo-reproduction/files/cpu/result.json.gz",
+      "sha256": "b72f9d72624b17221613222a81123c6ed1e69c12733f0f02de54e60a2d65a195"
+    },
+    {
+      "bytes": 40769,
+      "kind": "immutable_existing_input_archive_or_manifest",
+      "path": "docs/evidence/i011-qualification-20261022/http-echo-reproduction/manifest.json",
+      "sha256": "58c27a2ce30a246fd0c75f34e3a7805302e2b111de5d685eba5bbf651db20546"
+    },
+    {
+      "bytes": 3299417,
+      "kind": "immutable_existing_input_archive_or_manifest",
+      "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/manifest.json",
+      "sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20"
+    },
+    {
+      "bytes": 35750,
+      "kind": "immutable_existing_input_archive_or_manifest",
+      "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/8d96bd649d02aeb17e2692e7c66b602ea00c306f83fcec811c4c15e9594b8ee6.gz",
+      "sha256": "d5528406b6be529783397622f2d04cef074e743c34358daeb4d67d54e361a0fe"
+    },
+    {
+      "bytes": 32552,
+      "kind": "immutable_existing_input_archive_or_manifest",
+      "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/dc5807dab382932b1d59df1d55267cc096a586ee2d18a94aafdbebbeb432f32c.gz",
+      "sha256": "cc47c18624089e2a40551308730efa795f0f822f87ece60675feed5fc8e21e13"
+    }
+  ]
+}

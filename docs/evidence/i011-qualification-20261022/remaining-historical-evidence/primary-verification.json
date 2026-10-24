@@ -1,0 +1,13 @@
+{
+  "issue": "I011",
+  "state": "archive_hashes_and_lengths_verified",
+  "records_verified": 2527,
+  "unique_archives_verified": 1947,
+  "manifest_bindings": {
+    "manifest.json": "79d21d71e66293efd338bf6f023524dfa4e13487ebd65e962e9d50df2396c4c6",
+    "supplement.json": "2d1b2d1f62e648e1ce25f1eb880219ac5c7922bfa916dd5e5cea675644ce28a4",
+    "completion-receipt.json": "e05827bc3a13f93ad6f532b2e9a827590c95d1c4b7fcd343704c9dc417cfda7e"
+  },
+  "qualification_claim": false,
+  "cleanup_authorized": false
+}

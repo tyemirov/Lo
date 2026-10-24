@@ -1,0 +1,69 @@
+{
+  "issue": "B008",
+  "parent_issue": "I011",
+  "qualification_claim": false,
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "scope": "Rust ABI2 parser and typed consumers",
+  "outcome": "No blocking findings.",
+  "sources": [
+    {
+      "path": "runtime/native/src/metadata.rs",
+      "sha256": "394b65be2156df5af1f224f224effa35ae9daec0a0914a855bc11c4957c3513d"
+    },
+    {
+      "path": "runtime/native/src/context.rs",
+      "sha256": "b7cbaff59a503ce163d6c2cf15aeaea6700ffbb38a159b960e325a0bf838891f"
+    },
+    {
+      "path": "runtime/native/src/cli.rs",
+      "sha256": "e7af1d9c57e5e05f28f94fc1235a6561a1feb0425f4530684767e1ed0055c935"
+    },
+    {
+      "path": "runtime/native/src/exports.rs",
+      "sha256": "d42c96d4d8d4f104d0789d01c20a50418d9752080572d1e220ca5b2f1096da7e"
+    },
+    {
+      "path": "runtime/native/src/collections.rs",
+      "sha256": "156757192ed043a4d4c102193bd74aa5dd4ac1deede2181338ccfd3199968874"
+    },
+    {
+      "path": "runtime/native/src/autodiff.rs",
+      "sha256": "db90dd13bee587bffe96520895ad1756600bae73cb16153b133b53a4c3845b21"
+    },
+    {
+      "path": "runtime/native/src/process.rs",
+      "sha256": "5d4c032c5d0aca75d89736e362231fa832b04e2618ed76a2940ba58f8365604b"
+    },
+    {
+      "path": "runtime/native/src/files.rs",
+      "sha256": "6424071dfaa22d20ae4b368edcec0431a008b42241d2ecc7a2a52338adb76f0e"
+    },
+    {
+      "path": "runtime/native/src/file_entries.rs",
+      "sha256": "f0dd879ac024e0ce57ad7544ae1743c809a94a3a476d57e3511ea820ac317592"
+    },
+    {
+      "path": "runtime/native/src/http/server.rs",
+      "sha256": "1e607895ee1b7adcc701a6f7c80ffa43c9a6d69ea4569e1fcc2e89766a350cec"
+    }
+  ],
+  "runtime_handoff": {
+    "path": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/runtime-handoff.json",
+    "sha256": "4396cd80d5b640da8462abc531550f24457b185f5dbeda217f8ee6e73b876987"
+  },
+  "verified": [
+    "Full syntax parsing before semantic admission, including overwritten and unknown values.",
+    "Last-value duplicate keys in root, row, payload, span, and coordinate objects.",
+    "All file and span entries validated, including unused entries.",
+    "Coordinate extras, owner, incidental flow, Body indices, and derivative payloads retained.",
+    "Oversized Int and String limits deferred to execution.",
+    "Typed consumer access and public source-record shapes."
+  ],
+  "remaining": [
+    "Public program admission, receipt, derivative, and lifetime checks on both targets.",
+    "Go encoder review and full I011 qualification."
+  ]
+}

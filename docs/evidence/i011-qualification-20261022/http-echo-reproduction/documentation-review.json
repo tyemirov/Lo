@@ -1,0 +1,19 @@
+{
+  "scope": [
+    "docs/native-qualification-findings.md: Linux Echo Reproduction section",
+    "I011: focused echo status paragraph"
+  ],
+  "method": "Manual review under the user-approved I011 documentation exception. Changed prose reviewed against applicable Part 1 rules and Part 2 meanings.",
+  "official_reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+  "reviewed_section_sha256": "908994ed2a8816fa5c61b1f97ce6c043cbad5d228055ff4adba4cac8c1f13ed2",
+  "reviewed_issue_paragraph_sha256": "b20fd845f0cb7fc30a448dd2521c3df0c82eaf63c00608224d5a2905c7970ffd",
+  "checks": [
+    "Changed section sentence lengths passed.",
+    "Local document links resolve.",
+    "git diff --check passed.",
+    "Reported measurements agree with preserved raw results."
+  ],
+  "findings": [],
+  "full_document_compliance_claim": false,
+  "archived_records_verified": 108
+}

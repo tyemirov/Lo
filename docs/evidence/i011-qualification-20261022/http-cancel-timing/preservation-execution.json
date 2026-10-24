@@ -1,0 +1,41 @@
+{
+  "kind": "http-cancel-timing-post-preservation-verification",
+  "state": "all_declared_archives_and_identity_bindings_verified",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-cancel-timing/manifest.json",
+    "sha256": "5e4ef129fa22a8c4460944a1a7943f774ac1bf9337a8454bdbddad3fb2dc1408"
+  },
+  "new_records": 340,
+  "linked_records": 2927,
+  "hash_only_identities": 466,
+  "packed_raw_hashes_lengths_mtime0_filenameflag_verified": true,
+  "frozen_inputs_declared": 3352,
+  "Darwin_raw_processes_declared": 52,
+  "Linux_raw_processes_declared": 52,
+  "raw_export_and_serial_declared": true,
+  "prior_manifests_verified": 6,
+  "diagnostic_result": {
+    "diagnostic_screen": "insufficient_support_or_regression",
+    "errors": [],
+    "independent_state": "valid_independent_recomputation_agrees",
+    "valid_cases": 104
+  },
+  "all_original_scratch_retained": true,
+  "production_adoption": false,
+  "qualification_claim": false,
+  "commands": [
+    {
+      "target": "i011-cancel-timing-independent-audit",
+      "status": 0
+    },
+    {
+      "target": "i011-cancel-timing-preservation-plan",
+      "status": 0
+    },
+    {
+      "target": "i011-cancel-timing-preservation-execute",
+      "status": 0
+    }
+  ],
+  "primary_independent_preservation_review": "pending"
+}

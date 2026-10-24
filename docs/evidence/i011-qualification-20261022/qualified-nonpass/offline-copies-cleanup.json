@@ -1,0 +1,22 @@
+{
+  "state": "completed",
+  "manifest_sha256": "e17946e1eeafeb50516a409af5b4c013b03aa0975b78db175acb7ed8b1162e7f",
+  "independent_review_sha256": "6affcb7b64c57ab4f882819873cd8aa65591c4baab6612929e0389b3c841ed35",
+  "reason": "Remove only audited copied compiler directories; keep original packages and all raw acceptance evidence.",
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/darwin-install/second relocated installation/bin",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/darwin-install/second relocated installation/source",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-install/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-install/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-rejection/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-rejection/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-to-darwin/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-to-darwin/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-to-linux/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-to-linux/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-xor-build/root/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/linux-xor-build/root/relocated compiler package/source",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/metal-install/relocated compiler package/bin",
+    "_scratch/i011-20261020/completion-20261022/qualified-final/offline/metal-install/relocated compiler package/source"
+  ]
+}

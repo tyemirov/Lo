@@ -1,0 +1,10 @@
+{
+  "issue": "I011",
+  "state": "all_archives_and_transitive_links_verified",
+  "manifest_sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20",
+  "archive_records": 3793,
+  "unique_archives": 3000,
+  "transitive_links": 126,
+  "qualification_claim": false,
+  "i011_complete": false
+}

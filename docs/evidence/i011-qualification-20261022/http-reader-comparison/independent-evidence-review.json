@@ -1,0 +1,19 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "requested_role": "mpr-architect",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "recorded_by": "primary agent from reviewer report",
+  "manifest_sha256": "63fcd1110f578da61624d0696fe6d9949d4b28263e61f40ea27711cc72d277df",
+  "state": "passed",
+  "scope": [
+    "All 104 observations and 20800 requests recomputed. Exact warmup, measured counts, order, elapsed intervals, p95, and summary statistics match.",
+    "All 60 measurement bindings match. Four stage logs and eight clean CLI exits match. Both Linux raw exports reproduce the saved streams.",
+    "All 6350 archive records verified through 3388 unique payloads. Both 2681-file source reconstructions match frozen inventories.",
+    "Corrected receipt, finalizer, failed receipt, and raw correctness evidence are present. Immutable tool and SDK inputs are explicitly hash-bound."
+  ],
+  "conclusion": "No blocking finding. Adopt the exact Reader and reviewed lazy-input patches as bounded refactors. Fresh combined tests and the unchanged full campaign are required.",
+  "limits": "Each paired range crosses zero. These results do not prove a speedup or qualification."
+}

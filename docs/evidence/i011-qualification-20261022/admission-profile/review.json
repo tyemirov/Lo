@@ -1,0 +1,23 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "method": "primary transcription of native collaboration report",
+  "result": "supports narrow fixed-row refactor after characterization",
+  "verified": [
+    "245frozen inputs",
+    "six builds",
+    "234raw stage records and recomputed medians",
+    "CLI outputs",
+    "owner counts",
+    "Linux raw exports"
+  ],
+  "limits": [
+    "No contemporaneous load context",
+    "Retained batched Programs affect allocator/cache conditions",
+    "Admission is identified; generic row maps are not yet a measured cause",
+    "Do not sum/subtract these medians against process endpoints"
+  ]
+}

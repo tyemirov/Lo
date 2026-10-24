@@ -1,0 +1,27 @@
+{
+  "all_originals_retained": true,
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/manifest.json",
+    "sha256": "79d21d71e66293efd338bf6f023524dfa4e13487ebd65e962e9d50df2396c4c6"
+  },
+  "no_deletion": true,
+  "raw_bytes_generated_ir_identity_only": 1866807801,
+  "raw_bytes_new_archived": 681681579,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/1de970b7d4621bee0365c9410dbc7b9f2b6337ff6839b83c4a9b9bb8ed00c116.gz",
+      "archive_bytes": 307,
+      "archive_sha256": "d6c84419074b2af515125eaea2d607fd908567311b32b7afb4e2b1f3adec5793",
+      "bytes": 550,
+      "sha256": "1de970b7d4621bee0365c9410dbc7b9f2b6337ff6839b83c4a9b9bb8ed00c116",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/verification-execution.log"
+    }
+  ],
+  "remaining_gaps": [],
+  "setup_failure": "Verifier initially assumed the four-byte fixture contents; it stopped, retained the failure, then used the exact reviewed manifest hash/bytes instead.",
+  "state": "historical_preservation_and_verification_complete",
+  "supplement": {
+    "path": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/supplement.json",
+    "sha256": "2d1b2d1f62e648e1ce25f1eb880219ac5c7922bfa916dd5e5cea675644ce28a4"
+  }
+}

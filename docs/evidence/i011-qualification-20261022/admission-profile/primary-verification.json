@@ -1,0 +1,13 @@
+{
+  "issue": "I011",
+  "reviewer": "/root",
+  "manifest_sha256": "9efa77b3ca3d1484a3d99144e0bba7a76942fbc01a8b8d5ae06ae718dbd82fe3",
+  "archives_verified": 158,
+  "checks": [
+    "compressed length and SHA-256",
+    "decoded length and SHA-256",
+    "zero gzip timestamp",
+    "archive path inside Lo"
+  ],
+  "qualification_claim": false
+}

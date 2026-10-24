@@ -341,8 +341,20 @@ func TestLLVMHTTPClientCancellation(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("HTTP exchange did not stop after cancellation")
 	}
-	if command.ProcessState.ExitCode() != 2 || stdout.Len() != 0 || !strings.Contains(stderr.String(), `"code":"runtime.cancelled"`) || !strings.Contains(stderr.String(), `"http_progress"`) || !strings.Contains(stderr.String(), `"read-response"`) || !strings.Contains(stderr.String(), `"unknown"`) {
+	if command.ProcessState.ExitCode() != 2 || stdout.Len() != 0 || !strings.Contains(stderr.String(), `"code":"runtime.cancelled"`) || !strings.Contains(stderr.String(), `"http_progress"`) {
 		t.Fatalf("HTTP cancellation progress: %d %s %s", command.ProcessState.ExitCode(), stdout.String(), stderr.String())
+	}
+	progress := httpClientFailureProgress(t, result{status: command.ProcessState.ExitCode(), stdout: stdout.String(), stderr: stderr.String()})
+	values := make(map[string]any, len(progress))
+	for name, field := range progress {
+		var value any
+		if err := json.Unmarshal(field.Value, &value); err != nil {
+			t.Fatal(err)
+		}
+		values[name] = value
+	}
+	if len(values) != 3 || values["remote_outcome"] != "unknown" || !((values["stage"] == "write-request" && values["request_written"] == false) || (values["stage"] == "read-response" && values["request_written"] == true)) {
+		t.Fatalf("HTTP cancellation progress tuple: %+v", progress)
 	}
 }
 

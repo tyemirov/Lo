@@ -13,16 +13,8 @@ func TestLLVMProgramControlValueLifetime(t *testing.T) {
 			if index == 1 {
 				module = rewriteLLVMMetadata(t, module, func(metadata map[string]json.RawMessage) { metadata["has_result"] = json.RawMessage(`null`) })
 			}
-			var metadata struct {
-				Locations []struct {
-					ID     uint64
-					Action string
-				}
-			}
-			if err := json.Unmarshal(locationMetadataBytes(t, module), &metadata); err != nil {
-				t.Fatal(err)
-			}
-			for _, site := range metadata.Locations {
+			locations := metadataLocations(t, locationMetadataBytes(t, module))
+			for _, site := range locations {
 				if site.Action == "statement_step" {
 					return append(module, []byte(fmt.Sprintf("\n@lo_test_step_site = constant i64 %d\n", site.ID))...)
 				}

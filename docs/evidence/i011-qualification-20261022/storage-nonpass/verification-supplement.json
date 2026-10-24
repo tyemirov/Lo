@@ -1,0 +1,150 @@
+{
+  "cleanup_performed": false,
+  "i011_complete": false,
+  "issue": "I011",
+  "kind": "additive_independent_verification_and_finalized_operation_logs",
+  "main_manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/storage-nonpass/manifest.json",
+    "sha256": "fbe34a8281ca4935c2d765dd9b995610581fed781f549b0d15c9b61efb048c20"
+  },
+  "performance_outcome": "valid_inconclusive",
+  "qualification_claim": false,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/b916be7bcac7b63339a59f02223f786c78e98ea1e50a74782249763010eb3875.gz",
+      "archive_bytes": 2923,
+      "archive_sha256": "4cf61e0437ce2d01f3582966d1445b1efd10b7ec3c570294ee0d13fb7d65d88c",
+      "bytes": 8077,
+      "sha256": "b916be7bcac7b63339a59f02223f786c78e98ea1e50a74782249763010eb3875",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/verify_archive.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/60e643b7456c81c7f228fe4d1a96be0e16f5be1b2ab33b685b9316b69ddc7061.gz",
+      "archive_bytes": 160,
+      "archive_sha256": "8d4a36be4c0b25db42eb0508d8ae92831cfe30296d434f60b343c41035f21c82",
+      "bytes": 211,
+      "sha256": "60e643b7456c81c7f228fe4d1a96be0e16f5be1b2ab33b685b9316b69ddc7061",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/verify.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e0399106e9011eb498c816802fda2f099de408e011ca2d3e7bccf66d92cefbc0.gz",
+      "archive_bytes": 1134,
+      "archive_sha256": "db14f14f9d9d7fb2b31d350f96171cf7625c0a04a993807b0320252890b44f15",
+      "bytes": 4076,
+      "sha256": "e0399106e9011eb498c816802fda2f099de408e011ca2d3e7bccf66d92cefbc0",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/verify.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/verify.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/0b70f41c32bbce19a9db27471c37bb9765be631d8c58858a66a3792be8d3f9c2.gz",
+      "archive_bytes": 1040,
+      "archive_sha256": "685898a2f34e3952aaf64713f1b64fc0eaee9746fd939670e20a0d81633d1877",
+      "bytes": 3674,
+      "sha256": "0b70f41c32bbce19a9db27471c37bb9765be631d8c58858a66a3792be8d3f9c2",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/archive-verification.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/520a5bca386f56aa225e2e684c19451a93c065eb87daf371ed2d5a024fbb7cff.gz",
+      "archive_bytes": 525,
+      "archive_sha256": "8f586835b212d3c3302d07b1e2d8e57eca8841b84ee8c6e2834e9c3170c6c314",
+      "bytes": 1361,
+      "sha256": "520a5bca386f56aa225e2e684c19451a93c065eb87daf371ed2d5a024fbb7cff",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/package-artifact-verification.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/7e65cfd49a6f5e413d12306c7de9d4ecff7c2809175c1f6e53b39ef42e3c4aba.gz",
+      "archive_bytes": 1639,
+      "archive_sha256": "0eafb519d92eea82212292d4686d3df6ca0f29be4588e73189d76acfeafd30f6",
+      "bytes": 3544,
+      "sha256": "7e65cfd49a6f5e413d12306c7de9d4ecff7c2809175c1f6e53b39ef42e3c4aba",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/cleanup_inventory.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/206ef65a587825a4d8587100e7d5e02ff15bf2f436996cb41ee94087df973692.gz",
+      "archive_bytes": 1639,
+      "archive_sha256": "3e39a93982d8c90a00093eb94495e08b951bae89659105fd6425c4e596383139",
+      "bytes": 3544,
+      "sha256": "206ef65a587825a4d8587100e7d5e02ff15bf2f436996cb41ee94087df973692",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/cleanup_inventory.initial-count.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/433d1c1b5c8ebdd506ebb2153da7a8a277eb444a283a8f57fc39e8f45fe328fd.gz",
+      "archive_bytes": 443,
+      "archive_sha256": "5fb853d0a9487338a4d6deefaf0bc9a096adabc707ca1513806c2aad5927a0b7",
+      "bytes": 708,
+      "sha256": "433d1c1b5c8ebdd506ebb2153da7a8a277eb444a283a8f57fc39e8f45fe328fd",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/cleanup-inventory-correction.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/d9cae3ac4a1960daaeeb35f3d43e137b82e3e12aa578849ecc773cff1bb7bc6d.gz",
+      "archive_bytes": 165,
+      "archive_sha256": "f36bfad3984417e66ab64ddf76527dffd1d2d73eefed1102ecd2e54d58371bef",
+      "bytes": 220,
+      "sha256": "d9cae3ac4a1960daaeeb35f3d43e137b82e3e12aa578849ecc773cff1bb7bc6d",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/cleanup.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/b949e02946ddba276440358842cd87e383433d29811ae556192bdd232c772653.gz",
+      "archive_bytes": 1965,
+      "archive_sha256": "c441700ddf54f06065a1946830f710286010a1e349edff089b3f12aaeb102154",
+      "bytes": 42578,
+      "sha256": "b949e02946ddba276440358842cd87e383433d29811ae556192bdd232c772653",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/derived-cleanup-inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/2b72325097a3df61bc797e87f699ee1c8cdbc3b20eed5b6c74c508b3dcdfa031.gz",
+      "archive_bytes": 1087,
+      "archive_sha256": "1a7e96bd5c38ef703d4f7179ed43691866274bdff9dc3f324b2b9a4a80ac5d9c",
+      "bytes": 2439,
+      "sha256": "2b72325097a3df61bc797e87f699ee1c8cdbc3b20eed5b6c74c508b3dcdfa031",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/preserve_verification.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/6b1dcb193fc3e30543be3ba27d3bf35066205954666593b9dfc5a4f415584a18.gz",
+      "archive_bytes": 163,
+      "archive_sha256": "a63e9fd9a933d6d729328d18ea93dc1a55896280ff688062147fa27fa59791fc",
+      "bytes": 232,
+      "sha256": "6b1dcb193fc3e30543be3ba27d3bf35066205954666593b9dfc5a4f415584a18",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preparation/verification-preservation.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/482aab3581a98637abdee3acd174e82810e5740a742e3c27d3d928c30a8b18ea.gz",
+      "archive_bytes": 255,
+      "archive_sha256": "409b1302a2b7f59c4dce9233344f4627a5a543b4459a81218fda4c9874bd1ce2",
+      "bytes": 474,
+      "sha256": "482aab3581a98637abdee3acd174e82810e5740a742e3c27d3d928c30a8b18ea",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-audit.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-audit.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/8c8667804ccfc1ec5c9621c0c061d5cd408d1ab5af69c4575edde4980dfb7bb1.gz",
+      "archive_bytes": 142,
+      "archive_sha256": "ac633d35600bf2f704c858dd30ea15e066a2b7ff7df6053d840cf7e7fb42aec8",
+      "bytes": 147,
+      "sha256": "8c8667804ccfc1ec5c9621c0c061d5cd408d1ab5af69c4575edde4980dfb7bb1",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preservation.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/storage-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_bytes": 20,
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/storage-nonpass-preservation.stderr"
+    }
+  ]
+}

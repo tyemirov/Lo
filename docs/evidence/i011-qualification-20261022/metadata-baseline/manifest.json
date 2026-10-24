@@ -1,0 +1,224 @@
+{
+  "issue": "B008",
+  "parent_issue": "I011",
+  "phase": "ABI1_baseline_and_frozen_projection_before_compaction",
+  "qualification_claim": false,
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-inventory.json",
+      "bytes": 38683,
+      "sha256": "6ef06217e55fd64cf114b5b2803ca0e942b95b5cb4cff081b34247007f23a579",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/000.gz",
+      "archive_sha256": "1acd4e80c92e54c030893f04dda530ae887417b962325dc6e0879a09b48ebc72"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-design.json",
+      "bytes": 10843,
+      "sha256": "4d18cb0aaa2a12c832c987b162e5babdebf920216e753e7466d5aa18a15cb17b",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/001.gz",
+      "archive_sha256": "20d8845d763c4f334c5f401acf3a4b172b118ca1a363f033a1bde1a9a9f06618"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/after-baseline-sha256.json",
+      "bytes": 29760,
+      "sha256": "0bb08e66083d206bde2850e82ad25f1fa375e2c8a32530dfe45df15d05803449",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/002.gz",
+      "archive_sha256": "6407c7f78975fda4f2aafea667de5e4ba5c6514f0c670a43cff4ddbad424863e"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/before-sha256.json",
+      "bytes": 29760,
+      "sha256": "c6b70201caa92e0e61b27bd91cca56470266939ff4d2c36ca605a614a89c3ff1",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/003.gz",
+      "archive_sha256": "e388581aab30e7eef88e90da9cc0f30aecd86e88fa39977d14361ea1b6473d2a"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/darwin.log",
+      "bytes": 39677,
+      "sha256": "ad0c04ab0ddbe792682a0239aa03144fee3b81389b8ce6f0830dfbf8ceeceab6",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/004.gz",
+      "archive_sha256": "e176e3f30c88954a6e8f57daabab14a7111f81c9e553ae6d14b85b7957616e81"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/focused.mk",
+      "bytes": 2827,
+      "sha256": "2cbf8911a6ad3edfc84ce14d3e7329ac0d80f6b082ccbce20b037cd163f1ddb7",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/005.gz",
+      "archive_sha256": "1836c92980a5bbf6daff7dc91f86546659d50e47ae70ff3818609b505bad5c23"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/batch.json",
+      "bytes": 2101013,
+      "sha256": "6daaf56229b7eb8174c4b890b8db7a354246950b9f97d61c1f8318844dd7bee9",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/006.gz",
+      "archive_sha256": "7d1d207fe275430d5497abd3d4120d12623ce7335243f2ee34395d9702fddf76"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/control-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/007.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/control-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/008.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/development-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/009.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/probe-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/010.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/report.json",
+      "bytes": 4352,
+      "sha256": "680c5c5de6f97228b8bc4138e960ad87bd9849cabaa939e2135adf88fa92ac56",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/011.gz",
+      "archive_sha256": "b606442258d4313c361a6583e78e43ec219417946265077a7d36cf827e2dbe7b"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/semantic-linux-arm64.jsonl",
+      "bytes": 250203,
+      "sha256": "dc8286612ae8c6bc2a8bc8b780eed0186b047b9f4080c10c46c1fc1b81d91bc1",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/012.gz",
+      "archive_sha256": "7f0385b9a7442144dcc3757dc468c213f3d8b65659e9fdc16924e0fffe809713"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/test-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/013.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux.log",
+      "bytes": 6121,
+      "sha256": "095a59e26f0f6cb95be42200a5a03f22cc2e9c3243de6eee157360728c5f193b",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/014.gz",
+      "archive_sha256": "220099c3ab777d0f3ba0d22eca8a19739202c62b1ab01930f8a6a5afed358887"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/projection-frozen.json",
+      "bytes": 523,
+      "sha256": "60b3fd4c69026f44b83290bb9fd2f9f00e47ab4a8c050528a1cdaeff1451f801",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/015.gz",
+      "archive_sha256": "db0a1af8f44ea76fbc3019b7ab740efa85227f1e9dcf5b5bdbb37b2bd413d041"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/projection-green.log",
+      "bytes": 4348,
+      "sha256": "6e4009068339cdd57eb11df39861ebd1ad7158026c6a341ef931f93a1f234002",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/016.gz",
+      "archive_sha256": "89f5774e2f8c52d632d7f324fec7a4a67aab6469326b4e177a7ee9325ed104a9"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/projection-seed.log",
+      "bytes": 4722,
+      "sha256": "258bfdf07199d48a8ea4c31bcb82a5f4c59d36b45698e1f419873840b641c42d",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/017.gz",
+      "archive_sha256": "18bc699349f1afafbfe9a0ec05a5f086c67a3a6a193a9f74ebaa55a1c585b6cd"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/validation.json",
+      "bytes": 2428,
+      "sha256": "880694c4a34a1b58b91da3c8950a31993b4197a59cbdf0489d5d9b07b3f91a64",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/018.gz",
+      "archive_sha256": "0c36717f653805b9ed5bfa97283b08157a0d25345de18ed30eacdcb142141506"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/0.stdout",
+      "bytes": 47275,
+      "sha256": "3b810744d28c6f08efbb97a3c22bafc9673e82d1bbae315250781bef136d97c8",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/019.gz",
+      "archive_sha256": "f337ac58ff76187ffbfedc7535695fb153c2948fa9e347f8598dba68e23fad6c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/0.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/020.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/serial.log",
+      "bytes": 35,
+      "sha256": "e987cd4247c7e7ae20239097683a9d5fa768770c891a118d1afcee76158e9939",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/021.gz",
+      "archive_sha256": "b728fc87a6760eb7220afa33ae17b00068412e57784027f6adec78f92b9920fc"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/export.log",
+      "bytes": 105783,
+      "sha256": "474e5b8d633d722809557e604b9f2b6cc2c320cdc680de359a5bec51ae1778e5",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/022.gz",
+      "archive_sha256": "084666e6c5a8f329c68ac4b42d304d3d2a46517cbabb93d436a71d6f9bef6b7c"
+    },
+    {
+      "source": "internal/nativeplan/metadata_projection_test.go",
+      "bytes": 13350,
+      "sha256": "e97d6ecc7c78a131b8a62b55bc50c0b215696fd0e70785b330946f5fae1885c2",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/023.gz",
+      "archive_sha256": "7cd01965c8b5083268d184778f61b8e4b31322e8093286104640fc8656c30d1b"
+    },
+    {
+      "source": "internal/nativeplan/plan.go",
+      "bytes": 4766,
+      "sha256": "9e6749ee573e4a7aa4d791fb9a9092a4fbe438a6098c26c91cb00d41ce689aad",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/024.gz",
+      "archive_sha256": "4352d5977f8496d4fe777a558f6ba5cf44695f41cd050361ae03c5113c8dc66c"
+    },
+    {
+      "source": "internal/nativeplan/lower.go",
+      "bytes": 25084,
+      "sha256": "acd940266c189f5cf0526d6d5070ccb0d7ab8d22661a11194385b09afed7a0dd",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/025.gz",
+      "archive_sha256": "39fec7a453951ea782167a6cdf18ab36329ae6a767ed28157c0a6f42dcf62062"
+    },
+    {
+      "source": "internal/nativeplan/gradient.go",
+      "bytes": 10898,
+      "sha256": "89aabf8acca82a402bfed12a4c6adeb0d1953a8d77f5d1ab131387b259c47df5",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/026.gz",
+      "archive_sha256": "d15c55d2b9eb5bebdab741386f891b5ba1b471e1cb336b2a3bb41e1516fba62d"
+    },
+    {
+      "source": "runtime/native/src/context.rs",
+      "bytes": 30428,
+      "sha256": "ddac9f5cc148f2f21563b87c73f5853fbf7fc7887ac270cef009d64793e292b5",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/027.gz",
+      "archive_sha256": "e4e2dd43122e25611782fb5614b2eea4ed58fc399e5153b95383107254b1b75d"
+    },
+    {
+      "source": "runtime/native/src/metadata.rs",
+      "bytes": 15445,
+      "sha256": "ee741bdfc592095022adaaf3a0b185f12e905d178a3ea30c7b7ef51df331d394",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/028.gz",
+      "archive_sha256": "5dcfa12982aece855f2110165bbfe8f92065d18851e413ce4c12de3e5e1e9723"
+    },
+    {
+      "source": "internal/llvmemit/emit.go",
+      "bytes": 20366,
+      "sha256": "7075113bffa0c1546787e96ddb406f0e5d537928f326ed7b5f35a0d7f409c1e3",
+      "archive": "docs/evidence/i011-qualification-20261022/metadata-baseline/029.gz",
+      "archive_sha256": "492e67b970ecc1e1d601374b0cad3cbcda6ad912c9aa2509421a997f496bfa87"
+    }
+  ],
+  "limits": [
+    "The runtime baseline predates ABI2. These checks do not replace final qualification.",
+    "The retained baseline before/after identity receipts record the concurrent test-only edit.",
+    "This snapshot excludes guest filesystem copies and large binary executables, which remain identified by hashes.",
+    "The ABI2 red test and production implementation are not part of this baseline record."
+  ]
+}

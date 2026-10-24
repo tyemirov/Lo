@@ -1,0 +1,191 @@
+{
+  "archive_format": "Content-addressed gzip with mtime zero",
+  "history": "Initial and intermediate auditors are superseded. Only receipt-bound auditor is selected for the later independent audit.",
+  "i011_complete": false,
+  "issue": "I011",
+  "official_ste_reference_included": false,
+  "origin_review": {
+    "path": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/origin-review.json",
+    "sha256": "15819255165d6577ffb8aa9c2dd1602c2a9eacd95689e0a22a11246d7be66a94"
+  },
+  "pending": [
+    "qualified_final_preservation",
+    "final_documentation",
+    "actual_global_audit",
+    "independent_completion_review",
+    "owned_scratch_cleanup"
+  ],
+  "qualification_claim": false,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/4588286dcf8fa95d27b88e774fa4ede6bfb958338b4976c33b43a083a3f5cb0a.gz",
+      "archive_sha256": "39712fee2c4d1ac15d9344e6d05bdf1b252ef8c08a57460fbbc87b48da2e4f5d",
+      "bytes": 21886,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "4588286dcf8fa95d27b88e774fa4ede6bfb958338b4976c33b43a083a3f5cb0a",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/audit-origin-reviewed.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/8cfeaacdf43e663234ff82a82d054f54d26ee08b44374ed0f8a9f93864e3b29c.gz",
+      "archive_sha256": "04a9b7b93bd2a5c828e0320ed03a047668c47e49914ee5e5cb77e46c090e9e3b",
+      "bytes": 19483,
+      "label": "superseded auditor preparation",
+      "sha256": "8cfeaacdf43e663234ff82a82d054f54d26ee08b44374ed0f8a9f93864e3b29c",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/audit-reviewed.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/9122fc7670958c829cdb1ff27b9cd907cb44babca74851498a8fcbe1cc22479c.gz",
+      "archive_sha256": "7bc0281e4e551b9defb13a5ec9c36c66293c06622309b7e450a7bc2c62c7e26b",
+      "bytes": 18286,
+      "label": "superseded auditor preparation",
+      "sha256": "9122fc7670958c829cdb1ff27b9cd907cb44babca74851498a8fcbe1cc22479c",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/audit.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/12bd29262ce6835e5225d6cd4cbccb376f2a2cb328cbe58f816d480644a94dfa.gz",
+      "archive_sha256": "aa845302217e9ab735afca32c9aa578f058f0cdbd7ad22119e3b416be12ad48d",
+      "bytes": 933,
+      "label": "superseded auditor preparation",
+      "sha256": "12bd29262ce6835e5225d6cd4cbccb376f2a2cb328cbe58f816d480644a94dfa",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/independent-derivative-preparation-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/e12f753fac6a8f151405d16d39986d6b5acde01143316cd411ca2e98453eff79.gz",
+      "archive_sha256": "b5e54f663b6b77975ab99ecc3f3e745c31623eb10dcb9b0dc59dbc24b40bbc40",
+      "bytes": 1514,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "e12f753fac6a8f151405d16d39986d6b5acde01143316cd411ca2e98453eff79",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/independent-origin-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/08d5dd807873662659dc0a24913683b0fa65340c8333b238b5292dec678f6ba5.gz",
+      "archive_sha256": "af9f8866f9eb6b1385648efb5bc73f12df3e1338d26bd29c87398ac20b163e2d",
+      "bytes": 1235,
+      "label": "superseded auditor preparation",
+      "sha256": "08d5dd807873662659dc0a24913683b0fa65340c8333b238b5292dec678f6ba5",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/independent-preparation-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/20919f5c718f6414ece846d065b24e024435040622d1c1a053299be602b9deb4.gz",
+      "archive_sha256": "9fc6f0c0bd6102238da401696fd016066f182938d0f478bfa87ee70e6c17c3d4",
+      "bytes": 8443,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "20919f5c718f6414ece846d065b24e024435040622d1c1a053299be602b9deb4",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/measurement-contract.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/15819255165d6577ffb8aa9c2dd1602c2a9eacd95689e0a22a11246d7be66a94.gz",
+      "archive_sha256": "61b6cfc25dfee0b781232dca41e060e16f58bd99d1720c047609c61d6d9ebd60",
+      "bytes": 795,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "15819255165d6577ffb8aa9c2dd1602c2a9eacd95689e0a22a11246d7be66a94",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/origin-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/477beea62d12278eccd57bc3af74e84d5cc7657370bf83365b2fcf4bbad198cf.gz",
+      "archive_sha256": "d0cc668c59d6fdc5363e7792da1c83be9993c3f0333730e7ed9c7071c8e7b917",
+      "bytes": 8629,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "477beea62d12278eccd57bc3af74e84d5cc7657370bf83365b2fcf4bbad198cf",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/origin-reviewed-preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/06cdf8bcb89efbe1e002f486792f1f4e5041790a94a9ede6adf87e5214f877f9.gz",
+      "archive_sha256": "455c0ab6f9ab22eb364135492066e88571ad281d74cd4c4ef82d6cd6612ae757",
+      "bytes": 99,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "06cdf8bcb89efbe1e002f486792f1f4e5041790a94a9ede6adf87e5214f877f9",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/origin-reviewed-synthetic.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/88f81738850f9a9c6bbbfecd3d967797541da59db11af69c41f1f883e9dc2522.gz",
+      "archive_sha256": "03486b3ecc2c232d6200852fadc91c53767ab055c9f06d926481cdd246411ca9",
+      "bytes": 2989,
+      "label": "superseded auditor preparation",
+      "sha256": "88f81738850f9a9c6bbbfecd3d967797541da59db11af69c41f1f883e9dc2522",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/82ef6b55570bc8cd1f0bdcf06d19f323fddb71bc189cf30ea406ab58909625f7.gz",
+      "archive_sha256": "a1a06552a6b08a27dabd5db99fedcce14558f73612f6adb65a82d1f056eb772f",
+      "bytes": 5655,
+      "label": "superseded auditor preparation",
+      "sha256": "82ef6b55570bc8cd1f0bdcf06d19f323fddb71bc189cf30ea406ab58909625f7",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/reviewed-preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/48c5696fc05812f4fa3fb6a8c8b8374820243316710b456ba8d038effb5655cf.gz",
+      "archive_sha256": "872594ba89393a320ddea184ecdb723f0aa4520d1026e574557ac78b8b1e1ddc",
+      "bytes": 98,
+      "label": "superseded auditor preparation",
+      "sha256": "48c5696fc05812f4fa3fb6a8c8b8374820243316710b456ba8d038effb5655cf",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/reviewed-synthetic.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/2f430951464379d3fb7ed5255b7d2f31de715472f7a2ce12ab4b5901db6977c8.gz",
+      "archive_sha256": "cc21f4f696a1319316aa6acec6f0b0a45b4cf59a35776dee254593cdc86aa3da",
+      "bytes": 669,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "2f430951464379d3fb7ed5255b7d2f31de715472f7a2ce12ab4b5901db6977c8",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/run-origin-reviewed.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/8bcae3ab993c8e59a1970aa094bcec16648406ae7a3bedb67fde97c9a36529e5.gz",
+      "archive_sha256": "b315797cc105e26b891048d59f1c915a8f8234cc985b48d9d6d15ed0cae5748a",
+      "bytes": 359,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "8bcae3ab993c8e59a1970aa094bcec16648406ae7a3bedb67fde97c9a36529e5",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/test-origin-reviewed.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/299c306981a1956b25be1986fac5ff9b4be1748d73c7cad859651bea7379438e.gz",
+      "archive_sha256": "654cd1c5dc8da045d7f5c87b11fa8e0e7ac24591798f6a1e4880249df213f2a4",
+      "bytes": 331,
+      "label": "superseded auditor preparation",
+      "sha256": "299c306981a1956b25be1986fac5ff9b4be1748d73c7cad859651bea7379438e",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/test-reviewed.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/11cc15ea4e4b6184c504dd16332a4158e73cae5c444fdc0dd78a985f5fc72134.gz",
+      "archive_sha256": "54c25fea1712b61902891c1f6ba8a7b28684e8791707cd2c49ded439e9fdd22a",
+      "bytes": 4400,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "11cc15ea4e4b6184c504dd16332a4158e73cae5c444fdc0dd78a985f5fc72134",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/test_origin_reviewed.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/ff8648317f604aafa00a14622d0f3eff8b27a316c32d0776ca6f7e6bcaa52a44.gz",
+      "archive_sha256": "e2fb1c6db67b6ab1e2ce5214a9b84f957f45bc36586f8badf8d5e47aab564e9d",
+      "bytes": 1935,
+      "label": "superseded auditor preparation",
+      "sha256": "ff8648317f604aafa00a14622d0f3eff8b27a316c32d0776ca6f7e6bcaa52a44",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/test_reviewed.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/02c0595dc6c16f6c875aa8f2845e5bb70977f513652718a5d5c599ec608f30e7.gz",
+      "archive_sha256": "adcd0be4c604c05467d84147de90865441f3d91ccd9a5cccc0ed3d9378acb58f",
+      "bytes": 5474,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "02c0595dc6c16f6c875aa8f2845e5bb70977f513652718a5d5c599ec608f30e7",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/preserve-global-audit.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/de17ac734d85824a9fbbff6f645d4cc1a48e5ae1f648f056a6e81f656fc73ad7.gz",
+      "archive_sha256": "b74c6e60272134246c44377601ea86148968019b249ba2001ca49d56da4bd6fb",
+      "bytes": 273,
+      "label": "selected receipt-bound audit preparation or supporting evidence",
+      "sha256": "de17ac734d85824a9fbbff6f645d4cc1a48e5ae1f648f056a6e81f656fc73ad7",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/preserve-global-audit.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/global-audit-preparation/payload/128391583d5a47b832163adc73eb7fbbb48f386716cf5addb126245bddbf38fd.gz",
+      "archive_sha256": "a52353cf9997287cd7f9b5b5878a25761eb9ba50d013712ca418577296753429",
+      "bytes": 6098,
+      "label": "pre-execution preservation freeze",
+      "sha256": "128391583d5a47b832163adc73eb7fbbb48f386716cf5addb126245bddbf38fd",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/global-audit-preservation-freeze.json"
+    }
+  ],
+  "scope": "Immediate audit source/tests/Make/preparation/reviews/logs/receipt; no caches or actual global report.",
+  "state": "reviewed_global_audit_preparation_preserved"
+}

@@ -1,0 +1,177 @@
+{
+  "issue": "B007",
+  "parent_issue": "I011",
+  "phase": "ABI1_compact_loop_candidate_focused_validation",
+  "qualification_claim": false,
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/candidate-validation.json",
+      "bytes": 6964,
+      "sha256": "bbfa5040b34b54abff89d023a3d1f8aafad880f4211b940bb990f30aee5f1f39",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/000.gz",
+      "archive_sha256": "4687f0b1de05bd45b9034f8697caf7aaf3438924ff19452c9748928cd328723c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/focused.mk",
+      "bytes": 5199,
+      "sha256": "9827f1ea5e2229003d2bf9363d31c082c7240a03cee22cdd855f457651cc7b5f",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/001.gz",
+      "archive_sha256": "a3fa73463e3bf20c943456694e0c543fa92299d2858b1ad5206ba71149ad3a12"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-sequence-design.json",
+      "bytes": 35374,
+      "sha256": "fcce70545e1c6d7494528158df3defa3f2649a58cc23633cffd8ac653b0d0965",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/002.gz",
+      "archive_sha256": "886b5fe1033e1863f6e42cc471485722bc07c7e475462192fa18ed7f696e852d"
+    },
+    {
+      "source": "internal/nativeplan/plan.go",
+      "bytes": 5056,
+      "sha256": "6baf18d1ee9affded12e94d152b2c1c9fecc1504e313d0507638804198ea45a4",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/003.gz",
+      "archive_sha256": "8a63fb87c663b2bf08506787bafdab3da4770237634ca54c00aaa4f0d00c709c"
+    },
+    {
+      "source": "internal/nativeplan/lower.go",
+      "bytes": 27840,
+      "sha256": "0dccb103aa0fd58a37b8b82b277a7c61acf0d1a7997fea7c27eeff7afe27d3e1",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/004.gz",
+      "archive_sha256": "f83f481d23197b10459fb0ec08d17f7e0494b2f8349cf107369eb15b7903ac3c"
+    },
+    {
+      "source": "internal/nativeplan/verify.go",
+      "bytes": 21915,
+      "sha256": "bf24cb696b0785b006eaeb395dea79ddbcffad271403d8ebc0458531fc0363e1",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/005.gz",
+      "archive_sha256": "e92925961008d429e9d544ecfe5ae04eeafcc6c1c5d6ed852db6b9f88aad0803"
+    },
+    {
+      "source": "internal/llvmemit/emit.go",
+      "bytes": 28609,
+      "sha256": "e413c501e7711e8f445094b8584e9d09e87ac3e0437ff7092d8c3ad0e72ccc3f",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/006.gz",
+      "archive_sha256": "af5cc70f4158fcca876ec0ef5ecdd155164946562663ce7f10aceb61d167c174"
+    },
+    {
+      "source": "internal/nativeplan/literal_sequence_test.go",
+      "bytes": 6854,
+      "sha256": "5822ab3a754b8b2cda53dd502f77cb24889beaf9aaf8f048680e6691c34d7edc",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/007.gz",
+      "archive_sha256": "71385e4971209ce033065f04f6d1634d1b3dbd58221702860eedc5f4a9ca2d7e"
+    },
+    {
+      "source": "internal/llvmemit/literal_sequence_integration_test.go",
+      "bytes": 3874,
+      "sha256": "3ceae9449adb650d4ea90d10f3759f5a3a4c58300bb0c9c9a788efe1483d93ff",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/008.gz",
+      "archive_sha256": "c12dcf3b45fe36a0d13637c9f93da26457401661f6fe62afde76cdfdc02b4490"
+    },
+    {
+      "source": "tests/integration/llvm_literal_sequence_test.go",
+      "bytes": 13824,
+      "sha256": "94a72e82a8363268c0d4fb39a8daa3cdbbbc39bfcb33a87b88c38caa0fec25c0",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/009.gz",
+      "archive_sha256": "fd5cb31aa68050e4a83c46c43c38f5ec99ad6709046a4218486c62b78e6a49aa"
+    },
+    {
+      "source": "tests/integration/llvm_literal_sequence_status_test.go",
+      "bytes": 1473,
+      "sha256": "4710d42d4f3d8ac2e44b2338815ea611ae6ef238c30f9f68c63ffe355dd89b08",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/010.gz",
+      "archive_sha256": "f5e7a054c02ee08500fc1373cc22a1a7f02c4adaeab5886d9b304ab12d19f956"
+    },
+    {
+      "source": "internal/nativeplan/metadata_projection_test.go",
+      "bytes": 13350,
+      "sha256": "e97d6ecc7c78a131b8a62b55bc50c0b215696fd0e70785b330946f5fae1885c2",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/011.gz",
+      "archive_sha256": "7cd01965c8b5083268d184778f61b8e4b31322e8093286104640fc8656c30d1b"
+    },
+    {
+      "source": "testdata/native-qualification/literal-sequence.c",
+      "bytes": 5753,
+      "sha256": "21cb7fa4d9ec03aae0c724b9ac74c51f60546c6f546d27f107534327c30d033a",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/012.gz",
+      "archive_sha256": "46c7214da47114fb49df780b914623175bc12eff56e4392af9e18f226694fba1"
+    },
+    {
+      "source": "testdata/native-qualification/literal-sequence-status.c",
+      "bytes": 5958,
+      "sha256": "32fe82b7e3139058a0bfad67f50d295f2def4989f1ac138fa1e74d5a0d3c8275",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/013.gz",
+      "archive_sha256": "3ba908be73d4d41978abcc69e2ee41ba1849532969afd72124a0179fbd431550"
+    },
+    {
+      "source": "testdata/native-runtime/numerical.c",
+      "bytes": 5234,
+      "sha256": "76a40983f3cbeff02d1542bee361b2ba7ed43e55d9aea4d1badbb5cb2dfbe209",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/014.gz",
+      "archive_sha256": "269d6cbdda4ef4282b63ae75019d244a6e079052a5eaeb432ad5671f757e1bb4"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/core-candidate-first.log",
+      "bytes": 13369,
+      "sha256": "4c9ab5321e280a17b8ea60883542caf24758512c35536fff53bcb4e4e50a8baa",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/015.gz",
+      "archive_sha256": "76970244b46242ef20523d6a98665b33b72603eea89a1366bdadc8f343128b13"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/core-candidate-loops.log",
+      "bytes": 13369,
+      "sha256": "ad530125bc468297aefeeb0260929a41d05516296ce5a5e020ef175b33c89a27",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/016.gz",
+      "archive_sha256": "1b90293b046fb2bc97775ef05d6f1be3f8e694ab7cba6234cfa94bc32182aa19"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/candidate-darwin-first.log",
+      "bytes": 4735,
+      "sha256": "e81e659305a98408add71ca67d91a7c78a5303ae988f784638a3924a387b0abd",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/017.gz",
+      "archive_sha256": "f557dcc87a63c0430659567eb29ad3f26dfe47a6f2ddf086ecfdc6c4dea31243"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/candidate-linux-cross-first.log",
+      "bytes": 3307,
+      "sha256": "ff1228ef29193c1673487b4da7c2211b561f694594bb89bec8f51d90cca788a5",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/018.gz",
+      "archive_sha256": "d5d7cb7264dba0dcc800c7115fc7aa8b1007a3f178936fe022957d7853daa17c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/candidate-darwin-loops.log",
+      "bytes": 4735,
+      "sha256": "24801be6438b27780a9d977e471446d165e40dacba69da5560d4cdbee9528773",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/019.gz",
+      "archive_sha256": "58a677cad319902cdae064a6998b2c8fbfc106060a0f0f9cbe36c7f3bea80036"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/candidate-linux-cross-loops.log",
+      "bytes": 3307,
+      "sha256": "8d7599e11f82094dee6295584b19fc8ecedad75b4d7781e2f5815a3e93446c0e",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/020.gz",
+      "archive_sha256": "98b00e0ea087491ad500db30e2280505b907835eb76f388fa5e50ac4083fc01f"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/gradient-plan-candidate.log",
+      "bytes": 1373,
+      "sha256": "582ff5da3045f8f4cbadfe2834fe2c055e123ad3284fd0f79c126f2396120d3e",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/021.gz",
+      "archive_sha256": "899f97c0cf14693b4532fc59fa387bcb9ca403e019ab69885db4fbb9defc5b0c"
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/gradient-plan-candidate-fixed.log",
+      "bytes": 1373,
+      "sha256": "1e26d65804b0c55930fb8a77fc3bf0b703cb0995167b901f8ae6eec2af216ff2",
+      "archive": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/022.gz",
+      "archive_sha256": "469ff6563e320b3a393d75ed5d04976cb302c68f811a407c2594efcebc695d26"
+    }
+  ],
+  "review": {
+    "path": "docs/evidence/i011-qualification-20261022/literal-loop-candidate/review.json",
+    "sha256": "1ddeaba12d7c60fbf26763a2cc1c39c66555d4f78f9722b267cd9766f6fdb3b1"
+  },
+  "limits": [
+    "Candidate compiler source is distinct from immutable ABI1 runtime/package provenance.",
+    "Fresh ABI2 packages, both installed hosts, full corpora, offline checks, CI and performance remain required."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "all raw hashes and sizes",
+    "all packed hashes and zero timestamps",
+    "gzip payload equality",
+    "all frozen source hashes after preservation",
+    "no unapproved detector candidate"
+  ],
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/global-audit-preparation/manifest.json",
+    "sha256": "ec13301af322678f30d9e05af1edf6ee0c30aca3207c4adbc1da32f2a7bff66a"
+  },
+  "qualification_claim": false,
+  "records_verified": 21,
+  "state": "passed"
+}

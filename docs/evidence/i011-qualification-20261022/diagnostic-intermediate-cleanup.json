@@ -1,0 +1,32 @@
+{
+  "issue": "I011",
+  "reason": "Remove regenerable guest copies after raw evidence preservation and independent audit.",
+  "evidence_bindings": {
+    "admission-profile": {
+      "manifest_sha256": "9efa77b3ca3d1484a3d99144e0bba7a76942fbc01a8b8d5ae06ae718dbd82fe3",
+      "primary_verification_sha256": "3d40be47080543187e258a7e39fc8a55c11d9d9b09ba9f1e82cfbd6c48d14a39"
+    },
+    "metadata-row": {
+      "manifest_sha256": "54e2683c8408b1eccc533abb4a1de517defa69639640ee99dbea7aafd3635599",
+      "primary_verification_sha256": "70cf530ea9a1266a3c31e25c507e9848c97b87b36b698f2a52ae24d9b093bf60"
+    },
+    "http-error-characterization": {
+      "manifest_sha256": "55172aaa33fade37a4f9d7a4079c07a0255c2ffa9d98c40498b4191f266b658a",
+      "primary_verification_sha256": "78e2ac2fc10d1fc472ff8baad8c915c41be2ab063e2534579cfafd1ecc4e9f7c"
+    }
+  },
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/root",
+    "_scratch/i011-20261020/completion-20261022/admission-profile/run-linux-arm64/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/linux-baseline/guest/root",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/linux-baseline/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/linux-green/guest/root",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/linux-green/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/admission-profile-row/run-linux-arm64/guest/root",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/admission-profile-row/run-linux-arm64/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/root",
+    "_scratch/i011-20261020/completion-20261022/http-error-characterization/linux-baseline/guest/root.cpio.gz"
+  ],
+  "state": "complete",
+  "all_absent": true
+}

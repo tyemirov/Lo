@@ -1,0 +1,23 @@
+{
+  "inventory": {
+    "archive": "inventory.json.gz",
+    "sha256": "c8dd11e63e5dba886568b8aa9b0fe663959df7f76664e1246f6d5517ec9ee482",
+    "archive_sha256": "7ad7e08562b0ef823c6c0518f02c5a75fd848a5cd7afccef8e3fbd5c3c56dda5",
+    "bytes": 16306,
+    "archive_bytes": 3120
+  },
+  "state": "nine_derived_paths_removed_and_verified_absent",
+  "verified_archives": 13,
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/linux-result/guest/root",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/linux-result/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/cargo-target/release",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/cargo-target/aarch64-apple-darwin/release/.fingerprint",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/cargo-target/aarch64-apple-darwin/release/build",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/cargo-target/aarch64-apple-darwin/release/deps",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/cargo-target/aarch64-unknown-linux-gnu/release/.fingerprint",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/cargo-target/aarch64-unknown-linux-gnu/release/build",
+    "_scratch/i011-20261020/completion-20261022/http-borrowed-timing/timing-run/cargo-target/aarch64-unknown-linux-gnu/release/deps"
+  ],
+  "retained_final_artifacts_verified": true
+}

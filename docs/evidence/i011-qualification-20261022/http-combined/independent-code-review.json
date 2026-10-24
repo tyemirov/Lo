@@ -1,0 +1,17 @@
+{
+  "issue": "I011",
+  "reviewer": "/root/i011_completion_review",
+  "requested_role": "mpr-architect",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "recorded_by": "primary agent from reviewer report",
+  "state": "passed",
+  "combined_diff_sha256": "24e9089681fae4c11db054dbcc449ea8f2260b1903b21dd43165ad85689b9eea",
+  "findings": [],
+  "scope": "The reconstructed two-file diff equals the approved Reader and lazy-input changes plus two formatting changes. No new branch, poll, charge, ownership, or source scope. Both-target focused commands select the eight prior HTTP tests and ErrorInputs. The preserver includes their raw results.",
+  "pending": [
+    "fresh combined public checks",
+    "full qualification"
+  ]
+}

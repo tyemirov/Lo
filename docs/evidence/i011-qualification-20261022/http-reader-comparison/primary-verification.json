@@ -1,0 +1,9 @@
+{
+  "issue": "I011",
+  "reviewer": "primary agent",
+  "manifest_sha256": "63fcd1110f578da61624d0696fe6d9949d4b28263e61f40ea27711cc72d277df",
+  "records": 6350,
+  "unique_archives": 3388,
+  "state": "passed",
+  "scope": "Archive hashes, decoded hashes and lengths, deterministic gzip timestamps, and repository paths."
+}

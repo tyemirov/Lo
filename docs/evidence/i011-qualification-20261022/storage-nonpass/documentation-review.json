@@ -1,0 +1,34 @@
+{
+  "issue": "I011",
+  "state": "changed_campaign_status_prose_reviewed",
+  "scope": [
+    "Current qualification result and HTTP storage sections in findings.",
+    "Latest I011 status paragraphs.",
+    "Latest compiler plan status paragraphs and I011 table row."
+  ],
+  "files": {
+    "ISSUES.md": "9cf8e82fe57aae672c42a605e6e7c8e3ae6dc4ae2a4cae466f0fc95f34ba4685",
+    "docs/native-qualification-findings.md": "dbaa516b2407f2237dc5b3b35d602743ea783c96bf9e037818949cc43bcb9418",
+    "docs/standalone-compiler-plan.md": "5d32a823ee1d0a9e7b2b4b62f8927a48b8029ba444e222c6c3d3a14578d62021"
+  },
+  "reference": {
+    "standard": "ASD-STE100 Issue 9",
+    "sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "payload_redistributed": false
+  },
+  "authorization": "The user approved manual review for I011 documentation because required command checks resolve into another repository.",
+  "review": [
+    "Applied Part 1 writing rules and Part 2 word meanings to the selected prose.",
+    "Checked technical terms against repository terminology.",
+    "Checked status and numerical claims against the audited storage campaign.",
+    "Preserved historical outcomes and separate preliminary screen results.",
+    "Checked sentence lengths and local evidence references."
+  ],
+  "findings": [],
+  "limits": [
+    "This review covers the stated changed prose, not complete-document compliance.",
+    "Later diagnostic or qualification edits require another review.",
+    "I011 remains open."
+  ],
+  "qualification_claim": false
+}

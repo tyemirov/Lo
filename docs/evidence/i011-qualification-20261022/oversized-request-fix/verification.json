@@ -1,0 +1,17 @@
+{
+  "ci_outcome": "stopped_at_user_request",
+  "ci_status": -15,
+  "hash_only": 75,
+  "historical_links": 3,
+  "i011_complete": false,
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/oversized-request-fix/manifest.json",
+    "sha256": "a961544bf80a3fac8b391552042bc08ef1adae34dfd614856dfa63906f2a4018"
+  },
+  "performance_started": false,
+  "qualification_claim": false,
+  "records": 317,
+  "scratch_retained": true,
+  "state": "every_fix_evidence_archive_reopened_verified"
+}

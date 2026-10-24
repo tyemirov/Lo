@@ -1,0 +1,21 @@
+{
+  "state": "completed",
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/final/corpus/linux/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/http-hotpath-profile/run-v3/linux/computed/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/http-hotpath-profile/run-v3/linux/echo/guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/compact-profile/b007-corrected/linux-arm64-multiple_groups/guest/root.cpio.gz"
+  ],
+  "inventory_sha256": "46a9a1b6bf109a26dc7235000bb4afaf8f5ea4830c0cecfc5ea2817548da2f86",
+  "total_bytes": 4759501255,
+  "independent_review": "docs/evidence/i011-qualification-20261022/older-image-cleanup-review.json",
+  "preserve": "All sibling roots, original raw evidence, durable evidence, and all specialized paths.",
+  "remaining_images": [],
+  "sibling_roots_retained": true
+}

@@ -1,0 +1,40 @@
+{
+  "audit": {
+    "path": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-audit.json",
+    "sha256": "d80efaa17c2fd26723934dc72956f96b7a73be0753438f5045d1c05dc709cb40"
+  },
+  "audit_exit_status": 0,
+  "i011_complete": false,
+  "issue": "I011",
+  "preserve_exit_status": 0,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/qualified-nonpass/payload/2010c24a1f37d16818c8f0ba377e444dfee64c689bbdd5e1018b7df85c04c7bc.gz",
+      "archive_sha256": "7d9480f8cd5e722c555f6baafa56c00b01fec8fc2efa029361dac694053a3617",
+      "bytes": 478,
+      "sha256": "2010c24a1f37d16818c8f0ba377e444dfee64c689bbdd5e1018b7df85c04c7bc",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-audit.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/qualified-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-audit.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/qualified-nonpass/payload/8b2598391bb718006f9459c70a096892e835181b91009fc576d5c01639f23dcc.gz",
+      "archive_sha256": "035dc2ff76a070916700abfb820d71a47d9f8e96e8ec23f2249c564ce9c40a4d",
+      "bytes": 149,
+      "sha256": "8b2598391bb718006f9459c70a096892e835181b91009fc576d5c01639f23dcc",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-preserve.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/qualified-nonpass/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-preserve.stderr"
+    }
+  ]
+}

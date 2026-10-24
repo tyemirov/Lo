@@ -47,7 +47,7 @@ def arguments(package: Path) -> dict:
             'accelerator': 'none', 'producer_kind': 'darwin-native',
             'producer_tools': {'python': 'controlled Python'},
             'producer_sources': ('scripts/qualify_native.py', 'tools/nativebench/identity.py'),
-            'reference_go': 'controlled Go compiler', 'samples': 10}
+            'reference_go': 'controlled Go compiler'}
 
 
 def test_identity_binds_actual_package_and_all_source_boundaries(installed: Path) -> None:
@@ -63,7 +63,7 @@ def test_identity_binds_actual_package_and_all_source_boundaries(installed: Path
     assert set(identity['harness']) == {'tools/nativebench/main.go', 'tools/nativebench/harness.c.txt',
                                        'tools/nativebench/allocation.c.txt'}
     assert identity['evaluator'] == {'tools/nativebench/qualification.py': sha(ROOT / 'tools/nativebench/qualification.py')}
-    assert identity['measurement']['samples'] == 10
+    assert identity['measurement']['sample_plan'] == {'execution': 10, 'process': 10, 'http': 100, 'build': 10}
     assert identity['measurement']['limits']['build_seconds'] == 180
     assert identity['measurement']['timer_contract']['batch_calibration'] == (
         'untimed doubling of batch size from 1 through 64 until at least 1 ms; then at least 200 ms or 1000000 iterations; elapsed divided by completed iterations; no subtraction')
@@ -195,7 +195,7 @@ def test_linux_public_preparation_freezes_inputs_before_generators(installed: Pa
     monkeypatch.setattr(module, 'capture_provenance', freeze)
     monkeypatch.setattr(module, 'execute', execute)
     inputs = module.Inputs(preparation, installed, installed / 'bin/lo', installed.parent / 'linux-run',
-                           'go', 10, ('process',), ('startup',))
+                           'go', ('process',), ('startup',))
     with pytest.raises(ValueError, match='controlled frozen input rejection'):
         module.prepare(inputs)
     assert invoked == ['freeze']

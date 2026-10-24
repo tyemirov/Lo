@@ -59,37 +59,72 @@ Both hosts also passed 500-step XOR training through installed compilation.
 I011 removed Go generation and the embedded runtime source bundle.
 The interpreter remains available through explicit execution commands.
 
-Source freeze7 passed 2,624 Darwin native cases.
-It also passed 1,414 Linux native cases under QEMU HVF.
-Both native lanes recorded no failed or skipped cases.
-The interpreter passed 1,738 cases and excluded 153 native-only cases.
-The strict semantic report passed all 394 required references in three lanes.
+I011 passed the final focused HTTP qualification on both targets with unchanged numeric thresholds.
+The user selected review of earlier correctness, offline, and non-HTTP evidence instead of another full suite run.
+I011 closed on October 23, 2026, after the evidence audit and independent review passed.
+The final HTTP reports remain separate from the earlier campaign.
+The [measurement contract](native-compilation-contract.md#measurement-validity) defines acceptance and its limits.
 
-The unchanged packages passed offline acceptance, full CI, and all 56 component checks.
-Both installed compiler hosts passed 500-step XOR training.
-B001 through B004 are closed after their required checks passed.
+### Earlier Qualification History
 
-Earlier performance attempts did not establish complete acceptance.
-Campaign9 and campaign11 ended before measurement because their obsolete admission rules required a quiet host.
-Their source and package identities remained unchanged.
+B001 through B006 completed their necessary corrections and reviews.
+Earlier performance attempts do not show full acceptance.
+Campaign9 and campaign11 ended before measurement under obsolete admission rules.
+The later campaign ended with the status `invalid` during Linux process setup.
+Its completed Darwin HTTP measurements had the status `inconclusive`.
+The initial reports stay in the evidence record.
 
-I011 is in progress under the revised measurement contract requested by the user.
-External load is now recorded as context. It cannot prevent measurement or remove samples.
-The fixed corpus, paired measurements, sample counts, confidence calculations, and numeric thresholds stay the same.
-The maintained campaign runs one owned timing job at a time and retains failed and inconclusive results.
-The [measurement contract](native-compilation-contract.md#measurement-validity) defines admission and its limits.
-B005 corrected one blocked capture fixture. Its 21 affected scenarios passed on each target.
-Fresh CI found the same defect in another fixture.
-B005 now replaces all seven synchronous capture fixtures with one shared helper.
-The complete correction passed 178 Darwin checks, 176 Linux checks, and the host-to-Linux capture staging check.
-B006 corrected process cleanup and terminal record handling. All 25 campaign checks passed.
-Fresh full CI passed 2,635 native cases without failures or skips and all 197 qualification-tool checks.
-B005 and B006 are closed after their required checks and independent correction reviews passed.
-One complete performance campaign now uses the corrected source identity.
-Full performance acceptance, the evidence audit, and independent review of the complete qualification are not complete.
-The [interim findings](native-qualification-findings.md) record the measured results before corrective work.
-Darwin execution and process lanes passed. The four Darwin HTTP gates are inconclusive.
-The snapshot contains partial build observations. Linux measurements and final audits remain pending.
+I011 corrected the HTTP elapsed-time calculation and added raw measurement checks.
+A fixed 100-pair experiment found Linux HTTP ratios above the limit.
+The runtime now uses the existing HTTP reader buffer instead of an 8 KiB zero fill for each read.
+The corrected runtime completed all eight HTTP gates in a second experiment with the same design.
+The focused HTTP checks completed on both targets.
+Correctness and offline checks completed with the new runtime packages.
+
+The ten-pair campaign stopped at a 180-second `records_10000` build timeout on Darwin.
+Its Linux performance lanes did not start.
+The failed campaign stays in the evidence record.
+
+At that stage, full performance acceptance and the final evidence review remained pending.
+The [findings](native-qualification-findings.md) contain the saved outcomes and current limits.
+
+The recorded compiler had high memory, build time, and executable costs for large literal lists.
+The HTTP correction does not address these costs.
+Stage profiles identify LLVM register allocation as the largest measured compiler cost.
+A diagnostic allocator change decreases time but keeps high memory costs and increases executable size.
+The Go, Rust, and C++ diagnostics recorded lower large-literal costs than Lo on Darwin.
+The comparison includes absolute costs and increases from baselines for empty programs.
+
+B007 adds compact literal loops with the approved DWARF limitation.
+B008 adds the canonical ABI2 metadata format.
+Both changes passed focused checks on both targets and code review by a different agent.
+The installed Darwin diagnostic recorded a 2.224-second median for 10,000 items, with 143.8 MB sampled RSS and a 7.66 MB executable.
+
+The new distributions passed full correctness and offline checks.
+All eight performance lanes completed.
+All Darwin lanes and the Linux execution and build lanes passed.
+The Linux process and HTTP lanes have the status `inconclusive`.
+The evidence review found no measurement defect.
+
+Program admission and HTTP diagnostics then measured these costs.
+The parser now uses fixed row fields, and the HTTP runtime avoids a buffer copy and unused error records.
+The changed paths passed public checks on both targets and review by a different agent.
+The new distributions passed full correctness and offline checks.
+Their full campaign completed seven lanes with `pass` and one with `inconclusive`.
+Only Linux echo throughput remained inconclusive in that campaign.
+
+A later change gives the HTTP reader a concrete connection type.
+The new distributions passed correctness and offline acceptance.
+The full campaign passed seven performance lanes.
+Both Linux HTTP latency gates passed, but both throughput intervals cross the unchanged 1.1 limit.
+I011 remained open after that campaign.
+
+A later runtime change removes repeated tensor searches from HTTP values without tensor storage.
+It passed focused public checks on both targets, full CI, the Linux corpus, and offline acceptance.
+The complete campaign again passed seven performance lanes.
+Linux computed-response HTTP passed, but echo latency and throughput remain inconclusive.
+The raw audit confirmed every lane and target result without a threshold change.
+The later oversized-request correction and focused qualification are recorded in the findings.
 
 ## Required Outcome
 
@@ -250,7 +285,7 @@ The validation requirements in each issue are its acceptance criteria.
 | Port adapters | I009 | Files, processes, and HTTP pass confinement and lifecycle tests. |
 | Port devices | I010 | Completed: transfers, Metal profiles, and resource cleanup pass software acceptance. |
 | Supply the distribution | F017 | Completed: both compiler hosts pass offline compilation, relocation, rejection, and independent artifact execution. |
-| Qualify and replace | I011 | Blocked: campaign11 ended at its admission timeout without a measurement. Corpus, offline, component, and CI checks passed. Performance qualification and final review are not complete. |
+| Qualify and replace | I011 | Complete under the user-selected focused acceptance update: HTTP passed on both targets; earlier evidence passed review. |
 | Specify composition | P006 | Modules, types, generics, and package rules. |
 | Implement composition | F018, F019, F020, F021 | Modules, variants, generics, and offline packages. |
 | Add library and tools | F022, F023 | Standard library, formatter, test runner, editor, and debug support. |

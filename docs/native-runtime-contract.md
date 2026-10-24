@@ -102,7 +102,7 @@ A terminal host failure records its diagnostic in the execution context.
 Generated code must branch on `status` before it uses the payload.
 Unknown statuses and incorrect ABI identities are terminal build or runtime failures.
 
-Use `lo-native-1` as the canonical ABI identity in the runtime and distribution manifests.
+Use `lo-native-2` as the canonical ABI identity in the runtime and distribution manifests.
 Reject a manifest with a different identity.
 Generate operation declarations from the checked catalog with one fixed call convention:
 
@@ -118,6 +118,52 @@ Each operation has its own generated symbol and catalog-checked argument count.
 Generated flows use the same convention.
 The caller supplies the original source-location identifier.
 The runtime validates externally supplied program metadata before it admits execution.
+
+### Program Metadata
+
+B008 changes the metadata format to `lo-native-2`.
+The runtime rejects `lo-native-1` and all other ABI identities.
+The C result layout and operation call convention stay the same.
+
+The document contains `source`, `types`, `flows`, `derivatives`, `has_result`, `files`, `spans`, and `locations`.
+It also contains `abi` and an optional `artifact` value.
+The compiler keeps source, type, flow, derivative, and location order.
+The location array index identifies each initial runtime site.
+
+| Table | Record |
+| --- | --- |
+| `files` | Unchanged source file strings in first-use order. |
+| `spans` | `file_index`, `start`, and `end`. Coordinates keep their extra JSON values. |
+| `locations` | `span`, `action`, `type`, `owner`, `flow`, and `payload`. |
+
+Each action selects one payload shape.
+Literal payloads contain `text`.
+Float literals also contain `float_bits`.
+Projection payloads contain `field`.
+Operation payloads contain `operation`, `labels`, and ordered `arguments`.
+Derivative payloads also contain `derivative_plan`, `derivative_node`, and `derivative_frame`.
+
+Body payloads contain these three derivative indices.
+Bodies without a derivative plan use zero values.
+
+Other actions have an empty payload.
+The format does not contain fields that have no meaning for the selected action.
+The runtime keeps typed sites with shared source spans.
+It constructs public source records for errors and receipts.
+It does not expand sites into the previous metadata format.
+
+The runtime parses the full JSON syntax before semantic admission.
+For a duplicate key, the runtime uses the last value.
+The runtime rejects unknown root, span, location, and payload fields.
+The runtime accepts coordinate extras.
+The source, type, flow, and derivative subrecords keep their existing admission rules.
+
+Admission validates ABI identity, source, and types before the file and span tables.
+It validates every file and span, including unused entries.
+The tables can contain the same correct entry more than once.
+The runtime validates locations before the existing flow, derivative, and action cross-checks.
+The `has_result` check comes last.
+Correct literals that exceed a limit keep their failures during execution and their initial failure order.
 
 Use borrowed input handles for operation arguments.
 Return one owned handle on success or recoverable failure.
@@ -236,7 +282,14 @@ The initial I006 implementation used `-O0`.
 Retain the current 180-second, 2-GiB, and 64-MiB build limits.
 
 Use DWARF source locations for generated flows and runtime boundaries.
-Emit the original Lo file, line, and column on each relevant instruction.
+Emit the Lo source file, line, and column on each relevant instruction, except compact integer literal helpers.
+For these helpers, use the source span of the `List.new` expression.
+Keep every Lo item site in the runtime source map.
+
+A debugger can stop at the list expression but cannot step through each item in the helper.
+This exception does not change runtime error records, evaluation order, logical charges, cancellation checks, or cleanup.
+The user approved this debug mapping for B007 on October 22, 2026.
+
 Keep source tables available for runtime error traces independently of debug information.
 The [debug probe](../experiments/native-backends/qualification-debug.json) verifies locations in generated LLVM objects.
 It does not verify source debugging for a full Lo application.
@@ -292,14 +345,14 @@ The offline command uses the prepared archives without Rust, Cargo, Go, or SDK d
 The [Linux support receipt](evidence/native-runtime-abi/linux-support-inputs.json) identifies the necessary GCC packages.
 The [Rust receipt](evidence/native-runtime-abi/rust-linux-std.json) identifies the additional Linux standard library.
 
-## Remaining Acceptance
+## Qualification Evidence
 
 I006 implements the selected lowering contract and source maps.
 I007 through I010 implement the full runtime and adapters.
 F017 supplies and qualifies the installed distribution on both hosts.
 
-I011 passed the current semantic, offline, component, and CI checks after removal of Go generation.
-Performance qualification and final review remain pending.
-The earlier experiments do not satisfy the full standalone compiler criterion.
+I011 retains the earlier semantic, offline, component, and CI results after removal of Go generation.
+The final HTTP qualification passed on both targets under the user-selected focused acceptance update.
+The early ABI experiments alone do not satisfy the full standalone compiler criterion.
 The [distribution guide](compiler-distribution.md) defines the installed compiler checks.
-Keep I011 pending until all qualification checks pass.
+The [qualification findings](native-qualification-findings.md) identify the accepted scope and separate source identities.

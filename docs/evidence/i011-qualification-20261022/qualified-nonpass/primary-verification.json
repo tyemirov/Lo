@@ -1,0 +1,15 @@
+{
+  "i011_complete": false,
+  "issue": "I011",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/qualified-nonpass/manifest.json",
+    "sha256": "e17946e1eeafeb50516a409af5b4c013b03aa0975b78db175acb7ed8b1162e7f"
+  },
+  "performance_status": "valid_inconclusive",
+  "raw_bytes": 235535426,
+  "records_checked": 3523,
+  "scope": "All archived payloads, source bytes, compressed and raw hashes, zero gzip timestamps, and transitive evidence hashes. Binary identities and excluded derived paths remain explicit in the manifest.",
+  "source_sha256": "f9b5a69b9b99118142276a47489fbe95c3db8c7c31fa2ebfa25f6e132f8dbca7",
+  "transitive_links_checked": 60,
+  "verification": "passed"
+}

@@ -1,0 +1,52 @@
+{
+  "kind": "http-cancel-inline-post-preservation-verification",
+  "state": "all_declared_archives_and_identity_inputs_verified",
+  "manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-cancel-inline/manifest.json",
+    "sha256": "9850b4ca3ccbaef234dcc5c550283f48d81fa2c8e444e1968ef689556490af69"
+  },
+  "new_raw_records": 330,
+  "linked_raw_records": 2961,
+  "hash_only_binary_identities": 224,
+  "gzip_verified": {
+    "raw_and_packed_sha256": true,
+    "raw_and_packed_lengths": true,
+    "timestamp_zero": true,
+    "filename_flag_absent": true
+  },
+  "frozen_input_coverage": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-cancel-inline/normal-freeze.json",
+      "sha256": "33b74549ba1f65ce7abe257631a6abed01983d5e02b82161889f3189645ad7d3",
+      "inputs_bound": 2852
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-cancel-inline/forced-inline-preparation/forced-freeze.json",
+      "sha256": "0b47c2cb45e1d0094a3601873c565e32427317e604cc1239f8f6434490a64520",
+      "inputs_bound": 2891
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/http-cancel-inline/two-inline-preparation/two-freeze.json",
+      "sha256": "34aebfaa848b9216191c5f961441c2a492ebdaa98b025a5f8f618240f84524f0",
+      "inputs_bound": 2893
+    }
+  ],
+  "prior_manifest_links_verified": 5,
+  "excluded_groups": 24,
+  "missing": [],
+  "all_original_scratch_retained": true,
+  "scope": "No performance measurement, adoption, production source change or I011completion claim. Primary independentarchiveverification remains separate.",
+  "commands": [
+    {
+      "target": "http-cancel-inline-preservation-plan",
+      "status": 0,
+      "plan_sha256": "489d474e03ba8be6510c2cb3c899c29d5e21bb61b2a44e04c170ec5f85756855"
+    },
+    {
+      "target": "http-cancel-inline-preservation-execute",
+      "status": 0,
+      "stdin": "closed",
+      "CI": "1"
+    }
+  ]
+}

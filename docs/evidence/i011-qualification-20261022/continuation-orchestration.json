@@ -1,0 +1,19 @@
+{
+  "issue": "I011",
+  "records": [
+    {
+      "original_path": "_scratch/i011-20261020/completion-20261022/continue-final.py",
+      "original_sha256": "9f351d58959381fd3ba6f73d098b7f99d7c461c1b9645b8ea773de283650e793",
+      "bytes": 7044,
+      "archive": "docs/evidence/i011-qualification-20261022/continuation-continue-final.py.gz",
+      "archive_sha256": "17dd16e41ff8e34f090deac03577fa055914128f6fe04883e62af6d56cea48e1"
+    },
+    {
+      "original_path": "_scratch/i011-20261020/completion-20261022/continuation.mk",
+      "original_sha256": "06393f945965a8cbf3eef60a6d2ed7847c5da64698cc8c5f02f6e07a23719db6",
+      "bytes": 546,
+      "archive": "docs/evidence/i011-qualification-20261022/continuation-continuation.mk.gz",
+      "archive_sha256": "93a266a01335f33b2867bd3926c387a7af8fb1010d9fcc8fbeb9afe8ef741b17"
+    }
+  ]
+}

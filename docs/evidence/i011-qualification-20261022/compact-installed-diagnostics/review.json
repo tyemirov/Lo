@@ -1,0 +1,25 @@
+{
+  "issue": "I011",
+  "related_issues": [
+    "B007",
+    "B008"
+  ],
+  "qualification_claim": false,
+  "reviewer": "/root/i011_completion_review",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "high",
+  "actual_pair_telemetry": null,
+  "outcome": "No blocking findings in the installed diagnostic scope.",
+  "verified": [
+    "All 12 installed build and run observations, exact outputs, and cleanup.",
+    "Frozen inputs, current source hashes, and package provenance.",
+    "Raw measured medians.",
+    "Independent decoding of all six LLVM metadata strings and exact byte lengths."
+  ],
+  "limits": [
+    "Historical reference measurements ran at different times.",
+    "Linux-target emission ran on Darwin.",
+    "These observations do not establish statistical equivalence or full I011 qualification."
+  ],
+  "audit_follow_up": "Root added raw corpus extraction and Linux orchestration checks, and post-start script archives. The corrected audit uses test2json -t."
+}

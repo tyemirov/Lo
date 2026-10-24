@@ -1,0 +1,131 @@
+{
+  "issue": "I011",
+  "state": "additional_historical_source_copies_preserved",
+  "records": [
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-controls/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/runtime/native/src/context.rs",
+      "sha256": "b7cbaff59a503ce163d6c2cf15aeaea6700ffbb38a159b960e325a0bf838891f",
+      "bytes": 36261,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/b7cbaff59a503ce163d6c2cf15aeaea6700ffbb38a159b960e325a0bf838891f.gz",
+      "archive_sha256": "9a4ff6aba4e6d939efd2a3e84c41c4f6def7f1151b2e6d9c0d687b11e9a1b41a",
+      "archive_bytes": 8115
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/runtime/native/src/http/server.rs",
+      "sha256": "1e607895ee1b7adcc701a6f7c80ffa43c9a6d69ea4569e1fcc2e89766a350cec",
+      "bytes": 41592,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1e607895ee1b7adcc701a6f7c80ffa43c9a6d69ea4569e1fcc2e89766a350cec.gz",
+      "archive_sha256": "827cf4c1b6cc59e25b19e04a7aa18a73ffd8b854e322f83530476d5ec7d30eb3",
+      "archive_bytes": 9486
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/runtime/native/src/metadata.rs",
+      "sha256": "394b65be2156df5af1f224f224effa35ae9daec0a0914a855bc11c4957c3513d",
+      "bytes": 14361,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/394b65be2156df5af1f224f224effa35ae9daec0a0914a855bc11c4957c3513d.gz",
+      "archive_sha256": "85aeafcb180b8dc0fd954da86205a4bc7115dacfee335a1af1482734b9db5006",
+      "archive_bytes": 2969
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-green/guest/root/workspace/tests/integration/llvm_metadata_v2_test.go",
+      "sha256": "2d0fa8166e81fbbcd49b7b57f1578955643510c209a52b32f88d93c6f4cdd942",
+      "bytes": 14787,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/2d0fa8166e81fbbcd49b7b57f1578955643510c209a52b32f88d93c6f4cdd942.gz",
+      "archive_sha256": "5724cdb1f55adcb84033c7c9710d4fb2941a79453d487b1185b0110cdecae837",
+      "archive_bytes": 3352
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/linux-red/guest/root/workspace/tests/integration/llvm_metadata_v2_test.go",
+      "sha256": "1800f9fcda56b008e6ac36b5104ae684f64502c5a7474a04d37d638b1563bdfa",
+      "bytes": 15281,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/1800f9fcda56b008e6ac36b5104ae684f64502c5a7474a04d37d638b1563bdfa.gz",
+      "archive_sha256": "396e3c3ed04102ce7ee14b7b87641107f8ff55553d16b8f976bbf10eaac9b5a9",
+      "archive_bytes": 3734
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-final/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/literal-characterization/linux-grouped-prefix/guest/root/workspace/runtime/native/src/http/client.rs",
+      "sha256": "68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593",
+      "bytes": 26349,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/68971f362bfa11b8fab1a0c6c7fad1ed56b7017122e7e399fe4910fd23069593.gz",
+      "archive_sha256": "be9af0d0db0700e946b4270fd4a1a3c8976117f50726bb068c7cc2cf7b8a2f05",
+      "archive_bytes": 6637
+    },
+    {
+      "source": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/finalize.py",
+      "sha256": "695b03bfd174360b685cee571ded84c358865765a6b9fef9a002644280b891e8",
+      "bytes": 3810,
+      "archive": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/payload/695b03bfd174360b685cee571ded84c358865765a6b9fef9a002644280b891e8.gz",
+      "archive_sha256": "c185177f420bf747e2b9e4f43ef9ba7a375ce43b2ce3ae0dc7843f0983ab3cfe",
+      "archive_bytes": 1449
+    }
+  ],
+  "initial_source_manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/old-guest-source-cleanup/manifest.json",
+    "sha256": "c19f143a4c1f1c11722a42ddfab1d99f64d183755f163fa6f0c7bac7f7b979fc",
+    "bytes": 91334
+  },
+  "initial_verified_inventory": {
+    "path": "_scratch/i011-20261020/completion-20261022/old-guest-source-cleanup/inventory.json",
+    "sha256": "d9448d087c695403851e8e931b26067299ebf12a119873110a68cd7c3de25363",
+    "bytes": 36937013
+  },
+  "reason": "Canonical source changed after prior inventory. Preserve exact13historical text copies with7unique digests.",
+  "no_official_STE_inputs": true,
+  "no_deletion": true
+}

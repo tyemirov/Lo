@@ -1,0 +1,851 @@
+{
+  "qualification_claim": false,
+  "samples_per_cell": 3,
+  "cells": [
+    {
+      "experiment": "language-comparison",
+      "language": "lo",
+      "case": "empty",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            1.879518959,
+            1.908708709,
+            1.932134458
+          ],
+          "median": 1.908708709,
+          "range": [
+            1.879518959,
+            1.932134458
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.12953699999999999,
+            0.130775,
+            0.13111399999999998
+          ],
+          "median": 0.130775,
+          "range": [
+            0.12953699999999999,
+            0.13111399999999998
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.083851,
+            0.086183,
+            0.088249
+          ],
+          "median": 0.086183,
+          "range": [
+            0.083851,
+            0.088249
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            2954448,
+            2954448,
+            2954448
+          ],
+          "median": 2954448,
+          "range": [
+            2954448,
+            2954448
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            51576832,
+            14254080,
+            19513344
+          ],
+          "median": 19513344,
+          "range": [
+            14254080,
+            51576832
+          ],
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": true
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.0
+    },
+    {
+      "experiment": "language-comparison",
+      "language": "lo",
+      "case": "map_1000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            2.692054083,
+            2.733934375,
+            2.796586209
+          ],
+          "median": 2.733934375,
+          "range": [
+            2.692054083,
+            2.796586209
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.8877189999999999,
+            0.868794,
+            0.8791049999999999
+          ],
+          "median": 0.8791049999999999,
+          "range": [
+            0.868794,
+            0.8877189999999999
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.119182,
+            0.120864,
+            0.120486
+          ],
+          "median": 0.120486,
+          "range": [
+            0.119182,
+            0.120864
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            4887408,
+            4887408,
+            4887408
+          ],
+          "median": 4887408,
+          "range": [
+            4887408,
+            4887408
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            240566272,
+            228425728,
+            233488384
+          ],
+          "median": 233488384,
+          "range": [
+            228425728,
+            240566272
+          ],
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": true
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.825225666
+    },
+    {
+      "experiment": "language-comparison",
+      "language": "lo",
+      "case": "map_10000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            50.223912458,
+            51.453317291,
+            56.18921025
+          ],
+          "median": 51.453317291,
+          "range": [
+            50.223912458,
+            56.18921025
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            48.01524,
+            48.893538,
+            52.56744
+          ],
+          "median": 48.893538,
+          "range": [
+            48.01524,
+            52.56744
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.47270599999999996,
+            0.549983,
+            0.7833239999999999
+          ],
+          "median": 0.549983,
+          "range": [
+            0.47270599999999996,
+            0.7833239999999999
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            21977920,
+            21977920,
+            21977920
+          ],
+          "median": 21977920,
+          "range": [
+            21977920,
+            21977920
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            1927954432,
+            1977679872,
+            1891729408
+          ],
+          "median": 1927954432,
+          "range": [
+            1891729408,
+            1977679872
+          ],
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": true
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 49.544608582
+    },
+    {
+      "experiment": "language-comparison",
+      "language": "go",
+      "case": "empty",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.159653291,
+            0.182762208,
+            0.1915805
+          ],
+          "median": 0.182762208,
+          "range": [
+            0.159653291,
+            0.1915805
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.108927,
+            0.12382499999999999,
+            0.12324399999999999
+          ],
+          "median": 0.12324399999999999,
+          "range": [
+            0.108927,
+            0.12382499999999999
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.10316299999999999,
+            0.123328,
+            0.120956
+          ],
+          "median": 0.120956,
+          "range": [
+            0.10316299999999999,
+            0.123328
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            2429874,
+            2429874,
+            2429874
+          ],
+          "median": 2429874,
+          "range": [
+            2429874,
+            2429874
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            69107712,
+            60096512,
+            56426496
+          ],
+          "median": 60096512,
+          "range": [
+            56426496,
+            69107712
+          ],
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": true
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.0
+    },
+    {
+      "experiment": "language-comparison",
+      "language": "go",
+      "case": "map_1000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.155504916,
+            0.171207583,
+            0.163553583
+          ],
+          "median": 0.163553583,
+          "range": [
+            0.155504916,
+            0.171207583
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.11322099999999999,
+            0.11520999999999999,
+            0.113718
+          ],
+          "median": 0.113718,
+          "range": [
+            0.11322099999999999,
+            0.11520999999999999
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.11045999999999999,
+            0.110276,
+            0.11365399999999999
+          ],
+          "median": 0.11045999999999999,
+          "range": [
+            0.110276,
+            0.11365399999999999
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            2429938,
+            2429938,
+            2429938
+          ],
+          "median": 2429938,
+          "range": [
+            2429938,
+            2429938
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            69812224,
+            65961984,
+            60932096
+          ],
+          "median": 65961984,
+          "range": [
+            60932096,
+            69812224
+          ],
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": true
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": -0.019208625
+    },
+    {
+      "experiment": "language-comparison",
+      "language": "go",
+      "case": "map_10000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.169744875,
+            0.33562125,
+            0.272372291
+          ],
+          "median": 0.272372291,
+          "range": [
+            0.169744875,
+            0.33562125
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.123515,
+            0.120126,
+            0.11915999999999999
+          ],
+          "median": 0.120126,
+          "range": [
+            0.11915999999999999,
+            0.123515
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.120958,
+            0.130265,
+            0.111804
+          ],
+          "median": 0.120958,
+          "range": [
+            0.111804,
+            0.130265
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            2512498,
+            2512498,
+            2512498
+          ],
+          "median": 2512498,
+          "range": [
+            2512498,
+            2512498
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            58441728,
+            68894720,
+            44728320
+          ],
+          "median": 58441728,
+          "range": [
+            44728320,
+            68894720
+          ],
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": true
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.089610083
+    },
+    {
+      "experiment": "language-comparison-write",
+      "language": "rust",
+      "case": "empty",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.277217166,
+            0.252709542,
+            0.460599333
+          ],
+          "median": 0.277217166,
+          "range": [
+            0.252709542,
+            0.460599333
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.029884999999999995,
+            0.027419,
+            0.033509
+          ],
+          "median": 0.029884999999999995,
+          "range": [
+            0.027419,
+            0.033509
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.023454,
+            0.018431,
+            0.06358799999999999
+          ],
+          "median": 0.023454,
+          "range": [
+            0.018431,
+            0.06358799999999999
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            33840,
+            33840,
+            33840
+          ],
+          "median": 33840,
+          "range": [
+            33840,
+            33840
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "median": null,
+          "range": null,
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": false,
+          "positive_observations_lower_bounds": []
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.0
+    },
+    {
+      "experiment": "language-comparison-write",
+      "language": "rust",
+      "case": "map_1000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.47266775,
+            0.363545292,
+            0.469742791
+          ],
+          "median": 0.469742791,
+          "range": [
+            0.363545292,
+            0.47266775
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.032458999999999995,
+            0.031876999999999996,
+            0.039007
+          ],
+          "median": 0.032458999999999995,
+          "range": [
+            0.031876999999999996,
+            0.039007
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.018455,
+            0.018349,
+            0.066122
+          ],
+          "median": 0.018455,
+          "range": [
+            0.018349,
+            0.066122
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            34272,
+            34272,
+            34272
+          ],
+          "median": 34272,
+          "range": [
+            34272,
+            34272
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "median": null,
+          "range": null,
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": false,
+          "positive_observations_lower_bounds": []
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.192525625
+    },
+    {
+      "experiment": "language-comparison-write",
+      "language": "rust",
+      "case": "map_10000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.260732541,
+            0.681692541,
+            0.4663325
+          ],
+          "median": 0.4663325,
+          "range": [
+            0.260732541,
+            0.681692541
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.036841,
+            0.047465999999999994,
+            0.046432
+          ],
+          "median": 0.046432,
+          "range": [
+            0.036841,
+            0.047465999999999994
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.019215,
+            0.10425,
+            0.06439399999999999
+          ],
+          "median": 0.06439399999999999,
+          "range": [
+            0.019215,
+            0.10425
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            100320,
+            100320,
+            100320
+          ],
+          "median": 100320,
+          "range": [
+            100320,
+            100320
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            0,
+            69976064,
+            61603840
+          ],
+          "median": null,
+          "range": null,
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": false,
+          "positive_observations_lower_bounds": [
+            69976064,
+            61603840
+          ]
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.189115334
+    },
+    {
+      "experiment": "language-comparison-write",
+      "language": "cpp",
+      "case": "empty",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.253097334,
+            0.343078458,
+            0.467827458
+          ],
+          "median": 0.343078458,
+          "range": [
+            0.253097334,
+            0.467827458
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.023253999999999997,
+            0.021573,
+            0.025084
+          ],
+          "median": 0.023253999999999997,
+          "range": [
+            0.021573,
+            0.025084
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.011510999999999999,
+            0.010059,
+            0.018956
+          ],
+          "median": 0.011510999999999999,
+          "range": [
+            0.010059,
+            0.018956
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            33920,
+            33920,
+            33920
+          ],
+          "median": 33920,
+          "range": [
+            33920,
+            33920
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            0,
+            0,
+            0
+          ],
+          "median": null,
+          "range": null,
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": false,
+          "positive_observations_lower_bounds": []
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.0
+    },
+    {
+      "experiment": "language-comparison-write",
+      "language": "cpp",
+      "case": "map_1000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.2508785,
+            0.588538125,
+            0.713182584
+          ],
+          "median": 0.588538125,
+          "range": [
+            0.2508785,
+            0.713182584
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.027580999999999998,
+            0.030946,
+            0.034432
+          ],
+          "median": 0.030946,
+          "range": [
+            0.027580999999999998,
+            0.034432
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.011158999999999999,
+            0.0201,
+            0.069366
+          ],
+          "median": 0.0201,
+          "range": [
+            0.011158999999999999,
+            0.069366
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            50816,
+            50816,
+            50816
+          ],
+          "median": 50816,
+          "range": [
+            50816,
+            50816
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            0,
+            0,
+            43991040
+          ],
+          "median": null,
+          "range": null,
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": false,
+          "positive_observations_lower_bounds": [
+            43991040
+          ]
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.245459667
+    },
+    {
+      "experiment": "language-comparison-write",
+      "language": "cpp",
+      "case": "map_10000",
+      "metrics": {
+        "build_wall_seconds": {
+          "observations": [
+            0.392539375,
+            0.645149083,
+            0.718304458
+          ],
+          "median": 0.645149083,
+          "range": [
+            0.392539375,
+            0.718304458
+          ]
+        },
+        "build_cpu_user_seconds": {
+          "observations": [
+            0.030071999999999998,
+            0.033805999999999996,
+            0.037891
+          ],
+          "median": 0.033805999999999996,
+          "range": [
+            0.030071999999999998,
+            0.037891
+          ]
+        },
+        "build_cpu_system_seconds": {
+          "observations": [
+            0.015144,
+            0.039832,
+            0.070839
+          ],
+          "median": 0.039832,
+          "range": [
+            0.015144,
+            0.070839
+          ]
+        },
+        "artifact_bytes": {
+          "observations": [
+            116880,
+            116880,
+            116880
+          ],
+          "median": 116880,
+          "range": [
+            116880,
+            116880
+          ]
+        },
+        "peak_sampled_process_tree_rss_bytes": {
+          "observations": [
+            0,
+            0,
+            41205760
+          ],
+          "median": null,
+          "range": null,
+          "interpretation": "unavailable_for_any_zero_observation; zero_does_not_mean_zero_memory",
+          "all_observations_captured": false,
+          "positive_observations_lower_bounds": [
+            41205760
+          ]
+        }
+      },
+      "build_wall_seconds_delta_from_empty_medians": 0.302070625
+    }
+  ],
+  "limitations": [
+    "separate_reference_run_after_printf_link_failures",
+    "warm_toolchain_caches_fresh_user_compilation",
+    "rust_no_std_cpp_header_free_minimal_C_ABI",
+    "Lo_additional_arbitrary_precision_charges_errors_ownership_and_callback_semantics",
+    "harness_stage_monitoring_and_cleanup_included_in_wall_time",
+    "sampled_RSS_zero_is_unavailable_not_zero_usage",
+    "Go_executable_frozen_but_complete_host_Go_toolchain_not_distribution_pinned",
+    "Darwin_arm64_only"
+  ]
+}

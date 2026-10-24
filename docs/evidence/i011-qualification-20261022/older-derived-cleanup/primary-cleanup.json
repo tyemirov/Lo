@@ -1,0 +1,51 @@
+{
+  "state": "twelve_paths_removed_and_verified_absent",
+  "archives": [
+    {
+      "archive": "proposal.json.gz",
+      "sha256": "8498c37e750152388995c21ddb1e0fdc5d02277b3c59b8904963b0ca81bcd73b",
+      "bytes": 18377,
+      "archive_sha256": "91f5b92695b8039b881a838953e55a34e145f92e242c5fa634b9187d11a764b2",
+      "archive_bytes": 3870
+    },
+    {
+      "archive": "inventory.json.gz",
+      "sha256": "e946e51489bfa8e9e5d8f77ca8b0061988d71bb7c7c51e8de722a4724a596006",
+      "bytes": 34975736,
+      "archive_sha256": "7d75d4cb70b0ecb5fd2bcaf1eb8eeb5a870f9e0987c7e731fef4c620d5263fd6",
+      "archive_bytes": 2846758
+    },
+    {
+      "archive": "package-tars.json.gz",
+      "sha256": "85eebb911c28b6612f195ba7118e4cac10cabb31d1207ddce07105ec770ac208",
+      "bytes": 182255,
+      "archive_sha256": "98df7e20acbf6ead352c2681ad5b5ffdaea8dbacc89b32aebb434898b9c91f0e",
+      "archive_bytes": 21417
+    },
+    {
+      "archive": "execute.py.gz",
+      "sha256": "48422905c68b4aceda3308459831c4956902cda5f03e13d41aadfddbd42c013b",
+      "bytes": 4292,
+      "archive_sha256": "8cb7f5c0d476df0accbc91879374591eefba0f898a70baa339f4364a5cd28199",
+      "archive_bytes": 1489
+    }
+  ],
+  "paths": [
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/rust-unit-linux-guest/root",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/rust-unit-linux-guest/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/continuation/offline/linux-rejection/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/continuation/offline/linux-to-darwin/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/continuation/offline/linux-to-linux/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/continuation/offline/linux-xor-build/root.cpio.gz",
+    "_scratch/i011-20261020/completion-20261022/continuation/offline/darwin-install/second relocated installation",
+    "_scratch/i011-20261020/completion-20261022/continuation/offline/metal-install/relocated compiler package",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/packages/lo-darwin-arm64-software.tar",
+    "_scratch/i011-20261020/completion-20261022/metadata-v2-characterization/packages/lo-linux-arm64-software.tar",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/packages/lo-darwin-arm64-software.tar",
+    "_scratch/i011-20261020/completion-20261022/metadata-row-characterization/packages/lo-linux-arm64-software.tar"
+  ],
+  "retained_files_verified": 810,
+  "raw_archives_verified": 14,
+  "logical_bytes": 7515769181,
+  "physical_reclaim_claim": false
+}

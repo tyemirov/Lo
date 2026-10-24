@@ -1,0 +1,10 @@
+{
+  "removed": "_scratch/i011-20261020/completion-20261022/http-echo-repro",
+  "verified_absent": true,
+  "archives_verified_before_and_after": 108,
+  "binary_identities_verified_before": 5,
+  "prior_campaign_unchanged": true,
+  "manifest_sha256": "58c27a2ce30a246fd0c75f34e3a7805302e2b111de5d685eba5bbf651db20546",
+  "scope": "Only the completed focused reproduction scratch directory. Other I011 scratch, packages, and runtimes remain.",
+  "i011_complete": false
+}

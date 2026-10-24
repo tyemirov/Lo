@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 from typing import Any
 
-from qualification import BUILD_BYTES, BUILD_RSS, BUILD_SECONDS, DIAGNOSTIC_BYTES, WARMUP
+from qualification import BUILD_BYTES, BUILD_RSS, BUILD_SECONDS, DIAGNOSTIC_BYTES, SAMPLE_PLAN, WARMUP
 
 CACHE = 'warm filesystem; fresh private tool snapshots'
 ORDER = 'alternating paired samples'
@@ -55,7 +55,7 @@ def semantic_source(root: Path) -> str:
 def merge_identity(*, root: Path, compiler: Path, manifest: Path, target: str,
                    environment: dict[str, str], accelerator: str, producer_kind: str,
                    producer_tools: dict[str, str], producer_sources: tuple[str, ...],
-                   reference_go: str, samples: int) -> dict[str, Any]:
+                   reference_go: str) -> dict[str, Any]:
     """Read the complete canonical identity before admitting a whole-lane merge."""
     root = root.resolve()
     compiler, manifest = contained(root, compiler), contained(root, manifest)
@@ -63,7 +63,7 @@ def merge_identity(*, root: Path, compiler: Path, manifest: Path, target: str,
     if compiler != package / 'bin/lo':
         raise DiagnosticCompiler('merge requires a compiler from its installed distribution')
     validate_environment(target, environment, accelerator, producer_kind)
-    if not 10 <= samples <= 1000 or not reference_go or not producer_tools:
+    if not reference_go or not producer_tools:
         raise ValueError('benchmark identity requires sample, reference, and producer tool inputs')
     if not all(isinstance(value, str) and value for value in producer_tools.values()):
         raise ValueError('benchmark producer tool identities must be nonempty strings')
@@ -77,7 +77,7 @@ def merge_identity(*, root: Path, compiler: Path, manifest: Path, target: str,
         'reference': {'go': reference_go, 'source_identity': provenance['reference']['source_identity']},
         'harness': provenance['harness'],
         'evaluator': provenance['evaluator'],
-        'measurement': {'samples': samples, 'warmup': WARMUP, 'order': ORDER, 'cache': CACHE,
+        'measurement': {'sample_plan': dict(SAMPLE_PLAN), 'warmup': WARMUP, 'order': ORDER, 'cache': CACHE,
                         'max_steps': 10000000, 'concurrency': 1, 'limits': dict(LIMITS),
                         'timer_contract': dict(TIMER_CONTRACT), 'load_policy': LOAD_POLICY},
     }

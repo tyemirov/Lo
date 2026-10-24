@@ -1,0 +1,119 @@
+{
+  "all_originals_retained": true,
+  "exact_detector": {
+    "bytes": 21886,
+    "path": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/audit-origin-reviewed.py",
+    "sha256": "4588286dcf8fa95d27b88e774fa4ede6bfb958338b4976c33b43a083a3f5cb0a"
+  },
+  "finalized_log_binding": "The supplemental preservation-execution.log records completion; the zero-byte main record is the pre-execution snapshot.",
+  "limits": [
+    "Sixteen extracted compiler object stdout files remain derived binary identities, with existing code-inspection references.",
+    "Sixty-four large generated IR modules retain identity and actual source/producer bindings; no byte-identical regeneration claim.",
+    "Active storage-final outputs remained unread except permitted phase status. No deletion or qualification claim."
+  ],
+  "main_archive_records_verified": 2518,
+  "main_manifest": {
+    "bytes": 1547385,
+    "path": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/manifest.json",
+    "sha256": "79d21d71e66293efd338bf6f023524dfa4e13487ebd65e962e9d50df2396c4c6"
+  },
+  "official_reference_exclusions": [
+    {
+      "bytes": 3316157,
+      "eventual_delete": true,
+      "owner": "/root (historical or orchestration; confirm before cleanup)",
+      "path": "_scratch/i011-20261020/ste-reference/ASD-STE100_ISSUE9.pdf",
+      "sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+      "state": "official_reference_identity_only_never_archive"
+    },
+    {
+      "bytes": 1170813,
+      "eventual_delete": true,
+      "owner": "/root (historical or orchestration; confirm before cleanup)",
+      "path": "_scratch/i011-20261020/ste-reference/reference.txt",
+      "sha256": "a216fe199bd6e9c77fc743dfe6dc081ee5f245adcb115ed6ca1aa45ee50fa3f5",
+      "state": "official_reference_identity_only_never_archive"
+    }
+  ],
+  "origin_review": {
+    "bytes": 795,
+    "path": "_scratch/i011-20261020/completion-20261022/final-storage-preservation/origin-review.json",
+    "sha256": "15819255165d6577ffb8aa9c2dd1602c2a9eacd95689e0a22a11246d7be66a94"
+  },
+  "override": {
+    "current_disposition": "preserved_synthetic_raw_binary_stdout",
+    "previous_disposition": "identity_only_binary_raw_object",
+    "reason": "The four bytes are an intentional public-batch protocol fixture, not an extracted compiler object. Preserve raw bytes in the supplemental record.",
+    "sha256": "46a1fda4b60882b250ae85357e3b3e51fa7fe529c67f246b36eb16a702c7dfd6",
+    "source": "_scratch/i011-20261020/fixtures/transport/green-tmp/test_public_batch_uses_dedicat0/guest/0.stdout"
+  },
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/46a1fda4b60882b250ae85357e3b3e51fa7fe529c67f246b36eb16a702c7dfd6.gz",
+      "archive_bytes": 24,
+      "archive_sha256": "02e51bd0dfd9eac679dea8dae45f67434468399f714068e136ff94709213c504",
+      "bytes": 4,
+      "sha256": "46a1fda4b60882b250ae85357e3b3e51fa7fe529c67f246b36eb16a702c7dfd6",
+      "source": "_scratch/i011-20261020/fixtures/transport/green-tmp/test_public_batch_uses_dedicat0/guest/0.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/cc851f9a63ff26534b7e659e903801072fb55035ca2308864310de1e3ccebc99.gz",
+      "archive_bytes": 319,
+      "archive_sha256": "15f31e89466165abd8150006f3f1cda8bdf82cddd6eba98ff64be5fac4dabf9a",
+      "bytes": 462,
+      "sha256": "cc851f9a63ff26534b7e659e903801072fb55035ca2308864310de1e3ccebc99",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/preservation-execution.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/ea60c371b3b98f131d84d05553c21d77b304834032aac72958f632945941d9a6.gz",
+      "archive_bytes": 77,
+      "archive_sha256": "45b1be37191f5412d251d796e531353e1c4526ef8528439e93e4ac3eec17d539",
+      "bytes": 74,
+      "sha256": "ea60c371b3b98f131d84d05553c21d77b304834032aac72958f632945941d9a6",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/preservation-progress.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/3bf42895fb161751b60faa1a242e6f9cff5e88b49d360145ab97bb4939f64437.gz",
+      "archive_bytes": 245673,
+      "archive_sha256": "6ffc42d3d50f01c1cfbc663ceb4d8e4590a092ff6de740cc57c9594c5d0df36a",
+      "bytes": 1344008,
+      "sha256": "3bf42895fb161751b60faa1a242e6f9cff5e88b49d360145ab97bb4939f64437",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/historical-journal.jsonl"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/149cfb06b63ce2d82813a63f61fcb932fd40398c91efb465cd4a3e1a1793ffb9.gz",
+      "archive_bytes": 88,
+      "archive_sha256": "d9c6b7d8e7ac6d9aeb477052dedeec974f8b2462431b2d25000052d47d3609ee",
+      "bytes": 73,
+      "sha256": "149cfb06b63ce2d82813a63f61fcb932fd40398c91efb465cd4a3e1a1793ffb9",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/remaining-gaps.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/bc1c9f26af704f18f579733421aa4f0231a6ca9e58085900bc25302284f62627.gz",
+      "archive_bytes": 2055,
+      "archive_sha256": "308e59315b7e1a14cea19c8afdf62ae84d4968374132da1e12f465b550afe681",
+      "bytes": 4878,
+      "sha256": "bc1c9f26af704f18f579733421aa4f0231a6ca9e58085900bc25302284f62627",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/verify_historical-initial-fixture-assumption.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/cd6b56dde1eec415aa62fb52d40683119211e18d738d757035f8984fa90be90d.gz",
+      "archive_bytes": 250,
+      "archive_sha256": "ea1829ee4f8e09e1c6da49430b4ed097c5a6234ea53d85c10b0b720004e5ae54",
+      "bytes": 337,
+      "sha256": "cd6b56dde1eec415aa62fb52d40683119211e18d738d757035f8984fa90be90d",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/verification-initial-fixture-assumption.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/remaining-historical-evidence/payload/17dfb320856fdc738e5565f310d313ef2c34b13a5567e3de1d54437a100d106e.gz",
+      "archive_bytes": 2119,
+      "archive_sha256": "d8abeba5df77ce42667c4ebc69e567983641a7ebc2e4cbac6263dba1001ac88f",
+      "bytes": 5181,
+      "sha256": "17dfb320856fdc738e5565f310d313ef2c34b13a5567e3de1d54437a100d106e",
+      "source": "_scratch/i011-20261020/completion-20261022/final-storage-cleanup-preparation/verify_historical.py"
+    }
+  ],
+  "remaining_gaps": [],
+  "state": "all_historical_archives_verified",
+  "unique_main_archives_verified": 1938
+}

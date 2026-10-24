@@ -2,15 +2,73 @@ package nativeplan
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"math"
+	"math/big"
 	"slices"
 	"strings"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 )
 
 type definition struct {
 	block BlockID
 	index int
+}
+
+func verifyLiteralSequence(ctx context.Context, instruction Instruction, function Function, sites []Location, types map[uint64]typeMetadata, claimed map[uint64]bool) error {
+	if function.Flow == -2 {
+		return fmt.Errorf("literal sequence is not a synthetic derivative node")
+	}
+	count := uint64(len(instruction.Literals))
+	base := uint64(instruction.OwnedBase)
+	if count == 0 || count > math.MaxUint32/3 || base == 0 || base+3*count > uint64(len(function.Values)) || base+3*count != uint64(instruction.Value) {
+		return fmt.Errorf("invalid literal ownership range")
+	}
+	if instruction.Symbol != OperationSymbol("List.new") || len(instruction.Inputs) != 0 || len(instruction.Predecessors) != 0 || instruction.Index != 0 || instruction.Payload || instruction.CallerLocation {
+		return fmt.Errorf("invalid literal sequence instruction shape")
+	}
+	operation := sites[instruction.Site]
+	output := types[operation.Type]
+	if operation.Action != "operation" || operation.Operation != "List.new" || output.Name != "List<Int>" || output.Kind != "List" || operation.Owner != function.Name || len(operation.Labels) != 0 || uint64(len(operation.Arguments)) != count || instruction.Site < 3*count {
+		return fmt.Errorf("invalid literal sequence operation metadata")
+	}
+	var previousEnd int
+	for index, triple := range instruction.Literals {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		first := instruction.Site - 3*count + 3*uint64(index)
+		if triple.Step != first || triple.Literal != first+1 || triple.Charge != first+2 {
+			return fmt.Errorf("literal descriptor must preserve original site order")
+		}
+		step, literal, charge := sites[triple.Step], sites[triple.Literal], sites[triple.Charge]
+		kind := types[literal.Type]
+		argument := operation.Arguments[index]
+		if step.Action != "expression_step" || literal.Action != "literal" || charge.Action != "charge_value" || kind.Name != "Int" || kind.Kind != "Int" || argument.Kind != "value" || argument.Type != literal.Type || argument.Flow != 0 {
+			return fmt.Errorf("literal descriptor requires canonical Int value sites")
+		}
+		if step.Type != literal.Type || charge.Type != literal.Type || step.Start != literal.Start || charge.Start != literal.Start || step.End != literal.End || charge.End != literal.End || step.File != literal.File || charge.File != literal.File || literal.File != operation.File || step.Owner != function.Name || literal.Owner != function.Name || charge.Owner != function.Name || step.Flow != operation.Flow || literal.Flow != operation.Flow || charge.Flow != operation.Flow || literal.Start.Offset < operation.Start.Offset || literal.End.Offset > operation.End.Offset || index > 0 && literal.Start.Offset < previousEnd {
+			return fmt.Errorf("literal descriptor source/type/owner differs")
+		}
+		if _, ok := new(big.Int).SetString(literal.Text, 10); !ok {
+			return fmt.Errorf("invalid sequence integer literal")
+		}
+		for _, site := range []uint64{triple.Step, triple.Literal, triple.Charge} {
+			if claimed[site] {
+				return fmt.Errorf("literal descriptor site claimed twice")
+			}
+			claimed[site] = true
+		}
+		for phase := uint64(0); phase < 3; phase++ {
+			if !function.Values[base+3*uint64(index)+phase-1] {
+				return fmt.Errorf("literal group contains borrowed slot")
+			}
+		}
+		previousEnd = literal.End.Offset
+	}
+	return nil
 }
 
 func successors(t Terminator) []BlockID {
@@ -27,6 +85,22 @@ func successors(t Terminator) []BlockID {
 }
 
 func verify(ctx context.Context, module Module) error {
+	var metadata struct {
+		Types []typeMetadata `json:"types"`
+	}
+	if err := json.Unmarshal(module.Metadata, &metadata); err != nil {
+		return fmt.Errorf("invalid native metadata: %w", err)
+	}
+	types := map[uint64]typeMetadata{}
+	typeNames := map[string]bool{}
+	for index, value := range metadata.Types {
+		if value.ID != uint64(index) || typeNames[value.Name] {
+			return fmt.Errorf("noncanonical native type table")
+		}
+		types[value.ID] = value
+		typeNames[value.Name] = true
+	}
+	sequenceSites := map[uint64]bool{}
 	functions := map[string]Function{}
 	for _, f := range module.Functions {
 		if _, ok := functions[f.Symbol]; ok {
@@ -43,15 +117,15 @@ func verify(ctx context.Context, module Module) error {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		if err := verifyFunction(ctx, f, module.Locations, functions); err != nil {
+		if err := verifyFunction(ctx, f, module.Locations, functions, types, sequenceSites); err != nil {
 			return fmt.Errorf("%s: %w", f.Symbol, err)
 		}
 	}
 	return nil
 }
 
-func verifyFunction(ctx context.Context, f Function, sites []Location, functions map[string]Function) error {
-	if len(f.Blocks) == 0 || f.Symbol == "" || f.Arity < 0 {
+func verifyFunction(ctx context.Context, f Function, sites []Location, functions map[string]Function, types map[uint64]typeMetadata, sequenceSites map[uint64]bool) error {
+	if len(f.Blocks) == 0 || f.Symbol == "" || f.Arity < 0 || uint64(len(f.Values)) > math.MaxUint32 {
 		return fmt.Errorf("incomplete function")
 	}
 	preds := make([][]BlockID, len(f.Blocks))
@@ -61,6 +135,19 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 	resultValues := map[ResultID]ValueID{}
 	adoptions := map[ValueID][]definition{}
 	releases := map[ValueID][]definition{}
+	groupSlots := map[ValueID]ValueID{}
+	groupCounts := map[ValueID]int{}
+	// Account all source-level caller storage together, not each group alone.
+	// Actual optimized target frames are qualified separately; this is checked
+	// array/index arithmetic, not an inferred machine stack safety guarantee.
+	storage := uint64(len(f.Values))*8 + uint64(f.Results)*16
+	addArguments := func(count uint64) error {
+		if count > (math.MaxUint64-storage)/8 {
+			return fmt.Errorf("%w: native function storage", ErrLimit)
+		}
+		storage += count * 8
+		return nil
+	}
 	helperArity := map[string]int{LiteralSymbol: 0, StepSymbol: 0, ChargeSymbol: 1, ScopeEnterSymbol: 0, FlowEnterSymbol: 0, CauseSymbol: 1, InvalidStatusSymbol: 0, CommitSymbol: 1, "lo_project": 1, "lo_match": 2, "lo_flow_ref": 0, "lo_convert_success": 1, "lo_convert_failure": 1, "lo_convert_propagate": 1, "lo_convert_record_view": 1, "lo_convert_scalar_list_view": 1, "lo_convert_fallible_record_view": 1}
 	for symbol, arity := range map[string]int{"lo_derivative_enter": 0, "lo_derivative_snapshot": -1, "lo_derivative_retain": 1, "lo_derivative_loss": -1, "lo_derivative_zero": 1, "lo_derivative_seed": 1, "lo_derivative_reverse": -1, "lo_derivative_finish": 1, "lo_derivative_failure": 1, "lo_derivative_host_failure": 0} {
 		helperArity[symbol] = arity
@@ -84,8 +171,36 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 			if instruction.Site >= uint64(len(sites)) {
 				return fmt.Errorf("missing instruction source")
 			}
-			if instruction.Kind < Call || instruction.Kind > TapeLeave {
+			if instruction.Kind < Call || instruction.Kind > LiteralSequence {
 				return fmt.Errorf("invalid instruction")
+			}
+			if instruction.Kind != LiteralSequence && (instruction.OwnedBase != 0 || len(instruction.Literals) != 0) {
+				return fmt.Errorf("literal sequence fields on ordinary instruction")
+			}
+			if instruction.Kind == LiteralSequence {
+				if err := verifyLiteralSequence(ctx, instruction, f, sites, types, sequenceSites); err != nil {
+					return err
+				}
+				count := 3 * len(instruction.Literals)
+				groupCounts[instruction.OwnedBase] = count
+				for offset := 0; offset < count; offset++ {
+					id := instruction.OwnedBase + ValueID(offset)
+					if _, ok := values[id]; ok || groupSlots[id] != 0 {
+						return fmt.Errorf("overlapping literal ownership group")
+					}
+					values[id] = definition{block.ID, position}
+					groupSlots[id] = instruction.OwnedBase
+				}
+				if err := addArguments(uint64(len(instruction.Literals))); err != nil {
+					return err
+				}
+				if block.End.Kind != Status || block.End.Targets[1] != block.End.Targets[3] {
+					return fmt.Errorf("literal sequence requires nonrecoverable checked status")
+				}
+				invalid := f.Blocks[block.End.Targets[3]]
+				if len(invalid.Instructions) == 0 || invalid.Instructions[0].Kind != Call || invalid.Instructions[0].Symbol != InvalidStatusSymbol || invalid.Instructions[0].Site != f.Site {
+					return fmt.Errorf("literal sequence must preserve shared invalid-status site")
+				}
 			}
 			if instruction.Value != 0 && instruction.Kind != AdoptResult {
 				if int(instruction.Value) > len(f.Values) {
@@ -99,7 +214,7 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 					return fmt.Errorf("inconsistent value ownership")
 				}
 			}
-			if instruction.Kind == Call {
+			if instruction.Kind == Call || instruction.Kind == LiteralSequence {
 				if instruction.Result == 0 || uint32(instruction.Result) > f.Results || instruction.Value == 0 {
 					return fmt.Errorf("invalid call result")
 				}
@@ -115,7 +230,12 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 				if callee, ok := functions[instruction.Symbol]; ok && len(instruction.Inputs) != callee.Arity {
 					return fmt.Errorf("call to %s has incorrect arity", instruction.Symbol)
 				}
-				if _, ok := functions[instruction.Symbol]; !ok {
+				if instruction.Kind == Call {
+					if err := addArguments(uint64(len(instruction.Inputs))); err != nil {
+						return err
+					}
+				}
+				if _, ok := functions[instruction.Symbol]; !ok && instruction.Kind == Call {
 					if arity, ok := helperArity[instruction.Symbol]; ok {
 						if arity >= 0 && len(instruction.Inputs) != arity {
 							return fmt.Errorf("helper %s has incorrect arity", instruction.Symbol)
@@ -161,6 +281,17 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 	}
 	if len(values) != len(f.Values) || len(results) != int(f.Results) {
 		return fmt.Errorf("unbound native values or results")
+	}
+	for _, block := range f.Blocks {
+		for _, instruction := range block.Instructions {
+			if instruction.Kind == Release {
+				for _, value := range instruction.Inputs {
+					if groupSlots[value] != 0 {
+						return fmt.Errorf("literal ownership group requires ReleaseAll")
+					}
+				}
+			}
+		}
 	}
 	// Compute immediate dominators with linear storage; checked programs can be large.
 	visited := make([]bool, len(f.Blocks))
@@ -236,6 +367,9 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 		return false
 	}
 	checkValue := func(value ValueID, block BlockID, index int) error {
+		if groupSlots[value] != 0 {
+			return fmt.Errorf("literal ownership slot cannot be an ordinary operand")
+		}
 		def, ok := values[value]
 		if !ok {
 			return fmt.Errorf("unbound operand %d", value)
@@ -248,7 +382,7 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 				return fmt.Errorf("operand %d used after planned release", value)
 			}
 		}
-		if f.Blocks[def.block].Instructions[def.index].Kind == Call {
+		if kind := f.Blocks[def.block].Instructions[def.index].Kind; kind == Call || kind == LiteralSequence {
 			available := false
 			for _, adopt := range adoptions[value] {
 				if dominates(adopt.block, block) && (adopt.block != block || adopt.index < index) {
@@ -366,12 +500,18 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 		}
 		blockPhases[block.ID] |= 1 << phase
 		for index, instruction := range block.Instructions {
-			if instruction.Value != 0 && instruction.Kind != Call && f.Values[instruction.Value-1] {
+			if instruction.Kind == LiteralSequence {
+				current.released = false
+				for offset := 0; offset < groupCounts[instruction.OwnedBase]; offset++ {
+					valuePhases[instruction.OwnedBase+ValueID(offset)] |= 1 << phase
+				}
+			}
+			if instruction.Value != 0 && instruction.Kind != Call && instruction.Kind != LiteralSequence && f.Values[instruction.Value-1] {
 				current.released = false
 				valuePhases[instruction.Value] |= 1 << phase
 			}
 			switch instruction.Kind {
-			case Call:
+			case Call, LiteralSequence:
 				if instruction.Symbol == "lo_derivative_enter" && (current.tape || !current.scope) {
 					return fmt.Errorf("invalid derivative tape entry")
 				}

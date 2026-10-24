@@ -35,7 +35,11 @@ func TestLLVMRuntimeRejectsAlteredMetadata(t *testing.T) {
 			}
 			changed := false
 			for _, site := range sites {
-				if string(site["operation"]) == `"Math.add"` {
+				var payload map[string]json.RawMessage
+				if err := json.Unmarshal(site["payload"], &payload); err != nil {
+					t.Fatal(err)
+				}
+				if string(payload["operation"]) == `"Math.add"` {
 					site["action"] = json.RawMessage(`"flow_call"`)
 					changed = true
 				}

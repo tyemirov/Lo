@@ -198,7 +198,7 @@ static int type_record(lo_context *c, u64 site) {
     u64 id = token_number(c, field(c, location(c, site), "type")); return array_at(c, c->types, id);
 }
 static void type_kind(lo_context *c, u64 site, char *out, int bytes) { token_text(c, field(c, type_record(c, site), "kind"), out, bytes); }
-static void site_text(lo_context *c, u64 site, const char *name, char *out, int bytes) { token_text(c, field(c, location(c, site), name), out, bytes); }
+static void site_text(lo_context *c, u64 site, const char *name, char *out, int bytes) { int row = location(c, site); int object = equal(name,"text") || equal(name,"field") ? field(c,row,"payload") : row; token_text(c, field(c, object, name), out, bytes); }
 
 ABI(lo_step) {
     event(c, "step");
@@ -307,7 +307,7 @@ ABI(lo_op_Math_2Eeq) { require(n == 2 && a[0]->kind == K_INT && a[1]->kind == K_
 ABI(lo_op_List_2Enew) { event(c, "op:List.new"); result(out, 0, 0, container(c, K_LIST, a, n)); }
 ABI(lo_op_List_2Elength) { require(n == 1 && a[0]->kind == K_LIST); event(c, "op:List.length"); result(out, 0, 0, integer(c, (i64)a[0]->count)); }
 ABI(lo_op_Record_2Enew) {
-    event(c, "op:Record.new"); lo_value *v = container(c, K_RECORD, a, n); int labels = field(c, location(c, site), "labels");
+    event(c, "op:Record.new"); lo_value *v = container(c, K_RECORD, a, n); int labels = field(c, field(c, location(c, site), "payload"), "labels");
     require((u64)c->tokens[labels].children == n);
     for (u64 i = 0; i < n; i++) { token_text(c, array_at(c, labels, i), v->labels[i], sizeof v->labels[i]); v->weight += strlen(v->labels[i]); }
     result(out, 0, 0, v);
@@ -381,10 +381,12 @@ void lo_program_admit(lo_context *c, const unsigned char *metadata, u64 bytes, c
     int offset = 0;
     if (parse_json(c, &offset, -1) != 0) { terminal(c, out, UNSUPPORTED); return; }
     whitespace(c, &offset);
-    if (offset != c->metadata_bytes || !token_equal(c, field(c, 0, "abi"), "lo-native-1")) { terminal(c, out, UNSUPPORTED); return; }
+    if (offset != c->metadata_bytes || !token_equal(c, field(c, 0, "abi"), "lo-native-2")) { terminal(c, out, UNSUPPORTED); return; }
     c->types = field(c, 0, "types"); c->locations = field(c, 0, "locations"); c->flows = field(c, 0, "flows");
     require(c->types >= 0 && c->locations >= 0 && c->flows >= 0 && (u64)c->tokens[c->flows].children == count);
-    for (u64 i = 0; i < (u64)c->tokens[c->locations].children; i++) require(token_number(c, field(c, array_at(c, c->locations, i), "id")) == i);
+    int files = field(c,0,"files"), spans = field(c,0,"spans");
+    require(files>=0 && spans>=0 && c->tokens[files].kind=='[' && c->tokens[spans].kind=='[');
+    for (u64 i=0;i<(u64)c->tokens[c->locations].children;i++) require(token_number(c,field(c,location(c,i),"span"))<(u64)c->tokens[spans].children);
     result(out, 0, 0, 0);
 }
 static void print_value(const lo_value *v) {

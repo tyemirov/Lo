@@ -1,0 +1,21 @@
+{
+  "all_archives_decompressed_verified": true,
+  "cleanup_performed": false,
+  "i011_complete": false,
+  "issue": "I011",
+  "kind": "additive_final_disposition_and_cleanup_inventory",
+  "main_manifest": {
+    "path": "docs/evidence/i011-qualification-20261022/http-final-20261023/manifest.json",
+    "sha256": "bd43091ac8528b7968f2c80b1f16c40b9eeb634c514903a33c6609caea804752"
+  },
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/http-final-20261023/payload/5fcc7565098ccf7c09a1b9f8da84c1b69901d24365972895e38f33eccc0a498f.gz",
+      "archive_bytes": 609,
+      "archive_sha256": "a172e290ac0ae6568eab9a1b56bceaeca13583f96d8418e71bb5c04d9f74cd2f",
+      "bytes": 1481,
+      "sha256": "5fcc7565098ccf7c09a1b9f8da84c1b69901d24365972895e38f33eccc0a498f",
+      "source": "_scratch/i011-20261020/completion-20261022/http-final-20261023/evidence-audit/cleanup-candidates.json"
+    }
+  ]
+}

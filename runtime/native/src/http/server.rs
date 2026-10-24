@@ -84,7 +84,7 @@ impl Http {
                 match client::exchange(context, &self.policy, &self.resolver, as_http(target)) {
                     Ok(v) => {
                         context.last_activation = Some(
-                            json!({"operation":"HTTP.request","span":{"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")},"result_type":"HTTP.Response","status":v.fields()["status"].json()}),
+                            json!({"operation":"HTTP.request","span":site.source_record(),"result_type":"HTTP.Response","status":v.fields()["status"].json()}),
                         );
                         context.charge(&v)?;
                         Ok(v)
@@ -199,7 +199,7 @@ impl Http {
                 });
                 let receipt = wrap("HTTP.ServerReceipt", Value::Fields(fields));
                 context.last_activation = Some(
-                    json!({"operation":"HTTP.listen","span":{"file":site.raw["file"],"start":site.raw.coordinate("start"),"end":site.raw.coordinate("end")},"receipt":receipt.json()}),
+                    json!({"operation":"HTTP.listen","span":site.source_record(),"receipt":receipt.json()}),
                 );
                 context.charge(&receipt)?;
                 Ok(receipt)
@@ -437,11 +437,10 @@ fn handle_request(
             let _ = stream.stream.shutdown(Shutdown::Write);
             let deadline = Instant::now() + Duration::from_millis(500);
             let mut buffer = [0u8; 8192];
-            let mut drained = 0;
-            while Instant::now() < deadline && drained < (256 << 10) {
+            while Instant::now() < deadline {
                 match stream.reader.read(&mut buffer) {
                     Ok(0) => break,
-                    Ok(count) => drained += count,
+                    Ok(_) => {}
                     Err(error)
                         if matches!(
                             error.kind(),
@@ -509,7 +508,8 @@ fn read_request(
         connection: stream,
         context,
         deadline,
-        pending: vec![],
+        valid: 0,
+        scratch: [0; 8192],
         offset: 0,
         idle_header: true,
         strict_crlf: false,
@@ -525,18 +525,23 @@ fn read_request(
     let method = parts[0];
     let raw_path = request_path(method, parts[1]).map_err(RequestError::Host)?;
     let path = percent_decode(raw_path).map_err(RequestError::Host)?;
-    let input = record([
-        (
-            "method".into(),
-            new(atom("Bytes"), Data::Bytes(method.as_bytes().to_vec())),
-        ),
-        ("path".into(), new(atom("Bytes"), Data::Bytes(path.clone()))),
-    ]);
-    let path = String::from_utf8(path).map_err(|_| {
+    let input = |path: &[u8]| {
+        record([
+            (
+                "method".into(),
+                new(atom("Bytes"), Data::Bytes(method.as_bytes().to_vec())),
+            ),
+            (
+                "path".into(),
+                new(atom("Bytes"), Data::Bytes(path.to_vec())),
+            ),
+        ])
+    };
+    let path = String::from_utf8(path).map_err(|error| {
         RequestError::Cause(
             "HTTP.InvalidRequest".into(),
             "request text is not valid UTF-8".into(),
-            input.clone(),
+            input(error.as_bytes()),
         )
     })?;
     let declared = framing(&pairs).map_err(RequestError::Host)?;
@@ -544,7 +549,7 @@ fn read_request(
         return Err(RequestError::Cause(
             "HTTP.RequestTooLarge".into(),
             "request body exceeds its byte limit".into(),
-            input,
+            input(path.as_bytes()),
         ));
     }
     if pairs.iter().filter(|(n, _)| n == "host").count() != 1 && parts[2] == "HTTP/1.1" {
@@ -576,8 +581,9 @@ fn read_request(
             .write_all(b"HTTP/1.1 100 Continue\r\n\r\n")
             .map_err(|e| RequestError::Host(host(e.to_string())))?;
     }
-    let headers = headers(pairs)
-        .map_err(|e| RequestError::Cause("HTTP.InvalidRequest".into(), e, input.clone()))?;
+    let headers = headers(pairs).map_err(|e| {
+        RequestError::Cause("HTTP.InvalidRequest".into(), e, input(path.as_bytes()))
+    })?;
     let body = reader
         .body(match declared {
             Framing::Eof => Framing::Length(0),
@@ -587,12 +593,12 @@ fn read_request(
             Fault::Host("runtime.limit", _) => RequestError::Cause(
                 "HTTP.RequestTooLarge".into(),
                 "request body exceeds its byte limit".into(),
-                input.clone(),
+                input(path.as_bytes()),
             ),
             _ => RequestError::Cause(
                 "HTTP.RequestReadFailed".into(),
                 "read request body: unexpected EOF".into(),
-                input.clone(),
+                input(path.as_bytes()),
             ),
         })?;
     Ok((
@@ -665,7 +671,7 @@ fn response_data(
         handle
     };
     let fields = handle.fields();
-    let input = record(fields.iter().map(|(n, v)| (n.clone(), v.clone())));
+    let input = || record(fields.iter().map(|(n, v)| (n.clone(), v.clone())));
     let status = fields["status"]
         .integer()
         .to_u16()
@@ -673,12 +679,12 @@ fn response_data(
         .ok_or_else(|| {
             (
                 "response status must be between 200 and 599".into(),
-                input.clone(),
+                input(),
             )
         })?;
     let body = bytes(&fields["body"]).to_vec();
     if [204, 205, 304].contains(&status) && !body.is_empty() {
-        return Err(("response status prohibits a body".into(), input));
+        return Err(("response status prohibits a body".into(), input()));
     }
     Ok((status, header_pairs(&fields["headers"]), body))
 }

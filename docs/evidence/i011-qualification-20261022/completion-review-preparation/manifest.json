@@ -1,0 +1,1766 @@
+{
+  "archive_format": "Content-addressed gzip with mtime zero",
+  "excluded": [
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final-driver.stderr",
+      "reason": "Active final campaign output preserved separately, or large unscoped log"
+    },
+    {
+      "path": "_scratch/i011-20261020/completion-20261022/specialized-final-driver.stdout",
+      "reason": "Active final campaign output preserved separately, or large unscoped log"
+    }
+  ],
+  "freeze_sha256": "ceb453fe6dcba78152fb19dfea255cbfbf518fce7071d80d4ae4637815717111",
+  "i011_complete": false,
+  "interpretation": "Earlier pending, failed, superseded or review states remain historical; these records do not establish current completion.",
+  "issue": "I011",
+  "official_ste_reference_included": false,
+  "pending": [
+    "fresh_specialized_qualification",
+    "final_manual_documentation_review",
+    "final_global_evidence_audit",
+    "independent_completion_review",
+    "owned_scratch_cleanup"
+  ],
+  "qualification_claim": false,
+  "records": [
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/0bffaa8612d0a57f0731305955475263e866883decccad9f95d51d0d196ce2a5.gz",
+      "archive_sha256": "cc4603e2bb74acf3b73e3a4851fa630b0b89e2d31aa72ced12952c3eb2898cfe",
+      "bytes": 1029,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "0bffaa8612d0a57f0731305955475263e866883decccad9f95d51d0d196ce2a5",
+      "source": "_scratch/i011-20261020/acceptance-summary-review-11.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/cae5e4dc5b9f96d852a0240effcf22dbfcd7245c8abe001601a94b2267a0dbb6.gz",
+      "archive_sha256": "1c23475ae2009e124dfb4a404497d74624dafee1a54404962bfe89b06e5a0abe",
+      "bytes": 2264,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "cae5e4dc5b9f96d852a0240effcf22dbfcd7245c8abe001601a94b2267a0dbb6",
+      "source": "_scratch/i011-20261020/admission-completion-review-11.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/7d80446b59be8f9562e07f778a01c1647f3324f0a4592007eb22bb532f9f6fba.gz",
+      "archive_sha256": "421b483aeae35e7b7eb6161b5c5ddb0efe58e9f4030bef064f02418ee9826dc6",
+      "bytes": 2404,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "7d80446b59be8f9562e07f778a01c1647f3324f0a4592007eb22bb532f9f6fba",
+      "source": "_scratch/i011-20261020/admission-completion-review-9.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e9a1bafc065f17853d4428750742d7e3b45f526592cf7e0c25167eee5e126331.gz",
+      "archive_sha256": "6b5097731beb416cf03e3aa16b685e631e90ab281ac6fae3149077fc3451b72f",
+      "bytes": 2171,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e9a1bafc065f17853d4428750742d7e3b45f526592cf7e0c25167eee5e126331",
+      "source": "_scratch/i011-20261020/admission-review-evidence-9.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d22fdf33fa3a33d16a75d68eeb00749345e0139b86db5fa680747561e95cbb4b.gz",
+      "archive_sha256": "3e944d40b287bf721a625299ce45358633b3df5700a9e8d403cca63450c93b52",
+      "bytes": 281,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d22fdf33fa3a33d16a75d68eeb00749345e0139b86db5fa680747561e95cbb4b",
+      "source": "_scratch/i011-20261020/admission-review-preservation-11.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/bfae7b55eb474c6b3f430cf186328b1ee0d4f6066c59c68befc1aa55a1293cc6.gz",
+      "archive_sha256": "9981b5dd6ef7a3e39f5340f5c230270971de2a9d04075d78cc28fe4324e6b3f0",
+      "bytes": 2162,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "bfae7b55eb474c6b3f430cf186328b1ee0d4f6066c59c68befc1aa55a1293cc6",
+      "source": "_scratch/i011-20261020/architect-final-source-review-6.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/a32426ff9e3a5bd7b23c426c6b13e8e3cccffd3d47770bdf3331597b92b83b1f.gz",
+      "archive_sha256": "559283273e5f9db166289c0ab9cefac8db0014d60524dba704be7b194c1b949e",
+      "bytes": 7496,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "a32426ff9e3a5bd7b23c426c6b13e8e3cccffd3d47770bdf3331597b92b83b1f",
+      "source": "_scratch/i011-20261020/changed-docs-mechanical.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8d0ed5c5777fe85d0a5414e9f460f8556a5397015627951b08441cc888e31685.gz",
+      "archive_sha256": "3b8df77c89fecd0e576f1fbb07cc9ced7832de2140441279790a1b14598920ae",
+      "bytes": 125,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8d0ed5c5777fe85d0a5414e9f460f8556a5397015627951b08441cc888e31685",
+      "source": "_scratch/i011-20261020/changed-docs-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/2ab229e4d0025f75f8593a135ae9b4672652fe3fb3c3b1c07fbe9d4c30c746e7.gz",
+      "archive_sha256": "79d5842e23bd5038ba9fe52890c772b74e308989072e44ebab3ac7ee16ae9a26",
+      "bytes": 679,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "2ab229e4d0025f75f8593a135ae9b4672652fe3fb3c3b1c07fbe9d4c30c746e7",
+      "source": "_scratch/i011-20261020/changed-documents.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d9d900658110483693d97afa85e65e8e889c3deab6605a49d3b289dcddfb648e.gz",
+      "archive_sha256": "189890d13bafb94656244eb0cf44483265a702b83f820aa2f2e8eb92d1449aeb",
+      "bytes": 21040,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d9d900658110483693d97afa85e65e8e889c3deab6605a49d3b289dcddfb648e",
+      "source": "_scratch/i011-20261020/completion-20261022/audit-compact-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/c52db9aafd3a8b0e3d92e7fba3e42d5cad13f6436b0196b71cdbd0960f06caef.gz",
+      "archive_sha256": "b633e34c8ce4bb985745075c0014974c1692ed804cb56253043d2b093b7beef9",
+      "bytes": 23163,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "c52db9aafd3a8b0e3d92e7fba3e42d5cad13f6436b0196b71cdbd0960f06caef",
+      "source": "_scratch/i011-20261020/completion-20261022/audit-compact-nonpass.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e191e4059b7767e3ffaa21057f88b9a8389d1b71faac6e5ee2dc9e39617d0264.gz",
+      "archive_sha256": "afbf0c170485c016c255ecddde2e5750b18b9a33e50ae51a3ace37ab0ec59649",
+      "bytes": 16403,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e191e4059b7767e3ffaa21057f88b9a8389d1b71faac6e5ee2dc9e39617d0264",
+      "source": "_scratch/i011-20261020/completion-20261022/audit-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d27dd5e098408a9e0e3ee1e0ce86f41ffb3265d72dbec90ddddef35072772e74.gz",
+      "archive_sha256": "57fab0723aea98b21dac7be75fabcd4791c0de6e626abc3b599567250ab68c43",
+      "bytes": 20653,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d27dd5e098408a9e0e3ee1e0ce86f41ffb3265d72dbec90ddddef35072772e74",
+      "source": "_scratch/i011-20261020/completion-20261022/audit-qualified-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/4bee44f34f2cf60e39094e4ec0549530fb53a9f65faba1281925cd7171fa7a2b.gz",
+      "archive_sha256": "7e091f7b6af5a7304ed3f113a46977575ada421dbcf35d91536c21c693af1d90",
+      "bytes": 22906,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "4bee44f34f2cf60e39094e4ec0549530fb53a9f65faba1281925cd7171fa7a2b",
+      "source": "_scratch/i011-20261020/completion-20261022/audit-qualified-nonpass.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ad8e91e7a0f002666187ec12a36b0f33e0836026e346a7ceb0adc2ca625bca74.gz",
+      "archive_sha256": "1f6247e40ca7f5c13e101c07a29b906829f716575b3059d8a94dbd21b1632d6c",
+      "bytes": 20677,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "ad8e91e7a0f002666187ec12a36b0f33e0836026e346a7ceb0adc2ca625bca74",
+      "source": "_scratch/i011-20261020/completion-20261022/audit-specialized-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/5d46d4cb3dee5dfc8b14caebfc057fe3c34329cbcabd30dc7489343a001787e6.gz",
+      "archive_sha256": "46cdec4a1ed8e92aa748ee4bf36165503c07d1b9c3bbd7d5c5d431de53222ef7",
+      "bytes": 32060,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "5d46d4cb3dee5dfc8b14caebfc057fe3c34329cbcabd30dc7489343a001787e6",
+      "source": "_scratch/i011-20261020/completion-20261022/changed-document-prose.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8c64bcc235d458fc6e090fe64d3263d61bfeebc8d4e6e83dc39ad2fcc96153a5.gz",
+      "archive_sha256": "5784230bf8aeba73edd4d5a35a9a34045f5d0aa84d8f088954e294f2e8a73120",
+      "bytes": 566463,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8c64bcc235d458fc6e090fe64d3263d61bfeebc8d4e6e83dc39ad2fcc96153a5",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-audit-semantic-recomputed.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e48bc9e9a236f4281ad9b96f46d501839e7102228c0e6b256039f4deac18f8ea.gz",
+      "archive_sha256": "26700a539f5e1dcf496a178c23c44583490e8e150536277db7617c03c04dc6c4",
+      "bytes": 59870,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e48bc9e9a236f4281ad9b96f46d501839e7102228c0e6b256039f4deac18f8ea",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-candidate-preflight.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/6b090efd116992d7c6df4539a0e1cf6af110b6c90330fb085033c5f4ddb71e99.gz",
+      "archive_sha256": "405933e9aed6d48366268747a290871c61d259801e5141d6abe89449e4d0cd27",
+      "bytes": 158,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "6b090efd116992d7c6df4539a0e1cf6af110b6c90330fb085033c5f4ddb71e99",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-evidence.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/99ddfd7884cde83530500fe39f20f4293f93b254f135ae8707f75a40ae708a17.gz",
+      "archive_sha256": "08299dbebd4cd5aef4f813fb8f830c93c447abeea0d3714f7a73258f31e2ed2e",
+      "bytes": 43,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "99ddfd7884cde83530500fe39f20f4293f93b254f135ae8707f75a40ae708a17",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final-driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final-driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8a4b708d19888cda4bddf63d3601c390c8cce63550ac1067ea0b029638b0e672.gz",
+      "archive_sha256": "3040603bd03720e474bfab9b3e3a8ec0401b426014e7ae56df32e4ee64d5e8fe",
+      "bytes": 8511,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8a4b708d19888cda4bddf63d3601c390c8cce63550ac1067ea0b029638b0e672",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final-nonpass-audit.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/90d50821508e47dad59272fd286ef0579269942cc3be7b3a16e48347f189d78e.gz",
+      "archive_sha256": "8c21759f8a74e19d7b29568222c294cc5b3dc5995feb6055f478ef16eef821ee",
+      "bytes": 9480,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "90d50821508e47dad59272fd286ef0579269942cc3be7b3a16e48347f189d78e",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final-run.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8eaf35384b0cc93939e29fdb7dda2bb9ff05fb16254d27709f5aa220eab3fbec.gz",
+      "archive_sha256": "243b9ab5d2c3698ed31b084e839671609c80b86a67e0d78705c5447174044da6",
+      "bytes": 855,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8eaf35384b0cc93939e29fdb7dda2bb9ff05fb16254d27709f5aa220eab3fbec",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-final.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8ab947c219713237d134ab971a143dad53620061b9c615f0d56a4f04e95b4af1.gz",
+      "archive_sha256": "7b640f76457a0ffad313d60516ae19a3caf8d7eedbf5d81b61a32204531d3031",
+      "bytes": 1613,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8ab947c219713237d134ab971a143dad53620061b9c615f0d56a4f04e95b4af1",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-independent-review-root-transcription.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/b6eb4bbdaeb94b256a2f25294ab91ffc564a865da8cc7277e5fbca5acac4a6bf.gz",
+      "archive_sha256": "f11ab72bac7f9f11ed718f7984e5dda4c678e647726c650f543f4a25be4fefcb",
+      "bytes": 381,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "b6eb4bbdaeb94b256a2f25294ab91ffc564a865da8cc7277e5fbca5acac4a6bf",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-nonpass-evidence.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-package.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/134b7c9c88723280e6c6500e47e3a820e9c364fabcd83cf95b843a7008492c05.gz",
+      "archive_sha256": "98c69fac832487d037ef3519057c5e8f320578f4f0ca7551dc2a02cecfdbf146",
+      "bytes": 1495,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "134b7c9c88723280e6c6500e47e3a820e9c364fabcd83cf95b843a7008492c05",
+      "source": "_scratch/i011-20261020/completion-20261022/compact-package.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44.gz",
+      "archive_sha256": "47b4204422340b47a4aa2c94e753e30c3a30fe1946143bfdcaf4ed80c6533765",
+      "bytes": 131,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44",
+      "source": "_scratch/i011-20261020/completion-20261022/continuation-driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/continuation-driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/06393f945965a8cbf3eef60a6d2ed7847c5da64698cc8c5f02f6e07a23719db6.gz",
+      "archive_sha256": "93a266a01335f33b2867bd3926c387a7af8fb1010d9fcc8fbeb9afe8ef741b17",
+      "bytes": 546,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "06393f945965a8cbf3eef60a6d2ed7847c5da64698cc8c5f02f6e07a23719db6",
+      "source": "_scratch/i011-20261020/completion-20261022/continuation.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/9f351d58959381fd3ba6f73d098b7f99d7c461c1b9645b8ea773de283650e793.gz",
+      "archive_sha256": "17dd16e41ff8e34f090deac03577fa055914128f6fe04883e62af6d56cea48e1",
+      "bytes": 7044,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "9f351d58959381fd3ba6f73d098b7f99d7c461c1b9645b8ea773de283650e793",
+      "source": "_scratch/i011-20261020/completion-20261022/continue-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8e7a8f2af90c527c0f6e58694d40cfe9fd7510767b213173c733eda247997603.gz",
+      "archive_sha256": "a6105cb958c24875aa5d08e1d195e2e5312ad4a0bc3b85626bdd36a18c13549e",
+      "bytes": 50472,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "8e7a8f2af90c527c0f6e58694d40cfe9fd7510767b213173c733eda247997603",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-changes.txt"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/56ab426353a21012b590b873fa2b9d8da22e77dbf76bd5421aa1f5a86d18e4d1.gz",
+      "archive_sha256": "d84cdf2e4d9f0f4fd9d35d1a64188cdeb793465741b26071687d4ade5ca646c7",
+      "bytes": 415,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "56ab426353a21012b590b873fa2b9d8da22e77dbf76bd5421aa1f5a86d18e4d1",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-current-length-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/24b3b5e4ba09c661bdb5dc9059d2c42c6894f103c13a5a26e34e32ace4733598.gz",
+      "archive_sha256": "915d6fbb5f654ad2de3146d8b4e9ccceb3516b2abbbfe6441f302bb2af09cbde",
+      "bytes": 621,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "24b3b5e4ba09c661bdb5dc9059d2c42c6894f103c13a5a26e34e32ace4733598",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-exception.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/58f9cf5c375beb5b5efe4f60ebc227f57f3cf0d0c3fffb00538674b5fc4a9644.gz",
+      "archive_sha256": "588910f77f4929cbf1cd4a52536ea25f5e154ba78c8e7aa43b4389b01f02d140",
+      "bytes": 328,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "58f9cf5c375beb5b5efe4f60ebc227f57f3cf0d0c3fffb00538674b5fc4a9644",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-length-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/f933cefc4351227068caa2e31e9e14c90a258899da8396d3e2ce5646a59ee56d.gz",
+      "archive_sha256": "1799a3ff244e5c1094e5b9c483311dee286e599d15bb358275944dd3f450208e",
+      "bytes": 5130,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "f933cefc4351227068caa2e31e9e14c90a258899da8396d3e2ce5646a59ee56d",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-structure-findings.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/00425714cf58ed89af38d6caf9153391902b92c873336fdc9bc64e2afa1e9623.gz",
+      "archive_sha256": "a1771fdf90f0838d2a93d95c6d38e6239f708c975d41bde7dc31b331ded49181",
+      "bytes": 1244,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "00425714cf58ed89af38d6caf9153391902b92c873336fdc9bc64e2afa1e9623",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-structure-reviewed.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/63a561c9960f2a3e2704bb837850ab75aac3415b419d09c4195b8635a4cf5a76.gz",
+      "archive_sha256": "7937ffd7ac85a5c561b845b1d62866ef115ad2c67fa0901a59b88d9f73c59aef",
+      "bytes": 18012,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "63a561c9960f2a3e2704bb837850ab75aac3415b419d09c4195b8635a4cf5a76",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-vocabulary-edits.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44.gz",
+      "archive_sha256": "47b4204422340b47a4aa2c94e753e30c3a30fe1946143bfdcaf4ed80c6533765",
+      "bytes": 131,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44",
+      "source": "_scratch/i011-20261020/completion-20261022/final-driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/final-driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/78d90aa2c0a253dbc1239dab15bd2db01531963e4dbf9e2093d52af9664cf87e.gz",
+      "archive_sha256": "e76f473c8c45a230ef816e176899f43795fcb300c6a15dde2eab7561ea9269f4",
+      "bytes": 18280,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "historical_audit_preparation",
+      "sha256": "78d90aa2c0a253dbc1239dab15bd2db01531963e4dbf9e2093d52af9664cf87e",
+      "source": "_scratch/i011-20261020/completion-20261022/final-global-audit/audit.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/acdac4752455352e4a6e443f294396ede78a46e1be1787dc9e78d68375320e24.gz",
+      "archive_sha256": "54d6b0507f87639a9c6c2c249dd0cadfadb45c6b82d81a1dd0233b7f49fe0a60",
+      "bytes": 5144,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "historical_audit_preparation",
+      "sha256": "acdac4752455352e4a6e443f294396ede78a46e1be1787dc9e78d68375320e24",
+      "source": "_scratch/i011-20261020/completion-20261022/final-global-audit/nonpass-preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/3f7c61ec3db80dea204141c8ef4d90b66c8c44b15bc29afd39ef6ac2b45cc609.gz",
+      "archive_sha256": "f8eeef4bd3ebb6d6e9446731ef04df258d6840d77cc3272a2f1d700beeb5f7c3",
+      "bytes": 4635,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "historical_audit_preparation",
+      "sha256": "3f7c61ec3db80dea204141c8ef4d90b66c8c44b15bc29afd39ef6ac2b45cc609",
+      "source": "_scratch/i011-20261020/completion-20261022/final-global-audit/preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ab7d122c9676710f4102a11e4fbefff1bdad66f1b5f39d42b246b2836c6a7fb1.gz",
+      "archive_sha256": "9ed4714ab82b20574710b21f1e07a19cef56101b72c12e2a943c3afeb7f2c950",
+      "bytes": 7548,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "ab7d122c9676710f4102a11e4fbefff1bdad66f1b5f39d42b246b2836c6a7fb1",
+      "source": "_scratch/i011-20261020/completion-20261022/final-run.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/9122fc7670958c829cdb1ff27b9cd907cb44babca74851498a8fcbe1cc22479c.gz",
+      "archive_sha256": "7bc0281e4e551b9defb13a5ec9c36c66293c06622309b7e450a7bc2c62c7e26b",
+      "bytes": 18286,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "9122fc7670958c829cdb1ff27b9cd907cb44babca74851498a8fcbe1cc22479c",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/audit.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/08d5dd807873662659dc0a24913683b0fa65340c8333b238b5292dec678f6ba5.gz",
+      "archive_sha256": "af9f8866f9eb6b1385648efb5bc73f12df3e1338d26bd29c87398ac20b163e2d",
+      "bytes": 1235,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "08d5dd807873662659dc0a24913683b0fa65340c8333b238b5292dec678f6ba5",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/independent-preparation-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/20919f5c718f6414ece846d065b24e024435040622d1c1a053299be602b9deb4.gz",
+      "archive_sha256": "9fc6f0c0bd6102238da401696fd016066f182938d0f478bfa87ee70e6c17c3d4",
+      "bytes": 8443,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "20919f5c718f6414ece846d065b24e024435040622d1c1a053299be602b9deb4",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/measurement-contract.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/88f81738850f9a9c6bbbfecd3d967797541da59db11af69c41f1f883e9dc2522.gz",
+      "archive_sha256": "03486b3ecc2c232d6200852fadc91c53767ab055c9f06d926481cdd246411ca9",
+      "bytes": 2989,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "88f81738850f9a9c6bbbfecd3d967797541da59db11af69c41f1f883e9dc2522",
+      "source": "_scratch/i011-20261020/completion-20261022/final-specialized-global-audit/preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/guest-check.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/91969fb68e8065e91029e6621c237dce8ec85f460dbaae308adae21658d51a07.gz",
+      "archive_sha256": "595029d45e0829b008cc9269681b3d3b8f55210063232c5ae61a2f9b8749cbd1",
+      "bytes": 114,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "91969fb68e8065e91029e6621c237dce8ec85f460dbaae308adae21658d51a07",
+      "source": "_scratch/i011-20261020/completion-20261022/guest-check.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ef45f1be7ec5a04bf39cd6b001f1b3aed9f2ef6857fbda50f2f6d46078892eeb.gz",
+      "archive_sha256": "461315d3dc0a12d8fc3867b3b4c832f161a222911935a999cc31a399633fed5c",
+      "bytes": 1104,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "ef45f1be7ec5a04bf39cd6b001f1b3aed9f2ef6857fbda50f2f6d46078892eeb",
+      "source": "_scratch/i011-20261020/completion-20261022/http-generic-reader-design.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/035719373dc851dae905b0711f92565925c620b32b0e5ef966ea9ed745d7fb1a.gz",
+      "archive_sha256": "9a585e9a8cf39ff62f40057ecd69a2c33bb79cff5e8922b2f29b40e63f6b8998",
+      "bytes": 1884,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "035719373dc851dae905b0711f92565925c620b32b0e5ef966ea9ed745d7fb1a",
+      "source": "_scratch/i011-20261020/completion-20261022/http-lazy-input-design.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44.gz",
+      "archive_sha256": "47b4204422340b47a4aa2c94e753e30c3a30fe1946143bfdcaf4ed80c6533765",
+      "bytes": 131,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44",
+      "source": "_scratch/i011-20261020/completion-20261022/http-precision-driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/http-precision-driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/71682848f2f129ede5a50b1108efb435b8af69671bac1749b5dcf83380b24632.gz",
+      "archive_sha256": "78c8741d5571eb1bbd8c619a09e77b070e591dc980702aaf184d2301c39391d0",
+      "bytes": 5020,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "71682848f2f129ede5a50b1108efb435b8af69671bac1749b5dcf83380b24632",
+      "source": "_scratch/i011-20261020/completion-20261022/http-precision.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44.gz",
+      "archive_sha256": "47b4204422340b47a4aa2c94e753e30c3a30fe1946143bfdcaf4ed80c6533765",
+      "bytes": 131,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "584be28adbd3f4bf262d5c9075c08e56a6fe057cf4b1109e94bad86ea7477a44",
+      "source": "_scratch/i011-20261020/completion-20261022/http-reader-candidate-driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/http-reader-candidate-driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d739b008bf0046159ad4165a124871fe6813191452d4128895ef9af525b3c53f.gz",
+      "archive_sha256": "cbe9b1d35f4cc6401d1e662587dec6fdf6fcdbedc44a0383eb486ec9829dcf5c",
+      "bytes": 5230,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d739b008bf0046159ad4165a124871fe6813191452d4128895ef9af525b3c53f",
+      "source": "_scratch/i011-20261020/completion-20261022/http-reader-candidate.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/http-request-profile-preservation-corrected.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/5d85825abe232d7c8e2ed5c5d1a8062c353ec73854a502ca04dcf56d17e820a3.gz",
+      "archive_sha256": "36379392b0c65aa35504f488d9c47a7c856b7600c10bb9732ad021710d2fae4a",
+      "bytes": 1173,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "5d85825abe232d7c8e2ed5c5d1a8062c353ec73854a502ca04dcf56d17e820a3",
+      "source": "_scratch/i011-20261020/completion-20261022/http-request-profile-preservation.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/fcce70545e1c6d7494528158df3defa3f2649a58cc23633cffd8ac653b0d0965.gz",
+      "archive_sha256": "886b5fe1033e1863f6e42cc471485722bc07c7e475462192fa18ed7f696e852d",
+      "bytes": 35374,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "fcce70545e1c6d7494528158df3defa3f2649a58cc23633cffd8ac653b0d0965",
+      "source": "_scratch/i011-20261020/completion-20261022/literal-sequence-design.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/945092da9b54061f7e871ba9385bd242876f9af3daa50a2c1522ea2fa705795b.gz",
+      "archive_sha256": "f23417bb8372acc508dddda2bc992f01a7b1366718f0a1c7575f93b99a21ee44",
+      "bytes": 2122,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "945092da9b54061f7e871ba9385bd242876f9af3daa50a2c1522ea2fa705795b",
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-row-design.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/39fb28ee68154e96d35ec0c59f669800bcb3fae759635386fa4622b2cbb370ba.gz",
+      "archive_sha256": "8ec34ea53fe24cbc75d77e28c403699f3ea961622d8f36607a8774b1905aff69",
+      "bytes": 10987,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "39fb28ee68154e96d35ec0c59f669800bcb3fae759635386fa4622b2cbb370ba",
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-design.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/a64ee8a12d855871abe787015a6c17cda3460ef0f688812fb52fe0da4ce218e5.gz",
+      "archive_sha256": "c362d15a449b334ed1f4e17bbbadb886fd4516d179795e5631c96e335f2712e5",
+      "bytes": 41394,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "a64ee8a12d855871abe787015a6c17cda3460ef0f688812fb52fe0da4ce218e5",
+      "source": "_scratch/i011-20261020/completion-20261022/metadata-v2-inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/764254d9589d3edc9a80c4498cbf63ffb244b3d961a329c3a5ba8974697342ce.gz",
+      "archive_sha256": "21b439676eb37ed089aed761ebb6631425d5cd1f1b142c93aff4583b4d26cfd1",
+      "bytes": 7305,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "764254d9589d3edc9a80c4498cbf63ffb244b3d961a329c3a5ba8974697342ce",
+      "source": "_scratch/i011-20261020/completion-20261022/preserve-compact-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/22b37e671d10353c19879da90f61179b5bc125000a97b81a882c4b165508dcf8.gz",
+      "archive_sha256": "907448f2d0412841d66fb9319bc8d29bf199f704d07b0965f4f7aee33f2ed1fa",
+      "bytes": 8741,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "22b37e671d10353c19879da90f61179b5bc125000a97b81a882c4b165508dcf8",
+      "source": "_scratch/i011-20261020/completion-20261022/preserve-compact-nonpass.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/3b088a01079303db60ae2df19c7f422f2f12dbd0b6f6e7a13b628e9ab13282ea.gz",
+      "archive_sha256": "040e438bb80798c453de5739ab0475e67bac1f2246595be859c1252cd0509f0b",
+      "bytes": 16059,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "3b088a01079303db60ae2df19c7f422f2f12dbd0b6f6e7a13b628e9ab13282ea",
+      "source": "_scratch/i011-20261020/completion-20261022/preserve-failed-campaign.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/55a0020360c45da08053940063b75e39e742a54b45393bcaba794778d2194bdc.gz",
+      "archive_sha256": "368a12b5eb88f24270f152cb696ee9b3cd3f9c67ad09e2ebaddc47c70b821a4c",
+      "bytes": 30691,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "55a0020360c45da08053940063b75e39e742a54b45393bcaba794778d2194bdc",
+      "source": "_scratch/i011-20261020/completion-20261022/preserve-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/6dd2dfec0e5c6138bcabd327368555b32bbc940020ec983b5b04b908ec003965.gz",
+      "archive_sha256": "a18c6894b44ff92478fbb073d95cd867840d4e189dcc04f97bc021db2fb979e6",
+      "bytes": 7677,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "6dd2dfec0e5c6138bcabd327368555b32bbc940020ec983b5b04b908ec003965",
+      "source": "_scratch/i011-20261020/completion-20261022/preserve-qualified-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/fa5bcb2d3762e503e2b4f547ba3305702de028e8fc1c80ef3d9af7b8d1264863.gz",
+      "archive_sha256": "2250e287f364f73074823ca527a27a70dfcaea76bcfb09dd7df56bdeb143f5e1",
+      "bytes": 8491,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "fa5bcb2d3762e503e2b4f547ba3305702de028e8fc1c80ef3d9af7b8d1264863",
+      "source": "_scratch/i011-20261020/completion-20261022/preserve-qualified-nonpass.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/140618fe4ea1d59bc8699f1a70d0ba5f2abe094e0f3d2cf4e25f17e3501eef50.gz",
+      "archive_sha256": "1c970bfad52c06636bd46551347d6b9838b914823e408faa6c64273d377ed317",
+      "bytes": 7723,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "140618fe4ea1d59bc8699f1a70d0ba5f2abe094e0f3d2cf4e25f17e3501eef50",
+      "source": "_scratch/i011-20261020/completion-20261022/preserve-specialized-final.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/28d2168ca06018a4f51a171f69813f2fdb0ff6e2e8241871b83b5200fad65e99.gz",
+      "archive_sha256": "f2abea115519273fd8fb5492b57bed49efc4431ca2f72361e3b10a7e7f7ab514",
+      "bytes": 858,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "28d2168ca06018a4f51a171f69813f2fdb0ff6e2e8241871b83b5200fad65e99",
+      "source": "_scratch/i011-20261020/completion-20261022/progress.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/09e8cc69b63a7576fd602365d4df23d42437fc7711f6bac9e099d141f16fba06.gz",
+      "archive_sha256": "b4a13a58af54b21460936c7d4ae70d679f1910b0a5b25ebb7b16f14b5d701088",
+      "bytes": 60793,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "09e8cc69b63a7576fd602365d4df23d42437fc7711f6bac9e099d141f16fba06",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-candidate-preflight.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/b14ad46a900db30b6be6463afac25a4e644ef941111e3ae7310e9f3e83f34490.gz",
+      "archive_sha256": "589a978dabddd7892af56051dbe3df3318a9f73ceaa263529b78754df20f461f",
+      "bytes": 164,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "b14ad46a900db30b6be6463afac25a4e644ef941111e3ae7310e9f3e83f34490",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-evidence.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/dc927019fe20c1c0f9dd5f92aada198b36e9f930559a78a826ec751818492c84.gz",
+      "archive_sha256": "494409d3b11716d957fc09e1104ab3f8f2a1ed6807f53ee7dc67c31afe7d03e3",
+      "bytes": 45,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "dc927019fe20c1c0f9dd5f92aada198b36e9f930559a78a826ec751818492c84",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-final-driver.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-final-driver.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/9ad076c9cd1e860071f085acea9335c1dcefde73d8e22d4f24e16b571bb2a7a8.gz",
+      "archive_sha256": "fdb18ecf3a666cb438a8a44bd3b0fec55add47f75041bbc1b27cec5aa84c1a40",
+      "bytes": 9975,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "9ad076c9cd1e860071f085acea9335c1dcefde73d8e22d4f24e16b571bb2a7a8",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-final-run.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8822a6bf31ecb639ad2e4d6854194e8c1b6f6cc775a0c85b3e11d519ac90c961.gz",
+      "archive_sha256": "4a24b5eb0e734e893b2acdb74cf86938ae8dc69e528345c5141e9fd75aafae32",
+      "bytes": 875,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8822a6bf31ecb639ad2e4d6854194e8c1b6f6cc775a0c85b3e11d519ac90c961",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-final.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-focused-darwin.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/62b756dddcf8d8271655efff2f6e19971492f8179165e64c60a8b39e97b766cc.gz",
+      "archive_sha256": "594a3ba2fb125112679576ee4cc5aeb920771a13ce72455200fae927f5f1bdbc",
+      "bytes": 5671,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "62b756dddcf8d8271655efff2f6e19971492f8179165e64c60a8b39e97b766cc",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-focused-darwin.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-focused-linux.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8cf077a1b890d084a545955cf1a600d04b6494b021cb8593c0d06ed6a12cd2a8.gz",
+      "archive_sha256": "f4be0145ee6a9a1f461175a6dba3e687aa20a727c8420552e007998232b1ddcc",
+      "bytes": 2539,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8cf077a1b890d084a545955cf1a600d04b6494b021cb8593c0d06ed6a12cd2a8",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-focused-linux.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/b0ee56a605bb66beee702b1e1a291093e98d553dbf1c179ebab5cf7bbbc8e945.gz",
+      "archive_sha256": "ed35d5487c88ba638212d55b79fa9b3661f9b49c79216aee7322251c4343390e",
+      "bytes": 4453,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "b0ee56a605bb66beee702b1e1a291093e98d553dbf1c179ebab5cf7bbbc8e945",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-focused-results.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/f9b4a8c67a9fcaab6ec0fdc990e03022cd6052dcf6036f9bca6e3ad4f4a96c6c.gz",
+      "archive_sha256": "b3619d70d49120b35d9b134cb4bb298235e701863f1f8bb54ad5ed0c56b3b873",
+      "bytes": 1399,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "f9b4a8c67a9fcaab6ec0fdc990e03022cd6052dcf6036f9bca6e3ad4f4a96c6c",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-focused.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/470fb2445f1fab975916b94e512dc99755e6cf99298202ab51d7a1285c11ac91.gz",
+      "archive_sha256": "35ae54f319fab433e1a872dd87cd94eead918f169bfa02b20dd14a74cbed318f",
+      "bytes": 566720,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "470fb2445f1fab975916b94e512dc99755e6cf99298202ab51d7a1285c11ac91",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-audit-semantic-recomputed.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d80efaa17c2fd26723934dc72956f96b7a73be0753438f5045d1c05dc709cb40.gz",
+      "archive_sha256": "c660d1611484879fc3cbd0e06d9c22a15f7534195dbdd024d105364919010aea",
+      "bytes": 9081,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d80efaa17c2fd26723934dc72956f96b7a73be0753438f5045d1c05dc709cb40",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-audit.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-audit.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/2010c24a1f37d16818c8f0ba377e444dfee64c689bbdd5e1018b7df85c04c7bc.gz",
+      "archive_sha256": "7d9480f8cd5e722c555f6baafa56c00b01fec8fc2efa029361dac694053a3617",
+      "bytes": 478,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "2010c24a1f37d16818c8f0ba377e444dfee64c689bbdd5e1018b7df85c04c7bc",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-audit.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/614afb9eb53b9d3d13ae92d6602241a450087ba0265fba0019d39616bc5809f1.gz",
+      "archive_sha256": "6e485277c096e9313451791406f9c1ebc726b40f4103f4dc854d5a54a4795cde",
+      "bytes": 348,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "614afb9eb53b9d3d13ae92d6602241a450087ba0265fba0019d39616bc5809f1",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-evidence.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-preserve.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8b2598391bb718006f9459c70a096892e835181b91009fc576d5c01639f23dcc.gz",
+      "archive_sha256": "035dc2ff76a070916700abfb820d71a47d9f8e96e8ec23f2249c564ce9c40a4d",
+      "bytes": 149,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8b2598391bb718006f9459c70a096892e835181b91009fc576d5c01639f23dcc",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-nonpass-preserve.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-package.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/310cdb9ca56196b049211c0979d1ed96ce11bdf8092ccac078358c1dba2aa787.gz",
+      "archive_sha256": "dfd749d2d46ebaee4bccdf806a0531d1c360ed9b675f6bc6cfd994193e8f8b80",
+      "bytes": 1509,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "310cdb9ca56196b049211c0979d1ed96ce11bdf8092ccac078358c1dba2aa787",
+      "source": "_scratch/i011-20261020/completion-20261022/qualified-package.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/reader-focused.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/2a62901e8420f4a6d99c7cdaa80778ff98bfb9e78bb2edd904b148266531c099.gz",
+      "archive_sha256": "5da8bb1e2c4bec29b4f53c3394e8f536002dca87957b764979da8bef23975d86",
+      "bytes": 25506,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "2a62901e8420f4a6d99c7cdaa80778ff98bfb9e78bb2edd904b148266531c099",
+      "source": "_scratch/i011-20261020/completion-20261022/reader-focused.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/reader-package-build.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d24a8aeef4deb29ae5ede764d77915b5f506ce0ca613812730369db83cb9c665.gz",
+      "archive_sha256": "86b4d9493c082973f0adc6cbf016c83cb0a4de32e4189a3a21649fd02f7f0eca",
+      "bytes": 1446,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d24a8aeef4deb29ae5ede764d77915b5f506ce0ca613812730369db83cb9c665",
+      "source": "_scratch/i011-20261020/completion-20261022/reader-package-build.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/2bc81606d9b6ef3b2fdba4740e7e3cf4becca21a26f42eca512613171237e49e.gz",
+      "archive_sha256": "8c2f67ee4c9b03799ca00d7a4fad3638c65c658a1c0d079a773b34a1edb37fa1",
+      "bytes": 820,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "2bc81606d9b6ef3b2fdba4740e7e3cf4becca21a26f42eca512613171237e49e",
+      "source": "_scratch/i011-20261020/completion-20261022/scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/49c3d45226f8fe15f4dc0225867509c41428f3ceee3ecaf4a61524d1e8eb9f5a.gz",
+      "archive_sha256": "a731471a7ee05b992615bdbd1dcb812335ab5538310b4f78dd8b30529ef8da41",
+      "bytes": 196,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "49c3d45226f8fe15f4dc0225867509c41428f3ceee3ecaf4a61524d1e8eb9f5a",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-change-evidence/evidence.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/1a15947580e8a27752e140692a8bb5e4980a9d7201cc0992d012b7cdbbb20c01.gz",
+      "archive_sha256": "c7c3af4f950e6002b9ce9de8ee3e7ac5126578dfe6cfa65e4ffd5a3bf7409082",
+      "bytes": 1160,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "1a15947580e8a27752e140692a8bb5e4980a9d7201cc0992d012b7cdbbb20c01",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-change-evidence/preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d67fe70ef0e4c10722289b87c656bc0c69796aedb6a03958b394990a35c96d70.gz",
+      "archive_sha256": "fe52176dc8ad1a76cef3f399b0d9caf358212ffa5049749d3b98ab38a43321b3",
+      "bytes": 8011,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d67fe70ef0e4c10722289b87c656bc0c69796aedb6a03958b394990a35c96d70",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-change-evidence/preserve.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durable_bytes_other_source_path",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-change-preservation.log"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/288ed0d556eeaee8c04a6721aad9dca0cbeb4ca0c6d3e5484f211c53b2886ca6.gz",
+      "archive_sha256": "abfca0135987cf21618815bd259d94bad3b158a5743924c1acd46692803eeb35",
+      "bytes": 170,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "288ed0d556eeaee8c04a6721aad9dca0cbeb4ca0c6d3e5484f211c53b2886ca6",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-evidence.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/841926acc806f3e1cad8a665c444b3dd5e9545e6fb31a8266ea0966ea8ea6eb1.gz",
+      "archive_sha256": "69722e4f4e9cf16adb3e4f1cc645564ebf62b51572c8a08754245bc034355044",
+      "bytes": 10013,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "841926acc806f3e1cad8a665c444b3dd5e9545e6fb31a8266ea0966ea8ea6eb1",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-final-run.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/4c01775a760ea302c486c5de5b869c93dfa8d0c705f9b84b1f5d8249938323ef.gz",
+      "archive_sha256": "1d87657de728194ac86aa16d2eb0b74db26852a3b1e9b1f55ea44b46a873dcf8",
+      "bytes": 919,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "4c01775a760ea302c486c5de5b869c93dfa8d0c705f9b84b1f5d8249938323ef",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-final.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-darwin.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/4fd79f9223d2cc9add7e4cb2131546048ce00d576d2afbbdcc090348c9504661.gz",
+      "archive_sha256": "c36f333baa686f6da6f486988e5847515cd5300013c710d02f6a3fe4f7a60358",
+      "bytes": 6057,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "4fd79f9223d2cc9add7e4cb2131546048ce00d576d2afbbdcc090348c9504661",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-darwin.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-linux.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/6663e8a1fc3537acdac30664edf90401b8bbf39ac31a8937336de1c4f35abffc.gz",
+      "archive_sha256": "e14487e04e9d86c758c5da4391f068cde172a7d4a5e66683535fb8348f56ad31",
+      "bytes": 2659,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "6663e8a1fc3537acdac30664edf90401b8bbf39ac31a8937336de1c4f35abffc",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-linux.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/611c247c9e1293c85913daaf45ef8413c536a323ad6101fb07302cc9dd6498b9.gz",
+      "archive_sha256": "9248349f4e0c0d6ef29fd87ff8c234edb2fd0e898fde4a85e1cc1e729c020269",
+      "bytes": 5336,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "611c247c9e1293c85913daaf45ef8413c536a323ad6101fb07302cc9dd6498b9",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected-results.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/abdf960aa65c6f6faeca7c575ea99e43b23f3d0c606aa1bf148eca84beb3fcde.gz",
+      "archive_sha256": "22bf20e37ddc559d1bb1dc2137138626856a77dcaf0257f9fe1390cb9135d0b6",
+      "bytes": 1511,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "abdf960aa65c6f6faeca7c575ea99e43b23f3d0c606aa1bf148eca84beb3fcde",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-corrected.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-darwin.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/946b8f9af1f801bef86330c11ad66fbdd80fe6e7547c3e23a0cd29ca0373944d.gz",
+      "archive_sha256": "da38b68f1752b8846fde997d4a1ba25d74a9ce8f579092470c611858c5abcfce",
+      "bytes": 5671,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "946b8f9af1f801bef86330c11ad66fbdd80fe6e7547c3e23a0cd29ca0373944d",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-darwin.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8cd53984eb2c9157e9a70a47ae86de4e8c9ccf0f8aad42ff0fadd65885bddf9c.gz",
+      "archive_sha256": "c227bb6d1914908f488f10375832273ece4069ab9466d05821ca09c6f451abd7",
+      "bytes": 48,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8cd53984eb2c9157e9a70a47ae86de4e8c9ccf0f8aad42ff0fadd65885bddf9c",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-linux.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/56757661448931589fe8962bb9270ebb2b60f03ec8c2382843f5d08e16742924.gz",
+      "archive_sha256": "74f191ecf754baa0300aa1bf236fe7bc8c032a57fe44ab5cf75d054883ee903e",
+      "bytes": 2555,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "56757661448931589fe8962bb9270ebb2b60f03ec8c2382843f5d08e16742924",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused-linux.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/9ad01cf2fa4148854d2e2c77b9f3646a20f645f6be057227bce50853058c40de.gz",
+      "archive_sha256": "c0199b55d46d592057443e7c7a9812f35f589f65f79d638810a7a5fa0ea7fa59",
+      "bytes": 1417,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "9ad01cf2fa4148854d2e2c77b9f3646a20f645f6be057227bce50853058c40de",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-focused.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/bb269a62de2640c53ab16acd369b0060a710f8b96e3ed31884fdeaf899ff350e.gz",
+      "archive_sha256": "8facfb2f5ae16bcd9f94bacb7d0cca9c8da98763adf335d0b0ba2146fdbd0168",
+      "bytes": 1953,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "bb269a62de2640c53ab16acd369b0060a710f8b96e3ed31884fdeaf899ff350e",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-orchestration-independent-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/29a7eea5da0a22145dcac7745b2af53ef4a89c21564e33cc125422cbd397722d.gz",
+      "archive_sha256": "bdd1f660e294f124f38167ed9f5d9cfbfa6996b24071a236886c06d1b4192190",
+      "bytes": 30390,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "29a7eea5da0a22145dcac7745b2af53ef4a89c21564e33cc125422cbd397722d",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-orchestration-preparation.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "bytes": 0,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-package.stderr"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/325c75239de5320b67cce128bc52049fc28ff3745614c5e6fd0bbe44ac3849a7.gz",
+      "archive_sha256": "57b09e332c0f0a40e178376423ea14e083f645e54230787a595c2ac1d7c31d49",
+      "bytes": 1523,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "325c75239de5320b67cce128bc52049fc28ff3745614c5e6fd0bbe44ac3849a7",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-package.stdout"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/05aa88b7c8cecafe0fb052fcd298f59572387c6e28d40de2470b8fb9acdf0e66.gz",
+      "archive_sha256": "8069f7bec3a1d6490506b60460e963237b055ddaa1ed82bb014053d35b3cc209",
+      "bytes": 863,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "05aa88b7c8cecafe0fb052fcd298f59572387c6e28d40de2470b8fb9acdf0e66",
+      "source": "_scratch/i011-20261020/completion-20261022/specialized-progress.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/10b8b51defd43f267aaff7ff175b1082982317c54958a1c28f614f837a0fa8fb.gz",
+      "archive_sha256": "6248c777bb0fb0f55fa638a4ed203dff21f094ba2919a2c0bde539ebd7c846ad",
+      "bytes": 2188,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition durably_archived_exact",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "10b8b51defd43f267aaff7ff175b1082982317c54958a1c28f614f837a0fa8fb",
+      "source": "_scratch/i011-20261020/completion-20261022/task.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/59cdf10f17c0cf084f7bf2c9aef1eb7a5ab3794dd83d9ef39ab939919632571f.gz",
+      "archive_sha256": "c9980d6628ad81a31fc0fa3bce6dcd8e8e0922a0bd71d38d0b61a43e02215f24",
+      "bytes": 532,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "59cdf10f17c0cf084f7bf2c9aef1eb7a5ab3794dd83d9ef39ab939919632571f",
+      "source": "_scratch/i011-20261020/coordinate-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/cdd7769b6e9d07511aef25286a3976046e38524a23e92b38d2e75f8f5cdcbd6a.gz",
+      "archive_sha256": "80afbbfdd445d5a64f2a7e71af92091b019905dbf95ace7c559b485be391356a",
+      "bytes": 1676,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "cdd7769b6e9d07511aef25286a3976046e38524a23e92b38d2e75f8f5cdcbd6a",
+      "source": "_scratch/i011-20261020/defect-code-reviews.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/537c592c12928f2d8add7c6f415ab4440bbd68a9cc82a73d5e09ca9dbed3b122.gz",
+      "archive_sha256": "1d0614f82431b2c59da29706f9cdfd8505b71be5b5b5f29c9c3b774fe06c8585",
+      "bytes": 4666,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "537c592c12928f2d8add7c6f415ab4440bbd68a9cc82a73d5e09ca9dbed3b122",
+      "source": "_scratch/i011-20261020/defect-docs-ste.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/1596c25e7e61e378791d183a1c802b046f6d5dcc9f935b9285062c3798063b07.gz",
+      "archive_sha256": "23650955de8636e3b42b93717666b2d07c04dfbc1fccf3781c9deaa2bee48e8f",
+      "bytes": 12672,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "1596c25e7e61e378791d183a1c802b046f6d5dcc9f935b9285062c3798063b07",
+      "source": "_scratch/i011-20261020/docs-ste-before-final-8-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/606e86ecb09567f6e70420e644ca3fa800ff0d35c6002ea4dcff84ed7641ac17.gz",
+      "archive_sha256": "e76afc49ca1e2eb2971d38557937091f6a1432dd91f2aaed678382dcc0b8489c",
+      "bytes": 8290,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "606e86ecb09567f6e70420e644ca3fa800ff0d35c6002ea4dcff84ed7641ac17",
+      "source": "_scratch/i011-20261020/docs-ste-before-final-8.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/0aac7d36b13f8a6f74f41c8f7fd5ee6172b5bc05bc763f77f2540075107312c1.gz",
+      "archive_sha256": "5947f220cd7ea3a55c2636db74fb6b3f7f59ed496512fb288252804cb331aef5",
+      "bytes": 12698,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "0aac7d36b13f8a6f74f41c8f7fd5ee6172b5bc05bc763f77f2540075107312c1",
+      "source": "_scratch/i011-20261020/docs-ste-language-corrections-8-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/16141e19e70331b67d46f3fce38403d284d085e1557e41c0c632bef30ef77ab3.gz",
+      "archive_sha256": "f42528fb64b55b5d3f2b810326e31401fb835201dc580cab4abbbc62fae28ae1",
+      "bytes": 8290,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "16141e19e70331b67d46f3fce38403d284d085e1557e41c0c632bef30ef77ab3",
+      "source": "_scratch/i011-20261020/docs-ste-language-corrections-8.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/47cdc3aa23a203b9e1037c32fe604f2b98b02e3417afaf61d234cef80d0aca5d.gz",
+      "archive_sha256": "9db2376f8d348aff05a60544c162deff8c4be4be4b58aad6b43b47c5bcf91eb4",
+      "bytes": 161,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "47cdc3aa23a203b9e1037c32fe604f2b98b02e3417afaf61d234cef80d0aca5d",
+      "source": "_scratch/i011-20261020/docs-ste-transport-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/606e86ecb09567f6e70420e644ca3fa800ff0d35c6002ea4dcff84ed7641ac17.gz",
+      "archive_sha256": "e76afc49ca1e2eb2971d38557937091f6a1432dd91f2aaed678382dcc0b8489c",
+      "bytes": 8290,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "606e86ecb09567f6e70420e644ca3fa800ff0d35c6002ea4dcff84ed7641ac17",
+      "source": "_scratch/i011-20261020/docs-ste-transport.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8e05fc3e97a81be9ec93a114762dfdf7aad9a774e382a161d35cfec78a0342d8.gz",
+      "archive_sha256": "32498fef56334d84aba3d5b2c8394a3c48a41c9b0ae2b7566b72483bff784768",
+      "bytes": 2452,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8e05fc3e97a81be9ec93a114762dfdf7aad9a774e382a161d35cfec78a0342d8",
+      "source": "_scratch/i011-20261020/document-current-9/final-document-links.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/783a08020504fd6c265378c18da321456fcd823a7147d42c7592cf328c4c9580.gz",
+      "archive_sha256": "1ac4c937bc7c4eed5f561e0655d0c5d380788294568f9b755a8e6e76f13d953f",
+      "bytes": 4790,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "783a08020504fd6c265378c18da321456fcd823a7147d42c7592cf328c4c9580",
+      "source": "_scratch/i011-20261020/document-current-9/final-repository-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/d4e503eb026fee4b0727018db3ed251521eb4babab1ceb82783365546dba01e2.gz",
+      "archive_sha256": "efc1b6b0feda4be643988cb3a14a5fd5e9b83fe8e8ed2a4b2985ec670a88d88e",
+      "bytes": 8332,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "d4e503eb026fee4b0727018db3ed251521eb4babab1ceb82783365546dba01e2",
+      "source": "_scratch/i011-20261020/document-current-9/manual-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8f015e6de9d0c0b23d232ab0a859cec354396edadfb1777b01ea94be8348c9e0.gz",
+      "archive_sha256": "5a3bc9886607d297ab3232e88f12b6cd78156a65385df5cdb04dd0212bc714f0",
+      "bytes": 15156,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8f015e6de9d0c0b23d232ab0a859cec354396edadfb1777b01ea94be8348c9e0",
+      "source": "_scratch/i011-20261020/document-current-9/mechanical-ste-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ccb09e6d02384fd22584a9c369ef28df716717b7501a1725da98624889cfcbb9.gz",
+      "archive_sha256": "d6081a2334fde2d2116c7b0ef2a50e0afe2e4085827ec10f68eecb77ab1f6879",
+      "bytes": 8381,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "ccb09e6d02384fd22584a9c369ef28df716717b7501a1725da98624889cfcbb9",
+      "source": "_scratch/i011-20261020/document-current-9/mechanical-ste.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/bbca948b9d1f4048c93bd9a721ecddecb9761f4c199b043f26ee298f6bf8faa7.gz",
+      "archive_sha256": "4f1391ebe992e717893cdb4afa8f6fa167265289fcaf45fdbe3eab2e4c1c9507",
+      "bytes": 472,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "bbca948b9d1f4048c93bd9a721ecddecb9761f4c199b043f26ee298f6bf8faa7",
+      "source": "_scratch/i011-20261020/document-current-9/root-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/62ccea4adac1979d2a97bb943603ce43aad54d73558426691a05f1f38e636fba.gz",
+      "archive_sha256": "6f2e229bf5cd041aecdd8d9f991167b86566665659735e6a3c627ad35eb5a0f8",
+      "bytes": 2549,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "62ccea4adac1979d2a97bb943603ce43aad54d73558426691a05f1f38e636fba",
+      "source": "_scratch/i011-20261020/document-outcome-11/final-document-links.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/55941241332f513d28a2d63ad4dd35732e29c39d847ccfe9276d4aeb5d16cb75.gz",
+      "archive_sha256": "4c33867013f8fb287a358b5aa8b911c050a12d5dbaf369151e297dbf9f8e40a7",
+      "bytes": 4887,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "55941241332f513d28a2d63ad4dd35732e29c39d847ccfe9276d4aeb5d16cb75",
+      "source": "_scratch/i011-20261020/document-outcome-11/final-repository-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/bb6fa565ffa4c2fd405196cb8d3eb2d9ac8e2604c315e768effe084a72e5330d.gz",
+      "archive_sha256": "e3eea4288f54f814959fed2c54d152268b95a69e435b8b8fc7371734e1ed67ff",
+      "bytes": 19886,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "bb6fa565ffa4c2fd405196cb8d3eb2d9ac8e2604c315e768effe084a72e5330d",
+      "source": "_scratch/i011-20261020/document-outcome-11/manual-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/0fe0fdeebf119f0285a798edb54d457fb1c5213cb5e4325eb58ff705ea91d560.gz",
+      "archive_sha256": "65e118cfe0d5f7f2225803a5a83958a1850666d52d4986feb3498e6e35d8b43c",
+      "bytes": 18222,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "0fe0fdeebf119f0285a798edb54d457fb1c5213cb5e4325eb58ff705ea91d560",
+      "source": "_scratch/i011-20261020/document-outcome-11/ste-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/72ed6da0ce7ed7f0d52fcd5ec375bffa0638cd048c4b5d4400ede4cac14a52eb.gz",
+      "archive_sha256": "c12ba38e3caf90ea8827d684adacfe90acb04e1b0b46fc54acfcd30dfd08bdca",
+      "bytes": 8520,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "72ed6da0ce7ed7f0d52fcd5ec375bffa0638cd048c4b5d4400ede4cac14a52eb",
+      "source": "_scratch/i011-20261020/document-outcome-11/ste.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/2ab229e4d0025f75f8593a135ae9b4672652fe3fb3c3b1c07fbe9d4c30c746e7.gz",
+      "archive_sha256": "79d5842e23bd5038ba9fe52890c772b74e308989072e44ebab3ac7ee16ae9a26",
+      "bytes": 679,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "2ab229e4d0025f75f8593a135ae9b4672652fe3fb3c3b1c07fbe9d4c30c746e7",
+      "source": "_scratch/i011-20261020/document-outcome-9/changed-documents.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/389c7bd52788be9ac9f2164114b3197a09f89c951c81a5506d2a0f89bfcfa096.gz",
+      "archive_sha256": "944eff395c2121d986a4a05226e843699f81f62b85c098697697f42f83ff9805",
+      "bytes": 2549,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "389c7bd52788be9ac9f2164114b3197a09f89c951c81a5506d2a0f89bfcfa096",
+      "source": "_scratch/i011-20261020/document-outcome-9/final-document-links.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8f36836770f2eb15a3527669ebfd8ea947497c0f17d4899fd2f9a7084b78737f.gz",
+      "archive_sha256": "d76bb5e39a9c3039d41f3064b3f5d58420973de30847ed8fc3ca91b6f5838d65",
+      "bytes": 4887,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "8f36836770f2eb15a3527669ebfd8ea947497c0f17d4899fd2f9a7084b78737f",
+      "source": "_scratch/i011-20261020/document-outcome-9/final-repository-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ed9c9991f9de3468b92c35cbad4b19c2460fa9de236f52ea94c5fb0b40eb1fe9.gz",
+      "archive_sha256": "68daf3396ea8de57155df2e116fc8dd31042d091f2e0e018484640238c830afc",
+      "bytes": 4742,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "ed9c9991f9de3468b92c35cbad4b19c2460fa9de236f52ea94c5fb0b40eb1fe9",
+      "source": "_scratch/i011-20261020/document-outcome-9/manual-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/2fc5a64943bb2a434676440ad574b3cf3c5ca78a8d6961e96cd1dcc9c41e1d95.gz",
+      "archive_sha256": "7d726d9e959911ed77444f1719206e123aebe7aff2c314f5bd7ff5b8256ea9fa",
+      "bytes": 16811,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "2fc5a64943bb2a434676440ad574b3cf3c5ca78a8d6961e96cd1dcc9c41e1d95",
+      "source": "_scratch/i011-20261020/document-outcome-9/mechanical-ste-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/c2a8175dada04aaa024e9cafbf396225cfc501b42cad04eac5f6bd36cd7ae3ea.gz",
+      "archive_sha256": "b7501686db5d4de060b9f945a94d40c5de915da60169cba1890b00ff7513298c",
+      "bytes": 8520,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "c2a8175dada04aaa024e9cafbf396225cfc501b42cad04eac5f6bd36cd7ae3ea",
+      "source": "_scratch/i011-20261020/document-outcome-9/mechanical-ste.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/c2ccc19868adbad8d8b8d783c2722266b36e679a9e7c5750ad599823d34eea35.gz",
+      "archive_sha256": "a59d86086fe717aec5bbbf2edbb8b4bcd005cbbb8c010650b1a52af132c6eaad",
+      "bytes": 1004,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "c2ccc19868adbad8d8b8d783c2722266b36e679a9e7c5750ad599823d34eea35",
+      "source": "_scratch/i011-20261020/document-outcome-9/root-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/dc2dc8027ccb05718a40bf5e251fedc806505aa764396b06c4c23a792ca9bd63.gz",
+      "archive_sha256": "8d5cbef34fc40ac22f6f5cfd079369a66107246b8ff5dc1e3bb0f66c3aeb286c",
+      "bytes": 3231,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "dc2dc8027ccb05718a40bf5e251fedc806505aa764396b06c4c23a792ca9bd63",
+      "source": "_scratch/i011-20261020/document-outcome-9/terminal-plan.md"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/1dbdd4c1d898e019d3018d0a72034ca1fd92cb8f884f04c0b9f6e742112f00d4.gz",
+      "archive_sha256": "707161671c45ea843103c7e782f77de66b36c6ee9e950c2a69aa19615cf6a177",
+      "bytes": 2551,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "1dbdd4c1d898e019d3018d0a72034ca1fd92cb8f884f04c0b9f6e742112f00d4",
+      "source": "_scratch/i011-20261020/document-preparation-11/final-document-links.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/047907f16698042854f7114d95a32ddc55ecc8bbd9abb5792115e922476701e8.gz",
+      "archive_sha256": "576cdeda83347066ac1a50a30396de38efcb686f93c35fcaaaca47fec04f113d",
+      "bytes": 4889,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "047907f16698042854f7114d95a32ddc55ecc8bbd9abb5792115e922476701e8",
+      "source": "_scratch/i011-20261020/document-preparation-11/final-repository-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/c52ab42eb8b9ed18716675c9c2aea45026ed85a472af0ce1fcec0beb2579d7a9.gz",
+      "archive_sha256": "d49b663ce907c199fc4cd44c345b44631e28b565e0bceef79b825e6838f6363a",
+      "bytes": 13693,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "c52ab42eb8b9ed18716675c9c2aea45026ed85a472af0ce1fcec0beb2579d7a9",
+      "source": "_scratch/i011-20261020/document-preparation-11/manual-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/af0ff68ca59cb8317cef202b4ecc6b64e855733d1b015c65f64c268853801099.gz",
+      "archive_sha256": "f2c78a3a986a8ea6c327160fce9840558d3fc19d3e1b5c3789bb0a04ebbd7ac5",
+      "bytes": 17578,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "af0ff68ca59cb8317cef202b4ecc6b64e855733d1b015c65f64c268853801099",
+      "source": "_scratch/i011-20261020/document-preparation-11/ste-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/52393c88eb6241fdd43892cfca07eaafa1d7fb848c791abf8d4993e7ea8f2d63.gz",
+      "archive_sha256": "d8d1241432b91b492c4a3b043a9f10f3d73f6a43880971c9fcdf5697b9b57113",
+      "bytes": 8520,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "52393c88eb6241fdd43892cfca07eaafa1d7fb848c791abf8d4993e7ea8f2d63",
+      "source": "_scratch/i011-20261020/document-preparation-11/ste.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/6badfd2bdd5717769df727ad9e8e75785c7bb2310eea97c07fd351319c5f2a13.gz",
+      "archive_sha256": "2df5b5c8999b4e7a482772ec6725f1ab4873ff37fd338dd258f0abf3add8bfc2",
+      "bytes": 1234,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "6badfd2bdd5717769df727ad9e8e75785c7bb2310eea97c07fd351319c5f2a13",
+      "source": "_scratch/i011-20261020/document-preservation-11.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/4e6281df9151486828aeb73158219a08396e1534d6d2c6a1b9c755a4e07a82b8.gz",
+      "archive_sha256": "92075dd983d9c61f6cc01cdc00015211affcfc91c57481d43b38c3c00bae1f91",
+      "bytes": 2551,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "4e6281df9151486828aeb73158219a08396e1534d6d2c6a1b9c755a4e07a82b8",
+      "source": "_scratch/i011-20261020/document-status-9/final-document-links.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/f7ec693f35658597a76b62f70d26a3336e99c0e10c806156df31d62a793c99ef.gz",
+      "archive_sha256": "1ec28adb78f049630e4ef8b816e1b07abd407b002ff5309b686a6e7e1b94737e",
+      "bytes": 4889,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "f7ec693f35658597a76b62f70d26a3336e99c0e10c806156df31d62a793c99ef",
+      "source": "_scratch/i011-20261020/document-status-9/final-repository-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ce4c85983cf671bf411b2799662d04215ff30aaf6283d1929b5931ece77ad73a.gz",
+      "archive_sha256": "3507b980f02a4736e6e5347563024f9db1f7ca4fc0cae43ab977a4de6fd9faa0",
+      "bytes": 11706,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "ce4c85983cf671bf411b2799662d04215ff30aaf6283d1929b5931ece77ad73a",
+      "source": "_scratch/i011-20261020/document-status-9/manual-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/1c2333ba239ae6330f26c3ccfddf36c262fcd14e42f3ff11e2b8ead3ce0786f7.gz",
+      "archive_sha256": "1e381934e26506ef51c26391ab238dbb06cbbeabf1cda59cb5ee02677726f2d7",
+      "bytes": 17556,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "1c2333ba239ae6330f26c3ccfddf36c262fcd14e42f3ff11e2b8ead3ce0786f7",
+      "source": "_scratch/i011-20261020/document-status-9/mechanical-ste-scope.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/a9128ae858a543aaee7575724ee3ea1070301ba8da3dcb74ec0a21f4c3f17107.gz",
+      "archive_sha256": "933340c65fee73596d3bbea7f2556216117064e44068ad92f2a186db463a9ba2",
+      "bytes": 8520,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "a9128ae858a543aaee7575724ee3ea1070301ba8da3dcb74ec0a21f4c3f17107",
+      "source": "_scratch/i011-20261020/document-status-9/mechanical-ste.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e721db0c3cc3a614a148ce37fcf9b30d09bfde310086b76c621a7b6228cb469d.gz",
+      "archive_sha256": "d56b7ec1b84c7071682e53478cb0f7ac868036f3624458e7571684204bb81b68",
+      "bytes": 834,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e721db0c3cc3a614a148ce37fcf9b30d09bfde310086b76c621a7b6228cb469d",
+      "source": "_scratch/i011-20261020/document-status-9/root-checks.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/dbaecc906b2e4e0dc85d90e2959be46e6b1ed735e89424970de3a33f84b10585.gz",
+      "archive_sha256": "8456bceea2e0a15f5c1e4f6b55aef36fd472a30e9af7a8264beebe4f57dfb442",
+      "bytes": 516,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "dbaecc906b2e4e0dc85d90e2959be46e6b1ed735e89424970de3a33f84b10585",
+      "source": "_scratch/i011-20261020/document-status-9/root-correction.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/6996a6b77af44bff88d48d5aa044917b55954eb200c35517733b84c23a265b63.gz",
+      "archive_sha256": "e7698f224dbab3997c7c13669555066e134fbf4a50848878b05be40a56664ab3",
+      "bytes": 2717,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "6996a6b77af44bff88d48d5aa044917b55954eb200c35517733b84c23a265b63",
+      "source": "_scratch/i011-20261020/final-architecture-code-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/891014dbf370eaba244d11d4878592c7e7a3efbd9b4c3c56f4c6335c67aa9f30.gz",
+      "archive_sha256": "cc759f88136ea9ce7bf66e9bb8aa62e5821a5c83648d8db5f615a9f47ca22a05",
+      "bytes": 2425,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "891014dbf370eaba244d11d4878592c7e7a3efbd9b4c3c56f4c6335c67aa9f30",
+      "source": "_scratch/i011-20261020/final-architecture-orchestration-review-11.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/95994e27ffdc6508db765317d02dd2f9cf4b652dab7c74954d76435d47b98fd3.gz",
+      "archive_sha256": "53584766ebc3af8ec7df84d1fe38fada1d04dcb47c54c0d9c695500f3a6dbd05",
+      "bytes": 2314,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "95994e27ffdc6508db765317d02dd2f9cf4b652dab7c74954d76435d47b98fd3",
+      "source": "_scratch/i011-20261020/final-architecture-orchestration-review-8.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/15c30733d568cd282c38d99e1c63d80f4ffd4fb888f6985caca1b15c9cd03bc5.gz",
+      "archive_sha256": "4d56803916a60fe9ec375303aae8375efff1f97f401fac958aeadd25f5f26f60",
+      "bytes": 2432,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "15c30733d568cd282c38d99e1c63d80f4ffd4fb888f6985caca1b15c9cd03bc5",
+      "source": "_scratch/i011-20261020/final-architecture-orchestration-review-9.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/6a8ce6ddb5441301026563a9e26d7fff0f87248f8c9051158ec28c904daa1148.gz",
+      "archive_sha256": "594b28c2a8618abbbf36174eab37fa3fcd573ac12d83028d8001669f2905d15a",
+      "bytes": 2466,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "6a8ce6ddb5441301026563a9e26d7fff0f87248f8c9051158ec28c904daa1148",
+      "source": "_scratch/i011-20261020/final-architecture-source-review-4.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e58ce59e52ced2a6e49c7fa4c8474377c5701b0c20b42dfd3a9d7e42a28ee2ad.gz",
+      "archive_sha256": "6368931d5a11ccc77d5fdc4ec37e3c241390b8b1f29cbc489dca30d79a6f0f3d",
+      "bytes": 1084,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "e58ce59e52ced2a6e49c7fa4c8474377c5701b0c20b42dfd3a9d7e42a28ee2ad",
+      "source": "_scratch/i011-20261020/final-architecture-source-review-5.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/887c21ef01e9111a560c58dd05db1d4e1adf61aaea687b1a54e140e8d642bec3.gz",
+      "archive_sha256": "1fba3aed8d64d69515065f150aca4c5456dd576a7e10fd003fd0c1d7aa96d84b",
+      "bytes": 1348,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "887c21ef01e9111a560c58dd05db1d4e1adf61aaea687b1a54e140e8d642bec3",
+      "source": "_scratch/i011-20261020/final-architecture-source-review-6.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/9bb7923595b34962cf9aaffee675551faf20473c7d7dc37cd429ca235244573c.gz",
+      "archive_sha256": "09de575af0259c1daa344493573f76938ba70eb804bab3b182df8e1b7d45e101",
+      "bytes": 1786,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "9bb7923595b34962cf9aaffee675551faf20473c7d7dc37cd429ca235244573c",
+      "source": "_scratch/i011-20261020/final-architecture-source-review-7.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/a6af2692fc0b9849d5b01a915bcca64b926a2a24ce5812608773efc0b641a04e.gz",
+      "archive_sha256": "8eae94a9de14948ddbdbd9ecf6d12df97d1b6c6fd74968914b1fffac3f5384fd",
+      "bytes": 261,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "a6af2692fc0b9849d5b01a915bcca64b926a2a24ce5812608773efc0b641a04e",
+      "source": "_scratch/i011-20261020/final-disposition-preservation-11.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/7eba5f4191356809191c082b6180d295a7bcc02897def1bc5274641b64249423.gz",
+      "archive_sha256": "b5fcf451b590e41ec52f4d1cbf894d71d3dfd4b5ab877ff3b1590c5dacbf56b8",
+      "bytes": 2078,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "7eba5f4191356809191c082b6180d295a7bcc02897def1bc5274641b64249423",
+      "source": "_scratch/i011-20261020/final-disposition-review-11.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/08126b4e9a8a1929fdacc1552786e362feb20046ca09ccd98edce28c739c0caf.gz",
+      "archive_sha256": "b0c3705927de316b04dab441d90dd53a8cbe6127ffae647ac64d033d3b0cf1ea",
+      "bytes": 8220,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "08126b4e9a8a1929fdacc1552786e362feb20046ca09ccd98edce28c739c0caf",
+      "source": "_scratch/i011-20261020/final-docs-ste-initial.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/b309c0718e8ca870677bf0872754297eaef321f963632b746d66eeb5f94f38fb.gz",
+      "archive_sha256": "0488161852f6e5479fd0d9d1f8351b32c10d79b59168606775b31a38e8e5b287",
+      "bytes": 57064,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "b309c0718e8ca870677bf0872754297eaef321f963632b746d66eeb5f94f38fb",
+      "source": "_scratch/i011-20261020/manual-language-review-before-final-8.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/58949d91bb0dd1776f1db0262e32950150083fb6deeed1438d484dbcd0d06da2.gz",
+      "archive_sha256": "8d44804a5d2154cc357d21d36ab1a6e875eb426b6aaa94b26d194d3930e595d0",
+      "bytes": 1002,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "58949d91bb0dd1776f1db0262e32950150083fb6deeed1438d484dbcd0d06da2",
+      "source": "_scratch/i011-20261020/offline-transport-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/6fe55faefd66b781c02b27e7dc2a4c27283e6b5a05d212e1c8579e07d900f2a5.gz",
+      "archive_sha256": "e5fb319d3cfb51a0e1ccd1affcfff845f3dce7eb55835d7f806dff4f567eae2b",
+      "bytes": 6396,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "6fe55faefd66b781c02b27e7dc2a4c27283e6b5a05d212e1c8579e07d900f2a5",
+      "source": "_scratch/i011-20261020/prepare-acceptance-summary-11.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/2eae710bbe64366c18cab1d8e24c5d06926881ef9854f307518d3f3cfbd63830.gz",
+      "archive_sha256": "0dc29cf8f4e63f720f392bfd121e0db23541057ed068e106d7e503b287f59ed6",
+      "bytes": 5864,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "2eae710bbe64366c18cab1d8e24c5d06926881ef9854f307518d3f3cfbd63830",
+      "source": "_scratch/i011-20261020/prepare-acceptance-summary-8.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/228eb83ba8df545e309d246d37563c19a620f6870b04ab9a4d070d09421c6b5a.gz",
+      "archive_sha256": "1fddafc1c8b3ca0ad2c770210aa82ee45cff7da3602cdc0f27fcf0cefe09e989",
+      "bytes": 6256,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "228eb83ba8df545e309d246d37563c19a620f6870b04ab9a4d070d09421c6b5a",
+      "source": "_scratch/i011-20261020/prepare-acceptance-summary-9.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/a7756c76ea1f238240eb9d32d300886c8b5560226865a9f5e4c8e7c7574e2a2b.gz",
+      "archive_sha256": "f8b8df9cbb337ab566e67a10aeb56dfabc65206ba8beb9d59504f2541ae3c668",
+      "bytes": 2146,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "a7756c76ea1f238240eb9d32d300886c8b5560226865a9f5e4c8e7c7574e2a2b",
+      "source": "_scratch/i011-20261020/staged-nonperformance-review-9.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/c7532633f7e7c98662f175c8494ad70ebee03a068411cbf35139bf25256779d1.gz",
+      "archive_sha256": "c606aa7eedec4e69e70749861bc2a7fb43eb1cecd329b9eee410615ab98af680",
+      "bytes": 309,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "c7532633f7e7c98662f175c8494ad70ebee03a068411cbf35139bf25256779d1",
+      "source": "_scratch/i011-20261020/staged-review-evidence-9.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/0271d6dc3c3143423269760255c0343b2ed7226295b9c6cd3b5ce4179f1056b0.gz",
+      "archive_sha256": "0e3bf927aa1cf95a282cdf7d81a0c5f54e32f92e6711d12a890782bd059d0133",
+      "bytes": 858,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "0271d6dc3c3143423269760255c0343b2ed7226295b9c6cd3b5ce4179f1056b0",
+      "source": "_scratch/i011-20261020/suite-budget-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/c7971433329af8e0f39400eff8d3da615b60245752096dd0e5ea63f28aff46d9.gz",
+      "archive_sha256": "79e1d419c13c31d76d2893206ee188280564aba4e9d100b657db73bb9ef2fc06",
+      "bytes": 1499,
+      "label": "Current small-record snapshot; historical state remains as written; inventory disposition not_durably_archived_current_bytes",
+      "priority": "supporting_review_or_orchestration",
+      "sha256": "c7971433329af8e0f39400eff8d3da615b60245752096dd0e5ea63f28aff46d9",
+      "source": "_scratch/i011-20261020/transport-recurrence-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/41a8cc0666dcecf25b376e531e9f76518c964461fbb916aaec9c0c020932a13b.gz",
+      "archive_sha256": "7229345b5d167f4847477e7d93b0789525bc83d0b75a155bda312a81742c2d3a",
+      "bytes": 106855,
+      "label": "Inventory and preservation preparation",
+      "priority": "preservation_preparation",
+      "sha256": "41a8cc0666dcecf25b376e531e9f76518c964461fbb916aaec9c0c020932a13b",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/inventory.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/e9977b14a99543affec1b7edc7e5d37f3449f7ffe2e65d16cd8508fee94986bd.gz",
+      "archive_sha256": "b565ed1fd774660ed07e554271ac5c744a3f5c493f420edd0d6cb915e79e7a66",
+      "bytes": 7296,
+      "label": "Inventory and preservation preparation",
+      "priority": "preservation_preparation",
+      "sha256": "e9977b14a99543affec1b7edc7e5d37f3449f7ffe2e65d16cd8508fee94986bd",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/inventory.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/bc14f3ecb3dea6fe47b283358b56d95d6d77df2db2ce3fec9681888cbdfd8b71.gz",
+      "archive_sha256": "de1ba69f052b9719045c3c8c147de52a282b6aa07d94bf1cb662fc7d33602839",
+      "bytes": 252,
+      "label": "Inventory and preservation preparation",
+      "priority": "preservation_preparation",
+      "sha256": "bc14f3ecb3dea6fe47b283358b56d95d6d77df2db2ce3fec9681888cbdfd8b71",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/preserve.mk"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/bf4d7b460c31ab703d23ce10b6c6b9e30f39511b25420b1dde6c39ac2dd99d18.gz",
+      "archive_sha256": "053b8b464aca031fa2a7fa25d126f94ee43633f944af990871c938003a8a40d5",
+      "bytes": 3830,
+      "label": "Preservation preparation; priorfreeze retained honestly",
+      "priority": "preservation_preparation",
+      "sha256": "bf4d7b460c31ab703d23ce10b6c6b9e30f39511b25420b1dde6c39ac2dd99d18",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/preserve.py"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/8aaf8376ee31b2d2782062c48693bc5b62e61e11e592aefd3ade2fb26bd21608.gz",
+      "archive_sha256": "83d284ab0051a8a5d676077f45e34becd48b513aba82164c56b7dbe8760fc628",
+      "bytes": 27534,
+      "label": "Inventory and preservation preparation",
+      "priority": "preservation_preparation",
+      "sha256": "8aaf8376ee31b2d2782062c48693bc5b62e61e11e592aefd3ade2fb26bd21608",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/regenerable-candidates.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/a32539b26a1835cddcfc4f819b2921c6e86c461f465c6b3b7d128d0e8708b2ba.gz",
+      "archive_sha256": "21300ee7e5e5d06ac78f7f55d9cc46a56e7aaf8a640de6bff7c7091876c3689a",
+      "bytes": 75081,
+      "label": "Preservation preparation; priorfreeze retained honestly",
+      "priority": "preservation_preparation",
+      "sha256": "a32539b26a1835cddcfc4f819b2921c6e86c461f465c6b3b7d128d0e8708b2ba",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/preservation-freeze.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ac681a919be67990c9860f056513ca5dc4d007f0881a21b8e252702199c84893.gz",
+      "archive_sha256": "688c499355def4bf956a5fa5a81fe29df87c829638d95d9043a77fd5c897abed",
+      "bytes": 1222,
+      "label": "Current review preparation; no documentation compliance/completion claim",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "ac681a919be67990c9860f056513ca5dc4d007f0881a21b8e252702199c84893",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-specialized-length-review.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/c9f5816ff0aa7f8feb01a656ff091508c4f991d34d4a8850f820e23096b584ac.gz",
+      "archive_sha256": "07365e4c74accc07b06563300e4515a3df8a06a596a52beddb37f7597b80f4dc",
+      "bytes": 4558,
+      "label": "Current review preparation; no documentation compliance/completion claim",
+      "priority": "final_review_or_manual_documentation",
+      "sha256": "c9f5816ff0aa7f8feb01a656ff091508c4f991d34d4a8850f820e23096b584ac",
+      "source": "_scratch/i011-20261020/completion-20261022/documentation-vocabulary-followup.json"
+    },
+    {
+      "archive": "docs/evidence/i011-qualification-20261022/completion-review-preparation/payload/ceb453fe6dcba78152fb19dfea255cbfbf518fce7071d80d4ae4637815717111.gz",
+      "archive_sha256": "940ae5e446b83efdfcab7ca2b6668076a2fbe1ff5784f755f4ec810448aa917d",
+      "bytes": 76507,
+      "label": "pre-execution hash freeze",
+      "priority": "preservation_identity",
+      "sha256": "ceb453fe6dcba78152fb19dfea255cbfbf518fce7071d80d4ae4637815717111",
+      "source": "_scratch/i011-20261020/completion-20261022/final-cleanup-inventory/preservation-freeze-v2.json"
+    }
+  ],
+  "state": "small_review_preparation_snapshot_preserved"
+}

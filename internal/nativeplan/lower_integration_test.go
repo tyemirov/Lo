@@ -145,7 +145,7 @@ func TestPlanMetadataIsImmutable(t *testing.T) {
 		}
 		seen[location.ID] = true
 	}
-	if !strings.Contains(string(plan.Snapshot().Metadata), "lo-native-1") {
+	if !strings.Contains(string(plan.Snapshot().Metadata), "lo-native-2") {
 		t.Fatal("missing ABI")
 	}
 }

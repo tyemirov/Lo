@@ -48,16 +48,8 @@ func TestLLVMSourceColumnOverflow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var program struct {
-		Locations []struct {
-			Action, Text string
-			Start        struct{ Line, Column int }
-		}
-	}
-	if err := json.Unmarshal(metadata, &program); err != nil {
-		t.Fatal(err)
-	}
-	for _, location := range program.Locations {
+	locations := metadataLocations(t, metadata)
+	for _, location := range locations {
 		if location.Action == "literal" && location.Text == "7" {
 			if location.Start.Line != 1 || location.Start.Column != column {
 				t.Fatalf("runtime source position lost: %+v, want column %d", location, column)
