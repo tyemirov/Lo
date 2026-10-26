@@ -1,4 +1,4 @@
-// P001 design fixture. The extension operations are not implemented in v0.3.
+// P001 design fixture. See specification.md for implemented v0.4 behavior and backend limits.
 
 flow Forward(inputs: Tensor<FP32>, values: Record{b1: Tensor<FP32>, b2: Tensor<FP32>, w1: Tensor<FP32>, w2: Tensor<FP32>}) -> Tensor<FP32>! {
   hidden_linear = Tensor.matmul(inputs, values.w1)
