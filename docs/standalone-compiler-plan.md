@@ -333,7 +333,10 @@ Keep release publication and production deployment outside implementation issue 
 
 ## Language Evolution
 
-P006 defines extensions before their implementation.
+The [v0.4 specification](../specification.md#version-and-scope) defines the implemented language.
+The native compiler migration preserves that contract.
+The extensions below are planned and are outside v0.4.
+P006 defines these extensions before their implementation.
 The existing immutable values, named flows, explicit commits, and error values remain binding semantics.
 
 - Add modules with explicit visibility, deterministic imports, and transitive effects.

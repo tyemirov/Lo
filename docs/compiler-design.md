@@ -35,7 +35,9 @@ The [stage 6 validation run](evidence/activation-http-green.txt) records File ac
 Regression evidence covers [HTTP inspection](evidence/inspection-http-red.txt), [truncated requests](evidence/http-body-red.txt), and [shutdown](evidence/http-shutdown-red.txt).
 The [final audit gate](evidence/audit-green.txt) includes additional resource limits and the corrected client-disconnection boundary.
 
-The [language specification](../specification.md) owns Lo syntax and observable semantics.
+The [v0.4 language specification](../specification.md) owns Lo syntax and observable semantics.
+The [version and scope section](../specification.md#version-and-scope) defines the implemented contract.
+The [planned features section](../specification.md#planned-features) separates future work from current behavior.
 This design owns compiler structure, internal contracts, and implementation acceptance criteria.
 The [README roadmap](../README.md#implementation-roadmap) gives the public milestone overview.
 The [repository policy](../.mprlab/POLICY.md) owns development and validation procedures.
@@ -138,7 +140,7 @@ P001 completed that design task.
 F002, F003, and F004 implement Float arithmetic and CPU tensors.
 F005, F006, and F007 add CPU autodiff, Parameters, gradients, and pure optimizer transitions.
 F008 implements device grants, explicit transfers, and the resource ledger.
-F009, F010, F011, and I001 retain device arithmetic, deferred execution, precision, and complete training acceptance.
+F009, F010, F011, and I001 retain planned NVIDIA arithmetic, deferred execution, mixed precision, and complete NVIDIA training acceptance.
 F001 implements the same CPU training contracts in native executables.
 The extension document maps each required specification change to its owning issue.
 

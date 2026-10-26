@@ -14,8 +14,15 @@ F005 implements first-order CPU autodiff and derivative plans in inspection repo
 F006 and F007 implement Parameters, gradients, stop-gradient, SGD, and AdamW.
 F001 implements the CPU training operations in standalone native executables.
 
-Transfers and GPU execution remain selected APIs for later issues.
-The [specification](../specification.md) section 24 defines the implemented numeric and tensor contract.
+F008 implements device grants and explicit transfers.
+F012 through F014 implement Metal transfers, arithmetic, training, and native artifacts.
+F015 and F016 implement checkpoints and complete optimizer-state transfers.
+The [v0.4 specification](../specification.md#version-and-scope) includes these implemented contracts.
+Section 24 defines their current behavior.
+
+NVIDIA arithmetic, deferred execution, mixed precision, and complete NVIDIA training acceptance are planned under F009, F010, F011, and I001.
+The NVIDIA signatures and execution rules below describe selected future work.
+The [backend support table](../specification.md#backend-support) records current execution support.
 
 The [language specification](../specification.md) remains the authority for implemented language behavior.
 The [source changes](#source-contract-changes) identify the changes required before each extension receives implementation acceptance.

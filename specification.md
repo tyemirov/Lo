@@ -1,10 +1,33 @@
 # Lo Language Reference
 
 Lo is a typed dataflow language for executable plans, file workflows, HTTP services, and tensor training.
-This reference defines the implemented v0.3 core, File workflows, reverse-mode autodiff, SGD, AdamW, and explicit device transfers.
+This reference defines the implemented Lo v0.4 language contract.
 CPU execution and the selected Metal backend support training.
 Native executables use the same language contracts as the interpreter.
 The [reference audit](docs/language-reference-audit.md) records implementation evidence and its scope.
+
+## Version and Scope
+
+Lo v0.4 includes the core language and its implemented adapter, numeric, training, and device extensions.
+This version update records existing behavior.
+It adds no syntax or runtime operations.
+The interpreter and native compiler use this same language contract.
+Runtime ABI, checkpoint encoding, and compiler distribution identities follow their separate documented contracts.
+
+| Implemented contract | Reference |
+| --- | --- |
+| Immutable values, exact structural records, named flows, pipes, and `Match.new` | Sections 4 through 17 |
+| Typed failures, transitive effects, explicit commits, and activation result bindings | Sections 5, 12, 13, and 22 |
+| File observations, nominal targets, receipts, and sequential activation | Sections 8.8, 9.1, and 23.6 |
+| HTTP headers, responses, server receipts, and client actions | Sections 9.2 through 9.4 and 23.7 |
+| Process commands, results, grants, and qualified host execution | Section 9.5 |
+| Binary64 arithmetic, FP32 tensors, and shape checks | Sections 24.1 through 24.4 |
+| First-order reverse-mode autodiff, Parameters, gradients, SGD, and AdamW | Sections 24.5 through 24.7 |
+| Explicit CPU and Metal selection, device grants, and tensor transfers | Section 24.8 and [backend support](#backend-support) |
+| Parameter checkpoints, optimizer checkpoints, and training-state transfers | Section 24.9 |
+
+The [planned features](#planned-features) below are outside the implemented v0.4 contract.
+Design documents and historical acceptance reports retain their stated scope and dates.
 
 ## Start Here
 
@@ -17,7 +40,7 @@ The [reference audit](docs/language-reference-audit.md) records implementation e
 | Handle failures | [Error handling](#12-error-handling) and [fallible values](#223-fallible-values) |
 | Clean up observed files | [File adapter](#91-file-adapter), [sequential activation](#88-sequential-flow-processor), and [Gateway log example](docs/examples/gateway-log-cleanup.lo) |
 | Use files or HTTP | [Adapters](#9-adapters), [activation](#236-file-and-server-activation), and [examples](#19-examples) |
-| Review future adapter rules | [Shared adapter design](docs/adapter-design.md) and [implementation plan](docs/adapter-plan.md), both separate from the implemented reference |
+| Review adapter implementation | [Shared adapter design](docs/adapter-design.md) and [implementation plan](docs/adapter-plan.md), with implementation status and remaining work |
 | Select CPU or Metal | [Backend support](#backend-support) and [device resources](#248-device-resources-and-explicit-transfers) |
 | Inspect implementation evidence | [Reference audit](docs/language-reference-audit.md) |
 
@@ -255,11 +278,30 @@ The standard software build cannot execute Metal operations.
 [Device resources](#248-device-resources-and-explicit-transfers) defines grants, explicit downloads, and resource limits.
 The [native Metal contract](docs/native-metal.md) defines build selection.
 
+## Planned Features
+
+This section records future work, not normative v0.4 behavior.
+A selected design or issue does not establish implementation support.
+
+| Planned feature | Design or issue |
+| --- | --- |
+| NVIDIA tensor arithmetic and kernels | F009 and the [training design](docs/training-extension-design.md#nvidia-backend-contract) |
+| Deferred device execution and complete NVIDIA training acceptance | F010 and I001 |
+| Mixed-precision training | F011 |
+| Modules, explicit visibility, user-defined records, tagged variants, generics, and packages | P006 and F018 through F021 |
+| Application library modules, formatter, test runner, editor integration, and debugging tools | F022 and F023 |
+
+The [language evolution plan](docs/standalone-compiler-plan.md#language-evolution) defines the application language sequence.
+Built-in parameterized types and exact structural records already belong to v0.4.
+User-defined generic declarations and named record declarations are planned.
+Recursion, closures, concurrency syntax, and foreign-function access need separate proposals.
+Multiple compute devices, distributed training, sparse tensors, convolution, attention, and higher-order derivatives are deferred.
+
 ## Contents
 
 - [1. Purpose](#1-purpose)
 - [2. Design Principles](#2-design-principles)
-- [3. Non-Goals for v0.3](#3-non-goals-for-v03)
+- [3. Non-Goals for v0.4](#3-non-goals-for-v04)
 - [4. Core Semantic Categories](#4-core-semantic-categories)
 - [5. Execution Model](#5-execution-model)
 - [6. Type System](#6-type-system)
@@ -312,7 +354,7 @@ Lo follows these principles.
 
 1. Explicit data over hidden behavior. Values, processors, flows, adapters, errors, and commits are separate concepts.
 2. Construction is separate from activation. .new(...) constructs. commit activates only side effects and activatable adapters.
-3. Named flows only. Lo does not support lambdas or anonymous functions in v0.3.
+3. Named flows only. Lo does not support lambdas or anonymous functions in v0.4.
 4. `List<T>` represents general-purpose sequences. `Tensor<FP32>` represents dense numeric arrays. Laziness is a runtime concern.
 5. Pragmatic standard library. Common arithmetic and aggregate operations belong in Math. Users should not be forced to express routine math through folds.
 6. Typed boundaries. The language exposes domain-oriented adapters such as File and HTTP, not generic IO.
@@ -323,9 +365,9 @@ Lo follows these principles.
 
 ---
 
-## 3. Non-Goals for v0.3
+## 3. Non-Goals for v0.4
 
-The following are out of scope in v0.3:
+The following are out of scope in v0.4:
 
 1. Classes and inheritance.
 2. Mutable variables.
@@ -416,7 +458,7 @@ Examples:
 * String!
 * HTTP.Response!
 
-Lo does not expose a user-visible generic Result<T> type in v0.3.
+Lo does not expose a user-visible generic Result<T> type in v0.4.
 
 An implementation may lower T! to an internal tagged result representation, but
 that representation is not part of the surface language or public type system.
@@ -512,7 +554,7 @@ A top-level return may produce either T or T!.
 
 If a top-level return produces an uncaught Error, the host runtime reports it using an implementation-defined diagnostic format.
 
-### 5.5 Commit Failure in v0.3
+### 5.5 Commit Failure in v0.4
 
 Statement-level commit failure participates in the same bubbling model inside flows.
 
@@ -523,7 +565,7 @@ Rules:
 3. inside a plain total flow, commit is not allowed,
 4. at top level, failed commit aborts activation.
 
-This means any flow that uses commit must declare either -> T! or -> T onError ErrorHandler in v0.3.
+This means any flow that uses commit must declare either -> T! or -> T onError ErrorHandler in v0.4.
 
 ### 5.6 Deterministic Evaluation and Host Runtime Constraints
 
@@ -552,11 +594,11 @@ evaluated.
 
 Ownership, borrowing, reference counting, tracing garbage collection, OS
 threads, green threads, channels, locks, and scheduler policy are host
-implementation concerns in v0.3. They are not user-visible language constructs.
+implementation concerns in v0.4. They are not user-visible language constructs.
 An implementation may use such mechanisms internally only if observable Lo
 semantics remain unchanged.
 
-v0.3 exposes no shared mutable memory, thread creation, channel creation,
+v0.4 exposes no shared mutable memory, thread creation, channel creation,
 async/await syntax, lock syntax, concurrency annotations, or scheduler controls.
 
 ### 5.7 Binding and Value Passing
@@ -581,7 +623,7 @@ Lo program.
 
 Lo has no address-of operation, dereference operation, pointer identity
 operation, move operation, borrow operation, destructor, finalizer, or aliasing
-primitive in v0.3.
+primitive in v0.4.
 
 Two bindings may name equal values, but there is no operation that asks whether
 they refer to the same host object or storage location.
@@ -613,7 +655,7 @@ The atomic built-in types are:
 
 Scalar denotes a single Unicode scalar value.
 
-Int denotes a signed mathematical integer. A v0.3 implementation may choose a
+Int denotes a signed mathematical integer. A v0.4 implementation may choose a
 bounded host representation internally, but arithmetic semantics are defined in
 terms of mathematical integers. Recoverable numeric domain failures are listed
 in section 18.3.
@@ -666,16 +708,16 @@ The composite types are:
 
 Error is a built-in nominal composite type with required fields. It is not structurally interchangeable with Record.
 
-Record{ ... } is an exact structural record type in v0.3. A value assigned to an
+Record{ ... } is an exact structural record type in v0.4. A value assigned to an
 expected Record{ ... } type must provide every declared field exactly once with
 the declared type. It must not omit required fields, add extra fields, or fill a
 field with null unless that field is explicitly declared as Null. The bare type
 Record denotes an implementation-facing record value of any exact record shape;
-portable v0.3 programs may project only fields known from an exact
+portable v0.4 programs may project only fields known from an exact
 Record{ ... } type or from a built-in boundary type.
 
-The equality-comparable types in v0.3 are Scalar, String, Int, Bool, and Null.
-The ordered-comparable types in v0.3 are Scalar, String, and Int. Bytes, Float,
+The equality-comparable types in v0.4 are Scalar, String, Int, Bool, and Null.
+The ordered-comparable types in v0.4 are Scalar, String, and Int. Bytes, Float,
 records, maps, lists, ranges, Error, and boundary types are not comparable
 except through explicit comparison processors.
 Float comparison processors do not make Float a valid map key or range endpoint.
@@ -801,7 +843,7 @@ This list contains the core constructors.
    total and may construct an empty range.
 5. Scalar.new requires input that resolves to exactly one Unicode scalar value.
 6. HTTP.Server.new(...) constructs a server instance but does not start it. It requires a mandatory onError flow.
-7. Any operation that constructs a value must use .new(...) in v0.3.
+7. Any operation that constructs a value must use .new(...) in v0.4.
 
 ---
 
@@ -832,7 +874,7 @@ Processors are pure.
 
 Lo includes a pragmatic Math namespace.
 
-All Math processors in v0.3 operate on Int operands or `List<Int>` inputs.
+All Math processors in v0.4 operate on Int operands or `List<Int>` inputs.
 
 * `Math.add(left_value, right_value) -> Int`
 * `Math.sub(left_value, right_value) -> Int`
@@ -1125,7 +1167,7 @@ HTTP.Response is a structured semantic value with at least these fields:
 The adapter is responsible for parsing incoming bytes into HTTP.Request and serializing HTTP.Response back to bytes.
 
 The listed HTTP.Request and HTTP.Response fields are always present. Portable
-v0.3 programs may project only these listed fields unless a later adapter
+v0.4 programs may project only these listed fields unless a later adapter
 revision specifies additional fields. Optional or extension data must be modeled
 through maps and accessed with Map.has_key or Map.get rather than nullable
 fields.
@@ -1296,7 +1338,7 @@ flow FlowName(parameter_one: TypeOne, parameter_two: TypeTwo) -> OutputType onEr
 5. A pure flow has no direct or indirect host observations or commit activation. Section 22 specifies the transitive rule.
 6. Only pure named flows may be passed to pure data processors.
 7. Adapter boundary parameters may accept effectful flows as defined by the adapter signature.
-8. Lo does not support anonymous functions or lambdas in v0.3.
+8. Lo does not support anonymous functions or lambdas in v0.4.
 9. A nested flow does not implicitly capture outer values. Any required value must be passed explicitly as a parameter.
 10. A plain total flow (-> T) may not use unresolved fallible expressions.
 11. A fallible flow (-> T!) automatically propagates unresolved fallible expressions via error bubbling.
@@ -1344,7 +1386,7 @@ Match rules:
 
 1. Cases are checked in source order.
 2. The first matching case wins.
-3. _ is required in v0.3.
+3. _ is required in v0.4.
 4. All branch expressions must unify to one output type.
 5. Only the selected branch is evaluated.
 6. Case heads and predicates must be pure and total.
@@ -1408,7 +1450,7 @@ Automatic trace summaries do not remove secret text from arbitrary program-autho
 
 ### 12.6 Recoverable Failure Contract
 
-The following failures are recoverable in v0.3 and must be represented as Error
+The following failures are recoverable in v0.4 and must be represented as Error
 values, not hidden host exceptions:
 
 * invalid input data accepted by a fallible constructor,
@@ -1462,7 +1504,7 @@ Commit has no expression form inside arguments, pipes, or Match branches.
 return return_expression
 ```
 
-There is no run keyword and no export keyword in v0.3.
+There is no run keyword and no export keyword in v0.4.
 
 ---
 
@@ -1518,7 +1560,7 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 
 ### 15.1 General Rules
 
-* Every expression has a statically known type in v0.3.
+* Every expression has a statically known type in v0.4.
 * Every binding name must be unique within its scope.
 * References must resolve to a prior binding or a named flow.
 * User bindings and flow names must not shadow predeclared built-in type,
@@ -1564,14 +1606,14 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 
 * The null literal has only type Null.
 * Null is assignable only where the expected type is exactly Null.
-* No type in v0.3 is implicitly nullable.
-* v0.3 has no optional record fields.
+* No type in v0.4 is implicitly nullable.
+* v0.4 has no optional record fields.
 * A Record{ ... } value must contain exactly the declared fields when checked
   against an exact record type.
 * Missing map data is represented by Map.get returning Error, not by returning
   null.
 * A future revision may add first-class optional data, such as Option<T> or
-  broader union types, but v0.3 does not include those features.
+  broader union types, but v0.4 does not include those features.
 
 ---
 
@@ -1598,7 +1640,7 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 
 ## 17. Surface Grammar
 
-This grammar is normative for v0.3. It is written in EBNF-style notation.
+This grammar is normative for v0.4. It is written in EBNF-style notation.
 Semantic rules in sections 10, 12, and 15 may reject programs that are
 syntactically valid.
 
@@ -1688,7 +1730,7 @@ It is not an expression binding.
    classified by the type checker as exact-value or range case heads.
 7. A self-handling flow return signature uses NonFallibleTypeExpression on the
    left side of onError. A fallible self-handling return such as T! onError H is
-   invalid in v0.3.
+   invalid in v0.4.
 
 ### 17.1 Lexical Rules
 
@@ -2061,7 +2103,7 @@ rejection for syntactically valid programs that violate semantic rules.
 | Null rejection | `nothing = null` binds a value whose type is Null. | Passing `null` or `Null` to `String.concat`, `Math.add`, `File.Path.new`, or `HTTP.Response.Text.new` where another type is required. |
 | Record exactness | `Record.new(limit: Int.new(10))` satisfies `Record{ limit: Int }`. | A value checked against `Record{ limit: Int }` that omits limit, adds another field, or sets `limit: null`. |
 | Map construction | `Map.new(Record.new(key: String.new("a"), value: Int.new(1)))` satisfies `Map<String, Int>`. | `Map.new(Record.new(name: String.new("a"), value: Int.new(1)))` because the entry field must be named key. |
-| Comparable domains | `Range.new(start: Int.new(1), end: Int.new(3), include_start: true, include_end: true)` and `Map<String, Int>`. | `Range<Bytes>` or `Map<List<Int>, String>` because those key/endpoint types are not comparable in v0.3. |
+| Comparable domains | `Range.new(start: Int.new(1), end: Int.new(3), include_start: true, include_end: true)` and `Map<String, Int>`. | `Range<Bytes>` or `Map<List<Int>, String>` because those key/endpoint types are not comparable in v0.4. |
 | Map absence | `Map.has_key(values, key)` is total and `Map.get(values, key)` is fallible. | Treating a missing map value as a nullable successful value. |
 | List flow references | `List.filter(numbers, IsPositive)` where IsPositive is pure and `(Int) -> Bool`. | Passing an anonymous function, an effectful flow, or a flow with the wrong parameter order to a list processor. |
 | Commit activation | `action = File.Append.new(path, UTF8.Bytes.new(text))` followed by `receipt = commit action` in a fallible or self-handling flow. | `commit text` where text has type String, or any commit inside a plain total flow. |
@@ -2070,12 +2112,12 @@ rejection for syntactically valid programs that violate semantic rules.
 
 ## 21. Summary
 
-Lo v0.3 is a typed declarative dataflow language with:
+Lo v0.4 is a typed declarative dataflow language with:
 
 1. explicit .new(...) construction,
 2. pure processors,
 3. named flows only,
-4. typed adapters such as File and HTTP,
+4. typed File, HTTP, and Process adapters,
 5. one conditional Match.new(...) construct,
 6. a first-argument threading operator |>,
 7. a pragmatic Math namespace,
@@ -2088,9 +2130,9 @@ Lo v0.3 is a typed declarative dataflow language with:
 14. mandatory adapter-level onError flows to guarantee a boundary catch.
 
 The implementation includes the lexer, parser, type checker, checked graph, interpreter, and native compiler.
-File and HTTP adapters use explicit host grants.
+File, HTTP, and Process adapters use explicit host grants.
 Tensor training includes reverse-mode autodiff, gradient operations, SGD, and AdamW.
-Sections 24.1 through 24.8 define the numeric and device contracts.
+Sections 24.1 through 24.9 define numeric, device, and checkpoint contracts.
 
 ## 22. Verifier Contract Details
 

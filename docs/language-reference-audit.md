@@ -7,6 +7,24 @@ The [Lo Language Reference](../specification.md) is the language contract.
 This audit records implementation comparisons at the dates specified below.
 It does not define a separate language contract.
 
+## v0.4 Reference Update
+
+Update date: October 24, 2026.
+The [v0.4 reference](../specification.md#version-and-scope) now identifies the implemented language contract.
+It includes adapter activation results, Process execution, tensor training, device transfers, and checkpoints.
+The [planned features](../specification.md#planned-features) are outside implemented behavior.
+The update changes documentation and one fixture comment.
+It preserves numbered rule identities, operation signatures, grammar productions, and executable examples.
+The validation records below retain their original dates and implementation scope.
+
+Local link, heading, version-reference, and whitespace checks passed for this update.
+All 114 numbered section identities, fenced code blocks, and executable fixture content are unchanged.
+The official STE reference passed SHA-256 verification against the repository-recorded digest.
+The shared `prepare-ste-reference` and `check-ste` helpers are outside Lo and could not run within the repository boundary.
+Changed prose received a limited manual language review.
+Full STE compliance is unverified.
+The [update record](evidence/v04-reference-update.json) records local checks and independent documentation review.
+
 ## Scope and Findings
 
 The audit included the built-in catalog, core syntax and semantics, tensors, autodiff, gradients, optimizers, and device support.

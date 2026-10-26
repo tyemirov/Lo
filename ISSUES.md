@@ -1106,6 +1106,132 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify source locations for native breakpoints and error traces.
   - Run the test command offline with declared grants and controlled failures.
 
+### Process workflows
+
+- [ ] [F024] (P1) {I009} Add inherited Process.Context values and qualify cleanup execution
+  Goal:
+  Execute typed process workflows with the caller's environment and working directory through explicit, qualified activation.
+
+  Current state:
+  Process command construction, bound commits, captured output, typed termination, and session cleanup are implemented.
+  The current constructor requires separate environment and directory inputs.
+  The qualified native profile denies child writes, network access, and descendants.
+  Native admission permits at most 16 environment entries and an 8192-byte command body.
+  These limits prevent general environment inheritance and package-cache or Docker cleanup.
+  The [adapter contract](docs/adapter-design.md#process) defines current behavior.
+  The [mac-cleanup plan](docs/mac-cleanup-plan.md) defines the application requirements.
+
+  Requirements:
+  - Add nominal, immutable `Process.Context` values with environment variables and an absolute working directory.
+  - Obtain the runner environment and working directory once before program evaluation.
+  - Supply the same initial value to every context observation within that invocation.
+  - Support injected initial values for embedded runners and repository fixtures.
+  - Keep execution authority in host policy, separate from context data.
+  - Keep the existing grammar, named flows, callback purity rules, and `commit` activation boundary.
+  - Replace the command constructor with `Process.Command.new(context, executable, arguments, stdin)` and update all callers.
+  - Keep command arguments separate from shell source.
+  - Retain `Process.Result` with termination, stdout bytes, and stderr bytes.
+  - Classify context observation and executable discovery as host observations.
+  - Keep context construction, context changes, and command construction pure.
+  - Distinguish absent environment variables from variables with empty values.
+  - Distinguish executable absence from discovery failure and denied execution authority.
+  - Select the first executable candidate through the context's `PATH` before execution authorization.
+  - Reject an unauthorized selected candidate instead of searching for another executable.
+  - Specify missing `PATH`, empty and relative search entries, explicit paths, symlinks, and executable identity before implementation.
+  - Keep executable grants and identity verification effective through launch.
+  - Specify bounded environment transport that can carry ordinary inherited environments.
+  - Update Go, C, and Rust admission and framing together.
+  - Keep the trusted launcher environment fixed and send child environment values through the separate command channel.
+  - Report context origins, source overrides, dynamic dependencies, and required authority in inspection output.
+  - Redact inherited values from automatic output and diagnostic snapshots, including nested contexts and commands.
+  - Preserve explicit program access to selected environment values.
+
+  Proposed API:
+  These operations are proposed and are not implemented.
+  Context changes return new values and leave their inputs unchanged.
+  The environment update operation retains unspecified variables and replaces the supplied names.
+
+  | Operation | Contract | Effect |
+  | --- | --- | --- |
+  | `Process.Context.current()` | Return the invocation's initial `Process.Context!`. | Host observation |
+  | `Process.Context.new(environment, directory)` | Construct `Process.Context!` from explicit inputs. | Pure |
+  | `Process.Context.override_environment(context, updates)` | Apply `Map<String, String>` updates and return `Process.Context!`. | Pure |
+  | `Process.Context.with_directory(context, directory)` | Select an absolute `File.Path` and return `Process.Context!`. | Pure |
+  | `Process.Context.environment_value(context, name)` | Return `String!` with a distinct absent-variable error. | Pure |
+  | `Process.Context.without_environment(context, names)` | Remove the listed names and return `Process.Context!`. Absent names remain absent. | Pure |
+  | `Process.Executable.resolve(context, name)` | Discover `Process.Executable!` under the selected context. | Host observation |
+  | `Process.Command.new(context, executable, arguments, stdin)` | Construct an inert `Process.Command!`. | Pure |
+
+  Proposed example:
+  The Docker command requires a qualified profile with endpoint access.
+  Acceptance uses a process helper inside Lo instead of the installed Docker client.
+
+  ```lo
+  inherited = Process.Context.current()
+  context = Process.Context.override_environment(
+      inherited,
+      Map.new(
+          Record.new(key: "CI", value: "1"),
+          Record.new(key: "GOTOOLCHAIN", value: "local")
+      )
+  )
+  docker = Process.Executable.resolve(context, "docker")
+  command = Process.Command.new(
+      context: context,
+      executable: docker,
+      arguments: List.new("--context", "desktop-linux", "system", "df"),
+      stdin: UTF8.Bytes.new("")
+  )
+  result = commit command
+  return result
+  ```
+
+  Deliverables:
+  1. Implement context support and bounded transport.
+     Add types, catalog signatures, error kinds, effect metadata, context values, initial inputs, and structural redaction.
+     Update runner sessions, interpreter operations, native metadata, and the Rust runtime.
+     Update the C launcher protocol and transport limits with the same contract.
+  2. Implement executable discovery and interpreter/native parity.
+     Add controlled `PATH` resolution, exact grant checks, identity checks, and public CLI fixtures.
+     Prove context behavior with repository-local helpers before cleanup-profile acceptance.
+  3. Specify and qualify cleanup execution profiles.
+     Define permitted mutation roots, descendants, executable identities, endpoint access, resource limits, and lifecycle guarantees.
+     Qualify package-manager subprocess behavior separately from context delivery.
+     Define Docker daemon operations separately from client filesystem access and client termination.
+     Record confirmed daemon requests without a claim that client cancellation reverses daemon effects.
+     Keep the existing profile restrictions effective until a selected additional profile passes qualification.
+  4. Update the language reference, adapter contract, inspection contract, examples, and mac-cleanup plan.
+     Keep proposed operations separate from implemented behavior until their acceptance checks pass.
+     Apply one canonical contract to all callers and fixtures.
+
+  Validation:
+  - Start with failing public CLI integration tests for the proposed context and command contracts.
+  - Verify inherited variables, exact overrides, explicit empty environments, absent values, removals, and independent derived contexts.
+  - Verify that repeated context observations use the initial inputs after controlled host changes.
+  - Verify working directories and discovery under controlled `PATH` values.
+  - Verify missing executables, discovery errors, unauthorized first candidates, symlinks, and executable replacement before launch.
+  - Reject host observations in pure callbacks and verify that construction starts no process.
+  - Verify redaction for standalone contexts, nested commands, automatic output, and diagnostic snapshots in both runtimes.
+  - Verify exact command arguments, environment values, closed input, termination, stdout, and stderr through local helpers.
+  - Test transport boundaries, overflow, malformed frames, cancellation, output limits, and complete owned-process cleanup.
+  - Verify allowed and denied mutation, endpoint, and descendant behavior with controlled fixtures inside Lo.
+  - Verify Docker requests and response handling with a repository-local protocol implementation.
+  - Compare interpreter and native results, errors, effects, and lifecycle events.
+  - Run focused repository targets during implementation and final stack CI after the last correction.
+  - Complete independent review before issue closure.
+
+  Scope:
+  Keep every helper, fixture, protocol endpoint, cache, and generated artifact inside Lo.
+  Complete mac-cleanup acceptance remains separate and includes file metadata, locking, category continuation, and final exit status.
+  This issue does not authorize installed-script changes or cleanup of actual package caches or Docker resources.
+
+  Design references:
+  [typed-process](https://hackage-content.haskell.org/package/typed-process-0.2.13.0/docs/System-Process-Typed.html) supplies typed command descriptions and context inheritance.
+  [Shelly](https://hackage-content-origin.haskell.org/package/shelly-1.12.1/docs/Shelly.html) supplies local environment and directory scope.
+  [Bos](https://erratique.ch/software/bos/doc/Bos/Cmd/index.html) supplies command and argument composition.
+  [Eio](https://ocaml-multicore.github.io/eio/eio/Eio/Process/index.html) supplies explicit process authority and scoped lifetime.
+  [Dune actions](https://dune.readthedocs.io/en/stable/reference/actions/index.html) supply declarative execution and scoped context changes.
+
 ## BugFixes
 
 - [x] [B001] (P1) Preserve enclosing fold progress after native cancellation
