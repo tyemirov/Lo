@@ -10,11 +10,16 @@ Lo is not a replacement for Go, Python, or shell. It is an execution contract be
 
 For language rules and training examples, start with the [Lo Language Reference](specification.md).
 The [adapter design](docs/adapter-design.md) defines the shared contract for File, HTTP, and Process.
-Its [implementation plan](docs/adapter-plan.md) separates proposed APIs from current behavior.
+Its [implementation plan](docs/adapter-plan.md) records implementation status and remaining work.
 
 ## Status
 
-Lo implements the **v0.3 core, native compilation, CPU and Metal training, and explicit device transfers**.
+Lo implements the **v0.4 language contract**, with native compilation, CPU and Metal training, explicit device transfers, and model checkpoints.
+
+The [implemented contract](specification.md#version-and-scope) includes File, HTTP, and Process adapters with explicit grants and activation results.
+This version records the implemented language.
+The [planned features](specification.md#planned-features) are outside v0.4.
+They include NVIDIA arithmetic, mixed precision, modules, user-defined types, generics, packages, and development tools.
 
 The reference implementation has a Go frontend, verifier, checked execution graph, and static inspector.
 The parser and verifier accept all six specification examples.
@@ -33,7 +38,7 @@ Artifacts support the current operations, CPU training, File workflows, and HTTP
 The [native compilation contract](docs/native-compilation-contract.md) defines toolchain requirements, limits, and artifact construction.
 F001 qualified the previous Go-generation implementation on macOS arm64 and Linux arm64.
 Its [historical acceptance report](docs/native-compilation-results.md) records those measurements.
-I011 qualifies the current LLVM implementation against the same semantic and performance requirements.
+I011 completed qualification under the [focused acceptance update](docs/standalone-compiler-plan.md).
 
 The selected [training extension design](docs/training-extension-design.md) defines FP32 tensors, reverse-mode autodiff, immutable optimizer state, and explicit device execution.
 P001 completed the design task.
@@ -189,7 +194,7 @@ commit          activates side effects
 onError         handles boundary failure
 ```
 
-Lo v0.3 intentionally excludes:
+Lo v0.4 intentionally excludes:
 
 - classes and inheritance
 - mutable variables
@@ -204,7 +209,9 @@ Lo v0.3 intentionally excludes:
 - concurrency syntax
 - shared mutable memory
 
-These omissions are part of the design. The language is meant to be easy for AI agents to generate and easy for verifiers to reject.
+These limits apply to v0.4.
+The [planned features](specification.md#planned-features) identify later extensions.
+The core stays small for AI generation, verification, and inspection.
 
 ## Example: HTTP Handler With Typed Failure
 
@@ -324,7 +331,7 @@ The commit statement writes its Bytes payload.
    `.new(...)` constructs values and adapters. `commit` activates side effects and activatable adapters.
 
 3. **Named flows only**  
-   Lo v0.3 does not support lambdas or anonymous functions.
+   Lo v0.4 does not support lambdas or anonymous functions.
 
 4. **Errors are values**  
    Recoverable failures are represented as `Error`, not hidden host-language exceptions.
@@ -418,7 +425,7 @@ lo/
 Milestones 1 through 5 are implemented.
 The sections below record their scope.
 F008 adds explicit transfers and device resource budgets.
-F009, F010, F011, and I001 own device arithmetic, deferred execution, precision, and complete training acceptance.
+F009, F010, F011, and I001 own planned NVIDIA arithmetic, deferred execution, mixed precision, and complete NVIDIA training acceptance.
 
 ### Milestone 1: Verifier MVP
 
@@ -613,7 +620,7 @@ All work and fixtures obey the [Lo repository boundary](.mprlab/POLICY.md#lo-rep
 
 ## Language Reference
 
-The [Lo Language Reference](specification.md) defines the implemented v0.3 core and tensor training contracts.
+The [Lo Language Reference](specification.md) defines the implemented v0.4 language, adapter, training, device, and checkpoint contracts.
 It includes a contents list, operation signatures, examples, and current backend limits.
 
 - [File adapter and cleanup example](specification.md#91-file-adapter)
@@ -630,7 +637,7 @@ It includes a contents list, operation signatures, examples, and current backend
 
 ## Non-Goals
 
-Lo v0.3 is not trying to be:
+Lo v0.4 is not trying to be:
 
 - a general-purpose programming language
 - a Python replacement
@@ -650,7 +657,7 @@ Make AI-generated action plans typed, inspectable, and executable by a trusted r
 
 ## Contributing
 
-This project has a reference compiler and runtime for the v0.3 proposal.
+This project has a reference compiler and runtime for the implemented v0.4 language contract.
 
 Useful contributions include:
 
