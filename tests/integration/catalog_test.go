@@ -14,6 +14,13 @@ func builtinExamples() []builtinExample {
 	executablePath := repository + "/testdata/inert-process/executable"
 	directoryPath := repository + "/testdata/inert-process/directory"
 	examples := []builtinExample{
+		{"Process.Context.current", `return Process.Context.current()`, "Process.Context!"},
+		{"Process.Context.new", fmt.Sprintf(`return Process.Context.new(Map.new(), File.Path.new(%q))`, directoryPath), "Process.Context!"},
+		{"Process.Context.override_environment", fmt.Sprintf(`flow Main() -> Process.Context! { initial = Process.Context.new(Map.new(), File.Path.new(%q)); return Process.Context.override_environment(initial, Map.new(Record.new(key: "KEY", value: "value"))) }; return Main()`, directoryPath), "Process.Context!"},
+		{"Process.Context.without_environment", fmt.Sprintf(`flow Main() -> Process.Context! { initial = Process.Context.new(Map.new(), File.Path.new(%q)); return Process.Context.without_environment(initial, List.new("KEY")) }; return Main()`, directoryPath), "Process.Context!"},
+		{"Process.Context.with_directory", fmt.Sprintf(`flow Main() -> Process.Context! { initial = Process.Context.new(Map.new(), File.Path.new(%q)); return Process.Context.with_directory(initial, File.Path.new(%q)) }; return Main()`, directoryPath, repository), "Process.Context!"},
+		{"Process.Context.environment_value", fmt.Sprintf(`flow Main() -> String! { initial = Process.Context.new(Map.new(Record.new(key: "KEY", value: "value")), File.Path.new(%q)); return Process.Context.environment_value(initial, "KEY") }; return Main()`, directoryPath), "String!"},
+		{"Process.Executable.resolve", fmt.Sprintf(`flow Main() -> Process.Executable! { initial = Process.Context.new(Map.new(), File.Path.new(%q)); return Process.Executable.resolve(initial, %q) }; return Main()`, directoryPath, binary), "Process.Executable!"},
 		{"Autodiff.grad", `flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.mul(p.x,p.x) }; flow Example() -> Record{value: Tensor<FP32>, gradients: Record{x: Tensor<FP32>}}! { x=Tensor.new(List.new(2.0),List.new()); return Autodiff.grad(Record.new(x:x),Loss) }; return Example()`, "Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}!"},
 		{"Int.new", `return Int.new(123456789012345678901234567890)`, "Int"},
 		{"String.new", `return String.new("héllo")`, "String"},
@@ -44,7 +51,7 @@ func builtinExamples() []builtinExample {
 		{"Process.Executable.new", fmt.Sprintf(`return Process.Executable.new(File.Path.new(%q))`, executablePath), "Process.Executable!"},
 		{"Process.Termination.exit_code", `flow Read(value: Process.Termination) -> Int! { return Process.Termination.exit_code(value) }; return 0`, "Int"},
 		{"Process.Termination.signal", `flow Read(value: Process.Termination) -> Int! { return Process.Termination.signal(value) }; return 0`, "Int"},
-		{"Process.Command.new", fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(File.Path.new(%q)); return Process.Command.new(executable,List.new("argument"),Map.new(Record.new(key: "TOKEN",value: "value")),File.Path.new(%q),Bytes.new("stdin")) }; return Main()`, executablePath, directoryPath), "Process.Command!"},
+		{"Process.Command.new", fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(File.Path.new(%q)); return Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN",value: "value")), File.Path.new(%q)), stdin: Bytes.new("stdin")) }; return Main()`, executablePath, directoryPath), "Process.Command!"},
 		{"HTTP.Server.new", `flow H(r: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow E(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; return HTTP.Server.new(8080, H, E)`, "HTTP.Server"},
 		{"HTTP.URL.new", `return HTTP.URL.new("http://127.0.0.1/resource")`, "HTTP.URL!"},
 		{"HTTP.Method.new", `return HTTP.Method.new("GET")`, "HTTP.Method!"},

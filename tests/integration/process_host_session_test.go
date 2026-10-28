@@ -96,7 +96,7 @@ func sessionFixture(t *testing.T) (processhost.Config, string, string) {
 		t.Fatal(err)
 	}
 	digest := sha256.Sum256(data)
-	policy, err := adapter.NewProcessPolicy([]string{fmt.Sprintf("%x,%s", digest, path)}, filepath.Join(root, "absent-launcher"), []string{root})
+	policy, err := adapter.NewProcessPolicy(adapter.ProcessPolicyInput{Grants: []string{fmt.Sprintf("%x,%s", digest, path)}, Launcher: filepath.Join(root, "absent-launcher"), ReadRoots: []string{root}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,7 +113,7 @@ func sessionFixture(t *testing.T) (processhost.Config, string, string) {
 
 func sessionRun(t *testing.T, root, path string, session processhost.Session) <-chan error {
 	t.Helper()
-	program := processCompositionProgram(t, root, fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); arguments = List.new("arg"); environment = Map.new(Record.new(key: "NAME", value: "explicit")); command = Process.Command.new(executable, arguments, environment, File.Path.new(%q), UTF8.Bytes.new("input")); result = commit command; return result }; return Main()`, path, root))
+	program := processCompositionProgram(t, root, fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); arguments = List.new("arg"); environment = Map.new(Record.new(key: "NAME", value: "explicit")); command = Process.Command.new(executable: executable, arguments: arguments, context: Process.Context.new(environment, File.Path.new(%q)), stdin: UTF8.Bytes.new("input")); result = commit command; return result }; return Main()`, path, root))
 	done := make(chan error, 1)
 	go func() {
 		_, err := program.Run(context.Background(), session.Boundary(), execution.DefaultBudget(), device.DefaultConfig())
@@ -248,7 +248,7 @@ func TestProcessHostSessionSettledCreationFailureDoesNotRetainResources(t *testi
 }
 
 func TestProcessHostSessionEmptyPolicyKeepsDefaultGateClosed(t *testing.T) {
-	policy, err := adapter.NewProcessPolicy(nil, "", nil)
+	policy, err := adapter.NewProcessPolicy(adapter.ProcessPolicyInput{Grants: nil, Launcher: "", ReadRoots: nil})
 	if err != nil {
 		t.Fatal(err)
 	}

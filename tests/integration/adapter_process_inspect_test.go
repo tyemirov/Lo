@@ -9,20 +9,29 @@ import (
 )
 
 type processInspection struct {
-	Executable  inspectionDescription `json:"executable"`
-	Arguments   inspectionDescription `json:"arguments"`
-	Environment inspectionDescription `json:"environment"`
-	Directory   inspectionDescription `json:"directory"`
-	Stdin       inspectionDescription `json:"stdin"`
-	Profile     struct {
+	Context    processContextInspection `json:"context"`
+	Executable inspectionDescription    `json:"executable"`
+	Arguments  inspectionDescription    `json:"arguments"`
+	Stdin      inspectionDescription    `json:"stdin"`
+	Profile    struct {
 		Required bool   `json:"required"`
 		Status   string `json:"status"`
 	} `json:"execution_profile"`
 }
 
+type processContextInspection struct {
+	Source      inspectionDescription     `json:"source"`
+	Origin      string                    `json:"origin"`
+	Environment *inspectionDescription    `json:"environment"`
+	Directory   *inspectionDescription    `json:"directory"`
+	Base        *processContextInspection `json:"base"`
+	Updates     *inspectionDescription    `json:"updates"`
+	Removed     *inspectionDescription    `json:"removed"`
+}
+
 func TestAdapterProcessInspection(t *testing.T) {
 	root := fileFixtureRoot(t)
-	program := fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); arguments = List.new("arg"); environment = Map.new(Record.new(key: "ENV",value: "value")); directory = File.Path.new(%q); stdin = UTF8.Bytes.new("input"); target = Process.Command.new(executable,arguments,environment,directory,stdin); outcome = commit target; return outcome }; return Main()`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
+	program := fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); arguments = List.new("arg"); environment = Map.new(Record.new(key: "ENV",value: "value")); directory = File.Path.new(%q); context = Process.Context.new(environment, directory); stdin = UTF8.Bytes.new("input"); target = Process.Command.new(context, executable, arguments, stdin); outcome = commit target; return outcome }; return Main()`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
 	report, path, output := inspectSource(t, program)
 	var document struct {
 		Report struct {
@@ -52,7 +61,7 @@ func TestAdapterProcessInspection(t *testing.T) {
 		inputs := []struct {
 			name, kind string
 			value      inspectionDescription
-		}{{"executable", "Process.Executable", process.Executable}, {"arguments", "List<String>", process.Arguments}, {"environment", "Map<String, String>", process.Environment}, {"directory", "File.Path", process.Directory}, {"stdin", "Bytes", process.Stdin}}
+		}{{"context", "Process.Context", process.Context.Source}, {"executable", "Process.Executable", process.Executable}, {"arguments", "List<String>", process.Arguments}, {"stdin", "Bytes", process.Stdin}}
 		for _, input := range inputs {
 			if input.value.Type != input.kind || input.value.Node == "" || len(input.value.Span) == 0 || len(input.value.Dependencies) == 0 {
 				t.Fatalf("missing %s description: %s", input.name, output)
@@ -69,7 +78,7 @@ func TestAdapterProcessInspection(t *testing.T) {
 				t.Fatalf("missing %s input provenance: %s", input.name, output)
 			}
 		}
-		if process.Executable.Value != filepath.Join(root, "absent-executable") || process.Directory.Value != filepath.Join(root, "absent-directory") {
+		if process.Context.Origin != "explicit" || process.Context.Environment == nil || process.Context.Environment.Type != "Map<String, String>" || process.Context.Directory == nil || process.Context.Directory.Value != filepath.Join(root, "absent-directory") || process.Executable.Value != filepath.Join(root, "absent-executable") {
 			t.Fatalf("lost declared paths: %s", output)
 		}
 	}
@@ -87,7 +96,7 @@ func TestAdapterProcessInspection(t *testing.T) {
 	if text.status != 0 || !strings.Contains(text.stdout, "execution_profile=required/unavailable") {
 		t.Fatalf("text inspection omits unmet profile: %+v", text)
 	}
-	for _, name := range []string{"executable", "arguments", "environment", "directory", "stdin"} {
+	for _, name := range []string{"context", "executable", "arguments", "stdin"} {
 		if !strings.Contains(text.stdout, name+"=") {
 			t.Fatalf("text inspection omits %s: %+v", name, text)
 		}
@@ -115,7 +124,7 @@ func TestAdapterProcessInspectionDynamicTarget(t *testing.T) {
 	if !process.Profile.Required || process.Profile.Status != "unavailable" {
 		t.Fatalf("unknown command lost execution gate: %s", output)
 	}
-	for _, input := range []inspectionDescription{process.Executable, process.Arguments, process.Environment, process.Directory, process.Stdin} {
+	for _, input := range []inspectionDescription{process.Context.Source, process.Executable, process.Arguments, process.Stdin} {
 		if input.Kind != "dynamic" || input.Node == "" || len(input.Dependencies) != 2 || input.Expression != "outcome = commit command" {
 			t.Fatalf("unknown input provenance lost: %s", output)
 		}

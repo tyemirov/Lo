@@ -89,7 +89,11 @@ func lifecycleCommand(t *testing.T) value.ProcessCommand {
 	if err != nil {
 		t.Fatal(err)
 	}
-	command, err := value.NewProcessCommand(executable, arguments, environment, path, value.NewBytes([]byte("input")))
+	processContext, err := value.NewProcessContext(environment, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	command, err := value.NewProcessCommand(processContext, executable, arguments, value.NewBytes([]byte("input")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -525,7 +529,11 @@ func TestAdapterProcessLifecycleFailureEvidence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	command, err := value.NewProcessCommand(executable, arguments, environment, path, value.NewBytes([]byte("input")))
+	processContext, err := value.NewProcessContext(environment, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	command, err := value.NewProcessCommand(processContext, executable, arguments, value.NewBytes([]byte("input")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -598,7 +606,7 @@ func (w *lifecycleWriteCloser) Close() error { return nil }
 
 func lifecycleProgram(t *testing.T, root string) execution.Program {
 	t.Helper()
-	text, err := source.New(filepath.Join(root, "lifecycle.lo"), fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable,List.new("one two","$VALUE"),Map.new(Record.new(key:"ONLY",value:"explicit")),File.Path.new(%q),UTF8.Bytes.new("input")); outcome = commit target; return outcome }; return Main()`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory")))
+	text, err := source.New(filepath.Join(root, "lifecycle.lo"), fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable: executable, arguments: List.new("one two","$VALUE"), context: Process.Context.new(Map.new(Record.new(key:"ONLY",value:"explicit")), File.Path.new(%q)), stdin: UTF8.Bytes.new("input")); outcome = commit target; return outcome }; return Main()`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory")))
 	if err != nil {
 		t.Fatal(err)
 	}

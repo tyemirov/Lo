@@ -25,7 +25,7 @@ func processLiteral(t *testing.T, text string) string {
 }
 func processCommandSource(t *testing.T, executable, arguments, environment, directory, stdin, finish string) string {
 	t.Helper()
-	return fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(path: File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: %s, environment: %s, directory: File.Path.new(%s), stdin: %s); %s }; return Main()`, processLiteral(t, executable), arguments, environment, processLiteral(t, directory), stdin, finish)
+	return fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(path: File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: %s, context: Process.Context.new(%s, File.Path.new(%s)), stdin: %s); %s }; return Main()`, processLiteral(t, executable), arguments, environment, processLiteral(t, directory), stdin, finish)
 }
 func processFields(t *testing.T, input runtimeValue) map[string]runtimeValue {
 	t.Helper()
@@ -86,7 +86,7 @@ func TestAdapterProcessCommandValue(t *testing.T) {
 		t.Fatalf("command type %s", command.Type)
 	}
 	fields := processFields(t, command)
-	if len(fields) != 5 {
+	if len(fields) != 4 || fields["context"].Type != "Process.Context" {
 		t.Fatalf("command fields %+v", fields)
 	}
 	executable := processFields(t, fields["executable"])
@@ -94,11 +94,10 @@ func TestAdapterProcessCommandValue(t *testing.T) {
 		t.Fatalf("executable type %s", fields["executable"].Type)
 	}
 	valueJSON(t, executable["path"], processLiteral(t, lexicalExecutable))
-	valueJSON(t, fields["directory"], processLiteral(t, lexicalDirectory))
+	valueJSON(t, fields["context"], `{"origin":"explicit","redacted":true}`)
 	valueJSON(t, fields["arguments"], `[{"type":"String","value":"one two"},{"type":"String","value":"$HOME"},{"type":"String","value":"$(printf literal); echo literal"},{"type":"String","value":"line\nbreak"}]`)
-	valueJSON(t, fields["environment"], `[{"key":{"type":"String","value":"EMPTY"},"value":{"type":"String","value":""}},{"key":{"type":"String","value":"UNICODE"},"value":{"type":"String","value":"é\nvalue"}}]`)
 	valueJSON(t, fields["stdin"], `"AP8KgA=="`)
-	if strings.Contains(string(fields["environment"].Value), "ambient-value-must-not-enter-command") {
+	if strings.Contains(string(fields["context"].Value), "ambient-value-must-not-enter-command") {
 		t.Fatal("command inherited an environment value")
 	}
 }
@@ -124,7 +123,11 @@ func TestAdapterProcessConstructorValidation(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			source := processCommandSource(t, root+"/missing-executable", test.arguments, test.environment, test.directory, validStdin, `return command`)
-			processConstructorFailure(t, source, "Process.InvalidCommand")
+			kind := "Process.InvalidContext"
+			if test.name == "nul-argument" {
+				kind = "Process.InvalidCommand"
+			}
+			processConstructorFailure(t, source, kind)
 		})
 	}
 }
@@ -133,7 +136,7 @@ func TestAdapterProcessNominalTypes(t *testing.T) {
 	root := fileFixtureRoot(t)
 	for _, source := range []string{
 		fmt.Sprintf(`return Process.Executable.new(%s)`, processLiteral(t, root)),
-		fmt.Sprintf(`return Process.Command.new(File.Path.new(%s), List.new(), Map.new(), File.Path.new(%s), Bytes.new(""))`, processLiteral(t, root), processLiteral(t, root)),
+		fmt.Sprintf(`return Process.Command.new(executable: File.Path.new(%s), arguments: List.new(), context: Process.Context.new(Map.new(), File.Path.new(%s)), stdin: Bytes.new(""))`, processLiteral(t, root), processLiteral(t, root)),
 		`flow Bad(command: Process.Command) -> Process.Executable { return command }`,
 		`return Process.run()`,
 		`return Process.Result.new()`,
@@ -148,7 +151,7 @@ func TestAdapterProcessNominalTypes(t *testing.T) {
 
 func TestAdapterProcessConstructorPurity(t *testing.T) {
 	root := fileFixtureRoot(t)
-	source := fmt.Sprintf(`flow Build(path: File.Path) -> Process.Command! { executable = Process.Executable.new(path); return Process.Command.new(executable, List.new(), Map.new(), path, Bytes.new("")) }; return List.map(List.new(File.Path.new(%s)), Build)`, processLiteral(t, root+"/nonexistent"))
+	source := fmt.Sprintf(`flow Build(path: File.Path) -> Process.Command! { executable = Process.Executable.new(path); return Process.Command.new(executable: executable, arguments: List.new(), context: Process.Context.new(Map.new(), path), stdin: Bytes.new("")) }; return List.map(List.new(File.Path.new(%s)), Build)`, processLiteral(t, root+"/nonexistent"))
 	list := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
 	if list.Type != "List<Process.Command>" {
 		t.Fatalf("pure command list type %s", list.Type)
@@ -167,7 +170,7 @@ func TestAdapterProcessCommandDiagnosticSnapshot(t *testing.T) {
 	arguments := `List.new("` + processArgumentSecret + `")`
 	environment := `Map.new(Record.new(key: "TOKEN", value: "` + processEnvironmentSecret + `"))`
 	stdin := `UTF8.Bytes.new("` + processStdinSecret + `")`
-	source := fmt.Sprintf(`flow Main() -> Error! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable, %s, %s, File.Path.new(%s), %s); return Error.new("Probe", "safe", Record.new(command: command, nested: List.new(command))) }; return Main()`, processLiteral(t, root+"/missing"), arguments, environment, processLiteral(t, root), stdin)
+	source := fmt.Sprintf(`flow Main() -> Error! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: %s, context: Process.Context.new(%s, File.Path.new(%s)), stdin: %s); return Error.new("Probe", "safe", Record.new(command: command, nested: List.new(command))) }; return Main()`, processLiteral(t, root+"/missing"), arguments, environment, processLiteral(t, root), stdin)
 	got := run(t, "run", sourceFile(t, source), "--format", "json")
 	if got.status != 0 {
 		t.Fatalf("explicit command error: %+v", got)
@@ -184,13 +187,13 @@ func TestAdapterProcessCommandDiagnosticSnapshot(t *testing.T) {
 	}
 	snapshot := processFields(t, command)
 	valueJSON(t, snapshot["arguments"], `[]`)
-	valueJSON(t, snapshot["environment"], `[]`)
+	valueJSON(t, snapshot["context"], `{"origin":"explicit","redacted":true}`)
 	valueJSON(t, snapshot["stdin"], `""`)
 }
 
 func TestAdapterProcessFailureTraceRedaction(t *testing.T) {
 	root := fileFixtureRoot(t)
-	source := fmt.Sprintf(`flow Fail(command: Process.Command) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable, List.new("%s"), Map.new(Record.new(key: "TOKEN", value: "%s")), File.Path.new(%s), UTF8.Bytes.new("%s")); return Fail(command) }; return Main()`, processLiteral(t, root+"/missing"), processArgumentSecret, processEnvironmentSecret, processLiteral(t, root), processStdinSecret)
+	source := fmt.Sprintf(`flow Fail(command: Process.Command) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: List.new("%s"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN", value: "%s")), File.Path.new(%s)), stdin: UTF8.Bytes.new("%s")); return Fail(command) }; return Main()`, processLiteral(t, root+"/missing"), processArgumentSecret, processEnvironmentSecret, processLiteral(t, root), processStdinSecret)
 	got := run(t, "run", sourceFile(t, source), "--format", "json")
 	diagnostic := receiptHostDiagnostic(t, got)
 	if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != "Math.DivideByZero" {
@@ -235,7 +238,11 @@ func TestAdapterProcessSnapshotWeight(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			command, err := value.NewProcessCommand(executable, arguments, environment, path, value.NewBytes([]byte(text.Text())))
+			processContext, err := value.NewProcessContext(environment, path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			command, err := value.NewProcessCommand(processContext, executable, arguments, value.NewBytes([]byte(text.Text())))
 			if err != nil {
 				t.Fatal(err)
 			}

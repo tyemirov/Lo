@@ -51,7 +51,11 @@ func TestAdapterProcessCompletionBeforeResultCharge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	command, err := value.NewProcessCommand(executable, arguments, environment, path, value.NewBytes(nil))
+	processContext, err := value.NewProcessContext(environment, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	command, err := value.NewProcessCommand(processContext, executable, arguments, value.NewBytes(nil))
 	if err != nil {
 		t.Fatal(err)
 	}

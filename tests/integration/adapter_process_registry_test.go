@@ -37,12 +37,12 @@ func registryRemoveSource(root, name string) string {
 
 func registryProgram(t *testing.T, root, path string) execution.Program {
 	t.Helper()
-	return processCompositionProgram(t, root, fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable, List.new("argument"), Map.new(Record.new(key: "ONLY", value: "explicit")), File.Path.new(%q), UTF8.Bytes.new("input")); result = commit target; return result }; return Main()`, path, root))
+	return processCompositionProgram(t, root, fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key: "ONLY", value: "explicit")), File.Path.new(%q)), stdin: UTF8.Bytes.new("input")); result = commit target; return result }; return Main()`, path, root))
 }
 
 func registryRecoveryProgram(t *testing.T, root, path string) execution.Program {
 	t.Helper()
-	return processCompositionProgram(t, root, fmt.Sprintf(`flow Recover(error: Error) -> Int { return 73 }; flow Main() -> Int onError Recover { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable, List.new("argument"), Map.new(Record.new(key: "ONLY", value: "explicit")), File.Path.new(%q), UTF8.Bytes.new("input")); result = commit target; return 1 }; return Main()`, path, root))
+	return processCompositionProgram(t, root, fmt.Sprintf(`flow Recover(error: Error) -> Int { return 73 }; flow Main() -> Int onError Recover { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key: "ONLY", value: "explicit")), File.Path.new(%q)), stdin: UTF8.Bytes.new("input")); result = commit target; return 1 }; return Main()`, path, root))
 }
 
 func registryNoTermination(t *testing.T, progress value.Record) {

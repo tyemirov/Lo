@@ -74,7 +74,7 @@ func TestAdapterProcessPolicyCopiesCollections(t *testing.T) {
 	root, command, launcher := processPolicyPaths(t)
 	grants := []string{strings.Repeat("aB", 32) + "," + command}
 	reads := []string{root}
-	policy, err := adapter.NewProcessPolicy(grants, launcher, reads)
+	policy, err := adapter.NewProcessPolicy(adapter.ProcessPolicyInput{Grants: grants, Launcher: launcher, ReadRoots: reads})
 	if err != nil {
 		t.Fatal(err)
 	}
