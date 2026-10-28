@@ -1459,3 +1459,47 @@ pub unsafe extern "C" fn lo_op_Process_2EExecutable_2Eresolve(
 ) {
     call(c, a, n, s, o, Some("Process.Executable.resolve"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Host_2EInvocation_2Ecurrent(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Host.Invocation.current"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2Edirectory(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.directory"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2Escan(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.scan"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ERemove_2Echecked(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.Remove.checked"))
+}

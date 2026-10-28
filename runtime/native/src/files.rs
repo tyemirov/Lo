@@ -16,17 +16,22 @@ use std::{
 
 #[path = "file_entries.rs"]
 mod entries;
+#[path = "file_observer.rs"]
+mod observer;
 #[path = "file_probe.rs"]
 mod probe;
-pub(crate) use entries::{validate_namespace, MutationAccess};
 pub use entries::Value;
+pub(crate) use entries::{validate_namespace, MutationAccess};
 pub const SUPPORTED: &[&str] = &[
     "File.read",
     "File.Write.new",
     "File.Append.new",
     "File.list",
+    "File.directory",
+    "File.scan",
     "File.open_paths",
     "File.Remove.new",
+    "File.Remove.checked",
 ];
 const MAX_FILE_ENTRIES: usize = 10_000;
 const MAX_FILE_DIRECTORIES: usize = 128;
@@ -55,6 +60,21 @@ pub fn admit(site: &Site) -> Result<(), String> {
             args == [atom("File.Path")]
                 && site.typ == Type::Fallible(Box::new(Type::List(Box::new(atom("File.Entry")))))
         }
+        "File.directory" | "File.scan" => {
+            args == [atom("File.Path")]
+                && site.typ
+                    == Type::Fallible(Box::new(atom(if site.operation == "File.directory" {
+                        "File.Directory"
+                    } else {
+                        "File.Scan"
+                    })))
+        }
+        "File.Remove.checked" => {
+            args.first() == Some(&Type::List(Box::new(atom("File.Entry"))))
+                && matches!(site.arguments.last(), Some(Argument::Flow(_)))
+                && site.arguments.len() == args.len() + 1
+                && site.typ == Type::Fallible(Box::new(atom("File.Remove")))
+        }
         "File.open_paths" => {
             args == [atom("File.Path")]
                 && site.typ == Type::Fallible(Box::new(Type::List(Box::new(atom("File.Path")))))
@@ -65,11 +85,37 @@ pub fn admit(site: &Site) -> Result<(), String> {
         }
         _ => false,
     };
-    if valid && args.len() == site.arguments.len() {
+    if valid && (args.len() == site.arguments.len() || site.operation == "File.Remove.checked") {
         Ok(())
     } else {
         Err("file operation metadata type mismatch".into())
     }
+}
+pub fn admit_guard(site: &Site, flows: &[Flow]) -> Result<(), String> {
+    let invalid = || "invalid native removal guard contract".to_owned();
+    let Some(Argument::Flow(callback)) = site.arguments.last() else {
+        return Err(invalid());
+    };
+    let flow = flows.get(*callback).ok_or_else(invalid)?;
+    let mut parameters = Vec::new();
+    for argument in &site.arguments[1..site.arguments.len() - 1] {
+        let Argument::Value(typ) = argument else {
+            return Err(invalid());
+        };
+        parameters.push(typ.clone());
+    }
+    parameters.push(atom("File.Entry"));
+    parameters.push(atom("File.Entry"));
+    if parameters.len() != flow.parameters.len()
+        || parameters
+            .iter()
+            .zip(&flow.parameters)
+            .any(|(a, (_, b))| a != b)
+        || flow.output != atom("Bool")
+    {
+        return Err(invalid());
+    }
+    Ok(())
 }
 #[cfg(target_os = "macos")]
 const FLAGS: [i32; 6] = [0x100, 0x100000, 0x1000000, 0x4, 0x200, 0x400];
@@ -151,6 +197,7 @@ pub struct Files {
     probe: Option<probe::Probe>,
     last_removal: Option<(Handle, Handle)>,
     write_progress: std::cell::RefCell<Option<Handle>>,
+    observer: Option<observer::Observer>,
 }
 #[derive(Default)]
 pub struct Options {
@@ -173,6 +220,7 @@ pub fn empty() -> Files {
         probe: None,
         last_removal: None,
         write_progress: std::cell::RefCell::new(None),
+        observer: None,
     }
 }
 
@@ -329,6 +377,7 @@ impl Files {
         }
         let mut fork = empty();
         fork.base = self.base.clone();
+        fork.observer = self.observer;
         let result = (|| {
             fork.reads = roots(&self.reads)?;
             fork.writes = roots(&self.writes)?;
@@ -512,6 +561,9 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
             ))
         }
         "File.list" => return entries::list(context, site, &args[0]),
+        "File.directory" => return entries::directory(context, site, &args[0]),
+        "File.scan" => return entries::scan(context, site, &args[0]),
+        "File.Remove.checked" => return entries::selection_checked(context, site, args),
         "File.open_paths" => return probe::open_paths(context, site, &args[0]),
         "File.Remove.new" => return entries::selection(context, site, &args[0]),
         _ => (),

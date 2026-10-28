@@ -18,10 +18,23 @@ pub struct Observation {
     pub identity: (u64, u64),
 }
 #[derive(Clone)]
+pub struct Guard {
+    pub flow: usize,
+    pub predicate: String,
+    pub contexts: Vec<Handle>,
+}
+#[derive(Clone)]
 pub enum Value {
     Entry {
         fields: Handle,
         observation: Option<Observation>,
+    },
+    Directory {
+        fields: Handle,
+        observation: Option<Observation>,
+    },
+    Scan {
+        fields: Handle,
     },
     Content {
         append: bool,
@@ -32,6 +45,7 @@ pub enum Value {
         entries: Handle,
         session: u64,
         payload_weight: u64,
+        guard: Option<Guard>,
     },
 }
 impl Value {
@@ -46,6 +60,16 @@ impl Value {
                         128 + observation.directory.path.as_os_str().len() as u64
                     })
             }
+            Self::Directory {
+                fields,
+                observation,
+            } => {
+                fields.weight
+                    + observation.as_ref().map_or(0, |observation| {
+                        128 + observation.directory.path.as_os_str().len() as u64
+                    })
+            }
+            Self::Scan { fields } => fields.weight,
             Self::Content {
                 append,
                 path,
@@ -65,19 +89,23 @@ impl Value {
     }
     pub fn fields(&self) -> Option<&BTreeMap<String, Handle>> {
         match self {
-            Self::Entry { fields, .. } => Some(fields.fields()),
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+                Some(fields.fields())
+            }
             _ => None,
         }
     }
     pub fn json(&self) -> Json {
         match self {
-            Self::Entry { fields, .. } => Json::Object(
-                fields
-                    .fields()
-                    .iter()
-                    .map(|(name, value)| (name.clone(), value.json()))
-                    .collect(),
-            ),
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+                Json::Object(
+                    fields
+                        .fields()
+                        .iter()
+                        .map(|(name, value)| (name.clone(), value.json()))
+                        .collect(),
+                )
+            }
             Self::Content {
                 append,
                 path,
@@ -85,26 +113,32 @@ impl Value {
             } => {
                 json!({"operation":if *append {"File.Append.new"}else{"File.Write.new"},"file_path":path.json(),"file_content":content.json()})
             }
-            Self::Remove { entries, .. } => {
-                json!({"operation":"File.Remove.new","entries":entries.json()})
+            Self::Remove { entries, guard, .. } => {
+                let mut result = json!({"operation":"File.Remove.new","entries":entries.json()});
+                if let Some(guard) = guard {
+                    result["guard"] = json!({"predicate":guard.predicate,"context":guard.contexts.iter().map(|v|crate::value::snapshot(v).json()).collect::<Vec<_>>()});
+                }
+                result
             }
         }
     }
     pub fn canonical_json(&self) -> String {
         match self {
-            Self::Entry { fields, .. } => format!(
-                "{{{}}}",
-                fields
-                    .fields()
-                    .iter()
-                    .map(|(name, value)| format!(
-                        "{}:{}",
-                        serde_json::to_string(name).unwrap(),
-                        value.canonical_json()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(",")
-            ),
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+                format!(
+                    "{{{}}}",
+                    fields
+                        .fields()
+                        .iter()
+                        .map(|(name, value)| format!(
+                            "{}:{}",
+                            serde_json::to_string(name).unwrap(),
+                            value.canonical_json()
+                        ))
+                        .collect::<Vec<_>>()
+                        .join(",")
+                )
+            }
             Self::Content {
                 append,
                 path,
@@ -119,10 +153,28 @@ impl Value {
                 path.canonical_json(),
                 content.canonical_json()
             ),
-            Self::Remove { entries, .. } => format!(
-                "{{\"operation\":\"File.Remove.new\",\"entries\":{}}}",
-                entries.canonical_json()
-            ),
+            Self::Remove { entries, guard, .. } => {
+                let suffix = guard
+                    .as_ref()
+                    .map(|guard| {
+                        format!(
+                            ",\"guard\":{{\"predicate\":{},\"context\":[{}]}}",
+                            serde_json::to_string(&guard.predicate).unwrap(),
+                            guard
+                                .contexts
+                                .iter()
+                                .map(|v| crate::value::snapshot(v).canonical_json())
+                                .collect::<Vec<_>>()
+                                .join(",")
+                        )
+                    })
+                    .unwrap_or_default();
+                format!(
+                    "{{\"operation\":\"File.Remove.new\",\"entries\":{}{}}}",
+                    entries.canonical_json(),
+                    suffix
+                )
+            }
         }
     }
     pub fn output(&self) -> String {
@@ -134,10 +186,22 @@ impl Value {
                 fields: fields.clone(),
                 observation: None,
             },
-            Self::Remove { entries, .. } => Self::Remove {
+            Self::Directory { fields, .. } => Self::Directory {
+                fields: crate::value::snapshot(fields),
+                observation: None,
+            },
+            Self::Scan { fields } => Self::Scan {
+                fields: crate::value::snapshot(fields),
+            },
+            Self::Remove { entries, guard, .. } => Self::Remove {
                 entries: crate::value::snapshot(entries),
                 session: 0,
                 payload_weight: self.weight() + 16,
+                guard: guard.as_ref().map(|g| Guard {
+                    flow: g.flow,
+                    predicate: g.predicate.clone(),
+                    contexts: g.contexts.iter().map(crate::value::snapshot).collect(),
+                }),
             },
             _ => self.clone(),
         }
@@ -152,12 +216,18 @@ pub fn adapter(typ: &str, value: Value) -> Handle {
 fn identity(info: &std::fs::Metadata) -> (u64, u64) {
     (info.dev(), info.ino())
 }
+#[derive(Clone)]
 pub(super) struct FileInfo {
     pub identity: (u64, u64),
     size: u64,
     modified: i64,
     nanoseconds: i64,
     links: u64,
+    owner: u32,
+    accessed: i64,
+    accessed_nsec: i64,
+    changed: i64,
+    changed_nsec: i64,
     kind: &'static str,
 }
 impl FileInfo {
@@ -217,8 +287,59 @@ pub(super) fn lstat_at(parent: &File, name: &str) -> io::Result<FileInfo> {
         modified: information.st_mtime as i64,
         nanoseconds: information.st_mtime_nsec as i64,
         links: information.st_nlink as u64,
+        owner: information.st_uid as u32,
+        accessed: information.st_atime as i64,
+        accessed_nsec: information.st_atime_nsec as i64,
+        changed: information.st_ctime as i64,
+        changed_nsec: information.st_ctime_nsec as i64,
         kind,
     })
+}
+fn observed_at(
+    context: &Context,
+    parent: &File,
+    root: &Path,
+    name: &str,
+    phase: u32,
+) -> Result<FileInfo, super::observer::Failure> {
+    use super::observer::{Failure, Metadata};
+    let mut info = lstat_at(parent, name).map_err(Failure::IO)?;
+    let mut metadata = Metadata {
+        owner_uid: info.owner as u64,
+        accessed_sec: info.accessed,
+        accessed_nsec: info.accessed_nsec,
+        modified_sec: info.modified,
+        modified_nsec: info.nanoseconds,
+        changed_sec: info.changed,
+        changed_nsec: info.changed_nsec,
+        link_count: info.links,
+        size_bytes: info.size,
+    };
+    super::observer::apply(context, root, name, phase, &mut metadata)?;
+    info.owner = metadata.owner_uid as u32;
+    info.accessed = metadata.accessed_sec;
+    info.accessed_nsec = metadata.accessed_nsec;
+    info.modified = metadata.modified_sec;
+    info.nanoseconds = metadata.modified_nsec;
+    info.changed = metadata.changed_sec;
+    info.changed_nsec = metadata.changed_nsec;
+    info.links = metadata.link_count;
+    info.size = metadata.size_bytes;
+    Ok(info)
+}
+fn observation_failure(
+    error: super::observer::Failure,
+    site: &Site,
+    root: &Handle,
+    kind: &str,
+    path: &Path,
+) -> Fault {
+    match error {
+        super::observer::Failure::IO(error) => {
+            list_failure(site, root, kind, path, &error.to_string())
+        }
+        super::observer::Failure::Host(fault) => fault,
+    }
 }
 fn exact_path(path: &Path) -> Result<(), String> {
     let resolved = std::fs::canonicalize(path).map_err(|error| {
@@ -312,7 +433,7 @@ fn list_failure(site: &Site, root: &Handle, kind: &str, path: &Path, message: &s
     file_fault(
         site,
         kind,
-        &format!("{kind}: File.list {}: {message}", quote(path)),
+        &format!("{kind}: {} {}: {message}", site.operation, quote(path)),
         operation_input(root),
     )
 }
@@ -330,7 +451,7 @@ fn exact_grant(
         .find(|grant| grant.path == path)
         .ok_or_else(|| denied(operation, &path))?;
     if grant.inert {
-        if operation == "File.list"
+        if matches!(operation, "File.list" | "File.directory" | "File.scan")
             && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
         {
             return Err(file_fault(
@@ -343,7 +464,7 @@ fn exact_grant(
         return Err(denied(operation, &path));
     }
     if let Err(message) = exact_path(&path) {
-        if operation == "File.list"
+        if matches!(operation, "File.list" | "File.directory" | "File.scan")
             && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
         {
             return Err(file_fault(
@@ -439,12 +560,228 @@ impl Drop for DirectoryStream {
         }
     }
 }
-pub(super) fn list(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
+fn timestamp(seconds: i64, nanoseconds: i64) -> Result<i64, String> {
+    if !(0..1_000_000_000).contains(&nanoseconds) {
+        return Err("invalid timestamp nanoseconds".into());
+    }
+    i64::try_from((seconds as i128) * 1_000_000_000 + nanoseconds as i128)
+        .map_err(|_| "timestamp exceeds Unix nanosecond range".into())
+}
+fn metadata_times(info: &FileInfo) -> Result<(i64, i64, i64), String> {
+    Ok((
+        timestamp(info.accessed, info.accessed_nsec)?,
+        timestamp(info.modified, info.nanoseconds)?,
+        timestamp(info.changed, info.changed_nsec)?,
+    ))
+}
+fn entry_value(
+    context: &mut Context,
+    site: &Site,
+    observation: &Directory,
+    name: &str,
+    info: &FileInfo,
+    prior_weight: u64,
+    kind: &str,
+) -> Outcome {
+    let (accessed, modified, changed) = metadata_times(info).map_err(|message| {
+        list_failure(
+            site,
+            &text(name),
+            kind,
+            &observation.path.join(name),
+            &message,
+        )
+    })?;
+    let path_value = new(
+        atom("File.Path"),
+        Data::Text(observation.path.join(name).to_string_lossy().into_owned()),
+    );
+    let fields = [
+        ("path", path_value),
+        ("name", text(name)),
+        ("kind", text(info.kind)),
+        ("size_bytes", int(info.len())),
+        (
+            "modified_unix_ns",
+            new(atom("Int"), Data::Int(BigInt::from(modified))),
+        ),
+        ("link_count", int(info.nlink())),
+        ("owner_uid", int(info.owner)),
+        (
+            "accessed_unix_ns",
+            new(atom("Int"), Data::Int(BigInt::from(accessed))),
+        ),
+        (
+            "changed_unix_ns",
+            new(atom("Int"), Data::Int(BigInt::from(changed))),
+        ),
+    ];
+    let weight = 16
+        + 128
+        + observation.path.as_os_str().len() as u64
+        + 16
+        + fields
+            .iter()
+            .map(|(name, value)| name.len() as u64 + value.weight)
+            .sum::<u64>();
+    context.reserve_file(0, prior_weight + weight)?;
+    Ok(adapter(
+        "File.Entry",
+        Value::Entry {
+            fields: record(fields.into_iter().map(|(k, v)| (k.into(), v))),
+            observation: Some(Observation {
+                session: context.files.session,
+                directory: observation.clone(),
+                identity: info.identity,
+            }),
+        },
+    ))
+}
+fn directory_value(
+    context: &mut Context,
+    site: &Site,
+    root: &Handle,
+    directory: &File,
+    observation: &Directory,
+    prior_weight: u64,
+) -> Outcome {
+    context.reserve_file(1, prior_weight)?;
+    let failure_kind = if site.operation == "File.directory" {
+        "File.DirectoryFailed"
+    } else {
+        "File.ListFailed"
+    };
+    let info = observed_at(context, directory, &observation.path, ".", 1)
+        .map_err(|error| observation_failure(error, site, root, failure_kind, &observation.path))?;
+    if !info.is_dir() || info.identity != observation.identity {
+        return Err(denied(&site.operation, &observation.path));
+    }
+    let (accessed, modified, changed) = metadata_times(&info)
+        .map_err(|message| list_failure(site, root, failure_kind, &observation.path, &message))?;
+    let fields = [
+        (
+            "path",
+            new(
+                atom("File.Path"),
+                Data::Text(observation.path.to_string_lossy().into_owned()),
+            ),
+        ),
+        ("owner_uid", int(info.owner)),
+        (
+            "accessed_unix_ns",
+            new(atom("Int"), Data::Int(BigInt::from(accessed))),
+        ),
+        (
+            "modified_unix_ns",
+            new(atom("Int"), Data::Int(BigInt::from(modified))),
+        ),
+        (
+            "changed_unix_ns",
+            new(atom("Int"), Data::Int(BigInt::from(changed))),
+        ),
+    ];
+    let weight = 16
+        + 128
+        + observation.path.as_os_str().len() as u64
+        + 16
+        + fields
+            .iter()
+            .map(|(name, value)| name.len() as u64 + value.weight)
+            .sum::<u64>();
+    context.reserve_file(0, prior_weight + weight)?;
+    Ok(adapter(
+        "File.Directory",
+        Value::Directory {
+            fields: record(fields.into_iter().map(|(k, v)| (k.into(), v))),
+            observation: Some(Observation {
+                session: context.files.session,
+                directory: observation.clone(),
+                identity: observation.identity,
+            }),
+        },
+    ))
+}
+fn finish_observation(
+    context: &mut Context,
+    observation: Directory,
+    directory: File,
+    retained: File,
+    fresh: bool,
+    result: Outcome,
+) -> Outcome {
+    let mut result = match (result, close_file(directory)) {
+        (Err(primary), Err(cleanup)) => Err(cleanup_failure(primary, cleanup)),
+        (Err(primary), Ok(())) => Err(primary),
+        (Ok(_), Err(cleanup)) => Err(host(system_error(&cleanup))),
+        (Ok(value), Ok(())) => Ok(value),
+    };
+    if result.is_ok() && fresh {
+        context.files.observed.insert(observation, retained);
+    } else if let Err(cleanup) = close_file(retained) {
+        result = Err(match result {
+            Err(primary) => cleanup_failure(primary, cleanup),
+            Ok(_) => host(system_error(&cleanup)),
+        });
+    }
+    result
+}
+pub(super) fn directory(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
     context.check_cancel()?;
     let (directory, observation) = exact_grant(
         &context.files.lists,
         &context.files.base,
-        "File.list",
+        "File.directory",
+        root.string(),
+        site,
+        root,
+    )?;
+    let fresh = !context.files.observed.contains_key(&observation);
+    if fresh && context.files.observed.len() == MAX_FILE_DIRECTORIES {
+        return Err(limit("retained file directories"));
+    }
+    let retained = directory
+        .try_clone()
+        .map_err(|error| host(error.to_string()))?;
+    let result = (|| {
+        let value = directory_value(context, site, root, &directory, &observation, 16)?;
+        let (check, current) = exact_grant(
+            &context.files.lists,
+            &context.files.base,
+            "File.directory",
+            root.string(),
+            site,
+            root,
+        )?;
+        close_file(check).map_err(|error| host(system_error(&error)))?;
+        if current != observation {
+            return Err(denied("File.directory", &observation.path));
+        }
+        Ok(value)
+    })();
+    finish_observation(context, observation, directory, retained, fresh, result)
+}
+#[derive(Clone, Copy, PartialEq)]
+enum Discovery {
+    Strict,
+    ReportVanished,
+}
+pub(super) fn list(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
+    discover(context, site, root, Discovery::Strict)
+}
+pub(super) fn scan(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
+    discover(context, site, root, Discovery::ReportVanished)
+}
+fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) -> Outcome {
+    context.check_cancel()?;
+    let operation = if mode == Discovery::Strict {
+        "File.list"
+    } else {
+        "File.scan"
+    };
+    let (directory, observation) = exact_grant(
+        &context.files.lists,
+        &context.files.base,
+        operation,
         root.string(),
         site,
         root,
@@ -466,8 +803,24 @@ pub(super) fn list(context: &mut Context, site: &Site, root: &Handle) -> Outcome
         )
     })?;
     let result = (|| {
+        let directory_observation = if mode == Discovery::ReportVanished {
+            Some(directory_value(
+                context,
+                site,
+                root,
+                &directory,
+                &observation,
+                128,
+            )?)
+        } else {
+            None
+        };
+        let mut weight = directory_observation.as_ref().map_or(32, |v| {
+            96 + "directoryentriesvanished_names".len() as u64 + v.weight
+        });
         let mut items = Vec::new();
-        let mut weight = 32;
+        let mut vanished = Vec::new();
+        let mut names = BTreeSet::new();
         loop {
             context.check_cancel()?;
             let Some(filename) = stream.next().map_err(|error| {
@@ -482,7 +835,7 @@ pub(super) fn list(context: &mut Context, site: &Site, root: &Handle) -> Outcome
             else {
                 break;
             };
-            if items.len() == MAX_FILE_ENTRIES {
+            if names.len() == MAX_FILE_ENTRIES {
                 return Err(limit("directory entries"));
             }
             context.reserve_file(1, weight)?;
@@ -495,98 +848,88 @@ pub(super) fn list(context: &mut Context, site: &Site, root: &Handle) -> Outcome
                     "invalid UTF-8 filename",
                 )
             })?;
-            let info = lstat_at(&directory, name).map_err(|error| {
-                list_failure(
-                    site,
-                    root,
-                    "File.ListFailed",
-                    &observation.path.join(name),
-                    &error.to_string(),
-                )
-            })?;
-            let modified = (info.mtime() as i128) * 1_000_000_000 + info.mtime_nsec() as i128;
-            if modified < i64::MIN as i128 || modified > i64::MAX as i128 {
+            if !names.insert(name.to_owned()) {
                 return Err(list_failure(
                     site,
                     root,
                     "File.ListFailed",
-                    &observation.path.join(name),
-                    "modification time exceeds Unix nanosecond range",
+                    &observation.path,
+                    "duplicate directory entry",
                 ));
             }
-            let kind = if info.file_type().is_file() {
-                "regular"
-            } else if info.is_dir() {
-                "directory"
-            } else if info.file_type().is_symlink() {
-                "symlink"
-            } else {
-                "other"
+            let info = match observed_at(context, &directory, &observation.path, name, 2) {
+                Ok(info) => info,
+                Err(super::observer::Failure::IO(error))
+                    if mode == Discovery::ReportVanished
+                        && error.kind() == io::ErrorKind::NotFound =>
+                {
+                    context.reserve_file(0, weight + 16 + name.len() as u64)?;
+                    let value = text(name);
+                    weight += value.weight;
+                    vanished.push(value);
+                    continue;
+                }
+                Err(error) => {
+                    return Err(observation_failure(
+                        error,
+                        site,
+                        root,
+                        "File.ListFailed",
+                        &observation.path.join(name),
+                    ))
+                }
             };
-            let path_value = new(
-                atom("File.Path"),
-                Data::Text(observation.path.join(name).to_string_lossy().into_owned()),
-            );
-            let name_value = text(name);
-            let size_value = int(info.len());
-            let modified_value = new(atom("Int"), Data::Int(BigInt::from(modified)));
-            let links_value = int(info.nlink());
-            let entry_weight = 16
-                + 128
-                + observation.path.as_os_str().len() as u64
-                + 16
-                + ("path".len()
-                    + "name".len()
-                    + "kind".len()
-                    + "size_bytes".len()
-                    + "modified_unix_ns".len()
-                    + "link_count".len()) as u64
-                + path_value.weight
-                + name_value.weight
-                + 16
-                + kind.len() as u64
-                + size_value.weight
-                + modified_value.weight
-                + links_value.weight;
-            context.reserve_file(0, weight + entry_weight)?;
-            let fields = record([
-                ("path".into(), path_value),
-                ("name".into(), name_value),
-                ("kind".into(), text(kind)),
-                ("size_bytes".into(), size_value),
-                ("modified_unix_ns".into(), modified_value),
-                ("link_count".into(), links_value),
-            ]);
-            let entry = adapter(
-                "File.Entry",
-                Value::Entry {
-                    fields,
-                    observation: Some(Observation {
-                        session: context.files.session,
-                        directory: observation.clone(),
-                        identity: info.identity,
-                    }),
-                },
-            );
+            let entry = entry_value(
+                context,
+                site,
+                &observation,
+                name,
+                &info,
+                weight,
+                "File.ListFailed",
+            )?;
             weight += entry.weight;
             items.push(entry);
         }
-        let count = items.len() as u64;
+        let count = names.len() as u64;
         let sort_steps = if count > 1 {
             count * (64 - (count - 1).leading_zeros() as u64)
         } else {
             0
         };
         context.reserve_file(sort_steps, weight)?;
-        items.sort_by(|left, right| {
-            left.fields()["name"]
-                .string()
-                .cmp(right.fields()["name"].string())
-        });
-        Ok(new(
-            Type::List(Box::new(atom("File.Entry"))),
-            Data::List(items),
-        ))
+        items.sort_by(|a, b| a.fields()["name"].string().cmp(b.fields()["name"].string()));
+        let entries = new(Type::List(Box::new(atom("File.Entry"))), Data::List(items));
+        if let Some(directory_observation) = directory_observation {
+            vanished.sort_by(|a, b| a.string().cmp(b.string()));
+            let (check, current) = exact_grant(
+                &context.files.lists,
+                &context.files.base,
+                operation,
+                root.string(),
+                site,
+                root,
+            )?;
+            close_file(check).map_err(|error| host(system_error(&error)))?;
+            if current != observation {
+                return Err(denied(operation, &observation.path));
+            }
+            Ok(adapter(
+                "File.Scan",
+                Value::Scan {
+                    fields: record([
+                        ("directory".into(), directory_observation),
+                        ("entries".into(), entries),
+                        (
+                            "vanished_names".into(),
+                            new(Type::List(Box::new(atom("String"))), Data::List(vanished)),
+                        ),
+                    ]),
+                },
+            ))
+        } else {
+            Ok(entries)
+        }
     })();
     let result = match (result, stream.close()) {
         (Err(primary), Err(cleanup)) => Err(cleanup_failure(primary, cleanup)),
@@ -597,21 +940,7 @@ pub(super) fn list(context: &mut Context, site: &Site, root: &Handle) -> Outcome
         ))),
         (Ok(value), Ok(())) => Ok(value),
     };
-    let mut result = match (result, close_file(directory)) {
-        (Err(primary), Err(cleanup)) => Err(cleanup_failure(primary, cleanup)),
-        (Err(primary), Ok(())) => Err(primary),
-        (Ok(_), Err(cleanup)) => Err(host(system_error(&cleanup))),
-        (Ok(value), Ok(())) => Ok(value),
-    };
-    if result.is_ok() && fresh {
-        context.files.observed.insert(observation, retained);
-    } else if let Err(cleanup) = close_file(retained) {
-        result = Err(match result {
-            Err(primary) => cleanup_failure(primary, cleanup),
-            Ok(_) => host(system_error(&cleanup)),
-        });
-    }
-    result
+    finish_observation(context, observation, directory, retained, fresh, result)
 }
 
 pub(super) fn selection(context: &mut Context, site: &Site, entries: &Handle) -> Outcome {
@@ -661,8 +990,125 @@ pub(super) fn selection(context: &mut Context, site: &Site, entries: &Handle) ->
             entries: entries.clone(),
             session: context.files.session,
             payload_weight: "File.Remove.new".len() as u64 + entries.weight,
+            guard: None,
         },
     ))
+}
+pub(super) fn selection_checked(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
+    let flow = match &args
+        .last()
+        .ok_or_else(|| host("missing removal predicate"))?
+        .data
+    {
+        Data::Flow(flow) => *flow,
+        _ => return Err(host("invalid removal predicate")),
+    };
+    let predicate = context
+        .program
+        .flows
+        .get(flow)
+        .ok_or_else(|| host("unknown removal predicate"))?
+        .identity
+        .clone();
+    let contexts = args[1..args.len() - 1].to_vec();
+    let selected = selection(context, site, &args[0])?;
+    let Data::Adapter(crate::adapters::AdapterValue::File(Value::Remove {
+        entries,
+        session,
+        payload_weight,
+        ..
+    })) = &selected.data
+    else {
+        return Err(host("invalid removal construction"));
+    };
+    let payload_weight = *payload_weight
+        + 32
+        + predicate.len() as u64
+        + contexts.iter().map(|v| v.weight).sum::<u64>();
+    context.reserve_file(0, 16 + payload_weight + 16)?;
+    Ok(adapter(
+        "File.Remove",
+        Value::Remove {
+            entries: entries.clone(),
+            session: *session,
+            payload_weight,
+            guard: Some(Guard {
+                flow,
+                predicate,
+                contexts,
+            }),
+        },
+    ))
+}
+fn guard_rejection(
+    site: &Site,
+    entries: &Handle,
+    total: usize,
+    completed: usize,
+    bytes: &BigInt,
+    index: usize,
+    phase: &str,
+    guard: &Guard,
+) -> Fault {
+    let mut activation = site.clone();
+    activation.operation = "File.remove".into();
+    file_fault(
+        &activation,
+        "File.EntryChanged",
+        "File.EntryChanged: removal predicate returned false",
+        record([
+            ("entries".into(), crate::value::snapshot(entries)),
+            (
+                "progress".into(),
+                progress(total, completed, bytes, index as i64, phase),
+            ),
+            (
+                "guard".into(),
+                record([
+                    ("predicate".into(), text(&guard.predicate)),
+                    ("phase".into(), text(phase)),
+                    ("index".into(), int(index)),
+                    ("condition".into(), text("predicate-false")),
+                ]),
+            ),
+        ]),
+    )
+}
+fn evaluate_guard(
+    context: &mut Context,
+    site: &Site,
+    info: &FileInfo,
+    entry: &Handle,
+    guard: &Guard,
+    phase: &str,
+) -> Result<bool, Fault> {
+    let Data::Adapter(crate::adapters::AdapterValue::File(Value::Entry {
+        observation: Some(observation),
+        ..
+    })) = &entry.data
+    else {
+        return Err(host("invalid guarded entry"));
+    };
+    let current = entry_value(
+        context,
+        site,
+        &observation.directory,
+        entry.fields()["name"].string(),
+        info,
+        0,
+        "File.RemoveFailed",
+    )?;
+    context.charge(&current)?;
+    let mut args = guard.contexts.clone();
+    args.push(entry.clone());
+    args.push(current);
+    let result = unsafe { crate::exports::invoke(context, guard.flow, &args, site.id) }?;
+    let Data::Bool(eligible) = &result.data else {
+        return Err(host(format!(
+            "invalid removal predicate result during {phase}"
+        )));
+    };
+    Ok(*eligible)
 }
 fn progress(total: usize, completed: usize, bytes: &BigInt, index: i64, stage: &str) -> Handle {
     record([
@@ -705,39 +1151,54 @@ fn removal_failure(
         ]),
     )
 }
-fn revalidate(directory: &File, entry: &Handle) -> Result<(), (&'static str, String)> {
+enum RevalidationFailure {
+    File(&'static str, String),
+    Host(Fault),
+}
+fn revalidate(
+    context: &Context,
+    directory: &File,
+    entry: &Handle,
+    phase: u32,
+) -> Result<FileInfo, RevalidationFailure> {
     let Data::Adapter(crate::adapters::AdapterValue::File(Value::Entry {
         fields,
         observation: Some(observation),
     })) = &entry.data
     else {
-        return Err((
+        return Err(RevalidationFailure::File(
             "File.InvalidSelection",
             "removal requires observed file entries".into(),
         ));
     };
     let name = fields.fields()["name"].string();
-    let info = lstat_at(directory, name).map_err(|error| {
-        (
-            if error.kind() == io::ErrorKind::NotFound {
-                "File.EntryChanged"
-            } else {
-                "File.RemoveFailed"
-            },
-            format!(
-                "revalidate {}: lstat {name}: {}",
-                crate::checkpoint_print::quote(name),
-                system_error(&error)
-            ),
-        )
-    })?;
+    let info = observed_at(context, directory, &observation.directory.path, name, phase).map_err(
+        |failure| {
+            let error = match failure {
+                super::observer::Failure::IO(error) => error,
+                super::observer::Failure::Host(fault) => return RevalidationFailure::Host(fault),
+            };
+            RevalidationFailure::File(
+                if error.kind() == io::ErrorKind::NotFound {
+                    "File.EntryChanged"
+                } else {
+                    "File.RemoveFailed"
+                },
+                format!(
+                    "revalidate {}: lstat {name}: {}",
+                    crate::checkpoint_print::quote(name),
+                    system_error(&error)
+                ),
+            )
+        },
+    )?;
     let modified = (info.mtime() as i128) * 1_000_000_000 + info.mtime_nsec() as i128;
     if !info.file_type().is_file()
         || info.identity != observation.identity
         || fields.fields()["size_bytes"].integer() != &BigInt::from(info.len())
         || fields.fields()["modified_unix_ns"].integer() != &BigInt::from(modified)
     {
-        return Err((
+        return Err(RevalidationFailure::File(
             "File.EntryChanged",
             format!(
                 "selected file {} changed since discovery",
@@ -745,7 +1206,7 @@ fn revalidate(directory: &File, entry: &Handle) -> Result<(), (&'static str, Str
             ),
         ));
     }
-    Ok(())
+    Ok(info)
 }
 extern "C" {
     fn unlinkat(directory: i32, path: *const std::os::raw::c_char, flags: i32) -> i32;
@@ -784,7 +1245,10 @@ fn record_removal(
 }
 fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
     let Value::Remove {
-        entries, session, ..
+        entries,
+        session,
+        guard,
+        ..
     } = target
     else {
         return Err(host("invalid removal target"));
@@ -870,8 +1334,40 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                     "preflight",
                 );
                 context.check_cancel()?;
-                if let Err((kind, message)) = revalidate(&retained, entry) {
-                    return Err(fail(0, &bytes, index as i64, "preflight", kind, &message));
+                let info = match revalidate(context, &retained, entry, 3) {
+                    Ok(info) => info,
+                    Err(RevalidationFailure::File(kind, message)) => {
+                        return Err(fail(0, &bytes, index as i64, "preflight", kind, &message))
+                    }
+                    Err(RevalidationFailure::Host(fault)) => return Err(fault),
+                };
+                if let Some(guard) = guard {
+                    match evaluate_guard(context, site, &info, entry, guard, "preflight") {
+                        Ok(true) => (),
+                        Ok(false) => {
+                            return Err(guard_rejection(
+                                site,
+                                entries,
+                                total,
+                                0,
+                                &bytes,
+                                index,
+                                "preflight",
+                                guard,
+                            ))
+                        }
+                        Err(fault) if matches!(fault.primary(), Fault::Recoverable(_)) => {
+                            return Err(fail(
+                                0,
+                                &bytes,
+                                index as i64,
+                                "preflight",
+                                "File.RemoveFailed",
+                                &fault.message(),
+                            ))
+                        }
+                        Err(fault) => return Err(fault),
+                    }
                 }
             }
             for (index, entry) in entries.items().iter().enumerate() {
@@ -904,15 +1400,40 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                         "observed directory identity changed",
                     ));
                 }
-                if let Err((kind, message)) = revalidate(&retained, entry) {
-                    return Err(fail(
-                        completed,
-                        &bytes,
-                        index as i64,
-                        "remove",
-                        kind,
-                        &message,
-                    ));
+                let info = match revalidate(context, &retained, entry, 4) {
+                    Ok(info) => info,
+                    Err(RevalidationFailure::File(kind, message)) => {
+                        return Err(fail(
+                            completed,
+                            &bytes,
+                            index as i64,
+                            "remove",
+                            kind,
+                            &message,
+                        ))
+                    }
+                    Err(RevalidationFailure::Host(fault)) => return Err(fault),
+                };
+                if let Some(guard) = guard {
+                    match evaluate_guard(context, site, &info, entry, guard, "remove") {
+                        Ok(true) => (),
+                        Ok(false) => {
+                            return Err(guard_rejection(
+                                site, entries, total, completed, &bytes, index, "remove", guard,
+                            ))
+                        }
+                        Err(fault) if matches!(fault.primary(), Fault::Recoverable(_)) => {
+                            return Err(fail(
+                                completed,
+                                &bytes,
+                                index as i64,
+                                "remove",
+                                "File.RemoveFailed",
+                                &fault.message(),
+                            ))
+                        }
+                        Err(fault) => return Err(fault),
+                    }
                 }
                 let name = entry.fields()["name"].string();
                 let name_c = CString::new(name).unwrap();

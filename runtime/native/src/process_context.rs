@@ -51,16 +51,24 @@ fn context_value(environment: Handle, directory: Handle, origin: &str) -> Result
 }
 
 pub fn capture_context() -> Result<Handle, String> {
+    capture_context_with_environment(&std::env::vars_os().collect::<Vec<_>>())
+}
+
+pub fn capture_context_with_environment(
+    environment: &[(std::ffi::OsString, std::ffi::OsString)],
+) -> Result<Handle, String> {
     let directory = std::env::current_dir().map_err(|_| "capture Process directory failed")?;
     let directory = directory
         .to_str()
         .ok_or("capture Process directory: invalid text")?;
     let mut variables = BTreeMap::new();
-    for (key, val) in std::env::vars_os() {
+    for (key, val) in environment {
         let key = key
+            .clone()
             .into_string()
             .map_err(|_| "capture Process environment name: invalid text")?;
         let val = val
+            .clone()
             .into_string()
             .map_err(|_| "capture Process environment value: invalid text")?;
         variables.insert(key, val);

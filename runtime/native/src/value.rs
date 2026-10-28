@@ -220,6 +220,9 @@ const ATOM_NAMES: &[&str] = &[
     "File.Write",
     "File.WriteReceipt",
     "File.Entry",
+    "File.Directory",
+    "File.Scan",
+    "Host.Invocation",
     "File.Append",
     "File.Remove",
     "File.AppendReceipt",
@@ -738,6 +741,13 @@ fn canonical_typed_payload(typ: Option<&str>, value: &Json) -> String {
     let names: &[&str] = match typ {
         Some("Process.Executable") => &["path"],
         Some("Process.Context") => &["origin", "redacted"],
+        Some("Host.Invocation") => &[
+            "argument_count",
+            "real_uid",
+            "effective_uid",
+            "now_unix_ns",
+            "redacted",
+        ],
         Some("Process.Command") => &["context", "executable", "arguments", "stdin"],
         Some("Process.Result") => &["termination", "stdout", "stderr"],
         Some("Process.Termination") => &["kind", "exit_code", "signal"],

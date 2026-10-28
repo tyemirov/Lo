@@ -260,9 +260,19 @@ pub unsafe extern "C" fn lo_cli_main(
     }
     signal(SIGPIPE, SIG_IGN);
     let mut args = vec![];
+    let mut program_utf8_error = false;
+    let mut after_separator = false;
     for i in 1..argc {
-        let s = match CStr::from_ptr(*argv.add(i as usize)).to_str() {
+        let raw = CStr::from_ptr(*argv.add(i as usize));
+        if raw.to_bytes() == b"--" {
+            after_separator = true;
+        }
+        let s = match raw.to_str() {
             Ok(v) => v,
+            Err(_) if after_separator => {
+                program_utf8_error = true;
+                ""
+            }
             Err(_) => {
                 checked_stderr!("cli.invalid-invocation: invalid UTF-8 argument");
                 return 2;
@@ -317,6 +327,7 @@ pub unsafe extern "C" fn lo_cli_main(
     let mut ports = vec![];
     let mut device_grant = String::new();
     let mut device_set = false;
+    let mut program_arguments = vec![];
     let serving = args.first() == Some(&"serve");
     if args.first() != Some(&"run") && !serving {
         error = Some("artifact requires run or serve without a source path".to_string())
@@ -324,7 +335,20 @@ pub unsafe extern "C" fn lo_cli_main(
     let mut i = 1;
     while i < args.len() {
         let arg = args[i];
-        if arg == "--format" && !format_set && i + 1 < args.len() {
+        if arg == "--" {
+            program_arguments = args[i + 1..]
+                .iter()
+                .map(|argument| (*argument).to_owned())
+                .collect();
+            if program_utf8_error {
+                error = Some("program argument requires valid UTF-8 without NUL".into());
+            } else if let Err(message) =
+                crate::host_invocation::validate_arguments(&program_arguments)
+            {
+                error = Some(message);
+            }
+            break;
+        } else if arg == "--format" && !format_set && i + 1 < args.len() {
             i += 1;
             format = args[i];
             format_set = true;
@@ -501,8 +525,10 @@ pub unsafe extern "C" fn lo_cli_main(
             );
         }
     };
+    let captured = crate::host_invocation::capture_inputs(&program_arguments);
     let session = Arc::new(Session {
-        initial_process_context: crate::process::capture_context(),
+        initial_process_context: captured.process,
+        initial_host_invocation: captured.host,
         program: program.clone(),
         steps,
         processes,

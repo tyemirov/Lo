@@ -710,6 +710,9 @@ impl Program {
                 if site.operation == "HTTP.Server.new" {
                     crate::http::admit_callbacks(site, &flows)?;
                 }
+                if site.operation == "File.Remove.checked" {
+                    crate::files::admit_guard(site, &flows)?;
+                }
                 if matches!(
                     site.operation.as_str(),
                     "List.map"

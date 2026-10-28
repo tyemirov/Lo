@@ -1,4 +1,3 @@
-mod metadata;
 mod action;
 mod adapters;
 mod autodiff;
@@ -12,7 +11,9 @@ mod device;
 mod exports;
 mod files;
 mod generated_operations;
+mod host_invocation;
 mod http;
+mod metadata;
 mod operations;
 mod process;
 mod resources;
