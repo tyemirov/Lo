@@ -1,6 +1,6 @@
 # Lo Language Reference
 
-Lo is a typed dataflow language for executable plans, file workflows, HTTP services, and tensor training.
+Lo is a typed, general-purpose dataflow language for executable plans, file workflows, HTTP services, and tensor training.
 This reference defines the implemented Lo v0.4 language contract.
 CPU execution and the selected Metal backend support training.
 Native executables use the same language contracts as the interpreter.
@@ -13,6 +13,12 @@ This version update records existing behavior.
 It adds no syntax or runtime operations.
 The interpreter and native compiler use this same language contract.
 Runtime ABI, checkpoint encoding, and compiler distribution identities follow their separate documented contracts.
+
+Each language operation has types and behavior that apply across applications.
+Application programs contain file selection, retention rules, command arguments, output formats, and exit policy.
+Language operations and runtime semantics contain no rules for one named application.
+Examples for named applications and their acceptance criteria stay outside this reference.
+Proposed operations and syntax stay outside the implemented contract until the compiler and runtimes implement them.
 
 | Implemented contract | Reference |
 | --- | --- |
@@ -38,7 +44,7 @@ Design documents and historical acceptance reports retain their stated scope and
 | Select tensor operations | [Tensor values](#242-tensor-values-and-shape-boundaries) and [operation signatures](#243-tensor-operation-set) |
 | Update Parameters | [Gradient lifecycle](#246-parameters-and-gradient-lifecycle) and [SGD and AdamW](#247-sgd-and-adamw) |
 | Handle failures | [Error handling](#12-error-handling) and [fallible values](#223-fallible-values) |
-| Clean up observed files | [File adapter](#91-file-adapter), [sequential activation](#88-sequential-flow-processor), and [Gateway log example](docs/examples/gateway-log-cleanup.lo) |
+| Process observed files | [File adapter](#91-file-adapter) and [sequential activation](#88-sequential-flow-processor) |
 | Use files or HTTP | [Adapters](#9-adapters), [activation](#236-file-and-server-activation), and [examples](#19-examples) |
 | Review adapter implementation | [Shared adapter design](docs/adapter-design.md) and [implementation plan](docs/adapter-plan.md), with implementation status and remaining work |
 | Select CPU or Metal | [Backend support](#backend-support) and [device resources](#248-device-resources-and-explicit-transfers) |
@@ -432,6 +438,9 @@ Examples:
 
 * `File.Path`
 * `File.Entry`
+* `File.Directory`
+* `File.Scan`
+* `Host.Invocation`
 * `HTTP.Server`
 
 Some adapter operations produce committable targets.
@@ -668,9 +677,9 @@ FP32 has no standalone values or constructor.
 Bool has exactly two values, true and false.
 
 Null is its own atomic type. The null literal is spelled null and has type Null.
-Other types do not inherit from Null. Null is not an implicit inhabitant of
-String, Bytes, Int, Float, Bool, records, maps, lists, ranges, Error, File.Path, File.Entry,
-HTTP.Request, HTTP.Response, HTTP.Server, File actions, or activation results.
+Other types do not inherit from Null.
+Null is not an implicit inhabitant of another type.
+This includes scalar, collection, adapter, action, and activation result types.
 
 The type name Null is not a value expression. Passing either the null literal or
 an unresolved identifier named Null where another type is required is a type
@@ -731,6 +740,9 @@ The initial boundary-oriented built-in types are:
 
 * `File.Path`
 * `File.Entry`
+* `File.Directory`
+* `File.Scan`
+* `Host.Invocation`
 * `HTTP.Request`
 * `HTTP.Response`
 * `HTTP.Server`
@@ -1019,8 +1031,11 @@ Independent source review closed the current findings.
 | `File.Path.eq(left_operand: File.Path, right_operand: File.Path)` | `Bool` |
 | `File.read(file_path: File.Path)` | `Bytes!` |
 | `File.list(root: File.Path)` | `List<File.Entry>!` |
+| `File.directory(root: File.Path)` | `File.Directory!` |
+| `File.scan(root: File.Path)` | `File.Scan!` |
 | `File.open_paths(root: File.Path)` | `List<File.Path>!` |
 | `File.Remove.new(entries: List<File.Entry>)` | `File.Remove!` |
+| `File.Remove.checked(entries, context..., Eligible)` | `File.Remove!` |
 | `File.Append.new(file_path: File.Path, file_content: Bytes)` | `File.Append` |
 | `File.Write.new(file_path: File.Path, file_content: Bytes)` | `File.Write` |
 
@@ -1043,6 +1058,15 @@ Each immutable `File.Entry` exposes these projections:
 | `size_bytes` | `Int` | Observed logical size. |
 | `modified_unix_ns` | `Int` | Modification time since the Unix epoch, in nanoseconds. |
 | `link_count` | `Int` | Observed filesystem link count. |
+| `owner_uid` | `Int` | Observed owner UID. |
+| `accessed_unix_ns` | `Int` | Last access time in Unix nanoseconds. |
+| `changed_unix_ns` | `Int` | Last inode metadata-change time in Unix nanoseconds. |
+
+Each entry contains fields from one native metadata result.
+Property access is pure and does not repeat the observation.
+Timestamps use the signed 64-bit Unix-nanosecond range, including negative values.
+The change timestamp is not creation time.
+UIDs use the inclusive range `0..4294967295`.
 
 Entries have opaque session and directory provenance, with no public constructor or checkpoint representation.
 Copies and List processors preserve provenance.
@@ -1056,6 +1080,20 @@ Read and write grants do not imply these grants.
 Exact grant paths reject symlink traversal and replacement-directory authority.
 A grant for an absent directory stays inert if the directory appears later.
 An absent granted directory produces `File.DirectoryAbsent` from listing.
+
+`File.directory` observes that exact root and returns `path`, `owner_uid`, `accessed_unix_ns`, `modified_unix_ns`, and `changed_unix_ns`.
+`File.scan` returns a `File.Scan` with `directory: File.Directory`, `entries: List<File.Entry>`, and `vanished_names: List<String>`.
+Both operations require `--list-root`.
+A parent or read grant does not authorize another root.
+Directory and scan values have no public constructors, equality, ordering, or checkpoint representation.
+A directory observation cannot become a removal selection.
+
+A scan records an enumerated basename in `vanished_names` only when its metadata lookup reports `ENOENT`.
+It returns no report after another discovery error or an invalid UTF-8 name.
+Entries and vanished names are disjoint collections, each sorted in Unicode scalar order.
+The limit of 10000 children counts every enumerated name, including vanished names, during enumeration.
+Strict `File.list` continues to fail when an enumerated child disappears.
+The [observation contract](docs/file-observation-extension-design.md#scan-reports-and-disappearance) defines scan limits and failure boundaries.
 
 `File.open_paths` runs a fixed `lsof -Fn +D .` probe from a retained directory descriptor.
 It returns sorted distinct paths, with no claim that the files remain open or closed.
@@ -1073,9 +1111,28 @@ Commit authorizes and revalidates the whole batch before mutation, then revalida
 It compares identity, size, modification time, and file kind.
 A failed batch stops its suffix and preserves confirmed progress.
 
+`File.Remove.checked` captures the same selection with immutable contexts and a named removal guard.
+Its guard has signature `Eligible(context..., original: File.Entry, current: File.Entry) -> Bool`.
+The guard must be total and pure, including all transitive calls.
+Construction invokes no guard and performs no filesystem access, including for empty or unused targets.
+The verifier rejects invalid signatures and effects before execution.
+
+During commit, the host performs the mandatory comparisons before each guard invocation.
+The guard receives the fixed original entry and a new current observation.
+It runs once per reached entry during preflight and once immediately before each reached removal.
+False produces `File.EntryChanged` with the fixed condition `predicate-false` and the current progress stage.
+A successful nonempty batch invokes the guard twice per entry.
+An empty batch invokes it zero times.
+
+The base `3 * N` steps cover both metadata lookups and removal attempts.
+New observation values and ordinary guard execution receive separate value and execution charges.
+Lo flows select owner, timestamp, and link-count rules explicitly.
+The final metadata check and removal remain separate native operations.
+
 | Lo error kind | Condition |
 | --- | --- |
 | `File.DirectoryAbsent` | Granted listing directory is absent. |
+| `File.DirectoryFailed` | A directory observation cannot obtain root metadata. |
 | `File.ListFailed` | Discovery cannot obtain complete metadata. |
 | `File.InvalidName` | A directory entry has an invalid UTF-8 name. |
 | `File.OpenFilesFailed` | The probe cannot supply a valid observation. |
@@ -1100,9 +1157,10 @@ Retained directory handles stay open until session cleanup.
 A later cleanup failure keeps confirmed progress.
 
 The [File design](docs/file-adapter-design.md) specifies limits, progress records, and concurrency boundaries.
-The [Gateway log example](docs/examples/gateway-log-cleanup.lo) uses pure selection and `Flow.fold` with singleton commits.
-It handles only changed or absent candidates as skips.
-Its preview and cleanup results distinguish an absent directory from an empty one.
+Pure flows select entries from immutable observations.
+`Flow.fold` can commit singleton removal targets and carry explicit application state.
+Application flows select which failures to report, propagate, or count as skips.
+An absent directory and an empty observation remain distinct under the File error contract.
 
 ### 9.2 HTTP Adapter
 
@@ -1365,6 +1423,47 @@ HTTP `onError` remains pure, so a Process commit there fails with `check.effectf
 Qualification remains mandatory before standard-host native activation acceptance. Reviewed qualification probes have a separate execution gate.
 
 ---
+
+### 9.6 Host Invocation
+
+`Host.Invocation.current() -> Host.Invocation!` returns the immutable invocation snapshot captured before program evaluation.
+The snapshot has these projections:
+
+| Projection | Type | Meaning |
+| --- | --- | --- |
+| `arguments` | `List<String>` | Program arguments after the explicit CLI separator. |
+| `home` | `File.Path` | Initial nonempty absolute `HOME` value. |
+| `real_uid` | `Int` | Initial real UID. |
+| `effective_uid` | `Int` | Initial effective UID. |
+| `now_unix_ns` | `Int` | Initial wall-clock time in Unix nanoseconds. |
+
+The operation has a host-read effect even though it returns a previously captured result.
+Projection from the returned value is pure.
+The value has no public constructor, equality, ordering, or checkpoint representation.
+The snapshot grants no filesystem or process authority.
+
+Source execution accepts `lo run source.lo [runner options] -- [program arguments]`.
+The same separator applies to `lo serve` and native artifact runtime options.
+The snapshot excludes runner options, executable and source names, command names, and the separator.
+Without the separator, `arguments` is empty.
+After the separator, values that start with `-` and explicit empty arguments stay literal values.
+Invalid argument encoding or argument limits produce CLI exit status 2 before evaluation.
+
+The limits are 4096 arguments and 65536 bytes per argument, including its terminal NUL.
+The full encoded argument vector and full snapshot each have a 1048576-byte limit, including their framing.
+UIDs use the inclusive range `0..4294967295`.
+The clock uses signed 64-bit Unix nanoseconds.
+The [invocation contract](docs/file-observation-extension-design.md#argument-boundary-and-limits) defines exact framing.
+
+The host captures arguments, `HOME`, UIDs, and the clock once.
+It shares the initial result with server startup and HTTP callbacks.
+It does not read another home source or recapture inputs after an environment change.
+Missing or invalid home data, invalid UIDs or clock, snapshot overflow, and malformed transport produce `Host.InvocationFailed` when observed.
+A captured failure does not stop a program that never invokes the operation.
+
+Automatic output redacts home and argument values recursively, including captured removal contexts.
+Explicit projections provide the selected values under ordinary output rules.
+Inspection does not capture host inputs or execute observations.
 
 ## 10. Flow Definitions
 
@@ -1946,10 +2045,11 @@ Device access has a separate resource summary.
 ### 18.3 Fallible Constructors and Processors
 
 Section 24 defines numeric, tensor, autodiff, gradient, optimizer, and device failures.
-Section 9.1 defines `File.list`, `File.open_paths`, `File.Remove.new`, and their failure kinds.
+Section 9.1 defines File observations, removal constructors, and their failure kinds.
 Section 8.8 defines callback failure propagation for `Flow.fold`.
 Sections 9.2 and 9.4 define HTTP constructor failure kinds.
 Section 9.5 defines context observation, discovery, Process construction, termination accessors, activation errors, and host unavailability.
+Section 9.6 defines the invocation snapshot and `Host.InvocationFailed`.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
@@ -2031,6 +2131,7 @@ Unsupported or unconfigured Process activation returns `runtime.process-unavaila
 ### 18.4 Committable Targets
 
 * `File.Remove.new`
+* `File.Remove.checked`
 * `File.Append.new`
 * `File.Write.new`
 * `HTTP.Server.new`
@@ -2487,7 +2588,7 @@ They do not create missing parent directories.
 A failed activation uses the error kind specified in section 18.3.
 Its input record contains `file_path` and `file_content`.
 
-`File.Remove.new` follows the batch contract in section 9.1.
+Both File removal constructors follow the batch contract in section 9.1.
 Removal diagnostics retain ordered entry snapshots and a progress record with counts, observed bytes, failed index, and stage.
 The host fields are `removal_entries` and `removal_progress`.
 
