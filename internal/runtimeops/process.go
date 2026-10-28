@@ -18,7 +18,7 @@ func ProcessExecutableNew(session execution.Session, call Call, args []value.Val
 
 // ProcessCommandNew constructs a pure command description.
 func ProcessCommandNew(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
-	command, err := value.NewProcessCommand(args[0].(value.ProcessExecutable), args[1].(value.List), args[2].(value.Map), args[3].(value.Text), args[4].(value.Bytes))
+	command, err := value.NewProcessCommand(args[0].(value.ProcessContext), args[1].(value.ProcessExecutable), args[2].(value.List), args[3].(value.Bytes))
 	if err != nil {
 		return OperationFailure(call, nil, catalog.ProcessInvalidCommand, err.Error()), nil
 	}

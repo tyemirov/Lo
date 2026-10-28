@@ -92,12 +92,19 @@ func NewServers(p execution.Program, files execution.Boundary, policy ListenPoli
 	return &servers{program: p, files: files, policy: policy, budget: budget, devices: devices, fatal: make(chan error, 1), requestContext: ctx, cancelRequests: cancel, pending: map[net.Conn]struct{}{}}, nil
 }
 func (s *servers) Start(ctx context.Context) (value.Value, error) {
+	ctx = execution.CaptureProcessContext(ctx)
 	s.mu.Lock()
 	if s.started || s.stopping {
 		s.mu.Unlock()
 		return nil, execution.HostFailure("start HTTP service", "program", errors.New("service already started or stopped"))
 	}
 	s.started = true
+	requestContext, err := execution.InheritProcessContext(s.requestContext, ctx)
+	if err != nil {
+		s.mu.Unlock()
+		return nil, err
+	}
+	s.requestContext = requestContext
 	s.mu.Unlock()
 	output, err := s.program.Run(ctx, s, s.budget, s.devices)
 	if err == nil && len(s.Snapshot()) == 0 {

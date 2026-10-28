@@ -29,16 +29,17 @@ const (
 )
 
 type abstract struct {
-	typ          types.Type
-	node         nodeID
-	location     *string
-	known        *string
-	fileRoot     *string
-	dependencies []nodeID
-	fields       map[string]abstract
-	items        []abstract
-	targets      []targetReference
-	carried      []targetReference
+	processContext *processContextDescription
+	typ            types.Type
+	node           nodeID
+	location       *string
+	known          *string
+	fileRoot       *string
+	dependencies   []nodeID
+	fields         map[string]abstract
+	items          []abstract
+	targets        []targetReference
+	carried        []targetReference
 }
 type context struct {
 	id         contextID

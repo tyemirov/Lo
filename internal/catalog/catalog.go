@@ -151,29 +151,41 @@ const (
 )
 
 const (
-	ProcessExecutableNew       = "Process.Executable.new"
-	ProcessCommandNew          = "Process.Command.new"
-	ProcessRun                 = "Process.run"
-	ProcessInvalidExecutable   = "Process.InvalidExecutable"
-	ProcessInvalidCommand      = "Process.InvalidCommand"
-	ProcessExecutionFailed     = "Process.ExecutionFailed"
-	ProcessTerminationExitCode = "Process.Termination.exit_code"
-	ProcessTerminationSignal   = "Process.Termination.signal"
-	ProcessTerminationKind     = "Process.TerminationKind"
-	HTTPListen                 = "HTTP.listen"
-	URLNew                     = "HTTP.URL.new"
-	MethodNew                  = "HTTP.Method.new"
-	ClientRequestNew           = "HTTP.Client.Request.new"
-	HTTPExchange               = "HTTP.request"
-	HTTPExchangeFailed         = "HTTP.ExchangeFailed"
-	InvalidURL                 = "HTTP.InvalidURL"
-	InvalidMethod              = "HTTP.InvalidMethod"
-	HTTPRequest                = "HTTP.request"
-	HTTPRespond                = "HTTP.respond"
-	RequestTooLarge            = "HTTP.RequestTooLarge"
-	InvalidRequest             = "HTTP.InvalidRequest"
-	RequestReadFailed          = "HTTP.RequestReadFailed"
-	InvalidResponse            = "HTTP.InvalidResponse"
+	ProcessContextCurrent          = "Process.Context.current"
+	ProcessContextNew              = "Process.Context.new"
+	ProcessContextOverride         = "Process.Context.override_environment"
+	ProcessContextDirectory        = "Process.Context.with_directory"
+	ProcessContextEnvironmentValue = "Process.Context.environment_value"
+	ProcessContextWithout          = "Process.Context.without_environment"
+	ProcessInvalidContext          = "Process.InvalidContext"
+	ProcessContextUnavailable      = "Process.ContextUnavailable"
+	ProcessEnvironmentAbsent       = "Process.EnvironmentAbsent"
+	ProcessExecutableResolve       = "Process.Executable.resolve"
+	ProcessExecutableAbsent        = "Process.ExecutableAbsent"
+	ProcessDiscoveryFailed         = "Process.DiscoveryFailed"
+	ProcessExecutableNew           = "Process.Executable.new"
+	ProcessCommandNew              = "Process.Command.new"
+	ProcessRun                     = "Process.run"
+	ProcessInvalidExecutable       = "Process.InvalidExecutable"
+	ProcessInvalidCommand          = "Process.InvalidCommand"
+	ProcessExecutionFailed         = "Process.ExecutionFailed"
+	ProcessTerminationExitCode     = "Process.Termination.exit_code"
+	ProcessTerminationSignal       = "Process.Termination.signal"
+	ProcessTerminationKind         = "Process.TerminationKind"
+	HTTPListen                     = "HTTP.listen"
+	URLNew                         = "HTTP.URL.new"
+	MethodNew                      = "HTTP.Method.new"
+	ClientRequestNew               = "HTTP.Client.Request.new"
+	HTTPExchange                   = "HTTP.request"
+	HTTPExchangeFailed             = "HTTP.ExchangeFailed"
+	InvalidURL                     = "HTTP.InvalidURL"
+	InvalidMethod                  = "HTTP.InvalidMethod"
+	HTTPRequest                    = "HTTP.request"
+	HTTPRespond                    = "HTTP.respond"
+	RequestTooLarge                = "HTTP.RequestTooLarge"
+	InvalidRequest                 = "HTTP.InvalidRequest"
+	RequestReadFailed              = "HTTP.RequestReadFailed"
+	InvalidResponse                = "HTTP.InvalidResponse"
 )
 
 type Operation interface {
@@ -254,12 +266,14 @@ func build() map[string]Operation {
 		one(pair.name, pair.t, pair.t)
 	}
 	fixed(ProcessExecutableNew, []types.Parameter{{Name: "path", Type: types.Path()}}, must(types.NewFallible(types.ProcessExecutable())))
-	fixed(ProcessCommandNew, []types.Parameter{{Name: "executable", Type: types.ProcessExecutable()}, {Name: "arguments", Type: must(types.NewList(types.String()))}, {Name: "environment", Type: must(types.NewMap(types.String(), types.String()))}, {Name: "directory", Type: types.Path()}, {Name: "stdin", Type: types.Bytes()}}, must(types.NewFallible(types.ProcessCommand())))
+	fixed(ProcessCommandNew, []types.Parameter{{Name: "context", Type: types.ProcessContext()}, {Name: "executable", Type: types.ProcessExecutable()}, {Name: "arguments", Type: must(types.NewList(types.String()))}, {Name: "stdin", Type: types.Bytes()}}, must(types.NewFallible(types.ProcessCommand())))
+	addProcessContexts(m, fixed)
 	executable := m[ProcessExecutableNew].(operation)
 	executable.errors = []string{ProcessInvalidExecutable}
 	m[ProcessExecutableNew] = executable
 	command := m[ProcessCommandNew].(operation)
 	command.boundary = Effect
+	command.targetPosition = 1
 	command.errors = []string{ProcessInvalidCommand}
 	command.activation = []string{ProcessExecutionFailed}
 	m[ProcessCommandNew] = command

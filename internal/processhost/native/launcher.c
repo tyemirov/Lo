@@ -71,14 +71,16 @@ static int valid_utf8(const unsigned char *bytes, size_t size) {
     return 1;
 }
 
-static char *entry(const unsigned char *body, size_t size, size_t *offset, char storage[MAX_ENTRY + 1]) {
+static char *entry(const unsigned char *body, size_t size, size_t *offset, char **next, size_t maximum) {
     if (size - *offset < 4) fail(2, EINVAL);
     uint32_t length = number(body + *offset);
     *offset += 4;
-    if (length > MAX_ENTRY || size - *offset < length || !valid_utf8(body + *offset, length)) fail(2, EINVAL);
+    if (length > maximum || size - *offset < length || !valid_utf8(body + *offset, length)) fail(2, EINVAL);
+    char *storage = *next;
     memcpy(storage, body + *offset, length);
     storage[length] = '\0';
     *offset += length;
+    *next += length + 1;
     return storage;
 }
 
@@ -92,7 +94,7 @@ static void configuration_entry(const unsigned char *body, size_t size, size_t *
     *offset += length;
 }
 
-static int authorized_directory(const char *directory, char roots[MAX_COUNT][MAX_ENTRY + 1], uint32_t count) {
+static int authorized_directory(const char *directory, char roots[MAX_COUNT][MAX_PATH + 1], uint32_t count) {
     for (uint32_t index = 0; index < count; index++) {
         size_t size = strlen(roots[index]);
         if (strcmp(roots[index], "/") == 0 && directory[0] == '/') return 1;
@@ -109,18 +111,19 @@ int main(int argc, char **argv, char **host_environment) {
     if (fcntl(STATUS, F_SETFD, FD_CLOEXEC) != 0 || fcntl(PERMIT, F_SETFD, FD_CLOEXEC) != 0) fail(5, errno);
     if (lo_normalize_inherited_rights() != 0) fail(1, EPERM);
     unsigned char configuration_header[16], configuration[MAX_CONFIGURATION], extra;
-    if (exact_read(CONFIGURATION, configuration_header, sizeof(configuration_header)) != 0 || memcmp(configuration_header, "LOC1", 4) != 0) fail(1, EINVAL);
+    if (exact_read(CONFIGURATION, configuration_header, sizeof(configuration_header)) != 0 || memcmp(configuration_header, "LOC2", 4) != 0) fail(1, EINVAL);
     uint32_t configuration_size = number(configuration_header + 4), command_count = number(configuration_header + 8), root_count = number(configuration_header + 12);
     if (configuration_size > MAX_CONFIGURATION || command_count == 0 || command_count > MAX_COUNT || root_count == 0 || root_count > MAX_COUNT || exact_read(CONFIGURATION, configuration, configuration_size) != 0) fail(1, EINVAL);
     ssize_t tail;
     do { tail = read(CONFIGURATION, &extra, 1); } while (tail < 0 && errno == EINTR);
     if (tail != 0 || close(CONFIGURATION) != 0) fail(1, EINVAL);
     size_t configuration_offset = 0;
-    char profile[MAX_PROFILE + 1], host_directory[MAX_ENTRY + 1], commands[MAX_COUNT][MAX_ENTRY + 1], roots[MAX_COUNT][MAX_ENTRY + 1];
+    char profile[MAX_PROFILE + 1], host_directory[MAX_PATH + 1], initial_executable[MAX_PATH + 1], commands[MAX_COUNT][MAX_PATH + 1], roots[MAX_COUNT][MAX_PATH + 1];
     configuration_entry(configuration, configuration_size, &configuration_offset, profile, MAX_PROFILE);
-    configuration_entry(configuration, configuration_size, &configuration_offset, host_directory, MAX_ENTRY);
-    for (uint32_t index = 0; index < command_count; index++) configuration_entry(configuration, configuration_size, &configuration_offset, commands[index], MAX_ENTRY);
-    for (uint32_t index = 0; index < root_count; index++) configuration_entry(configuration, configuration_size, &configuration_offset, roots[index], MAX_ENTRY);
+    configuration_entry(configuration, configuration_size, &configuration_offset, host_directory, MAX_PATH);
+    configuration_entry(configuration, configuration_size, &configuration_offset, initial_executable, MAX_PATH);
+    for (uint32_t index = 0; index < command_count; index++) configuration_entry(configuration, configuration_size, &configuration_offset, commands[index], MAX_PATH);
+    for (uint32_t index = 0; index < root_count; index++) configuration_entry(configuration, configuration_size, &configuration_offset, roots[index], MAX_PATH);
     if (configuration_offset != configuration_size || host_environment[0] == NULL || host_environment[1] == NULL || host_environment[2] != NULL || strcmp(host_environment[0], "CI=1") != 0 || strncmp(host_environment[1], "TMPDIR=", 7) != 0 || strcmp(host_environment[1] + 7, host_directory) != 0) fail(2, EINVAL);
     char *sandbox_error = NULL;
     if (sandbox_init(profile, 0, &sandbox_error) != 0) {
@@ -130,22 +133,22 @@ int main(int argc, char **argv, char **host_environment) {
     unsigned char header[16], body[MAX_BODY];
     if (exact_read(FRAME, header, sizeof(header)) != 0 || memcmp(header, "LOP1", 4) != 0) fail(2, EINVAL);
     uint32_t size = number(header + 4), argument_count = number(header + 8), environment_count = number(header + 12);
-    if (size > MAX_BODY || argument_count == 0 || argument_count > MAX_COUNT || environment_count > MAX_COUNT || exact_read(FRAME, body, size) != 0) fail(2, EINVAL);
+    if (size > MAX_BODY || argument_count == 0 || argument_count > MAX_ARGUMENTS || environment_count > MAX_ENVIRONMENT || exact_read(FRAME, body, size) != 0) fail(2, EINVAL);
     do { tail = read(FRAME, &extra, 1); } while (tail < 0 && errno == EINTR);
     if (tail != 0 || close(FRAME) != 0) fail(2, EINVAL);
     size_t offset = 0;
-    char executable[MAX_ENTRY + 1], directory[MAX_ENTRY + 1];
-    entry(body, size, &offset, executable);
-    entry(body, size, &offset, directory);
+    /* Payload bytes plus one NUL per bounded entry fit in this single arena. */
+    char storage[MAX_BODY + MAX_ARGUMENTS + MAX_ENVIRONMENT + 2], *next = storage;
+    char *executable = entry(body, size, &offset, &next, MAX_PATH);
+    char *directory = entry(body, size, &offset, &next, MAX_PATH);
     int command_allowed = 0;
     for (uint32_t index = 0; index < command_count; index++) if (strcmp(executable, commands[index]) == 0) command_allowed = 1;
-    if (!command_allowed || !authorized_directory(directory, roots, root_count)) fail(2, EINVAL);
-    char argument_storage[MAX_COUNT][MAX_ENTRY + 1], environment_storage[MAX_COUNT][MAX_ENTRY + 1];
-    char *arguments[MAX_COUNT + 1], *environment[MAX_COUNT + 1];
-    for (uint32_t index = 0; index < argument_count; index++) arguments[index] = entry(body, size, &offset, argument_storage[index]);
+    if (!command_allowed || strcmp(executable, initial_executable) != 0 || !authorized_directory(directory, roots, root_count)) fail(2, EINVAL);
+    char *arguments[MAX_ARGUMENTS + 1], *environment[MAX_ENVIRONMENT + 1];
+    for (uint32_t index = 0; index < argument_count; index++) arguments[index] = entry(body, size, &offset, &next, MAX_ENTRY);
     arguments[argument_count] = NULL;
     for (uint32_t index = 0; index < environment_count; index++) {
-        environment[index] = entry(body, size, &offset, environment_storage[index]);
+        environment[index] = entry(body, size, &offset, &next, MAX_ENTRY);
         char *equal = strchr(environment[index], '=');
         if (equal == NULL || equal == environment[index]) fail(2, EINVAL);
         size_t name_length = (size_t)(equal - environment[index]);

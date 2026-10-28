@@ -121,7 +121,11 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	}
 	switch op.Boundary() {
 	case catalog.Read:
-		r := a.resource(c, op.Name(), node, values[0])
+		target := a.unknown(node, types.ProcessContext())
+		if len(values) > 0 {
+			target = values[0]
+		}
+		r := a.resource(c, op.Name(), node, target)
 		r.ID = nextID("r", len(a.data.Reads))
 		a.data.Reads = append(a.data.Reads, r)
 		a.capability(r, op.Capability())
@@ -218,6 +222,22 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		return a.list(c, e, values, flows[len(e.Arguments())-1])
 	}
 	switch op.Name() {
+	case catalog.ProcessContextCurrent:
+		out.processContext = &processContextDescription{Origin: "inherited"}
+	case catalog.ProcessContextNew:
+		environment, directory := a.describe(values[0]), a.describe(values[1])
+		out.processContext = &processContextDescription{Origin: "explicit", Environment: &environment, Directory: &directory}
+	case catalog.ProcessContextOverride, catalog.ProcessContextWithout, catalog.ProcessContextDirectory:
+		base, change := a.describeProcessContext(values[0]), a.describe(values[1])
+		out.processContext = &processContextDescription{Origin: "derived", Base: &base}
+		switch op.Name() {
+		case catalog.ProcessContextOverride:
+			out.processContext.Updates = &change
+		case catalog.ProcessContextWithout:
+			out.processContext.Removed = &change
+		case catalog.ProcessContextDirectory:
+			out.processContext.Directory = &change
+		}
 	case catalog.FileList:
 		out.fileRoot = values[0].known
 	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew, catalog.ScalarNew, catalog.PathNew, catalog.URLNew, catalog.MethodNew, catalog.ProcessExecutableNew:

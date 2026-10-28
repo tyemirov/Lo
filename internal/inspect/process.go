@@ -9,12 +9,30 @@ import (
 
 // processData describes source inputs without a configured host profile.
 type processData struct {
-	Executable  description          `json:"executable"`
-	Arguments   description          `json:"arguments"`
-	Environment description          `json:"environment"`
-	Directory   description          `json:"directory"`
-	Stdin       description          `json:"stdin"`
-	Profile     executionProfileData `json:"execution_profile"`
+	Context    processContextDescription `json:"context"`
+	Executable description               `json:"executable"`
+	Arguments  description               `json:"arguments"`
+	Stdin      description               `json:"stdin"`
+	Profile    executionProfileData      `json:"execution_profile"`
+}
+
+type processContextDescription struct {
+	Source      description                `json:"source"`
+	Origin      string                     `json:"origin"`
+	Environment *description               `json:"environment,omitempty"`
+	Directory   *description               `json:"directory,omitempty"`
+	Base        *processContextDescription `json:"base,omitempty"`
+	Updates     *description               `json:"updates,omitempty"`
+	Removed     *description               `json:"removed,omitempty"`
+}
+
+func (a *analyzer) describeProcessContext(value abstract) processContextDescription {
+	if value.processContext != nil {
+		result := *value.processContext
+		result.Source = a.describe(value)
+		return result
+	}
+	return processContextDescription{Source: a.describe(value), Origin: "dynamic"}
 }
 
 type executionProfileData struct {
@@ -24,8 +42,7 @@ type executionProfileData struct {
 
 func (a *analyzer) processInputs(values []abstract) *processData {
 	return &processData{
-		Executable: a.describe(values[0]), Arguments: a.describe(values[1]),
-		Environment: a.describe(values[2]), Directory: a.describe(values[3]), Stdin: a.describe(values[4]),
+		Context: a.describeProcessContext(values[0]), Executable: a.describe(values[1]), Arguments: a.describe(values[2]), Stdin: a.describe(values[3]),
 		Profile: executionProfileData{Required: true, Status: "unavailable"},
 	}
 }
@@ -45,11 +62,12 @@ func (process *processData) writeText(output *strings.Builder) {
 	for _, input := range []struct {
 		name  string
 		value description
-	}{{"executable", process.Executable}, {"arguments", process.Arguments}, {"environment", process.Environment}, {"directory", process.Directory}, {"stdin", process.Stdin}} {
+	}{{"context", process.Context.Source}, {"executable", process.Executable}, {"arguments", process.Arguments}, {"stdin", process.Stdin}} {
 		text := input.value.Expression
 		if input.value.Value != nil {
 			text = *input.value.Value
 		}
 		fmt.Fprintf(output, " %s=%q node=%s dependencies=%v", input.name, text, input.value.Node, input.value.Dependencies)
 	}
+	fmt.Fprintf(output, " context_origin=%s", process.Context.Origin)
 }

@@ -52,6 +52,7 @@ func NewSession(ctx context.Context, boundary Boundary, budget Budget, config de
 	if ctx == nil || boundary == nil || budget == nil {
 		return nil, fmt.Errorf("execution requires context, boundary, and budget")
 	}
+	ctx = CaptureProcessContext(ctx)
 	resources, err := device.NewSession(config)
 	if err != nil {
 		return nil, err
