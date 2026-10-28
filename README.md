@@ -596,17 +596,29 @@ The selected Darwin 27 arm64 profile passed [native qualification](docs/evidence
 Process acceptance for Go generation passed all 24 interpreter and Go-generated cases.
 Its CI checks and completion review passed.
 The [compiler plan](docs/standalone-compiler-plan.md) records current LLVM qualification.
-The selected host denies child writes, network access, and descendants, and clears the specified inherited Mach slots.
-Commands use exact arguments, explicit environment values, and stdin bytes without a shell or inherited environment.
+
+F024 adds immutable `Process.Context` values, controlled executable discovery, and per-executable cleanup scopes.
+`Process.Context.current()` reads the environment and physical working directory captured once before evaluation.
+Pure context changes keep their inputs unchanged. Execution authority remains in host policy.
+`Process.Command.new(context, executable, arguments, stdin)` uses exact arguments and stdin bytes without a shell.
+
+The default profile denies writes and network access. Optional scopes supply authority for selected mutation roots and Unix endpoints.
+Registered exec chains keep the initial executable's scope. Forked and spawned descendants remain denied.
+The launcher clears the specified inherited Mach slots and keeps its fixed environment separate from child environment values.
 The conditional work bound uses host parallelism and completed lifetime. It is not a hard CPU quota.
 
 Configure `run` or `serve` with `--process-allow SHA256,ABSOLUTE_PATH`, `--process-launcher ABSOLUTE_PATH`, and `--process-read-root ABSOLUTE_PATH`.
 The selected backend verifies the pinned launcher and registered command identities.
+Cleanup scopes use `--process-write-root`, `--process-prune-root`, and `--process-unix-endpoint` with explicit JSON inputs.
 These grants do not grant parent File access.
 The [native admission limits](docs/adapter-design.md#selected-native-admission-limits) apply separately from pure constructor validation.
 Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
 Configured Process policy on an unsupported backend fails session open before program evaluation.
 Source inspection without host configuration also reports the execution profile as unavailable.
+
+The [F024 evidence](docs/evidence/process-context-cleanup/checkpoint.json) records interpreter and native cleanup fixtures and stack validation results.
+Package helpers and a local Docker-like protocol qualify the bounded profile, rather than installed package managers or Docker/buildx.
+The [package-cache example](docs/examples/package-cache-cleanup.lo) uses context overrides, optional discovery, and sequential command activation.
 
 One canonical session owns Process, participating File adapters, and shutdown for interpreter, generated-native, and server execution.
 `Close(ctx)` starts one shutdown owner. `WaitRetained()` joins it when the caller deadline expires.
