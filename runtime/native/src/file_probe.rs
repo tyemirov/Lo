@@ -361,7 +361,7 @@ fn parse(context: &mut Context, directory: &Path, output: &[u8]) -> Outcome {
                 if value.is_empty() {
                     return Err(host("open-file probe returned an empty descriptor"));
                 }
-                if !value.bytes().all(|byte| byte.is_ascii_alphanumeric()) {
+                if !valid_descriptor(value) {
                     return Err(host("open-file probe returned an invalid descriptor"));
                 }
             }
@@ -429,6 +429,14 @@ fn parse(context: &mut Context, directory: &Path, output: &[u8]) -> Outcome {
                 .collect(),
         ),
     ))
+}
+
+fn valid_descriptor(value: &str) -> bool {
+    if let Some(digits) = value.strip_prefix('*') {
+        digits.len() == 3 && digits.bytes().all(|byte| byte.is_ascii_digit())
+    } else {
+        !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_alphanumeric())
+    }
 }
 pub(super) fn open_paths(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
     context.check_cancel()?;

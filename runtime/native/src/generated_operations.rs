@@ -1382,3 +1382,80 @@ pub unsafe extern "C" fn lo_op_Process_2ETermination_2Eexit_5Fcode(
 ) {
     call(c, a, n, s, o, Some("Process.Termination.exit_code"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EContext_2Ecurrent(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Context.current"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EContext_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Context.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EContext_2Eoverride_5Fenvironment(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Context.override_environment"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EContext_2Ewithout_5Fenvironment(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Context.without_environment"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EContext_2Ewith_5Fdirectory(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Context.with_directory"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EContext_2Eenvironment_5Fvalue(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Context.environment_value"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EExecutable_2Eresolve(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Executable.resolve"))
+}

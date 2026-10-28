@@ -2,6 +2,10 @@ use super::*;
 use num_bigint::BigInt;
 use serde_json::{json, Value as Json};
 
+#[path = "file_mutation_scan.rs"]
+mod mutation_scan;
+pub(crate) use mutation_scan::{validate_namespace, MutationAccess};
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Directory {
     pub path: PathBuf,

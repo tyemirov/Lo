@@ -123,7 +123,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
         for(int i=0;i<count;i++) {
             if(events[i].flags&EV_ERROR) {fail(r,5,2);}
             if(events[i].fflags&NOTE_EXEC) {
-                if(!permitted||executed) fail(r,5,0);
+                if(!permitted) fail(r,5,0);
                 else executed=1;
             }
             if(events[i].fflags&NOTE_EXIT) exit_seen=1;

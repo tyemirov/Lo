@@ -43,6 +43,7 @@ impl AdapterValue {
 }
 
 pub struct Session {
+    pub initial_process_context: Result<Handle, String>,
     pub program: Arc<Program>,
     pub steps: u64,
     pub processes: Arc<crate::process::Processes>,
@@ -54,6 +55,7 @@ pub struct Session {
 impl Session {
     pub fn empty(program: Arc<Program>, steps: u64) -> Arc<Self> {
         Arc::new(Self {
+            initial_process_context: crate::process::capture_context(),
             program,
             steps,
             processes: Arc::new(crate::process::empty()),
