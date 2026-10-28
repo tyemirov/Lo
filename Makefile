@@ -62,10 +62,10 @@ ifeq ($(shell uname -s),Darwin)
 PROCESS_LAUNCHER := bin/lo-process-launcher
 .PHONY: process-launcher verify-process-launcher
 process-launcher: | tool-state
-	python3 -B tools/processbuild/identity.py build $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go </dev/null
+	python3 -B tools/processbuild/identity.py build $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
 
 verify-process-launcher: | tool-state
-	python3 -B tools/processbuild/identity.py verify $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go </dev/null
+	python3 -B tools/processbuild/identity.py verify $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
 endif
 
 build: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
@@ -103,10 +103,10 @@ test-native: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
 prepare-native-runtime: | tool-state
 	python3 -B tools/nativeruntime/prepare.py --state "$(NATIVE_RUNTIME_STATE)" --download --platform </dev/null
 
-build-native-runtime: | tool-state
+build-native-runtime: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
 	python3 -B tools/nativeruntime/build.py --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(NATIVE_RUNTIME_OUTPUT)" </dev/null
 
-build-native-runtime-metal: | tool-state
+build-native-runtime-metal: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
 	python3 -B tools/nativeruntime/build.py --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(NATIVE_RUNTIME_OUTPUT)" --metal </dev/null
 
 test-native-runtime-tools: | tool-state
