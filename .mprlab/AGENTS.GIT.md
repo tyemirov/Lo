@@ -11,8 +11,9 @@ Git and GitHub workflow guidance for this repository. Use this guide whenever br
 - Branch names use taxonomy prefixes: `feature/`, `improvement/`, `bugfix/`, `maintenance/`, or `blocked/`.
 - Keep one concrete issue or task per branch.
 - Apply the [Lo repository boundary](POLICY.md#lo-repository-boundary) to every Git operation.
-- Never create or use another checkout or Git worktree for Lo work.
-- Work only in the existing primary checkout. If the checkout is not safe, stop and ask the user.
+- Never create or use another Lo checkout or Lo Git worktree.
+- Work only in the existing primary Lo checkout. If the checkout is not safe, stop and ask the user.
+- Use tools and skills from any location under the repository boundary policy.
 - Do not infer worktree permission from a request to isolate work or preserve unrelated changes.
 - Do not infer permission from a request to branch, implement, commit, push, open a pull request, or parallelize.
 - Prefer repo-native commands and documented release helpers.

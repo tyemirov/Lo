@@ -14,6 +14,8 @@ Before prose edits, run the Governor `prepare-ste-reference --cache-dir <task-di
 It retrieves the official [ASD-STE100 Issue 9](https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf) PDF and verifies its pinned SHA-256.
 Use an ignored task directory under Lo's `_scratch/` for the reference cache and tool output.
 Apply the [Lo repository boundary](POLICY.md#lo-repository-boundary) to reference preparation and all document checks.
+Use reference and language tools from any location without additional user approval.
+Keep their reference caches and output inside Lo.
 
 Use Part 1 for writing rules and Part 2 for the controlled dictionary.
 If retrieval or verification fails, stop prose edits and report the source blocker.
