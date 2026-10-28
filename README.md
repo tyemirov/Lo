@@ -2,11 +2,14 @@
 
 ![Lo logo](assets/lo-logo-horizontal.svg)
 
-**Lo is a typed executable plan language for AI agents.**
+**Lo is a typed, general-purpose dataflow language for AI agents.**
 
 Language models are good at proposing workflows, but unsafe as direct executors of arbitrary Python, shell scripts, browser automation, or raw API calls. Lo gives agents a small declarative language for producing action graphs that can be parsed, type-checked, inspected, approved, and executed by a trusted runtime.
 
-Lo is not a replacement for Go, Python, or shell. It is an execution contract between an AI planner, a verifier, and a runtime.
+Lo gives an execution contract between an AI planner, a verifier, and a runtime.
+Its language contract applies across applications.
+Lo programs contain file selection, retention rules, command arguments, output formats, and exit policy.
+Language operations supply typed contracts for values, control flow, and host access across applications.
 
 For language rules and training examples, start with the [Lo Language Reference](specification.md).
 The [adapter design](docs/adapter-design.md) defines the shared contract for File, HTTP, and Process.
@@ -627,7 +630,10 @@ The [implementation evidence](docs/evidence/adapter-implementation-review.json) 
 
 The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
 The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, interpreter tests, and native tests.
-The [mac-cleanup plan](docs/mac-cleanup-plan.md) defines the remaining complete-script work.
+The [mac-cleanup plan](docs/mac-cleanup-plan.md) records application requirements and acceptance criteria.
+The [full cleanup source](docs/examples/mac-cleanup.lo) contains the cleanup policy in Lo application code.
+Its [application design](docs/mac-cleanup-script-design.md) identifies implemented operations and proposed interfaces.
+The source includes proposed operations that the current compiler and runtimes do not implement.
 All work and fixtures obey the [Lo repository boundary](.mprlab/POLICY.md#lo-repository-boundary).
 
 ## Language Reference
@@ -635,7 +641,7 @@ All work and fixtures obey the [Lo repository boundary](.mprlab/POLICY.md#lo-rep
 The [Lo Language Reference](specification.md) defines the implemented v0.4 language, adapter, training, device, and checkpoint contracts.
 It includes a contents list, operation signatures, examples, and current backend limits.
 
-- [File adapter and cleanup example](specification.md#91-file-adapter)
+- [File observations and activation](specification.md#91-file-adapter)
 - [Process values, execution, and host policy](specification.md#95-process-adapter)
 - [Sequential activation with Flow.fold](specification.md#88-sequential-flow-processor)
 - [Quick start](specification.md#quick-start)
@@ -649,17 +655,18 @@ It includes a contents list, operation signatures, examples, and current backend
 
 ## Non-Goals
 
-Lo v0.4 is not trying to be:
+The current scope excludes:
 
-- a general-purpose programming language
-- a Python replacement
-- a shell replacement
 - a workflow engine with every possible integration
 - a visual programming system
 - a distributed compute framework
 - an ownership-language experiment
 - a concurrency model
 - a package ecosystem
+
+These limits apply to the current implementation of a general-purpose language.
+Lo programs and application documentation contain application names and policies.
+The same operation contract applies across applications.
 
 The goal is:
 
@@ -686,7 +693,7 @@ Less useful contributions at this stage:
 
 - syntax bikeshedding without implementation impact
 - adding large language features
-- adding general-purpose programming constructs
+- adding operations or runtime semantics for one named application
 - adding module systems or package management
 - adding async or concurrency syntax
 
