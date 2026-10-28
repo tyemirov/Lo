@@ -48,7 +48,8 @@ func TestProcessContextTransportBounds(t *testing.T) {
 	}
 	root := fileFixtureRoot(t)
 	path, code := filepath.Join(root, "bounded-helper"), filepath.Join(root, "bounded-helper.c")
-	writeLLVMFixture(t, code, []byte(`int main(void){return 0;}`))
+	writeLLVMFixture(t, code, []byte(`extern int atoi(const char*);
+int main(int argc,char **argv,char **env){if(argc!=2)return 0;int count=0;while(env[count])count++;return count==atoi(argv[1])?0:73;}`))
 	command := exec.Command("cc", code, "-o", path)
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("build bounded helper: %v: %s", err, output)
@@ -58,6 +59,7 @@ func TestProcessContextTransportBounds(t *testing.T) {
 		t.Fatal(err)
 	}
 	digest := sha256.Sum256(data)
+	const environmentLimit = 4096
 	for _, test := range []struct {
 		name                         string
 		arguments, variables, length int
@@ -65,8 +67,8 @@ func TestProcessContextTransportBounds(t *testing.T) {
 	}{
 		{"arguments-at-limit", 255, 0, 0, true},
 		{"arguments-over-limit", 256, 0, 0, false},
-		{"environment-at-limit", 0, 4096, 1, true},
-		{"environment-over-limit", 0, 4097, 1, false},
+		{"environment-at-limit", 0, environmentLimit, 1, true},
+		{"environment-over-limit", 0, environmentLimit + 1, 1, false},
 		{"entry-at-limit", 0, 1, 65530, true},
 		{"entry-over-limit", 0, 1, 65531, false},
 		{"body-over-limit", 0, 20, 60000, false},
@@ -76,11 +78,31 @@ func TestProcessContextTransportBounds(t *testing.T) {
 			for index := range arguments {
 				arguments[index] = `"argument"`
 			}
-			environment := make([]string, test.variables)
-			for index := range environment {
-				environment[index] = fmt.Sprintf(`Record.new(key: "V%04d", value: %q)`, index, strings.Repeat("x", test.length))
+			contextSource := ""
+			flows := ""
+			if test.variables >= environmentLimit {
+				// Build the environment at runtime without a large, unrolled LLVM function.
+				const batchSize = 64
+				entries := make([]string, batchSize)
+				for index := range entries {
+					entries[index] = fmt.Sprintf(`Record.new(key: String.concat("V", Int.to_string(Math.add(offset, %d))), value: "x")`, index)
+				}
+				flows = fmt.Sprintf(`flow Offset(offset: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: offset, next_state: Math.add(offset, %d)) }; flow Extend(context: Process.Context, offset: Int) -> Process.Context! { return Process.Context.override_environment(context, Map.new(%s)) }; `, batchSize, strings.Join(entries, ","))
+				contextSource = fmt.Sprintf(`initial = Process.Context.new(Map.new(), File.Path.new(%q)); offsets = List.unfold(0, %d, Offset); batched = List.fold(offsets, initial, Extend); `, root, environmentLimit/batchSize)
+				if test.variables > environmentLimit {
+					contextSource += fmt.Sprintf(`context = Process.Context.override_environment(batched, Map.new(Record.new(key: "V%d", value: "x"))); `, environmentLimit)
+				} else {
+					contextSource += `context = batched; `
+				}
+				arguments = []string{fmt.Sprintf(`"%d"`, test.variables)}
+			} else {
+				environment := make([]string, test.variables)
+				for index := range environment {
+					environment[index] = fmt.Sprintf(`Record.new(key: "V%04d", value: %q)`, index, strings.Repeat("x", test.length))
+				}
+				contextSource = fmt.Sprintf(`context = Process.Context.new(Map.new(%s), File.Path.new(%q)); `, strings.Join(environment, ","), root)
 			}
-			source := processContextProgram("Int", fmt.Sprintf(`context = Process.Context.new(Map.new(%s), File.Path.new(%q)); executable = Process.Executable.new(File.Path.new(%q)); command = Process.Command.new(context, executable, List.new(%s), Bytes.new("")); result = commit command; return Process.Termination.exit_code(result.termination)`, strings.Join(environment, ","), root, path, strings.Join(arguments, ",")))
+			source := flows + processContextProgram("Int", contextSource+fmt.Sprintf(`executable = Process.Executable.new(File.Path.new(%q)); command = Process.Command.new(context, executable, List.new(%s), Bytes.new("")); result = commit command; return Process.Termination.exit_code(result.termination)`, path, strings.Join(arguments, ",")))
 			got := run(t, "run", sourceFile(t, source), "--process-allow", fmt.Sprintf("%x,%s", digest, path), "--process-read-root", root, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--format", "json")
 			if test.accepted {
 				valueJSON(t, fileOutput(t, got), `"0"`)
