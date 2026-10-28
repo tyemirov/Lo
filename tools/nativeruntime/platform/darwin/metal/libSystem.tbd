@@ -38,6 +38,7 @@ exports:
       - __tlv_bootstrap
       - _abort
       - _accept
+      - _access
       - _alarm
       - _bind
       - _bootstrap_port

@@ -14,7 +14,6 @@ exports:
       - _CMSDecoderCopyAllCerts
       - _CMSDecoderCopyContent
       - _CMSDecoderCopyDetachedContent
-      - _CMSDecoderCopyEncapsulatedContentType
       - _CMSDecoderCopySignerEmailAddress
       - _CMSDecoderCopySignerSigningTime
       - _CMSDecoderCopySignerStatus
