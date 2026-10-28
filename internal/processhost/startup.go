@@ -84,6 +84,14 @@ func host(message string) error {
 }
 
 func failure(stage Stage) error { return errors.New("Process startup failed during " + string(stage)) }
+
+type creationFailure struct{ error }
+
+func (failure creationFailure) Unwrap() error { return failure.error }
+
+// ProcessCreationFailure marks an error from the creation callback.
+func (creationFailure) ProcessCreationFailure() {}
+
 func validStage(stage Stage) bool {
 	switch stage {
 	case Creation, Confinement, Input, Readiness, Witness, Permission, Execution, Protocol:
@@ -261,7 +269,12 @@ func (o *owner) cancellationFailure() error {
 
 // callbackFailure reconstructs only the closed public class and startup stage.
 // It never retains a callback message, subject, or raw error chain.
-func (o *owner) callbackFailure(err error, stage Stage) error {
+func (o *owner) callbackFailure(err error, stage Stage) (result error) {
+	defer func() {
+		if result != nil && stage == Creation && !errors.Is(result, context.Canceled) && !errors.Is(result, context.DeadlineExceeded) {
+			result = creationFailure{result}
+		}
+	}()
 	if err == nil {
 		return nil
 	}

@@ -13,7 +13,9 @@ func SnapshotWeight(v Value) uint64 {
 	case ProcessResult:
 		return addWeight(48, x.Termination().Weight())
 	case ProcessCommand:
-		return addWeight(64, addWeight(x.Executable().Weight(), x.Directory().Weight()))
+		return addWeight(48, addWeight(x.Executable().Weight(), SnapshotWeight(x.Context())))
+	case ProcessContext:
+		return 49
 	case URL:
 		return uint64(16 + len(x.Origin()) + 1)
 	case ClientRequest:

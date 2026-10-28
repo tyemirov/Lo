@@ -38,6 +38,7 @@ func NewProcessExecutable(path Text) (ProcessExecutable, error) {
 // ProcessCommand keeps every declared input of an inert command.
 type ProcessCommand interface {
 	Target
+	Context() ProcessContext
 	Executable() ProcessExecutable
 	Arguments() List
 	Environment() Map
@@ -47,63 +48,48 @@ type ProcessCommand interface {
 }
 type processCommand struct {
 	base
-	executable  ProcessExecutable
-	arguments   List
-	environment Map
-	directory   Text
-	stdin       Bytes
+	context    ProcessContext
+	executable ProcessExecutable
+	arguments  List
+	stdin      Bytes
 }
 
 func (processCommand) target()                         {}
 func (processCommand) processCommand()                 {}
 func (v processCommand) Executable() ProcessExecutable { return v.executable }
+func (v processCommand) Context() ProcessContext       { return v.context }
 func (v processCommand) Arguments() List               { return v.arguments }
-func (v processCommand) Environment() Map              { return v.environment }
-func (v processCommand) Directory() Text               { return v.directory }
+func (v processCommand) Environment() Map              { return v.context.Environment() }
+func (v processCommand) Directory() Text               { return v.context.Directory() }
 func (v processCommand) Stdin() Bytes                  { return v.stdin }
 func (v processCommand) MarshalJSON() ([]byte, error) {
 	return encode(v, struct {
-		Executable  ProcessExecutable `json:"executable"`
-		Arguments   List              `json:"arguments"`
-		Environment Map               `json:"environment"`
-		Directory   Text              `json:"directory"`
-		Stdin       Bytes             `json:"stdin"`
-	}{v.executable, v.arguments, v.environment, v.directory, v.stdin})
+		Context    ProcessContext    `json:"context"`
+		Executable ProcessExecutable `json:"executable"`
+		Arguments  List              `json:"arguments"`
+		Stdin      Bytes             `json:"stdin"`
+	}{v.context, v.executable, v.arguments, v.stdin})
 }
 
 // NewProcessCommand validates declared inputs without access or launch.
-func NewProcessCommand(executable ProcessExecutable, arguments List, environment Map, directory Text, stdin Bytes) (ProcessCommand, error) {
-	if executable == nil || arguments == nil || environment == nil || directory == nil || stdin == nil || !types.Equal(executable.Type(), types.ProcessExecutable()) || !types.Equal(arguments.Type(), must(types.NewList(types.String()))) || !types.Equal(environment.Type(), must(types.NewMap(types.String(), types.String()))) || !types.Equal(directory.Type(), types.Path()) || !types.Equal(stdin.Type(), types.Bytes()) {
+func NewProcessCommand(context ProcessContext, executable ProcessExecutable, arguments List, stdin Bytes) (ProcessCommand, error) {
+	if context == nil || executable == nil || arguments == nil || stdin == nil || !types.Equal(executable.Type(), types.ProcessExecutable()) || !types.Equal(arguments.Type(), must(types.NewList(types.String()))) || !types.Equal(stdin.Type(), types.Bytes()) {
 		return nil, fmt.Errorf("Process command requires typed declared inputs")
-	}
-	if !filepath.IsAbs(directory.Text()) || strings.ContainsRune(directory.Text(), 0) {
-		return nil, fmt.Errorf("Process directory must be absolute and contain no NUL")
 	}
 	for index, argument := range arguments.Items() {
 		if strings.ContainsRune(argument.(Text).Text(), 0) {
 			return nil, fmt.Errorf("Process argument %d contains NUL", index)
 		}
 	}
-	for index, entry := range environment.Entries() {
-		name := entry.Key.(Text).Text()
-		if name == "" || strings.ContainsAny(name, "\x00=") {
-			return nil, fmt.Errorf("Process environment entry %d has an invalid name", index)
-		}
-		if strings.ContainsRune(entry.Value.(Text).Text(), 0) {
-			return nil, fmt.Errorf("Process environment entry %d value contains NUL", index)
-		}
-	}
-	return newProcessCommand(executable, arguments, environment, directory, stdin), nil
+	return newProcessCommand(context, executable, arguments, stdin), nil
 }
-func newProcessCommand(executable ProcessExecutable, arguments List, environment Map, directory Text, stdin Bytes) ProcessCommand {
+func newProcessCommand(context ProcessContext, executable ProcessExecutable, arguments List, stdin Bytes) ProcessCommand {
 	weight := addWeight(executable.Weight(), arguments.Weight())
-	weight = addWeight(weight, environment.Weight())
-	weight = addWeight(weight, directory.Weight())
+	weight = addWeight(weight, context.Weight())
 	weight = addWeight(weight, stdin.Weight())
-	return processCommand{newBase(types.ProcessCommand(), weight), executable, arguments, environment, directory, stdin}
+	return processCommand{newBase(types.ProcessCommand(), weight), context, executable, arguments, stdin}
 }
 func redactedProcessCommand(command ProcessCommand) ProcessCommand {
 	arguments := must(NewList(must(types.NewList(types.String())), nil))
-	environment := must(NewMap(must(types.NewMap(types.String(), types.String())), nil))
-	return newProcessCommand(command.Executable(), arguments, environment, command.Directory(), NewBytes(nil))
+	return newProcessCommand(redactedProcessContext(command.Context()), command.Executable(), arguments, NewBytes(nil))
 }

@@ -72,6 +72,8 @@ func Snapshot(v Value) Value {
 		return must(NewProcessResult(x.Termination(), NewBytes(nil), NewBytes(nil)))
 	case ProcessCommand:
 		return redactedProcessCommand(x)
+	case ProcessContext:
+		return redactedProcessContext(x)
 	case URL:
 		return redactedURL(x)
 	case ClientRequest:

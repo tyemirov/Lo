@@ -227,10 +227,11 @@ type receiptActivationDiagnostic struct {
 	Receipt   runtimeValue    `json:"receipt"`
 }
 type receiptRuntimeDiagnostic struct {
-	Code          string
-	WriteProgress *runtimeValue                `json:"write_progress"`
-	LastCompleted *receiptActivationDiagnostic `json:"last_completed_activation"`
-	Error         *runtimeValue
+	ProcessProgress *runtimeValue `json:"process_progress"`
+	Code            string
+	WriteProgress   *runtimeValue                `json:"write_progress"`
+	LastCompleted   *receiptActivationDiagnostic `json:"last_completed_activation"`
+	Error           *runtimeValue
 }
 
 func receiptHostDiagnostic(t *testing.T, got result) receiptRuntimeDiagnostic {

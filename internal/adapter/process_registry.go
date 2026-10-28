@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 	"golang.org/x/sys/unix"
@@ -355,7 +356,7 @@ func (r *processRegistry) validate(ctx context.Context, invocation ProcessInvoca
 func (r *processRegistry) validateExecutable(ctx context.Context, path string) error {
 	registration, ok := r.registrations[path]
 	if !ok {
-		return registryHost("admission", errors.New("unregistered executable"))
+		return execution.Denied(catalog.ProcessRun, "executable")
 	}
 	for _, ancestor := range registration.ancestors {
 		if err := ctx.Err(); err != nil {

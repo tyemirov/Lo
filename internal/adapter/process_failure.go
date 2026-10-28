@@ -78,6 +78,12 @@ func (p *processFailure) ProcessProgress() value.Record {
 	return must(value.NewRecord(fields))
 }
 func (p *processFailure) setPrimary(stage string, cause error) {
+	var creation interface{ ProcessCreationFailure() }
+	if cause != nil && errors.As(cause, &creation) {
+		// Creation errors take precedence over the channel failures that they cause.
+		stage = processStart
+		p.cause, p.hostCause = nil, nil
+	}
 	if cause != nil && p.hostCause == nil {
 		if execution.BoundaryHostError(cause) != nil {
 			p.hostCause = cause

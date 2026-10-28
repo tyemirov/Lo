@@ -21,24 +21,30 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const nativeFrameLimit = 8192
-const nativeEntryLimit = 1024
+const nativeFrameLimit = 1 << 20
+const nativeEntryLimit = 1 << 16
+const nativePathLimit = 1024
 const nativeEntryCount = 16
+const nativeArgumentCount = 256
+const nativeEnvironmentCount = 4096
 
 func nativeFrame(invocation adapter.ProcessInvocation) ([]byte, error) {
 	if invocation == nil {
 		return nil, failure(Input)
 	}
 	arguments, environment := invocation.Argv(), invocation.Environment()
-	if len(arguments) == 0 || len(arguments) > nativeEntryCount || len(environment) > nativeEntryCount || arguments[0] != invocation.Executable() {
+	if len(arguments) == 0 || len(arguments) > nativeArgumentCount || len(environment) > nativeEnvironmentCount || arguments[0] != invocation.Executable() {
 		return nil, failure(Input)
 	}
 	var body bytes.Buffer
 	entries := []string{invocation.Executable(), invocation.Directory()}
+	if len(entries[0]) > nativePathLimit || len(entries[1]) > nativePathLimit {
+		return nil, failure(Input)
+	}
 	entries = append(entries, arguments...)
 	entries = append(entries, environment...)
 	for _, entry := range entries {
-		if len(entry) > nativeEntryLimit || !utf8.ValidString(entry) || strings.ContainsRune(entry, 0) {
+		if len(entry) > nativeEntryLimit || len(entry)+4 > nativeFrameLimit-body.Len() || !utf8.ValidString(entry) || strings.ContainsRune(entry, 0) {
 			return nil, failure(Input)
 		}
 		var length [4]byte
@@ -303,7 +309,7 @@ func (c *darwinCreator) Create(ctx context.Context, invocation adapter.ProcessIn
 	go p.readStatus()
 	go func() {
 		defer close(p.frameJoined)
-		_, configurationErr := io.Copy(p.configuration, bytes.NewReader(c.configuration))
+		_, configurationErr := io.Copy(p.configuration, bytes.NewReader(c.configurations[invocation.Executable()]))
 		configurationCloseErr := p.configuration.Close()
 		_, writeErr := io.Copy(p.frame, bytes.NewReader(frame))
 		closeErr := p.frame.Close()

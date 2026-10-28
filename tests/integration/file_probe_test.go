@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"golang.org/x/sys/unix"
 )
 
 func installFileProbeFixture(t *testing.T) string {
@@ -83,6 +85,9 @@ func TestFileOpenPathsResults(t *testing.T) {
 		{"control-character", "n./tab\tname.log\n", "", "0", "File.OpenFilesFailed"},
 		{"empty-descriptor", "f\n", "", "0", "File.OpenFilesFailed"},
 		{"malformed-descriptor", "f3?\n", "", "0", "File.OpenFilesFailed"},
+		{"short-truncated-descriptor", "f*00\n", "", "0", "File.OpenFilesFailed"},
+		{"long-truncated-descriptor", "f*0000\n", "", "0", "File.OpenFilesFailed"},
+		{"nondecimal-truncated-descriptor", "f*00x\n", "", "0", "File.OpenFilesFailed"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Setenv("LO_TEST_PROBE_STDOUT", tc.output)
@@ -110,7 +115,7 @@ func TestFileOpenPathsRecordedProtocol(t *testing.T) {
 	installFileProbeFixture(t)
 	root := fileFixtureRoot(t)
 	// Captured from the host probe against a retained Lo fixture directory.
-	t.Setenv("LO_TEST_PROBE_STDOUT", "p33265\nf3\nn./held.log\nf4\nn.\np33271\nfcwd\nn.\np33276\nfcwd\nn.\n")
+	t.Setenv("LO_TEST_PROBE_STDOUT", "p33265\nf3\nn./held.log\nf4\nn.\nf*000\nn./held.log\nf*001\nn./held.log\np33271\nfcwd\nn.\np33276\nfcwd\nn.\n")
 	t.Setenv("LO_TEST_PROBE_EXIT", "0")
 	path := sourceFile(t, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root))
 	got := fileOutput(t, run(t, "run", path, "--open-files-root", root, "--format", "json"))
@@ -141,6 +146,34 @@ func TestFileOpenPathsHostProbe(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer held.Close()
+	program := sourceFile(t, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root))
+	got := fileOutput(t, run(t, "run", program, "--open-files-root", root, "--format", "json"))
+	valueJSON(t, got, fmt.Sprintf(`[{"type":"File.Path","value":%q}]`, path))
+}
+
+func TestFileOpenPathsHighDescriptorHostProbe(t *testing.T) {
+	if _, err := exec.LookPath("lsof"); err != nil {
+		t.Skip("host lsof is unavailable; recorded protocol fixtures cover the boundary")
+	}
+	root := fileFixtureRoot(t)
+	path := fileFixture(t, root, "held.log", "held")
+	held, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	descriptor, duplicateErr := unix.FcntlInt(held.Fd(), unix.F_DUPFD_CLOEXEC, 10000)
+	closeErr := held.Close()
+	if duplicateErr != nil {
+		t.Fatalf("duplicate high probe descriptor: %v", duplicateErr)
+	}
+	defer func() {
+		if err := unix.Close(descriptor); err != nil {
+			t.Error(err)
+		}
+	}()
+	if closeErr != nil {
+		t.Fatal(closeErr)
+	}
 	program := sourceFile(t, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root))
 	got := fileOutput(t, run(t, "run", program, "--open-files-root", root, "--format", "json"))
 	valueJSON(t, got, fmt.Sprintf(`[{"type":"File.Path","value":%q}]`, path))

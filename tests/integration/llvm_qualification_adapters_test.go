@@ -10,13 +10,14 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
 	"time"
 )
 
-const nativeProcessLifecycleSource = `flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new("/command"));target=Process.Command.new(executable,List.new("one two","$VALUE"),Map.new(Record.new(key:"ONLY",value:"explicit")),File.Path.new("/work"),Bytes.new("input"));result=commit target;return result};return Main()`
+const nativeProcessLifecycleSource = `flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new("/command"));target=Process.Command.new(executable: executable, arguments: List.new("one two","$VALUE"), context: Process.Context.new(Map.new(Record.new(key:"ONLY",value:"explicit")), File.Path.new("/work")), stdin: Bytes.new("input"));result=commit target;return result};return Main()`
 
 func nativeProcessLifecycleScenarios(t *testing.T, cases []int) {
 	t.Helper()
@@ -84,7 +85,7 @@ func TestLLVMProcessTransportCompleted(t *testing.T) {
 				t.Fatal(err)
 			}
 			digest := sha256.Sum256(data)
-			source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable,List.new("one two","$VALUE"),Map.new(Record.new(key:"ONLY",value:"explicit")),File.Path.new(%q),Bytes.new("input"));result=commit target;return result};return Main()`, child, directory))
+			source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new("one two","$VALUE"), context: Process.Context.new(Map.new(Record.new(key:"ONLY",value:"explicit")), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, child, directory))
 			artifact, built := buildForTest(t, source)
 			if built.status != 0 {
 				t.Fatalf("build process program: %+v", built)
@@ -123,11 +124,7 @@ func TestLLVMProcessTransportCancellation(t *testing.T) {
 	directory := t.TempDir()
 	childSource := filepath.Join(directory, "blocked.c")
 	child := filepath.Join(directory, "blocked")
-	gate := filepath.Join(directory, "ready.fifo")
-	if err := syscall.Mkfifo(gate, 0o600); err != nil {
-		t.Fatal(err)
-	}
-	writeLLVMFixture(t, childSource, []byte(`extern long read(int,void*,unsigned long),write(int,const void*,unsigned long);extern int pause(void),open(const char*,int,...),close(int);int main(int argc,char**argv){if(argc!=2)return 76;int ready=open(argv[1],0);char byte;if(ready<0||read(ready,&byte,1)!=1)return 77;close(ready);write(1,"partial",7);for(;;)pause();}`))
+	writeLLVMFixture(t, childSource, []byte(`extern long write(int,const void*,unsigned long);extern int pause(void);int main(void){write(1,"partial",7);for(;;)pause();}`))
 	command := exec.Command("cc", childSource, "-o", child)
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("compile blocked dependency: %v: %s", err, output)
@@ -137,7 +134,7 @@ func TestLLVMProcessTransportCancellation(t *testing.T) {
 		t.Fatal(err)
 	}
 	digest := sha256.Sum256(data)
-	source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable,List.new(%q),Map.new(),File.Path.new(%q),Bytes.new("input"));result=commit target;return result};return Main()`, child, gate, directory))
+	source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new(), context: Process.Context.new(Map.new(), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, child, directory))
 	artifact, built := buildForTest(t, source)
 	if built.status != 0 {
 		t.Fatalf("build cancellation program: %+v", built)
@@ -150,42 +147,62 @@ func TestLLVMProcessTransportCancellation(t *testing.T) {
 	if err := process.Start(); err != nil {
 		t.Fatal(err)
 	}
-	// Opening the FIFO proves that the real child reached its read boundary.
-	ready := make(chan error, 1)
-	go func() {
-		file, err := os.OpenFile(gate, os.O_WRONLY, 0)
-		if err == nil {
-			_, err = file.Write([]byte("x"))
-			closeErr := file.Close()
-			if err == nil {
-				err = closeErr
+	joined, childPID := false, 0
+	defer func() {
+		if !joined {
+			_ = process.Process.Kill()
+			_ = process.Wait()
+			if childPID != 0 {
+				_ = syscall.Kill(childPID, syscall.SIGKILL)
 			}
 		}
-		ready <- err
 	}()
-	select {
-	case err := <-ready:
+	deadline := time.NewTimer(5 * time.Second)
+	defer deadline.Stop()
+	poll := time.NewTicker(10 * time.Millisecond)
+	defer poll.Stop()
+	for childPID == 0 {
+		observation, err := exec.Command("ps", "-axo", "pid=,ppid=,comm=").CombinedOutput()
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("observe native child: %v: %s", err, observation)
 		}
-	case <-time.After(5 * time.Second):
-		_ = process.Process.Kill()
-		_ = process.Wait()
-		t.Fatal("process dependency did not reach its readiness boundary")
+		for _, line := range strings.Split(string(observation), "\n") {
+			fields := strings.Fields(line)
+			if len(fields) < 3 || fields[1] != strconv.Itoa(process.Process.Pid) || filepath.Base(fields[len(fields)-1]) != filepath.Base(child) {
+				continue
+			}
+			childPID, err = strconv.Atoi(fields[0])
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		if childPID != 0 {
+			break
+		}
+		select {
+		case <-poll.C:
+		case <-deadline.C:
+			t.Fatal("native child did not reach execution")
+		}
 	}
 	if err := process.Process.Signal(os.Interrupt); err != nil {
 		t.Fatal(err)
 	}
 	done := make(chan error, 1)
 	go func() { done <- process.Wait() }()
+	var waitErr error
 	select {
-	case <-done:
+	case waitErr = <-done:
+		joined = true
 	case <-time.After(5 * time.Second):
 		_ = process.Process.Kill()
 		t.Fatal("cancelled transport did not join its process owner")
 	}
 	if process.ProcessState.ExitCode() != 2 || stdout.Len() != 0 || !strings.Contains(stderr.String(), "runtime.cancelled") || !strings.Contains(stderr.String(), `"cleanup_complete":{"type":"Bool","value":true}`) || !strings.Contains(stderr.String(), `"start_confirmed":{"type":"Bool","value":true}`) || strings.Contains(stderr.String(), "cGFydGlhbA==") {
-		t.Fatalf("cancellation result: status=%d out=%s err=%s", process.ProcessState.ExitCode(), stdout.String(), stderr.String())
+		t.Fatalf("cancellation result: state=%s wait=%v out=%s err=%s", process.ProcessState, waitErr, stdout.String(), stderr.String())
+	}
+	if err := syscall.Kill(childPID, 0); err != syscall.ESRCH {
+		t.Fatalf("native child remains after cancellation: %v", err)
 	}
 }
 
@@ -211,7 +228,7 @@ func TestLLVMProcessTransportOutputLimits(t *testing.T) {
 	digest := sha256.Sum256(data)
 	for _, name := range []string{"exact", "stdout", "stderr"} {
 		t.Run(name, func(t *testing.T) {
-			source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable,List.new(%q),Map.new(),File.Path.new(%q),Bytes.new("input"));result=commit target;return result};return Main()`, child, name, directory))
+			source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new(%q), context: Process.Context.new(Map.new(), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, child, name, directory))
 			artifact, built := buildForTest(t, source)
 			if built.status != 0 {
 				t.Fatalf("build output contract: %+v", built)

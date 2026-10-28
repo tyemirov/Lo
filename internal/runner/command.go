@@ -13,39 +13,44 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 )
 
 const (
-	BuildCommand          = "build"
-	outputOption          = "--output"
-	targetOption          = "--target"
-	deviceBackendOption   = "--device-backend"
-	emitOption            = "--emit"
-	LLVMEmission          = "llvm"
-	toolchainOption       = "--toolchain"
-	ParseCommand          = "parse"
-	CheckCommand          = "check"
-	InspectCommand        = "inspect"
-	RunCommand            = "run"
-	ServeCommand          = "serve"
-	listenOption          = "--listen"
-	httpAllowOption       = "--http-allow"
-	processAllowOption    = "--process-allow"
-	processLauncherOption = "--process-launcher"
-	processReadRootOption = "--process-read-root"
-	readRootOption        = "--read-root"
-	writeRootOption       = "--write-root"
-	listRootOption        = "--list-root"
-	removeRootOption      = "--remove-root"
-	openFilesRootOption   = "--open-files-root"
-	allowDeviceOption     = "--allow-device"
-	maxStepsOption        = "--max-steps"
-	formatOption          = "--format"
-	TextFormat            = "text"
-	JsonFormat            = "json"
-	ExitSuccess           = 0
-	ExitRejected          = 1
-	ExitHost              = 2
+	BuildCommand              = "build"
+	outputOption              = "--output"
+	targetOption              = "--target"
+	deviceBackendOption       = "--device-backend"
+	emitOption                = "--emit"
+	LLVMEmission              = "llvm"
+	toolchainOption           = "--toolchain"
+	ParseCommand              = "parse"
+	CheckCommand              = "check"
+	InspectCommand            = "inspect"
+	RunCommand                = "run"
+	ServeCommand              = "serve"
+	listenOption              = "--listen"
+	httpAllowOption           = "--http-allow"
+	processAllowOption        = "--process-allow"
+	processLauncherOption     = "--process-launcher"
+	processReadRootOption     = "--process-read-root"
+	processWriteRootOption    = "--process-write-root"
+	processPruneRootOption    = "--process-prune-root"
+	processUnixEndpointOption = "--process-unix-endpoint"
+	readRootOption            = "--read-root"
+	writeRootOption           = "--write-root"
+	listRootOption            = "--list-root"
+	removeRootOption          = "--remove-root"
+	openFilesRootOption       = "--open-files-root"
+	allowDeviceOption         = "--allow-device"
+	maxStepsOption            = "--max-steps"
+	formatOption              = "--format"
+	TextFormat                = "text"
+	JsonFormat                = "json"
+	ExitSuccess               = 0
+	ExitRejected              = 1
+	ExitHost                  = 2
 )
 
 type invocation struct {
@@ -80,6 +85,7 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	var ports []uint16
 	var httpGrants []string
 	var processGrants, processReadRoots []string
+	var processWrites, processPrunes, processEndpoints []adapter.ProcessPathScopeInput
 	var processLauncher string
 	processLauncherSet := false
 	for i := 1; i < len(args); i++ {
@@ -107,7 +113,7 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 			inv.emit = args[i]
 			continue
 		}
-		if arg == processAllowOption || arg == processLauncherOption || arg == processReadRootOption {
+		if arg == processAllowOption || arg == processLauncherOption || arg == processReadRootOption || arg == processWriteRootOption || arg == processPruneRootOption || arg == processUnixEndpointOption {
 			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
 				return inv, fmt.Errorf("%s requires a value with run or serve", arg)
 			}
@@ -125,6 +131,23 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 				processLauncherSet, processLauncher = true, args[i]
 			case processReadRootOption:
 				processReadRoots = append(processReadRoots, args[i])
+			case processWriteRootOption, processPruneRootOption, processUnixEndpointOption:
+				field := "root"
+				if arg == processUnixEndpointOption {
+					field = "endpoint"
+				}
+				scope, err := parseProcessScope(args[i], field)
+				if err != nil {
+					return inv, fmt.Errorf("%s: %w", arg, err)
+				}
+				switch arg {
+				case processWriteRootOption:
+					processWrites = append(processWrites, scope)
+				case processPruneRootOption:
+					processPrunes = append(processPrunes, scope)
+				case processUnixEndpointOption:
+					processEndpoints = append(processEndpoints, scope)
+				}
 			}
 			continue
 		}
@@ -280,11 +303,105 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	if err != nil {
 		return inv, err
 	}
-	inv.processPolicy, err = adapter.NewProcessPolicy(processGrants, processLauncher, processReadRoots)
+	inv.processPolicy, err = adapter.NewProcessPolicy(adapter.ProcessPolicyInput{Grants: processGrants, Launcher: processLauncher, ReadRoots: processReadRoots, Writes: processWrites, Prunes: processPrunes, Endpoints: processEndpoints})
 	if err != nil {
 		return inv, err
 	}
 	return inv, nil
+}
+
+func parseProcessScope(input, field string) (adapter.ProcessPathScopeInput, error) {
+	if !strings.HasPrefix(strings.TrimSpace(input), "{") {
+		return adapter.ProcessPathScopeInput{}, fmt.Errorf("expected one JSON object with executable and %s", field)
+	}
+	validation := json.NewDecoder(strings.NewReader(input))
+	var document json.RawMessage
+	if err := validation.Decode(&document); err != nil || !processScopeUnicode(string(document)) {
+		return adapter.ProcessPathScopeInput{}, fmt.Errorf("malformed Process scope JSON")
+	}
+	var trailing json.RawMessage
+	if err := validation.Decode(&trailing); err != io.EOF {
+		return adapter.ProcessPathScopeInput{}, fmt.Errorf("Process scope must contain one JSON object")
+	}
+	decoder := json.NewDecoder(strings.NewReader(input))
+	token, err := decoder.Token()
+	if err != nil || token != json.Delim('{') {
+		return adapter.ProcessPathScopeInput{}, fmt.Errorf("expected one JSON object with executable and %s", field)
+	}
+	values := map[string]string{}
+	for decoder.More() {
+		token, err := decoder.Token()
+		if err != nil {
+			return adapter.ProcessPathScopeInput{}, fmt.Errorf("read Process scope field: %w", err)
+		}
+		name, ok := token.(string)
+		if !ok || name != "executable" && name != field {
+			return adapter.ProcessPathScopeInput{}, fmt.Errorf("unknown Process scope field")
+		}
+		if _, exists := values[name]; exists {
+			return adapter.ProcessPathScopeInput{}, fmt.Errorf("duplicate Process scope field")
+		}
+		var raw any
+		if err := decoder.Decode(&raw); err != nil {
+			return adapter.ProcessPathScopeInput{}, fmt.Errorf("malformed Process scope JSON")
+		}
+		value, text := raw.(string)
+		if !text {
+			return adapter.ProcessPathScopeInput{}, fmt.Errorf("Process scope field must contain text")
+		}
+		values[name] = value
+	}
+	if _, err := decoder.Token(); err != nil {
+		return adapter.ProcessPathScopeInput{}, fmt.Errorf("close Process scope: %w", err)
+	}
+	var extra json.RawMessage
+	if err := decoder.Decode(&extra); err != io.EOF {
+		return adapter.ProcessPathScopeInput{}, fmt.Errorf("Process scope must contain one JSON object")
+	}
+	if len(values) != 2 || values["executable"] == "" || values[field] == "" {
+		return adapter.ProcessPathScopeInput{}, fmt.Errorf("Process scope requires executable and %s", field)
+	}
+	return adapter.ProcessPathScopeInput{Executable: values["executable"], Path: values[field]}, nil
+}
+
+func processScopeUnicode(input string) bool {
+	if !utf8.ValidString(input) {
+		return false
+	}
+	for offset := 0; offset < len(input); {
+		if input[offset] != '\\' {
+			offset++
+			continue
+		}
+		if offset+1 == len(input) {
+			return false
+		}
+		if input[offset+1] != 'u' {
+			offset += 2
+			continue
+		}
+		if offset+6 > len(input) {
+			return false
+		}
+		first, err := strconv.ParseUint(input[offset+2:offset+6], 16, 16)
+		if err != nil {
+			return false
+		}
+		offset += 6
+		if first >= 0xD800 && first <= 0xDBFF {
+			if offset+6 > len(input) || input[offset:offset+2] != `\u` {
+				return false
+			}
+			second, err := strconv.ParseUint(input[offset+2:offset+6], 16, 16)
+			if err != nil || second < 0xDC00 || second > 0xDFFF {
+				return false
+			}
+			offset += 6
+		} else if first >= 0xDC00 && first <= 0xDFFF {
+			return false
+		}
+	}
+	return true
 }
 
 type Options interface {

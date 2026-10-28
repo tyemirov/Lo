@@ -232,6 +232,7 @@ const ATOM_NAMES: &[&str] = &[
     "HTTP.Response",
     "HTTP.Server",
     "HTTP.ServerReceipt",
+    "Process.Context",
     "Process.Executable",
     "Process.Command",
     "Process.Result",
@@ -736,13 +737,8 @@ pub fn canonical_json_value(value: &Json) -> String {
 fn canonical_typed_payload(typ: Option<&str>, value: &Json) -> String {
     let names: &[&str] = match typ {
         Some("Process.Executable") => &["path"],
-        Some("Process.Command") => &[
-            "executable",
-            "arguments",
-            "environment",
-            "directory",
-            "stdin",
-        ],
+        Some("Process.Context") => &["origin", "redacted"],
+        Some("Process.Command") => &["context", "executable", "arguments", "stdin"],
         Some("Process.Result") => &["termination", "stdout", "stderr"],
         Some("Process.Termination") => &["kind", "exit_code", "signal"],
         _ => return canonical_json_value(value),
@@ -876,7 +872,10 @@ fn snapshot_type(t: &Type) -> Type {
 #[cfg(test)]
 mod http_storage_flags_tests {
     use super::*;
-    use crate::{context::{Context, Fault, Program}, http, tensor};
+    use crate::{
+        context::{Context, Fault, Program},
+        http, tensor,
+    };
     use std::sync::Arc;
 
     fn checked<T>(result: Result<T, Fault>) -> T {
@@ -890,10 +889,13 @@ mod http_storage_flags_tests {
 
     fn adapter(headers: bool, fields: Handle) -> Handle {
         if headers {
-            http::wrap("HTTP.Headers", http::Value::Headers {
-                entries: fields.fields()["entries"].clone(),
-                fields: fields.fields().clone(),
-            })
+            http::wrap(
+                "HTTP.Headers",
+                http::Value::Headers {
+                    entries: fields.fields()["entries"].clone(),
+                    fields: fields.fields().clone(),
+                },
+            )
         } else {
             http::wrap("HTTP.Request", http::Value::Fields(fields))
         }
@@ -921,12 +923,20 @@ mod http_storage_flags_tests {
         let mut owner = context();
         let mut foreign = context();
         let tensor = tensor::value(checked(tensor::construct(
-            &mut owner, &checked(tensor::Shape::new(vec![1])), vec![1.0],
+            &mut owner,
+            &checked(tensor::Shape::new(vec![1])),
+            vec![1.0],
         )));
         let storage_id = tensor::data(&tensor).storage.id;
-        let aliases = new(Type::List(Box::new(tensor.typ.clone())), Data::List(vec![tensor.clone(), tensor.clone()]));
+        let aliases = new(
+            Type::List(Box::new(tensor.typ.clone())),
+            Data::List(vec![tensor.clone(), tensor.clone()]),
+        );
         let nested = record([("aliases".into(), aliases)]);
-        let fields = record([("entries".into(), text("scalar entries")), ("nested".into(), nested)]);
+        let fields = record([
+            ("entries".into(), text("scalar entries")),
+            ("nested".into(), nested),
+        ]);
         let expected = tensor::allocations(&[fields.clone()]);
         assert_eq!(expected, vec![storage_id]);
         for headers in [true, false] {
@@ -934,8 +944,13 @@ mod http_storage_flags_tests {
             assert!(value.contains_storage());
             assert_eq!(tensor::allocations(&[value.clone()]), expected);
             checked(tensor::validate_inputs(&owner, &[value.clone()]));
-            let fault = tensor::validate_inputs(&foreign, &[value.clone()]).err().expect("foreign storage accepted");
-            assert_eq!(fault.message(), "tensor allocation belongs to another invocation or a released scope");
+            let fault = tensor::validate_inputs(&foreign, &[value.clone()])
+                .err()
+                .expect("foreign storage accepted");
+            assert_eq!(
+                fault.message(),
+                "tensor allocation belongs to another invocation or a released scope"
+            );
             assert!(tensor::host_publishable(&value));
         }
         assert_eq!(owner.resources.live, 4);

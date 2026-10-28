@@ -308,6 +308,9 @@ pub unsafe extern "C" fn lo_cli_main(
     let mut roots = crate::files::Options::default();
     let mut process_grants = vec![];
     let mut process_roots = vec![];
+    let mut process_writes = vec![];
+    let mut process_prunes = vec![];
+    let mut process_endpoints = vec![];
     let mut process_launcher = String::new();
     let mut launcher_set = false;
     let mut http_grants = vec![];
@@ -349,6 +352,12 @@ pub unsafe extern "C" fn lo_cli_main(
             }
         } else if matches!(
             arg,
+            "--process-write-root" | "--process-prune-root" | "--process-unix-endpoint"
+        ) && i + 1 == args.len()
+        {
+            error = Some(format!("{arg} requires a value with run or serve"));
+        } else if matches!(
+            arg,
             "--read-root"
                 | "--write-root"
                 | "--list-root"
@@ -357,6 +366,9 @@ pub unsafe extern "C" fn lo_cli_main(
                 | "--process-allow"
                 | "--process-launcher"
                 | "--process-read-root"
+                | "--process-write-root"
+                | "--process-prune-root"
+                | "--process-unix-endpoint"
                 | "--http-allow"
                 | "--listen"
         ) && i + 1 < args.len()
@@ -374,6 +386,9 @@ pub unsafe extern "C" fn lo_cli_main(
                 "--open-files-root" => roots.open_files.push(value),
                 "--process-allow" => process_grants.push(value),
                 "--process-read-root" => process_roots.push(value),
+                "--process-write-root" => process_writes.push(value),
+                "--process-prune-root" => process_prunes.push(value),
+                "--process-unix-endpoint" => process_endpoints.push(value),
                 "--process-launcher" => {
                     if launcher_set {
                         error = Some("duplicate --process-launcher".into());
@@ -408,10 +423,16 @@ pub unsafe extern "C" fn lo_cli_main(
     if let Err(message) = &http {
         error = Some(message.clone());
     }
-    if let Err(message) =
-        crate::process::validate_policy(&process_grants, &process_launcher, &process_roots)
-    {
-        error = Some(message);
+    let process_policy = crate::process::Policy::new(
+        process_grants,
+        process_launcher,
+        process_roots,
+        &process_writes,
+        &process_prunes,
+        &process_endpoints,
+    );
+    if let Err(message) = &process_policy {
+        error = Some(message.clone());
     }
     if let Some(message) = error {
         if format == "json" {
@@ -452,14 +473,7 @@ pub unsafe extern "C" fn lo_cli_main(
     };
     signal(2, stop as *const () as usize);
     signal(15, stop as *const () as usize);
-    let processes = match crate::process::configure(
-        &process_grants,
-        &process_launcher,
-        &process_roots,
-        5000,
-        1 << 20,
-        1000,
-    ) {
+    let processes = match crate::process::configure(&process_policy.unwrap(), 5000, 1 << 20, 1000) {
         Ok(processes) => Arc::new(processes),
         Err(message) => {
             let fault = if message == crate::process::UNAVAILABLE {
@@ -488,6 +502,7 @@ pub unsafe extern "C" fn lo_cli_main(
         }
     };
     let session = Arc::new(Session {
+        initial_process_context: crate::process::capture_context(),
         program: program.clone(),
         steps,
         processes,

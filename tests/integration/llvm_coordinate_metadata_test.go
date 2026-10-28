@@ -287,7 +287,7 @@ func TestLLVMCoordinateReceiptSpans(t *testing.T) {
 			t.Fatal(err)
 		}
 		digest := sha256.Sum256(data)
-		add("process", fmt.Sprintf(`flow Main()->Int!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable,List.new("coordinate-child"),Map.new(),File.Path.new(%q),Bytes.new(""));result=commit target;return Math.div(1,0)};return Main()`, executable, repository), "Process.run", 4, []string{"--process-allow", fmt.Sprintf("%x,%s", digest, executable), "--process-read-root", repository})
+		add("process", fmt.Sprintf(`flow Main()->Int!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new("coordinate-child"), context: Process.Context.new(Map.new(), File.Path.new(%q)), stdin: Bytes.new(""));result=commit target;return Math.div(1,0)};return Main()`, executable, repository), "Process.run", 4, []string{"--process-allow", fmt.Sprintf("%x,%s", digest, executable), "--process-read-root", repository})
 	}
 	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), scenarios)
 }

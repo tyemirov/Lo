@@ -18,6 +18,7 @@ use std::{
 mod entries;
 #[path = "file_probe.rs"]
 mod probe;
+pub(crate) use entries::{validate_namespace, MutationAccess};
 pub use entries::Value;
 pub const SUPPORTED: &[&str] = &[
     "File.read",

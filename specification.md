@@ -745,6 +745,7 @@ The initial boundary-oriented built-in types are:
 * `HTTP.URL`
 * `HTTP.Method`
 * `HTTP.Client.Request`
+* `Process.Context`
 * `Process.Executable`
 * `Process.Command`
 * `Process.Result`
@@ -1240,13 +1241,51 @@ Host diagnostics expose `http_progress` without header or body payloads.
 
 ### 9.5 Process Adapter
 
-Pure command construction, inspection, and the trusted injected result and lifecycle core are implemented.
-The [lifecycle evidence](docs/evidence/process-start-lifecycle.json) records passed focused checks, race checks, and current-stack CI.
-The selected Darwin 27 arm64 profile passed [native qualification](docs/adapter-design.md#qualification-status).
-Canonical public acceptance passed all 24 interpreter/generated-native cases. Final stack CI and independent completion review passed.
-The runners accept [explicit Process policy inputs](docs/adapter-design.md#host-policy-inputs) without filesystem access during parsing.
-These inputs do not enable an unqualified backend or grant parent File authority.
-The [selected native admission limits](docs/adapter-design.md#selected-native-admission-limits) apply separately from pure constructor validation.
+Immutable contexts, executable discovery, command construction, inspection, and bounded activation are implemented under F024.
+The [F024 evidence](docs/evidence/process-context-cleanup/checkpoint.json) records interpreter, native, transport, cleanup, and stack validation results.
+The [adapter design](docs/adapter-design.md#process) owns host enforcement and qualification limits.
+
+`Process.Context` contains an environment and an absolute working directory, without execution authority.
+The runner captures the initial environment and physical working directory once before program evaluation.
+Repeated context observations and server callbacks use those same inputs.
+Trusted embeddings and fixtures can inject initial inputs before evaluation.
+The inherited `PWD` variable remains environment data. It does not select the physical working directory.
+
+| Operation | Result and effect |
+| --- | --- |
+| `Process.Context.current()` | `Process.Context!`, host observation of the invocation's initial inputs. |
+| `Process.Context.new(environment: Map<String, String>, directory: File.Path)` | `Process.Context!`, pure construction from explicit inputs. |
+| `Process.Context.override_environment(context: Process.Context, updates: Map<String, String>)` | `Process.Context!`, pure replacement of supplied names with other names kept unchanged. |
+| `Process.Context.without_environment(context: Process.Context, names: List<String>)` | `Process.Context!`, pure removal of the listed names. |
+| `Process.Context.with_directory(context: Process.Context, directory: File.Path)` | `Process.Context!`, pure selection of an absolute directory. |
+| `Process.Context.environment_value(context: Process.Context, name: String)` | `String!`, pure lookup with `Process.EnvironmentAbsent` for an absent name. |
+| `Process.Executable.new(path: File.Path)` | `Process.Executable!`, pure construction of an absolute executable description. |
+| `Process.Executable.resolve(context: Process.Context, name: String)` | `Process.Executable!`, host observation that selects an executable. |
+| `Process.Command.new(context: Process.Context, executable: Process.Executable, arguments: List<String>, stdin: Bytes)` | `Process.Command!`, pure construction of an inert command. |
+
+Context changes return new values and keep their inputs unchanged.
+An empty environment remains empty. An empty variable value differs from an absent variable.
+
+Executable and directory paths must be absolute and contain no NUL.
+Arguments and environment values must contain no NUL.
+Environment names must be nonempty and contain neither NUL nor `=`.
+
+Invalid context inputs produce `Process.InvalidContext`. Unavailable initial inputs produce `Process.ContextUnavailable`.
+Invalid executable descriptions produce `Process.InvalidExecutable`. Invalid command inputs produce `Process.InvalidCommand`.
+
+Pure construction keeps exact lexical data without filesystem access, path resolution, or shell expansion.
+Context observation and executable discovery are host observations, which pure callbacks cannot do.
+
+Discovery uses the selected context's `PATH` for a name without `/`.
+Missing `PATH` produces `Process.ExecutableAbsent`.
+Empty, relative, or noncanonical search entries produce `Process.DiscoveryFailed`.
+A name with `/` must be a canonical absolute path.
+Discovery resolves symlinks and selects the first executable candidate before launch authorization.
+
+An exhausted search produces `Process.ExecutableAbsent`. Other discovery failures produce `Process.DiscoveryFailed`.
+
+Launch policy requires an exact grant for the selected resolved path and verifies its identity through launch.
+An unauthorized first candidate produces `runtime.capability-denied`. The runtime does not select a later candidate.
 
 A configured session requires these canonical inputs:
 
@@ -1254,25 +1293,34 @@ A configured session requires these canonical inputs:
 - `--process-launcher ABSOLUTE_PATH` selects the pinned trusted helper.
 - `--process-read-root ABSOLUTE_PATH` selects each child data root and allowed working directory.
 
-The selected profile denies child filesystem writes, network access, and descendants.
+Optional cleanup inputs select authority for one initial executable:
+
+- `--process-write-root {"executable":"/absolute/tool","root":"/absolute/cache"}` selects a data-write root.
+- `--process-prune-root {"executable":"/absolute/tool","root":"/absolute/prune"}` selects a namespace-removal root.
+- `--process-unix-endpoint {"executable":"/absolute/tool","endpoint":"/absolute/socket"}` selects an exact Unix socket endpoint.
+
+Without these cleanup inputs, the selected profile denies child writes and network access.
+Cleanup scopes remain separate for each initial executable. Registered in-process exec chains keep that initial scope.
+Both profiles deny forked and spawned descendants.
+Cleanup admission checks canonical roots, socket kinds, bounded directory inventories, and hardlink aliases before activation.
+The [cleanup profile contract](docs/adapter-design.md#cleanup-execution-profile) defines the restrictions and qualification evidence.
+
+These grants do not grant parent File authority.
+Captured output can feed a separate parent File commit under its own grants.
+
+Native limits are 256 arguments including `argv[0]`, 4096 environment entries, and 65536 bytes per argument or environment entry.
+The command body has a 1048576-byte limit, including its length prefixes.
+Paths have a 1024-byte limit. Command grants and child read roots each have a 16-entry limit.
+Each initial executable has at most 16 combined mutation roots and 16 Unix endpoints.
+The [native limits](docs/adapter-design.md#selected-native-admission-limits) apply separately from pure constructor validation.
+
+The trusted launcher uses a fixed environment. Child environment values use a separate bounded command channel after confinement.
+The runtime passes the context environment to the target without additional inherited entries.
+
 The launcher normalizes specified registered ports, bootstrap authority, and task/current-thread exception slots before command admission.
 This selected-slot normalization does not establish named IPC denial or arbitrary inherited endpoint removal.
-Captured output can feed a separate parent File commit under its own grants.
 The conditional work bound uses maximum host parallelism times completed lifetime under a responsive OS.
 It is not a hard CPU quota. Unresolved creation or termination leaves that bound unverified.
-
-| Operation | Result |
-| --- | --- |
-| `Process.Executable.new(path: File.Path)` | `Process.Executable!` |
-| `Process.Command.new(executable: Process.Executable, arguments: List<String>, environment: Map<String, String>, directory: File.Path, stdin: Bytes)` | `Process.Command!` |
-
-Executable and directory paths must be absolute and contain no NUL.
-Arguments and environment values must contain no NUL.
-Environment names must be nonempty and contain neither NUL nor `=`.
-Invalid executable paths produce recoverable `Process.InvalidExecutable` errors.
-Invalid command inputs produce recoverable `Process.InvalidCommand` errors.
-The constructors keep exact lexical data without filesystem access or path resolution.
-They add no shell expansion or environment inheritance.
 
 Activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
@@ -1280,20 +1328,28 @@ Activation declares metadata capability `Process.run` and nominal success type `
 `Process.Termination.kind` is `exited` or `signaled`.
 `Process.Termination.exit_code(value) -> Int!` returns the exit code only for `exited`.
 `Process.Termination.signal(value) -> Int!` returns the signal only for `signaled`.
+
 A mismatched accessor returns `Process.TerminationKind`.
 Neither type has a Lo constructor.
 Nonzero exit and signal termination remain result data.
 Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
 Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
-Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
-Explicit program output keeps those values.
+
+Automatic context output contains origin and redaction status, without environment or directory payloads.
+Constructor diagnostics and nested snapshots redact context, command environment, argument, and stdin payloads.
+Explicit lookup and program output of a selected environment value remain available.
+
 The inspector adds an optional `process` object to command targets and capabilities.
-It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
+It contains `context`, `executable`, `arguments`, and `stdin` input descriptions.
+The context describes its `source` and `origin`, with explicit environment, directory, base, updates, or removals when present.
+Origins are `inherited`, `explicit`, `derived`, or `dynamic`.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
 It also contains `execution_profile: {required: true, status: "unavailable"}`.
+
 Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
-Executable descriptions trace the supplied `File.Path`.
+Explicit executable descriptions trace the supplied `File.Path`.
+Discovery descriptions keep the context, name, and dynamic dependencies.
 Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
@@ -1814,6 +1870,7 @@ Whitespace can occur between the components of a qualified name and before its c
 * `HTTP.URL.new`
 * `HTTP.Method.new`
 * `HTTP.Client.Request.new`
+* `Process.Context.new`
 * `Process.Executable.new`
 * `Process.Command.new`
 * `HTTP.Response.new`
@@ -1846,6 +1903,10 @@ Device access has a separate resource summary.
 | SGD and AdamW transitions | [24.7](#247-sgd-and-adamw) |
 | Checkpoints and training-state transfers | [24.9](#249-model-checkpoints-and-training-state-transfers) |
 
+* `Process.Context.override_environment`
+* `Process.Context.without_environment`
+* `Process.Context.with_directory`
+* `Process.Context.environment_value`
 * `Process.Termination.exit_code`
 * `Process.Termination.signal`
 * `File.Path.eq`
@@ -1888,7 +1949,7 @@ Section 24 defines numeric, tensor, autodiff, gradient, optimizer, and device fa
 Section 9.1 defines `File.list`, `File.open_paths`, `File.Remove.new`, and their failure kinds.
 Section 8.8 defines callback failure propagation for `Flow.fold`.
 Sections 9.2 and 9.4 define HTTP constructor failure kinds.
-Section 9.5 defines Process construction, termination accessors, activation errors, and host unavailability.
+Section 9.5 defines context observation, discovery, Process construction, termination accessors, activation errors, and host unavailability.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
@@ -1919,8 +1980,29 @@ include additional fields in Error.input when useful.
 * `Process.Executable.new(path) -> Process.Executable!`
   * Failure: the path is relative or contains NUL.
   * Required Error.kind: String.new("Process.InvalidExecutable")
-* `Process.Command.new(executable, arguments, environment, directory, stdin) -> Process.Command!`
-  * Failure: the directory, arguments, or environment violate section 9.5.
+* `Process.Context.current() -> Process.Context!`
+  * Failure: the invocation's initial inputs are unavailable.
+  * Required Error.kind: String.new("Process.ContextUnavailable")
+* `Process.Context.new(environment, directory) -> Process.Context!`
+  * Failure: the environment or directory violates section 9.5.
+  * Required Error.kind: String.new("Process.InvalidContext")
+* `Process.Context.override_environment(context, updates) -> Process.Context!`
+  * Failure: an environment update violates section 9.5.
+  * Required Error.kind: String.new("Process.InvalidContext")
+* `Process.Context.without_environment(context, names) -> Process.Context!`
+  * Failure: an environment name violates section 9.5.
+  * Required Error.kind: String.new("Process.InvalidContext")
+* `Process.Context.with_directory(context, directory) -> Process.Context!`
+  * Failure: the directory violates section 9.5.
+  * Required Error.kind: String.new("Process.InvalidContext")
+* `Process.Context.environment_value(context, name) -> String!`
+  * Failure: the environment variable is absent.
+  * Required Error.kind: String.new("Process.EnvironmentAbsent")
+* `Process.Executable.resolve(context, name) -> Process.Executable!`
+  * Failure: discovery finds no executable, or a discovery operation fails.
+  * Required Error.kind: String.new("Process.ExecutableAbsent") or String.new("Process.DiscoveryFailed"), respectively.
+* `Process.Command.new(context, executable, arguments, stdin) -> Process.Command!`
+  * Failure: the command inputs violate section 9.5.
   * Required Error.kind: String.new("Process.InvalidCommand")
 * Any list processor invocation whose referenced pure flow is fallible.
   * Failure: the referenced flow returns Error for an element.

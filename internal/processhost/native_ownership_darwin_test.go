@@ -55,7 +55,7 @@ func ownershipInvocation(t *testing.T) (adapter.ProcessInvocation, string) {
 		t.Fatal("native ownership fixture outside Lo")
 	}
 	path := filepath.Join(directory, "inert-command")
-	text, err := source.New(filepath.Join(directory, "ownership.lo"), fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"NAME",value:"explicit")),File.Path.new(%q),UTF8.Bytes.new("input")); result = commit target; return result }; return Main()`, path, directory))
+	text, err := source.New(filepath.Join(directory, "ownership.lo"), fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"NAME",value:"explicit")), File.Path.new(%q)), stdin: UTF8.Bytes.new("input")); result = commit target; return result }; return Main()`, path, directory))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,6 +95,20 @@ func TestNativeOwnershipSetupCloseFailure(t *testing.T) {
 			}()
 			pipeCalls, closeCalls, startCalls := 0, 0, 0
 			creator := &darwinCreator{launcher: filepath.Join(directory, "never-launched"), directory: directory, commands: map[string]struct{}{invocation.Executable(): {}}, roots: []string{directory}}
+			policy, err := adapter.NewProcessPolicy(adapter.ProcessPolicyInput{Grants: []string{strings.Repeat("0", 64) + "," + invocation.Executable()}, Launcher: creator.launcher, ReadRoots: creator.roots})
+			if err != nil {
+				t.Fatal(err)
+			}
+			scope, exists := policy.Scope(invocation.Executable())
+			if !exists {
+				t.Fatal("ownership fixture has no command scope")
+			}
+			configuration, err := creator.buildConfiguration(policy.Grants(), invocation.Executable(), scope)
+			if err != nil {
+				t.Fatal(err)
+			}
+			creator.scopes = map[string]adapter.ProcessScope{invocation.Executable(): scope}
+			creator.configurations = map[string][]byte{invocation.Executable(): configuration}
 			creator.setup = &nativeSetup{
 				pipe: func() (*os.File, *os.File, error) {
 					pipeCalls++

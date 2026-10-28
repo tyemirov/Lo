@@ -1,0 +1,1384 @@
+{
+  "issue": "F024",
+  "state": "complete",
+  "source_sha256": {
+    ".mprlab/AGENTS.DOCS.md": "474afae6229ceb1cffb1ccb19d0332379197293bb92a21814cded4a7da6c038a",
+    ".mprlab/AGENTS.GIT.md": "00dc40673e2e6f7bab2cf2437c2c525c13506fa03e331ebf641bb003026078b8",
+    ".mprlab/PLANNING.md": "233a5edf00f4b3d772bbb7245c99fa12e1c31fb3ebf9f81d6307eef9c2e1dfc0",
+    ".mprlab/POLICY.md": "088f99b07b6841567ce837424876ee22513065f7718ce942b6e2a803ad2c8429",
+    ".mprlab/TERMINOLOGY.md": "98e015efc3f9c4c3d0790f2fa5f35bf09f4cac30a0b595928f09e1b2c62fa4da",
+    "AGENTS.md": "be486a579d214ae640b62440eb1911e16b03f6a694109d1da6115efe07372fd6",
+    "ISSUES.md": "9c96926246cdf902f946492d1327c6353da96873051f3c00e5de1d3ca99e6186",
+    "Makefile": "9002177a02ad9812041cb8e20654b6a61f257d48705f08a42c91b9b11084f621",
+    "README.md": "924f8027c2e8941f776f3db491f75e45408576f1f4a934c706fe91584b40e570",
+    "docs/adapter-design.md": "f20c990b56632d81bc33f68e9ac9c72ab32f2564a88eceea7902fb3eaaf552eb",
+    "docs/adapter-plan.md": "e12eb5b130d454d2d4001bd8e2ebecf38044285ef1286135692d4fcf63ac637b",
+    "docs/compiler-design.md": "ddd3f4a270ac06702767883ae6d953d0efcdab78311d90cca62be44f1d9d0995",
+    "docs/examples/package-cache-cleanup.lo": "a24cc3e6130ffab34b243cec83af0f57446664541d21331771f822d02a38505c",
+    "docs/mac-cleanup-plan.md": "cfc442e42faf53050fd43c84fbe79801bb7bf441938ab76ffdc7cc67d575e783",
+    "experiments/process-host-final/native_test.go": "4daf84b13864b7ea545a0c3a8a3f2e4c353bf27c69301f457d74c02270913f02",
+    "experiments/process-host/native_test.go": "4286a89fa40dacf783b224af2bf28d33d54128fd368d22eb3d01b7fb96a76c31",
+    "internal/adapter/file_open_paths.go": "329a7c1c9d0836313f59201a8d1b89e344eb4ac88fdfc74f5cc5dc882a89b67e",
+    "internal/adapter/process_discovery.go": "9159be61e088c6e9aaef7b5f7c3e1a4b1dace481228be234988a3ef411fca76c",
+    "internal/adapter/process_failure.go": "9dd1c5b0b073fd4c4dbd32f75aa8c203addbc00a62a895e8010a13c9c2b699a8",
+    "internal/adapter/process_policy.go": "25b5d2ca50ff509d312fa6a6cd70361fa0145377a4dc9191c8504ab7830d1f41",
+    "internal/adapter/process_registry.go": "ddc296d45cb5043e4ca1fad74019c7f4f28990f9f9c0613e6128d8c943827dc4",
+    "internal/adapter/process_scope.go": "6d93587b94b25d2e22b2ec78c0f568c6f82d201eb40c328f022d4086c3d27ef5",
+    "internal/adapter/server.go": "4405eacbe74e2fbf9a413e11d9a15557a739179cfc81ebc59f8eb38b4a87d603",
+    "internal/catalog/catalog.go": "726f67eb55b29823a3f095be5fc5c837eec1971ab3776024c2d468587ad482df",
+    "internal/catalog/process_context.go": "c27125197962ad19eee4e1cdc6ab27217b2482e13e355181ab394f8ebf71ad0a",
+    "internal/eval/builtin.go": "f9e3334d8dece0410cef599cabe8443a11bec9ea23e000c3c323392476f2c016",
+    "internal/execution/process_context.go": "b57c80ba266ce43eb47c60f80e506cb0aba14bc17c40d6acdb1b5850a95015dd",
+    "internal/execution/session.go": "d1dfcd99f16e691d010228eb4b4d575d5716b6f6a6e133809db967e3609d53e4",
+    "internal/inspect/analyze.go": "c7247e62e45d3ed1c08063e59a8b3416c39756de2c9be497dc3f77a9486ac041",
+    "internal/inspect/expression.go": "09f59201e9ed2b974e4460a0d61f61de5848af2687d8b917f8fdc492eab6f0b7",
+    "internal/inspect/process.go": "9d322d4185b8655510de79494d91ecda2ddd26067556ea1f24504ff8966c1162",
+    "internal/processhost/helper_identity.go": "46aef4e7a8df22a0ca4de132a5ba2780a16bd18e4695605aff02d5d816cec287",
+    "internal/processhost/native/launcher.c": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc",
+    "internal/processhost/native/protocol.h": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b",
+    "internal/processhost/native_cleanup_darwin.go": "1a16171114861ed643d45ca75b51b4f65b027c01df3b43c53ade5fe6d4403f4d",
+    "internal/processhost/native_config_darwin.go": "36a908913b4b149600d6c4ac69bb51a7bd2bc12880f3d006df53d55e95e5bed7",
+    "internal/processhost/native_darwin.go": "a514e29a7fe8ed0af30622a2d09a7b7de375a0c13588488e3e15c0f6a9c6fb07",
+    "internal/processhost/native_ownership_darwin_test.go": "e1385c263c7aff26a4a075d06d231e8fddc9e51d33999d75ec44a8d114e84314",
+    "internal/processhost/startup.go": "37e1c11b4f066d0dacc00ad584beee5da273bd69ac5025a92baa3ce0653c2dd0",
+    "internal/runner/command.go": "b6c12a64dde3aee83bcc765ca72c1874f16e735796340841e2abbe611c6fa7f1",
+    "internal/runner/execute.go": "a26cbfdb20f672fd4663f1640af2308b85134f7a946ddf5f09e2a3c24b31d903",
+    "internal/runtimeops/process.go": "42ea4b30ea88abfc91d29f10fbf1b08558673c05d24757d2d1623ad978165009",
+    "internal/runtimeops/process_context.go": "def05b1ae9ddb70982a63f36b65aca7943b56b9574eb9e1a9047b09f838d4162",
+    "internal/types/types.go": "dd7414507a17259ca45981d22ff29ab7fc715e4574e620de7ce4f4c88aa9fcab",
+    "internal/value/process.go": "8296d5978583dc7f89da014bf337d0105b8ea235dd28d7ef62a4f4474d672b8c",
+    "internal/value/process_context.go": "41dad83a3a77bfb25cba7ff37535875be67459a8617f52e44db364059074e0df",
+    "internal/value/snapshot_weight.go": "74a15a7b56b17a8e1e87724e6bda3dcb9dde19efb2e7680271298657ed072beb",
+    "internal/value/tensor.go": "f10c25e16504862ac5a53d936752aa9683b5021d7695792b0f402666e5a8ad62",
+    "runtime/native/src/adapters.rs": "2ad8dbff77179ddd94c03015fe9d81cd8283a93d02c6aabcef31f9fc4bcf36da",
+    "runtime/native/src/cli.rs": "2953da48f418128f0bb3585ae59723a3f069fcefe3f81deea0b9f8c8c1da2bea",
+    "runtime/native/src/exports.rs": "b8549ef845c54e7b68890ceef3a9ca0ee00a1b07c93ba16e8d20389249d6d978",
+    "runtime/native/src/file_entries.rs": "fbde0d44ccd1c253f61a7013ed497a6ad20bea0211db763ba9e43e920ea072d0",
+    "runtime/native/src/file_mutation_scan.rs": "687dd4a93ca9647923d8e9ff6cd28e413635f967f73865974ef08d942363fef7",
+    "runtime/native/src/file_probe.rs": "f12f5ebd340df23f69bd3a85a4ee9be89a3f0f73b46b964af88461dc9002871b",
+    "runtime/native/src/files.rs": "4dd8ee8ecd4e2c90930a57a618b8ffbbffcc73c29f0a8720dad5a191d1ed62db",
+    "runtime/native/src/generated_operations.rs": "6ba2820e784fd6306d94cd85788790e47af40370fe48ca6dc2b09e913ecdfee0",
+    "runtime/native/src/process.rs": "468f3473285e98f395ea4df9d89cd9cdef01d5de6e9b902489208e2f11cf8617",
+    "runtime/native/src/process_cleanup.rs": "8c5af550118705ad47bedfbec7574dd08659bb57c34a2c677a15feccd979b28f",
+    "runtime/native/src/process_context.rs": "3836d6391c87f012523b00663dce3e57591367f6e317a9cdf0abaa9c238cb6e1",
+    "runtime/native/src/process_helper_identity.rs": "046bafbcaab2bfdca5536272a6eb2aa0f591b2767c300b89032d528e328e5573",
+    "runtime/native/src/process_policy.rs": "75d535e9082258858fb2106d83d979a6721e63285e50ea83fe12d50f02a0a99a",
+    "runtime/native/src/process_transport.c": "d6ab58a9d6b3d1fa12139b04974991c45e3428eda2a722ed0c117bd46d45a563",
+    "runtime/native/src/value.rs": "90be32259bf74887469a8cc838e0cdeeb7009d1dfe6bbca1738601c9eb7eaf2b",
+    "specification.md": "1e9e0b9907c91e08211e170b784de0b907ce97d90a139e95366a4b90c748065b",
+    "testdata/native-runtime/process-cleanup-command.c": "b3597f05bc49d392faf210a37b9e1c5f39fd7dfae378929aa30e95662088d9b1",
+    "testdata/native-runtime/process-context-input.c": "0de389976d50b226c21890caaadd4521c3e1c8bcb9dee465e7c8d8c28d08b5cb",
+    "testdata/native-runtime/process-docker-command.c": "8b26c5a82686c788a0a1983a032c2d35b86f5dbcfe8a779db33ffd7c6a36518b",
+    "testdata/native-runtime/process-package-command.c": "48994d2964acff5a22c00305f09d60e6cc224c5a6149280206cf628c43b0d466",
+    "testdata/native-runtime/process-package-wrapper.c": "a33e057bd8cf72a5633ac7456774f88837509b3722a2b3bf3e59eb81a594c7e2",
+    "testdata/semantic-migration/matrix.json": "5173956c30bff5c12b4e0706065f91a529f0530e274a0053b82dd1c8c3a54924",
+    "tests/integration/adapter_process_completion_test.go": "c07d8f9cbf90e2a101cc42de89eac56b3129429c8c3e5beb4014b9cdfff87a8f",
+    "tests/integration/adapter_process_gate_test.go": "b0d1e7731a9cbb66d123c049d1303903564d01e63e54bc0caa2c69ae2310c95a",
+    "tests/integration/adapter_process_inspect_test.go": "67c96452775144950c1d8fbf3e3ea5de895214757f755b66bfdd8835b5eec189",
+    "tests/integration/adapter_process_lifecycle_test.go": "136eb4b6a14eaa0e3e31fc7acf92e9041bf350b469da7e80904b35697b7172c5",
+    "tests/integration/adapter_process_policy_test.go": "73b61229d07bada76e09db140244c6b46eb0b92ca16070cf56ec7b1539d1b80f",
+    "tests/integration/adapter_process_registry_test.go": "4e1504fbc596c2a8cc3465f342938cc775c0576a37c5c57e7c74444eef32fded",
+    "tests/integration/adapter_process_values_test.go": "8f9f5365d7f3598c9dd9cfa14b75448889a837eaf933524f36d31452571d091d",
+    "tests/integration/adapter_receipts_test.go": "0d26409eb897f7a9252a650c0a4f234b63e8a589bf70e145cf89d2903684dfa1",
+    "tests/integration/catalog_test.go": "3a3876e2bbb92333b8c5da1aa8ba595cba8809993e2f0c8b8beee07cc4ab662a",
+    "tests/integration/file_probe_test.go": "04e10a828fdf1bf165371302e3c6055b03f10e6b08bbb47d6074715e44e71de4",
+    "tests/integration/llvm_coordinate_metadata_test.go": "9f7ec35f505f180be0fb56ae7f3c18a2f281bcad8ec1a56a42211a35a1346896",
+    "tests/integration/llvm_process_cleanup_admission_test.go": "96df08b78feb6687f8128475093ea9d8f99696d96ec390eb2499e19b4c27107a",
+    "tests/integration/llvm_process_context_test.go": "5a278d50447e2c6f9c22b0c36b535d29cdd10d138dcfc1316d06eb14f4e69de5",
+    "tests/integration/llvm_process_metal_artifact_test.go": "7899968a06e679070ffc9ffb57666c7f02e7e5f4693eb767dd142e43a22f083a",
+    "tests/integration/llvm_process_test.go": "cb6c084b0c0f18fb480c0a997f8a2e2dc70008acfd422e2a3e918eaf96b8aab1",
+    "tests/integration/llvm_qualification_adapters_test.go": "f8a0fc70989b36b4e5cef8533f74b1afd789c5df8a4c07b670fa71c7152d3e14",
+    "tests/integration/process_cleanup_policy_test.go": "d39d3f0ddbbfb39ac6e515c8b8fad166ccd0d56708ad8bd394120be981b59727",
+    "tests/integration/process_cleanup_test.go": "9b6e015f0a181337a05ae80b6b729bb2f3ae0378ecd58a5f08001e8a1789d1ea",
+    "tests/integration/process_context_identity_test.go": "b08fe1bd3064ce54bebbd743bd6ac3e0faf2b112f65b9d88891a3d0ff1ede00f",
+    "tests/integration/process_context_inputs_test.go": "30fbfd1a1d8d6c4f73e70ee33c2e0ce148e6c3a0997ce86c226225869de7f439",
+    "tests/integration/process_context_test.go": "6a52de7abe140487103bf5513ea760d1a8c561e32e6041147136d52c63905986",
+    "tests/integration/process_context_transport_test.go": "5905105135f35ff4c132612efdfb1a20ccbb790e0f0f3eac2233b788fbc54aae",
+    "tests/integration/process_docker_cleanup_test.go": "07a0adcc56cfcd1cf00473bb6d2d37c5bb15675bf7d12e212ce36303a84c18ed",
+    "tests/integration/process_host_session_test.go": "9a51bf0cb9f7ddac76a5192497f7ff4c3ed137b463f711d23b5750362c7a0b6b",
+    "tests/integration/process_launcher_transport_test.go": "d6ebadcadf6ce45c8ce3acb439761e554b0df49f6f56f92b220dbf775089b381",
+    "tests/integration/process_package_cleanup_test.go": "c4283c14a8ac439ddcb4778ccc0e334a31b669f6db8ae3b97f5a7effcf5ea7dc",
+    "tests/integration/runtime_catalog_test.go": "4c85948c77174e760973aa4845b13726c1acedabaedac9212b8fe17e8aa2fcb3",
+    "tools/nativeruntime/platform/darwin/Security.tbd": "c3450a9c40dfd718bd5708772db06d01efcd5a887a42f2398e6edbaea43faadf",
+    "tools/nativeruntime/platform/darwin/libSystem.tbd": "bda4d4019592e49c430187d327dc5c9b8ecdca67317f0f6754a13f875232277b",
+    "tools/nativeruntime/platform/darwin/metal/Security.tbd": "c3450a9c40dfd718bd5708772db06d01efcd5a887a42f2398e6edbaea43faadf",
+    "tools/nativeruntime/platform/darwin/metal/libSystem.tbd": "2e678d995ee1fa5589fba6f19ed3cf38bb41570cd48dd121c56d29c91af46e97",
+    "tools/nativeruntime/platform/darwin/metal/symbols.json": "cda26cdbff98e25ee21df45883ec8d8e4dd9c0f2ff3e9ec51a206aa347eb1732",
+    "tools/nativeruntime/platform/darwin/symbols.json": "b347dbf922741646d9cea9c058410d1f46c7d74076ac47f32eb22943eee271d7",
+    "tools/processbuild/identity.py": "4e5b030ccb011d0dbe47d54da2fd6547667b817cc55d9de7d4bff39ab1d90a87",
+    "tools/processbuild/test_identity.py": "32f898e155742c645f465fd5bfd668544c4260020ce4c8a6c21b5be8921ce0c6"
+  },
+  "checkpoints": {
+    "expected_red": [
+      {
+        "path": "docs/evidence/process-context-cleanup/context-red.log.gz",
+        "uncompressed_sha256": "4741d4884d68d3950e5d07c1ff85128f2022f36b26ee4b1cdccdc740834de4d4"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/context-invalid-red.log.gz",
+        "uncompressed_sha256": "517c9a6496948dca426f793497d9a7646a00783be506770a877f8b5dbfacd1cb"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-symlink-red.log.gz",
+        "uncompressed_sha256": "4fa02e725c48e85918162cfb3d4e2e53e605c4d574cee492548b55aa7866bbe6"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/native-injection-red.log.gz",
+        "uncompressed_sha256": "73d68ecfa2636f5a7815eb5d6572ed0da5945ade12484ce83b955805078f9be2"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/transport-red.log.gz",
+        "uncompressed_sha256": "21f20b2a5004d54190d2ddeced3e4d2ca8b32d51e5ed84790a7d1a36eb909d78"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/shared-pin-red.log.gz",
+        "uncompressed_sha256": "c4b53b7be561a6e4821e3af824b9b2b24f6ce70936b37c229a6edd32c6b96ce2"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-red.log.gz",
+        "uncompressed_sha256": "74ed1905b45ce5f5a13cf6b9946878a6fd9a5873023a40ae222c6ad4fc8cc930"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/prune-data-alias-red.log.gz",
+        "uncompressed_sha256": "63a06a8c3a66df0c5cdd6b7bbbf6939370bd8bbbe9a206c33916594a01aff83f"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-policy-red.log.gz",
+        "uncompressed_sha256": "773ce1865864d80377748f1f2d8e184c88ce4d955dc1e2ac9e20bc2222780cf7"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-policy-missing-red.log.gz",
+        "uncompressed_sha256": "7a6d37b1eb232150927e5f5840ed3293dd46f78bebbaf05a4003e0ea76b966e7"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-path-characters.log.gz",
+        "uncompressed_sha256": "1df46a3af5cf0c4b87fe2c260933e2c2032d2bebdc25c1913eccc200b02d589d"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-path-native-red.log.gz",
+        "uncompressed_sha256": "365464d500c0c028e3ba7a76352b6248ceada88e2667092e4d843c34a6c5bdd6"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/scope-unicode-red.log.gz",
+        "uncompressed_sha256": "838dcdff481593ec0b65dc8819697dfbec355125a5714d7d24417b80a4bf719b"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/context-directory-red.log.gz",
+        "uncompressed_sha256": "8addd39e0cdb018e03b6eb49b7d3e8d64eac858163397e101e9a7feae8836730"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/mixed-prune-alias-red.log.gz",
+        "uncompressed_sha256": "455510ff0dfb59ae04c2c33fef916d1248c4584f3db03c399ca51f45c369cff8"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/admission-parity-red.log.gz",
+        "uncompressed_sha256": "d2b2e8a1a899b823ffc52a0ec7229aa3974fde887861b87443efb4173a9a7619"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/host-probe-high-descriptor-red.log.gz",
+        "uncompressed_sha256": "9e956508a1a9aaa58a439903d408f053bb59bf8f18977d2551f1834330e44638"
+      }
+    ],
+    "passed_checkpoint": [
+      {
+        "path": "docs/evidence/process-context-cleanup/context-final-go.log.gz",
+        "uncompressed_sha256": "94b1871e6534ff98443e872f6fdc3a42cfe15f6862376f229a8ee8d2dea067e4"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/context-final-native.log.gz",
+        "uncompressed_sha256": "c7f737a8fcd37f0defccc9cdc36be272342f02053132c0451eac2a5a99d8a58d"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-parity.log.gz",
+        "uncompressed_sha256": "5dfc973fcbe7561c919487a648d69690cb732bcd001545314cf7570e8cc50613"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/shared-pin-green.log.gz",
+        "uncompressed_sha256": "cfc1c6951b1ee4e79edf09320ec4339b4dc640bf92a536d4c5f7942ba6471022"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/package-admission-parity.log.gz",
+        "uncompressed_sha256": "dc38b4fc142f4182cc52f1c8a1480811aec9f7ac5f5e43d0c93069da8f99af4c"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-lifecycle-policy-parity.log.gz",
+        "uncompressed_sha256": "eacd0a23eb07d739e9f75a0423f8b94dceafc8e058ad468dde5f338aa263d144"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/docker-parity.log.gz",
+        "uncompressed_sha256": "e2c9b113a281c205e0962296df3898c5b513c72c40a34bfc11b8740e3111eb25"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/package-example-parity.log.gz",
+        "uncompressed_sha256": "d71e854a07c4ca708ffbf453c6a3d66725eed91721fe21f4d6ce057320f80d3b"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/launcher-transport.log.gz",
+        "uncompressed_sha256": "d98593fc9d6aaf85e4f1e2180bc7973d15a2edd20cafa678e7f3f6177fb61177"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-path-parity.log.gz",
+        "uncompressed_sha256": "2e493bcf89d6ad7269a9dbdc8c3bbfc7f94a712e58675d60338af66f39a0f65c"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/process-metal-artifact.log.gz",
+        "uncompressed_sha256": "fedc1bcd7e619238bf4aaffc2b126dd45eae04a32b883d175073899f792f9e8f"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/transport-cancellation-repeat.log.gz",
+        "uncompressed_sha256": "3a88fa435790991fbe1e9c14c6be6ad07e8f0e9ffc393d7f884e60afe69d01bf"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/processhost-unit.log.gz",
+        "uncompressed_sha256": "5f766d331dac351d14a4514862c1f2569be6e4c6720c614fe96967af8b1774bd"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/scope-unicode-green.log.gz",
+        "uncompressed_sha256": "5667327e70614b4fcccc4dad72f9b19d713fb4c5accc86ace523116c7893fe7f"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/package-interpreter-parity.log.gz",
+        "uncompressed_sha256": "bb237712ee81a7c791df6abc170a34969eac87cd961c0dc90fd6fa3970803aab"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/context-directory-green.log.gz",
+        "uncompressed_sha256": "ecd926be93f2d5e67c3fb45aecda20ecc737def3edf70d57e22999e2cfc0dd11"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/profile-final-parity.log.gz",
+        "uncompressed_sha256": "bbfa4b9d6ef96327d5a5bd49c18dafc9abb32ad1573c3dd39a552c05bf85ce77"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/admission-parity-green.log.gz",
+        "uncompressed_sha256": "e111a67c3805aec7b204fae0e1849f0d6257253e4910e70b87b9231e599d50b8"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/admission-final-parity.log.gz",
+        "uncompressed_sha256": "7def936155ef27d8899fd25967c0acfbfb88ec8ed2d26c030d2ad43fb335a3fa"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/lifecycle-final.log.gz",
+        "uncompressed_sha256": "65de91ab7bdea9daf2d059359c86c7c774fe39761cedcde86dbb613d6aa8d455"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/fmt-lint.log.gz",
+        "uncompressed_sha256": "0cc6e09a668684d6074636d84a54a8f4a5cf2b63c6860e4b0e55375a9dbfa0b4"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/semantic-layout-green.log.gz",
+        "uncompressed_sha256": "67fa93e242e82100311aaa267bfb4dec5322b185fc1a6f57514be9936705d9cf"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/launcher-final-identity.log.gz",
+        "uncompressed_sha256": "a9593f9723ea48ab7be776e23aa8a85c8b42660fa98fd07a1c02b8558d608023"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/artifact-identity.log.gz",
+        "uncompressed_sha256": "4231f53fef5acf37fe13bce741400b1f2e6760f41392cab551fd6017d4f2829b"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/cleanup-final-parity.log.gz",
+        "uncompressed_sha256": "40ca97b3901e3d83acaa4d5d9693224f6289d8d719191cdb79c783e500ce7f92"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/host-probe-recheck.log.gz",
+        "uncompressed_sha256": "cd170f60aa2cd10e9c48abb6c04e12d8416f4467ea7472606702716e041da21e"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/host-probe-high-descriptor-go-green.log.gz",
+        "uncompressed_sha256": "320153397331d264a24dccbb5d4fcbc738472418941e0c44af5e42729e3b54ff"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/host-probe-high-descriptor-native-green.log.gz",
+        "uncompressed_sha256": "fd6a19937c2c328d57fec179c6937c488063176281c2c9226f000edb50f8314f"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/probe-artifact-final.log.gz",
+        "uncompressed_sha256": "8da36387f6f6b8be1bf03dcc1d777efd1c2484c77a4639ce2cf98cbf359edaad"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/probe-semantic-green.log.gz",
+        "uncompressed_sha256": "6ce326f06ecd6873b5e208bbf0159b68319e58fbd8e4f978b297aeea511aed4a"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/executable-replacement-parity.log.gz",
+        "uncompressed_sha256": "aad061eecf62f0a392df6aba7c4eedeac10b18444c4e531000dc2b3c1d27c74c"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/replacement-lint.log.gz",
+        "uncompressed_sha256": "d63875ff3815f4ba96382a81053a725422add6d2c5703eebc11546f4e4da9193"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/replacement-launcher-identity.log.gz",
+        "uncompressed_sha256": "a9593f9723ea48ab7be776e23aa8a85c8b42660fa98fd07a1c02b8558d608023"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/completion-artifact-check.log.gz",
+        "uncompressed_sha256": "d761088a3aa05dd0e5cd5b2c81e00e788d7a5a179d1923770c86099a59430504"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/replacement-ci-go-stage.log.gz",
+        "uncompressed_sha256": "21e1a4951a1a0177f5c342b6e6be91892a7bb6e4bab2fd41806c20776ee5baba"
+      }
+    ],
+    "passed_final_stack": [
+      {
+        "path": "docs/evidence/process-context-cleanup/review-stack-ci.log.gz",
+        "uncompressed_sha256": "adb17ff030974801d200a1f8455ef02024c8414c179ae9cc258c74f7629cf21d"
+      }
+    ],
+    "failed_stack_checkpoint": [
+      {
+        "path": "docs/evidence/process-context-cleanup/ci-ownership-red.log.gz",
+        "uncompressed_sha256": "07f568eb93cc263a4ec3489a354491dc5cd2fd9f5da633f1ecd133409d7e5800"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/final-ci.log.gz",
+        "uncompressed_sha256": "2d911c56cf0416b87934df000022dc02dd0a985381f284b805a1df54bf7425bf"
+      }
+    ],
+    "passed_superseded_stack_checkpoint": [
+      {
+        "path": "docs/evidence/process-context-cleanup/post-correction-ci.log.gz",
+        "uncompressed_sha256": "6c54e24e2df14bd3de10a2e9d8e82217f91ac1a05aa11f8d224dcc3f57ee613c"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/probe-correction-ci.log.gz",
+        "uncompressed_sha256": "153b06939c688fc2f6631a3309830ff3df89806df87529db1354cbc8da85f497"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/replacement-stack-ci.log.gz",
+        "uncompressed_sha256": "ab8d73092906000a50fcd54f5f63ba3467613b7f5230990fa9b8534de56a34ad"
+      }
+    ],
+    "host_protocol_capture": [
+      {
+        "path": "docs/evidence/process-context-cleanup/probe-capture.json.gz",
+        "uncompressed_sha256": "437d27559ab4ba1012f6a964a93dfde0c3d58b0e397d81a85e56c87f3f3d9030"
+      }
+    ],
+    "review_correction": [
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-native-red.log.gz",
+        "uncompressed_sha256": "babea92265bcb5817eddd9696d583565354ee808c74d38fd5f1a2a4036f7ec57"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-go-green.log.gz",
+        "uncompressed_sha256": "f627aa46baf3d429d99a85f0c5d67c058bb4a52b6394bb4e04f058b901ab36bb"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-native-green.log.gz",
+        "uncompressed_sha256": "02c4b60c092209b1436075b629ebd1ea3345239960a10132d400bfc0218a46f9"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/runtime-build.log.gz",
+        "uncompressed_sha256": "3470de2cdd4a56264e480289a319b4932cd89607b78f1097f22eeb8b39d418e3"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/compiler-build.log.gz",
+        "uncompressed_sha256": "b700f4adc510c74021433b86343d23b0f07e88164109dcbcec8d44cf3adf08cc"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/adjacent-layout.log.gz",
+        "uncompressed_sha256": "c6fe5cfa0aa223930d4f27f203301170ef60a0706cd9e614a6da4c0f55a77bff"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/final-artifact-check.log.gz",
+        "uncompressed_sha256": "4cfe260fb69bcedc6a261f0f534f799e447b08d9b5a231bd6654fddc15a0e899"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-results.json.gz",
+        "uncompressed_sha256": "d74cbd753a40cb9f400c10c814d707ed820174778ad07eeedf207d0e22238389"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/build-receipt.json.gz",
+        "uncompressed_sha256": "a8ce97fb82efe44bdb5366062c475769055f88fcdd0872b5a20833ee8c961bc4"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/toolchain.json.gz",
+        "uncompressed_sha256": "cf9367ad735ce592e717a2848eb8299526ce449c04834800b1cd038b6953007a"
+      }
+    ],
+    "documentation_review": [
+      {
+        "path": "docs/evidence/process-context-cleanup/report.json.gz",
+        "uncompressed_sha256": "efaf6c3ef3052241e6e4673bd629458e17bc252e95e678a3f95e34d0af31fce5"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/changed-language.json.gz",
+        "uncompressed_sha256": "f1c9eb2f9504986b61c17ef74522c19928e2f9c72b24d29bd43fc112ba952747"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/baseline-language.json.gz",
+        "uncompressed_sha256": "7409346770bc6591aabdaa4ce3bf92367f572e0594e3d1aa6a2c086a73197564"
+      }
+    ],
+    "governance_review": [
+      {
+        "path": "docs/evidence/process-context-cleanup/governance-before.json.gz",
+        "uncompressed_sha256": "41b237b590f00fc7c93fe5c1966c47797008dbd904c019220c53171d64f4b2d4"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/governance-after.json.gz",
+        "uncompressed_sha256": "41b237b590f00fc7c93fe5c1966c47797008dbd904c019220c53171d64f4b2d4"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/governance-language.json.gz",
+        "uncompressed_sha256": "fc1c68a8966e1fcfb2dea8a2de129acae72cf219d9bff38807f8b878a34617f7"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/tracker-language.json.gz",
+        "uncompressed_sha256": "5d4a0ea5c2d955808060cc746da420bda3df9feaa0b46a5cf85f360ff361a41f"
+      }
+    ]
+  },
+  "stack_ci": {
+    "state": "passed",
+    "session": 42842,
+    "exit_status": 0,
+    "command": "make -o process-launcher ci LLVM_TOOLCHAIN=_scratch/f024-20261027/review/runtime/toolchain.json NATIVE_RUNTIME_STATE=_scratch/f024-20261027/preparation SEMANTIC_COMPILER=_scratch/f024-20261027/review/runtime/bin/lo SEMANTIC_TOOLCHAIN=_scratch/f024-20261027/review/runtime/toolchain.json TEST_ARGS=-v",
+    "log": "docs/evidence/process-context-cleanup/review-stack-ci.log.gz",
+    "scope": "after_independent_review_correction",
+    "test_filter": null,
+    "launcher": "verified_existing_binary",
+    "go_integration_seconds": 140.961,
+    "native_integration_seconds": 3296.518,
+    "semantic_report_tests_passed": 21,
+    "semantic_report_seconds": 6.498,
+    "tool_tests_passed": 217,
+    "tool_test_seconds": 146.32,
+    "stages": {
+      "fmt": "passed",
+      "lint": "passed",
+      "test": "passed",
+      "test-native": "passed",
+      "build": "passed",
+      "test-semantic-report": "passed",
+      "test-native-qualification-tools": "passed"
+    },
+    "previous_completed_stack": {
+      "state": "passed",
+      "exit_status": 0,
+      "log": "docs/evidence/process-context-cleanup/replacement-stack-ci.log.gz",
+      "session": 18198,
+      "test_filter": null,
+      "launcher": "verified_existing_binary",
+      "includes_latest_test_addition": true,
+      "completed_go_phase": "docs/evidence/process-context-cleanup/replacement-ci-go-stage.log.gz",
+      "stages": {
+        "fmt": "passed",
+        "lint": "passed",
+        "test": "passed",
+        "test-native": "passed",
+        "build": "passed",
+        "test-semantic-report": "passed",
+        "test-native-qualification-tools": "passed"
+      },
+      "go_integration_seconds": 182.729,
+      "native_integration_seconds": 3573.706,
+      "semantic_report_tests_passed": 21,
+      "tool_tests_passed": 217,
+      "tool_test_seconds": 131.22,
+      "prior_run": {
+        "state": "failed",
+        "log": "docs/evidence/process-context-cleanup/final-ci.log.gz",
+        "exit_status": 2,
+        "failure": "TestFileOpenPathsHostProbe"
+      },
+      "superseded_running_runs": [],
+      "superseded_completed_runs": [
+        {
+          "state": "passed",
+          "exit_status": 0,
+          "log": "docs/evidence/process-context-cleanup/post-correction-ci.log.gz",
+          "scope": "before_probe_correction_and_replacement_test",
+          "native_integration_seconds": 3906.888,
+          "semantic_report_tests_passed": 21,
+          "tool_tests_passed": 217,
+          "tool_test_seconds": 139.78,
+          "runtime_source_sha256": "f55b9f34d98f997171c959443ca21630c1b92b177986a48f50ff73dc39080e5c"
+        },
+        {
+          "state": "passed",
+          "exit_status": 0,
+          "log": "docs/evidence/process-context-cleanup/probe-correction-ci.log.gz",
+          "scope": "before_replacement_test",
+          "native_integration_seconds": 3732.61,
+          "semantic_report_tests_passed": 21,
+          "tool_tests_passed": 217,
+          "tool_test_seconds": 134.57,
+          "runtime_source_sha256": "65dc2531fa4158b7bba7f914bba984bb6d00ad1cc8fba9c82337346fb5e7fe2a"
+        }
+      ],
+      "scope": "before_independent_review_correction"
+    }
+  },
+  "artifact_identity": {
+    "state": "passed",
+    "bundle": "_scratch/f024-20261027/review/runtime",
+    "runtime_source_sha256": "d6dea1c3deb7c9563dc04ef57049043af1f0bead576b0e94643dfc8ea7bb037a",
+    "manifest_sha256": "cf9367ad735ce592e717a2848eb8299526ce449c04834800b1cd038b6953007a",
+    "targets": [
+      "darwin/arm64",
+      "linux/arm64",
+      "metal"
+    ],
+    "process_sources": {
+      "launcher.c": {
+        "path": "internal/processhost/native/launcher.c",
+        "sha256": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc"
+      },
+      "normalization.c": {
+        "path": "internal/processhost/native/normalization.c",
+        "sha256": "b1b6b9e1adf7d1e76a59ecb6d07e4ce2b6418d4d809e932bf0b4f084978c4732"
+      },
+      "protocol.h": {
+        "path": "internal/processhost/native/protocol.h",
+        "sha256": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b"
+      }
+    },
+    "retention": "temporary_bundle_removed_after_verified_acceptance"
+  },
+  "documentation": {
+    "state": "passed",
+    "review_scope": "changed_prose",
+    "mechanical_ste_checks": "zero_new_findings",
+    "manual_review_decision": "reviewed_parts_1_and_2",
+    "official_reference": {
+      "path": "_scratch/f024-20261027/ste-reference/ASD-STE100_ISSUE9.pdf",
+      "sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+      "verified": true,
+      "source_url": "https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf",
+      "cache_retention": "task_cache_removed_after_review"
+    },
+    "document_inventory": [
+      {
+        "path": "specification.md",
+        "sha256": "1e9e0b9907c91e08211e170b784de0b907ce97d90a139e95366a4b90c748065b",
+        "reviewed_scope": "changed prose and directly affected Process contracts",
+        "changed_hunks": [
+          {
+            "start": 748,
+            "lines": 1
+          },
+          {
+            "start": 1244,
+            "lines": 45
+          },
+          {
+            "start": 1296,
+            "lines": 24
+          },
+          {
+            "start": 1321,
+            "lines": 0
+          },
+          {
+            "start": 1324,
+            "lines": 0
+          },
+          {
+            "start": 1331,
+            "lines": 1
+          },
+          {
+            "start": 1338,
+            "lines": 5
+          },
+          {
+            "start": 1344,
+            "lines": 3
+          },
+          {
+            "start": 1349,
+            "lines": 1
+          },
+          {
+            "start": 1351,
+            "lines": 2
+          },
+          {
+            "start": 1873,
+            "lines": 1
+          },
+          {
+            "start": 1906,
+            "lines": 4
+          },
+          {
+            "start": 1952,
+            "lines": 1
+          },
+          {
+            "start": 1983,
+            "lines": 23
+          }
+        ]
+      },
+      {
+        "path": "README.md",
+        "sha256": "924f8027c2e8941f776f3db491f75e45408576f1f4a934c706fe91584b40e570",
+        "reviewed_scope": "changed prose and directly affected Process contracts",
+        "changed_hunks": [
+          {
+            "start": 599,
+            "lines": 9
+          },
+          {
+            "start": 612,
+            "lines": 1
+          },
+          {
+            "start": 619,
+            "lines": 4
+          }
+        ]
+      },
+      {
+        "path": "docs/adapter-design.md",
+        "sha256": "f20c990b56632d81bc33f68e9ac9c72ab32f2564a88eceea7902fb3eaaf552eb",
+        "reviewed_scope": "changed prose and directly affected Process contracts",
+        "changed_hunks": [
+          {
+            "start": 413,
+            "lines": 1
+          },
+          {
+            "start": 418,
+            "lines": 3
+          },
+          {
+            "start": 424,
+            "lines": 1
+          },
+          {
+            "start": 426,
+            "lines": 2
+          },
+          {
+            "start": 447,
+            "lines": 1
+          },
+          {
+            "start": 455,
+            "lines": 40
+          },
+          {
+            "start": 504,
+            "lines": 1
+          },
+          {
+            "start": 509,
+            "lines": 2
+          },
+          {
+            "start": 520,
+            "lines": 2
+          },
+          {
+            "start": 523,
+            "lines": 1
+          },
+          {
+            "start": 525,
+            "lines": 3
+          },
+          {
+            "start": 530,
+            "lines": 1
+          },
+          {
+            "start": 532,
+            "lines": 2
+          },
+          {
+            "start": 693,
+            "lines": 3
+          },
+          {
+            "start": 697,
+            "lines": 3
+          },
+          {
+            "start": 719,
+            "lines": 7
+          },
+          {
+            "start": 728,
+            "lines": 1
+          },
+          {
+            "start": 731,
+            "lines": 41
+          },
+          {
+            "start": 906,
+            "lines": 6
+          }
+        ]
+      },
+      {
+        "path": "docs/compiler-design.md",
+        "sha256": "ddd3f4a270ac06702767883ae6d953d0efcdab78311d90cca62be44f1d9d0995",
+        "reviewed_scope": "changed prose and directly affected Process contracts",
+        "changed_hunks": [
+          {
+            "start": 57,
+            "lines": 11
+          },
+          {
+            "start": 76,
+            "lines": 4
+          },
+          {
+            "start": 81,
+            "lines": 3
+          },
+          {
+            "start": 86,
+            "lines": 1
+          },
+          {
+            "start": 88,
+            "lines": 2
+          },
+          {
+            "start": 103,
+            "lines": 2
+          }
+        ]
+      },
+      {
+        "path": "docs/adapter-plan.md",
+        "sha256": "e12eb5b130d454d2d4001bd8e2ebecf38044285ef1286135692d4fcf63ac637b",
+        "reviewed_scope": "changed prose and directly affected Process contracts",
+        "changed_hunks": [
+          {
+            "start": 13,
+            "lines": 2
+          },
+          {
+            "start": 72,
+            "lines": 1
+          },
+          {
+            "start": 195,
+            "lines": 1
+          },
+          {
+            "start": 200,
+            "lines": 2
+          },
+          {
+            "start": 211,
+            "lines": 2
+          },
+          {
+            "start": 214,
+            "lines": 1
+          },
+          {
+            "start": 216,
+            "lines": 3
+          },
+          {
+            "start": 221,
+            "lines": 1
+          },
+          {
+            "start": 223,
+            "lines": 2
+          },
+          {
+            "start": 463,
+            "lines": 38
+          },
+          {
+            "start": 504,
+            "lines": 1
+          }
+        ]
+      },
+      {
+        "path": "docs/mac-cleanup-plan.md",
+        "sha256": "cfc442e42faf53050fd43c84fbe79801bb7bf441938ab76ffdc7cc67d575e783",
+        "reviewed_scope": "changed prose and directly affected Process contracts",
+        "changed_hunks": [
+          {
+            "start": 11,
+            "lines": 4
+          },
+          {
+            "start": 30,
+            "lines": 1
+          },
+          {
+            "start": 32,
+            "lines": 2
+          },
+          {
+            "start": 50,
+            "lines": 1
+          },
+          {
+            "start": 166,
+            "lines": 1
+          },
+          {
+            "start": 168,
+            "lines": 3
+          },
+          {
+            "start": 183,
+            "lines": 12
+          },
+          {
+            "start": 201,
+            "lines": 3
+          },
+          {
+            "start": 206,
+            "lines": 7
+          },
+          {
+            "start": 235,
+            "lines": 3
+          },
+          {
+            "start": 241,
+            "lines": 1
+          }
+        ]
+      }
+    ],
+    "report": "docs/evidence/process-context-cleanup/report.json.gz",
+    "full_document_compliance_claimed": false
+  },
+  "independent_review": {
+    "state": "completed",
+    "remaining_material_findings": [],
+    "finding": "P3 canonical root-path discovery parity corrected after public integration failure",
+    "report": "docs/evidence/process-context-cleanup/independent-review.json",
+    "correction_review": "parent_reviewed_minimal_patch_and_regression"
+  },
+  "completion_blockers": {},
+  "full_mac_cleanup": "out_of_scope",
+  "external_package_managers": "unverified",
+  "external_docker": "unverified",
+  "cleanup_descendants": "denied",
+  "registered_exec_chains": "initial_scope_retained",
+  "requirement_audit": {
+    "context_values_and_pure_changes": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/value/process_context.go",
+        "internal/runtimeops/process_context.go",
+        "runtime/native/src/process_context.rs"
+      ],
+      "tests": [
+        "TestProcessContextEnvironment",
+        "TestProcessContextAbsentEnvironment",
+        "TestProcessContextInvalidChanges",
+        "TestProcessContextPureConstruction"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessContextEnvironment": "PASS",
+          "TestProcessContextAbsentEnvironment": "PASS",
+          "TestProcessContextInvalidChanges": "PASS",
+          "TestProcessContextPureConstruction": "PASS"
+        },
+        "native": {
+          "TestProcessContextEnvironment": "PASS",
+          "TestProcessContextAbsentEnvironment": "PASS",
+          "TestProcessContextInvalidChanges": "PASS",
+          "TestProcessContextPureConstruction": "PASS"
+        }
+      }
+    },
+    "initial_capture_and_injection": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/execution/process_context.go",
+        "internal/adapter/server.go",
+        "runtime/native/src/exports.rs"
+      ],
+      "tests": [
+        "TestProcessContextInitialInputs",
+        "TestProcessContextInjectedInputs",
+        "TestProcessContextServerSnapshot",
+        "TestLLVMProcessContextInjectedInputs",
+        "TestLLVMLinuxProcessContextInjectedInputs",
+        "TestProcessContextInheritedWorkingDirectoryIgnoresPWD"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessContextInitialInputs": "PASS",
+          "TestProcessContextInjectedInputs": "PASS",
+          "TestProcessContextServerSnapshot": "PASS",
+          "TestLLVMProcessContextInjectedInputs": "SKIP",
+          "TestLLVMLinuxProcessContextInjectedInputs": "SKIP",
+          "TestProcessContextInheritedWorkingDirectoryIgnoresPWD": "PASS"
+        },
+        "native": {
+          "TestProcessContextInitialInputs": "PASS",
+          "TestProcessContextInjectedInputs": "PASS",
+          "TestProcessContextServerSnapshot": "PASS",
+          "TestLLVMProcessContextInjectedInputs": "PASS",
+          "TestLLVMLinuxProcessContextInjectedInputs": "PASS",
+          "TestProcessContextInheritedWorkingDirectoryIgnoresPWD": "PASS"
+        }
+      }
+    },
+    "canonical_command_constructor_and_results": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/catalog/catalog.go",
+        "internal/value/process.go",
+        "runtime/native/src/process.rs"
+      ],
+      "tests": [
+        "TestLLVMProcessConstructors",
+        "TestAdapterProcessActivationContract",
+        "TestProcessPackageCleanupCommands"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestLLVMProcessConstructors": "SKIP",
+          "TestAdapterProcessActivationContract": "PASS",
+          "TestProcessPackageCleanupCommands": "PASS"
+        },
+        "native": {
+          "TestLLVMProcessConstructors": "PASS",
+          "TestAdapterProcessActivationContract": "PASS",
+          "TestProcessPackageCleanupCommands": "PASS"
+        }
+      }
+    },
+    "discovery_identity_and_authority": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/adapter/process_discovery.go",
+        "internal/adapter/process_registry.go",
+        "runtime/native/src/process_context.rs",
+        "runtime/native/src/process.rs"
+      ],
+      "tests": [
+        "TestProcessExecutableDiscovery",
+        "TestProcessExecutableDiscoveryFailures",
+        "TestProcessExecutableDiscoveryUnauthorizedFirst",
+        "TestProcessExecutableReplacementBeforeActivation",
+        "TestAdapterProcessRegistryAdmission"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessExecutableDiscovery": "PASS",
+          "TestProcessExecutableDiscoveryFailures": "PASS",
+          "TestProcessExecutableDiscoveryUnauthorizedFirst": "PASS",
+          "TestProcessExecutableReplacementBeforeActivation": "PASS",
+          "TestAdapterProcessRegistryAdmission": "PASS"
+        },
+        "native": {
+          "TestProcessExecutableDiscovery": "PASS",
+          "TestProcessExecutableDiscoveryFailures": "PASS",
+          "TestProcessExecutableDiscoveryUnauthorizedFirst": "PASS",
+          "TestProcessExecutableReplacementBeforeActivation": "PASS",
+          "TestAdapterProcessRegistryAdmission": "PASS"
+        }
+      }
+    },
+    "bounded_transport_and_launcher_environment": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/processhost/native/launcher.c",
+        "internal/processhost/native/protocol.h",
+        "runtime/native/src/process_transport.c",
+        "tools/processbuild/identity.py",
+        "tools/processbuild/test_identity.py"
+      ],
+      "tests": [
+        "TestProcessContextInheritedTransport",
+        "TestProcessContextTransportBounds",
+        "TestProcessLauncherRejectsMalformedFrames"
+      ],
+      "tool_tests": [
+        "tools/processbuild/test_identity.py::test_controlled_build_and_read_only_verification"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessContextInheritedTransport": "PASS",
+          "TestProcessContextTransportBounds": "PASS",
+          "TestProcessLauncherRejectsMalformedFrames": "PASS"
+        },
+        "native": {
+          "TestProcessContextInheritedTransport": "PASS",
+          "TestProcessContextTransportBounds": "PASS",
+          "TestProcessLauncherRejectsMalformedFrames": "PASS"
+        }
+      }
+    },
+    "observation_purity_inspection_and_redaction": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/catalog/process_context.go",
+        "internal/inspect/process.go",
+        "internal/value/process_context.go",
+        "internal/value/snapshot_weight.go",
+        "internal/value/tensor.go",
+        "runtime/native/src/process_context.rs"
+      ],
+      "tests": [
+        "TestProcessContextObservationPurity",
+        "TestProcessContextDerivedInspection",
+        "TestProcessContextStructuralRedaction",
+        "TestAdapterProcessInspection",
+        "TestAdapterProcessCommandDiagnosticSnapshot",
+        "TestAdapterProcessFailureTraceRedaction",
+        "TestAdapterProcessSnapshotWeight"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessContextObservationPurity": "PASS",
+          "TestProcessContextDerivedInspection": "PASS",
+          "TestProcessContextStructuralRedaction": "PASS",
+          "TestAdapterProcessInspection": "PASS",
+          "TestAdapterProcessCommandDiagnosticSnapshot": "PASS",
+          "TestAdapterProcessFailureTraceRedaction": "PASS",
+          "TestAdapterProcessSnapshotWeight": "PASS"
+        },
+        "native": {
+          "TestProcessContextObservationPurity": "PASS",
+          "TestProcessContextDerivedInspection": "PASS",
+          "TestProcessContextStructuralRedaction": "PASS",
+          "TestAdapterProcessInspection": "PASS",
+          "TestAdapterProcessCommandDiagnosticSnapshot": "PASS",
+          "TestAdapterProcessFailureTraceRedaction": "PASS",
+          "TestAdapterProcessSnapshotWeight": "PASS"
+        }
+      }
+    },
+    "cleanup_roots_identities_endpoints_and_descendants": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/adapter/process_scope.go",
+        "internal/processhost/native_config_darwin.go",
+        "internal/processhost/native_cleanup_darwin.go",
+        "runtime/native/src/process_policy.rs",
+        "runtime/native/src/process_cleanup.rs"
+      ],
+      "tests": [
+        "TestProcessCleanupDataWrites",
+        "TestProcessCleanupPruneHardlink",
+        "TestProcessCleanupPruneAliasWithSeparateWriteRoot",
+        "TestProcessCleanupRejectsOutsideAlias",
+        "TestProcessCleanupRejectsDataAliasInPruneRoot",
+        "TestProcessCleanupOwnedHardlinks",
+        "TestProcessCleanupExactEndpoint",
+        "TestProcessCleanupInitialExecutableScope",
+        "TestProcessCleanupRechecksNamespaceAtActivation"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessCleanupDataWrites": "PASS",
+          "TestProcessCleanupPruneHardlink": "PASS",
+          "TestProcessCleanupPruneAliasWithSeparateWriteRoot": "PASS",
+          "TestProcessCleanupRejectsOutsideAlias": "PASS",
+          "TestProcessCleanupRejectsDataAliasInPruneRoot": "PASS",
+          "TestProcessCleanupOwnedHardlinks": "PASS",
+          "TestProcessCleanupExactEndpoint": "PASS",
+          "TestProcessCleanupInitialExecutableScope": "PASS",
+          "TestProcessCleanupRechecksNamespaceAtActivation": "PASS"
+        },
+        "native": {
+          "TestProcessCleanupDataWrites": "PASS",
+          "TestProcessCleanupPruneHardlink": "PASS",
+          "TestProcessCleanupPruneAliasWithSeparateWriteRoot": "PASS",
+          "TestProcessCleanupRejectsOutsideAlias": "PASS",
+          "TestProcessCleanupRejectsDataAliasInPruneRoot": "PASS",
+          "TestProcessCleanupOwnedHardlinks": "PASS",
+          "TestProcessCleanupExactEndpoint": "PASS",
+          "TestProcessCleanupInitialExecutableScope": "PASS",
+          "TestProcessCleanupRechecksNamespaceAtActivation": "PASS"
+        }
+      }
+    },
+    "resource_bounds_and_lifecycle": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/processhost/startup.go",
+        "internal/adapter/process_failure.go",
+        "runtime/native/src/process.rs"
+      ],
+      "tests": [
+        "TestProcessCleanupAdmissionDepthLimit",
+        "TestProcessCleanupScopeLimits",
+        "TestProcessCleanupResourceLimitsKeepConfirmedMutation",
+        "TestLLVMProcessCleanupAdmissionParity",
+        "TestAdapterProcessLifecycleFailures",
+        "TestAdapterProcessLifecycleCancellation",
+        "TestProcessHostSessionLateCreationRetainsSingleCleanupOwner"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessCleanupAdmissionDepthLimit": "PASS",
+          "TestProcessCleanupScopeLimits": "PASS",
+          "TestProcessCleanupResourceLimitsKeepConfirmedMutation": "PASS",
+          "TestLLVMProcessCleanupAdmissionParity": "PASS",
+          "TestAdapterProcessLifecycleFailures": "PASS",
+          "TestAdapterProcessLifecycleCancellation": "PASS",
+          "TestProcessHostSessionLateCreationRetainsSingleCleanupOwner": "PASS"
+        },
+        "native": {
+          "TestProcessCleanupAdmissionDepthLimit": "PASS",
+          "TestProcessCleanupScopeLimits": "PASS",
+          "TestProcessCleanupResourceLimitsKeepConfirmedMutation": "PASS",
+          "TestLLVMProcessCleanupAdmissionParity": "PASS",
+          "TestAdapterProcessLifecycleFailures": "PASS",
+          "TestAdapterProcessLifecycleCancellation": "PASS",
+          "TestProcessHostSessionLateCreationRetainsSingleCleanupOwner": "PASS"
+        }
+      }
+    },
+    "package_commands_optional_executables_and_exec_chain": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "docs/examples/package-cache-cleanup.lo",
+        "testdata/native-runtime/process-package-command.c",
+        "testdata/native-runtime/process-package-wrapper.c"
+      ],
+      "tests": [
+        "TestProcessPackageCleanupCommands",
+        "TestProcessPackageCleanupPipProbe",
+        "TestProcessPackageCleanupExample",
+        "TestProcessPackageCleanupRegisteredInterpreter"
+      ],
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessPackageCleanupCommands": "PASS",
+          "TestProcessPackageCleanupPipProbe": "PASS",
+          "TestProcessPackageCleanupExample": "PASS",
+          "TestProcessPackageCleanupRegisteredInterpreter": "PASS"
+        },
+        "native": {
+          "TestProcessPackageCleanupCommands": "PASS",
+          "TestProcessPackageCleanupPipProbe": "PASS",
+          "TestProcessPackageCleanupExample": "PASS",
+          "TestProcessPackageCleanupRegisteredInterpreter": "PASS"
+        }
+      }
+    },
+    "docker_requests_responses_and_irreversible_effects": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "testdata/native-runtime/process-docker-command.c",
+        "tests/integration/process_docker_cleanup_test.go"
+      ],
+      "tests": [
+        "TestProcessDockerCleanupRequests",
+        "TestProcessDockerCancellationKeepsConfirmedDaemonEffect",
+        "TestProcessDockerFailureResponses"
+      ],
+      "installed_docker_or_buildx_protocol_qualification": "unverified",
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestProcessDockerCleanupRequests": "PASS",
+          "TestProcessDockerCancellationKeepsConfirmedDaemonEffect": "PASS",
+          "TestProcessDockerFailureResponses": "PASS"
+        },
+        "native": {
+          "TestProcessDockerCleanupRequests": "PASS",
+          "TestProcessDockerCancellationKeepsConfirmedDaemonEffect": "PASS",
+          "TestProcessDockerFailureResponses": "PASS"
+        }
+      }
+    },
+    "stack_file_probe_correction": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "internal/adapter/file_open_paths.go",
+        "runtime/native/src/file_probe.rs",
+        "tests/integration/file_probe_test.go"
+      ],
+      "tests": [
+        "TestFileOpenPathsRecordedProtocol",
+        "TestFileOpenPathsResults",
+        "TestFileOpenPathsHostProbe",
+        "TestFileOpenPathsHighDescriptorHostProbe"
+      ],
+      "observed_host_field": "f*000",
+      "accepted_truncated_descriptor": "asterisk_and_exactly_three_ASCII_decimal_digits",
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestFileOpenPathsRecordedProtocol": "PASS",
+          "TestFileOpenPathsResults": "PASS",
+          "TestFileOpenPathsHostProbe": "PASS",
+          "TestFileOpenPathsHighDescriptorHostProbe": "PASS"
+        },
+        "native": {
+          "TestFileOpenPathsRecordedProtocol": "PASS",
+          "TestFileOpenPathsResults": "PASS",
+          "TestFileOpenPathsHostProbe": "PASS",
+          "TestFileOpenPathsHighDescriptorHostProbe": "PASS"
+        }
+      }
+    },
+    "metal_process_artifact": {
+      "state": "final_ci_tests_passed",
+      "sources": [
+        "tests/integration/llvm_process_metal_artifact_test.go"
+      ],
+      "tests": [
+        "TestLLVMProcessMetalArtifact"
+      ],
+      "gpu_operations": "not_exercised",
+      "final_ci_test_results": {
+        "interpreter": {
+          "TestLLVMProcessMetalArtifact": "PASS"
+        },
+        "native": {
+          "TestLLVMProcessMetalArtifact": "PASS"
+        }
+      }
+    },
+    "maintained_contract_documents": {
+      "state": "completed",
+      "sources": [
+        "specification.md",
+        "README.md",
+        "docs/adapter-design.md",
+        "docs/compiler-design.md",
+        "docs/adapter-plan.md",
+        "docs/mac-cleanup-plan.md"
+      ],
+      "example": "docs/examples/package-cache-cleanup.lo"
+    },
+    "final_stack_ci_after_last_correction": {
+      "state": "passed"
+    },
+    "independent_review": {
+      "state": "completed",
+      "remaining_material_findings": [],
+      "finding": "P3 canonical root-path discovery parity corrected after public integration failure",
+      "report": "docs/evidence/process-context-cleanup/independent-review.json",
+      "correction_review": "parent_reviewed_minimal_patch_and_regression"
+    },
+    "task_state_cleanup": {
+      "state": "completed",
+      "removed_paths": [
+        "_scratch/f024-20261027",
+        ".mprlab/F024-PLAN.md"
+      ],
+      "absence_verified": true
+    }
+  },
+  "authorization": {
+    "state": "standing_authorization_recorded",
+    "date": "2026-10-27",
+    "tool_locations": "any_location_including_external_repositories_and_symlink_targets",
+    "reviews_and_specialized_agents": "no_additional_user_approval",
+    "policy": "AGENTS.md; .mprlab/POLICY.md"
+  },
+  "governance": {
+    "state": "selective_update_validated",
+    "normalizer_exit_status": 1,
+    "preserved_template_differences": 7,
+    "new_template_findings": [],
+    "new_language_findings": [],
+    "independent_review_conflicts": [],
+    "policy": "AGENTS.md; .mprlab/POLICY.md"
+  },
+  "code_source_sha256": {
+    "Makefile": "9002177a02ad9812041cb8e20654b6a61f257d48705f08a42c91b9b11084f621",
+    "docs/examples/package-cache-cleanup.lo": "a24cc3e6130ffab34b243cec83af0f57446664541d21331771f822d02a38505c",
+    "experiments/process-host-final/native_test.go": "4daf84b13864b7ea545a0c3a8a3f2e4c353bf27c69301f457d74c02270913f02",
+    "experiments/process-host/native_test.go": "4286a89fa40dacf783b224af2bf28d33d54128fd368d22eb3d01b7fb96a76c31",
+    "internal/adapter/file_open_paths.go": "329a7c1c9d0836313f59201a8d1b89e344eb4ac88fdfc74f5cc5dc882a89b67e",
+    "internal/adapter/process_discovery.go": "9159be61e088c6e9aaef7b5f7c3e1a4b1dace481228be234988a3ef411fca76c",
+    "internal/adapter/process_failure.go": "9dd1c5b0b073fd4c4dbd32f75aa8c203addbc00a62a895e8010a13c9c2b699a8",
+    "internal/adapter/process_policy.go": "25b5d2ca50ff509d312fa6a6cd70361fa0145377a4dc9191c8504ab7830d1f41",
+    "internal/adapter/process_registry.go": "ddc296d45cb5043e4ca1fad74019c7f4f28990f9f9c0613e6128d8c943827dc4",
+    "internal/adapter/process_scope.go": "6d93587b94b25d2e22b2ec78c0f568c6f82d201eb40c328f022d4086c3d27ef5",
+    "internal/adapter/server.go": "4405eacbe74e2fbf9a413e11d9a15557a739179cfc81ebc59f8eb38b4a87d603",
+    "internal/catalog/catalog.go": "726f67eb55b29823a3f095be5fc5c837eec1971ab3776024c2d468587ad482df",
+    "internal/catalog/process_context.go": "c27125197962ad19eee4e1cdc6ab27217b2482e13e355181ab394f8ebf71ad0a",
+    "internal/eval/builtin.go": "f9e3334d8dece0410cef599cabe8443a11bec9ea23e000c3c323392476f2c016",
+    "internal/execution/process_context.go": "b57c80ba266ce43eb47c60f80e506cb0aba14bc17c40d6acdb1b5850a95015dd",
+    "internal/execution/session.go": "d1dfcd99f16e691d010228eb4b4d575d5716b6f6a6e133809db967e3609d53e4",
+    "internal/inspect/analyze.go": "c7247e62e45d3ed1c08063e59a8b3416c39756de2c9be497dc3f77a9486ac041",
+    "internal/inspect/expression.go": "09f59201e9ed2b974e4460a0d61f61de5848af2687d8b917f8fdc492eab6f0b7",
+    "internal/inspect/process.go": "9d322d4185b8655510de79494d91ecda2ddd26067556ea1f24504ff8966c1162",
+    "internal/processhost/helper_identity.go": "46aef4e7a8df22a0ca4de132a5ba2780a16bd18e4695605aff02d5d816cec287",
+    "internal/processhost/native/launcher.c": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc",
+    "internal/processhost/native/protocol.h": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b",
+    "internal/processhost/native_cleanup_darwin.go": "1a16171114861ed643d45ca75b51b4f65b027c01df3b43c53ade5fe6d4403f4d",
+    "internal/processhost/native_config_darwin.go": "36a908913b4b149600d6c4ac69bb51a7bd2bc12880f3d006df53d55e95e5bed7",
+    "internal/processhost/native_darwin.go": "a514e29a7fe8ed0af30622a2d09a7b7de375a0c13588488e3e15c0f6a9c6fb07",
+    "internal/processhost/native_ownership_darwin_test.go": "e1385c263c7aff26a4a075d06d231e8fddc9e51d33999d75ec44a8d114e84314",
+    "internal/processhost/startup.go": "37e1c11b4f066d0dacc00ad584beee5da273bd69ac5025a92baa3ce0653c2dd0",
+    "internal/runner/command.go": "b6c12a64dde3aee83bcc765ca72c1874f16e735796340841e2abbe611c6fa7f1",
+    "internal/runner/execute.go": "a26cbfdb20f672fd4663f1640af2308b85134f7a946ddf5f09e2a3c24b31d903",
+    "internal/runtimeops/process.go": "42ea4b30ea88abfc91d29f10fbf1b08558673c05d24757d2d1623ad978165009",
+    "internal/runtimeops/process_context.go": "def05b1ae9ddb70982a63f36b65aca7943b56b9574eb9e1a9047b09f838d4162",
+    "internal/types/types.go": "dd7414507a17259ca45981d22ff29ab7fc715e4574e620de7ce4f4c88aa9fcab",
+    "internal/value/process.go": "8296d5978583dc7f89da014bf337d0105b8ea235dd28d7ef62a4f4474d672b8c",
+    "internal/value/process_context.go": "41dad83a3a77bfb25cba7ff37535875be67459a8617f52e44db364059074e0df",
+    "internal/value/snapshot_weight.go": "74a15a7b56b17a8e1e87724e6bda3dcb9dde19efb2e7680271298657ed072beb",
+    "internal/value/tensor.go": "f10c25e16504862ac5a53d936752aa9683b5021d7695792b0f402666e5a8ad62",
+    "runtime/native/src/adapters.rs": "2ad8dbff77179ddd94c03015fe9d81cd8283a93d02c6aabcef31f9fc4bcf36da",
+    "runtime/native/src/cli.rs": "2953da48f418128f0bb3585ae59723a3f069fcefe3f81deea0b9f8c8c1da2bea",
+    "runtime/native/src/exports.rs": "b8549ef845c54e7b68890ceef3a9ca0ee00a1b07c93ba16e8d20389249d6d978",
+    "runtime/native/src/file_entries.rs": "fbde0d44ccd1c253f61a7013ed497a6ad20bea0211db763ba9e43e920ea072d0",
+    "runtime/native/src/file_mutation_scan.rs": "687dd4a93ca9647923d8e9ff6cd28e413635f967f73865974ef08d942363fef7",
+    "runtime/native/src/file_probe.rs": "f12f5ebd340df23f69bd3a85a4ee9be89a3f0f73b46b964af88461dc9002871b",
+    "runtime/native/src/files.rs": "4dd8ee8ecd4e2c90930a57a618b8ffbbffcc73c29f0a8720dad5a191d1ed62db",
+    "runtime/native/src/generated_operations.rs": "6ba2820e784fd6306d94cd85788790e47af40370fe48ca6dc2b09e913ecdfee0",
+    "runtime/native/src/process.rs": "468f3473285e98f395ea4df9d89cd9cdef01d5de6e9b902489208e2f11cf8617",
+    "runtime/native/src/process_cleanup.rs": "8c5af550118705ad47bedfbec7574dd08659bb57c34a2c677a15feccd979b28f",
+    "runtime/native/src/process_context.rs": "3836d6391c87f012523b00663dce3e57591367f6e317a9cdf0abaa9c238cb6e1",
+    "runtime/native/src/process_helper_identity.rs": "046bafbcaab2bfdca5536272a6eb2aa0f591b2767c300b89032d528e328e5573",
+    "runtime/native/src/process_policy.rs": "75d535e9082258858fb2106d83d979a6721e63285e50ea83fe12d50f02a0a99a",
+    "runtime/native/src/process_transport.c": "d6ab58a9d6b3d1fa12139b04974991c45e3428eda2a722ed0c117bd46d45a563",
+    "runtime/native/src/value.rs": "90be32259bf74887469a8cc838e0cdeeb7009d1dfe6bbca1738601c9eb7eaf2b",
+    "testdata/native-runtime/process-cleanup-command.c": "b3597f05bc49d392faf210a37b9e1c5f39fd7dfae378929aa30e95662088d9b1",
+    "testdata/native-runtime/process-context-input.c": "0de389976d50b226c21890caaadd4521c3e1c8bcb9dee465e7c8d8c28d08b5cb",
+    "testdata/native-runtime/process-docker-command.c": "8b26c5a82686c788a0a1983a032c2d35b86f5dbcfe8a779db33ffd7c6a36518b",
+    "testdata/native-runtime/process-package-command.c": "48994d2964acff5a22c00305f09d60e6cc224c5a6149280206cf628c43b0d466",
+    "testdata/native-runtime/process-package-wrapper.c": "a33e057bd8cf72a5633ac7456774f88837509b3722a2b3bf3e59eb81a594c7e2",
+    "testdata/semantic-migration/matrix.json": "5173956c30bff5c12b4e0706065f91a529f0530e274a0053b82dd1c8c3a54924",
+    "tests/integration/adapter_process_completion_test.go": "c07d8f9cbf90e2a101cc42de89eac56b3129429c8c3e5beb4014b9cdfff87a8f",
+    "tests/integration/adapter_process_gate_test.go": "b0d1e7731a9cbb66d123c049d1303903564d01e63e54bc0caa2c69ae2310c95a",
+    "tests/integration/adapter_process_inspect_test.go": "67c96452775144950c1d8fbf3e3ea5de895214757f755b66bfdd8835b5eec189",
+    "tests/integration/adapter_process_lifecycle_test.go": "136eb4b6a14eaa0e3e31fc7acf92e9041bf350b469da7e80904b35697b7172c5",
+    "tests/integration/adapter_process_policy_test.go": "73b61229d07bada76e09db140244c6b46eb0b92ca16070cf56ec7b1539d1b80f",
+    "tests/integration/adapter_process_registry_test.go": "4e1504fbc596c2a8cc3465f342938cc775c0576a37c5c57e7c74444eef32fded",
+    "tests/integration/adapter_process_values_test.go": "8f9f5365d7f3598c9dd9cfa14b75448889a837eaf933524f36d31452571d091d",
+    "tests/integration/adapter_receipts_test.go": "0d26409eb897f7a9252a650c0a4f234b63e8a589bf70e145cf89d2903684dfa1",
+    "tests/integration/catalog_test.go": "3a3876e2bbb92333b8c5da1aa8ba595cba8809993e2f0c8b8beee07cc4ab662a",
+    "tests/integration/file_probe_test.go": "04e10a828fdf1bf165371302e3c6055b03f10e6b08bbb47d6074715e44e71de4",
+    "tests/integration/llvm_coordinate_metadata_test.go": "9f7ec35f505f180be0fb56ae7f3c18a2f281bcad8ec1a56a42211a35a1346896",
+    "tests/integration/llvm_process_cleanup_admission_test.go": "96df08b78feb6687f8128475093ea9d8f99696d96ec390eb2499e19b4c27107a",
+    "tests/integration/llvm_process_context_test.go": "5a278d50447e2c6f9c22b0c36b535d29cdd10d138dcfc1316d06eb14f4e69de5",
+    "tests/integration/llvm_process_metal_artifact_test.go": "7899968a06e679070ffc9ffb57666c7f02e7e5f4693eb767dd142e43a22f083a",
+    "tests/integration/llvm_process_test.go": "cb6c084b0c0f18fb480c0a997f8a2e2dc70008acfd422e2a3e918eaf96b8aab1",
+    "tests/integration/llvm_qualification_adapters_test.go": "f8a0fc70989b36b4e5cef8533f74b1afd789c5df8a4c07b670fa71c7152d3e14",
+    "tests/integration/process_cleanup_policy_test.go": "d39d3f0ddbbfb39ac6e515c8b8fad166ccd0d56708ad8bd394120be981b59727",
+    "tests/integration/process_cleanup_test.go": "9b6e015f0a181337a05ae80b6b729bb2f3ae0378ecd58a5f08001e8a1789d1ea",
+    "tests/integration/process_context_identity_test.go": "b08fe1bd3064ce54bebbd743bd6ac3e0faf2b112f65b9d88891a3d0ff1ede00f",
+    "tests/integration/process_context_inputs_test.go": "30fbfd1a1d8d6c4f73e70ee33c2e0ce148e6c3a0997ce86c226225869de7f439",
+    "tests/integration/process_context_test.go": "6a52de7abe140487103bf5513ea760d1a8c561e32e6041147136d52c63905986",
+    "tests/integration/process_context_transport_test.go": "5905105135f35ff4c132612efdfb1a20ccbb790e0f0f3eac2233b788fbc54aae",
+    "tests/integration/process_docker_cleanup_test.go": "07a0adcc56cfcd1cf00473bb6d2d37c5bb15675bf7d12e212ce36303a84c18ed",
+    "tests/integration/process_host_session_test.go": "9a51bf0cb9f7ddac76a5192497f7ff4c3ed137b463f711d23b5750362c7a0b6b",
+    "tests/integration/process_launcher_transport_test.go": "d6ebadcadf6ce45c8ce3acb439761e554b0df49f6f56f92b220dbf775089b381",
+    "tests/integration/process_package_cleanup_test.go": "c4283c14a8ac439ddcb4778ccc0e334a31b669f6db8ae3b97f5a7effcf5ea7dc",
+    "tests/integration/runtime_catalog_test.go": "4c85948c77174e760973aa4845b13726c1acedabaedac9212b8fe17e8aa2fcb3",
+    "tools/nativeruntime/platform/darwin/Security.tbd": "c3450a9c40dfd718bd5708772db06d01efcd5a887a42f2398e6edbaea43faadf",
+    "tools/nativeruntime/platform/darwin/libSystem.tbd": "bda4d4019592e49c430187d327dc5c9b8ecdca67317f0f6754a13f875232277b",
+    "tools/nativeruntime/platform/darwin/metal/Security.tbd": "c3450a9c40dfd718bd5708772db06d01efcd5a887a42f2398e6edbaea43faadf",
+    "tools/nativeruntime/platform/darwin/metal/libSystem.tbd": "2e678d995ee1fa5589fba6f19ed3cf38bb41570cd48dd121c56d29c91af46e97",
+    "tools/nativeruntime/platform/darwin/metal/symbols.json": "cda26cdbff98e25ee21df45883ec8d8e4dd9c0f2ff3e9ec51a206aa347eb1732",
+    "tools/nativeruntime/platform/darwin/symbols.json": "b347dbf922741646d9cea9c058410d1f46c7d74076ac47f32eb22943eee271d7",
+    "tools/processbuild/identity.py": "4e5b030ccb011d0dbe47d54da2fd6547667b817cc55d9de7d4bff39ab1d90a87",
+    "tools/processbuild/test_identity.py": "32f898e155742c645f465fd5bfd668544c4260020ce4c8a6c21b5be8921ce0c6"
+  }
+}

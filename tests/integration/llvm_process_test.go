@@ -19,12 +19,12 @@ func TestLLVMProcessConstructors(t *testing.T) {
 	for index, source := range []string{
 		`return Process.Executable.new(File.Path.new("/absolute/command"))`,
 		`return Process.Executable.new(File.Path.new("relative"))`,
-		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"NAME",value:"value")),File.Path.new("/work"),Bytes.new("input")) }; return Main()`,
-		`flow Main()->Process.Result!{ executable=Process.Executable.new(File.Path.new("/command")); command=Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"NAME",value:"value")),File.Path.new("/work"),Bytes.new("input")); result=commit command; return result }; return Main()`,
-		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"NAME",value:"value")),File.Path.new("relative"),Bytes.new("input")) }; return Main()`,
-		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable,List.new("\u0000"),Map.new(Record.new(key:"NAME",value:"value")),File.Path.new("/work"),Bytes.new("input")) }; return Main()`,
-		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"",value:"value")),File.Path.new("/work"),Bytes.new("input")) }; return Main()`,
-		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"NAME",value:"\u0000")),File.Path.new("/work"),Bytes.new("input")) }; return Main()`,
+		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"NAME",value:"value")), File.Path.new("/work")), stdin: Bytes.new("input")) }; return Main()`,
+		`flow Main()->Process.Result!{ executable=Process.Executable.new(File.Path.new("/command")); command=Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"NAME",value:"value")), File.Path.new("/work")), stdin: Bytes.new("input")); result=commit command; return result }; return Main()`,
+		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"NAME",value:"value")), File.Path.new("relative")), stdin: Bytes.new("input")) }; return Main()`,
+		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable: executable, arguments: List.new("\u0000"), context: Process.Context.new(Map.new(Record.new(key:"NAME",value:"value")), File.Path.new("/work")), stdin: Bytes.new("input")) }; return Main()`,
+		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"",value:"value")), File.Path.new("/work")), stdin: Bytes.new("input")) }; return Main()`,
+		`flow Main()->Process.Command!{ executable=Process.Executable.new(File.Path.new("/command")); return Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"NAME",value:"\u0000")), File.Path.new("/work")), stdin: Bytes.new("input")) }; return Main()`,
 	} {
 		t.Run(fmt.Sprint(index), func(t *testing.T) {
 			input := sourceFile(t, source)
@@ -62,7 +62,7 @@ func TestLLVMProcessExecution(t *testing.T) {
 		t.Fatal(err)
 	}
 	digest := sha256.Sum256(data)
-	input := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable,List.new("argument"),Map.new(Record.new(key:"DECLARED",value:"value")),File.Path.new(%q),Bytes.new("input"));result=commit target;return result};return Main()`, executable, directory))
+	input := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key:"DECLARED",value:"value")), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, executable, directory))
 	artifact, built := buildForTest(t, input)
 	if built.status != 0 {
 		t.Fatalf("build process fixture: %+v", built)
@@ -123,7 +123,7 @@ func TestLLVMProcessExecution(t *testing.T) {
 
 	t.Run("post-commit-budget-safe-progress", func(t *testing.T) {
 		later := filepath.Join(directory, "later")
-		source := sourceFile(t, fmt.Sprintf(`flow Add(state:Int,item:Int)->Int{return Math.add(state,item)}; flow Main()->Int!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable,List.new("argument"),Map.new(Record.new(key:"DECLARED",value:"value")),File.Path.new(%q),Bytes.new("input"));result=commit target;items=List.new(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);total=Flow.fold(items,0,Add);write=File.Write.new(File.Path.new(%q),Bytes.new("wrong"));commit write;return total};return Main()`, executable, directory, later))
+		source := sourceFile(t, fmt.Sprintf(`flow Add(state:Int,item:Int)->Int{return Math.add(state,item)}; flow Main()->Int!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key:"DECLARED",value:"value")), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;items=List.new(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);total=Flow.fold(items,0,Add);write=File.Write.new(File.Path.new(%q),Bytes.new("wrong"));commit write;return total};return Main()`, executable, directory, later))
 		builtArtifact, built := buildForTest(t, source)
 		if built.status != 0 {
 			t.Fatalf("build postcommit fixture: %+v", built)
@@ -159,7 +159,7 @@ func TestLLVMProcessExecution(t *testing.T) {
 }
 
 func llvmProcessDriverScenarios() []llvmRuntimeScenario {
-	source := `flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new("/command"));target=Process.Command.new(executable,List.new("argument"),Map.new(Record.new(key:"DECLARED",value:"value")),File.Path.new("/work"),Bytes.new("input"));result=commit target;return result};return Main()`
+	source := `flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new("/command"));target=Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key:"DECLARED",value:"value")), File.Path.new("/work")), stdin: Bytes.new("input"));result=commit target;return result};return Main()`
 	names := []string{"success", "late-start-busy-retained-cleanup", "unresolved-start", "release-failure", "malformed-termination", "thread-creation-failure", "contradictory-success", "unconfirmed-termination"}
 	cases := make([]llvmRuntimeScenario, len(names))
 	for index, name := range names {
@@ -175,7 +175,7 @@ func TestLLVMLinuxProcessDriverOwnership(t *testing.T) {
 }
 
 func TestLLVMLinuxProcessUnavailable(t *testing.T) {
-	source := `flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new("/command"));target=Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"NAME",value:"value")),File.Path.new("/work"),Bytes.new("input"));result=commit target;return result};return Main()`
+	source := `flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new("/command"));target=Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"NAME",value:"value")), File.Path.new("/work")), stdin: Bytes.new("input"));result=commit target;return result};return Main()`
 	runLLVMRuntimeTargetScenarios(t, "linux/arm64", []llvmRuntimeScenario{
 		{name: "absent-authority", source: source, number: 0, harness: "testdata/native-runtime/process-unavailable.c"},
 		{name: "configured-unavailable-before-file-access", source: source, number: 1, harness: "testdata/native-runtime/process-unavailable.c"},
@@ -230,7 +230,7 @@ func TestLLVMProcessConfigurationDiagnostics(t *testing.T) {
 }
 
 func TestLLVMProcessAdmissionHashCancellation(t *testing.T) {
-	runLLVMRuntimeTargetScenarios(t, "darwin/arm64", []llvmRuntimeScenario{{name: "cancel-between-admission-hash-chunks", source: `flow Main()->Process.Result!{raw=File.read(File.Path.new("command-path"));path=UTF8.String.new(raw);directoryBytes=File.read(File.Path.new("directory-path"));directory=UTF8.String.new(directoryBytes);executable=Process.Executable.new(File.Path.new(path));target=Process.Command.new(executable,List.new("arg"),Map.new(Record.new(key:"DECLARED",value:"value")),File.Path.new(directory),Bytes.new("input"));result=commit target;return result};return Main()`, number: 0, harness: "testdata/native-runtime/process-hash-cancel.c"}})
+	runLLVMRuntimeTargetScenarios(t, "darwin/arm64", []llvmRuntimeScenario{{name: "cancel-between-admission-hash-chunks", source: `flow Main()->Process.Result!{raw=File.read(File.Path.new("command-path"));path=UTF8.String.new(raw);directoryBytes=File.read(File.Path.new("directory-path"));directory=UTF8.String.new(directoryBytes);executable=Process.Executable.new(File.Path.new(path));target=Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"DECLARED",value:"value")), File.Path.new(directory)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, number: 0, harness: "testdata/native-runtime/process-hash-cancel.c"}})
 }
 
 func TestLLVMProcessProtectedFileComposition(t *testing.T) {

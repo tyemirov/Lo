@@ -13,9 +13,31 @@ use std::{
 };
 #[path = "process_hash.rs"]
 pub(crate) mod hashing;
+#[path = "process_helper_identity.rs"]
+mod helper_identity;
 pub const UNAVAILABLE: &str =
     "Process activation requires a configured, qualified host execution profile";
+#[path = "process_cleanup.rs"]
+mod cleanup;
+#[path = "process_context.rs"]
+mod context_values;
+#[path = "process_policy.rs"]
+mod policy;
+pub use context_values::{capture_context, parse_initial_context};
+pub use policy::Policy;
+const MAX_COMMAND_BODY: usize = 1 << 20;
+const MAX_COMMAND_ENTRY: usize = 1 << 16;
+const MAX_COMMAND_ARGUMENTS: usize = 256;
+const MAX_COMMAND_ENVIRONMENT: usize = 4096;
+const MAX_POLICY_ENTRIES: usize = 16;
 pub const SUPPORTED: &[&str] = &[
+    "Process.Context.current",
+    "Process.Context.new",
+    "Process.Context.override_environment",
+    "Process.Context.without_environment",
+    "Process.Context.with_directory",
+    "Process.Context.environment_value",
+    "Process.Executable.resolve",
     "Process.Executable.new",
     "Process.Command.new",
     "Process.Termination.exit_code",
@@ -28,9 +50,15 @@ pub struct Value {
 }
 impl Value {
     pub fn weight(&self) -> u64 {
+        if self.kind == "Process.Context" {
+            return self.fields["environment"].weight + self.fields["directory"].weight;
+        }
         self.fields.values().map(|v| v.weight).sum()
     }
     pub fn json(&self) -> Json {
+        if self.kind == "Process.Context" {
+            return json!({"origin": self.fields["origin"].string(), "redacted": true});
+        }
         Json::Object(
             self.fields
                 .iter()
@@ -39,15 +67,15 @@ impl Value {
         )
     }
     pub fn canonical_json(&self) -> String {
+        if self.kind == "Process.Context" {
+            return format!(
+                "{{\"origin\":{},\"redacted\":true}}",
+                serde_json::to_string(self.fields["origin"].string()).unwrap()
+            );
+        }
         let names: &[&str] = match self.kind.as_str() {
             "Process.Executable" => &["path"],
-            "Process.Command" => &[
-                "executable",
-                "arguments",
-                "environment",
-                "directory",
-                "stdin",
-            ],
+            "Process.Command" => &["context", "executable", "arguments", "stdin"],
             "Process.Result" => &["termination", "stdout", "stderr"],
             "Process.Termination" if self.fields.contains_key("exit_code") => {
                 &["kind", "exit_code"]
@@ -75,6 +103,9 @@ impl Value {
         Some(&self.fields)
     }
     pub fn snapshot(&self) -> Self {
+        if self.kind == "Process.Context" {
+            return context_values::redacted(self);
+        }
         if self.kind == "Process.Result" {
             let mut result = self.clone();
             for name in ["stdout", "stderr"] {
@@ -92,13 +123,8 @@ impl Value {
             "arguments".into(),
             new(Type::List(Box::new(atom("String"))), Data::List(vec![])),
         );
-        v.fields.insert(
-            "environment".into(),
-            new(
-                Type::Map(Box::new(atom("String")), Box::new(atom("String"))),
-                Data::Map(vec![]),
-            ),
-        );
+        v.fields
+            .insert("context".into(), snapshot(&v.fields["context"]));
         v.fields
             .insert("stdin".into(), new(atom("Bytes"), Data::Bytes(vec![])));
         v
@@ -135,10 +161,9 @@ pub fn admit(site: &Site) -> Result<(), String> {
         "Process.Executable.new" => (vec!["File.Path"], "Process.Executable!"),
         "Process.Command.new" => (
             vec![
+                "Process.Context",
                 "Process.Executable",
                 "List<String>",
-                "Map<String, String>",
-                "File.Path",
                 "Bytes",
             ],
             "Process.Command!",
@@ -146,7 +171,7 @@ pub fn admit(site: &Site) -> Result<(), String> {
         "Process.Termination.exit_code" | "Process.Termination.signal" => {
             (vec!["Process.Termination"], "Int!")
         }
-        _ => return Err("unsupported Process operation".into()),
+        _ => return context_values::admit(site, &args),
     };
     if args.iter().map(String::as_str).collect::<Vec<_>>() == expected
         && args.len() == site.arguments.len()
@@ -160,7 +185,7 @@ pub fn admit(site: &Site) -> Result<(), String> {
 fn invalid(site: &Site, kind: &str, message: &str) -> Outcome {
     Err(Fault::Recoverable(error(site, kind, message, record([]))))
 }
-pub fn execute(_context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
+pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
     match site.operation.as_str() {
         "Process.Executable.new" => {
             if !Path::new(args[0].string()).is_absolute() || args[0].string().contains('\0') {
@@ -176,15 +201,7 @@ pub fn execute(_context: &mut Context, site: &Site, args: &[Handle]) -> Outcome 
             ))
         }
         "Process.Command.new" => {
-            let directory = args[3].string();
-            if !Path::new(directory).is_absolute() || directory.contains('\0') {
-                return invalid(
-                    site,
-                    "Process.InvalidCommand",
-                    "Process directory must be absolute and contain no NUL",
-                );
-            };
-            for (index, arg) in args[1].items().iter().enumerate() {
+            for (index, arg) in args[2].items().iter().enumerate() {
                 if arg.string().contains('\0') {
                     return invalid(
                         site,
@@ -193,37 +210,12 @@ pub fn execute(_context: &mut Context, site: &Site, args: &[Handle]) -> Outcome 
                     );
                 }
             }
-            let Data::Map(environment) = &args[2].data else {
-                return Err(host("invalid Process environment"));
-            };
-            for (index, (name, value)) in environment.iter().enumerate() {
-                if name.string().is_empty() || name.string().contains(['\0', '=']) {
-                    return invalid(
-                        site,
-                        "Process.InvalidCommand",
-                        &format!("Process environment entry {index} has an invalid name"),
-                    );
-                }
-                if value.string().contains('\0') {
-                    return invalid(
-                        site,
-                        "Process.InvalidCommand",
-                        &format!("Process environment entry {index} value contains NUL"),
-                    );
-                }
-            }
             Ok(value(
                 "Process.Command",
-                [
-                    "executable",
-                    "arguments",
-                    "environment",
-                    "directory",
-                    "stdin",
-                ]
-                .into_iter()
-                .zip(args.iter().cloned())
-                .map(|(n, v)| (n.into(), v)),
+                ["context", "executable", "arguments", "stdin"]
+                    .into_iter()
+                    .zip(args.iter().cloned())
+                    .map(|(n, v)| (n.into(), v)),
             ))
         }
         "Process.Termination.exit_code" | "Process.Termination.signal" => {
@@ -247,7 +239,7 @@ pub fn execute(_context: &mut Context, site: &Site, args: &[Handle]) -> Outcome 
             }
             Ok(v.fields[name].clone())
         }
-        _ => Err(host("unsupported Process operation")),
+        _ => context_values::execute(context, site, args),
     }
 }
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -332,7 +324,8 @@ pub struct Processes {
     launcher: String,
     embedded: bool,
     driver: Option<Driver>,
-    configuration: Vec<u8>,
+    configurations: BTreeMap<String, Vec<u8>>,
+    scopes: BTreeMap<String, policy::Scope>,
     roots: Vec<String>,
     timeout_ms: u64,
     output_bytes: usize,
@@ -349,7 +342,8 @@ pub fn empty() -> Processes {
         launcher: String::new(),
         embedded: false,
         driver: None,
-        configuration: vec![],
+        configurations: BTreeMap::new(),
+        scopes: BTreeMap::new(),
         roots: vec![],
         timeout_ms: 5000,
         output_bytes: 1 << 20,
@@ -385,7 +379,15 @@ fn frame(
 ) -> Result<Vec<u8>, String> {
     let mut body = vec![];
     for entry in entries {
-        if entry.len() > maximum || entry.contains('\0') {
+        let body_limit = if magic == b"LOP1" {
+            MAX_COMMAND_BODY
+        } else {
+            65536
+        };
+        if entry.len() > maximum
+            || entry.len() + 4 > body_limit - body.len()
+            || entry.contains('\0')
+        {
             return Err("Process startup failed during input".into());
         }
         field(&mut body, entry)
@@ -441,7 +443,7 @@ fn policy_path(path: &str) -> bool {
             .components()
             .all(|c| !matches!(c, std::path::Component::ParentDir))
 }
-pub fn validate_policy(grants: &[String], launcher: &str, roots: &[String]) -> Result<(), String> {
+fn validate_base_policy(grants: &[String], launcher: &str, roots: &[String]) -> Result<(), String> {
     if grants.is_empty() && launcher.is_empty() && roots.is_empty() {
         return Ok(());
     }
@@ -494,14 +496,12 @@ pub fn validate_policy(grants: &[String], launcher: &str, roots: &[String]) -> R
     Ok(())
 }
 pub fn configure(
-    grants: &[String],
-    launcher: &str,
-    roots: &[String],
+    policy: &Policy,
     timeout_ms: u64,
     output_bytes: usize,
     cleanup_ms: u64,
 ) -> Result<Processes, String> {
-    validate_policy(grants, launcher, roots)?;
+    let (grants, launcher, roots) = (&policy.grants, policy.launcher.as_str(), &policy.roots);
     let mut p = empty();
     if grants.is_empty() && launcher.is_empty() && roots.is_empty() {
         return Ok(p);
@@ -523,7 +523,13 @@ pub fn configure(
             "native lifecycle limits exceed the selected profile",
         ));
     }
-    if grants.len() > 16 || roots.len() > 16 {
+    if grants.len() > MAX_POLICY_ENTRIES || roots.len() > MAX_POLICY_ENTRIES {
+        return Err("Process startup failed during input".into());
+    }
+    if policy.scopes.values().any(|scope| {
+        scope.writes.len() + scope.prunes.len() > MAX_POLICY_ENTRIES
+            || scope.endpoints.len() > MAX_POLICY_ENTRIES
+    }) {
         return Err("Process startup failed during input".into());
     }
     if !canonical(launcher) {
@@ -550,9 +556,7 @@ pub fn configure(
     let embedded = own == Path::new(launcher)
         && identity(&open_read(&own).map_err(|e| e.to_string())?)? == helper_id;
     p.embedded = embedded;
-    if !embedded
-        && helper_hash != "ed153dd84e20a3d97212bbe06b02f6c5f236c43eed00a37543f1f0d6988e6caa"
-    {
+    if !embedded && helper_hash != helper_identity::SHA256 {
         return Err(startup_error("native helper identity mismatch"));
     }
     let mut commands = vec![];
@@ -596,42 +600,11 @@ pub fn configure(
         }
         p.roots.push(root.clone())
     }
-    let mut lines = vec![
-        "(version 1)".into(),
-        "(deny default (with no-log))".into(),
-        "(allow file-read* (subpath \"/usr/lib\") (subpath \"/System/Library\"))".into(),
-        "(allow file-read* file-test-existence (literal \"/\"))".into(),
-        "(deny network* (with no-log))".into(),
-        "(deny process-fork (with no-log))".into(),
-        "(allow signal (target self))".into(),
-    ];
-    for path in &commands {
-        let q = serde_json::to_string(path).unwrap();
-        lines.push(format!("(allow process-exec (literal {q}))"));
-        lines.push(format!("(allow file-read* (literal {q}))"));
-    }
-    for path in roots {
-        lines.push(format!(
-            "(allow file-read* (subpath {}))",
-            serde_json::to_string(path).unwrap()
-        ))
-    }
-    let profile = lines.join("\n") + "\n";
-    if profile.len() > 32768 {
-        return Err("Process startup failed during input".into());
-    }
-    let directory = Path::new(launcher)
-        .parent()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_owned();
-    let mut entries = vec![profile, directory];
-    entries.extend(commands.iter().cloned());
-    entries.extend(roots.iter().cloned());
-    p.configuration = frame(b"LOC1", &entries, commands.len(), roots.len(), 32768)?;
-    if p.configuration.len() > 65552 {
-        return Err("Process startup failed during input".into());
+    for executable in &commands {
+        let scope = policy.scopes.get(executable).unwrap();
+        let configuration = policy::configuration(&p, &commands, executable, scope)?;
+        p.configurations.insert(executable.clone(), configuration);
+        p.scopes.insert(executable.clone(), scope.clone());
     }
     Ok(p)
 }
@@ -937,7 +910,7 @@ fn progress(r: &NativeResult) -> Handle {
     };
     let class = match r.class_id {
         1 => "cancelled",
-        2 => "host",
+        2 | 4 => "host",
         3 => "limit",
         _ => "execution",
     };
@@ -1106,13 +1079,14 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     let executable = payload(&command.fields["executable"]).fields["path"]
         .string()
         .to_owned();
-    let directory = command.fields["directory"].string().to_owned();
+    let command_context = payload(&command.fields["context"]);
+    let directory = command_context.fields["directory"].string().to_owned();
     if processes.driver.is_none() && !processes.registrations.contains_key(&executable) {
         return Err(process_failure(
             site,
             &NativeResult {
                 stage: 1,
-                class_id: 2,
+                class_id: 4,
                 cleanup_complete: 1,
                 ..Default::default()
             },
@@ -1158,11 +1132,43 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
             ));
         }
     }
+    if processes.driver.is_none() {
+        let scope = processes
+            .scopes
+            .get(&executable)
+            .ok_or_else(|| host("registered command has no scope"))?;
+        if let Err(fault) = cleanup::validate(context, scope) {
+            let class_id = match fault.primary() {
+                Fault::Host("runtime.capability-denied", _) => 4,
+                Fault::Host("runtime.limit", _) | Fault::Budget { .. } => 3,
+                Fault::Host("runtime.cancelled", _) | Fault::RawCancellation => 1,
+                _ => 2,
+            };
+            return Err(process_failure(
+                site,
+                &NativeResult {
+                    stage: 1,
+                    class_id,
+                    cleanup_complete: 1,
+                    ..Default::default()
+                },
+            ));
+        }
+    }
+    let configuration = if processes.driver.is_some() {
+        vec![]
+    } else {
+        processes
+            .configurations
+            .get(&executable)
+            .ok_or_else(|| host("registered command has no configuration"))?
+            .clone()
+    };
     let arguments = command.fields["arguments"].items();
-    let Data::Map(environment) = &command.fields["environment"].data else {
+    let Data::Map(environment) = &command_context.fields["environment"].data else {
         return Err(host("invalid Process environment"));
     };
-    if arguments.len() + 1 > 16 || environment.len() > 16 {
+    if arguments.len() + 1 > MAX_COMMAND_ARGUMENTS || environment.len() > MAX_COMMAND_ENVIRONMENT {
         return Err(process_failure(
             site,
             &NativeResult {
@@ -1181,7 +1187,14 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     environment.sort();
     let env_count = environment.len();
     entries.extend(environment);
-    let frame = frame(b"LOP1", &entries, arguments.len() + 1, env_count, 1024).map_err(|_| {
+    let frame = frame(
+        b"LOP1",
+        &entries,
+        arguments.len() + 1,
+        env_count,
+        MAX_COMMAND_ENTRY,
+    )
+    .map_err(|_| {
         process_failure(
             site,
             &NativeResult {
@@ -1191,7 +1204,7 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
             },
         )
     })?;
-    if frame.len() > 8208 {
+    if frame.len() > MAX_COMMAND_BODY + 16 {
         return Err(process_failure(
             site,
             &NativeResult {
@@ -1262,8 +1275,8 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
                         directory.as_ptr(),
                         frame.as_ptr(),
                         frame.len(),
-                        p.configuration.as_ptr(),
-                        p.configuration.len(),
+                        configuration.as_ptr(),
+                        configuration.len(),
                         input.as_ptr(),
                         input.len(),
                         stdout.as_mut_ptr(),

@@ -653,6 +653,35 @@ pub unsafe extern "C" fn lo_context_free(c: *mut Context) {
     }
 }
 #[no_mangle]
+pub unsafe extern "C" fn lo_context_set_process_context(
+    c: *mut Context,
+    bytes: *const u8,
+    length: usize,
+) -> std::os::raw::c_int {
+    if c.is_null() || bytes.is_null() || length == 0 || length > MAX_BYTES {
+        return 0;
+    }
+    let context = &mut *c;
+    if context.entry().is_err()
+        || context.remaining != context.session.steps
+        || context.weight != 0
+        || context.scopes != 0
+        || context.depth != 0
+        || Arc::strong_count(&context.session) != 1
+    {
+        return 0;
+    }
+    let Ok(initial) =
+        crate::process::parse_initial_context(std::slice::from_raw_parts(bytes, length))
+    else {
+        return 0;
+    };
+    Arc::get_mut(&mut context.session)
+        .unwrap()
+        .initial_process_context = Ok(initial);
+    1
+}
+#[no_mangle]
 pub unsafe extern "C" fn lo_context_set_device_grant(
     c: *mut Context,
     grant: *const std::os::raw::c_char,

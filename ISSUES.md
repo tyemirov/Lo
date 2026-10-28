@@ -1108,16 +1108,18 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
 
 ### Process workflows
 
-- [ ] [F024] (P1) {I009} Add inherited Process.Context values and qualify cleanup execution
+- [x] [F024] (P1) {I009} Add inherited Process.Context values and qualify cleanup execution
   Goal:
   Execute typed process workflows with the caller's environment and working directory through explicit, qualified activation.
 
   Current state:
-  Process command construction, bound commits, captured output, typed termination, and session cleanup are implemented.
-  The current constructor requires separate environment and directory inputs.
-  The qualified native profile denies child writes, network access, and descendants.
-  Native admission permits at most 16 environment entries and an 8192-byte command body.
-  These limits prevent general environment inheritance and package-cache or Docker cleanup.
+  Context values, executable discovery, command activation, bounded transport, and cleanup profiles are implemented.
+  The canonical constructor is `Process.Command.new(context, executable, arguments, stdin)`.
+  The qualified profile permits explicit write roots, prune roots, and exact Unix endpoints for each initial executable.
+  Registered exec chains retain the initial scope. Fork and `posix_spawn` descendants remain denied.
+  Admission permits 4096 environment entries and a 1048576-byte command body.
+  Local fixtures verify package-cache commands and Docker-like protocol requests inside Lo.
+  Documentation, independent review, and final local CI completed successfully after the review correction.
   The [adapter contract](docs/adapter-design.md#process) defines current behavior.
   The [mac-cleanup plan](docs/mac-cleanup-plan.md) defines the application requirements.
 
@@ -1146,8 +1148,8 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Redact inherited values from automatic output and diagnostic snapshots, including nested contexts and commands.
   - Preserve explicit program access to selected environment values.
 
-  Proposed API:
-  These operations are proposed and are not implemented.
+  Current API:
+  These operations are implemented.
   Context changes return new values and leave their inputs unchanged.
   The environment update operation retains unspecified variables and replaces the supplied names.
 
@@ -1162,7 +1164,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   | `Process.Executable.resolve(context, name)` | Discover `Process.Executable!` under the selected context. | Host observation |
   | `Process.Command.new(context, executable, arguments, stdin)` | Construct an inert `Process.Command!`. | Pure |
 
-  Proposed example:
+  Example:
   The Docker command requires a qualified profile with endpoint access.
   Acceptance uses a process helper inside Lo instead of the installed Docker client.
 
@@ -1219,6 +1221,13 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Compare interpreter and native results, errors, effects, and lifecycle events.
   - Run focused repository targets during implementation and final stack CI after the last correction.
   - Complete independent review before issue closure.
+
+  Completed on October 27, 2026.
+  Public integration failures preceded the context, transport, cleanup, and discovery corrections.
+  The independent review found one error-kind difference for canonical root-path discovery.
+  Its regression failed before the native correction and completed successfully afterward in both runtimes.
+  Final local CI completed interpreter and native integration, 21 semantic checks, and 217 qualification-tool tests successfully.
+  The [evidence record](docs/evidence/process-context-cleanup/checkpoint.json) contains source identities, raw results, review findings, and qualification limits.
 
   Scope:
   Keep every helper, fixture, protocol endpoint, cache, and generated artifact inside Lo.

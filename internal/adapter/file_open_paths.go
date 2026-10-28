@@ -113,10 +113,8 @@ func parseOpenPaths(session execution.Session, root string, output []byte) (valu
 			if len(line) == 1 {
 				return nil, errors.New("open-file probe returned an empty descriptor")
 			}
-			for _, character := range line[1:] {
-				if !(character >= '0' && character <= '9' || character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z') {
-					return nil, errors.New("open-file probe returned an invalid descriptor")
-				}
+			if !validProbeDescriptor(line[1:]) {
+				return nil, errors.New("open-file probe returned an invalid descriptor")
 			}
 		case 'n':
 			path := line[1:]
@@ -173,6 +171,25 @@ func parseOpenPaths(session execution.Session, root string, output []byte) (valu
 		items[index] = item
 	}
 	return value.NewList(must(types.NewList(types.Path())), items)
+}
+
+func validProbeDescriptor(descriptor string) bool {
+	truncated := strings.HasPrefix(descriptor, "*")
+	if truncated {
+		if len(descriptor) != 4 {
+			return false
+		}
+		descriptor = descriptor[1:]
+	}
+	for _, character := range descriptor {
+		if character >= '0' && character <= '9' {
+			continue
+		}
+		if truncated || !(character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z') {
+			return false
+		}
+	}
+	return descriptor != ""
 }
 
 func (f *files) OpenPaths(ctx context.Context, path value.Text) (value.List, error) {

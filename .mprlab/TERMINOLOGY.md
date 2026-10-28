@@ -78,6 +78,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `source code`: Human-readable instructions that define software behavior.
 - `source blocker`: A failure that prevents access to a necessary official source.
 - `stack guide`: An agent guide for one language, framework, or runtime.
+- `skill`: A set of agent instructions and related tools for a specified task type.
+- `specialized agent`: An agent assigned a defined part of the current task, such as an independent review.
+- `standing authorization`: User approval that applies to later actions in the stated scope without additional approval.
+- `review`: An examination of an artifact against its requirements, with a recorded result.
+- `independent review`: A review by an agent that did not produce the examined changes.
 - `STE reference`: The verified official ASD-STE100 PDF that controls a language review.
 - `store publisher`: A repository-owned tool that submits a mobile store artifact directly to its store.
 - `static website`: A browser frontend that uses generated files without a website server runtime.
@@ -108,6 +113,12 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `higher-order operation`: An operation that accepts a named flow and defines when that flow executes.
 - `callback phase`: The construction, evaluation, activation, or external event stage that invokes a stored flow.
 - `execution profile`: Host-enforced restrictions on a child program, its descendants, external access, channels, and lifetime.
+- `Process context`: An immutable Process value that contains environment variables and an absolute working directory.
+- `context origin`: Inspection information that identifies an inherited, explicit, derived, or dynamic Process context.
+- `mutation root`: A host-authorized directory for data writes or namespace removal by a specified executable.
+- `prune root`: A mutation root that permits namespace removal without data writes.
+- `exec chain`: Registered executable replacements within one process that retain the initial executable's cleanup scope.
+- `Unix endpoint`: An exact local socket path that host policy authorizes for a specified executable.
 - `confinement`: Enforcement that prevents a process and its descendants from access outside their execution profile.
 - `termination variant`: One nominal representation of normal process exit or signal termination.
 - `request header`: One named HTTP field value supplied with a request.

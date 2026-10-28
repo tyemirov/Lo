@@ -236,7 +236,7 @@ func TestNativeProcessHostReviewedLane(t *testing.T) {
 			if name == "helper-mismatch" {
 				commandPath = filepath.Join(manifest.Directory, "protected-command-alias")
 			}
-			policy, err := adapter.NewProcessPolicy([]string{fmt.Sprintf("%x,%s", digest, commandPath)}, launcherPath, []string{manifest.Directory})
+			policy, err := adapter.NewProcessPolicy(adapter.ProcessPolicyInput{Grants: []string{fmt.Sprintf("%x,%s", digest, commandPath)}, Launcher: launcherPath, ReadRoots: []string{manifest.Directory}})
 			if err != nil {
 				t.Fatal(err)
 			}

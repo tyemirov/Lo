@@ -12,7 +12,7 @@ SCRIPT = ROOT / "tools/processbuild/identity.py"
 
 def invoke(action: str, launcher: Path, identity: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, "-B", str(SCRIPT), action, str(launcher), str(identity)],
+        [sys.executable, "-B", str(SCRIPT), action, str(launcher), str(identity), str(identity.with_suffix('.rs'))],
         cwd=ROOT, stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False,
     )
 
@@ -26,16 +26,25 @@ def test_controlled_build_and_read_only_verification(tmp_path: Path) -> None:
     assert built.returncode == 0, built.stderr
     original = launcher.read_bytes()
     pin = identity.read_bytes()
+    rust_identity = identity.with_suffix('.rs')
+    rust_pin = rust_identity.read_bytes()
     assert original != b"untrusted replacement"
     assert hashlib.sha256(original).hexdigest().encode() in pin
+    assert hashlib.sha256(original).hexdigest().encode() in rust_pin
     assert invoke("verify", launcher, identity).returncode == 0
     launcher.write_bytes(b"newer replacement")
     rejected = invoke("verify", launcher, identity)
     assert rejected.returncode != 0
     assert "identity mismatch" in rejected.stderr
     assert identity.read_bytes() == pin
+    assert rust_identity.read_bytes() == rust_pin
     assert launcher.read_bytes() == b"newer replacement"
     rebuilt = invoke("build", launcher, identity)
     assert rebuilt.returncode == 0, rebuilt.stderr
     assert launcher.read_bytes() != b"newer replacement"
     assert invoke("verify", launcher, identity).returncode == 0
+    rust_identity.write_text("incorrect Rust pin")
+    rejected = invoke("verify", launcher, identity)
+    assert rejected.returncode != 0
+    assert "identity mismatch" in rejected.stderr
+    assert rust_identity.read_text() == "incorrect Rust pin"

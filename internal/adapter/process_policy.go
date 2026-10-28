@@ -14,6 +14,7 @@ type ProcessPolicy interface {
 	Grants() []ProcessExecutableGrant
 	Launcher() string
 	ReadRoots() []string
+	Scope(string) (ProcessScope, bool)
 	processPolicy()
 }
 
@@ -21,12 +22,20 @@ type processPolicy struct {
 	grants   []ProcessExecutableGrant
 	launcher string
 	reads    []string
+	scopes   map[string]processScope
 }
 
 func (processPolicy) processPolicy()                     {}
 func (p processPolicy) Grants() []ProcessExecutableGrant { return slices.Clone(p.grants) }
 func (p processPolicy) Launcher() string                 { return p.launcher }
 func (p processPolicy) ReadRoots() []string              { return slices.Clone(p.reads) }
+func (p processPolicy) Scope(path string) (ProcessScope, bool) {
+	scope, ok := p.scopes[path]
+	if !ok {
+		return nil, false
+	}
+	return scope, true
+}
 
 func processPolicyPath(path string) bool {
 	return filepath.IsAbs(path) && filepath.Clean(path) == path && !strings.ContainsRune(path, 0)
@@ -35,9 +44,13 @@ func processPolicyPath(path string) bool {
 // NewProcessPolicy validates SHA256,ABSOLUTE_PATH grants and explicit launcher
 // and child read roots. No inputs selects no Process authority. Otherwise every
 // category is required. Hexadecimal case does not change executable identity.
-func NewProcessPolicy(grants []string, launcher string, readRoots []string) (ProcessPolicy, error) {
-	policy := processPolicy{launcher: launcher}
+func NewProcessPolicy(input ProcessPolicyInput) (ProcessPolicy, error) {
+	grants, launcher, readRoots := input.Grants, input.Launcher, input.ReadRoots
+	policy := processPolicy{launcher: launcher, scopes: map[string]processScope{}}
 	if len(grants) == 0 && launcher == "" && len(readRoots) == 0 {
+		if len(input.Writes)+len(input.Prunes)+len(input.Endpoints) != 0 {
+			return nil, fmt.Errorf("Process scopes require executable grants, a launcher, and read roots")
+		}
 		return policy, nil
 	}
 	if len(grants) == 0 || launcher == "" || len(readRoots) == 0 {
@@ -69,6 +82,7 @@ func NewProcessPolicy(grants []string, launcher string, readRoots []string) (Pro
 		}
 		paths[grant.Path()] = true
 		policy.grants = append(policy.grants, grant)
+		policy.scopes[grant.Path()] = processScope{}
 	}
 	reads := make(map[string]bool, len(readRoots))
 	for index, path := range readRoots {
@@ -80,6 +94,9 @@ func NewProcessPolicy(grants []string, launcher string, readRoots []string) (Pro
 		}
 		reads[path] = true
 		policy.reads = append(policy.reads, path)
+	}
+	if err := policy.addScopes(input); err != nil {
+		return nil, err
 	}
 	return policy, nil
 }

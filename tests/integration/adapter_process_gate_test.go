@@ -11,7 +11,7 @@ import (
 )
 
 func processGateSource(root string) string {
-	return fmt.Sprintf(`executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable, List.new("private-argument"), Map.new(Record.new(key: "PRIVATE", value: "private-environment")), File.Path.new(%q), UTF8.Bytes.new("private-stdin"));`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
+	return fmt.Sprintf(`executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable: executable, arguments: List.new("private-argument"), context: Process.Context.new(Map.new(Record.new(key: "PRIVATE", value: "private-environment")), File.Path.new(%q)), stdin: UTF8.Bytes.new("private-stdin"));`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
 }
 
 func assertProcessUnavailable(t *testing.T, got result) {

@@ -38,6 +38,7 @@ exports:
       - __tlv_bootstrap
       - _abort
       - _accept
+      - _access
       - _alarm
       - _bind
       - _bootstrap_port
@@ -117,12 +118,6 @@ exports:
       - _mach_task_self_
       - _mach_thread_self
       - _malloc
-      - _malloc_zone_memalign
-      - _malloc_zone_free
-      - _malloc_zone_realloc
-      - _malloc_zone_calloc
-      - _malloc_zone_malloc
-      - _malloc_default_zone
       - _memcmp
       - _memcpy
       - _memmove

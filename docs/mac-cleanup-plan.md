@@ -8,7 +8,10 @@ Further work uses this record and fixtures inside Lo.
 The [shared adapter design](adapter-design.md) owns File, HTTP, and Process semantics.
 Nominal File targets and bound commits passed final stack CI.
 HTTP client activation and the selected native Process profile passed public acceptance.
-The selected Process profile prohibits child writes and cannot execute the package-cache cleanup categories.
+
+F024 implements inherited Process contexts, controlled discovery, expanded bounded transport, and per-executable cleanup scopes.
+Local package helpers and a Docker-like protocol qualify selected mutations and Unix endpoint access.
+They do not qualify installed package managers or Docker/buildx, or complete category behavior.
 This application plan supplies acceptance examples under that contract.
 
 ## Contents
@@ -24,9 +27,10 @@ This application plan supplies acceptance examples under that contract.
 
 ## Repository Boundary
 
-The [Lo repository boundary](../.mprlab/POLICY.md#lo-repository-boundary) applies to every step, without exceptions.
+The [Lo repository boundary](../.mprlab/POLICY.md#lo-repository-boundary) applies to every step.
 Keep source changes, documents, examples, fixtures, temporary files, tool caches, and generated output inside Lo.
-Do not use another repository or access the installed cleanup script.
+Use tools and skills from any location under that policy.
+Do not use another project's application source.
 Do not install a replacement script or execute cleanup against real user data.
 
 Paths below describe the intended program's inputs.
@@ -43,7 +47,7 @@ No acceptance step runs actual package-cache or Docker cleanup.
 | Batch removal fails on changed or absent candidates. | The log example uses singleton commits through `Flow.fold` and handles only `File.EntryChanged` as a skip. |
 | The adapter rejects files with multiple links. | Generic removal now permits hardlinks. The log category has no single-link restriction. |
 | File entries omit metadata required by other categories. | Add owner identity, access time, and change time to the proposed entry contract. |
-| Command output needs a typed activation result. | Bound commits and typed Process results are implemented. The selected native profile prohibits child writes. |
+| Command output needs a typed activation result. | Bound commits and typed Process results are implemented. F024 adds selected mutation and endpoint scopes. |
 | Temporary directories and caches can escape Lo. | Make and native build subprocesses now use explicit state directories inside Lo. |
 
 The [File design](file-adapter-design.md) describes the current batch contract and its limits.
@@ -159,11 +163,11 @@ Do not silently replace either format with the other.
 
 ## Required Language Capabilities
 
-| Capability | Proposed contract |
+| Capability | Contract and current state |
 | --- | --- |
-| Host inputs | Capture home, real/effective user IDs, clock, arguments, and selected environment values as typed inputs. |
-| Executable discovery | Distinguish an absent executable from a discovery failure. |
-| Process construction | Describe an executable, argument list, environment, closed input, and bounded output without starting a process. |
+| Host inputs | Initial environment and physical working directory are implemented. Home, user IDs, clock, and argument contracts remain separate. |
+| Executable discovery | Implemented through `Process.Executable.resolve`, with absence, discovery failure, and launch denial kept distinct. |
+| Process construction | Implemented through `Process.Command.new(context, executable, arguments, stdin)`, without process creation. |
 | Process activation | Return `Process.Result` with typed termination, stdout bytes, and stderr bytes after explicit activation. |
 | Process failures | Keep nonzero child status inspectable. Report launch failure, cancellation, and output overflow distinctly. |
 | File observations | Expose required metadata and distinguish absence from failure at the directory and candidate boundaries. |
@@ -176,25 +180,36 @@ Do not silently replace either format with the other.
 Process construction must not execute commands.
 The [bound commit contract](adapter-design.md#activation-and-results) supplies typed activation results.
 The [qualified Process profile](adapter-design.md#qualification-status) supports explicit commands with captured output.
-Package-cache and Docker cleanup require a different profile with explicitly bounded mutation authority.
-The current profile does not supply that authority.
+F024 adds a [cleanup profile](adapter-design.md#cleanup-execution-profile) with per-executable mutation roots and exact Unix endpoints.
+The default profile remains read-only. Both profiles deny forked and spawned descendants.
+Registered exec chains retain the initial executable's scope, without combined authority from other executables.
+
+Package fixtures qualify exact command inputs and selected mutations, including registered wrapper-to-worker execution.
+They do not establish arbitrary subprocess support for installed package managers.
+Docker fixtures record requests and responses over a local protocol endpoint.
+Client cancellation preserves confirmed daemon effects. It does not reverse them.
+
+The [package-cache example](examples/package-cache-cleanup.lo) demonstrates inherited context overrides, optional discovery, and sequential activation.
+It does not implement the complete category sequence or category continuation contract.
+
 Output overflow must fail explicitly. It cannot appear as an empty successful result.
 Do not put cleanup-specific names, retention periods, or Docker policy in an adapter.
 
 ## Implementation Sequence
 
 The [File implementation record](file-adapter-plan.md) covers the completed log category and local build state.
+The [F024 checkpoint](evidence/process-context-cleanup/checkpoint.json) records completed context, discovery, transport, and bounded cleanup fixtures.
+It records interpreter integration, native integration, semantic checks, and qualification-tool checks with their source identities.
+Full mac-cleanup acceptance remains separate from these fixture results.
 Further work follows this sequence:
 
-1. Implement the applicable stages of the [shared adapter plan](adapter-plan.md) before new cleanup-specific capabilities.
-2. Validate the log fixture with nominal actions and typed receipts.
-3. Specify host inputs, discovery, locks, and extra metadata through the shared operation contract.
-4. Add common-policy fixtures for owner identity, timestamps, suffixes, temporary roots, and NUL-framed probes.
-5. Specify and qualify bounded mutation authority before package-cache or Docker command acceptance.
-6. Add process fixtures for package commands, optional executables, environment values, and category continuation.
-7. Add Docker response fixtures and reject invalid contexts, builders, endpoints, and ambient overrides.
-8. Add the ordered workflow with startup rejection, cleanup locking, reporting, and final exit status.
-9. Update the language reference and run confined repository validation and independent review.
+1. Specify the remaining host inputs, cleanup lock, and extra metadata through the shared operation contract.
+2. Add common-policy fixtures for owner identity, timestamps, suffixes, temporary roots, and NUL-framed probes.
+3. Implement the common-policy file categories with explicit changed-candidate and absence handling.
+4. Add complete package-category fixtures, including pip discovery order, status handling, and later-category continuation.
+5. Add Docker policy parsing and reject invalid contexts, builders, endpoints, and ambient overrides.
+6. Add the ordered workflow with startup rejection, cleanup locking, reporting, and final exit status.
+7. Update the language reference and complete repository validation and independent review.
 
 Keep one canonical contract for each capability.
 Do not add compatibility aliases or alternative legacy execution paths.
@@ -217,12 +232,13 @@ It uses the installed Go toolchain without automatic toolchain selection.
 They do not select a user cache or a default temporary directory.
 Tests verify child-process paths and invalid build-root rejection.
 
-If a later tool cannot satisfy this boundary, report that operation as blocked.
-Do not use another repository or an external cache to remove the limitation.
+Tools and skills can run from any location, including symlink targets outside Lo.
+Keep their task caches and output inside Lo.
+If an operation changes project files or task state outside Lo, stop that operation and report the limitation.
 
 ## Open Decisions
 
-- Specify application handling of bound commit results under the shared adapter contract.
+- Specify complete category status handling from bound commit results under the shared adapter contract.
 - Extend `Flow.fold` orchestration to the remaining category policies while preserving pure List callbacks.
 - Add common-policy metadata and discovery skips without suppressing unrelated filesystem errors.
 - Select cleanup-lock identity for interpreted and native programs.

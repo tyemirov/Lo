@@ -3,16 +3,24 @@
 ## Lo Repository Boundary
 
 Lo is a self-contained project.
-All Lo work must stay inside this repository, under all circumstances and for every task.
-No Lo task may use another repository, including for reference, implementation, tests, or acceptance.
+Keep Lo project files and task state inside this repository.
+Use tools and skills from any location, including another repository or a symlink target.
+Read their source files and references when necessary to use them.
+Never prevent tool use or ask for user approval because of its location.
+Do not use another project's application source for Lo implementation, tests, or acceptance.
 Do not change installed scripts, user configuration, external caches, or other files outside Lo.
 Keep task files, test fixtures, generated output, and tool caches inside Lo.
-Apply this boundary to tools, child processes, and all delegated work.
+Apply these rules to child processes and all delegated work.
 If an operation cannot obey this boundary, stop that operation and report the limitation.
-Do not make an exception for a feature, example, dependency, integration, or validation requirement.
 
 The [repository boundary policy](.mprlab/POLICY.md#lo-repository-boundary) owns the detailed requirements.
 Preserve this rule during governance updates.
+
+## Reviews And Specialized Agents
+
+The user gives standing authorization for reviews and specialized agents in the current task.
+When useful, start independent reviews and specialized agents without additional user approval.
+Apply the [review and delegation policy](.mprlab/POLICY.md#reviews-and-specialized-agents) to their work.
 
 ## Forward-Only Contract Discipline
 

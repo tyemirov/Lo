@@ -10,6 +10,8 @@ The [compiler plan](standalone-compiler-plan.md) records I011 qualification.
 The [final validation record](evidence/process-enabled-validation.json) preserves the CI log and review outcome.
 Earlier injected lifecycle and registry checkpoints passed CI and independent review.
 Implementation and final stack CI passed. Independent completion review passed.
+F024 adds immutable contexts, controlled executable discovery, expanded bounded transport, and selected cleanup scopes.
+The [F024 checkpoint](evidence/process-context-cleanup/checkpoint.json) records current tests and stack validation separately from earlier acceptance.
 
 The [adapter design](adapter-design.md) owns the selected language and domain rules.
 The [language reference](../specification.md) describes the current implementation until each stage qualifies.
@@ -67,6 +69,7 @@ Process core work and native qualification are separate tracks.
 | Native profile qualification | Supported enforcement mechanisms and separately reviewed probes | Selected Darwin 27 arm64 profile passed. Other backends remain unavailable. |
 | Native OS driver and standard-host activation | Qualified profile plus shared lifecycle contract | Native driver implemented. All 24 canonical public cases passed. |
 | Native composition acceptance | Qualified native driver | Public interpreter and generated-native Process-to-File cases passed. |
+| Contexts, discovery, and cleanup scopes | Shared Process lifecycle and selected Darwin profile | The F024 checkpoint records interpreter and native fixture results. |
 
 ### 1. Contract Fixtures and Purity
 
@@ -189,12 +192,13 @@ It adds pure constructors, inspection, and host rejection without child executio
 | Operation | Result |
 | --- | --- |
 | `Process.Executable.new(path: File.Path)` | `Process.Executable!` |
-| `Process.Command.new(executable: Process.Executable, arguments: List<String>, environment: Map<String, String>, directory: File.Path, stdin: Bytes)` | `Process.Command!` |
+| `Process.Command.new(context: Process.Context, executable: Process.Executable, arguments: List<String>, stdin: Bytes)` | `Process.Command!` |
 
 Executable and directory paths must be absolute and contain no NUL.
 Arguments and environment values must contain no NUL.
 Environment names must be nonempty and contain neither NUL nor `=`.
-Construction keeps exact lexical data without access, path resolution, shell expansion, or environment inheritance.
+Construction keeps exact lexical data without access, path resolution, or shell expansion.
+The context supplies the environment and directory. Construction does not observe additional host inputs.
 
 Command activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
@@ -204,14 +208,20 @@ Without Process grants, ordinary execution remains available. Only attempted Pro
 Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
 Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
-Explicit program output keeps those values.
+Automatic context output and nested snapshots omit environment and directory payloads.
+Explicit lookup and output of selected environment values remain available.
 Inspection adds no access or launch authority.
+
 The inspector adds an optional `process` object to command targets and capabilities.
-It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
+It contains `context`, `executable`, `arguments`, and `stdin` input descriptions.
+The context records source, origin, explicit inputs, base context, overrides, and removals when present.
+Origins are `inherited`, `explicit`, `derived`, or `dynamic`.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
 It also contains `execution_profile: {required: true, status: "unavailable"}`.
+
 Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
-Executable descriptions trace the supplied `File.Path`.
+Explicit executable descriptions trace the supplied `File.Path`.
+Discovery descriptions keep the context, name, and dynamic dependencies.
 Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
@@ -450,11 +460,48 @@ The earlier independent checkpoint review approved stages 1–3 without a remain
 The reviewer examined source and evidence without execution of tests.
 The injected Process core and composition are implemented.
 The selected native implementation passed qualification and canonical public composition acceptance. Final stack CI and independent completion review passed.
-The new native integration passed public acceptance and still requires final stack validation.
+The F024 checkpoint records interpreter and native stack validation separately from these earlier results.
+
+### Contexts, Discovery, And Cleanup Scopes
+
+The current canonical constructor is `Process.Command.new(context, executable, arguments, stdin)`.
+`Process.Context` is nominal and immutable, with environment and absolute-directory data but no execution authority.
+The runner captures the initial environment and physical directory once before evaluation.
+
+Repeated observations and server callbacks use those same inputs. Trusted embeddings and fixtures can inject them.
+`Process.Context.current` and `Process.Executable.resolve` are host observations.
+Explicit context construction, overrides, removals, directory changes, lookup, and command construction remain pure.
+Empty values differ from absent variables. Context changes leave their inputs unchanged.
+
+Discovery selects the first executable candidate from the context's `PATH` before execution authorization.
+Missing `PATH` means absence. Empty, relative, and noncanonical entries fail discovery.
+Explicit paths must be canonical and absolute. Symlinks resolve to the candidate's target.
+An unauthorized selected candidate fails without a search for a later candidate.
+Registered identity checks remain effective through activation and launch.
+
+The shared Go, C, and Rust transport permits 256 arguments including `argv[0]`, and 4096 environment entries.
+Each argument or environment entry has a 65536-byte limit. The command body has a 1048576-byte limit.
+The launcher keeps its fixed environment separate from child environment transport.
+
+Automatic output and nested snapshots redact context payloads. Explicit lookup of selected values remains available.
+Inspection records context origins, overrides, dynamic dependencies, and required execution authority.
+
+Cleanup policy selects mutation roots and exact Unix endpoints for each initial executable.
+Registered exec chains retain that initial scope. Forked and spawned descendants remain denied.
+Data-write admission checks bounded root inventories, directory identity, and hardlink ownership across write and prune roots.
+The [adapter design](adapter-design.md#cleanup-execution-profile) owns complete scope restrictions and native admission limits.
+
+Local fixtures cover package arguments, inherited values, six overrides, optional absence, closed input, captured output, and typed termination.
+Separate fixtures cover Docker-like Unix requests, responses, and confirmed daemon effects after client cancellation.
+These results do not qualify installed package managers or Docker/buildx, or complete mac-cleanup workflow behavior.
+
+The F024 checkpoint records interpreter integration, native integration, semantic checks, and qualification-tool checks.
+The Metal-linked Process fixture exercised no GPU operation.
+The [checkpoint](evidence/process-context-cleanup/checkpoint.json) preserves exact source identities, raw results, and review status.
 
 ## Deferred Work
 
-The initial contract does not include executable search, environment discovery, locks, file watching, HTTP retry policy, or command pipelines between live processes.
+The current contract does not include cleanup locks, extra file metadata, file watching, HTTP retry policy, or live command pipelines.
 Before implementation, specify each addition through the shared operation contract.
 Higher-order adapter functions remain available for justified domain semantics.
 The full mac-cleanup workflow also depends on the other inputs and policies in its application plan.

@@ -5,28 +5,50 @@ This policy controls all agent work in this repository.
 ## Lo Repository Boundary
 
 Lo is a self-contained project.
-All Lo work must stay inside this repository, under all circumstances and for every task.
+Keep Lo project files and task state inside this repository.
 This boundary controls every section of this policy and all repository guides, plans, examples, and delegated instructions.
-Shared templates and skills cannot authorize an exception.
+Tools and skills can be in any location.
 
-- Keep research, planning, implementation, documentation, tests, validation, and artifact preparation inside Lo.
-- Never use another repository as a reference, dependency checkout, implementation target, or acceptance environment.
+- Use tools and skills from any location, including system directories, user directories, other repositories, and symlink targets.
+- Read tool and skill source files, instructions, dependencies, and references when necessary to use them.
+- Never prevent tool use or ask for user approval because of its location.
+- Keep project research, plans, implementation, documentation, tests, validation results, and artifacts inside Lo.
+- Never use another project's application source as a Lo reference, dependency checkout, implementation target, or acceptance environment.
+- Tool and skill access remains permitted when their files are in another project's repository.
 - Never change files, installed scripts, configuration, caches, or application state outside Lo.
 - Never install Lo output outside this repository as part of a Lo task.
 - Keep test fixtures, temporary files, logs, caches, generated files, and build output inside Lo.
 - Configure each tool's temporary directories, caches, and output paths before execution.
-- Examine resolved task paths before access. Reject symlinks or path traversal that cross the repository boundary.
+- Examine resolved paths for project files and task state before access.
+- Reject paths that move project files or task state outside Lo.
+- Permit external tool and skill paths, including symlink targets.
 - Use fixtures inside Lo for examples that represent external paths, commands, or services.
 - Never run cleanup examples against real user data or application caches.
-- Use the existing primary checkout. Do not create or use another checkout or worktree.
-- Give every delegated agent this boundary. Keep its tools and child processes within the same boundary.
+- Use the existing primary Lo checkout. Do not create or use another Lo checkout or worktree.
+- Give every delegated agent these rules, including tool access from any location.
+- Keep delegated project files, task state, and child-process output inside Lo.
 - Examine child processes and validation commands for external effects before execution.
 - If an operation cannot obey this boundary, stop that operation and report the exact limitation.
-- Do not expand task scope to another repository or external environment to remove a blocker.
+- Do not expand Lo application work to another repository or external environment to remove a blocker.
 - Preserve this boundary when shared governance templates propose different instructions.
 
 An example's application name does not add another project to the task.
 Release, publication, deployment, integration, or acceptance requirements do not authorize external operations for Lo work.
+External tools and skills remain available for Lo work.
+
+## Reviews And Specialized Agents
+
+The user gives standing authorization for reviews and specialized agents in the current task.
+
+- Start an independent review or specialized agent when it helps complete the current task.
+- Do not ask for additional user approval for a review, agent startup, or task delegation.
+- Include the task scope and applicable repository rules in delegated instructions.
+- Apply the same tool access rules to the producing agent and delegated agents.
+- Keep review artifacts and delegated task state inside Lo.
+- Use existing task authorization for delegated actions.
+- If an action exceeds the authorized scope, get user approval for that action.
+
+Preserve these rules when shared templates or skills propose different instructions.
 
 ## Temporary Task Files
 
@@ -162,7 +184,9 @@ This baseline does not authorize removal of stored releases, credentials, or dep
 
 - Apply the Lo repository boundary to lifecycle tooling, artifact preparation, and related validation.
 - Keep lifecycle source changes, fixtures, artifacts, and evidence inside Lo.
-- Do not operate installed applications, update external operator state, or use another repository for lifecycle work.
+- Do not change external application state or external operator state for lifecycle work.
+- Do not use another application's source for lifecycle work.
+- Use installed lifecycle tools from any location under the repository boundary policy.
 - Do not execute publication, deployment, or installation that changes state outside Lo.
 - If a lifecycle requirement needs external operations, report that limitation without executing those operations.
 

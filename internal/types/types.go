@@ -38,6 +38,7 @@ const (
 	FileAppendReceiptKind  Kind = "File.AppendReceipt"
 	FileRemoveReceiptKind  Kind = "File.RemoveReceipt"
 	ProcessExecutableKind  Kind = "Process.Executable"
+	ProcessContextKind     Kind = "Process.Context"
 	ProcessCommandKind     Kind = "Process.Command"
 	ProcessResultKind      Kind = "Process.Result"
 	ProcessTerminationKind Kind = "Process.Termination"
@@ -148,13 +149,14 @@ func FileAppendReceipt() Type  { return atom(FileAppendReceiptKind) }
 func FileRemoveReceipt() Type  { return atom(FileRemoveReceiptKind) }
 func ServerReceipt() Type      { return atom(ServerReceiptKind) }
 func ProcessExecutable() Type  { return atom(ProcessExecutableKind) }
+func ProcessContext() Type     { return atom(ProcessContextKind) }
 func ProcessCommand() Type     { return atom(ProcessCommandKind) }
 func ProcessResult() Type      { return atom(ProcessResultKind) }
 func ProcessTermination() Type { return atom(ProcessTerminationKind) }
 func AnyRecord() Type          { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case URLKind, MethodKind, ClientRequestKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind:
+	case URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind:
 		return atom(name), true
 	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true

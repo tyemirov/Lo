@@ -8,7 +8,6 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -24,10 +23,15 @@ import (
 const nativeConfigurationLimit = 65536
 const nativeProfileLimit = 32768
 
+var nativeProfileEscapes = strings.NewReplacer(`\`, `\\`, `"`, `\"`)
+
+func nativeProfileQuote(path string) string { return `"` + nativeProfileEscapes.Replace(path) + `"` }
+
 type darwinCreator struct {
 	setup               *nativeSetup
 	launcher, directory string
-	configuration       []byte
+	configurations      map[string][]byte
+	scopes              map[string]adapter.ProcessScope
 	commands            map[string]struct{}
 	roots               []string
 	helper              adapter.ProcessExecutableGrant
@@ -43,7 +47,7 @@ func (c *darwinCreator) protectedImages() []adapter.ProcessExecutableGrant {
 }
 
 func canonicalNativePath(path string) bool {
-	if !filepath.IsAbs(path) || filepath.Clean(path) != path || strings.ContainsRune(path, 0) || len(path) > nativeEntryLimit || !utf8.ValidString(path) {
+	if !filepath.IsAbs(path) || filepath.Clean(path) != path || strings.ContainsRune(path, 0) || len(path) > nativePathLimit || !utf8.ValidString(path) {
 		return false
 	}
 	resolved, err := filepath.EvalSymlinks(path)
@@ -77,6 +81,17 @@ func NewDarwinCreator(ctx context.Context, configuration Config) (Creator, error
 	if len(policy.Grants()) == 0 || len(policy.Grants()) > nativeEntryCount || len(policy.ReadRoots()) == 0 || len(policy.ReadRoots()) > nativeEntryCount {
 		return nil, failure(Input)
 	}
+	scopes := make(map[string]adapter.ProcessScope)
+	for _, grant := range policy.Grants() {
+		scope, exists := policy.Scope(grant.Path())
+		if !exists {
+			return nil, host("registered command has no scope")
+		}
+		if len(scope.WriteRoots())+len(scope.PruneRoots()) > nativeEntryCount || len(scope.UnixEndpoints()) > nativeEntryCount {
+			return nil, failure(Input)
+		}
+		scopes[grant.Path()] = scope
+	}
 	launcher := policy.Launcher()
 	if !canonicalNativePath(launcher) {
 		return nil, host("invalid native helper path")
@@ -105,7 +120,7 @@ func NewDarwinCreator(ctx context.Context, configuration Config) (Creator, error
 	if err != nil || parallelism == 0 {
 		return nil, host("native processor bound unavailable")
 	}
-	c := &darwinCreator{launcher: launcher, directory: filepath.Dir(launcher), helper: helper, parallelism: parallelism, commands: make(map[string]struct{}), roots: policy.ReadRoots()}
+	c := &darwinCreator{launcher: launcher, directory: filepath.Dir(launcher), helper: helper, parallelism: parallelism, commands: make(map[string]struct{}), roots: policy.ReadRoots(), configurations: map[string][]byte{}, scopes: scopes}
 	for _, grant := range policy.Grants() {
 		if !canonicalNativePath(grant.Path()) {
 			return nil, host("invalid native command path")
@@ -128,7 +143,19 @@ func NewDarwinCreator(ctx context.Context, configuration Config) (Creator, error
 			return nil, host("native read root release failed")
 		}
 	}
-	profile, err := c.profile(policy.Grants())
+	for _, grant := range policy.Grants() {
+		scope := scopes[grant.Path()]
+		configuration, err := c.buildConfiguration(policy.Grants(), grant.Path(), scope)
+		if err != nil {
+			return nil, err
+		}
+		c.configurations[grant.Path()], c.scopes[grant.Path()] = configuration, scope
+	}
+	return c, nil
+}
+
+func (c *darwinCreator) buildConfiguration(grants []adapter.ProcessExecutableGrant, executable string, scope adapter.ProcessScope) ([]byte, error) {
+	profile, err := c.profile(grants, scope)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +168,8 @@ func NewDarwinCreator(ctx context.Context, configuration Config) (Creator, error
 	}
 	writeEntry(profile)
 	writeEntry(c.directory)
-	for _, grant := range policy.Grants() {
+	writeEntry(executable)
+	for _, grant := range grants {
 		writeEntry(grant.Path())
 	}
 	for _, root := range c.roots {
@@ -151,12 +179,11 @@ func NewDarwinCreator(ctx context.Context, configuration Config) (Creator, error
 		return nil, failure(Input)
 	}
 	header := make([]byte, 16)
-	copy(header, "LOC1")
+	copy(header, "LOC2")
 	binary.BigEndian.PutUint32(header[4:8], uint32(body.Len()))
-	binary.BigEndian.PutUint32(header[8:12], uint32(len(policy.Grants())))
+	binary.BigEndian.PutUint32(header[8:12], uint32(len(grants)))
 	binary.BigEndian.PutUint32(header[12:16], uint32(len(c.roots)))
-	c.configuration = append(header, body.Bytes()...)
-	return c, nil
+	return append(header, body.Bytes()...), nil
 }
 
 func nativeHelperDigest(ctx context.Context, file *os.File) ([32]byte, error) {
@@ -188,9 +215,9 @@ func nativeHelperDigest(ctx context.Context, file *os.File) ([32]byte, error) {
 	}
 }
 
-func (c *darwinCreator) profile(grants []adapter.ProcessExecutableGrant) (string, error) {
-	quote := func(path string) string { encoded, _ := json.Marshal(path); return string(encoded) }
-	lines := []string{"(version 1)", "(deny default (with no-log))", `(allow file-read* (subpath "/usr/lib") (subpath "/System/Library"))`, `(allow file-read* file-test-existence (literal "/"))`, "(deny network* (with no-log))", "(deny process-fork (with no-log))", "(allow signal (target self))"}
+func (c *darwinCreator) profile(grants []adapter.ProcessExecutableGrant, scope adapter.ProcessScope) (string, error) {
+	quote := nativeProfileQuote
+	lines := []string{"(version 1)", "(deny default (with no-log))", `(allow file-read* (subpath "/usr/lib") (subpath "/System/Library"))`, `(allow file-read* file-test-existence (literal "/"))`, "(deny process-fork (with no-log))", "(allow signal (target self))"}
 	for _, grant := range grants {
 		path := quote(grant.Path())
 		lines = append(lines, "(allow process-exec (literal "+path+"))", "(allow file-read* (literal "+path+"))")
@@ -198,6 +225,19 @@ func (c *darwinCreator) profile(grants []adapter.ProcessExecutableGrant) (string
 	for _, root := range c.roots {
 		lines = append(lines, "(allow file-read* (subpath "+quote(root)+"))")
 	}
+	for _, root := range scope.WriteRoots() {
+		lines = append(lines, "(allow file-write* (subpath "+quote(root)+"))")
+	}
+	for _, root := range scope.PruneRoots() {
+		lines = append(lines, "(allow file-write-unlink (subpath "+quote(root)+"))")
+	}
+	for _, endpoint := range scope.UnixEndpoints() {
+		lines = append(lines, "(allow file-read* (literal "+quote(endpoint)+"))", "(allow network-outbound (remote unix-socket (literal "+quote(endpoint)+")))")
+	}
+	for _, grant := range grants {
+		lines = append(lines, "(deny file-write* (literal "+quote(grant.Path())+"))")
+	}
+	lines = append(lines, "(deny file-write* (literal "+quote(c.launcher)+"))")
 	profile := strings.Join(lines, "\n") + "\n"
 	if len(profile) > nativeProfileLimit {
 		return "", failure(Input)
@@ -222,7 +262,7 @@ func (c *darwinCreator) authorize(ctx context.Context, invocation adapter.Proces
 	for _, root := range c.roots {
 		relative, err := filepath.Rel(root, directory)
 		if err == nil && (relative == "." || filepath.IsLocal(relative)) {
-			return nil
+			return validateCleanupScope(ctx, c.scopes[invocation.Executable()])
 		}
 	}
 	return execution.Denied("Process.run", "directory")
