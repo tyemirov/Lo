@@ -50,7 +50,7 @@ func TestFileLanguageInspection(t *testing.T) {
 
 func TestFileLanguageNominalAndCheckpointRejections(t *testing.T) {
 	cases := []string{
-		`flow F(entry: File.Entry) -> String { return entry.name }; return F(Record.new(path: File.Path.new("x"), name: "x", kind: "regular", size_bytes: 0, modified_unix_ns: 0, link_count: 1))`,
+		`flow F(entry: File.Entry) -> String { return entry.name }; return F(Record.new(path: File.Path.new("x"), name: "x", kind: "regular", size_bytes: 0, modified_unix_ns: 0, link_count: 1, owner_uid: 0, accessed_unix_ns: 0, changed_unix_ns: 0))`,
 		`flow Main() -> Bytes! { entries = File.list(File.Path.new("/fixture")); return Checkpoint.encode(entries) }; return Main()`,
 		`flow Main() -> Bytes! { entries = File.list(File.Path.new("/fixture")); return Checkpoint.encode(File.Remove.new(entries)) }; return Main()`,
 		`flow F(entry: File.Entry) -> Bool { return Match.new(entry, entry: true, _: false) }; return 0`,

@@ -14,6 +14,7 @@ func builtinExamples() []builtinExample {
 	executablePath := repository + "/testdata/inert-process/executable"
 	directoryPath := repository + "/testdata/inert-process/directory"
 	examples := []builtinExample{
+		{"Host.Invocation.current", `flow Main() -> Int! { initial = Host.Invocation.current(); return List.length(initial.arguments) }; return Main()`, "Int!"},
 		{"Process.Context.current", `return Process.Context.current()`, "Process.Context!"},
 		{"Process.Context.new", fmt.Sprintf(`return Process.Context.new(Map.new(), File.Path.new(%q))`, directoryPath), "Process.Context!"},
 		{"Process.Context.override_environment", fmt.Sprintf(`flow Main() -> Process.Context! { initial = Process.Context.new(Map.new(), File.Path.new(%q)); return Process.Context.override_environment(initial, Map.new(Record.new(key: "KEY", value: "value"))) }; return Main()`, directoryPath), "Process.Context!"},
@@ -99,8 +100,11 @@ func builtinExamples() []builtinExample {
 		{"List.length", `return List.length("héllo")`, "Int"},
 		{"File.read", `return File.read(File.Path.new("missing"))`, "Bytes!"},
 		{"File.list", `return File.list(File.Path.new("fixtures"))`, "List<File.Entry>!"},
+		{"File.directory", `flow Main() -> Bool! { directory = File.directory(File.Path.new("fixtures")); return File.Path.eq(directory.path, File.Path.new("fixtures")) }; return Main()`, "Bool!"},
+		{"File.scan", `flow Main() -> Int! { scan = File.scan(File.Path.new("fixtures")); return Math.add(List.length(scan.entries), List.length(scan.vanished_names)) }; return Main()`, "Int!"},
 		{"File.open_paths", `return File.open_paths(File.Path.new("fixtures"))`, "List<File.Path>!"},
 		{"File.Remove.new", `flow Empty() -> List<File.Entry> { return List.new() }; return File.Remove.new(Empty())`, "File.Remove!"},
+		{"File.Remove.checked", `flow Eligible(original: File.Entry, current: File.Entry) -> Bool { return true }; flow Main() -> Int! { pending = File.Remove.checked(List.new(), Eligible); receipt = commit pending; return receipt.completed_count }; return Main()`, "Int!"},
 		{"File.Append.new", `return File.Append.new(File.Path.new("unwritten"), UTF8.Bytes.new("data"))`, "File.Append"},
 		{"File.Write.new", `return File.Write.new(File.Path.new("unwritten"), Bytes.new("data"))`, "File.Write"},
 	}
