@@ -1624,6 +1624,126 @@
     },
     {
       "activation_errors": null,
+      "capability": "Process.Context.current",
+      "errors": [
+        "Process.ContextUnavailable"
+      ],
+      "operation": "Process.Context.current",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Context.current"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Context.current"
+      ],
+      "runtime_negative": [
+        "TestProcessContextInvalidInitialInputs"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Context.current"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.EnvironmentAbsent"
+      ],
+      "operation": "Process.Context.environment_value",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Context.environment_value"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Context.environment_value"
+      ],
+      "runtime_negative": [
+        "TestProcessContextAbsentEnvironment"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Context.environment_value"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.InvalidContext"
+      ],
+      "operation": "Process.Context.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Context.new"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Context.new"
+      ],
+      "runtime_negative": [
+        "TestAdapterProcessConstructorValidation"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Context.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.InvalidContext"
+      ],
+      "operation": "Process.Context.override_environment",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Context.override_environment"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Context.override_environment"
+      ],
+      "runtime_negative": [
+        "TestProcessContextInvalidChanges"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Context.override_environment"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.InvalidContext"
+      ],
+      "operation": "Process.Context.with_directory",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Context.with_directory"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Context.with_directory"
+      ],
+      "runtime_negative": [
+        "TestProcessContextInvalidChanges"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Context.with_directory"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
+        "Process.InvalidContext"
+      ],
+      "operation": "Process.Context.without_environment",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Context.without_environment"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Context.without_environment"
+      ],
+      "runtime_negative": [
+        "TestProcessContextInvalidChanges"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Context.without_environment"
+    },
+    {
+      "activation_errors": null,
       "capability": "",
       "errors": [
         "Process.InvalidExecutable"
@@ -1641,6 +1761,27 @@
       ],
       "negative_applicability": "catalog_failure_or_activation",
       "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Executable.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "Process.Executable.resolve",
+      "errors": [
+        "Process.ExecutableAbsent",
+        "Process.DiscoveryFailed"
+      ],
+      "operation": "Process.Executable.resolve",
+      "positive": [
+        "TestRunBuiltinCatalog/Process.Executable.resolve"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Process.Executable.resolve"
+      ],
+      "runtime_negative": [
+        "TestProcessExecutableDiscoveryFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Process.Executable.resolve"
     },
     {
       "activation_errors": null,
@@ -2622,7 +2763,8 @@
       "tests": [
         "TestAdapterProcessPolicyAcceptsInertCompilerInputs",
         "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs",
-        "TestAdapterProcessPolicyRejectsFlagsForOtherCommands"
+        "TestAdapterProcessPolicyRejectsFlagsForOtherCommands",
+        "TestProcessLauncherRejectsMalformedFrames"
       ],
       "oracle": "explicit_process_policy;no_parent_authority",
       "boundary": "compiler_cli"
@@ -2642,10 +2784,55 @@
       "tests": [
         "TestAdapterProcessPolicyAcceptsInertCompilerInputs",
         "TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs",
-        "TestAdapterProcessPolicyRejectsFlagsForOtherCommands"
+        "TestAdapterProcessPolicyRejectsFlagsForOtherCommands",
+        "TestProcessContextInheritedWorkingDirectoryIgnoresPWD"
       ],
       "oracle": "explicit_process_policy;no_parent_authority",
       "boundary": "compiler_cli"
+    },
+    {
+      "id": "--process-write-root",
+      "tests": [
+        "TestProcessCleanupPolicyDiagnostics",
+        "TestProcessCleanupDataWrites",
+        "TestProcessCleanupRechecksNamespaceAtActivation",
+        "TestProcessCleanupResourceLimitsKeepConfirmedMutation",
+        "TestProcessCleanupInitialExecutableScope",
+        "TestProcessCleanupScopedPathCharacters",
+        "TestLLVMProcessCleanupAdmissionParity"
+      ],
+      "oracle": "per_executable_mutation_scope;outside_alias_denial;activation_admission",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--process-prune-root",
+      "tests": [
+        "TestProcessCleanupPolicyDiagnostics",
+        "TestProcessCleanupPruneHardlink",
+        "TestProcessCleanupPruneAliasWithSeparateWriteRoot",
+        "TestProcessPackageCleanupCommands",
+        "TestProcessPackageCleanupPipProbe",
+        "TestProcessPackageCleanupExample",
+        "TestProcessPackageCleanupRegisteredInterpreter",
+        "TestProcessCleanupScopeLimits",
+        "TestLLVMProcessCleanupAdmissionParity"
+      ],
+      "oracle": "namespace_removal_only;exact_package_arguments;typed_nonzero_status",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--process-unix-endpoint",
+      "tests": [
+        "TestProcessCleanupPolicyDiagnostics",
+        "TestProcessCleanupExactEndpoint",
+        "TestProcessDockerCleanupRequests",
+        "TestProcessDockerCancellationKeepsConfirmedDaemonEffect",
+        "TestProcessDockerFailureResponses",
+        "TestProcessCleanupScopeLimits",
+        "TestLLVMProcessCleanupAdmissionParity"
+      ],
+      "oracle": "exact_unix_endpoint;daemon_authority_separate_from_client_lifetime",
+      "boundary": "cli_interpreter_and_native"
     },
     {
       "id": "--allow-device",
@@ -3247,6 +3434,9 @@
     "TestNativeBuildPaths": [
       "TestNativeBuildPaths"
     ],
+    "TestNativeCanonicalBuild": [
+      "TestNativeCanonicalBuild"
+    ],
     "TestNativeCrossTarget": [
       "TestNativeCrossTarget"
     ],
@@ -3258,6 +3448,9 @@
     ],
     "TestNativeMetalSoftwareArtifact": [
       "TestNativeMetalSoftwareArtifact"
+    ],
+    "TestNativeRejectsBackendSelection": [
+      "TestNativeRejectsBackendSelection"
     ],
     "TestNativeRemovedSourceDiagnostics": [
       "TestNativeRemovedSourceDiagnostics"
@@ -3292,6 +3485,78 @@
     ],
     "TestParserExternalInputs": [
       "TestParserExternalInputs"
+    ],
+    "TestProcessCleanupPolicyDiagnostics": [
+      "TestProcessCleanupPolicyDiagnostics"
+    ],
+    "TestLLVMProcessCleanupAdmissionParity": [
+      "TestLLVMProcessCleanupAdmissionParity"
+    ],
+    "TestProcessCleanupScopeLimits": [
+      "TestProcessCleanupScopeLimits"
+    ],
+    "TestProcessLauncherRejectsMalformedFrames": [
+      "TestProcessLauncherRejectsMalformedFrames"
+    ],
+    "TestProcessCleanupScopedPathCharacters": [
+      "TestProcessCleanupScopedPathCharacters"
+    ],
+    "TestProcessDockerFailureResponses": [
+      "TestProcessDockerFailureResponses"
+    ],
+    "TestProcessCleanupResourceLimitsKeepConfirmedMutation": [
+      "TestProcessCleanupResourceLimitsKeepConfirmedMutation"
+    ],
+    "TestProcessCleanupInitialExecutableScope": [
+      "TestProcessCleanupInitialExecutableScope"
+    ],
+    "TestProcessPackageCleanupPipProbe": [
+      "TestProcessPackageCleanupPipProbe"
+    ],
+    "TestProcessPackageCleanupExample": [
+      "TestProcessPackageCleanupExample"
+    ],
+    "TestProcessPackageCleanupRegisteredInterpreter": [
+      "TestProcessPackageCleanupRegisteredInterpreter"
+    ],
+    "TestProcessCleanupDataWrites": [
+      "TestProcessCleanupDataWrites"
+    ],
+    "TestProcessCleanupRechecksNamespaceAtActivation": [
+      "TestProcessCleanupRechecksNamespaceAtActivation"
+    ],
+    "TestProcessCleanupPruneHardlink": [
+      "TestProcessCleanupPruneHardlink"
+    ],
+    "TestProcessCleanupPruneAliasWithSeparateWriteRoot": [
+      "TestProcessCleanupPruneAliasWithSeparateWriteRoot"
+    ],
+    "TestProcessCleanupExactEndpoint": [
+      "TestProcessCleanupExactEndpoint"
+    ],
+    "TestProcessPackageCleanupCommands": [
+      "TestProcessPackageCleanupCommands"
+    ],
+    "TestProcessDockerCleanupRequests": [
+      "TestProcessDockerCleanupRequests"
+    ],
+    "TestProcessDockerCancellationKeepsConfirmedDaemonEffect": [
+      "TestProcessDockerCancellationKeepsConfirmedDaemonEffect"
+    ],
+    "TestProcessContextAbsentEnvironment": [
+      "TestProcessContextAbsentEnvironment"
+    ],
+    "TestProcessContextInheritedWorkingDirectoryIgnoresPWD": [
+      "TestProcessContextInheritedWorkingDirectoryIgnoresPWD"
+    ],
+    "TestProcessContextInvalidChanges": [
+      "TestProcessContextInvalidChanges"
+    ],
+    "TestProcessContextInvalidInitialInputs": [
+      "TestProcessContextInvalidInitialInputs"
+    ],
+    "TestProcessExecutableDiscoveryFailures": [
+      "TestProcessExecutableDiscoveryFailures"
     ],
     "TestRunBuiltinCatalog/Autodiff.grad": [
       "TestRunBuiltinCatalog/Autodiff.grad"
@@ -3544,8 +3809,29 @@
     "TestRunBuiltinCatalog/Process.Command.new": [
       "TestRunBuiltinCatalog/Process.Command.new"
     ],
+    "TestRunBuiltinCatalog/Process.Context.current": [
+      "TestRunBuiltinCatalog/Process.Context.current"
+    ],
+    "TestRunBuiltinCatalog/Process.Context.environment_value": [
+      "TestRunBuiltinCatalog/Process.Context.environment_value"
+    ],
+    "TestRunBuiltinCatalog/Process.Context.new": [
+      "TestRunBuiltinCatalog/Process.Context.new"
+    ],
+    "TestRunBuiltinCatalog/Process.Context.override_environment": [
+      "TestRunBuiltinCatalog/Process.Context.override_environment"
+    ],
+    "TestRunBuiltinCatalog/Process.Context.with_directory": [
+      "TestRunBuiltinCatalog/Process.Context.with_directory"
+    ],
+    "TestRunBuiltinCatalog/Process.Context.without_environment": [
+      "TestRunBuiltinCatalog/Process.Context.without_environment"
+    ],
     "TestRunBuiltinCatalog/Process.Executable.new": [
       "TestRunBuiltinCatalog/Process.Executable.new"
+    ],
+    "TestRunBuiltinCatalog/Process.Executable.resolve": [
+      "TestRunBuiltinCatalog/Process.Executable.resolve"
     ],
     "TestRunBuiltinCatalog/Range.contains": [
       "TestRunBuiltinCatalog/Range.contains"
@@ -3928,8 +4214,29 @@
     "TestSemanticBuiltinRejections/Process.Command.new": [
       "TestSemanticBuiltinRejections/Process.Command.new"
     ],
+    "TestSemanticBuiltinRejections/Process.Context.current": [
+      "TestSemanticBuiltinRejections/Process.Context.current"
+    ],
+    "TestSemanticBuiltinRejections/Process.Context.environment_value": [
+      "TestSemanticBuiltinRejections/Process.Context.environment_value"
+    ],
+    "TestSemanticBuiltinRejections/Process.Context.new": [
+      "TestSemanticBuiltinRejections/Process.Context.new"
+    ],
+    "TestSemanticBuiltinRejections/Process.Context.override_environment": [
+      "TestSemanticBuiltinRejections/Process.Context.override_environment"
+    ],
+    "TestSemanticBuiltinRejections/Process.Context.with_directory": [
+      "TestSemanticBuiltinRejections/Process.Context.with_directory"
+    ],
+    "TestSemanticBuiltinRejections/Process.Context.without_environment": [
+      "TestSemanticBuiltinRejections/Process.Context.without_environment"
+    ],
     "TestSemanticBuiltinRejections/Process.Executable.new": [
       "TestSemanticBuiltinRejections/Process.Executable.new"
+    ],
+    "TestSemanticBuiltinRejections/Process.Executable.resolve": [
+      "TestSemanticBuiltinRejections/Process.Executable.resolve"
     ],
     "TestSemanticBuiltinRejections/Process.Termination.exit_code": [
       "TestSemanticBuiltinRejections/Process.Termination.exit_code"
@@ -4172,12 +4479,6 @@
     ],
     "TestVerifierRejections": [
       "TestVerifierRejections"
-    ],
-    "TestNativeCanonicalBuild": [
-      "TestNativeCanonicalBuild"
-    ],
-    "TestNativeRejectsBackendSelection": [
-      "TestNativeRejectsBackendSelection"
     ]
   }
 }
