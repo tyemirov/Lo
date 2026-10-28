@@ -10,6 +10,8 @@ import (
 // SnapshotWeight calculates diagnostic value weight before snapshot allocation.
 func SnapshotWeight(v Value) uint64 {
 	switch x := v.(type) {
+	case HostInvocation:
+		return hostInvocationSnapshotWeight(x)
 	case ProcessResult:
 		return addWeight(48, x.Termination().Weight())
 	case ProcessCommand:
@@ -35,6 +37,10 @@ func SnapshotWeight(v Value) uint64 {
 		return addWeight(16, SnapshotWeight(x.FieldsRecord()))
 	case FileEntry:
 		return addWeight(16, x.FieldsRecord().Weight())
+	case FileDirectoryObservation:
+		return addWeight(16, SnapshotWeight(x.FieldsRecord()))
+	case FileScan:
+		return addWeight(16, SnapshotWeight(x.FieldsRecord()))
 	case RemovalEffect:
 		return addWeight(16, x.Weight())
 	case OptimizerState:

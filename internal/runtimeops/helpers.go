@@ -148,6 +148,13 @@ func ActivationError(target value.Target, err error, span source.Span) (value.Er
 		if _, progress, ok := execution.RemovalDetails(err); ok {
 			fields = append(fields, value.Field{Name: "progress", Value: progress})
 		}
+		guard, guardErr := execution.GuardRejectionDetails(err)
+		if guardErr != nil {
+			return nil, guardErr
+		}
+		if guard != nil {
+			fields = append(fields, value.Field{Name: "guard", Value: guard})
+		}
 		input = must(value.NewRecord(fields))
 	case value.ContentEffect:
 		operation = v.Operation().Capability()

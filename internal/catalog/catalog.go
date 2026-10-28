@@ -28,6 +28,7 @@ const (
 	TensorBundleOperation
 	OptimizerOperation
 	CheckpointOperation
+	CheckedRemovalConstructor
 )
 
 type Boundary uint8
@@ -225,8 +226,10 @@ func (o operation) Capability() string {
 		return FileWriteCapability
 	case FileAppend:
 		return FileAppendCapability
-	case FileRemove:
+	case FileRemove, FileRemoveChecked:
 		return FileRemoveCapability
+	case FileDirectory, FileScan:
+		return FileList
 	}
 	switch o.boundary {
 	case Read, Effect:
@@ -425,6 +428,7 @@ func build() map[string]Operation {
 	addOptimizers(m)
 	addCheckpoints(m)
 	addComputeFailures(m)
+	addObservations(m, fixed)
 	return m
 }
 func Lookup(name string) (Operation, bool) { o, ok := operations[name]; return o, ok }
@@ -441,7 +445,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "Process", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
+	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
 		return true
 	}
 	return false

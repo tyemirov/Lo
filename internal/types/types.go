@@ -24,6 +24,9 @@ const (
 	ErrorKind              Kind = "Error"
 	PathKind               Kind = "File.Path"
 	FileEntryKind          Kind = "File.Entry"
+	FileDirectoryKind      Kind = "File.Directory"
+	FileScanKind           Kind = "File.Scan"
+	HostInvocationKind     Kind = "Host.Invocation"
 	HeadersKind            Kind = "HTTP.Headers"
 	RequestKind            Kind = "HTTP.Request"
 	URLKind                Kind = "HTTP.URL"
@@ -131,6 +134,9 @@ func Device() Type            { return atom(DeviceKind) }
 func Error() Type             { return atom(ErrorKind) }
 func Path() Type              { return atom(PathKind) }
 func FileEntry() Type         { return atom(FileEntryKind) }
+func FileDirectory() Type     { return atom(FileDirectoryKind) }
+func FileScan() Type          { return atom(FileScanKind) }
+func HostInvocation() Type    { return atom(HostInvocationKind) }
 func Headers() Type           { return atom(HeadersKind) }
 func HeaderEntries() List {
 	return must(NewList(must(NewRecord([]Field{{Name: "name", Type: String()}, {Name: "value", Type: Bytes()}}))))
@@ -156,7 +162,7 @@ func ProcessTermination() Type { return atom(ProcessTerminationKind) }
 func AnyRecord() Type          { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind:
+	case URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, HostInvocationKind:
 		return atom(name), true
 	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true
@@ -310,6 +316,31 @@ func FieldType(t Type, name string) (Type, bool) {
 		return nil, false
 	}
 	switch t.Kind() {
+	case HostInvocationKind:
+		switch name {
+		case "arguments":
+			return must(NewList(String())), true
+		case "home":
+			return Path(), true
+		case "real_uid", "effective_uid", "now_unix_ns":
+			return Int(), true
+		}
+	case FileDirectoryKind:
+		switch name {
+		case "path":
+			return Path(), true
+		case "owner_uid", "accessed_unix_ns", "modified_unix_ns", "changed_unix_ns":
+			return Int(), true
+		}
+	case FileScanKind:
+		switch name {
+		case "directory":
+			return FileDirectory(), true
+		case "entries":
+			return must(NewList(FileEntry())), true
+		case "vanished_names":
+			return must(NewList(String())), true
+		}
 	case ProcessResultKind:
 		switch name {
 		case "termination":
@@ -346,7 +377,7 @@ func FieldType(t Type, name string) (Type, bool) {
 			return Path(), true
 		case "name", "kind":
 			return String(), true
-		case "size_bytes", "modified_unix_ns", "link_count":
+		case "size_bytes", "modified_unix_ns", "link_count", "owner_uid", "accessed_unix_ns", "changed_unix_ns":
 			return Int(), true
 		}
 	case HeadersKind:

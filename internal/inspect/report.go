@@ -128,18 +128,24 @@ type description struct {
 	Expression   string      `json:"expression,omitempty"`
 }
 type resourceData struct {
-	ID         string          `json:"id"`
-	Origin     string          `json:"origin,omitempty"`
-	Operation  string          `json:"operation"`
-	Context    contextID       `json:"context"`
-	Entry      string          `json:"entry,omitempty"`
-	Node       nodeID          `json:"node"`
-	Target     description     `json:"target"`
-	Method     *description    `json:"method,omitempty"`
-	Process    *processData    `json:"process,omitempty"`
-	Conditions []condition     `json:"conditions"`
-	Handler    identity.FlowID `json:"handler,omitempty"`
-	OnError    identity.FlowID `json:"on_error,omitempty"`
+	ID         string            `json:"id"`
+	Origin     string            `json:"origin,omitempty"`
+	Operation  string            `json:"operation"`
+	Context    contextID         `json:"context"`
+	Entry      string            `json:"entry,omitempty"`
+	Node       nodeID            `json:"node"`
+	Target     description       `json:"target"`
+	Method     *description      `json:"method,omitempty"`
+	Process    *processData      `json:"process,omitempty"`
+	Guard      *removalGuardData `json:"guard,omitempty"`
+	Conditions []condition       `json:"conditions"`
+	Handler    identity.FlowID   `json:"handler,omitempty"`
+	OnError    identity.FlowID   `json:"on_error,omitempty"`
+}
+type removalGuardData struct {
+	Flow     identity.FlowID `json:"flow"`
+	Phase    string          `json:"phase"`
+	Contexts []description   `json:"contexts"`
 }
 type targetReference struct {
 	ID         targetID    `json:"id"`
@@ -214,6 +220,9 @@ func (r *report) Text() string {
 			}
 			if r.Handler != "" {
 				fmt.Fprintf(&b, " handler=%s onError=%s", r.Handler, r.OnError)
+			}
+			if r.Guard != nil {
+				fmt.Fprintf(&b, " guard=%s phase=%s", r.Guard.Flow, r.Guard.Phase)
 			}
 			fmt.Fprintf(&b, " at %s\n", location(r.Target.Span))
 		}

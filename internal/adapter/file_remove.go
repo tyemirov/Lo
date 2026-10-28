@@ -92,7 +92,7 @@ func (f *files) remove(ctx context.Context, target value.RemovalEffect) (value.V
 		if err := ctx.Err(); err != nil {
 			return nil, receipt.failure(catalog.RemoveFailed, index, removalPreflight, err)
 		}
-		if err := f.revalidate(root, item.(value.FileEntry)); err != nil {
+		if err := f.revalidateGuard(ctx, session, root, item.(value.FileEntry), target, removalPreflight, index); err != nil {
 			return nil, receipt.failure(revalidationKind(err), index, removalPreflight, err)
 		}
 	}
@@ -108,7 +108,7 @@ func (f *files) remove(ctx context.Context, target value.RemovalEffect) (value.V
 		if current != directory {
 			return nil, receipt.failure(catalog.EntryChanged, index, removalStage, errors.New("observed directory identity changed"))
 		}
-		if err := f.revalidate(root, entry); err != nil {
+		if err := f.revalidateGuard(ctx, session, root, entry, target, removalStage, index); err != nil {
 			return nil, receipt.failure(revalidationKind(err), index, removalStage, err)
 		}
 		name := entry.FieldsRecord().Field("name").(value.Text).Text()
@@ -141,7 +141,7 @@ func (f *files) recordRemoval(session execution.Session, receipt *removalReceipt
 	f.mu.Unlock()
 }
 
-func (f *files) revalidate(root *os.Root, entry value.FileEntry) error {
+func (f *files) revalidate(root *os.Root, entry value.FileEntry) (os.FileInfo, error) {
 	fields := entry.FieldsRecord()
 	name := fields.Field("name").(value.Text).Text()
 	info, err := f.io.Lstat(root, name)
@@ -150,16 +150,43 @@ func (f *files) revalidate(root *os.Root, entry value.FileEntry) error {
 		if errors.Is(err, os.ErrNotExist) {
 			kind = catalog.EntryChanged
 		}
-		return execution.NewFileError(kind, nil, nil, fmt.Errorf("revalidate %q: %w", name, err))
+		return nil, execution.NewFileError(kind, nil, nil, fmt.Errorf("revalidate %q: %w", name, err))
 	}
 	identity, _, err := nativeFileIdentity(info)
 	if err != nil {
-		return execution.NewFileError(catalog.RemoveFailed, nil, nil, err)
+		return nil, execution.NewFileError(catalog.RemoveFailed, nil, nil, err)
 	}
 	observation := entry.Observation()
 	modified := info.ModTime().UnixNano()
 	if info.Mode().Type() != 0 || identity != observation.Identity || !time.Unix(0, modified).Equal(info.ModTime()) || fields.Field("size_bytes").(value.Integer).Big().Cmp(big.NewInt(info.Size())) != 0 || fields.Field("modified_unix_ns").(value.Integer).Big().Cmp(big.NewInt(modified)) != 0 {
-		return fmt.Errorf("selected file %q changed since discovery", name)
+		return nil, fmt.Errorf("selected file %q changed since discovery", name)
+	}
+	return info, nil
+}
+
+func (f *files) revalidateGuard(ctx context.Context, session execution.Session, root *os.Root, entry value.FileEntry, target value.RemovalEffect, phase string, index int) error {
+	info, err := f.revalidate(root, entry)
+	if err != nil {
+		return err
+	}
+	guard, guarded := target.Guard()
+	if !guarded {
+		return nil
+	}
+	name := entry.FieldsRecord().Field("name").(value.Text).Text()
+	current, err := observeEntry(session, entry.Observation().Directory, name, info, 0)
+	if err != nil {
+		return execution.NewFileError(catalog.RemoveFailed, nil, nil, err)
+	}
+	if err := session.ChargeValue(current); err != nil {
+		return err
+	}
+	eligible, err := execution.EvaluateRemovalGuard(ctx, guard, entry, current, phase, index)
+	if err != nil {
+		return err
+	}
+	if !eligible {
+		return execution.NewGuardRejection(guard, phase, index)
 	}
 	return nil
 }

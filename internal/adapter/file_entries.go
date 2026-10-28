@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
@@ -119,13 +118,13 @@ func (f *files) exactGrant(roots []grant, operation, path string) (grant, value.
 		}
 		if candidate.root == nil {
 			_, err := os.Lstat(path)
-			if operation == catalog.FileList && errors.Is(err, os.ErrNotExist) {
+			if (operation == catalog.FileList || operation == catalog.FileDirectory || operation == catalog.FileScan) && errors.Is(err, os.ErrNotExist) {
 				return grant{}, value.FileDirectory{}, execution.NewFileError(catalog.DirectoryAbsent, nil, nil, fmt.Errorf("directory %q is absent", path))
 			}
 			return grant{}, value.FileDirectory{}, execution.Denied(operation, path)
 		}
 		if _, err := exactPath(path); err != nil {
-			if operation == catalog.FileList && errors.Is(err, os.ErrNotExist) {
+			if (operation == catalog.FileList || operation == catalog.FileDirectory || operation == catalog.FileScan) && errors.Is(err, os.ErrNotExist) {
 				return grant{}, value.FileDirectory{}, execution.NewFileError(catalog.DirectoryAbsent, nil, nil, err)
 			}
 			return grant{}, value.FileDirectory{}, execution.Denied(operation, path)
@@ -305,9 +304,9 @@ func observeEntry(session execution.Session, directory value.FileDirectory, name
 	if err != nil {
 		return nil, err
 	}
-	modified := info.ModTime().UnixNano()
-	if !time.Unix(0, modified).Equal(info.ModTime()) {
-		return nil, errors.New("modification time exceeds Unix nanosecond range")
+	metadata, err := nativeFileMetadata(info)
+	if err != nil {
+		return nil, err
 	}
 	kind := value.OtherFile
 	switch info.Mode().Type() {
@@ -330,14 +329,15 @@ func observeEntry(session execution.Session, directory value.FileDirectory, name
 	if err != nil {
 		return nil, err
 	}
-	sizeValue, modifiedValue := value.Int64(info.Size()), value.Int64(modified)
+	sizeValue, modifiedValue := value.Int64(info.Size()), value.Int64(metadata.modified)
+	ownerValue, accessedValue, changedValue := value.Int64(int64(metadata.owner)), value.Int64(metadata.accessed), value.Int64(metadata.changed)
 	// Reserve the exact expanded entry representation before its record allocation.
 	weight := uint64(16 + 128 + len(directory.Path) + 16)
-	weight += uint64(len("path") + len("name") + len("kind") + len("size_bytes") + len("modified_unix_ns") + len("link_count"))
-	weight += pathValue.Weight() + nameValue.Weight() + uint64(16+len(kind)) + sizeValue.Weight() + modifiedValue.Weight() + linkValue.Weight()
+	weight += uint64(len("path") + len("name") + len("kind") + len("size_bytes") + len("modified_unix_ns") + len("link_count") + len("owner_uid") + len("accessed_unix_ns") + len("changed_unix_ns"))
+	weight += pathValue.Weight() + nameValue.Weight() + uint64(16+len(kind)) + sizeValue.Weight() + modifiedValue.Weight() + linkValue.Weight() + ownerValue.Weight() + accessedValue.Weight() + changedValue.Weight()
 	if err := session.ReserveFile(0, priorWeight+weight); err != nil {
 		return nil, err
 	}
 	observation := value.FileObservation{Session: session.FileSession(), Directory: directory, Identity: identity}
-	return value.NewFileEntry(observation, pathValue, nameValue, kind, sizeValue, modifiedValue, linkValue)
+	return value.NewFileEntry(observation, pathValue, nameValue, kind, sizeValue, modifiedValue, linkValue, ownerValue, accessedValue, changedValue)
 }

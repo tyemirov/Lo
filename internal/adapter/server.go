@@ -93,6 +93,7 @@ func NewServers(p execution.Program, files execution.Boundary, policy ListenPoli
 }
 func (s *servers) Start(ctx context.Context) (value.Value, error) {
 	ctx = execution.CaptureProcessContext(ctx)
+	ctx = execution.CaptureHostInvocation(ctx, nil)
 	s.mu.Lock()
 	if s.started || s.stopping {
 		s.mu.Unlock()
@@ -100,6 +101,11 @@ func (s *servers) Start(ctx context.Context) (value.Value, error) {
 	}
 	s.started = true
 	requestContext, err := execution.InheritProcessContext(s.requestContext, ctx)
+	if err != nil {
+		s.mu.Unlock()
+		return nil, err
+	}
+	requestContext, err = execution.InheritHostInvocation(requestContext, ctx)
 	if err != nil {
 		s.mu.Unlock()
 		return nil, err
@@ -125,6 +131,20 @@ func (s *servers) Read(ctx context.Context, path value.Text) (value.Bytes, error
 }
 func (s *servers) List(ctx context.Context, path value.Text) (value.List, error) {
 	return s.files.List(ctx, path)
+}
+func (s *servers) Directory(ctx context.Context, path value.Text) (value.Value, error) {
+	observer, ok := s.files.(execution.FileObserver)
+	if !ok {
+		return nil, execution.HostFailure(catalog.FileDirectory, path.Text(), errors.New("File boundary has no observation adapter"))
+	}
+	return observer.Directory(ctx, path)
+}
+func (s *servers) Scan(ctx context.Context, path value.Text) (value.Value, error) {
+	observer, ok := s.files.(execution.FileObserver)
+	if !ok {
+		return nil, execution.HostFailure(catalog.FileScan, path.Text(), errors.New("File boundary has no observation adapter"))
+	}
+	return observer.Scan(ctx, path)
 }
 func (s *servers) OpenPaths(ctx context.Context, path value.Text) (value.List, error) {
 	return s.files.OpenPaths(ctx, path)
