@@ -91,6 +91,7 @@ exports:
       - _getcwd
       - _getentropy
       - _getenv
+      - _geteuid
       - _getpeereid
       - _getpeername
       - _getpid
