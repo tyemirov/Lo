@@ -1,0 +1,47 @@
+flow EmptyCommands() -> List<Process.Command> {
+    return List.new()
+}
+
+flow ExecutableError(error: Error) -> Record{commands: List<Process.Command>!} {
+    return Record.new(commands: Match.new(error.kind,
+        "Process.ExecutableAbsent": EmptyCommands(),
+        _: error
+    ))
+}
+
+flow Describe(context: Process.Context, name: String, arguments: List<String>) -> Record{commands: List<Process.Command>!} onError ExecutableError {
+    executable = Process.Executable.resolve(context, name)
+    command = Process.Command.new(context, executable, arguments, Bytes.new(""))
+    return Record.new(commands: List.new(command))
+}
+
+flow Execute(previous: Int, command: Process.Command) -> Int! {
+    result = commit command
+    return Process.Termination.exit_code(result.termination)
+}
+
+flow Cleanup(context: Process.Context, name: String, arguments: List<String>) -> Record{available: Bool, exit_code: Int}! {
+    description = Describe(context, name, arguments)
+    commands = description.commands
+    code = Flow.fold(commands, 0, Execute)
+    return Record.new(available: Math.eq(List.length(commands), 1), exit_code: code)
+}
+
+flow CleanupContext() -> Process.Context! {
+    inherited = Process.Context.current()
+    return Process.Context.override_environment(inherited, Map.new(
+        Record.new(key: "CI", value: "1"),
+        Record.new(key: "HOMEBREW_NO_AUTO_UPDATE", value: "1"),
+        Record.new(key: "HOMEBREW_NO_ANALYTICS", value: "1"),
+        Record.new(key: "GOTOOLCHAIN", value: "local"),
+        Record.new(key: "MISE_AUTO_INSTALL", value: "0"),
+        Record.new(key: "UV_PYTHON_DOWNLOADS", value: "never")
+    ))
+}
+
+flow Main() -> Record{available: Bool, exit_code: Int}! {
+    context = CleanupContext()
+    return Cleanup(context, "npm", List.new("cache", "clean", "--force"))
+}
+
+return Main()

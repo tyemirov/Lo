@@ -410,17 +410,21 @@ This allowance does not include another repository, external task data, or exter
 All added sources, fixtures, caches, and output remain inside Lo.
 The abandoned intentional-crash experiment is optional and establishes no native impossibility.
 
-This section defines pure values, the shared lifecycle, and the selected native execution profile.
+This section defines immutable contexts, pure values, discovery, the shared lifecycle, and selected native execution profiles.
 Pure construction and source inspection need no executable access.
 Native host qualification and all 24 canonical public activation cases passed. Final stack CI and independent completion review passed.
 
 Process owns bounded execution of an explicitly described child program.
-It does not expose shell source, ambient executable discovery, or implicit environment inheritance.
+F024 adds explicit context observation, controlled executable discovery, and per-executable cleanup scopes.
+The [F024 evidence](evidence/process-context-cleanup/checkpoint.json) records interpreter and native acceptance and stack validation results.
+The API keeps context data separate from host authority and shell source.
 
 | Type or operation | Selected contract |
 | --- | --- |
+| `Process.Context` | An immutable environment and absolute working directory, without host authority. |
 | `Process.Executable.new(path: File.Path) -> Process.Executable!` | Validate an absolute executable description without access or launch. |
-| `Process.Command.new(executable, arguments, environment, directory, stdin) -> Process.Command!` | Construct an inert command with `Process.Executable`, `List<String>`, `Map<String, String>`, `File.Path`, and `Bytes` inputs. |
+| `Process.Executable.resolve(context: Process.Context, name: String) -> Process.Executable!` | Discover the first executable candidate under the context's search rules. |
+| `Process.Command.new(context, executable, arguments, stdin) -> Process.Command!` | Construct an inert command with `Process.Context`, `Process.Executable`, `List<String>`, and `Bytes` inputs. |
 | Bound command commit | Return `Process.Result` after bounded execution and output capture complete. |
 | `Process.Result` runtime value | Exact fields: `termination: Process.Termination`, `stdout: Bytes`, `stderr: Bytes`. |
 | `Process.Termination` | A nominal runtime value with `kind: String`, restricted to `exited` or `signaled`. |
@@ -440,13 +444,53 @@ Environment names must be nonempty and contain neither NUL nor `=`.
 The constructors validate these inputs without filesystem access.
 Constructor errors are distinct from executable access and launch failures.
 
-The program supplies the working directory and the full environment.
+The command context supplies the working directory and full environment.
 Arguments contain the values after `argv[0]`.
 The runtime supplies the selected executable path as `argv[0]`.
 It encodes argument strings as UTF-8 without shell expansion or quoting changes.
 It sends the specified stdin bytes, then closes that channel.
 Only declared channels and necessary runtime control channels reach the child.
 An empty input is explicit and closes without terminal interaction.
+
+### Immutable Contexts And Executable Discovery
+
+The runner captures the environment and physical working directory once before program evaluation.
+Every `Process.Context.current()` observation uses those initial inputs, including observations in later server callbacks.
+The inherited `PWD` value remains environment data and does not select the physical directory.
+Go embeddings can inject inputs through the execution context.
+Native embeddings can call `lo_context_set_process_context` before evaluation with canonical JSON context inputs.
+The native setter copies the supplied input bytes.
+
+| Operation | Effect and result |
+| --- | --- |
+| `Process.Context.current()` | Host observation, `Process.Context!`. Unavailable inputs produce `Process.ContextUnavailable`. |
+| `Process.Context.new(environment, directory)` | Pure, `Process.Context!`. Validate explicit `Map<String, String>` and `File.Path` inputs. |
+| `Process.Context.override_environment(context, updates)` | Pure, `Process.Context!`. Replace supplied names and keep unspecified variables unchanged. |
+| `Process.Context.without_environment(context, names)` | Pure, `Process.Context!`. Remove listed names, including names already absent. |
+| `Process.Context.with_directory(context, directory)` | Pure, `Process.Context!`. Select an absolute directory without access to it. |
+| `Process.Context.environment_value(context, name)` | Pure, `String!`. An absent name produces `Process.EnvironmentAbsent`. |
+
+Invalid context construction or changes produce `Process.InvalidContext`.
+Each change returns a new value and leaves its input unchanged.
+An explicit empty environment remains empty. An empty variable value differs from an absent variable.
+
+Automatic output contains origin and redaction status, without context environment or directory payloads.
+Nested diagnostic snapshots also remove those payloads structurally.
+Explicit program lookup and output of a selected environment value remain available.
+
+`Process.Executable.resolve` is a host observation. Pure callbacks cannot call it or `Process.Context.current`.
+For a name without `/`, discovery examines the context's `PATH` in order.
+Missing `PATH` produces `Process.ExecutableAbsent`.
+An empty, relative, or noncanonical search entry produces `Process.DiscoveryFailed`.
+A name with `/` must be canonical and absolute.
+
+Discovery resolves symlinks and returns the first executable candidate's resolved path.
+An exhausted search produces `Process.ExecutableAbsent`. Other discovery failures produce `Process.DiscoveryFailed`.
+
+Discovery selects a candidate without execution authorization.
+Activation requires an exact grant for the selected resolved path, plus identity verification through launch.
+An unauthorized first candidate produces `runtime.capability-denied`, without a search for a later authorized candidate.
+Replacement before activation fails identity verification even when replacement bytes have the approved digest.
 
 ### Pure Process Phase
 
@@ -457,12 +501,13 @@ It adds pure constructors, inspection, and host rejection without child executio
 | Operation | Result |
 | --- | --- |
 | `Process.Executable.new(path: File.Path)` | `Process.Executable!` |
-| `Process.Command.new(executable: Process.Executable, arguments: List<String>, environment: Map<String, String>, directory: File.Path, stdin: Bytes)` | `Process.Command!` |
+| `Process.Command.new(context: Process.Context, executable: Process.Executable, arguments: List<String>, stdin: Bytes)` | `Process.Command!` |
 
 Executable and directory paths must be absolute and contain no NUL.
 Arguments and environment values must contain no NUL.
 Environment names must be nonempty and contain neither NUL nor `=`.
-Construction keeps exact lexical data without access, path resolution, shell expansion, or environment inheritance.
+Pure construction keeps exact lexical data without access, path resolution, or shell expansion.
+The context supplies the environment and directory. Construction does not read additional host inputs.
 
 Command activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
@@ -472,14 +517,20 @@ Without Process grants, ordinary execution remains available. Only attempted Pro
 Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
 Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
-Explicit program output keeps those values.
+Automatic context output and nested snapshots omit environment and directory payloads.
+Explicit lookup and output of selected environment values remain available.
 Inspection adds no access or launch authority.
+
 The inspector adds an optional `process` object to command targets and capabilities.
-It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
+It contains `context`, `executable`, `arguments`, and `stdin` input descriptions.
+The context contains `source` and `origin`, plus explicit environment, directory, base, updates, or removals when present.
+Origins are `inherited`, `explicit`, `derived`, or `dynamic`.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
 It also contains `execution_profile: {required: true, status: "unavailable"}`.
+
 Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
-Executable descriptions trace the supplied `File.Path`.
+Explicit executable descriptions trace the supplied `File.Path`.
+Discovery descriptions keep the context, name, and dynamic dependencies.
 Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
@@ -639,8 +690,13 @@ Parsing validates descriptions without filesystem access. The selected native pr
 | `--process-allow SHA256,ABSOLUTE_PATH` | Repeatable command grant with a 64-digit hexadecimal digest. |
 | `--process-launcher ABSOLUTE_PATH` | One trusted launcher path. The build must supply its expected identity before activation. |
 | `--process-read-root ABSOLUTE_PATH` | Repeatable child read root. The selected profile uses these roots for data reads and the working directory. |
+| `--process-write-root {"executable":"/absolute/tool","root":"/absolute/cache"}` | Repeatable data-write root for one exact granted initial executable. |
+| `--process-prune-root {"executable":"/absolute/tool","root":"/absolute/prune"}` | Repeatable namespace-removal root for one exact granted initial executable. |
+| `--process-unix-endpoint {"executable":"/absolute/tool","endpoint":"/absolute/socket"}` | Repeatable exact Unix socket endpoint for one granted initial executable. |
 
-A configured policy requires all three input categories.
+A configured policy requires command grants, one launcher, and child read roots.
+Cleanup scope inputs are optional and use strict JSON objects.
+Parsing rejects duplicate or unknown fields, nontext values, trailing input, and malformed Unicode.
 Paths must be clean, absolute, and free of NUL.
 The grant separator follows the digest. Commas after that separator are part of the path.
 Duplicate command paths, read roots, and launcher options are invalid.
@@ -660,14 +716,58 @@ Native admission rejects those descriptions without target execution.
 | --- | --- |
 | Command grants | At most 16 exact path/digest grants. |
 | Child read roots | At most 16 roots. |
-| Arguments | At most 16 entries including `argv[0]`, so at most 15 supplied arguments. |
-| Environment | At most 16 `NAME=value` entries. |
-| Entry or path | At most 1024 UTF-8 bytes. The environment bound includes the entire `NAME=value` entry. |
-| Command body | At most 8192 bytes, including each entry's four-byte length prefix. |
+| Mutation roots | At most 16 combined write and prune roots per initial executable. |
+| Unix endpoints | At most 16 endpoints per initial executable, with at most 103 UTF-8 bytes per endpoint path. |
+| Arguments | At most 256 entries including `argv[0]`, so at most 255 supplied arguments. |
+| Environment | At most 4096 `NAME=value` entries. |
+| Argument or environment entry | At most 65536 UTF-8 bytes, including the complete `NAME=value` entry. |
+| Path | At most 1024 UTF-8 bytes. |
+| Command body | At most 1048576 bytes, including each entry's four-byte length prefix. |
 
 Native helper, command, read-root, and working-directory paths must equal their resolved paths.
-The selected native profile rejects paths with symlink resolution.
+Native policy paths must already be canonical. Executable discovery can resolve a symlink before exact grant selection.
 These restrictions do not change the constructors' lexical path contract.
+
+Scope-count limits fail backend configuration before helper, file, or registry I/O, even when the program never activates a command.
+
+### Cleanup Execution Profile
+
+The default scope denies child writes and network access.
+F024 adds explicit data-write roots, namespace-removal roots, and exact Unix socket endpoints for each initial executable.
+The host never combines scopes from different initial executables.
+Registered in-process exec chains retain the initial executable's scope, including interpreter-to-worker execution.
+Both profiles deny fork and `posix_spawn`. They do not support arbitrary package-manager process trees.
+
+Mutation roots must be canonical, disjoint within the selected scope, and contained in child read roots.
+They must not contain a registered executable or the trusted launcher.
+Unix endpoints must be canonical socket paths outside every mutation root.
+The host rechecks roots and endpoint kinds before activation.
+
+Data-write admission inventories all selected mutation roots through directory-relative operations, without symlink traversal.
+The inventory has a 100000-entry limit and a depth limit of 128.
+Changing directory identities or inconsistent hardlink counts fail admission.
+
+This profile uses the registry's trusted host model.
+External actors must not change the namespaces or hardlink sets of mutation roots during admission or command execution.
+Admission scans do not lock other host processes.
+
+Every hardlink name for a data-write inode must remain within data-write roots.
+An alias outside those roots, including an alias in a prune root, prevents activation.
+A prune-only scope can unlink an outside-linked name without changing the underlying file data.
+It cannot move that file into a data-write root or modify its contents.
+
+Profile enforcement protects registered images, outside files, sibling endpoints, and other executables' scopes.
+The trusted launcher configuration binds the initial executable and rejects a mismatched command frame.
+Command environment values never enter the launcher's fixed environment.
+
+Repository helpers qualify exact package arguments, six environment overrides, inherited variables, directory selection, closed input, and captured results.
+The package example preserves pure command descriptions and uses `Flow.fold` for explicit sequential activation.
+Wrapper fixtures qualify registered exec chains separately from denied forked and spawned descendants.
+
+A local Docker-like protocol records confirmed requests and checks responses over an authorized Unix endpoint.
+Client cancellation does not reverse a confirmed daemon effect.
+These fixtures do not qualify installed npm, Go, uv, pnpm, pip, Docker, or buildx implementations.
+The complete mac-cleanup workflow remains separate, as specified by its [application plan](mac-cleanup-plan.md).
 
 ### Execution Profile Prerequisite
 
@@ -803,7 +903,12 @@ Current acceptance and final stack CI passed. Independent completion review pass
 
 The selected host verifies the pinned helper and exact registered command identities.
 Continuous protection and ownership leases cover participating File mutations and the command lifetime.
-The profile denies child writes, network access, and descendants.
+The default profile denies child writes and network access. Both default and cleanup profiles deny forked and spawned descendants.
+
+The [F024 checkpoint](evidence/process-context-cleanup/checkpoint.json) adds context, discovery, transport, mutation, endpoint, and exec-chain qualification.
+The checkpoint records interpreter integration, native integration, semantic checks, qualification-tool checks, and their exact source identities.
+Metal-linked Process artifacts exercised no GPU operation.
+
 The launcher clears SDK-enumerated registered ports, bootstrap authority, and task/current-thread exception slots before admission.
 It preserves required runtime/self rights and rejects aliases of those protected endpoints.
 Local controls establish selected-slot normalization, without a named IPC-denial or arbitrary inheritance claim.

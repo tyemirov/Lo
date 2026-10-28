@@ -1,0 +1,283 @@
+{
+  "issue": "F024",
+  "review": {
+    "role": "independent_code_review_before_correction",
+    "scope": [
+      "F024 and I009 contracts",
+      "Go and Rust immutable Process.Context values and invocation capture",
+      "canonical four-argument Process.Command constructor",
+      "PATH discovery and first-candidate authorization",
+      "executable registry identity and launch admission",
+      "Go C Rust transport bounds and trusted launcher channel",
+      "inspection context origins and structural redaction",
+      "per-initial-executable data-write prune and Unix endpoint scopes",
+      "hardlink namespace admission and descendant denial",
+      "registered exec chains and retained initial scope",
+      "cancellation progress and cleanup evidence",
+      "package and Docker controlled fixtures and qualification limits",
+      "governance tool locations and standing review-agent authorization"
+    ],
+    "findings": [
+      {
+        "priority": "P3",
+        "status": "corrected",
+        "operation": "Process.Executable.resolve",
+        "input": "/",
+        "before": {
+          "interpreter": "Process.ExecutableAbsent",
+          "native": "Process.DiscoveryFailed"
+        },
+        "after": {
+          "interpreter": "Process.ExecutableAbsent",
+          "native": "Process.ExecutableAbsent"
+        },
+        "source": "runtime/native/src/process_context.rs:267",
+        "correction": "name != \"/\" && component validation",
+        "regression": "TestProcessExecutableDiscoveryFailures/root-directory",
+        "public_reproduction": {
+          "path": "_scratch/f024-20261027/review/discovery-results.json",
+          "sha256": "d74cbd753a40cb9f400c10c814d707ed820174778ad07eeedf207d0e22238389"
+        }
+      }
+    ],
+    "remaining_material_findings": [],
+    "governance_conflicts": [],
+    "qualification_limits": {
+      "external_package_managers": "unverified",
+      "installed_Docker_or_buildx": "unverified",
+      "arbitrary_descendants": "denied",
+      "external_concurrent_namespace_mutation": "excluded",
+      "Linux_Process_activation": "unavailable",
+      "live_Metal_GPU": "unverified",
+      "complete_mac_cleanup_workflow": "separate_acceptance"
+    }
+  },
+  "correction_sources": [
+    {
+      "path": "runtime/native/src/process_context.rs",
+      "sha256": "3836d6391c87f012523b00663dce3e57591367f6e317a9cdf0abaa9c238cb6e1"
+    },
+    {
+      "path": "tests/integration/process_context_test.go",
+      "sha256": "6a52de7abe140487103bf5513ea760d1a8c561e32e6041147136d52c63905986"
+    }
+  ],
+  "validation": {
+    "native_red": {
+      "command": "make -o process-launcher test-native LLVM_TOOLCHAIN=_scratch/f024-20261027/probe-runtime/toolchain.json NATIVE_RUNTIME_STATE=_scratch/f024-20261027/preparation TEST_ARGS='-run ^TestProcessExecutableDiscoveryFailures$$ -v'",
+      "exit_code": 2,
+      "expected_failed_subtest": "root-directory",
+      "log": {
+        "path": "_scratch/f024-20261027/review/discovery-native-red.log",
+        "sha256": "babea92265bcb5817eddd9696d583565354ee808c74d38fd5f1a2a4036f7ec57"
+      }
+    },
+    "interpreter_green": {
+      "command": "make -o process-launcher test-integration LLVM_TOOLCHAIN=_scratch/f024-20261027/probe-runtime/toolchain.json TEST_ARGS='-run ^TestProcessExecutableDiscovery -v'",
+      "exit_code": 0,
+      "tests": 3,
+      "log": {
+        "path": "_scratch/f024-20261027/review/discovery-go-green.log",
+        "sha256": "f627aa46baf3d429d99a85f0c5d67c058bb4a52b6394bb4e04f058b901ab36bb"
+      }
+    },
+    "native_green": {
+      "command": "make -o process-launcher test-native LLVM_TOOLCHAIN=_scratch/f024-20261027/review/runtime/toolchain.json NATIVE_RUNTIME_STATE=_scratch/f024-20261027/preparation TEST_ARGS='-run ^TestProcessExecutableDiscovery -v'",
+      "exit_code": 0,
+      "tests": 3,
+      "log": {
+        "path": "_scratch/f024-20261027/review/discovery-native-green.log",
+        "sha256": "02c4b60c092209b1436075b629ebd1ea3345239960a10132d400bfc0218a46f9"
+      }
+    },
+    "runtime_build": {
+      "command": "make -o process-launcher build-native-runtime-metal NATIVE_RUNTIME_STATE=_scratch/f024-20261027/preparation NATIVE_RUNTIME_OUTPUT=_scratch/f024-20261027/review/runtime",
+      "exit_code": 0,
+      "log": {
+        "path": "_scratch/f024-20261027/review/runtime-build.log",
+        "sha256": "3470de2cdd4a56264e480289a319b4932cd89607b78f1097f22eeb8b39d418e3"
+      }
+    },
+    "compiler_build": {
+      "command": "make -f _scratch/f024-20261027/review/probe.mk review-compiler",
+      "exit_code": 0,
+      "log": {
+        "path": "_scratch/f024-20261027/review/compiler-build.log",
+        "sha256": "b700f4adc510c74021433b86343d23b0f07e88164109dcbcec8d44cf3adf08cc"
+      }
+    },
+    "compiler_adjacent_layout": {
+      "compiler": {
+        "path": "_scratch/f024-20261027/review/runtime/bin/lo",
+        "sha256": "40f3e1e0b51dbf08adbd1deb5cf554813e18ac22c28df8a6ad74fc394dacc380"
+      },
+      "toolchain": {
+        "path": "_scratch/f024-20261027/review/runtime/toolchain.json",
+        "sha256": "cf9367ad735ce592e717a2848eb8299526ce449c04834800b1cd038b6953007a"
+      },
+      "explicit_toolchain_argument": true,
+      "command": "make -f _scratch/f024-20261027/review/probe.mk review-layout",
+      "exit_code": 0,
+      "log": {
+        "path": "_scratch/f024-20261027/review/adjacent-layout.log",
+        "sha256": "c6fe5cfa0aa223930d4f27f203301170ef60a0706cd9e614a6da4c0f55a77bff"
+      }
+    },
+    "diff_check": {
+      "command": "git diff --check -- runtime/native/src/process_context.rs tests/integration/process_context_test.go",
+      "exit_code": 0
+    },
+    "full_CI_after_correction": {
+      "state": "passed",
+      "session": 42842,
+      "exit_status": 0,
+      "log": "docs/evidence/process-context-cleanup/review-stack-ci.log.gz"
+    },
+    "no_tests_attempt_used_as_acceptance": false
+  },
+  "bundle": {
+    "path": "_scratch/f024-20261027/review/runtime",
+    "runtime_source_sha256": "d6dea1c3deb7c9563dc04ef57049043af1f0bead576b0e94643dfc8ea7bb037a",
+    "manifest": {
+      "path": "_scratch/f024-20261027/review/runtime/toolchain.json",
+      "sha256": "cf9367ad735ce592e717a2848eb8299526ce449c04834800b1cd038b6953007a"
+    },
+    "build_receipt": {
+      "path": "_scratch/f024-20261027/review/runtime/build-receipt.json",
+      "sha256": "a8ce97fb82efe44bdb5366062c475769055f88fcdd0872b5a20833ee8c961bc4"
+    },
+    "runtime_archives": {
+      "darwin/arm64": {
+        "path": "_scratch/f024-20261027/review/runtime/runtime/aarch64-apple-darwin/liblo_runtime.a",
+        "sha256": "a9d61dde87a61acb687fdc8f2835366b05dbf1df287d00ab7597c37e6a51ac1a"
+      },
+      "linux/arm64": {
+        "path": "_scratch/f024-20261027/review/runtime/runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+        "sha256": "2e0a446d423575630780e2b20f8d6add5bc4d5614a96c5dc5a5bd0cdea878957"
+      },
+      "metal": {
+        "path": "_scratch/f024-20261027/review/runtime/runtime/aarch64-apple-darwin/metal/liblo_runtime.a",
+        "sha256": "93baf7ff0e485d8213db7bbfb4c1564892a80319b6a7536f30a409272c86f788"
+      }
+    },
+    "process_sources": {
+      "launcher.c": {
+        "path": "internal/processhost/native/launcher.c",
+        "sha256": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc"
+      },
+      "normalization.c": {
+        "path": "internal/processhost/native/normalization.c",
+        "sha256": "b1b6b9e1adf7d1e76a59ecb6d07e4ce2b6418d4d809e932bf0b4f084978c4732"
+      },
+      "protocol.h": {
+        "path": "internal/processhost/native/protocol.h",
+        "sha256": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b"
+      }
+    },
+    "Metal_assets": {
+      "manifest": {
+        "path": "runtime/metal/manifest.json",
+        "sha256": "c70b0d45d0857e6d1b15678434d8e6263778f16c92a6ac85adac43a0a79bcf65"
+      },
+      "producer": {
+        "path": "bin/lo-metal-build.json",
+        "sha256": "ba1ccfa79f2042fbacc6dfc140bec708cb9bf33250a240dbfb7270bdffb6381d"
+      },
+      "sources": {
+        "internal/device/metal_bridge.h": {
+          "path": "internal/device/metal_bridge.h",
+          "sha256": "24bb8d03421440d1d22df9c0d6a5454959daa35dc28317bfd221d2c6e772ff47"
+        },
+        "internal/device/metal_bridge_darwin.m": {
+          "path": "internal/device/metal_bridge_darwin.m",
+          "sha256": "3532af5341db44c7003aa12c3c2df94ba49217f7dfec87b0724afa721887ae74"
+        },
+        "internal/device/metal_darwin.go": {
+          "path": "internal/device/metal_darwin.go",
+          "sha256": "9850d3975e2c6920a9c136abfed11c9be6756eba1da22500ceb26d90f04cd36d"
+        },
+        "internal/device/metal_types.h": {
+          "path": "internal/device/metal_types.h",
+          "sha256": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683"
+        },
+        "internal/metalconfig/config.go": {
+          "path": "internal/metalconfig/config.go",
+          "sha256": "7946af24fdc32e91192279057779e9b77e18e1ecc1f8baa2fe228f436c874b90"
+        },
+        "runtime/metal/embed.go": {
+          "path": "runtime/metal/embed.go",
+          "sha256": "b4cea917f904ea120b01471c3ee6d3f87a6a3baff4b179403813ccafbc4d3c64"
+        },
+        "runtime/metal/kernels.metal": {
+          "path": "runtime/metal/kernels.metal",
+          "sha256": "d70f010dd2f9faf06e993bc3961e355ef0703e12d30d9726e666dd624ba5dfef"
+        },
+        "runtime/metal/manifest.json": {
+          "path": "runtime/metal/manifest.json",
+          "sha256": "c70b0d45d0857e6d1b15678434d8e6263778f16c92a6ac85adac43a0a79bcf65"
+        },
+        "runtime/metal/metal.metallib": {
+          "path": "runtime/metal/metal.metallib",
+          "sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"
+        },
+        "tools/metalbuild/main.go": {
+          "path": "tools/metalbuild/main.go",
+          "sha256": "027ac1613342b0e08c8e350e2bd9ad2d8a8c333ba43ce83647fe7c3cdf484559"
+        }
+      }
+    },
+    "pinned_sources_and_archives_verified": true,
+    "previous_probe_manifest_unchanged": true,
+    "shared_Darwin_link_inputs_unchanged": true
+  },
+  "parent_correction_review": {
+    "state": "passed",
+    "remaining_findings": []
+  },
+  "artifact_retention": {
+    "runtime_archives_and_compiler": "removed_after_verified_acceptance",
+    "historical_task_paths": "recorded_for_provenance",
+    "preserved_artifacts": [
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-native-red.log.gz",
+        "uncompressed_sha256": "babea92265bcb5817eddd9696d583565354ee808c74d38fd5f1a2a4036f7ec57"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-go-green.log.gz",
+        "uncompressed_sha256": "f627aa46baf3d429d99a85f0c5d67c058bb4a52b6394bb4e04f058b901ab36bb"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-native-green.log.gz",
+        "uncompressed_sha256": "02c4b60c092209b1436075b629ebd1ea3345239960a10132d400bfc0218a46f9"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/runtime-build.log.gz",
+        "uncompressed_sha256": "3470de2cdd4a56264e480289a319b4932cd89607b78f1097f22eeb8b39d418e3"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/compiler-build.log.gz",
+        "uncompressed_sha256": "b700f4adc510c74021433b86343d23b0f07e88164109dcbcec8d44cf3adf08cc"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/adjacent-layout.log.gz",
+        "uncompressed_sha256": "c6fe5cfa0aa223930d4f27f203301170ef60a0706cd9e614a6da4c0f55a77bff"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/final-artifact-check.log.gz",
+        "uncompressed_sha256": "4cfe260fb69bcedc6a261f0f534f799e447b08d9b5a231bd6654fddc15a0e899"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/discovery-results.json.gz",
+        "uncompressed_sha256": "d74cbd753a40cb9f400c10c814d707ed820174778ad07eeedf207d0e22238389"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/build-receipt.json.gz",
+        "uncompressed_sha256": "a8ce97fb82efe44bdb5366062c475769055f88fcdd0872b5a20833ee8c961bc4"
+      },
+      {
+        "path": "docs/evidence/process-context-cleanup/toolchain.json.gz",
+        "uncompressed_sha256": "cf9367ad735ce592e717a2848eb8299526ce449c04834800b1cd038b6953007a"
+      }
+    ]
+  }
+}

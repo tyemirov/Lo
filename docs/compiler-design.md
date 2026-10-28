@@ -54,6 +54,17 @@ Canonical public acceptance passed all 24 interpreter/generated-native cases, in
 Final stack CI and independent completion review passed.
 Earlier injected checkpoints passed CI and independent review.
 The [adapter design](adapter-design.md#process) owns the complete Process contract.
+
+F024 adds nominal immutable `Process.Context` values and host observations for initial context and executable discovery.
+The runner captures the environment and physical working directory once before evaluation, including inputs used by server callbacks.
+Trusted embeddings can inject initial context inputs before evaluation.
+Context construction and changes remain pure. The command constructor is `Process.Command.new(context, executable, arguments, stdin)`.
+
+Pure callbacks cannot observe the initial context or discover executables.
+Discovery selects the first executable candidate from the context's `PATH` before launch authorization.
+An unauthorized selected candidate fails without a search for another executable.
+The [F024 evidence](evidence/process-context-cleanup/checkpoint.json) records matching interpreter and native behavior and stack validation results.
+
 The catalog declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
 Results and termination accessors use the shared lifecycle in injected and selected native execution.
@@ -62,14 +73,20 @@ The [selected native admission limits](adapter-design.md#selected-native-admissi
 Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
 Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
-Constructor diagnostics and nominal snapshots must omit argument, environment, and stdin payloads.
-Explicit program output keeps those values.
+Automatic context output and nested snapshots omit environment and directory payloads, with origin and redaction status retained.
+Constructor diagnostics and command snapshots also omit argument, environment, and stdin payloads.
+Explicit lookup and output of selected environment values remain available.
+
 The inspector adds an optional `process` object to command targets and capabilities.
-It contains `executable`, `arguments`, `environment`, `directory`, and `stdin` input descriptions.
+It contains `context`, `executable`, `arguments`, and `stdin` input descriptions.
+The context records its source and origin, with explicit inputs, base context, overrides, and removals when present.
+Origins are `inherited`, `explicit`, `derived`, or `dynamic`.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
 It also contains `execution_profile: {required: true, status: "unavailable"}`.
+
 Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
-Executable descriptions trace the supplied `File.Path`.
+Explicit executable descriptions trace the supplied `File.Path`.
+Discovery descriptions keep the context, name, and dynamic dependencies.
 Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
@@ -83,7 +100,8 @@ Generic commit execution validates the result type without a universal host qual
 HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
 HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
 Qualification remains mandatory before standard-host native activation acceptance. Reviewed qualification probes have a separate execution gate.
-The native integration passed public acceptance and still requires final stack validation.
+The selected cleanup profile adds per-initial-executable mutation roots and Unix endpoints, without combined authority across commands.
+Registered exec chains retain the initial scope. Forked and spawned descendants remain denied.
 
 Specification sections 22 and 23 define the verifier and runtime contracts.
 The [Open Decisions](#open-decisions) section identifies the final contract status.
