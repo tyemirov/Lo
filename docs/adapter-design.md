@@ -23,6 +23,7 @@ The [repository boundary](../.mprlab/POLICY.md#lo-repository-boundary) applies t
 - [Activation and results](#activation-and-results)
 - [Callbacks and higher-order operations](#callbacks-and-higher-order-operations)
 - [File](#file)
+- [Host invocation](#host-invocation)
 - [HTTP](#http)
 - [Process](#process)
 - [Inspection and execution](#inspection-and-execution)
@@ -220,6 +221,11 @@ File owns filesystem observations and changes.
 Lists, records, and flow arguments keep that provenance.
 Published metadata cannot reconstruct it.
 
+Entries include owner UID, access time, and inode metadata-change time from one native metadata result.
+Property projections are pure.
+`File.Directory` observes an exact granted root, and `File.Scan` reports entries and vanished names explicitly.
+The strict listing operation keeps its full discovery contract for the Gateway policy.
+
 The selected File surface is:
 
 | Operation or target | Evaluation | Result |
@@ -227,10 +233,13 @@ The selected File surface is:
 | `File.Path.new(text)` and `File.Path.eq(a, b)` | Pure construction or comparison | Path or Bool. |
 | `File.read(path)` | Immediate observation | `Bytes!`. |
 | `File.list(root)` | Immediate observation | `List<File.Entry>!`. |
+| `File.directory(root)` | Immediate observation | `File.Directory!` under exact listing authority. |
+| `File.scan(root)` | Immediate observation | `File.Scan!` with entries and explicitly reported vanished names. |
 | `File.open_paths(root)` | Immediate observation | `List<File.Path>!`. |
 | `File.Write.new(path, content)` | Pure construction | Nominal `File.Write`. Commit produces `File.WriteReceipt`. |
 | `File.Append.new(path, content)` | Pure construction | Nominal `File.Append`. Commit produces `File.AppendReceipt`. |
 | `File.Remove.new(entries)` | Pure fallible construction | Nominal `File.Remove!`. Commit produces `File.RemoveReceipt`. |
+| `File.Remove.checked(entries, context..., Eligible)` | Pure fallible construction | Nominal `File.Remove!` with a total pure guard evaluated during commit. |
 
 Write and append accept `Bytes`.
 An explicit `UTF8.Bytes.new(text: String) -> Bytes` constructor supplies text encoding.
@@ -256,12 +265,38 @@ Identity checks do not make deletion atomic against an uncoordinated writer.
 Write and append do not promise a transaction or durable storage after a machine failure.
 The [current File design](file-adapter-design.md) records these implemented limits.
 
+A removal guard has signature `Eligible(context..., original: File.Entry, current: File.Entry) -> Bool`.
+Construction captures its flow reference and immutable contexts without observation or predicate execution.
+During commit, mandatory identity checks precede the guard at preflight and immediately before each removal.
+A false predicate produces `File.EntryChanged` with `predicate-false` and the current progress stage.
+The current `File.RemoveReceipt` and confirmed-prefix rules apply to either constructor.
+The [observation implementation contract](file-observation-extension-design.md) owns exact callback, framing, and budget rules.
+
 `File.open_paths` remains a File observation with an independent grant.
 Its domain meaning is an observation of open paths beneath the authorized directory.
 It does not establish that a file remains open or closed after the observation.
 The current `lsof` framing and filename restrictions remain documented backend limitations.
 A replacement must pass acceptance before the reference can claim broader filename support.
 Moving this operation to Process would not remove those limitations.
+
+## Host Invocation
+
+`Host.Invocation.current()` returns a nominal immutable snapshot of initial host inputs.
+It contains program arguments, the initial home path, real and effective UIDs, and the captured wall-clock time.
+The runner captures one result before program evaluation and shares it with server startup and HTTP callbacks.
+The operation has a host-read effect even when the capture result is already available.
+Property projections are pure and supply no host authority.
+
+Source and artifact execution separate program arguments from runner options with an explicit `--`.
+Invalid argument encoding or argument limits produce CLI exit status 2 before evaluation.
+Invalid home, UID, clock, full snapshot size, or transport data produces a captured `Host.InvocationFailed` result.
+That failure reaches Lo only when `Host.Invocation.current()` executes.
+An unrelated program can execute without observing the failed capture.
+
+Automatic snapshots redact argument values and the home path recursively, including captured removal contexts.
+Explicit projections provide the selected values under ordinary output rules.
+The [language reference](../specification.md#96-host-invocation) defines the public fields, limits, and argument boundary.
+The [F025 contract](file-observation-extension-design.md#host-invocation) defines exact capture, framing, and redaction behavior.
 
 ## HTTP
 
@@ -1010,7 +1045,9 @@ Obsolete shapes and aliases must not remain as compatibility paths.
 - Qualify open-file observation backends before any broader filename-support claim.
 
 These decisions do not reopen bound commit semantics or authorize unrestricted Process execution.
-Before implementation, specify individual operation contracts for other metadata, executable discovery, locks, and domain-specific folds.
+The [F025 contract](file-observation-extension-design.md) defines metadata, host inputs, scan reports, and conditional removal.
+F025 acceptance remains separate from full mac-cleanup application acceptance.
+Before implementation, specify the remaining lock, candidate-probe, and application orchestration contracts.
 
 The earlier pure Process checkpoint passed `CI=1 make ci </dev/null` with exit status `0`.
 Full interpreter integration took 43.391 seconds, and full native integration took 522.053 seconds.
