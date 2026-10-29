@@ -1231,7 +1231,7 @@ pub(super) fn remove(context: &mut Context, site: &Site, target: &Value) -> Outc
 }
 fn record_removal(
     context: &mut Context,
-    entries: &Handle,
+    entries_snapshot: &Handle,
     total: usize,
     completed: usize,
     bytes: &BigInt,
@@ -1239,7 +1239,7 @@ fn record_removal(
     stage: &str,
 ) {
     context.files.last_removal = Some((
-        crate::value::snapshot(entries),
+        entries_snapshot.clone(),
         progress(total, completed, bytes, index, stage),
     ));
 }
@@ -1272,7 +1272,16 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
         ));
     }
     if total > 0 {
-        record_removal(context, entries, total, 0, &bytes, -1, "preflight");
+        let diagnostic_entries = crate::value::snapshot(entries);
+        record_removal(
+            context,
+            &diagnostic_entries,
+            total,
+            0,
+            &bytes,
+            -1,
+            "preflight",
+        );
         let Data::Adapter(crate::adapters::AdapterValue::File(Value::Entry {
             observation: Some(first),
             ..
@@ -1326,7 +1335,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
             for (index, entry) in entries.items().iter().enumerate() {
                 record_removal(
                     context,
-                    entries,
+                    &diagnostic_entries,
                     total,
                     completed,
                     &bytes,
@@ -1373,7 +1382,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
             for (index, entry) in entries.items().iter().enumerate() {
                 record_removal(
                     context,
-                    entries,
+                    &diagnostic_entries,
                     total,
                     completed,
                     &bytes,
@@ -1462,7 +1471,15 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                 }
                 completed += 1;
                 bytes += entry.fields()["size_bytes"].integer();
-                record_removal(context, entries, total, completed, &bytes, -1, "finalize");
+                record_removal(
+                    context,
+                    &diagnostic_entries,
+                    total,
+                    completed,
+                    &bytes,
+                    -1,
+                    "finalize",
+                );
                 context.check_cancel().map_err(|fault| {
                     fault.with_details(BoundaryDetails {
                         removal_entries: Some(crate::value::snapshot(entries).json()),
