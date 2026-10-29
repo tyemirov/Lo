@@ -10,6 +10,16 @@ func f025NativeMetadata(info os.FileInfo) (uint32, int64, int64) {
 	return stat.Uid, stat.Atim.Sec*1_000_000_000 + stat.Atim.Nsec, stat.Ctim.Sec*1_000_000_000 + stat.Ctim.Nsec
 }
 
+func f025FixedMetadata(info os.FileInfo) os.FileInfo {
+	stat := *info.Sys().(*syscall.Stat_t)
+	stat.Uid = 1001
+	stat.Atim.Sec = -1
+	stat.Atim.Nsec = 123456789
+	stat.Ctim.Sec = -1
+	stat.Ctim.Nsec = 0
+	return f025MetadataInfo{FileInfo: info, native: &stat}
+}
+
 func f025ChangedMetadata(info os.FileInfo, field string) os.FileInfo {
 	stat := *info.Sys().(*syscall.Stat_t)
 	switch field {

@@ -122,6 +122,7 @@ func NewFloat(n float64) (Float, error) {
 
 type Bytes interface {
 	Value
+	Len() int
 	Bytes() []byte
 }
 type bytes struct {
@@ -129,6 +130,7 @@ type bytes struct {
 	data []byte
 }
 
+func (v bytes) Len() int                     { return len(v.data) }
 func (v bytes) Bytes() []byte                { return slices.Clone(v.data) }
 func (v bytes) MarshalJSON() ([]byte, error) { return encode(v, v.data) }
 func NewBytes(data []byte) Bytes {

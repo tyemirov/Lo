@@ -189,7 +189,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `inference`: Neural network execution that calculates predictions from trained Parameters without gradient updates.
 
 - `geometric mean`: The root of the product of positive measurements, with the root degree equal to their count.
-- `resident set size`: The amount of process memory present in physical memory at a measurement point.
+- `resident set size (RSS)`: The amount of process memory present in physical memory at a measurement point.
 - `build cache`: Compiled data that the Go toolchain stores for use in subsequent builds.
 - `warmup`: A preliminary execution excluded from measured performance samples.
 - `race detector`: Runtime analysis that finds memory access without the required synchronization.
@@ -206,6 +206,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `contention`: Competition between processes for a shared computing resource.
 - `allocation profile`: A sampled report of memory allocations attributed to functions.
 - `CPU profile`: A sampled report of processor time attributed to functions.
+- `diagnostic snapshot`: An immutable value without host authority, used in a diagnostic.
+- `quadratic allocation work`: Allocation work that increases with the square of the input count.
+- `sample percentile`: A measured value below which a specified fraction of ordered samples falls.
+- `file cache`: Memory that the operating system uses to retain file data between operations.
+- `workload template`: A benchmark program with a canonical placeholder for its fixture path.
 
 - `metadata`: Information about a program or value, including source positions, types, shapes, storage sizes, and devices.
 - `runtime site`: One ordered metadata record that identifies an execution boundary or source construct.

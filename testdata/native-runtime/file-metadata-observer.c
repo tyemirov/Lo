@@ -29,8 +29,8 @@ static int observe(uintptr_t userdata, uint32_t phase, const unsigned char *root
     if (name_length != 1 || (name[0] != 'a' && name[0] != 'b')) return 0;
     unsigned index = name[0] == 'a' ? 0 : 1;
     metadata->owner_uid = 1001;
-    metadata->accessed_sec = -3;
-    metadata->accessed_nsec = 0;
+    metadata->accessed_sec = -1;
+    metadata->accessed_nsec = 123456789;
     metadata->changed_sec = -1;
     metadata->changed_nsec = 0;
     if (phase == LO_FILE_DISCOVERY) {

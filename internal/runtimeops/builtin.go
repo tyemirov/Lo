@@ -712,7 +712,7 @@ func FileRead(session execution.Session, call Call, args []value.Value, flows ma
 		}
 		return OperationFailure(call, args, catalog.ReadFailed, err.Error()), nil
 	}
-	if len(data.Bytes()) > execution.MaxBytes {
+	if data.Len() > execution.MaxBytes {
 		return nil, execution.Limit("file read bytes")
 	}
 	return Success(call.Type(), data), nil
