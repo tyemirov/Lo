@@ -98,6 +98,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `application`: A program or service that uses language operations for a specific task.
+- `general-purpose language`: A programming language with contracts that apply across application domains.
+- `glob`: A wildcard pattern that matches a complete string.
+- `worklist`: An ordered collection of items that a bounded flow processor has yet to visit.
+- `tree snapshot`: Immutable observations of a filesystem tree with relative names and retained directory identities.
 - `HTTP origin`: The canonical scheme, hostname, and effective port of an HTTP destination.
 - `IP literal`: An explicit IPv4 or IPv6 address without a hostname lookup.
 - `DNS`: The system that resolves a hostname to network addresses.
@@ -138,6 +143,15 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `basename`: The final name component of a filesystem path.
 - `Unix epoch`: The time origin at 00:00:00 UTC on January 1, 1970.
 - `logical size`: The observed file length in bytes, independent of reclaimed disk storage.
+- `invocation snapshot`: Immutable host inputs captured once for one runner invocation.
+- `directory observation`: Immutable metadata for an exactly granted directory and its private native identity.
+- `scan report`: A directory observation, observed child entries, and explicitly reported vanished child names.
+- `vanished child`: An enumerated child whose metadata lookup reports absence in the same directory observation.
+- `removal guard`: A pure named flow evaluated against original and current file observations during removal activation.
+- `UID`: The numeric user identity supplied by the operating system.
+- `inode`: The native filesystem object identified with its device identity.
+- `timestamp`: A specified time represented as Unix nanoseconds in the File and Host contracts.
+- `predicate`: A pure named flow that returns a total Bool value for supplied inputs.
 
 - `standalone compiler`: An installed compiler distribution that supplies its compile and link tools without a separate development toolchain.
 - `linker`: A tool that combines object files and libraries into an executable.
@@ -390,6 +404,8 @@ Use the simple present, simple past, simple future, imperative, or infinitive fo
 
 ## Repository Technical Verbs
 
+- `capture`: Get host inputs once and keep their immutable result. Forms: capture, captures, captured.
+- `redact`: Hide specified private data in automatic output under a nominal value's output contract. Forms: redact, redacts, redacted.
 - `encode`: Convert a typed value into its specified byte representation. Forms: encode, encodes, encoded.
 - `decode`: Convert encoded bytes into a validated typed value. Forms: decode, decodes, decoded.
 - `load`: Read persisted model data into the runtime. Forms: load, loads, loaded.

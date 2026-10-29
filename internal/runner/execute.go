@@ -43,6 +43,7 @@ func RunContext(ctx context.Context, options Options, p execution.Program, facto
 
 func runProgram(ctx context.Context, inv invocation, p execution.Program, stdout, stderr io.Writer) int {
 	ctx = execution.CaptureProcessContext(ctx)
+	ctx = execution.CaptureHostInvocation(ctx, inv.programArguments)
 	limits := adapter.DefaultProcessLimits()
 	configuration, err := processhost.NewConfig(inv.processPolicy, limits)
 	if err != nil {

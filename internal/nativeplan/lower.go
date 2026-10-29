@@ -660,14 +660,15 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 	count := len(args)
 	variadic := op.Rule() == catalog.StringConcat || op.Rule() == catalog.ListConstructor || op.Rule() == catalog.MapConstructor || op.Rule() == catalog.RecordConstructor
 	processor := op.Rule() == catalog.ListProcessor || op.Rule() == catalog.FlowProcessor
-	if !variadic && !processor && count != len(op.Parameters()) {
+	guarded := op.Rule() == catalog.CheckedRemovalConstructor
+	if !variadic && !processor && !guarded && count != len(op.Parameters()) {
 		return fmt.Errorf("native lowering: %s requires %d arguments, got %d", op.Name(), len(op.Parameters()), count)
 	}
 	minimum := 2
 	if op.Name() == catalog.ListFold || op.Name() == catalog.ListUnfold || op.Name() == catalog.FlowFold {
 		minimum = 3
 	}
-	if processor && count < minimum {
+	if (processor || guarded) && count < minimum {
 		return fmt.Errorf("native lowering: incomplete callback arguments for %s", op.Name())
 	}
 	seen := make([]bool, count)
@@ -678,7 +679,7 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 		seen[arg.Position()] = true
 		switch arg := arg.(type) {
 		case ir.ValueArgument:
-			if processor && arg.Position() == count-1 {
+			if (processor || guarded) && arg.Position() == count-1 {
 				return fmt.Errorf("native lowering: missing callback for %s", op.Name())
 			}
 			if op.Rule() == catalog.Fixed && op.Parameters()[arg.Position()].Type != nil && !types.Equal(op.Parameters()[arg.Position()].Type, arg.Value().Type()) {
@@ -689,7 +690,27 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 			if !ok {
 				return fmt.Errorf("native lowering: missing callback %s", arg.Flow())
 			}
-			if processor {
+			if guarded {
+				if arg.Position() != count-1 || len(flow.Parameters()) != count || !types.Equal(flow.Signature().Output(), types.Bool()) || flow.Effects().Reads || flow.Effects().Commits {
+					return fmt.Errorf("native lowering: invalid removal predicate for %s", op.Name())
+				}
+				for index, parameter := range flow.Parameters() {
+					if index >= count-2 && !types.Equal(parameter.Type, types.FileEntry()) {
+						return fmt.Errorf("native lowering: invalid removal predicate entry type")
+					}
+					if index < count-2 {
+						matched := false
+						for _, candidate := range args {
+							if value, ok := candidate.(ir.ValueArgument); ok && value.Position() == index+1 {
+								matched = types.Equal(parameter.Type, value.Value().Type())
+							}
+						}
+						if !matched {
+							return fmt.Errorf("native lowering: invalid removal predicate context type")
+						}
+					}
+				}
+			} else if processor {
 				arity := count - 1
 				if op.Name() == catalog.ListUnfold {
 					arity = count - 2

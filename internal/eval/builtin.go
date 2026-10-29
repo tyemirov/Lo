@@ -201,6 +201,12 @@ func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int
 		return runtimeops.PathEqual(m.Session, call, args, flows)
 	case catalog.FileList:
 		return runtimeops.FileList(m.Session, call, args, flows)
+	case catalog.FileDirectory, catalog.FileScan:
+		return runtimeops.FileObservation(m.Session, call, args, flows)
+	case catalog.FileRemoveChecked:
+		return runtimeops.FileRemoveChecked(m.Session, call, args, flows)
+	case catalog.HostInvocationCurrent:
+		return runtimeops.HostInvocationCurrent(m.Session, call, args, flows)
 	case catalog.FileRemove:
 		return runtimeops.FileRemove(m.Session, call, args, flows)
 	case catalog.FileRead:

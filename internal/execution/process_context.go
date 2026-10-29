@@ -17,6 +17,7 @@ type processContextKey struct{}
 type initialProcessContext struct {
 	value value.ProcessContext
 	err   error
+	home  string
 }
 
 // WithProcessContext supplies immutable invocation inputs to an embedded runner.
@@ -24,7 +25,11 @@ func WithProcessContext(ctx context.Context, initial value.ProcessContext) (cont
 	if ctx == nil || initial == nil {
 		return nil, fmt.Errorf("initial Process context requires a context and validated value")
 	}
-	return context.WithValue(ctx, processContextKey{}, initialProcessContext{value: initial}), nil
+	home := ""
+	if input, found := initial.EnvironmentValue("HOME"); found {
+		home = input.Text()
+	}
+	return context.WithValue(ctx, processContextKey{}, initialProcessContext{value: initial, home: home}), nil
 }
 
 // CaptureProcessContext captures the environment and directory once before evaluation.
@@ -33,8 +38,15 @@ func CaptureProcessContext(ctx context.Context) context.Context {
 	if _, ok := ctx.Value(processContextKey{}).(initialProcessContext); ok {
 		return ctx
 	}
-	initial, err := captureProcessContext()
-	return context.WithValue(ctx, processContextKey{}, initialProcessContext{value: initial, err: err})
+	environment := os.Environ()
+	home := ""
+	for _, entry := range environment {
+		if name, text, ok := strings.Cut(entry, "="); ok && name == "HOME" {
+			home = text
+		}
+	}
+	initial, err := captureProcessContext(environment)
+	return context.WithValue(ctx, processContextKey{}, initialProcessContext{value: initial, err: err, home: home})
 }
 
 // InheritProcessContext attaches the parent's captured inputs to a new lifetime.
@@ -55,12 +67,11 @@ func InitialProcessContext(ctx context.Context) (value.ProcessContext, error) {
 	return initial.value, initial.err
 }
 
-func captureProcessContext() (value.ProcessContext, error) {
+func captureProcessContext(environment []string) (value.ProcessContext, error) {
 	directory, err := unix.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("capture Process directory: %w", err)
 	}
-	environment := os.Environ()
 	sort.Strings(environment)
 	entries := make([]value.Entry, 0, len(environment))
 	for _, entry := range environment {

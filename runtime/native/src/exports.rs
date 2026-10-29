@@ -199,6 +199,9 @@ pub unsafe fn call(
             if crate::tensor::SUPPORTED.contains(&op) {
                 return crate::tensor::execute(&mut *c, &s, &a);
             }
+            if op == crate::host_invocation::OPERATION {
+                return crate::host_invocation::execute(&mut *c, &s);
+            }
             if crate::training::SUPPORTED.contains(&op) {
                 return crate::training::execute(&mut *c, &s, &a);
             }
@@ -679,6 +682,35 @@ pub unsafe extern "C" fn lo_context_set_process_context(
     Arc::get_mut(&mut context.session)
         .unwrap()
         .initial_process_context = Ok(initial);
+    1
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_set_host_invocation(
+    c: *mut Context,
+    bytes: *const u8,
+    length: usize,
+) -> std::os::raw::c_int {
+    if c.is_null() || bytes.is_null() {
+        return 0;
+    }
+    let context = &mut *c;
+    if context.entry().is_err()
+        || context.remaining != context.session.steps
+        || context.weight != 0
+        || context.scopes != 0
+        || context.depth != 0
+        || Arc::strong_count(&context.session) != 1
+    {
+        return 0;
+    }
+    let initial = if length > 1048576 {
+        Err("decode host snapshot: transport limit".into())
+    } else {
+        crate::host_invocation::decode(std::slice::from_raw_parts(bytes, length))
+    };
+    Arc::get_mut(&mut context.session)
+        .unwrap()
+        .initial_host_invocation = initial;
     1
 }
 #[no_mangle]

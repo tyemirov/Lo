@@ -15,6 +15,7 @@ The [shared implementation plan](adapter-plan.md) records HTTP client and qualif
 - [Public operations](#public-operations)
 - [Entry values](#entry-values)
 - [Listing](#listing)
+- [Directory observations and scans](#directory-observations-and-scans)
 - [Grants](#grants)
 - [Open-file observations](#open-file-observations)
 - [Removal construction](#removal-construction)
@@ -24,13 +25,16 @@ The [shared implementation plan](adapter-plan.md) records HTTP client and qualif
 - [Inspection and native execution](#inspection-and-native-execution)
 - [Gateway log cleanup](#gateway-log-cleanup)
 - [Scope limits](#scope-limits)
+- [Observation implementation contract](#observation-implementation-contract)
 
 ## Decisions
 
 `File` is a domain adapter, with no `IO` parent or inheritance.
 `File.list` returns ordinary immutable values in `List<File.Entry>`.
+`File.directory` observes an exact root, and `File.scan` reports surviving children and vanished names.
 List processors select and summarize those values.
 `File.Remove.new` constructs a nominal `File.Remove` target.
+`File.Remove.checked` constructs that target with a pure removal guard.
 Only `commit` executes removal.
 `Flow.fold` permits ordered callback activation when each candidate needs a separate result.
 List callbacks cannot include transitive host observations or commits.
@@ -51,8 +55,11 @@ flowchart LR
 | --- | --- |
 | `File.Path.eq(left_operand: File.Path, right_operand: File.Path) -> Bool` | Compare path text without filesystem access or normalization. |
 | `File.list(root: File.Path) -> List<File.Entry>!` | Observe direct directory children. |
+| `File.directory(root: File.Path) -> File.Directory!` | Observe metadata for the exact granted root. |
+| `File.scan(root: File.Path) -> File.Scan!` | Observe children and explicitly report vanished names. |
 | `File.open_paths(root: File.Path) -> List<File.Path>!` | Observe open paths through a bounded host probe. |
 | `File.Remove.new(entries: List<File.Entry>) -> File.Remove!` | Construct a removal selection without filesystem access. |
+| `File.Remove.checked(entries, context..., Eligible) -> File.Remove!` | Capture a selection, immutable contexts, and a pure total removal guard. |
 | `File.read(file_path: File.Path) -> Bytes!` | Read file contents. |
 | `File.Write.new(file_path: File.Path, file_content: Bytes) -> File.Write` | Construct a content replacement. |
 | `File.Append.new(file_path: File.Path, file_content: Bytes) -> File.Append` | Construct an append from Bytes. |
@@ -109,12 +116,22 @@ Host diagnostics expose `cleanup_errors` as a JSON array.
 | `size_bytes` | `Int` | Observed nonnegative logical size. |
 | `modified_unix_ns` | `Int` | Observed modification time since the Unix epoch, in nanoseconds. |
 | `link_count` | `Int` | Observed number of filesystem links. |
+| `owner_uid` | `Int` | Observed owner UID. |
+| `accessed_unix_ns` | `Int` | Observed last access time in Unix nanoseconds. |
+| `changed_unix_ns` | `Int` | Observed last inode metadata-change time in Unix nanoseconds. |
+
+Each entry uses one native metadata result without a content read.
+The timestamp range is signed 64-bit Unix nanoseconds, including negative values.
+The change timestamp is not creation time.
+UIDs use the inclusive range `0..4294967295`.
+Invalid representations fail observation instead of publishing substitute values.
+Field projections are pure and repeat no filesystem access.
 
 Opaque provenance connects an entry to its execution session, retained directory, basename, native identity, size, modification time, and kind.
 The adapter validates metadata at the filesystem boundary.
 Copies, records, flow arguments, and filters preserve provenance.
 A reconstructed record cannot satisfy `File.Entry`.
-JSON and diagnostic snapshots expose only the six public projections.
+JSON and diagnostic snapshots show only the nine public projections.
 Printed values cannot become executable observations in another invocation.
 
 Each session retains at most 128 observed directories.
@@ -142,6 +159,36 @@ One result permits at most 10,000 entries, subject to the 16 MiB value and 64 Mi
 Limits and cancellation produce host diagnostics that bypass Lo handlers.
 Handles close on success and failure.
 
+## Directory Observations and Scans
+
+`File.directory(root)` requires the exact `--list-root` grant and observes its open directory.
+It returns immutable `File.Directory` metadata with private session and directory provenance.
+Its projections are `path`, `owner_uid`, `accessed_unix_ns`, `modified_unix_ns`, and `changed_unix_ns`.
+It rejects symlink traversal and roots that are not directories.
+
+Absence produces `File.DirectoryAbsent`.
+Another root metadata failure produces `File.DirectoryFailed`.
+The host preserves existing authority diagnostics for missing grants and replaced roots.
+
+`File.scan(root)` uses that same exact grant and returns `File.Scan`.
+The report contains `directory: File.Directory`, `entries: List<File.Entry>`, and `vanished_names: List<String>`.
+A vanished name is an enumerated child whose metadata lookup reports `ENOENT`.
+The report does not retry that name if it later reappears.
+Other enumeration or child metadata failures produce `File.ListFailed` without a partial report.
+Invalid UTF-8 names produce `File.InvalidName`.
+
+The host bounds enumeration before accumulation of all directory contents.
+The 10000-child limit includes all vanished names.
+Entries and vanished names are disjoint collections sorted in Unicode scalar order.
+The host rejects duplicate enumerated names and revalidates the root grant before report publication.
+The scan reserves one root metadata step and one step per enumerated name, plus ordinary evaluation and sorting work.
+`File.directory` reserves one metadata step in addition to ordinary operation evaluation.
+
+These nominal values have no public constructors, equality, ordering, or checkpoint representation.
+Directory metadata does not supply removal authority and cannot become a removal selection.
+The common cleanup flows consume scan reports and count vanished names as skips.
+The Gateway flow keeps strict `File.list` discovery and propagates discovery failures.
+
 ## Grants
 
 The `run` and `serve` commands accept separate repeatable grants:
@@ -150,7 +197,7 @@ The `run` and `serve` commands accept separate repeatable grants:
 | --- | --- |
 | `--read-root DIRECTORY` | Read contents within the directory tree. |
 | `--write-root DIRECTORY` | Write or append contents within the directory tree. |
-| `--list-root DIRECTORY` | List the exact directory's immediate children. |
+| `--list-root DIRECTORY` | Observe that exact directory and list or scan its immediate children. |
 | `--remove-root DIRECTORY` | Remove selected immediate regular files in the exact directory. |
 | `--open-files-root DIRECTORY` | Probe open paths in the exact directory and its descendants. |
 
@@ -210,14 +257,35 @@ It reserves one step per entry and checks value weight before allocation.
 The maximum batch size is 10,000 entries.
 The nominal `File.Remove` target keeps its selection and opaque entry provenance.
 
+`File.Remove.checked(entries, context..., Eligible)` also captures a resolved removal guard and immutable contexts.
+The guard has signature `Eligible(context..., original: File.Entry, current: File.Entry) -> Bool`.
+The checker requires a total pure Bool result and rejects transitive host observations or commits.
+It validates empty selections and unused targets under the same static rules.
+Construction invokes no guard and performs no filesystem access.
+
+Captured entries and context values participate in target value-weight reservations.
+
 ## Commit and Failure Progress
 
 Commit authorizes the complete selection before mutation.
 It reserves `3 * N` steps and diagnostic storage before removal.
 It revalidates the complete batch, then revalidates each entry immediately before removal.
 Revalidation compares native identity, size, modification time, and regular-file kind.
-It does not compare link count or change time.
+Unconditional removal does not add owner, access-time, change-time, or link-count comparisons.
 Removal uses the retained directory and basename.
+
+A guarded target applies the same mandatory comparisons before each guard invocation.
+The host invokes its guard once per reached preflight entry and once immediately before each reached removal.
+The original observation stays fixed, and each invocation receives a new current observation.
+A false result produces `File.EntryChanged` with the fixed condition `predicate-false` and current progress stage.
+The host does not infer which application expression caused rejection.
+An empty activation invokes no guard.
+
+The base `3 * N` steps cover both metadata lookups and each removal attempt.
+New observation values and ordinary predicate work receive separate value and execution charges.
+Preflight metadata never substitutes for the final observation.
+Earlier removals can affect later observations, including the link count of another selected hardlink.
+The final metadata check and removal remain separate operations.
 
 A changed or absent entry produces `File.EntryChanged`.
 Other metadata or removal failures produce `File.RemoveFailed`.
@@ -278,6 +346,9 @@ It adds no application coordination protocol.
 ## Inspection and Native Execution
 
 Inspection reports listing and open-file reads separately from removal activation.
+Directory and scan observations use exact listing authority.
+Guarded targets report `guard: {flow, phase: "activation", contexts}`.
+The resolved predicate executes in an `activation-guard` inspection context only after a reachable commit.
 It reports `Flow.fold` callback contexts and reachable commits.
 A filtered selection remains calculated data, not an invented static filename list.
 Unused flows have separate contexts.
@@ -310,4 +381,10 @@ No source project, installed script, or real application cache is an acceptance 
 
 This slice includes nonrecursive entry discovery, regular-file removal, and a fixed recursive open-file probe.
 It excludes arbitrary subprocesses, directory removal, file watchers, persistent journals, and effect replay.
-The complete mac-cleanup script still needs host inputs, process results, cleanup locking, additional metadata, and category orchestration.
+The complete mac-cleanup script still needs cleanup locking, candidate-path probes, and category orchestration.
+F024 supplies the current process contexts and results.
+
+## Observation Implementation Contract
+
+The [F025 contract](file-observation-extension-design.md) specifies host inputs, metadata, directory observations, scan reports, and conditional removal.
+Its acceptance matrix distinguishes current public contracts from full cleanup application acceptance.

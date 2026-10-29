@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
+	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
@@ -184,6 +185,30 @@ func (s *session) List(ctx context.Context, path value.Text) (value.List, error)
 	}
 	defer end()
 	return s.boundary.List(operation, path)
+}
+func (s *session) Directory(ctx context.Context, path value.Text) (value.Value, error) {
+	operation, end, err := s.admit(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer end()
+	observer, ok := s.boundary.(execution.FileObserver)
+	if !ok {
+		return nil, execution.HostFailure(catalog.FileDirectory, path.Text(), errors.New("File boundary has no observation adapter"))
+	}
+	return observer.Directory(operation, path)
+}
+func (s *session) Scan(ctx context.Context, path value.Text) (value.Value, error) {
+	operation, end, err := s.admit(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer end()
+	observer, ok := s.boundary.(execution.FileObserver)
+	if !ok {
+		return nil, execution.HostFailure(catalog.FileScan, path.Text(), errors.New("File boundary has no observation adapter"))
+	}
+	return observer.Scan(operation, path)
 }
 func (s *session) OpenPaths(ctx context.Context, path value.Text) (value.List, error) {
 	operation, end, err := s.admit(ctx)

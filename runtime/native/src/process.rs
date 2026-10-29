@@ -23,7 +23,9 @@ mod cleanup;
 mod context_values;
 #[path = "process_policy.rs"]
 mod policy;
-pub use context_values::{capture_context, parse_initial_context};
+pub use context_values::{
+    capture_context, capture_context_with_environment, parse_initial_context,
+};
 pub use policy::Policy;
 const MAX_COMMAND_BODY: usize = 1 << 20;
 const MAX_COMMAND_ENTRY: usize = 1 << 16;

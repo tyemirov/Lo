@@ -7,6 +7,7 @@ use std::{
 
 #[derive(Clone)]
 pub enum AdapterValue {
+    Host(crate::host_invocation::Value),
     File(crate::files::Value),
     Process(crate::process::Value),
     Http(crate::http::Value),
@@ -14,6 +15,7 @@ pub enum AdapterValue {
 macro_rules! delegate {
     ($self:ident, $method:ident) => {
         match $self {
+            Self::Host(v) => v.$method(),
             Self::File(v) => v.$method(),
             Self::Process(v) => v.$method(),
             Self::Http(v) => v.$method(),
@@ -35,6 +37,7 @@ impl AdapterValue {
     }
     pub fn snapshot(&self) -> Self {
         match self {
+            Self::Host(v) => Self::Host(v.snapshot()),
             Self::File(v) => Self::File(v.snapshot()),
             Self::Process(v) => Self::Process(v.snapshot()),
             Self::Http(v) => Self::Http(v.snapshot()),
@@ -44,6 +47,7 @@ impl AdapterValue {
 
 pub struct Session {
     pub initial_process_context: Result<Handle, String>,
+    pub initial_host_invocation: Result<Handle, String>,
     pub program: Arc<Program>,
     pub steps: u64,
     pub processes: Arc<crate::process::Processes>,
@@ -54,8 +58,10 @@ pub struct Session {
 }
 impl Session {
     pub fn empty(program: Arc<Program>, steps: u64) -> Arc<Self> {
+        let captured = crate::host_invocation::capture_inputs(&[]);
         Arc::new(Self {
-            initial_process_context: crate::process::capture_context(),
+            initial_process_context: captured.process,
+            initial_host_invocation: captured.host,
             program,
             steps,
             processes: Arc::new(crate::process::empty()),

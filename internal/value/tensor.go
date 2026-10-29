@@ -68,6 +68,8 @@ func NewDevice(selector string) (Device, error) {
 // Snapshot removes tensor storage from diagnostic inputs, including nested data.
 func Snapshot(v Value) Value {
 	switch x := v.(type) {
+	case HostInvocation:
+		return redactedHostInvocation(x)
 	case ProcessResult:
 		return must(NewProcessResult(x.Termination(), NewBytes(nil), NewBytes(nil)))
 	case ProcessCommand:
@@ -86,8 +88,20 @@ func Snapshot(v Value) Value {
 		return must(NewReceipt(x.Type(), Snapshot(x.FieldsRecord()).(Record)))
 	case FileEntry:
 		return publicFileEntry{newBase(types.FileEntry(), x.FieldsRecord().Weight()), x.FieldsRecord()}
+	case FileDirectoryObservation:
+		return publicFileValue{newBase(types.FileDirectory(), SnapshotWeight(x.FieldsRecord())), Snapshot(x.FieldsRecord()).(Record)}
+	case FileScan:
+		return publicFileValue{newBase(types.FileScan(), SnapshotWeight(x.FieldsRecord())), Snapshot(x.FieldsRecord()).(Record)}
 	case RemovalEffect:
-		return removalEffect{newBase(types.FileRemove(), x.Weight()), Snapshot(x.Entries()).(List), FileSession{}}
+		var guard RemovalGuard
+		if original, ok := x.Guard(); ok {
+			contexts := original.Context()
+			for index, item := range contexts {
+				contexts[index] = Snapshot(item)
+			}
+			guard = removalGuard{original.Flow(), contexts}
+		}
+		return removalEffect{newBase(types.FileRemove(), x.Weight()), Snapshot(x.Entries()).(List), FileSession{}, guard}
 	case OptimizerState:
 		return Snapshot(x.Contents())
 	case OptimizerConfig:

@@ -1241,6 +1241,58 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   [Eio](https://ocaml-multicore.github.io/eio/eio/Eio/Process/index.html) supplies explicit process authority and scoped lifetime.
   [Dune actions](https://dune.readthedocs.io/en/stable/reference/actions/index.html) supply declarative execution and scoped context changes.
 
+- [x] [F025] (P1) {F024} Add host inputs and complete File observations
+  Goal:
+  Supply immutable host inputs and File metadata for cleanup decisions with explicit conditional removal.
+
+  Current state:
+  The [extension design](docs/file-observation-extension-design.md) selects the public interfaces, runtime behavior, and acceptance criteria.
+  The operations, fields, and conditional activation are implemented in both runtimes.
+  F024 supplies the current Process context and activation foundation.
+
+  Requirements:
+  - Add `Host.Invocation.current()` with captured arguments, home, real UID, effective UID, and clock.
+  - Preserve one capture result through program evaluation, server startup, and HTTP callbacks.
+  - Add `owner_uid`, `accessed_unix_ns`, and `changed_unix_ns` to immutable `File.Entry` values.
+  - Add `File.directory` under exact listing authority for root metadata.
+  - Add `File.scan` with explicit vanished names and complete failure for unrelated discovery errors.
+  - Keep `File.list` strict for the current Gateway policy.
+  - Add `File.Remove.checked` with a pure total predicate over original and current observations.
+  - Invoke the predicate during preflight and immediately before each removal.
+  - Preserve mandatory identity checks, grants, confirmed progress, and the bounded race guarantee.
+  - Keep cleanup-specific selection rules in Lo flows.
+  - Implement the same schema, redaction, resource accounting, and failure behavior in both runtimes.
+
+  Deliverables:
+  - Implement the selected design through the catalog, types, CLI, runner, File adapters, and native runtime.
+  - Add public Lo examples and integration fixtures for observation and conditional activation.
+  - Update the specification, current adapter documents, semantic coverage, and runtime schema assertions.
+
+  Validation:
+  - Confirm public integration failures before production changes.
+  - Verify snapshot lifetime, literal arguments, missing home, UID bounds, clock bounds, and recursive redaction.
+  - Verify exact metadata, pure projections, root confinement, vanished children, unrelated errors, and enumeration limits.
+  - Verify constructor purity, callback signatures, callback phases, metadata changes, cancellation, budgets, and confirmed progress.
+  - Preserve Gateway discovery and unconditional-removal behavior through regression fixtures.
+  - Verify interpreter and native parity on Darwin arm64 and Linux arm64 under software emulation.
+  - Complete independent review and final repository-native CI after the last correction.
+
+  Results on October 28, 2026:
+  The four public contract fixtures failed before production changes because the new interfaces were absent.
+  The interpreter and native public acceptance fixtures passed after implementation.
+  Seven Host transport cases passed on each native target.
+  Twelve File metadata cases passed on each native target, including all four metadata changes and confirmed removal progress.
+  Darwin arm64 ran directly. Linux arm64 ran under QEMU.
+  Final `make ci` passed, including formatting, `go vet`, both integration lanes, build, and 21 semantic-report tests.
+  The qualification-tool suite passed all 217 tests.
+  Independent reviews found no unresolved defects.
+  Documentation checks found no new language findings.
+  The Governor check preserved seven existing template differences without new findings.
+
+  Scope:
+  Keep all fixture state, process helpers, caches, and artifacts inside Lo.
+  Subsequent issues own cleanup locking, candidate-path probes, complete categories, and final application orchestration.
+
 ## BugFixes
 
 - [x] [B001] (P1) Preserve enclosing fold progress after native cancellation

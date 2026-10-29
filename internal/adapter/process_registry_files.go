@@ -83,6 +83,22 @@ func (f *processRegistryFiles) List(ctx context.Context, path value.Text) (value
 	defer end()
 	return f.Files.List(ctx, path)
 }
+func (f *processRegistryFiles) Directory(ctx context.Context, path value.Text) (value.Value, error) {
+	end, err := f.begin()
+	if err != nil {
+		return nil, err
+	}
+	defer end()
+	return f.Files.(execution.FileObserver).Directory(ctx, path)
+}
+func (f *processRegistryFiles) Scan(ctx context.Context, path value.Text) (value.Value, error) {
+	end, err := f.begin()
+	if err != nil {
+		return nil, err
+	}
+	defer end()
+	return f.Files.(execution.FileObserver).Scan(ctx, path)
+}
 func (f *processRegistryFiles) OpenPaths(ctx context.Context, path value.Text) (value.List, error) {
 	end, err := f.begin()
 	if err != nil {

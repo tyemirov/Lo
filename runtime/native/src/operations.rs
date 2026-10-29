@@ -82,6 +82,9 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
     }
 }
 pub fn admit(s: &Site) -> Result<(), String> {
+    if s.operation == crate::host_invocation::OPERATION {
+        return crate::host_invocation::admit(s);
+    }
     if crate::process::SUPPORTED.contains(&s.operation.as_str()) {
         return crate::process::admit(s);
     }

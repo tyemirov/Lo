@@ -69,6 +69,7 @@ type invocation struct {
 	listenPolicy          adapter.ListenPolicy
 	httpPolicy            adapter.HTTPPolicy
 	processPolicy         adapter.ProcessPolicy
+	programArguments      []string
 }
 
 func parseArgs(args []string, embedded bool) (invocation, error) {
@@ -90,6 +91,16 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	processLauncherSet := false
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
+		if arg == "--" {
+			if inv.command != RunCommand && inv.command != ServeCommand {
+				return inv, fmt.Errorf("program arguments require run or serve")
+			}
+			inv.programArguments = append([]string(nil), args[i+1:]...)
+			if err := value.ValidateInvocationArguments(inv.programArguments); err != nil {
+				return inv, err
+			}
+			break
+		}
 		if arg == toolchainOption {
 			if embedded || inv.command != BuildCommand || i+1 == len(args) {
 				return inv, fmt.Errorf("--toolchain requires a value with build")

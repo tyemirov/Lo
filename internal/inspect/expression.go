@@ -122,6 +122,9 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	switch op.Boundary() {
 	case catalog.Read:
 		target := a.unknown(node, types.ProcessContext())
+		if op.Name() == catalog.HostInvocationCurrent {
+			target = a.unknown(node, types.HostInvocation())
+		}
 		if len(values) > 0 {
 			target = values[0]
 		}
@@ -138,8 +141,15 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		if op.Name() == catalog.ProcessCommandNew {
 			r.Process = a.processInputs(values)
 		}
-		if op.Name() == catalog.FileRemove {
+		if op.Name() == catalog.FileRemove || op.Name() == catalog.FileRemoveChecked {
 			r.Target.Kind = "calculated"
+		}
+		if op.Name() == catalog.FileRemoveChecked {
+			contexts := make([]description, 0, len(values)-2)
+			for _, argument := range values[1 : len(values)-1] {
+				contexts = append(contexts, a.describe(argument))
+			}
+			r.Guard = &removalGuardData{Flow: flows[len(values)-1], Phase: "activation", Contexts: contexts}
 		}
 		r.Origin = "construction"
 		r.ID = nextID("t", len(a.data.Targets))
@@ -240,6 +250,16 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		}
 	case catalog.FileList:
 		out.fileRoot = values[0].known
+	case catalog.FileDirectory:
+		out.fields = map[string]abstract{"path": values[0]}
+	case catalog.FileScan:
+		entryType, _ := types.FieldType(types.FileScan(), "entries")
+		vanishedType, _ := types.FieldType(types.FileScan(), "vanished_names")
+		entries := a.unknown(node, entryType)
+		entries.fileRoot = values[0].known
+		directory := a.unknown(node, types.FileDirectory())
+		directory.fields = map[string]abstract{"path": values[0]}
+		out.fields = map[string]abstract{"entries": entries, "directory": directory, "vanished_names": a.unknown(node, vanishedType)}
 	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew, catalog.ScalarNew, catalog.PathNew, catalog.URLNew, catalog.MethodNew, catalog.ProcessExecutableNew:
 		out = values[0]
 	case catalog.Concat:

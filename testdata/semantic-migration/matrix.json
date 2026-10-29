@@ -226,6 +226,33 @@
       "errors": [
         "File.InvalidSelection"
       ],
+      "operation": "File.Remove.checked",
+      "positive": [
+        "TestRunBuiltinCatalog/File.Remove.checked"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.Remove.checked"
+      ],
+      "runtime_negative": [
+        "TestF025CheckedSelectionValidation",
+        "TestF025GuardRejectionPreservesFiles",
+        "TestF025GuardWorkExhaustion",
+        "TestF025CheckedRemovalRejectsAtPreflight",
+        "TestF025CheckedRemovalMetadataChanges"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.Remove.checked"
+    },
+    {
+      "activation_errors": [
+        "File.EntryChanged",
+        "File.RemoveFailed"
+      ],
+      "capability": "File.remove",
+      "errors": [
+        "File.InvalidSelection"
+      ],
       "operation": "File.Remove.new",
       "positive": [
         "TestRunBuiltinCatalog/File.Remove.new"
@@ -266,19 +293,42 @@
       "capability": "File.list",
       "errors": [
         "File.DirectoryAbsent",
+        "File.DirectoryFailed"
+      ],
+      "operation": "File.directory",
+      "positive": [
+        "TestRunBuiltinCatalog/File.directory"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.directory"
+      ],
+      "runtime_negative": [
+        "TestF025ObservationFailures"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.directory"
+    },
+    {
+      "activation_errors": null,
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryAbsent",
         "File.ListFailed",
         "File.InvalidName"
       ],
       "operation": "File.list",
       "positive": [
-        "TestRunBuiltinCatalog/File.list"
+        "TestRunBuiltinCatalog/File.list",
+        "TestF025FileMetadata"
       ],
       "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
       "negative": [
         "TestSemanticBuiltinRejections/File.list"
       ],
       "runtime_negative": [
-        "TestFileDiscoveryFailures"
+        "TestFileDiscoveryFailures",
+        "TestF025ScanReportsVanishedChildren"
       ],
       "negative_applicability": "catalog_failure_or_activation",
       "oracle": "literal_assertions:TestRunBuiltinCatalog/File.list"
@@ -322,6 +372,30 @@
       ],
       "negative_applicability": "catalog_failure_or_activation",
       "oracle": "literal_assertions:TestRunBuiltinCatalog/File.read"
+    },
+    {
+      "activation_errors": null,
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryAbsent",
+        "File.ListFailed",
+        "File.InvalidName"
+      ],
+      "operation": "File.scan",
+      "positive": [
+        "TestRunBuiltinCatalog/File.scan",
+        "TestF025ScanReportsVanishedChildren"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/File.scan"
+      ],
+      "runtime_negative": [
+        "TestF025ObservationFailures",
+        "TestF025ScanPreservesOtherErrors"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/File.scan"
     },
     {
       "activation_errors": null,
@@ -863,6 +937,32 @@
       ],
       "negative_applicability": "catalog_failure_or_activation",
       "oracle": "literal_assertions:TestRunBuiltinCatalog/HTTP.URL.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "Host.Invocation.current",
+      "errors": [
+        "Host.InvocationFailed"
+      ],
+      "operation": "Host.Invocation.current",
+      "positive": [
+        "TestRunBuiltinCatalog/Host.Invocation.current",
+        "TestHostInvocationCanonicalTransport/valid"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Host.Invocation.current"
+      ],
+      "runtime_negative": [
+        "TestHostInvocationDeferredCaptureFailure",
+        "TestHostInvocationCanonicalTransport/truncated",
+        "TestHostInvocationCanonicalTransport/trailing",
+        "TestHostInvocationCanonicalTransport/count-overflow",
+        "TestHostInvocationCanonicalTransport/interior-nul",
+        "TestHostInvocationCanonicalTransport/invalid-utf8"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Host.Invocation.current"
     },
     {
       "activation_errors": null,
@@ -4479,6 +4579,102 @@
     ],
     "TestVerifierRejections": [
       "TestVerifierRejections"
+    ],
+    "TestF025CheckedSelectionValidation": [
+      "TestF025CheckedSelectionValidation"
+    ],
+    "TestF025GuardRejectionPreservesFiles": [
+      "TestF025GuardRejectionPreservesFiles"
+    ],
+    "TestF025GuardWorkExhaustion": [
+      "TestF025GuardWorkExhaustion"
+    ],
+    "TestF025ObservationFailures": [
+      "TestF025ObservationFailures"
+    ],
+    "TestHostInvocationDeferredCaptureFailure": [
+      "TestHostInvocationDeferredCaptureFailure"
+    ],
+    "TestRunBuiltinCatalog/File.Remove.checked": [
+      "TestRunBuiltinCatalog/File.Remove.checked"
+    ],
+    "TestRunBuiltinCatalog/File.directory": [
+      "TestRunBuiltinCatalog/File.directory",
+      "TestLLVMF025FileObserver/metadata",
+      "TestLLVMLinuxF025FileObserver/metadata"
+    ],
+    "TestRunBuiltinCatalog/File.scan": [
+      "TestRunBuiltinCatalog/File.scan",
+      "TestLLVMF025FileObserver/metadata",
+      "TestLLVMLinuxF025FileObserver/metadata"
+    ],
+    "TestRunBuiltinCatalog/Host.Invocation.current": [
+      "TestRunBuiltinCatalog/Host.Invocation.current"
+    ],
+    "TestSemanticBuiltinRejections/File.Remove.checked": [
+      "TestSemanticBuiltinRejections/File.Remove.checked"
+    ],
+    "TestSemanticBuiltinRejections/File.directory": [
+      "TestSemanticBuiltinRejections/File.directory"
+    ],
+    "TestSemanticBuiltinRejections/File.scan": [
+      "TestSemanticBuiltinRejections/File.scan"
+    ],
+    "TestSemanticBuiltinRejections/Host.Invocation.current": [
+      "TestSemanticBuiltinRejections/Host.Invocation.current"
+    ],
+    "TestF025FileMetadata": [
+      "TestF025FileMetadata",
+      "TestLLVMF025FileObserver/metadata",
+      "TestLLVMLinuxF025FileObserver/metadata"
+    ],
+    "TestF025ScanReportsVanishedChildren": [
+      "TestLLVMF025FileObserver/vanished-child",
+      "TestLLVMLinuxF025FileObserver/vanished-child",
+      "TestLLVMF025FileObserver/strict-list-missing-child",
+      "TestLLVMLinuxF025FileObserver/strict-list-missing-child"
+    ],
+    "TestF025ScanPreservesOtherErrors": [
+      "TestLLVMF025FileObserver/lookup-error",
+      "TestLLVMLinuxF025FileObserver/lookup-error"
+    ],
+    "TestF025CheckedRemovalRejectsAtPreflight": [
+      "TestLLVMF025FileObserver/preflight-rejection",
+      "TestLLVMLinuxF025FileObserver/preflight-rejection"
+    ],
+    "TestF025CheckedRemovalMetadataChanges": [
+      "TestLLVMF025FileObserver/remove-rejection-prefix",
+      "TestLLVMLinuxF025FileObserver/remove-rejection-prefix",
+      "TestLLVMF025FileObserver/remove-access-change-prefix",
+      "TestLLVMLinuxF025FileObserver/remove-access-change-prefix",
+      "TestLLVMF025FileObserver/remove-ctime-change-prefix",
+      "TestLLVMLinuxF025FileObserver/remove-ctime-change-prefix",
+      "TestLLVMF025FileObserver/remove-link-change-prefix",
+      "TestLLVMLinuxF025FileObserver/remove-link-change-prefix"
+    ],
+    "TestHostInvocationCanonicalTransport/valid": [
+      "TestLLVMHostInvocationInjectedInputs/captured",
+      "TestLLVMLinuxHostInvocationInjectedInputs/captured"
+    ],
+    "TestHostInvocationCanonicalTransport/truncated": [
+      "TestLLVMHostInvocationInjectedInputs/truncated",
+      "TestLLVMLinuxHostInvocationInjectedInputs/truncated"
+    ],
+    "TestHostInvocationCanonicalTransport/trailing": [
+      "TestLLVMHostInvocationInjectedInputs/trailing",
+      "TestLLVMLinuxHostInvocationInjectedInputs/trailing"
+    ],
+    "TestHostInvocationCanonicalTransport/count-overflow": [
+      "TestLLVMHostInvocationInjectedInputs/count-overflow",
+      "TestLLVMLinuxHostInvocationInjectedInputs/count-overflow"
+    ],
+    "TestHostInvocationCanonicalTransport/interior-nul": [
+      "TestLLVMHostInvocationInjectedInputs/interior-nul",
+      "TestLLVMLinuxHostInvocationInjectedInputs/interior-nul"
+    ],
+    "TestHostInvocationCanonicalTransport/invalid-utf8": [
+      "TestLLVMHostInvocationInjectedInputs/invalid-utf8",
+      "TestLLVMLinuxHostInvocationInjectedInputs/invalid-utf8"
     ]
   }
 }

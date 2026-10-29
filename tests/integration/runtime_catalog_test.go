@@ -14,6 +14,10 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	executablePath := repository + "/testdata/inert-process/executable"
 	executableJSON := fmt.Sprintf(`{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":%q}}}`, executablePath)
 	want := map[string]string{
+		catalog.HostInvocationCurrent:          `{"type":"Int","value":"0"}`,
+		catalog.FileDirectory:                  `{"type":"Bool","value":true}`,
+		catalog.FileScan:                       `{"type":"Int","value":"0"}`,
+		catalog.FileRemoveChecked:              `{"type":"Int","value":"0"}`,
 		catalog.ProcessContextCurrent:          `{"type":"Process.Context","value":{"origin":"inherited","redacted":true}}`,
 		catalog.ProcessContextNew:              `{"type":"Process.Context","value":{"origin":"explicit","redacted":true}}`,
 		catalog.ProcessContextOverride:         `{"type":"Process.Context","value":{"origin":"derived","redacted":true}}`,
@@ -125,6 +129,15 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				return
 			}
 			var args []string
+			if tc.name == catalog.FileDirectory || tc.name == catalog.FileScan {
+				root := fileFixtureRoot(t)
+				if tc.name == catalog.FileDirectory {
+					tc.source = fmt.Sprintf(`flow Main() -> Bool! { directory = File.directory(File.Path.new(%q)); return File.Path.eq(directory.path, File.Path.new(%q)) }; return Main()`, root, root)
+				} else {
+					tc.source = fmt.Sprintf(`flow Main() -> Int! { scan = File.scan(File.Path.new(%q)); return Math.add(List.length(scan.entries), List.length(scan.vanished_names)) }; return Main()`, root)
+				}
+				args = []string{"--list-root", root}
+			}
 			if tc.name == catalog.FileList || tc.name == catalog.FileOpenPaths {
 				root := fileFixtureRoot(t)
 				flag := "--list-root"

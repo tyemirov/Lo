@@ -387,6 +387,14 @@ func (a *analyzer) activate(c *context, node nodeID, value abstract) {
 		arm := *c
 		arm.conditions = r.Conditions
 		a.addError(&arm, "activation", op.Name(), node, op.ActivationKinds(), nil)
+		if r.Guard != nil {
+			predicate := a.graph.flows[r.Guard.Flow]
+			arguments := make([]abstract, len(predicate.Parameters()))
+			for index, parameter := range predicate.Parameters() {
+				arguments[index] = a.unknown(a.graph.parameters[parameter.ID], parameter.Type)
+			}
+			a.invoke(&arm, r.Guard.Flow, "activation-guard", c.entry, node, arguments, r.Conditions)
+		}
 		if op.Boundary() == catalog.Server && r.Handler != "" {
 			a.adapter(&arm, r.Handler, r.OnError, activation.ID, node, requestCondition)
 			a.adapter(&arm, r.OnError, "", activation.ID, node, adapterErrorCondition)

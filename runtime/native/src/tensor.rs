@@ -157,6 +157,10 @@ fn visit_storages(
                 stack.extend_from_slice(&e.trace);
                 stack.extend_from_slice(&e.flow_progress)
             }
+            Data::Adapter(crate::adapters::AdapterValue::File(crate::files::Value::Remove {
+                guard: Some(guard),
+                ..
+            })) => stack.extend_from_slice(&guard.contexts),
             Data::Adapter(value) => {
                 if let Some(fields) = value.fields() {
                     stack.extend(fields.values().cloned());

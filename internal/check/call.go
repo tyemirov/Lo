@@ -157,6 +157,8 @@ func (c *checker) builtin(op catalog.Operation, args []syntax.Argument, expected
 		return builtinResult(op, types.String(), nodes, nil, span, values...), nil
 	case catalog.ListProcessor, catalog.FlowProcessor:
 		return c.listProcessor(op, args, span)
+	case catalog.CheckedRemovalConstructor:
+		return c.checkedRemoval(op, args, span)
 	}
 	bound, d := bindArguments(op.Name(), op.Parameters(), args, span)
 	if d != nil {

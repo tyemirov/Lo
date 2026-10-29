@@ -74,7 +74,18 @@ func (m *machine) body(body []ir.Statement, f frame) (output value.Value, result
 			if err != nil {
 				return nil, err
 			}
-			receipt, err := runtimeops.Commit(m.Session, v.(value.Target), x.Span())
+			activation, err := execution.WithRemovalGuardEvaluator(m.Context(), func(guard value.RemovalGuard, original, current value.FileEntry) (bool, error) {
+				arguments := append(guard.Context(), original, current)
+				result, err := m.invoke(guard.Flow(), arguments, x.Span())
+				if err != nil {
+					return false, err
+				}
+				return result.(value.Boolean).Bool(), nil
+			})
+			if err != nil {
+				return nil, err
+			}
+			receipt, err := runtimeops.Commit(activationSession{Session: m.Session, ctx: activation}, v.(value.Target), x.Span())
 			if err != nil {
 				return nil, err
 			}
@@ -88,6 +99,13 @@ func (m *machine) body(body []ir.Statement, f frame) (output value.Value, result
 	}
 	return nil, nil
 }
+
+type activationSession struct {
+	execution.Session
+	ctx context.Context
+}
+
+func (session activationSession) Context() context.Context { return session.ctx }
 func (m *machine) expression(expr ir.Expression, f frame) (value.Value, error) {
 	if err := m.Step(); err != nil {
 		return nil, err

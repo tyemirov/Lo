@@ -22,6 +22,18 @@ The user gives standing authorization for reviews and specialized agents in the 
 When useful, start independent reviews and specialized agents without additional user approval.
 Apply the [review and delegation policy](.mprlab/POLICY.md#reviews-and-specialized-agents) to their work.
 
+## General-Purpose Language Boundary
+
+Lo is a general-purpose programming language.
+Its language contract applies across applications.
+
+- Use types and behavior that apply across applications for language operations.
+- Keep application names, file selection, retention rules, command arguments, output formats, and exit policy in application code.
+- Keep examples for named applications and their acceptance criteria outside the language specification.
+- Do not add operations or runtime semantics that apply only to Gateway, npm, Docker, or another named application.
+- Keep proposed operations and syntax outside the implemented contract until the compiler and runtimes implement them.
+- Keep explicit host authority, immutable values, typed failures, and commit activation when you extend the language.
+
 ## Forward-Only Contract Discipline
 
 This repository follows a forward-only, confident programming paradigm. This is a binding agent contract: no fallbacks, no backward compatibility, no legacy support, and no compatibility shims. Do not spend design or implementation effort on backward compatibility considerations except for explicit one-off data migrations into the current canonical contract.

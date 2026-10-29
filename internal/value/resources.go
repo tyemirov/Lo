@@ -27,6 +27,12 @@ func Allocations(values ...Value) []device.Allocation {
 			walk(x.Contents())
 		case TensorBundle:
 			walk(x.Contents())
+		case RemovalEffect:
+			if guard, ok := x.Guard(); ok {
+				for _, context := range guard.Context() {
+					walk(context)
+				}
+			}
 		case Record:
 			for _, f := range x.Fields() {
 				walk(f.Value)
@@ -77,7 +83,7 @@ func resourceType(t types.Type) bool {
 		return false
 	}
 	switch t.Kind() {
-	case types.TensorKind, types.ParametersKind, types.GradientsKind, types.SGDStateKind, types.AdamWStateKind, types.AnyRecordKind:
+	case types.TensorKind, types.ParametersKind, types.GradientsKind, types.SGDStateKind, types.AdamWStateKind, types.AnyRecordKind, types.FileRemoveKind:
 		return true
 	}
 	return false
