@@ -29,6 +29,8 @@ export LO_BUILD_ROOT HOME TMPDIR TMP TEMP GOCACHE GOMODCACHE GOPATH GOTOOLCHAIN 
 TEST_ARGS ?=
 BENCH_COUNT ?= 10
 BENCH_TIME ?= 300ms
+FILE_BENCH_WORK ?= $(LO_BUILD_ROOT)
+FILE_BENCH_ARGS ?=
 NATIVE_BENCH_WORK ?= $(NATIVE_QUALIFICATION_OUTPUT)/benchmark
 NATIVE_BENCH_LANE ?= all
 NATIVE_QUALIFICATION_TEST_ARGS ?=
@@ -138,6 +140,13 @@ benchmark-native-baseline: | tool-state
 
 benchmark-native: build | tool-state
 	GOMAXPROCS=1 python3 -B scripts/qualify_native.py --binary bin/lo --toolchain "$(LLVM_TOOLCHAIN)" --workdir "$(NATIVE_BENCH_WORK)" --lane "$(NATIVE_BENCH_LANE)" </dev/null
+
+.PHONY: benchmark-file-io test-filebench
+benchmark-file-io: build | tool-state
+	$(GO) run ./tools/filebench -work "$(FILE_BENCH_WORK)" -compiler "$(abspath bin/lo)" -toolchain "$(abspath $(LLVM_TOOLCHAIN))" $(FILE_BENCH_ARGS) </dev/null
+
+test-filebench: | tool-state
+	$(GO) test ./tools/filebench $(TEST_ARGS) </dev/null
 
 .PHONY: benchmark-standalone
 benchmark-standalone: | tool-state
