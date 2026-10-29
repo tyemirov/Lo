@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -18,6 +19,8 @@ import (
 func TestF025FileMetadata(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := fileFixture(t, root, "entry", "payload")
+	source := fmt.Sprintf(`flow Fields(entry: File.Entry) -> Record{owner: Int, accessed: Int, changed: Int, modified: Int} { return Record.new(owner: entry.owner_uid, accessed: entry.accessed_unix_ns, changed: entry.changed_unix_ns, modified: entry.modified_unix_ns) }; flow Main() -> List<Record{owner: Int, accessed: Int, changed: Int, modified: Int}>! { entries = File.list(File.Path.new(%q)); return List.map(entries, Fields) }; return Main()`, root)
+	command := runtimeCommand(t, "run", sourceFile(t, source), "--list-root", root, "--format", "json")
 	accessed := time.Unix(-1, 123456789)
 	modified := time.Unix(1234, 987654321)
 	if err := os.Chtimes(path, accessed, modified); err != nil {
@@ -28,9 +31,39 @@ func TestF025FileMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 	owner, access, change := f025NativeMetadata(info)
-	source := fmt.Sprintf(`flow Fields(entry: File.Entry) -> Record{owner: Int, accessed: Int, changed: Int, modified: Int} { return Record.new(owner: entry.owner_uid, accessed: entry.accessed_unix_ns, changed: entry.changed_unix_ns, modified: entry.modified_unix_ns) }; flow Main() -> List<Record{owner: Int, accessed: Int, changed: Int, modified: Int}>! { entries = File.list(File.Path.new(%q)); return List.map(entries, Fields) }; return Main()`, root)
-	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--list-root", root, "--format", "json"))
+	var stdout, stderr bytes.Buffer
+	command.Stdout, command.Stderr = &stdout, &stderr
+	if err := command.Run(); err != nil {
+		t.Fatalf("metadata execution: %v stdout=%s stderr=%s", err, &stdout, &stderr)
+	}
+	got := fileOutput(t, result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()})
 	valueJSON(t, got, fmt.Sprintf(`[{"type":"Record{accessed: Int, changed: Int, modified: Int, owner: Int}","value":{"owner":{"type":"Int","value":"%d"},"accessed":{"type":"Int","value":"%d"},"changed":{"type":"Int","value":"%d"},"modified":{"type":"Int","value":"%d"}}}]`, owner, access, change, info.ModTime().UnixNano()))
+}
+
+func TestF025CheckedRemovalFallibleContext(t *testing.T) {
+	for _, argument := range []string{"7", "Math.div(1, 0)"} {
+		t.Run(argument, func(t *testing.T) {
+			root := fileFixtureRoot(t)
+			path := fileFixture(t, root, "entry", "payload")
+			source := fmt.Sprintf(`flow Guard(number: Int!, original: File.Entry, current: File.Entry) -> Bool { return Math.eq(List.length(List.new(number)), 1) }; flow Main() -> Int! { entries = File.list(File.Path.new(%q)); target = File.Remove.checked(entries, %s, Guard); receipt = commit target; return receipt.completed_count }; return Main()`, root, argument)
+			got := fileOutput(t, run(t, "run", sourceFile(t, source), "--list-root", root, "--remove-root", root, "--format", "json"))
+			valueJSON(t, got, `"1"`)
+			if _, err := os.Lstat(path); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("guarded entry survived: %v", err)
+			}
+		})
+	}
+}
+
+func TestF025CheckedRemovalRetainsTensorContext(t *testing.T) {
+	root := fileFixtureRoot(t)
+	path := fileFixture(t, root, "entry", "payload")
+	source := fmt.Sprintf(`flow Reject(error: Error) -> Bool { return false }; flow Guard(tensor: Tensor<FP32>, original: File.Entry, current: File.Entry) -> Bool onError Reject { values = Tensor.values(tensor); return Math.eq(List.length(values), 1) }; flow Build(entries: List<File.Entry>) -> File.Remove! { tensor = Tensor.new(List.new(1.0), List.new(1)); return File.Remove.checked(entries, tensor, Guard) }; flow Main() -> Int! { entries = File.list(File.Path.new(%q)); target = Build(entries); receipt = commit target; return receipt.completed_count }; return Main()`, root)
+	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--list-root", root, "--remove-root", root, "--format", "json"))
+	valueJSON(t, got, `"1"`)
+	if _, err := os.Lstat(path); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("guarded entry survived: %v", err)
+	}
 }
 
 func TestF025ScanReportsVanishedChildren(t *testing.T) {
