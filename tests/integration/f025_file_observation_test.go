@@ -3,6 +3,7 @@ package integration_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -19,7 +20,7 @@ import (
 func TestF025FileMetadata(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := fileFixture(t, root, "entry", "payload")
-	source := fmt.Sprintf(`flow Fields(entry: File.Entry) -> Record{owner: Int, accessed: Int, changed: Int, modified: Int} { return Record.new(owner: entry.owner_uid, accessed: entry.accessed_unix_ns, changed: entry.changed_unix_ns, modified: entry.modified_unix_ns) }; flow Main() -> List<Record{owner: Int, accessed: Int, changed: Int, modified: Int}>! { entries = File.list(File.Path.new(%q)); return List.map(entries, Fields) }; return Main()`, root)
+	source := fmt.Sprintf(`flow Fields(entry: File.Entry) -> Record{owner: Int, changed: Int, modified: Int} { return Record.new(owner: entry.owner_uid, changed: entry.changed_unix_ns, modified: entry.modified_unix_ns) }; flow Main() -> List<Record{owner: Int, changed: Int, modified: Int}>! { entries = File.list(File.Path.new(%q)); return List.map(entries, Fields) }; return Main()`, root)
 	command := runtimeCommand(t, "run", sourceFile(t, source), "--list-root", root, "--format", "json")
 	accessed := time.Unix(-1, 123456789)
 	modified := time.Unix(1234, 987654321)
@@ -30,14 +31,56 @@ func TestF025FileMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	owner, access, change := f025NativeMetadata(info)
+	owner, _, change := f025NativeMetadata(info)
+	content, err := os.ReadFile(path)
+	if err != nil || string(content) != "payload" {
+		t.Fatalf("fixture content changed: %q %v", content, err)
+	}
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
 	if err := command.Run(); err != nil {
 		t.Fatalf("metadata execution: %v stdout=%s stderr=%s", err, &stdout, &stderr)
 	}
 	got := fileOutput(t, result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()})
-	valueJSON(t, got, fmt.Sprintf(`[{"type":"Record{accessed: Int, changed: Int, modified: Int, owner: Int}","value":{"owner":{"type":"Int","value":"%d"},"accessed":{"type":"Int","value":"%d"},"changed":{"type":"Int","value":"%d"},"modified":{"type":"Int","value":"%d"}}}]`, owner, access, change, info.ModTime().UnixNano()))
+	valueJSON(t, got, fmt.Sprintf(`[{"type":"Record{changed: Int, modified: Int, owner: Int}","value":{"owner":{"type":"Int","value":"%d"},"changed":{"type":"Int","value":"%d"},"modified":{"type":"Int","value":"%d"}}}]`, owner, change, info.ModTime().UnixNano()))
+}
+
+func TestF025InjectedFileMetadata(t *testing.T) {
+	root := fileFixtureRoot(t)
+	path := fileFixture(t, root, "entry", "payload")
+	modified := time.Unix(1234, 987654321)
+	if err := os.Chtimes(path, modified, modified); err != nil {
+		t.Fatal(err)
+	}
+	filesystem := &scheduledFileIO{FileIO: adapter.NativeFileIO()}
+	filesystem.stat = func(dir *os.Root, name string, occurrence int) (os.FileInfo, error) {
+		info, err := filesystem.FileIO.Lstat(dir, name)
+		if err == nil && name == "entry" {
+			return f025FixedMetadata(info), nil
+		}
+		return info, err
+	}
+	source := fmt.Sprintf(`flow Fields(entry: File.Entry) -> Record{owner: Int, accessed: Int, changed: Int, modified: Int} { return Record.new(owner: entry.owner_uid, accessed: entry.accessed_unix_ns, changed: entry.changed_unix_ns, modified: entry.modified_unix_ns) }; flow Main() -> List<Record{owner: Int, accessed: Int, changed: Int, modified: Int}>! { entries = File.list(File.Path.new(%q)); return List.map(entries, Fields) }; return Main()`, root)
+	output, err, diagnostics := injectedFileProgram(t, context.Background(), root, source, filesystem)
+	if err != nil {
+		t.Fatalf("injected file metadata: %v %+v", err, diagnostics)
+	}
+	result, failure := output.(value.Fallible).Outcome()
+	if failure != nil {
+		t.Fatalf("injected file metadata failed: %v", failure)
+	}
+	serialized, err := json.Marshal(result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got runtimeValue
+	if err := json.Unmarshal(serialized, &got); err != nil {
+		t.Fatal(err)
+	}
+	valueJSON(t, got, `[{"type":"Record{accessed: Int, changed: Int, modified: Int, owner: Int}","value":{"owner":{"type":"Int","value":"1001"},"accessed":{"type":"Int","value":"-876543211"},"changed":{"type":"Int","value":"-1000000000"},"modified":{"type":"Int","value":"1234987654321"}}}]`)
+	if filesystem.stats["entry"] != 1 {
+		t.Fatalf("metadata snapshot count: %v", filesystem.stats)
+	}
 }
 
 func TestF025CheckedRemovalFallibleContext(t *testing.T) {

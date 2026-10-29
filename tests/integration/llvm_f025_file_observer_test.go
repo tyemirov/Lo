@@ -56,7 +56,7 @@ func llvmF025FileObserverScenarios() []llvmRuntimeScenario {
 				valueJSON(t, recordField(t, output, "directory_owner"), `"1001"`)
 				valueJSON(t, recordField(t, output, "scan_owner"), `"1001"`)
 				fields := recordField(t, output, "entries")
-				valueJSON(t, fields, `[{"type":"Record{access: Int, change: Int, owner: Int}","value":{"access":{"type":"Int","value":"-3000000000"},"change":{"type":"Int","value":"-1000000000"},"owner":{"type":"Int","value":"1001"}}},{"type":"Record{access: Int, change: Int, owner: Int}","value":{"access":{"type":"Int","value":"-3000000000"},"change":{"type":"Int","value":"-1000000000"},"owner":{"type":"Int","value":"1001"}}}]`)
+				valueJSON(t, fields, `[{"type":"Record{access: Int, change: Int, owner: Int}","value":{"access":{"type":"Int","value":"-876543211"},"change":{"type":"Int","value":"-1000000000"},"owner":{"type":"Int","value":"1001"}}},{"type":"Record{access: Int, change: Int, owner: Int}","value":{"access":{"type":"Int","value":"-876543211"},"change":{"type":"Int","value":"-1000000000"},"owner":{"type":"Int","value":"1001"}}}]`)
 			case "vanished-child":
 				output := fileOutput(t, actual)
 				valueJSON(t, recordField(t, output, "names"), `[{"type":"String","value":"b"}]`)
