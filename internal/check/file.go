@@ -45,9 +45,11 @@ func (c *checker) checkedRemoval(operation catalog.Operation, args []syntax.Argu
 		if failure != nil {
 			return expression{}, failure
 		}
-		value, failure = c.unwrap(value)
-		if failure != nil {
-			return expression{}, failure
+		if index == 0 {
+			value, failure = c.unwrap(value)
+			if failure != nil {
+				return expression{}, failure
+			}
 		}
 		values[index] = value
 		nodes[index] = must(ir.ValueArg(index, value.node))
