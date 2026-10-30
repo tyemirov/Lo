@@ -5,8 +5,6 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
-	"golang.org/x/sys/unix"
 	"io"
 	"os"
 	"path/filepath"
@@ -14,8 +12,10 @@ import (
 	"sync"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
+	"golang.org/x/sys/unix"
 )
 
 type Files interface {
@@ -136,6 +136,10 @@ func closeRoots(roots []grant, close func(*os.Root) error) error {
 	return result
 }
 func (f *files) Read(ctx context.Context, path value.Text) (value.Bytes, error) {
+	session, ok := execution.SessionFromContext(ctx)
+	if !ok {
+		return nil, execution.HostFailure(catalog.FileRead, path.Text(), errors.New("missing execution session"))
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, execution.HostFailure(catalog.FileRead, path.Text(), err)
 	}
@@ -148,13 +152,27 @@ func (f *files) Read(ctx context.Context, path value.Text) (value.Bytes, error) 
 		return nil, fmt.Errorf("%s %q: %w", catalog.FileRead, absolute, err)
 	}
 	closeFile := cancelFile(ctx, file)
-	data, readErr := io.ReadAll(io.LimitReader(contextReader{ctx, file}, execution.MaxBytes+1))
+	var data []byte
+	buffer := make([]byte, 65536)
+	var readErr error
+	for {
+		count, err := (contextReader{ctx, file}).Read(buffer)
+		if count > 0 {
+			if readErr = session.ReserveFile(1, uint64(len(data))+uint64(count)+16); readErr != nil {
+				break
+			}
+			data = append(data, buffer[:count]...)
+		}
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				readErr = err
+			}
+			break
+		}
+	}
 	closeErr := closeFile()
 	if readErr != nil || closeErr != nil {
 		return nil, fmt.Errorf("%s %q: %w", catalog.FileRead, absolute, errors.Join(readErr, closeErr))
-	}
-	if len(data) > execution.MaxBytes {
-		return nil, execution.Limit("file read bytes")
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, execution.HostFailure(catalog.FileRead, absolute, err)

@@ -63,13 +63,15 @@ func NewError(kind, message string, input Record) (Error, error) {
 }
 func At(e Error, operation string, span source.Span) Error {
 	out := e.(loError)
+	out.id = nextIdentity.Add(1)
 	out.operation, out.span = operation, span
 	return out
 }
 
-// WithFlowProgress prepends an already reserved immutable fold snapshot.
+// WithFlowProgress prepends an already reserved immutable processor snapshot.
 func WithFlowProgress(e Error, progress Record) Error {
 	out := e.(loError)
+	out.id = nextIdentity.Add(1)
 	out.flowProgress = make([]Record, len(out.flowProgress)+1)
 	out.flowProgress[0] = progress
 	copy(out.flowProgress[1:], e.(loError).flowProgress)
@@ -81,6 +83,7 @@ func WithFrame(e Error, flow, operation string, input Record) Error {
 	input = frameInput(input)
 	f := must(NewRecord([]Field{{"flow", must(NewText(types.String(), flow))}, {"operation", must(NewText(types.String(), operation))}, {"input", RecordView(input)}}))
 	out := e.(loError)
+	out.id = nextIdentity.Add(1)
 	out.trace = append(e.Trace(), f)
 	out.weight = addWeight(out.weight, f.Weight())
 	return out

@@ -12,13 +12,10 @@ import (
 const (
 	DefaultSteps        uint64 = 1_000_000
 	MaxBytes                   = 16 << 20
-	MaxItems                   = 1_000_000
 	MaxIntegerBits             = 1_048_576
 	MaxDepth                   = 256
 	MaxValueWeight      uint64 = 16 << 20
 	MaxEvaluationWeight uint64 = 64 << 20
-	MaxFileEntries             = 10_000
-	MaxFileDirectories         = 128
 )
 
 type Boundary interface {
@@ -27,21 +24,47 @@ type Boundary interface {
 	OpenPaths(context.Context, value.Text) (value.List, error)
 	Commit(context.Context, value.Target) (value.Value, error)
 }
+
+// Limits configures host quotas. Zero disables the corresponding quota.
+type Limits struct {
+	ValueBytes      uint64
+	LiveBytes       uint64
+	DataBytes       uint64
+	ListItems       uint64
+	FileEntries     uint64
+	FileDirectories uint64
+}
+
+// BudgetInput declares work and memory quotas for one execution.
+type BudgetInput struct {
+	Steps  uint64
+	Limits Limits
+}
+
 type Budget interface {
 	Steps() uint64
+	Limits() Limits
 	budget()
 }
-type budget uint64
+type budget struct{ input BudgetInput }
 
-func (budget) budget()         {}
-func (b budget) Steps() uint64 { return uint64(b) }
-func NewBudget(steps uint64) (Budget, error) {
-	if steps == 0 {
+func (budget) budget()          {}
+func (b budget) Steps() uint64  { return b.input.Steps }
+func (b budget) Limits() Limits { return b.input.Limits }
+
+// NewBudget validates the execution policy at the host boundary.
+func NewBudget(input BudgetInput) (Budget, error) {
+	if input.Steps == 0 {
 		return nil, fmt.Errorf("execution steps must be positive")
 	}
-	return budget(steps), nil
+	return budget{input}, nil
 }
-func DefaultBudget() Budget { return budget(DefaultSteps) }
+
+// DefaultBudgetInput returns the host's default execution policy.
+func DefaultBudgetInput() BudgetInput {
+	return BudgetInput{Steps: DefaultSteps, Limits: Limits{ValueBytes: MaxValueWeight, LiveBytes: MaxEvaluationWeight, FileDirectories: 128}}
+}
+func DefaultBudget() Budget { return budget{DefaultBudgetInput()} }
 
 type Failure interface {
 	error

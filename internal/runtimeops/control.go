@@ -49,16 +49,6 @@ func Propagate(v value.Value) (value.Value, error) {
 	}
 	return result, nil
 }
-func ScalarList(t types.List, v value.Text) (value.Value, error) {
-	items := []value.Value{}
-	for _, r := range v.Text() {
-		if len(items) == execution.MaxItems {
-			return nil, execution.Limit("list elements")
-		}
-		items = append(items, must(value.NewText(types.Scalar(), string(r))))
-	}
-	return value.NewList(t, items)
-}
 func FallibleRecord(t types.Fallible, v value.Fallible) (value.Value, error) {
 	r, cause := v.Outcome()
 	if cause != nil {

@@ -9,7 +9,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 )
 
-const ABIIdentity = "lo-native-2"
+const ABIIdentity = "lo-native-3"
 const MaxModuleBytes = 64 << 20
 
 var ErrUnsupported = errors.New("unsupported native lowering")

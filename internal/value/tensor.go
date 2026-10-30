@@ -23,7 +23,7 @@ func NewTensor(d tensor.Data) (Tensor, error) {
 	if d == nil {
 		return nil, fmt.Errorf("absent tensor data")
 	}
-	return tensorValue{base{types.Tensor(), tensor.Weight(d.Shape(), d.Location())}, d}, nil
+	return tensorValue{base{nextIdentity.Add(1), types.Tensor(), tensor.Weight(d.Shape(), d.Location())}, d}, nil
 }
 func (v tensorValue) MarshalJSON() ([]byte, error) {
 	if v.data.Location() != device.CPU {

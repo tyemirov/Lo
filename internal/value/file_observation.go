@@ -39,7 +39,7 @@ func (v fileDirectoryObservation) Observation() FileObservation { return v.obser
 
 // NewFileDirectoryObservation constructs validated metadata for one retained root.
 func NewFileDirectoryObservation(observation FileObservation, path Text, ownerUID, accessedUnixNS, modifiedUnixNS, changedUnixNS Integer) (FileDirectoryObservation, error) {
-	if observation.Session.token == nil || path == nil || path.Type().Kind() != types.PathKind || !filepath.IsAbs(path.Text()) || path.Text() != observation.Directory.Path || ownerUID == nil || ownerUID.Big().Sign() < 0 || ownerUID.Big().BitLen() > 32 || accessedUnixNS == nil || modifiedUnixNS == nil || changedUnixNS == nil {
+	if observation.Session.token == nil || observation.Lease.token == nil || path == nil || path.Type().Kind() != types.PathKind || !filepath.IsAbs(path.Text()) || path.Text() != observation.Directory.Path || ownerUID == nil || ownerUID.Big().Sign() < 0 || ownerUID.Big().BitLen() > 32 || accessedUnixNS == nil || modifiedUnixNS == nil || changedUnixNS == nil {
 		return nil, fmt.Errorf("invalid directory observation")
 	}
 	fields, err := NewRecord([]Field{{"path", path}, {"owner_uid", ownerUID}, {"accessed_unix_ns", accessedUnixNS}, {"modified_unix_ns", modifiedUnixNS}, {"changed_unix_ns", changedUnixNS}})

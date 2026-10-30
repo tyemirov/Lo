@@ -8,7 +8,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-// FlowProgress retains a completed fold prefix without executable provenance.
+// FlowProgress retains completed processor state without executable provenance.
 type FlowProgress interface {
 	Record() value.Record
 	flowProgress()
@@ -26,7 +26,7 @@ type flowError struct {
 
 func (e flowError) Unwrap() error { return e.error }
 
-// WithFlowProgress preserves the original failure and one completed fold prefix.
+// WithFlowProgress preserves the original failure and one completed processor prefix.
 func WithFlowProgress(err error, progress FlowProgress) error {
 	if err == nil || progress == nil {
 		return err
@@ -49,7 +49,7 @@ func preserveValueFlowProgress(err error, rejected value.Value) error {
 	return err
 }
 
-// FlowDetails obtains nested progress from outermost to innermost fold.
+// FlowDetails obtains nested progress from outermost to innermost processor.
 func FlowDetails(err error) []value.Record {
 	var records []value.Record
 	seen := map[FlowProgress]bool{}
@@ -100,21 +100,37 @@ func (s *session) RecordFlowProgress(total, completed int, state value.Value) (F
 	if err != nil {
 		return nil, err
 	}
-	s.weight += weight
+	if err := s.chargeProgress(record); err != nil {
+		return nil, err
+	}
 	progress := &flowProgress{record}
 	s.flowProgress = progress
 	return progress, nil
 }
 
 func (s *session) reserveFlowProgress(weight uint64) error {
-	if err := s.ctx.Err(); err != nil {
+	// Diagnostic completion survives a resource cleanup failure after a callback.
+	if err := s.contextError(); err != nil {
 		return BoundaryHostError(err)
 	}
-	if weight > MaxValueWeight {
+	if exceeds(s.limits.ValueBytes, 0, weight) {
 		return Limit("expanded flow progress bytes")
 	}
-	if weight > MaxEvaluationWeight-s.weight {
-		return Limit("evaluation flow progress bytes")
+	if exceeds(s.limits.LiveBytes, s.live-s.progressWeight, weight) {
+		return Limit("live value bytes")
 	}
+	if exceeds(s.limits.DataBytes, s.data, weight) {
+		return Limit("cumulative data bytes")
+	}
+	return nil
+}
+func (s *session) chargeProgress(record value.Record) error {
+	weight := record.Weight()
+	if err := s.reserveFlowProgress(weight); err != nil {
+		return err
+	}
+	s.live = s.live - s.progressWeight + weight
+	s.progressWeight = weight
+	s.data += weight
 	return nil
 }

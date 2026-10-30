@@ -74,7 +74,9 @@ func (f *files) remove(ctx context.Context, target value.RemovalEffect) (value.V
 	registry := f.sessions[session.FileSession()]
 	var root *os.Root
 	if registry != nil {
-		root = registry.directories[directory]
+		if observed, ok := registry.directories[directory]; ok && observed.lease == first.Observation().Lease {
+			root = observed.root
+		}
 	}
 	f.mu.Unlock()
 	if root == nil {
@@ -85,7 +87,6 @@ func (f *files) remove(ctx context.Context, target value.RemovalEffect) (value.V
 	if err := session.ReserveFile(uint64(3*len(items)), diagnosticWeight); err != nil {
 		return nil, receipt.failure(catalog.RemoveFailed, -1, removalPreflight, err)
 	}
-	session.AddWeight(diagnosticWeight)
 	receipt.entries = value.Snapshot(entries).(value.List)
 	f.recordRemoval(session, receipt)
 	for index, item := range items {
@@ -174,7 +175,7 @@ func (f *files) revalidateGuard(ctx context.Context, session execution.Session, 
 		return nil
 	}
 	name := entry.FieldsRecord().Field("name").(value.Text).Text()
-	current, err := observeEntry(session, entry.Observation().Directory, name, info, 0)
+	current, err := observeEntry(session, entry.Observation().Directory, entry.Observation().Lease, name, info, 0)
 	if err != nil {
 		return execution.NewFileError(catalog.RemoveFailed, nil, nil, err)
 	}

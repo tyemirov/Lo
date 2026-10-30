@@ -45,9 +45,13 @@ func (nativeFileIO) Remove(root *os.Root, name string) error               { ret
 func (nativeFileIO) CloseDirectory(root *os.Root) error                    { return root.Close() }
 func NativeFileIO() FileIO                                                 { return nativeFileIO{} }
 
+type observedDirectory struct {
+	root  *os.Root
+	lease value.FileLease
+}
+
 type fileRegistry struct {
-	directories map[value.FileDirectory]*os.Root
-	order       []value.FileDirectory
+	directories map[value.FileDirectory]observedDirectory
 }
 
 func exactPath(path string) (string, error) {
@@ -149,31 +153,34 @@ func (f *files) exactGrant(roots []grant, operation, path string) (grant, value.
 	return grant{}, value.FileDirectory{}, execution.Denied(operation, path)
 }
 
-func (f *files) directory(session execution.Session, source grant, identity value.FileDirectory) (*os.Root, bool, error) {
+func (f *files) directory(session execution.Session, source grant, identity value.FileDirectory) (*os.Root, value.FileLease, bool, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	key := session.FileSession()
 	registry := f.sessions[key]
 	if registry == nil {
-		registry = &fileRegistry{directories: map[value.FileDirectory]*os.Root{}}
+		registry = &fileRegistry{directories: map[value.FileDirectory]observedDirectory{}}
 		if err := session.OnClose(func() error { return f.closeSession(key) }); err != nil {
-			return nil, false, err
+			return nil, value.FileLease{}, false, err
 		}
 		f.sessions[key] = registry
 	}
-	if root := registry.directories[identity]; root != nil {
-		return root, false, nil
+	if observed, ok := registry.directories[identity]; ok {
+		return observed.root, observed.lease, false, nil
 	}
-	if len(registry.directories) == execution.MaxFileDirectories {
-		return nil, false, execution.Limit("retained file directories")
+	if limit := session.Limits().FileDirectories; limit != 0 && uint64(len(registry.directories)) >= limit {
+		return nil, value.FileLease{}, false, execution.Limit("retained file directories")
 	}
 	root, err := source.root.OpenRoot(".")
 	if err != nil {
-		return nil, false, err
+		return nil, value.FileLease{}, false, err
 	}
-	registry.directories[identity] = root
-	registry.order = append(registry.order, identity)
-	return root, true, nil
+	lease := value.NewFileLease()
+	if err := session.RegisterFileLease(lease, func() error { return f.releaseDirectory(key, identity, lease) }); err != nil {
+		return nil, value.FileLease{}, false, execution.PreserveCleanup(err, f.io.CloseDirectory(root))
+	}
+	registry.directories[identity] = observedDirectory{root, lease}
+	return root, lease, true, nil
 }
 
 func (f *files) closeSession(key value.FileSession) error {
@@ -185,24 +192,32 @@ func (f *files) closeSession(key value.FileSession) error {
 		return nil
 	}
 	var result error
-	for _, directory := range registry.order {
-		if root := registry.directories[directory]; root != nil {
-			if err := f.io.CloseDirectory(root); err != nil {
-				result = errors.Join(result, fmt.Errorf("close observed directory %q: %w", directory.Path, err))
-			}
+	for directory, observed := range registry.directories {
+		if err := f.io.CloseDirectory(observed.root); err != nil {
+			result = errors.Join(result, fmt.Errorf("close observed directory %q: %w", directory.Path, err))
 		}
 	}
 	return result
 }
 
-func (f *files) discardDirectory(session execution.Session, directory value.FileDirectory) error {
+func (f *files) releaseDirectory(session value.FileSession, directory value.FileDirectory, lease value.FileLease) error {
 	f.mu.Lock()
-	registry := f.sessions[session.FileSession()]
-	root := registry.directories[directory]
+	registry := f.sessions[session]
+	if registry == nil {
+		f.mu.Unlock()
+		return nil
+	}
+	observed, ok := registry.directories[directory]
+	if !ok || observed.lease != lease {
+		f.mu.Unlock()
+		return nil
+	}
 	delete(registry.directories, directory)
-	registry.order = slices.DeleteFunc(registry.order, func(item value.FileDirectory) bool { return item == directory })
 	f.mu.Unlock()
-	return f.io.CloseDirectory(root)
+	if err := f.io.CloseDirectory(observed.root); err != nil {
+		return fmt.Errorf("close observed directory %q: %w", directory.Path, err)
+	}
+	return nil
 }
 
 func listFailure(kind, path string, err error) error {
@@ -224,13 +239,13 @@ func (f *files) List(ctx context.Context, path value.Text) (result value.List, r
 	if err != nil {
 		return nil, err
 	}
-	root, fresh, err := f.directory(session, selected, directory)
+	root, lease, fresh, err := f.directory(session, selected, directory)
 	if err != nil {
 		return nil, listFailure(catalog.ListFailed, path.Text(), err)
 	}
 	defer func() {
 		if resultErr != nil && fresh {
-			resultErr = execution.PreserveCleanup(resultErr, f.discardDirectory(session, directory))
+			resultErr = execution.PreserveCleanup(resultErr, f.releaseDirectory(session.FileSession(), directory, lease))
 		}
 	}()
 	stream, err := root.Open(".")
@@ -256,7 +271,7 @@ func (f *files) List(ctx context.Context, path value.Text) (result value.List, r
 			return nil, listFailure(catalog.ListFailed, directory.Path, readErr)
 		}
 		for _, child := range children {
-			if len(items) == execution.MaxFileEntries {
+			if limit := session.Limits().FileEntries; limit != 0 && uint64(len(items)) >= limit {
 				return nil, execution.Limit("directory entries")
 			}
 			if err := session.ReserveFile(1, weight); err != nil {
@@ -270,7 +285,7 @@ func (f *files) List(ctx context.Context, path value.Text) (result value.List, r
 			if err != nil {
 				return nil, listFailure(catalog.ListFailed, filepath.Join(directory.Path, name), err)
 			}
-			entry, err := observeEntry(session, directory, name, info, weight)
+			entry, err := observeEntry(session, directory, lease, name, info, weight)
 			if err != nil {
 				return nil, listFailure(catalog.ListFailed, filepath.Join(directory.Path, name), err)
 			}
@@ -299,7 +314,7 @@ func (f *files) List(ctx context.Context, path value.Text) (result value.List, r
 	return value.NewList(listType, items)
 }
 
-func observeEntry(session execution.Session, directory value.FileDirectory, name string, info os.FileInfo, priorWeight uint64) (value.FileEntry, error) {
+func observeEntry(session execution.Session, directory value.FileDirectory, lease value.FileLease, name string, info os.FileInfo, priorWeight uint64) (value.FileEntry, error) {
 	identity, links, err := nativeFileIdentity(info)
 	if err != nil {
 		return nil, err
@@ -338,6 +353,6 @@ func observeEntry(session execution.Session, directory value.FileDirectory, name
 	if err := session.ReserveFile(0, priorWeight+weight); err != nil {
 		return nil, err
 	}
-	observation := value.FileObservation{Session: session.FileSession(), Directory: directory, Identity: identity}
+	observation := value.FileObservation{Session: session.FileSession(), Lease: lease, Directory: directory, Identity: identity}
 	return value.NewFileEntry(observation, pathValue, nameValue, kind, sizeValue, modifiedValue, linkValue, ownerValue, accessedValue, changedValue)
 }

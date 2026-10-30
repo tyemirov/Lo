@@ -15,6 +15,13 @@ type fileSessionToken struct{ marker byte }
 
 func NewFileSession() FileSession { return FileSession{&fileSessionToken{}} }
 
+// FileLease identifies one retained observation handle.
+type FileLease struct{ token *fileLeaseToken }
+type fileLeaseToken struct{ marker byte }
+
+// NewFileLease creates a distinct observation lease.
+func NewFileLease() FileLease { return FileLease{&fileLeaseToken{}} }
+
 // FileIdentity contains the filesystem identity of an observed object.
 type FileIdentity struct{ Device, Inode uint64 }
 
@@ -27,6 +34,7 @@ type FileDirectory struct {
 // FileObservation carries authority-free provenance from a filesystem observation.
 type FileObservation struct {
 	Session   FileSession
+	Lease     FileLease
 	Directory FileDirectory
 	Identity  FileIdentity
 }
@@ -71,7 +79,7 @@ func (v fileEntry) FieldsRecord() Record         { return v.fields }
 func (v fileEntry) Observation() FileObservation { return v.observation }
 func (v fileEntry) Kind() FileKind               { return v.kind }
 func NewFileEntry(observation FileObservation, path Text, name Text, kind FileKind, sizeBytes, modifiedUnixNS, linkCount, ownerUID, accessedUnixNS, changedUnixNS Integer) (FileEntry, error) {
-	if observation.Session.token == nil || !filepath.IsAbs(observation.Directory.Path) || path == nil || path.Type().Kind() != types.PathKind || name == nil || name.Type().Kind() != types.StringKind || name.Text() == "" || filepath.Base(name.Text()) != name.Text() || name.Text() == "." || name.Text() == ".." || path.Text() != filepath.Join(observation.Directory.Path, name.Text()) || sizeBytes == nil || sizeBytes.Big().Sign() < 0 || modifiedUnixNS == nil || linkCount == nil || linkCount.Big().Sign() < 0 || ownerUID == nil || ownerUID.Big().Sign() < 0 || ownerUID.Big().BitLen() > 32 || accessedUnixNS == nil || changedUnixNS == nil {
+	if observation.Session.token == nil || observation.Lease.token == nil || !filepath.IsAbs(observation.Directory.Path) || path == nil || path.Type().Kind() != types.PathKind || name == nil || name.Type().Kind() != types.StringKind || name.Text() == "" || filepath.Base(name.Text()) != name.Text() || name.Text() == "." || name.Text() == ".." || path.Text() != filepath.Join(observation.Directory.Path, name.Text()) || sizeBytes == nil || sizeBytes.Big().Sign() < 0 || modifiedUnixNS == nil || linkCount == nil || linkCount.Big().Sign() < 0 || ownerUID == nil || ownerUID.Big().Sign() < 0 || ownerUID.Big().BitLen() > 32 || accessedUnixNS == nil || changedUnixNS == nil {
 		return nil, fmt.Errorf("invalid file entry observation")
 	}
 	switch kind {
@@ -124,6 +132,7 @@ func NewRemovalEffect(session FileSession, entries List) (RemovalEffect, error) 
 	}
 	names := map[string]bool{}
 	var directory FileDirectory
+	var lease FileLease
 	for index, item := range entries.Items() {
 		entry, ok := item.(FileEntry)
 		if !ok {
@@ -131,10 +140,11 @@ func NewRemovalEffect(session FileSession, entries List) (RemovalEffect, error) 
 		}
 		observation := entry.Observation()
 		name := entry.FieldsRecord().Field("name").(Text).Text()
-		if observation.Session != session || entry.Kind() != RegularFile || names[name] || index > 0 && observation.Directory != directory {
+		if observation.Session != session || entry.Kind() != RegularFile || names[name] || index > 0 && (observation.Directory != directory || observation.Lease != lease) {
 			return nil, fmt.Errorf("invalid removal selection")
 		}
 		directory = observation.Directory
+		lease = observation.Lease
 		names[name] = true
 	}
 	return removalEffect{newBase(types.FileRemove(), addWeight(uint64(len(catalog.FileRemove)), entries.Weight())), entries, session, nil}, nil

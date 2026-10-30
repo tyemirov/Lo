@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"unicode/utf8"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
@@ -17,17 +18,33 @@ type Value interface {
 	json.Marshaler
 	Type() types.Type
 	Weight() uint64
+	identity() uint64
 	value()
 }
+
+var nextIdentity atomic.Uint64
+
+// Identity identifies an immutable value graph node within this process.
+func Identity(v Value) uint64 {
+	if v == nil {
+		return 0
+	}
+	return v.identity()
+}
+
 type base struct {
+	id     uint64
 	typ    types.Type
 	weight uint64
 }
 
-func (base) value()                             {}
-func (b base) Type() types.Type                 { return b.typ }
-func (b base) Weight() uint64                   { return b.weight }
-func newBase(t types.Type, payload uint64) base { return base{t, 16 + payload} }
+func (base) value()             {}
+func (b base) Type() types.Type { return b.typ }
+func (b base) Weight() uint64   { return b.weight }
+func (b base) identity() uint64 { return b.id }
+func newBase(t types.Type, payload uint64) base {
+	return base{nextIdentity.Add(1), t, 16 + payload}
+}
 
 type Integer interface {
 	Value
@@ -83,22 +100,27 @@ type Boolean interface {
 	Value
 	Bool() bool
 }
-type boolean bool
+type boolean struct {
+	id      uint64
+	boolean bool
+}
 
 func (boolean) value()                         {}
+func (v boolean) identity() uint64             { return v.id }
 func (boolean) Type() types.Type               { return types.Bool() }
 func (boolean) Weight() uint64                 { return 17 }
-func (v boolean) Bool() bool                   { return bool(v) }
-func (v boolean) MarshalJSON() ([]byte, error) { return encode(v, bool(v)) }
-func Bool(b bool) Boolean                      { return boolean(b) }
+func (v boolean) Bool() bool                   { return v.boolean }
+func (v boolean) MarshalJSON() ([]byte, error) { return encode(v, v.boolean) }
+func Bool(b bool) Boolean                      { return boolean{nextIdentity.Add(1), b} }
 
-type null struct{}
+type null struct{ id uint64 }
 
 func (null) value()                         {}
+func (v null) identity() uint64             { return v.id }
 func (null) Type() types.Type               { return types.Null() }
 func (null) Weight() uint64                 { return 16 }
 func (v null) MarshalJSON() ([]byte, error) { return encode(v, nil) }
-func Null() Value                           { return null{} }
+func Null() Value                           { return null{nextIdentity.Add(1)} }
 
 type Float interface {
 	Value
@@ -216,7 +238,9 @@ func NewRecord(fields []Field) (Record, error) {
 	}
 	return record{newBase(t, weight), fields}, nil
 }
-func RecordView(r Record) Record { return record{base{types.AnyRecord(), r.Weight()}, r.Fields()} }
+func RecordView(r Record) Record {
+	return record{base{nextIdentity.Add(1), types.AnyRecord(), r.Weight()}, r.Fields()}
+}
 
 type Entry struct {
 	Key   Value `json:"key"`

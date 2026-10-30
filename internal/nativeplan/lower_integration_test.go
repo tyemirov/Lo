@@ -19,6 +19,7 @@ func TestCheckedProgramsLower(t *testing.T) {
 		`flow Difference(left:Int,right:Int)->Int{return Math.sub(left,right)}; return Difference(right:Math.mul(2,3),left:Math.add(10,1))`,
 		`flow Double(item:Int)->Int{return Math.mul(item,2)}; return List.map(List.new(1,2),Double)`,
 		`flow Add(total:Int,item:Int)->Int{return Math.add(total,item)}; return Flow.fold(List.new(1,2),0,Add)`,
+		`flow Step(state:Int,item:Int)->Record{state:Int,items:List<Int>,stop:Bool}{return Record.new(state:Math.add(state,item),items:List.new(),stop:false)}; return Flow.worklist(List.new(1,2),0,Step)`,
 		`record=Record.new(x:1); return record.x`,
 		`target=File.Write.new(File.Path.new("out"),Bytes.new("data")); commit target; return 1`, "flow Divide(x: Int) -> Int! { return Math.div(8, x) }\nreturn Divide(2)\n"} {
 		t.Run(text, func(t *testing.T) {
@@ -145,7 +146,7 @@ func TestPlanMetadataIsImmutable(t *testing.T) {
 		}
 		seen[location.ID] = true
 	}
-	if !strings.Contains(string(plan.Snapshot().Metadata), "lo-native-2") {
+	if !strings.Contains(string(plan.Snapshot().Metadata), "lo-native-3") {
 		t.Fatal("missing ABI")
 	}
 }
