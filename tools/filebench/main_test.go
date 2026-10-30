@@ -236,7 +236,7 @@ func TestFilebenchNearLimitPipelinesCLI(t *testing.T) {
 	}
 	for _, sample := range report.Samples {
 		expected := "runtime.limit"
-		if sample.Size == 12582912 && sample.Case != "read" {
+		if sample.Size == 12582912 {
 			expected = "12582912"
 		}
 		if !sample.Verified || sample.Expected != expected {
@@ -320,7 +320,11 @@ func TestFilebenchLimitsCLI(t *testing.T) {
 		t.Fatalf("capacity inventory: %d", len(report.Samples))
 	}
 	for _, sample := range report.Samples {
-		if sample.Expected != "runtime.limit" || !sample.Verified || sample.Status != 2 {
+		if sample.Expected == "129" {
+			if !sample.Verified || sample.Status != 0 {
+				t.Fatalf("released directory observations: %+v", sample)
+			}
+		} else if sample.Expected != "runtime.limit" || !sample.Verified || sample.Status != 2 {
 			t.Fatalf("capacity result: %+v", sample)
 		}
 	}

@@ -120,7 +120,7 @@ def prepare(inputs: Inputs) -> tuple[Path, dict[str, Any]]:
     frozen = capture_provenance(ROOT, inputs.package / 'bin/lo', inputs.package / 'toolchain.json',
                                 'linux/arm64', PRODUCER_SOURCES, tool_paths)
     manifest = json.loads(local(inputs.package / 'toolchain.json').read_text())
-    if manifest['host'] != 'linux/arm64' or manifest['llvm'] != '21.1.8' or manifest['abi'] != 'lo-native-2':
+    if manifest['host'] != 'linux/arm64' or manifest['llvm'] != '21.1.8' or manifest['abi'] != 'lo-native-3':
         raise ValueError('performance requires the installed Linux LLVM distribution')
     resolve(inputs.package, manifest['targets']['linux/arm64']['runtime'])
     if not (inputs.package / 'bin/lo').is_file():
