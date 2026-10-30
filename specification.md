@@ -1010,6 +1010,82 @@ The records keep their outer-to-inner order.
 The host limit does not publish the rejected value.
 This preservation reuses reserved snapshots.
 
+### 8.9 Dynamic Worklists And Host Resource Quotas
+
+`Flow.worklist(items, initial_state, context..., Step)` visits an ordered list and items that the callback discovers.
+`Step` receives `context..., state, item`.
+It returns exactly `Record{state: S, items: List<T>, stop: Bool}`, or that record with a fallible output.
+`T` and `S` match the initial item and state types.
+The state type `S` cannot itself be fallible.
+If `S` is a record, its fields can contain fallible values.
+
+Context parameters keep their declared types, including fallible types.
+The processor returns the final state, with fallibility determined by the callback.
+
+An empty initial list returns the initial state without a callback invocation.
+
+Each successful callback replaces the state.
+Its returned items precede pending items in their supplied order.
+This rule gives depth-first order when each item supplies its children.
+A true `stop` discards all pending and newly returned items.
+The runtime does not invoke callbacks for discarded items.
+
+Flow-cycle checks remain unchanged.
+The callback has the same observation, activation, and purity rules as `Flow.fold`.
+
+A callback failure stops traversal and keeps the last completed state.
+Its progress record contains `operation: "Flow.worklist"`, `completed_count`, `pending_count`, and an authority-free `state` snapshot.
+Before callback completion, `pending_count` includes the current item.
+After completion, admission failure includes newly discovered items in that count.
+Early stop sets the count to zero.
+
+Recoverable failures expose progress through `Error.flow_progress`.
+Terminal host diagnostics preserve the same confirmed progress.
+
+Pending items retain their value graphs, tensor allocations, and file observations.
+Consumed items release these references after the callback completes.
+A state or result that retains the same resources keeps them alive.
+A directory observation closes when no retained value requires its private observation handle.
+A later observation receives a new private handle, even for the same directory identity.
+An old entry cannot acquire authority from that new observation.
+
+Snapshots retain public data without private file handles or tensor allocations.
+
+The worklist grows dynamically and has no fixed item-count maximum.
+The host configures the following resource quotas for each run or request.
+Zero disables each listed resource quota.
+
+| CLI option | Default | Resource |
+| --- | --- | --- |
+| `--max-value-bytes` | `16777216` | Expanded weight of one value. |
+| `--max-live-bytes` | `67108864` | Live value weight and worklist slots. |
+| `--max-data-bytes` | `0` | Cumulative weight of newly charged values and progress snapshots. |
+| `--max-list-items` | `0` | Items in one list. |
+| `--max-file-entries` | `0` | Entries enumerated or selected by one file operation. |
+| `--max-file-directories` | `128` | Simultaneously retained directory observations. |
+
+`--max-steps` remains a positive work budget with a default of `1000000`.
+Cancellation remains terminal.
+Exhausted resource quotas produce `runtime.limit` and preserve confirmed progress.
+Logical counter overflow also produces `runtime.limit` when resource quotas are disabled.
+A cleanup failure remains terminal and is reported through the execution boundary.
+
+Live value weight is logical accounting, not a process-memory measurement.
+Each distinct charged immutable value contributes its expanded weight while its scope retains it.
+A separately charged child can contribute weight in addition to its container.
+Repeated aliases of the same charged value do not add weight.
+A pending item without its own charge receives a retention charge for its expanded weight.
+
+Each pending item also reserves 16 logical bytes for its queue slot and pin receipt.
+Each new progress snapshot replaces the previous diagnostic reservation.
+A completed callback releases temporary values before the next callback.
+A long scan can process cumulative data beyond its live-value quota.
+Tensor storage and adapter transport retain their separate documented limits.
+
+The Go embedding API accepts `execution.NewBudget(execution.BudgetInput{Steps: ..., Limits: ...})`.
+`execution.DefaultBudgetInput()` supplies the CLI defaults.
+The native ABI uses the options structure in the [runtime contract](docs/native-runtime-contract.md).
+
 ---
 
 ## 9. Adapters
@@ -1071,8 +1147,8 @@ UIDs use the inclusive range `0..4294967295`.
 Entries have opaque session and directory provenance, with no public constructor or checkpoint representation.
 Copies and List processors preserve provenance.
 JSON exposes only the public fields and cannot restore authority.
-One listing permits at most 10,000 entries.
-One session retains at most 128 observed directories, with repeated observations reusing a directory slot.
+Host resource quotas in section 8.9 control entry counts and simultaneously retained directory observations.
+Repeated observations reuse an open directory slot until its last private reference is released.
 
 `--list-root` and `--remove-root` authorize one exact directory and its immediate children.
 `--open-files-root` separately authorizes a recursive open-file probe rooted at that exact directory.
@@ -1091,7 +1167,7 @@ A directory observation cannot become a removal selection.
 A scan records an enumerated basename in `vanished_names` only when its metadata lookup reports `ENOENT`.
 It returns no report after another discovery error or an invalid UTF-8 name.
 Entries and vanished names are disjoint collections, each sorted in Unicode scalar order.
-The limit of 10000 children counts every enumerated name, including vanished names, during enumeration.
+A configured file-entry quota counts every enumerated name, including vanished names, during enumeration.
 Strict `File.list` continues to fail when an enumerated child disappears.
 The [observation contract](docs/file-observation-extension-design.md#scan-reports-and-disappearance) defines scan limits and failure boundaries.
 
@@ -1099,7 +1175,8 @@ The [observation contract](docs/file-observation-extension-design.md#scan-report
 It returns sorted distinct paths, with no claim that the files remain open or closed.
 It accepts exit status 0 or 1 only with empty stripped standard error and valid process, descriptor, and name records.
 It rejects backslashes and control characters in name payloads because the line-framed format is ambiguous for those filenames.
-Each stream is bounded to 8 MiB, and the result to 10,000 paths.
+Each stream is bounded to 8 MiB.
+The configured file-entry quota also applies to the distinct result paths.
 Invalid output or launch failure produces `File.OpenFilesFailed`.
 Output overflow, work limits, and cancellation remain host failures.
 
@@ -2344,7 +2421,7 @@ A pure flow has no host observations or commit activation, directly or through i
 The summaries keep `reads`, `commits`, and `devices` separate.
 Device requirements alone do not make a callback impure.
 
-List callbacks, `Flow.fold` callbacks, and Match predicates participate in the same transitive analysis.
+List callbacks, Flow processor callbacks, and Match predicates participate in the same transitive analysis.
 An unused nested definition does not change the enclosing flow summary.
 Adapter construction keeps handler requirements without executing the handlers.
 The verifier checks all flow bodies, including unused flows.
@@ -2356,7 +2433,7 @@ The verifier checks all flow bodies, including unused flows.
 | Match case head | Pure total value calculation. |
 | Match selector or selected branch | Host observations permitted. Commit activation prohibited. |
 | Flow self-handler or adapter `onError` | Pure total named flow. |
-| `Flow.fold` callback | Host observations and commits permitted under ordinary fallibility rules. |
+| `Flow.fold` or `Flow.worklist` callback | Host observations and commits permitted under ordinary fallibility rules. |
 | HTTP request handler | Host observations and commits permitted under its declared signature. |
 
 A flow with commit activation must have a fallible output or a self-handler.
@@ -2826,7 +2903,7 @@ The profile requires identical bits across repeated executions with the same bui
 
 Tensor rank is at most eight.
 Each dimension and each tensor element count is at most 1,000,000.
-The existing expanded-value limits remain 16 MiB per value and 64 MiB per invocation.
+The host resource quotas in section 8.9 apply to expanded values and live value weight.
 Tensor weight is `16 + 4*N + 8*rank + len(dtype) + len(selector)` bytes.
 Device weight is `16 + len(selector)` bytes.
 Containers count repeated tensor values repeatedly.
@@ -2911,7 +2988,7 @@ The derivative plan permits at most 100,000 expression visits, 100,000 nodes, an
 An exceeded compiler bound produces `check.autodiff-limit`.
 Saved tensor storage has a 32 MiB tape limit.
 Shared views count their storage once.
-The existing 64 MiB cumulative value limit also applies.
+The host resource quotas in section 8.9 also apply.
 The tape belongs to one gradient call and becomes unreachable after success, failure, or cancellation.
 No failure publishes a partial loss or gradient record.
 
@@ -3094,7 +3171,7 @@ The transfer operations obey section 24.8, including authorization and cleanup.
 `Checkpoint.InvalidData` reports malformed, invalid, or noncanonical data.
 `Checkpoint.SchemaMismatch` reports incompatible types, fields, dtypes, devices, shapes, or element counts.
 Duplicate keys, unknown fields, trailing data, and alternative numeric encodings are invalid.
-Encoded bytes have the existing 16 MiB value limit.
+Encoded bytes remain subject to the configured value-byte quota.
 All operations consume the current execution and resource budgets.
 
 The checkpoint operations do not access files.
