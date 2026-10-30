@@ -1,0 +1,379 @@
+{
+  "recorded_utc": "2026-10-29T21:57:07.511545+00:00",
+  "git_head": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+  "acceptance": "current_workspace_source",
+  "existing_workspace_changes_preserved": true,
+  "contract": "specification.md#89-dynamic-worklists-and-host-resource-quotas",
+  "abi": "lo-native-3",
+  "runtime_archives": {
+    "darwin/arm64": "0beee07938119cb824c4f3f78cfbb5ee49245bb9b98ba12ff4be2fd6177f3a71",
+    "linux/arm64": "72e52379e157388d97b93c8993d7f1096ee6feb77f623edd38ab2c03358215fe"
+  },
+  "source_sha256": {
+    ".mprlab/TERMINOLOGY.md": "c3ac27f8f82b02e744f967ebdb5b8d4437cbe7e00bcf80faf9f32bc44eba3b0b",
+    "README.md": "089257a98b1fcc09c603b55a777a75b147c9695f7c5031987947c2950ffaa638",
+    "docs/evidence/cleanup-control-composition.json": "c2a4eadeb75af23c609f30202861f3ce1deb8c5c6c5ba8779d765fc4bd1d87a3",
+    "docs/examples/cleanup-control-flow.lo": "560d197cb515be888690dc0e8698a4b630a2e00cd93b60d3224fd9f15bec338d",
+    "docs/examples/mac-cleanup.lo": "5193b0f5f072fcafed744ef58ad1a1665d779ee697b4283dda84b662e1fec172",
+    "docs/file-io-performance.md": "24ff31f50efe80bbbff86ef1b990cbf10fb7b963a0112f0f78d48fc527a3f372",
+    "docs/file-observation-extension-design.md": "9c07085aa7cd13dddb22679a81862b0e962b6a35bcec46b1660f147281a21321",
+    "docs/mac-cleanup-plan.md": "6d24348c9b58835666d8f0f9f43f5809d1ed94cf68b18257c1773c90497fae79",
+    "docs/mac-cleanup-script-design.md": "2501e772a47fd7502cb015a6b7609dd3fa54e9a22c8ee8d0dc2e1244834a017d",
+    "docs/native-lowering.md": "80bffaa64f31b3211e9836296246ed4cf1c9172142faee35c8194871a673d3ee",
+    "docs/native-qualification-findings.md": "da0cc50692abdfc45e760a45feeac9bc30b722b1fcaea312e34bdc3596036f09",
+    "docs/native-runtime-contract.md": "759fc3c3d1d11530ec78de78001247dc62c0c73f9707061f6c41475af09b8e51",
+    "experiments/process-host-final/native_test.go": "273f2ceb2cabb7514121fd755820616a2bc0fb9af6db001d9eb4a06b5377c3cf",
+    "experiments/process-host/native_test.go": "fe755449de79dc46fd5a32da690df381af4a4c3bf979611e62280ff9b44e3d5e",
+    "experiments/process-startup/native_test.go": "a05b7bf0c30423ce26ba34991a1e423975573bd0fdb2efcc236549ced70e3d7f",
+    "internal/adapter/file_entries.go": "668f7e4f24ef02ee1246d625e0d75f31d9680354907409842fcd3c3c2cbc5a65",
+    "internal/adapter/file_observation.go": "2e144951bf9522eda3b353bc0c02c9e9e1304ec8b973569bd1cf369092a9b4b4",
+    "internal/adapter/file_open_paths.go": "b8d19fb25850f04724cd3e02ff928f80578df206c72440d4d24c41c2ec6791ed",
+    "internal/adapter/file_remove.go": "fb90d0bfbb8a3da21ffa3b0dbf53e70f9ab172d4677139faabba65ed0c63b947",
+    "internal/adapter/files.go": "743ba1ba8be3ca9af3d0e07f3280a5bc8e029f99ab86c9c8fc0ed8cb5c494cf9",
+    "internal/catalog/catalog.go": "cc6db7a3e884ff2c73bd89d5ae88f8085046d5c6ad3bff360d642feaa53f4111",
+    "internal/check/collections.go": "7acbe2b2447d3269bf0ad89f50fc76cdba448ee33d7a85b8f847d71ad1e5e1ef",
+    "internal/device/device.go": "3b1c3f06e9752115a8c4b90c8d5310fd56a7eeed5ed6f36f2a0641c08b26898c",
+    "internal/eval/builtin.go": "5ebab476bfbac741ad81e4cb1be2d02f0b32a230c9d948f2dec756acbe62144b",
+    "internal/eval/eval.go": "a533c50383b339c92900b9f732787ffa0884df12892fd20f5bab3f0e95c322d7",
+    "internal/eval/list.go": "2aaaccdd8b095ba7e17e8e1232e1c21ea4ef7a9617a3c7c62e583f24fa9177d7",
+    "internal/eval/worklist.go": "284b75f53b7ee20343cb1058926639933ff72f3c06e925a2f01e32c492fd1b14",
+    "internal/execution/contract.go": "9ec3d3db7b798cc67c0b318677e1ba552c33eadc1a53e7b8ba892600c216a307",
+    "internal/execution/flow_progress.go": "0c2d5aa51d0e764f01633c5b5c54f472a1084cd30bc805012516eb1ab085bbcb",
+    "internal/execution/ownership.go": "c97a60d539ec3f5b9cb6cb4703219e29c9039ab4a22c94ce9b2cd69d993ab363",
+    "internal/execution/session.go": "a038107c00c9aeb0b52d780ac7eaae1ceed0a1dc58bb9da424a4ade211108d4c",
+    "internal/execution/worklist_progress.go": "0725d95f687a59971d8e063a48a10ef96b641dd3264c21f213fde4e5833efa3c",
+    "internal/inspect/expression.go": "bb8471543c446ff3ce447d775ce2816245f64de2e24be2d3da0ea5395efb96c2",
+    "internal/llvmemit/emit.go": "377ae99dd621e64ecbb07050fc43025bb87a50d6b643480a5047c9e9b6a65518",
+    "internal/nativeplan/lower.go": "4ba0e6a1c6842af937a0098ee8bf0cac7b030cc7a6492599abcea5d29d567792",
+    "internal/nativeplan/lower_integration_test.go": "4446dc6cebc096a6577d9eb2cba6914e9aae58b0c3fe3945488841da6a851593",
+    "internal/nativeplan/metadata_projection_test.go": "8ba2e65e3e5872dac56adbefee1b4768ea48c9301f57527e7fbc4b84e8ad7b13",
+    "internal/nativeplan/metadata_test.go": "2c77a5022c0567fcf044428de2c2892db86beb3375019eda765e1d0ad9bc0c67",
+    "internal/nativeplan/plan.go": "bbed9c9bfad4473b73695b3076e2b6f2e42c3be9c5e551ae514a93829adb2163",
+    "internal/runner/command.go": "9c7e167d244f1e9ad77e73c8dd59da6de359aec2be0be05439a8d04a521f3c80",
+    "internal/runtimeops/arithmetic.go": "750585a1e886188a700eff47d2fad07fcd138e27f9e9203ab9cfe3cd01f4fd7c",
+    "internal/runtimeops/builtin.go": "27adf3b55933197f064d11ec3ac1820ad7b900e80d79124c6b7d9cc490e2b040",
+    "internal/runtimeops/control.go": "56f20373d156def7c008f3f2ae9126a3fed11557d393c810f5f3b40f1e68a7ef",
+    "internal/runtimeops/file_observations.go": "a3ebf36b50ea9248498e50327d6e84fb17d233320bac49767db828c208771f6a",
+    "internal/runtimeops/runtime.go": "29c0c94bce4bfd0d0c652f13aaf1bda6f1f46e9aed4f4e7ec2081349481a8dd5",
+    "internal/value/error.go": "93cd825194fbf1f4f6f6288729c3941bd641f687e5c2b9b9af03535b79bd07e3",
+    "internal/value/file.go": "63da4e451a70bd148d13e5f3bedfc8edc48da382e517dc910c77842f449b41db",
+    "internal/value/file_leases.go": "96c4115fa0e2374c603a2400dae1aedf92752273c2a5d068650b2d91645c925f",
+    "internal/value/file_observation.go": "ea459743a4d66abd256bebfaea2d6a7d21e61f47b2348570f9f2ba4c5d2efeae",
+    "internal/value/reachable.go": "c27cae86b84e7311f70a9b870eeebfb7c2d4fad4969e11da98896fce65288ba7",
+    "internal/value/resources.go": "0056bd4d52acd2bd106b6180cd45e6adb0d1dfca1d5e787ec85daf21c6e9fcdd",
+    "internal/value/tensor.go": "b0c9adea403531dd4e695833628f322ebb86bc2b205d95b64b515c7c8f2740e1",
+    "internal/value/value.go": "ca8bf29fcefc9b159530a5c3ec6899f5b3e6ada238ab2226983c5ba719d9a0ba",
+    "runtime/native/include/lo_context_options.h": "07227fb44c0782aad0d650c7d2f57a229610d315e6737ed859bec879f6b09d21",
+    "runtime/native/src/adapters.rs": "5d629978edf903c1fd9bdee4f3e63190e255e070891140aaca9fe7b9a2d582e4",
+    "runtime/native/src/checkpoint.rs": "2e836e31b51c972de0997a937efdc75bc62000b59e21745e8bc61c9ca11cfc36",
+    "runtime/native/src/cli.rs": "27735fa8c0cedbcb815b192eab194c6b671f02703b7fa74992d50ea120e89bc9",
+    "runtime/native/src/collections.rs": "db4f1326a844f5e610f5bcdd92e5b616549aa4289ebf698e74de2a5966a95f46",
+    "runtime/native/src/context.rs": "20aa08232ea7b0e0e36ee3d14dcc52403c02dfb6b9cce2a5899fa2d77549bfaf",
+    "runtime/native/src/exports.rs": "af3e5d4844d00ecec7058af370394ad4c8fd3c521edcde0e439c3a3686a806bc",
+    "runtime/native/src/file_entries.rs": "63dd609d88a11114fa5eb8229f5afac2c715398e66348c746841f360704a3e70",
+    "runtime/native/src/file_leases.rs": "d9d630fb60a2906439081dc5d23a1828d4f9db2156b1ef91d040ce9e532023b7",
+    "runtime/native/src/file_probe.rs": "f3bf5ec7698510ca8fc712786fa9a2cf104d8d80a548da68ce80f97e8553e7e7",
+    "runtime/native/src/files.rs": "20f0b573dfd48f849621deb998f3dbd036274b9a2bd214ac77cbb5f3e1463c83",
+    "runtime/native/src/generated_operations.rs": "5134d7627aaffa0cf1404da9551c9699fc0bec307a84308a7e9d8a3a9e285f3a",
+    "runtime/native/src/lib.rs": "77ffdfbf4376eb4dd6746e3f7ef9753d35d201833049a295b821dc4f276a904f",
+    "runtime/native/src/operations.rs": "1838f1989d83bddaeef575ef163f41539af64996117e95b7334e60933d69b09f",
+    "runtime/native/src/resources.rs": "c64eae48a1b4f35c65ba416d2b07a1f89922cd7a4bbfa4797b3bd039c66dfab9",
+    "runtime/native/src/tensor.rs": "c8d542dd26e9f4420bac8e77cd35cee9b4f76d8f8e44a3e24fd4fbe126d7af06",
+    "runtime/native/src/training.rs": "e17a0a6bb1405adc8a3d4e5a581186fff0f0da2c3327985c116dae0537ad4081",
+    "runtime/native/src/value.rs": "496ee98761f2cd93e057776de79df85c77533247b33a14257bde801a38793d2f",
+    "runtime/native/src/value_resources.rs": "d28bfd0ee78b9eefe1b5d03108dd957b8015ff2dfd3385d5e96aa99d306c44e5",
+    "specification.md": "924e15283fbf6b19afb76f72ee4088629932ef7e2e0ee9b931c116fbc732f11d",
+    "testdata/native-qualification/collection-arguments.c": "c415cda26d267be6573530676c2f61e01e001ba881707f9066ff4c4a666f0c70",
+    "testdata/native-qualification/device-immutable.c": "79d932d4a6704addbe8abff5ca44db73ff61e2e8e73e391f06cb30d1160f8ee1",
+    "testdata/native-qualification/file-failures.c": "8f8c1ed37a6d9a3b2d77cb4d6c744dbde2d6ed635538f3c8af57736c8dd354bf",
+    "testdata/native-qualification/literal-sequence-status.c": "a104d8ed8c98fb6acf8a6061559facc36a50fb7d762c5f6d0c60bd76a736cbb8",
+    "testdata/native-qualification/literal-sequence.c": "e6d40803e436df2d82dadecbe71fd23c6b6879021e7c098433fd38b340444dd0",
+    "testdata/native-qualification/metadata-v2.c": "926d2e076339a3d1496080ab3b34e048cc4454231d1f68db591da695997137b2",
+    "testdata/native-qualification/process-lifecycle.c": "20b7fbcfee202a6935d40caefb6d115f802e2380bcb0bc5a2a9240cb5ca3a66d",
+    "testdata/native-qualification/process-result.c": "a3752180e94f0a9091c1c45791c0a5d473fad011c2b55a180ba9e09ed9be2396",
+    "testdata/native-qualification/program-control-null.c": "deef3cf13944c23cac1e1f637fbcc93432665690eb39463b6652882d2b252fea",
+    "testdata/native-qualification/program-sessions.c": "d6cd65ed501055475f427779d093b9970b9297e5dcfd3c1efb08633c60891747",
+    "testdata/native-qualification/thread-admission.c": "c131247fbf5f78440c8a5841207b35114e11170f1d2e121167bcb5ca5c4b623a",
+    "testdata/native-runtime/files-observation-cleanup.c": "726b584e9df2791df5434921b36b94fdabc0853cfad706ee2f48e78cd9f086f5",
+    "testdata/native-runtime/host-invocation-input.c": "888fda7b3053655252611717587da0cb27462957c0a658239490d339d2293d4f",
+    "testdata/native-runtime/lifetime.c": "c2b2576f2bf4e82d9c96cb49db3f0dca80257a081188f69afbff9353d4cb3f57",
+    "testdata/native-runtime/numerical.c": "994da46ec67d5f9083b70895c2e0b722ba5459030c89d095a3b9814298969882",
+    "testdata/native-runtime/process-context-input.c": "d58c2b08fa2ae3a3c1679cea337ddc1328117171bd3a9563fa9ed8965121ff91",
+    "testdata/native-runtime/process-driver.c": "0a55287d2463d2b479f34ff01153348d98132405aed5603a5bd20521e79d7bac",
+    "testdata/native-runtime/resource-policy.c": "84f1c860cb0777e9dabd415bd8a5aaf9ec430ac3b7d4e48d106170852b21422f",
+    "testdata/semantic-migration/matrix.json": "c30d978c8289483ccd112718621bb6ed2c151e1af71e127ce171b01162dc6c38",
+    "tests/benchmark/native_test.go": "e692a55892ca20a894965a5aeb0add9c47134aeaff2c410634e8fe581eb4a98e",
+    "tests/benchmark/training_test.go": "b4326c2dfa2fa6a359425a55bd9fc12d828ebf3ba426191ecfc1bdf3eb8d45ee",
+    "tests/integration/adapter_http_composition_test.go": "9be70aeeb8221a528ee274ad7800933b664315503db44ca87b37b70baa528427",
+    "tests/integration/adapter_process_completion_test.go": "d4ecf1c4986885e906e74e3f3f118f3d35a4a86dab7b40fc3400f658572e9e24",
+    "tests/integration/adapter_receipts_test.go": "ff1f00a262e6f01994d98a172d3dcc4f59fd4f563a9c2529cf8b44592a21d1f2",
+    "tests/integration/adapter_test.go": "1fad94ac32ae40a60bcf43cb7256784957896dec7c21aa290e0a539883e58a82",
+    "tests/integration/autodiff_contract_test.go": "53ae4c6e189b4c4f6a2f730b141a3de9313200d9ebf865fd068ecb08d1c66137",
+    "tests/integration/catalog_test.go": "17a315c9d3d34306decf5aa6e3a54c62a33c6427ee8ffe88de14cd38ffe45c90",
+    "tests/integration/checkpoint_failure_test.go": "f84b921461a5a028eb7bb00f52c48b7952b6268bfd3cc0cd0d1313e1f0cbff9f",
+    "tests/integration/eval_test.go": "99db8e3560f4f0d4914d2ab7b76b4402f0fec19c8444427aa863596a228295bf",
+    "tests/integration/execution_policy_test.go": "daee2baed5f19cf26f2d9179e55e1ec7595a8e96232e944e5635d6e0cbebb5f0",
+    "tests/integration/f025_file_observation_test.go": "866a255ad30c8256cdcbc88d0773b1ee76cd521733ba0e51e2ea736ba0a14fa8",
+    "tests/integration/file_capacity_test.go": "e7677945e0b3ccb3ac213787ed0f2ee015c06936debcc5e30ce074664b51d6a4",
+    "tests/integration/file_failures_test.go": "d49d4a7aa399543aa0b39f7b77744d7c0e6265451d8957db60cfec8819a5d878",
+    "tests/integration/file_language_test.go": "249feeed8389a383467317853d2aa150321b1834d8139846f211d59977164ce2",
+    "tests/integration/file_observation_lifetime_test.go": "5880b83d252a89e87ab0caa1a82ddc0872955a11f6d2749a880b92cb6d9b812c",
+    "tests/integration/llvm_file_observation_cleanup_test.go": "fb3a720549b63637797c999c6aa6fdcb0dd0e0c7eae0e0202b0f4b33955a6fd0",
+    "tests/integration/llvm_lifetime_test.go": "17155ade103f32759d1d0fb85887480160a877c5ef4222c59016bb9bf898fdcd",
+    "tests/integration/llvm_linux_worklist_test.go": "9a9c7002ea72f1b20aad2c6f212973c1780b921c952b4cefe58b60318f04c6be",
+    "tests/integration/llvm_lowering_test.go": "4f3b2db918f0e22dee20cbf2e9569f60b41dbd46be4d24dddc26b60fefd1643d",
+    "tests/integration/llvm_metadata_helpers_test.go": "5b19bb12981bae3ba2d274d3dce9a7d0bade2c43b92709b00c6d4306d1924133",
+    "tests/integration/llvm_metadata_v2_test.go": "468e73969fba69a60248ee7ddbdd169df4c9771d67cb9d1f9b43174568976fdd",
+    "tests/integration/llvm_numerical_lifetime_test.go": "5c0d8ce6ccee0a6d21b0b7a840389a8968bfef6bb153bda6dae20741030f0627",
+    "tests/integration/llvm_qualification_files_test.go": "9a4d989bff96ddea11e5ccd131a70e48a8c5625a237f98056a0160c9fb38ea9d",
+    "tests/integration/llvm_runtime_test.go": "77eb4ee27dc2263b2ab616bbae55669507898d637961b29758f5096feca1adb8",
+    "tests/integration/llvm_worklist_test.go": "503a8b87b9ca526f7a8f85d00818dc0909ef8080fc6fdfc12f3c68827d1e7e22",
+    "tests/integration/native_compiler_selection_test.go": "a3cbc922fbee3b3190696b3bacb3414921f7ef2bde28128d5f17680637f480c1",
+    "tests/integration/native_paths_test.go": "387a0eb8374054ac28f87fc9bb04cbd30e24fbaa731d6df8f59197dfdac36cac",
+    "tests/integration/native_test.go": "287e3ee390c75047d68320efe359aa56d073f81d64d4440a79b2822a7209f9f9",
+    "tests/integration/process_resource_only_test.go": "97826ed8b7cb284054b995c81859e1f2496d4d3b2c0efa1b2195f1b2994a5bdb",
+    "tests/integration/run_test.go": "02e41dc17c199f018fca3a4524550e31d73444fd1fe3e7d4309f744c758943c7",
+    "tests/integration/runtime_catalog_test.go": "cd6d0a69c75748db812a536155c715c8687dbeca9360ffa0a34466a4bf8d6e74",
+    "tests/integration/tensor_budget_test.go": "6d0d1f79d9dc80e49000950930a2aba5fe407362f60244b2d95fffa53bfd1669",
+    "tests/integration/worklist_test.go": "bd7092def334befd8fcdee478a04adb27e396c69c2fbd04387fde66b64553628",
+    "tools/filebench/main.go": "edff25a323a88c42f853b12130a967adcb35f37c6a707b154b9c95f95787148c",
+    "tools/filebench/main_test.go": "a11811fd0a79e3f61d8c08d1616997964b451c284efc646f49e19d5428b90593",
+    "tools/filebench/workloads.go": "5fd6272e15b37579ad5c97534c25e15a78150053b7618af6f2bfe79f6cd84eb9",
+    "tools/lodistribution/package.py": "1b8670719d4e73264248a737032dc7eb6fc5d1aa9c744346a6fef5f7571aad42",
+    "tools/loqualification/performance.py": "193d2743878c4d932a630170b73757b5df5b1d20b5a59eccccad2c24997b9e4a",
+    "tools/nativebench/allocation.c.txt": "e9dc1da721e56b8dbe395185e28b372168ce9b04edc2223a4a387cf2e255264b",
+    "tools/nativebench/harness.c.txt": "7c20fa31ec84ece7f9642fe5266fc9c648e65e1293fe33f221433c0c258813a4",
+    "tools/nativebench/main.go": "83edb3e3d8c2846ba56ca4641ae907a6e3d50008579d11d128490942e5905b27",
+    "tools/nativebench/test_harness.py": "946aefcde9e2fcba45a7766eda516ee1a947a9fd0831dafe06a7592ee0165a4c",
+    "tools/nativelowering/run.py": "fa29b88e6ca8201b4e37b9db0981419fcfa009827cfb8971e46f5d98820a8ee9",
+    "tools/nativelowering/runtime.c": "7499e025005ccb8475a7d794323bc6af680b10e3aa291b1accc1a30a01b60293",
+    "tools/nativeruntime/build.py": "09d343fd7d2befff589e6f69dc1cd5cb095d3e9599186c3467dac99dc0601d64"
+  },
+  "validated_environments": [
+    "Go interpreter",
+    "Darwin ARM64 native software",
+    "Linux ARM64 QEMU"
+  ],
+  "observable_cases": {
+    "dynamic_work_items": 12001,
+    "dynamically_discovered_directories": 160,
+    "default_simultaneous_directory_quota": 128,
+    "sequential_read_bytes": 67108864,
+    "configured_live_value_bytes": 4194304,
+    "released_output_invocations_in_one_native_context": 100,
+    "scalar_production_and_alias_classes": [
+      "Bool",
+      "Null",
+      "Int",
+      "Float",
+      "String"
+    ],
+    "preserved_failures": [
+      "typed callback failure",
+      "work quota",
+      "live-value quota",
+      "data quota",
+      "cleanup failure",
+      "cancellation"
+    ]
+  },
+  "ci": {
+    "command": "make ci NATIVE_RUNTIME_STATE=_scratch/dynamic-traversal-XA7C/runtime TEST_ARGS='-count=1 -v'",
+    "status": "passed",
+    "process_exit": {
+      "pid": 23203,
+      "raw_exit_status": 0,
+      "flags": 2214592512,
+      "capture": "Darwin EVFILT_PROC NOTE_EXITSTATUS"
+    },
+    "log": "ci-complete.log",
+    "integration_durations_seconds": [
+      "166.643",
+      "4071.550"
+    ]
+  },
+  "language_review": {
+    "official_reference_issue": 9,
+    "sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "scope": "changed_prose",
+    "new_mechanical_findings": 0
+  },
+  "evidence_archive": {
+    "path": "docs/evidence/dynamic-traversal-20261029.log.gz",
+    "sha256": "5ea0cf8ff067a8d8be38d4540c2370bf9d356eab7f60949aa319b4b22ad153ba",
+    "entries": [
+      {
+        "name": "budget-before.json",
+        "bytes": 878,
+        "sha256": "dd5627beb51f2d912c48ccd3f56c410078a6200493618b390af1336dd6f97bee"
+      },
+      {
+        "name": "budget-before-cumulative.stderr",
+        "bytes": 466,
+        "sha256": "774f45781f9882210a4eb0daa1c7e2c77dc7571cb459511a0c52dfabc1f43f8a"
+      },
+      {
+        "name": "budget-before-policy.stderr",
+        "bytes": 114,
+        "sha256": "d473261da68892b22fea2e291d7e06e01817fd8c1da5f3cafe2d42d4ccecf65d"
+      },
+      {
+        "name": "frontend/before.log",
+        "bytes": 8382,
+        "sha256": "f7b4e5ddae94f506bdba6c4a882a8f0b6295a97a41a72047366f1f8c81289e75"
+      },
+      {
+        "name": "frontend/fallible-state-tdd-before.log",
+        "bytes": 4384,
+        "sha256": "b049689ff73cb789a5331f7c160c0be5d548b6a7a1190f2cfd0ba172843d0454"
+      },
+      {
+        "name": "frontend/nested-list-before.log",
+        "bytes": 6345,
+        "sha256": "71dce6677ddef867f14fb7677854d90151809034d83d859304aee5640fe9911a"
+      },
+      {
+        "name": "frontend/semantic-registry-final.log",
+        "bytes": 49037,
+        "sha256": "dc39421be23bd613d1943880a90d9af22840451bbfdeaab7721251a104a9d34e"
+      },
+      {
+        "name": "frontend/semantic-native-oracles.log",
+        "bytes": 3237,
+        "sha256": "5a66cb75d69de3e8a1c385e5f17b101e131150485998388a883dd17cabf370af"
+      },
+      {
+        "name": "frontend/filebench-after.log",
+        "bytes": 1199,
+        "sha256": "7bf6d8ba9cfb6586fbee37a77f782f28a8cb0cc7eb81b624332d85d3fca1695d"
+      },
+      {
+        "name": "directories/behavioral-red.log",
+        "bytes": 503,
+        "sha256": "5cd35a4b7e460298f0692feddd2b7b7aea214545ae220ef38c88ac0e9e964fdb"
+      },
+      {
+        "name": "directories/cleanup-handler-red.log",
+        "bytes": 5818,
+        "sha256": "75a666148b19efbb231fdf7683a263de327ccde9a9297b0896c3a1090c37a4d8"
+      },
+      {
+        "name": "directories/native-keep-behavior-red.log",
+        "bytes": 1859,
+        "sha256": "0569339ba006267b354c89ee8cd16c2348453fb6303bb74a7ace3fcc14fb8ac7"
+      },
+      {
+        "name": "directories/file-regressions-final.log",
+        "bytes": 19538,
+        "sha256": "7fdd086ed8a8fc8a928e89ef07217ea9a67074da2d36c5844ad047b64995da42"
+      },
+      {
+        "name": "native/cleanup-handler-before.log",
+        "bytes": 8609,
+        "sha256": "f6f3537b1a11210bdd1a456885343cdaf78a85cced236aa127844e3f665a7cfb"
+      },
+      {
+        "name": "native/repeated-context-before.log",
+        "bytes": 1484,
+        "sha256": "0c2ee959f58b6adb67a010c0f0a690af46324900079879de9bc12caa9a42f57e"
+      },
+      {
+        "name": "native/tape-boundary-before.log",
+        "bytes": 1705,
+        "sha256": "65be131e1632fc1c6d30340ccb6015241beca84d6a8f9b87f180ee12ff9ab41a"
+      },
+      {
+        "name": "native/tape-boundary-after.log",
+        "bytes": 1267,
+        "sha256": "c75878d0e12a7656ddb1dd8a10fc226a5629cea93d07d34b2186cca162742056"
+      },
+      {
+        "name": "scalar-identity-before.json",
+        "bytes": 1726,
+        "sha256": "d23a9e3ad8700ee807b1c5971cc5fcc7fc509506fe1adb9a5768e9ffdfae5d2f"
+      },
+      {
+        "name": "boolean-accounting-interpreter.json",
+        "bytes": 136,
+        "sha256": "65793078780f5c3b23b5334754154b7c227866b1c2476b9665ae531f26fed29b"
+      },
+      {
+        "name": "boolean-accounting-native.json",
+        "bytes": 176,
+        "sha256": "70686aa266e73b1090b9adea779ec4d25e7e077bd0d5259204b5a961df9bd5c3"
+      },
+      {
+        "name": "scalar-identity-red.log",
+        "bytes": 2204,
+        "sha256": "4cc279a991f4b9b1c1d9c8cd38602155e02266003ef66f1fcd02a4ef2bfb0d70"
+      },
+      {
+        "name": "scalar-identity-green.log",
+        "bytes": 21404,
+        "sha256": "8ba1d900b953ecfa0ec8db81ee1edc5fa52805da781f6ecd7bcfca2f68c61c65"
+      },
+      {
+        "name": "scalar-identity-native.log",
+        "bytes": 3147,
+        "sha256": "51ff10e68ba0e93529e8a0dc18252f5f5736ada7b04cf8bd85a2ff7043a5f7a7"
+      },
+      {
+        "name": "scalar-final.log",
+        "bytes": 1955,
+        "sha256": "e0e89f2c6b6d25405c8266054866fb872e31da342379b6ac95d8184c27b3e508"
+      },
+      {
+        "name": "native-final-before-overflow.log",
+        "bytes": 2422,
+        "sha256": "c6d414f206dd2a16e3eeef8501b20334bf9b4f9a4b1a5025594b2694c16917e4"
+      },
+      {
+        "name": "logical-overflow-interpreter.log",
+        "bytes": 1249,
+        "sha256": "18d58895e69806244c303ede197b6101c5f2be7dd713f8e420d2c9d34439108d"
+      },
+      {
+        "name": "ownership-fastpath.log",
+        "bytes": 1168,
+        "sha256": "57b262e0ceb98bc51d566d7b2e1925cd7d007ae3f3a38e3a3142a8f7f8ff6dda"
+      },
+      {
+        "name": "budget-fixture-migrations.log",
+        "bytes": 1960,
+        "sha256": "73560bed67680602ef12d477dc0f660a0de4ff5512d97cecae9144ef4519a46d"
+      },
+      {
+        "name": "native-complete-focused.log",
+        "bytes": 13244,
+        "sha256": "f591f7f077bc86a685a844dbf03f11c7a55c0130f73f6c8aaeefb9a697f51ba1"
+      },
+      {
+        "name": "all-docs-check.json",
+        "bytes": 9864,
+        "sha256": "a99ec02c149af36619fca5439037fc4bc125a7a339199e9b4ae087692bc2dbbb"
+      },
+      {
+        "name": "ci-inventory-before.log",
+        "bytes": 301707,
+        "sha256": "b2bd16f6d02026dbe664d0fe86f351eb1f1f67a0bd93cb6ce343c0f1aa4270b0"
+      },
+      {
+        "name": "ci-aborted-for-scalar-parity.log",
+        "bytes": 308423,
+        "sha256": "fb01f10c1c1816f9fcf0169f5450fda94d2186022e6eaa03e34afa8e798ef07d"
+      },
+      {
+        "name": "ci-complete.log",
+        "bytes": 834255,
+        "sha256": "b6b798f59c026fbfebdf23322aa53ee9f0cbc671c3f3801ddf5bbfa5a46d546f"
+      },
+      {
+        "name": "ci-exit.json",
+        "bytes": 117,
+        "sha256": "427be28e201dffd013801fb8ad9cb166be19fdebfac262b11bc1f3479c2b39ab"
+      }
+    ]
+  },
+  "full_cleanup_application": "remaining_proposed_operations_prevent_execution",
+  "hosted_ci": "not_run"
+}

@@ -177,7 +177,7 @@ It cannot be supplied to either removal constructor.
 - Keep an absent grant inert if a directory later appears at that path.
 - Return `File.DirectoryFailed` for another root metadata failure.
 - Preserve existing host authority diagnostics for missing grants or replaced roots.
-- Reuse open handles within the existing limit of 128 observed directories per session.
+- Reuse open handles within the configured quota for simultaneously retained directory observations.
 
 Temporary-root policy compares the observed owner with `Host.Invocation.real_uid` in Lo.
 The application validates the path requirements from the mac-cleanup plan.
@@ -198,7 +198,7 @@ The report has no public constructor, equality, ordering, or checkpoint represen
 All child lookups stay relative to the open directory and do not follow symlinks.
 
 - Count every enumerated basename before its metadata lookup.
-- Include vanished names in the existing limit of 10000 enumerated children.
+- Include vanished names in the configured file-entry quota.
 - Enforce count and storage limits during enumeration, before accumulation of the complete directory contents.
 - Reject invalid UTF-8 names with `File.InvalidName`.
 - Record a vanished name only when its child metadata lookup reports `ENOENT`.
@@ -349,17 +349,17 @@ Automatic trace inputs must redact an invocation snapshot inside any captured co
 
 ### Resource Accounting
 
-- Keep the current limits of 10000 file entries and 128 open directories per session.
+- Apply the [host resource quotas](../specification.md#89-dynamic-worklists-and-host-resource-quotas) to enumerated entries and simultaneously retained directory observations.
 - Charge one metadata step for `File.directory`, in addition to ordinary operation evaluation.
 - Charge one root metadata step for `File.scan`, in addition to its child discovery and sorting work.
 - Charge one discovery step for every enumerated name, including vanished names.
 - Reserve sorting work for the complete enumerated count before sorting either result collection.
 - Include all names, metadata, nested values, and private provenance overhead in value-weight reservations.
-- Keep the current 16 MiB value limit and 64 MiB cumulative evaluation limit.
+- Apply the configured value-byte and live-value quotas.
 - Reserve `3 * N` base steps for removal before preflight, as in the current removal contract.
 - Include the preflight metadata lookup, final metadata lookup, and removal attempt per entry in that reservation.
 - Charge no discovery step for those two activation observations.
-- Charge each new observation against the value and cumulative evaluation limits before allocation.
+- Compare each new observation with the configured resource quotas before allocation.
 - Charge predicate evaluation and flow invocation through ordinary execution steps in addition to the base reservation.
 - Charge captured contexts and preserve the current 256-frame recursion limit during callback evaluation.
 - Release temporary observations on success, rejection, cancellation, and failure.

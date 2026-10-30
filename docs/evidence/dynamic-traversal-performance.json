@@ -1,0 +1,1749 @@
+{
+  "recorded_utc": "2026-10-29T22:33:12.853084+00:00",
+  "analysis_status": "completed",
+  "performance_acceptance": "regressions_unresolved",
+  "production_source_changed_by_analysis": false,
+  "baseline_git_revision": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+  "baseline": {
+    "go_provenance": {
+      "revision": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+      "source_sha256": {
+        "cmd/lo/main.go": "bb0c9f640b76bfc35276d6326115db2cf7478934afdb0492399e668fa72bd67f",
+        "experiments/process-host-final/native_test.go": "4daf84b13864b7ea545a0c3a8a3f2e4c353bf27c69301f457d74c02270913f02",
+        "experiments/process-host/native_test.go": "4286a89fa40dacf783b224af2bf28d33d54128fd368d22eb3d01b7fb96a76c31",
+        "experiments/process-public/public_test.go": "22ba510270dca8bdc2a25fab33565796b65c712efafccb2757f7a30ebc99a5f4",
+        "experiments/process-startup/native_darwin.go": "fe8f3dd136ba9a67ae8f36d79c7c1aed3c749b8bf80549eb6b4607523a740f49",
+        "experiments/process-startup/native_test.go": "45906ddfaa270c32bf340dd5cae4e4cdd300c3ac01f5fdcb2b808e584172538c",
+        "experiments/process-startup/pending.go": "1a883ea361b63af870aefcb75cd1caf0713f6de4a7b44cb6a130a8942119f9d0",
+        "experiments/process-startup/startup.go": "bbe37a11b984114b55200ceff3f9e12d92a61d5405570371bce47834aa7a85aa",
+        "experiments/process-startup/startup_test.go": "00bcd1dd7caade01d13085017affc768ae22bb0191b4dcc8703ba10d9a5df60c",
+        "go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+        "go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03",
+        "internal/adapter/file_entries.go": "09eb2d3de44472d2da8d55570ca8a6a579691bdaa92d3832b2d04e63c4dccbb5",
+        "internal/adapter/file_identity_darwin.go": "a8ce2812d976cc3bb0d21823cf36b4b40af06908de51c7cab520cc417f08d55a",
+        "internal/adapter/file_identity_linux.go": "25a5c1672bed2368e45b57855caed4e991c79c93ab73c87e885584e61b86d0b4",
+        "internal/adapter/file_io.go": "01a5a1c66aa6f998c6c7ec336b20b2026c1f23ff2042b6b5494dc4dc29dd8fae",
+        "internal/adapter/file_metadata.go": "1811ece58cb24ae7670fdac17197ffc5ccece5d09dfc2ab1f2f3bb76cd4884ce",
+        "internal/adapter/file_observation.go": "d373192057d0793c85eebf9f7946fa058e27ff77dbcd32188a3ad6ba9e475cc1",
+        "internal/adapter/file_observer_forward.go": "a16b46f639d79e167ceec456bd681cb6f2b946c4bce7ebd2947297adabd333ba",
+        "internal/adapter/file_open_paths.go": "329a7c1c9d0836313f59201a8d1b89e344eb4ac88fdfc74f5cc5dc882a89b67e",
+        "internal/adapter/file_probe.go": "d8c32818390c0db8205074d4e707539f320a95bff6840c11e83bd68773784f3f",
+        "internal/adapter/file_probe_process.go": "a7051ca0afe1d61cc7d0babfa6cef1bd31a453ef55ad0c0e0a9152890d5d857c",
+        "internal/adapter/file_remove.go": "24f3d4a335a4d8393fd7636a007eedad792136edc57148c09a8691fcbd4a10fa",
+        "internal/adapter/files.go": "c8d9bef21c7e0a0285db3afe355e15532a80696c7fa5a2c575f8d0297f135f5b",
+        "internal/adapter/http.go": "a25babdae307e8828be2e4c3d046fac28793e18f92c9f2e1403b75833e682aad",
+        "internal/adapter/http_client.go": "101150bda2905e28fc50d204c07e67d78b9798bf891eada3c46d429b37a0f42f",
+        "internal/adapter/http_policy.go": "de2a5d4f167aee5d987c130ae58011fb6a60fb2b059bc00d91a4abf4d48a78d8",
+        "internal/adapter/process.go": "40594780a97982550a1d69c10b0b90f979ad28304c85b1f2a45cf85fda24ba48",
+        "internal/adapter/process_discovery.go": "9159be61e088c6e9aaef7b5f7c3e1a4b1dace481228be234988a3ef411fca76c",
+        "internal/adapter/process_failure.go": "9dd1c5b0b073fd4c4dbd32f75aa8c203addbc00a62a895e8010a13c9c2b699a8",
+        "internal/adapter/process_lifecycle.go": "775138a8f71b4f91e025de1f5efbd213e83b26ece662e68c897048667ac4ff41",
+        "internal/adapter/process_policy.go": "25b5d2ca50ff509d312fa6a6cd70361fa0145377a4dc9191c8504ab7830d1f41",
+        "internal/adapter/process_registry.go": "ddc296d45cb5043e4ca1fad74019c7f4f28990f9f9c0613e6128d8c943827dc4",
+        "internal/adapter/process_registry_files.go": "6ab78d7628ff93980ea9acc93b6f68c0c1a294d9c2dcd40b5d275600ec2b4237",
+        "internal/adapter/process_scope.go": "6d93587b94b25d2e22b2ec78c0f568c6f82d201eb40c328f022d4086c3d27ef5",
+        "internal/adapter/server.go": "d613b33c4eeba1cc9d15ce600850ad4b229c7008937057a3d17546014c1a828f",
+        "internal/autodiff/plan.go": "5e4e5e51033e5073e174911d3bd455bc2d572bbac4484dabf4d541f7a381f777",
+        "internal/catalog/autodiff.go": "750fda11c969fd188d6dddf497ed76253813dac9806859eeb0ee8856c2164b65",
+        "internal/catalog/catalog.go": "580eb8bf8bb574c16d46464bbf7ee6801c81d2b5e5aea9e682dc3047e179cfa2",
+        "internal/catalog/checkpoint.go": "18ff7cbd4fdd22b11c971572b0737a7721e04fce600b718bd611c04e8f41440a",
+        "internal/catalog/observations.go": "45c3a8e8cf2f05158fb80aea9cad31d8dcc294303a6b29d0eaf623fd0b5b4b5d",
+        "internal/catalog/optimizer.go": "e86ef0da21332d37bcd120450df99c75d241ea1e27aadc421a2a5650f9fa5dbe",
+        "internal/catalog/parameters.go": "00f38b5260ecf015aa318a209fd6568d2a659e83e1b9bfc4cca39e002f1185e6",
+        "internal/catalog/process_context.go": "c27125197962ad19eee4e1cdc6ab27217b2482e13e355181ab394f8ebf71ad0a",
+        "internal/catalog/tensor.go": "e6be8c898d76c6eeba8ac33c2b5a7173ad130e13741bddfecc73beae2d3acb36",
+        "internal/check/autodiff.go": "5a85270b627bfad3f1d253cb3957353694c5cb6605aa8e499cb0d367e01609fe",
+        "internal/check/call.go": "dcb7c94583cfb1f0770a086df73fc5d1f13b93f8f4d362fa4e8761c3e726fc89",
+        "internal/check/check.go": "0e704fb242f9d3bf234387d137b743d9e3389d16942e31f04990d472a27712be",
+        "internal/check/checkpoint.go": "89760844818292c3a33751ac5125407bd9d549718b2ed147822ed3982526f8d1",
+        "internal/check/collections.go": "f8777520c658b01d30ba81ff109b80bd4bace22856c75503dd700465dfe3caae",
+        "internal/check/expression.go": "3c27d322f4b997b580e30cc9591b77e5908511d68e0145634b81fa43be435b04",
+        "internal/check/file.go": "4638a51120390cb9e4c0867624ec7a60f7679692d37da834c6933d4be0f12ba7",
+        "internal/check/match.go": "9a5551b25fcb5deef07d35c1aeeb66573e2e701b51d7deb970727b4fb6387449",
+        "internal/check/optimizer.go": "75de8def75a753e60092bb6abd6a346c5036ed89b63f57ab655198e4be2641e4",
+        "internal/check/parameters.go": "b6afd937389bafebd0d9568a6aeb2729166322a5d134f9a6ef865ac05e63441a",
+        "internal/check/type.go": "ef6079d876eea30c67d281231ae8f380db01bc12c8dabe685e575a02eb40f39a",
+        "internal/compiler/compiler.go": "a37489303ed387f8ada4cc977c643c96517bad47cd1a4843464fdf80b8178380",
+        "internal/derivative/vjp.go": "e12a6e750d368af4565b27ed736cfcecb595beeea48b4c6e5ab614bbea0167dd",
+        "internal/device/build.go": "713dad1e5cab521f6da6d3ac44c1e59c63dc764b9b12d45532e5c5317b805972",
+        "internal/device/compute.go": "6753afc97e6d1cfa8103845e2a45b1bb10a564d6f8f50759c50bff59e47ea989",
+        "internal/device/device.go": "b7d141e6debf1db8cfc936a39c12e567a04105c7cb51b518d1393a157af3029f",
+        "internal/device/metal_darwin.go": "9850d3975e2c6920a9c136abfed11c9be6756eba1da22500ceb26d90f04cd36d",
+        "internal/device/metal_disabled.go": "ddccb1685eb958264a91ca3e3cd9d86808f7f81aace289e5951fac4981586d65",
+        "internal/diagnostic/diagnostic.go": "4b56533f7cae515ce2e423d64116d419a31e9079b9b9be87544a6591618fda69",
+        "internal/eval/autodiff.go": "598443afb24f8fe11051224e6113347a4ee32c58662564ee4e61a9715ae9a0b3",
+        "internal/eval/builtin.go": "3e8843ae0c8d619784feb095bbb0616664628f8e7ddb3a14461b079daaabe6e4",
+        "internal/eval/eval.go": "07524cf27e5bbc026433cd2317bd90688f889f59fdce5e85efd13302b8b73268",
+        "internal/eval/list.go": "6eb19d89cadc32086a21d91505a350c92bec3ef91d8ed6ddc0a44ef5532ac221",
+        "internal/execution/activation_progress.go": "e0db8b7c5aac92fa500b87488c84ac78878a9beb206e8e5c993b371d4e350f40",
+        "internal/execution/contract.go": "a8a554955e4abcf9e14930b462d7630b08266d132ab4492cecd13db47c377cd6",
+        "internal/execution/failure_capture.go": "2134f4f3ca2fb84529dd80ec1bff063359df7c4911b648901d03509d8f8e2c12",
+        "internal/execution/file.go": "19caf10a701384b4e7540b9ce16925f3aa8e20f7910583eb852f8efe63deaab7",
+        "internal/execution/file_guard.go": "f1f548d4023205928e1adc18872943ad40ab4038c80f926db45b302deccd5cea",
+        "internal/execution/file_write_progress.go": "675892824dcca6ae77d0e5cda97f541b2e862e27c74f9ac4ca5cda37fbf02b99",
+        "internal/execution/flow_progress.go": "b914f748f7a5c5da4a991088c762b8296e0a94e54619db915d58e7da701ca4cc",
+        "internal/execution/host_invocation.go": "6425d7b5cc4c509ea16ba7a3693ef5ab14874585496180fc348c1ab5bff7318a",
+        "internal/execution/http_progress.go": "95e320a22d4f6f9008b072f0524fd8d2961cf51c2eef385c0c0aaffead585a0a",
+        "internal/execution/operation_cleanup.go": "ac774842566e7c3ea97f28e580f1b3a33d50c6073fb17abf1c276a75145a54bc",
+        "internal/execution/process_context.go": "8c5e0e792469ff79d46bef8cd5493ffee0d44005cc0b42d297b84d48e3d91cb8",
+        "internal/execution/process_progress.go": "c4919a2e1f8660e8c620d895c637ddfcef36abd35e752405e1185b6b434ccb57",
+        "internal/execution/program.go": "936b6a379748469c208b8f5987def07472e078f8b84a34b571cca200542590d0",
+        "internal/execution/session.go": "8c50f369a618f27fa2b6738080cf0304216d7d0c6a2e98160844c0809993f5a7",
+        "internal/identity/flow.go": "ee15f4ac26587b22dd15def1280cdf73e2b3f73ece81d93666c441bc6c6ddf39",
+        "internal/inspect/analyze.go": "b592c399df4188a938fe8bbc89528d4fa089f633205bdc54fcd7ea0ba722c707",
+        "internal/inspect/autodiff.go": "728f882d823f526bd0af06b5c438be756fd656d7d2d184a36de8edfe5e98fce4",
+        "internal/inspect/expression.go": "72bd01fe802063035e6b87b9a7c78ba3c11c7906edf19e10b1b40abeb14a2874",
+        "internal/inspect/index.go": "758754b5dedb0f0e5145818bbd27e5e5fefc2855b83298400e5c098012c0124f",
+        "internal/inspect/process.go": "9d322d4185b8655510de79494d91ecda2ddd26067556ea1f24504ff8966c1162",
+        "internal/inspect/report.go": "b67d667b5027d621de82a6fd97f799726395a18d9f239d74c6e736b6c9bb0303",
+        "internal/ir/ir.go": "28e554a3c1ebfa6fe155869dae9c165404cd26c19b4819c15c7265821b71faff",
+        "internal/llvmemit/emit.go": "4a9952b4d167b3c45bb025f97b20c90ba69b761a34d8ad71d3b6361005928015",
+        "internal/llvmemit/emit_integration_test.go": "7bbf172518287dee50f576e433974eb88e793ba9f2d06c91b33dfb2ee5a323cd",
+        "internal/llvmemit/literal_sequence_integration_test.go": "3ceae9449adb650d4ea90d10f3759f5a3a4c58300bb0c9c9a788efe1483d93ff",
+        "internal/metalconfig/config.go": "7946af24fdc32e91192279057779e9b77e18e1ecc1f8baa2fe228f436c874b90",
+        "internal/nativebuild/build.go": "5e4fb95a743cf7645ac79209d182229dc30267dffa37a18af8bff7491e2b6b5c",
+        "internal/nativebuild/llvm.go": "b09d202d9ceda40e45d6a7a14080b4213a729ad8d852d89826cb7e2d002b4afa",
+        "internal/nativebuild/llvm_executable.go": "49e36c0e6ae6c41422fe4881f38f36366aa203910756d8e6056b80678768c64b",
+        "internal/nativebuild/llvm_generation_test.go": "dbb9cc445696bcb68cf5231f324a78ff6724453004bda03e02375f94bdd9b65d",
+        "internal/nativebuild/llvm_host_libraries_test.go": "d9ff3cd558e273fdb556659e8237bdb5055898111f6c3d6fddaa70735705501d",
+        "internal/nativebuild/llvm_metal.go": "389cdc734abafd59b0f43b65fe1d099982e14f713c8ec573d3a0e4032d3ce1b8",
+        "internal/nativebuild/llvm_publication_test.go": "2ae05aad54e25ddeeadc5e62e6afd854796ba770d3e86ce6656ccd425ec38042",
+        "internal/nativebuild/llvm_snapshot.go": "5e2a3d508dd0542dd38f860274a83b05489dc453378f4682f7ef6d378905b9e4",
+        "internal/nativebuild/llvm_snapshot_darwin.go": "272e79c9614f05a5adbb798223f86eaaa5f02f97d37b7c0df10396e68f48ff19",
+        "internal/nativebuild/llvm_snapshot_linux.go": "4482beaee9659ffe035394e119c073e59e286b26326df4d0dc8761c9f9f65ccb",
+        "internal/nativebuild/llvm_snapshot_other.go": "230d95e819c5ac5a8aac64ed440e472f7b314f60613453a09ce4d3fd5395fbdf",
+        "internal/nativebuild/llvm_snapshot_test.go": "637e12f1ed0e591bda3a4ec945441ce33c91e185d1e57df7bde1e9b02bd80762",
+        "internal/nativebuild/paths.go": "ba4f4d9a6b14bc00bced0f0943beb68de75d6e005b48e234618642a199e19e66",
+        "internal/nativeplan/gradient.go": "89aabf8acca82a402bfed12a4c6adeb0d1953a8d77f5d1ab131387b259c47df5",
+        "internal/nativeplan/literal_sequence_test.go": "5ebff7184b4df602575f7f120ae19c85ac9e6898eb70c3d19e7f78c53aee6dc9",
+        "internal/nativeplan/lower.go": "3f6ec434523df8912793d712c3f8f12e543fcece35e7b572288122cb66193753",
+        "internal/nativeplan/lower_integration_test.go": "a0d4cae90c1bc2373cd53c52ec59bbac575aeb83386a37b827af2502d433a424",
+        "internal/nativeplan/metadata.go": "40906f2a9585b9cb0e69ebbc261dbee80915222e038d3106c8a2e0fabb15b82e",
+        "internal/nativeplan/metadata_projection_test.go": "9d81c82f759335b02325e327e8a5697114173b893e48e6d3b6d688b596872758",
+        "internal/nativeplan/metadata_test.go": "5e2d0f6e3d88608876f370aadf5f102ae8d7a4a63df168868eb7a9a95f5d2515",
+        "internal/nativeplan/plan.go": "83a4213b2c850edf306997fa5fd45392f81d67d1fef14452c1cc3023d7ea6a71",
+        "internal/nativeplan/verify.go": "827f3856dd615ede2841c0d616be1acea2693641f871526ca2af0d121ab577f6",
+        "internal/nativeplan/verify_test.go": "cfff3c16841062e0ee9e963ed625b991da727b3560e9f99f352be66fe5eaf050",
+        "internal/processhost/helper_identity.go": "46aef4e7a8df22a0ca4de132a5ba2780a16bd18e4695605aff02d5d816cec287",
+        "internal/processhost/native_cleanup_darwin.go": "1a16171114861ed643d45ca75b51b4f65b027c01df3b43c53ade5fe6d4403f4d",
+        "internal/processhost/native_config_darwin.go": "36a908913b4b149600d6c4ac69bb51a7bd2bc12880f3d006df53d55e95e5bed7",
+        "internal/processhost/native_darwin.go": "a514e29a7fe8ed0af30622a2d09a7b7de375a0c13588488e3e15c0f6a9c6fb07",
+        "internal/processhost/native_other.go": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16",
+        "internal/processhost/native_ownership_darwin_test.go": "e1385c263c7aff26a4a075d06d231e8fddc9e51d33999d75ec44a8d114e84314",
+        "internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+        "internal/processhost/session.go": "354cd1752728fb4d573ce8b18a6b2e0c38aec0c8383ce48893f51c868cbcabe5",
+        "internal/processhost/startup.go": "37e1c11b4f066d0dacc00ad584beee5da273bd69ac5025a92baa3ce0653c2dd0",
+        "internal/resolve/scope.go": "59ee6ebda753d154d1c511edf669ef5d0b01566e711716f229596871df8ce742",
+        "internal/runner/command.go": "a73a6ff21e359d0efc13478a0a1a2f051a4db8ad4cc3a18c8f1027ab182d9ed2",
+        "internal/runner/execute.go": "bb07c93232bb10328c4ea84e4a6778b76c19ebea79330f3a40293cbb01e32ea4",
+        "internal/runtimeops/arithmetic.go": "05fd5c8ceecafddfab7563b3af0f4fbd04ffd7b138f25858b17abece5c44d169",
+        "internal/runtimeops/builtin.go": "4a1de8704cf1678b9aef4658548388ad7b097b78b23bec2d67f6f7657774dc77",
+        "internal/runtimeops/checkpoint.go": "5e6e0b3c3caac5533119299f0d056579da24397e02c2e71f9c416566394fe0a7",
+        "internal/runtimeops/control.go": "490271cfe61153ea2262a980f2159d7e76f47ea43195932be2a01d3bd5ea34c0",
+        "internal/runtimeops/derivative.go": "65d78ba3447b9ad81de66ce688de1a8e8973ba5ec2d770d2e5bd39b7a8625a0a",
+        "internal/runtimeops/file_observations.go": "253c1f4806bc762cbae794b000f06062f2f1639189040ead2534f0de3e61985a",
+        "internal/runtimeops/float.go": "646fef81daf610e10288ba0e5dc07ecc0eb2cbb78cbf0d33a5061ee6ea5d9aba",
+        "internal/runtimeops/helpers.go": "2d656c28f37ccacda47ee3e087ba24eef2f9ab4d56511fa38327905ed7cf5b14",
+        "internal/runtimeops/host_invocation.go": "28e9fe9151ab0a2a3f27499cdf43a4e60037f8252bd96999906f96ed71300047",
+        "internal/runtimeops/http_client.go": "8eb796d5b11cf94cc40448b61f4ce33eee79275fff85a94ea5608744c8e4dbee",
+        "internal/runtimeops/optimizer.go": "5a2f07557ea7b9674d3e9d63e01872c5c014b8e98a770ea3387d5d67f3e14782",
+        "internal/runtimeops/parameters.go": "40cd6e052b4dfc639ad0f03731f193173e2dac456715a4c75e735060b648b4ee",
+        "internal/runtimeops/process.go": "42ea4b30ea88abfc91d29f10fbf1b08558673c05d24757d2d1623ad978165009",
+        "internal/runtimeops/process_context.go": "def05b1ae9ddb70982a63f36b65aca7943b56b9574eb9e1a9047b09f838d4162",
+        "internal/runtimeops/runtime.go": "abd865024be4f874797db19772fac82e78a26628c0204cba4b4e7e14ed7659b5",
+        "internal/runtimeops/tensor.go": "30c64760f69cf0d4949ffc62d238319829ee63f543e2b9c8d550adaca6d3e318",
+        "internal/source/source.go": "6612c2bad62638c79aad2f1ecc61a7faa8887382452e299488250dd5b9dc3521",
+        "internal/syntax/ast.go": "ed1002b6508bf1834e0ab53c0816afb31d3d53e750db256e2275a68f97e2fe40",
+        "internal/syntax/lexer.go": "c1213cae056971402d9fc1f1a91e81a96ffb5e830f9945bc73ea3f79fe886038",
+        "internal/syntax/parser.go": "d6f1f4d0ed72cffe4df618a99036f6af3b67054b09cbe026db773ea173c89880",
+        "internal/tensor/compute.go": "63379f95df09dc89eaf3fac409c41138d71705eb16346f1edc254d036752b0e4",
+        "internal/tensor/cpu.go": "a82c9542f91b43d71e1b0bae70c8721647f6154bec08fda08136aeef336de00f",
+        "internal/tensor/device.go": "e9c7f1fdfc18f596773f4bb45f59148ec45382939467d201d140c70a67c628d6",
+        "internal/tensor/shape.go": "15aefdc0b82cc111063ac03234c5a5064c9a773e6dadd1dc63c51a3d247fd649",
+        "internal/tensorfacts/analyze.go": "f4271c9425af0bdad0dedbb5ec584ccb08c81275af5f1a0eb5b10db82e2ddedc",
+        "internal/tensorfacts/scope.go": "3bd17cd566ad2bf775296a38e2a185278d2131fa1b41e9b08cb0d686cc443788",
+        "internal/types/training.go": "8f67e2579f1b6572a6a870c062a120785831c5ef3dad117502e5266274ccd598",
+        "internal/types/types.go": "c158393654c7da620c75690b095b3f738a938e7e9f894f6d6046340709ff3b22",
+        "internal/value/error.go": "5ec3c8c799a8ae2ab285af5f1cbfd83d9582a975c6fca8ae18ee8afdecc86b74",
+        "internal/value/file.go": "cc8a6fb463e81d890629be6ba00eaed88c91483707b1b258c11019fd2823fb73",
+        "internal/value/file_observation.go": "0039544dccabb78c202e895477dc9c0c6a823d642b9a8cc8f2ba17b9c39a82bd",
+        "internal/value/headers.go": "04b3263cfa0cd56bd838af116190e8290a0d8840b6cde6a092e517eb677eb236",
+        "internal/value/host_invocation.go": "c09c3b337e061ec3940227f177f7264697c07bed7e78b4869726990e0a86154c",
+        "internal/value/http_client.go": "3f04db38d0d767f0b54eef416ddc54a0f1ff4f3701fd9f43ae4b494088366a06",
+        "internal/value/optimizer.go": "65ba9f205caf5db47b9b94d84b1b7017f890837dabed8fcff78964ffbc5c974a",
+        "internal/value/parameters.go": "dd1470ba363ba43d308bdc9d387a3b18b81fb9546bd1bd24aa026870f8665283",
+        "internal/value/process.go": "8296d5978583dc7f89da014bf337d0105b8ea235dd28d7ef62a4f4474d672b8c",
+        "internal/value/process_context.go": "41dad83a3a77bfb25cba7ff37535875be67459a8617f52e44db364059074e0df",
+        "internal/value/process_result.go": "cf9bcddc214dc2189cd0d935b24914a35567824d014042e444273f1440fcbc66",
+        "internal/value/receipt.go": "3c90f7426a5569d625d5e738c4f0193c27fbac704bc4e3486ceade18980946c8",
+        "internal/value/resources.go": "8fba6d656989f853e8363379746135a916e90a929b72a935e159eb59a05d7292",
+        "internal/value/resources_test.go": "9554ce34cef41659142b67bc8c87b1d4a98bd0f22df89f3b7842a440fa1da6f6",
+        "internal/value/snapshot_weight.go": "b311c1ceedfae6665706e574970eb25588cb009da15ce9f1a953fdc2d5bd6485",
+        "internal/value/target.go": "4d983b7fcbd26a170bb32a3f3709828e5bf3ba0b3d499087aa2b8a4145fa0652",
+        "internal/value/tensor.go": "d1328d3ff4e201a25f398aa539658e3add4834121dffc7b727f2711e8871b3f8",
+        "internal/value/value.go": "479e36fa5c61271c8afbc64bb5150819046c0693fcaea34529e82cf185589114",
+        "runtime/metal/embed.go": "b4cea917f904ea120b01471c3ee6d3f87a6a3baff4b179403813ccafbc4d3c64",
+        "testdata/fileprobe/main.go": "4b9039b17c015ae14751ee31452d6f87b3198aef23d7870b658cf74908adb8b7",
+        "tests/benchmark/native_test.go": "2e4d114cda9b40234098ff62c770667af5b4ddc849317e723cf2118bea52a314",
+        "tests/benchmark/training_test.go": "1c6ce79b5f255634c9d0abb0de20bf4d064a4067b16a1088394d4b7c1a3e593b",
+        "tests/corpus/corpus.go": "98f49ef6b22b1faba53c85b59d194e7ca98b6c5f435723f88296592bfe04060b",
+        "tests/integration/activation_test.go": "51f3b447ad1568f681ddc64bbbc0b0867a15618e36fbbd3e136eeaf404634701",
+        "tests/integration/adapter_http_client_test.go": "e713819aaae44a724c0f8415a16fae7e944e73cf1c295b1738804c20d3a24fbf",
+        "tests/integration/adapter_http_composition_test.go": "4c16d197d59bcfa16841fa6073d898e7f27049a25b50c58f1179b33e50f9d375",
+        "tests/integration/adapter_http_values_test.go": "66523662c61e35121bdcb42c27bf7204cf1c92eb182d5e454395863cfba5d504",
+        "tests/integration/adapter_process_boundary_test.go": "0193f08279515ecbd71934a0567230c5fd30a582467979e1b91201511211f9e1",
+        "tests/integration/adapter_process_completion_test.go": "c07d8f9cbf90e2a101cc42de89eac56b3129429c8c3e5beb4014b9cdfff87a8f",
+        "tests/integration/adapter_process_composition_test.go": "be70c7e4456f684156816cd717c933182ece746eed5c45143311241dc5796886",
+        "tests/integration/adapter_process_gate_test.go": "b0d1e7731a9cbb66d123c049d1303903564d01e63e54bc0caa2c69ae2310c95a",
+        "tests/integration/adapter_process_inspect_test.go": "67c96452775144950c1d8fbf3e3ea5de895214757f755b66bfdd8835b5eec189",
+        "tests/integration/adapter_process_lifecycle_test.go": "136eb4b6a14eaa0e3e31fc7acf92e9041bf350b469da7e80904b35697b7172c5",
+        "tests/integration/adapter_process_policy_test.go": "73b61229d07bada76e09db140244c6b46eb0b92ca16070cf56ec7b1539d1b80f",
+        "tests/integration/adapter_process_registry_test.go": "4e1504fbc596c2a8cc3465f342938cc775c0576a37c5c57e7c74444eef32fded",
+        "tests/integration/adapter_process_results_test.go": "cac433c60c1a7d7a45190e37722d6561e9f14a589437f1b10d9e79abee964e63",
+        "tests/integration/adapter_process_start_test.go": "221ba3c34b10b9bf37f76382ee28cd849108e15a3cf2e111572cd5b0f0d81796",
+        "tests/integration/adapter_process_values_test.go": "8f9f5365d7f3598c9dd9cfa14b75448889a837eaf933524f36d31452571d091d",
+        "tests/integration/adapter_purity_test.go": "f458787da0d5b5622662eb42f2cffbc328dfd963397abeaa8877ac67a7b5666b",
+        "tests/integration/adapter_receipts_test.go": "0d26409eb897f7a9252a650c0a4f234b63e8a589bf70e145cf89d2903684dfa1",
+        "tests/integration/adapter_server_failure_context_test.go": "2dc88fb1955bb2551d574ec52dc7e4ded50ead5a22f8550f37a8f576d6aa0818",
+        "tests/integration/adapter_test.go": "f106fa509681bfb6812715aec8d34fd166b444ff0cd2eec7ec827cd843b26552",
+        "tests/integration/autodiff_contract_test.go": "665f5fc3e7faf88caa696c3f3dc194abec09ef1c5edb6ecaa6703f055669fa39",
+        "tests/integration/autodiff_numeric_test.go": "3a2aecb590593d00ffd1639fdb0c9ac850c9e58eb184cfff7565e58c0e9a3b67",
+        "tests/integration/autodiff_test.go": "8ad53ebf9cfde098510fdd9c1bc8aea2f4d2d7350be165369303dfa3ca6cdc37",
+        "tests/integration/catalog_test.go": "1a8fa6e349f99b259cc7c9a06a1baaaa1f17899b646c332f56deb546e854bb4c",
+        "tests/integration/checkpoint_contract_test.go": "7e8771d59e8d34ecb1847fde434a54dffd31195d60ea886dbbede73a6ea2f4c6",
+        "tests/integration/checkpoint_failure_test.go": "fb1998041c2beee10655cf5a52d69833645ee2d557e988f4c700e5b5c7655134",
+        "tests/integration/checkpoint_metal_live_test.go": "2b0f47d13bb2473af6f1b0facfb6d98cfbe5489e325e9b2e3b84556828e67e56",
+        "tests/integration/checkpoint_test.go": "45da33a4c39e82e7e82a07eb630f6abdfcddb174e8a6115a5d1eaa170a4602cb",
+        "tests/integration/checkpoint_xor_test.go": "7e2fec8f9bbb6baaacbcfc9cd949ea35691445b89f22a03644964b86f75c3948",
+        "tests/integration/cli_test.go": "7bf7dcb7427c0c359a8c38f2b7beca0fd6451c8eced2bf92917eb9e10df63f7c",
+        "tests/integration/device_resources_test.go": "f25388a74a1cc966d529d462620e42a43e2e87f0d053079f2e776c635e9c0390",
+        "tests/integration/device_test.go": "e216d2cf6544aa638b7ee49c4882c778bc72c2990e3694eecc05db38c3310745",
+        "tests/integration/diagnostic_trace_test.go": "7a8a654ab426a31e96af99b0e4041bfab309906029556d12a21041aad1df3506",
+        "tests/integration/distribution_compiler_test.go": "aa40fcc5793c1c8f9f25fb16296dc2a58d6b6f752cb219bc449e44938dbcc9a5",
+        "tests/integration/eval_test.go": "d57a2034945b527caeb3d8424310a7a9a1030f605c27ce131d814368726e8b9f",
+        "tests/integration/f025_acceptance_test.go": "c17c55d61ec829b9bd7d3bf3a083c4218f03436ad89ddb1dace819bbafbed35d",
+        "tests/integration/f025_contract_test.go": "4f80e98fd42317725475d7ab16e7f05cb171a791221ceb840f760e57ef3ced17",
+        "tests/integration/f025_file_metadata_darwin_test.go": "28954fac02baade1a797153f2d8347bf3f9f1a5fa58dd0b4819237fc579ca713",
+        "tests/integration/f025_file_metadata_linux_test.go": "f908bcf44d10874450ccb3eebaf3fdfe6661a517b85c3f57317f6fb69faf7b52",
+        "tests/integration/f025_file_observation_test.go": "0a468abec4d7f3ad23faf093aa07327f08eb705c54010409cb3f0487b59945b9",
+        "tests/integration/file_capacity_test.go": "860f7dc8c42fd8bfe7a07dcd312f27e88abe356ea329f6e4dd1b3d51940e6a9b",
+        "tests/integration/file_failures_test.go": "050cd2e8d5289b06916407c57f19a677a362669e316b4078ea718ae6a2190ef9",
+        "tests/integration/file_language_test.go": "ded2727565130b8093ce5b059984378cb9cee6ccb8e63f8c764fbcbe81fa5a8d",
+        "tests/integration/file_probe_binding_test.go": "59a360d369abb99151f6ad6d5650d9df0de56fe4c0368b29c1845a7f10fd66b3",
+        "tests/integration/file_probe_test.go": "04e10a828fdf1bf165371302e3c6055b03f10e6b08bbb47d6074715e44e71de4",
+        "tests/integration/file_read_allocation_test.go": "654b96029912109019d2dee5ff0f8ea62411328d437e29e2531026404f84f035",
+        "tests/integration/file_workflow_test.go": "6623bbe58aa417991af1815ef0e912b218340730bc2b3c39e8b7771e86a4b2ae",
+        "tests/integration/float_test.go": "8ee88fca343268d265577cd743a22ece3984be6396ff8e2711159f25f6251084",
+        "tests/integration/flow_fold_budget_progress_test.go": "230e5f4a865e62e82e29da6db27c8abd3c9558af037fd785b5e940e59c59f9dd",
+        "tests/integration/flow_fold_error_progress_test.go": "ac53f5126af41c8be33e35b24351d4e0f585a717c3608e54e2010f4402e4ddc8",
+        "tests/integration/flow_fold_test.go": "efadfa8e4e29e14e3169a3a970ed986d7f1b3d5004c15cce171a4ac81c8e5de6",
+        "tests/integration/gateway_cleanup_test.go": "a709a74329c5bc7abbc22b0e33825d177b8d1e4f1f6cf7efaa44b8725aa8595e",
+        "tests/integration/graph_test.go": "5dc06d3463fc978541b9cd9e81b9e0786373c2b5122a6fc67f2f13634c2b7baf",
+        "tests/integration/host_invocation_test.go": "98e91f7c07886f513afa40583fbaf4bd6dad80f7c38bad4772cf197396de764f",
+        "tests/integration/http_review_test.go": "91ba48c352e2b825aae4f41ab89414f00180d96b2030454a28d452ccc3ff26fd",
+        "tests/integration/inspect_test.go": "08483bd04ef36dfd88d81e6c5fb6880c0a4a4854e7b8779d9abafa36827f96bd",
+        "tests/integration/linux_qualification_inputs_test.go": "2ec611c814d5fa0953f7560988c5dffa316b6f8799465c2dbfe5764270ebab87",
+        "tests/integration/llvm_capture_test.go": "02439b47e87b5524ff433a754dfa45fc040748e746f22510a4ede02407d5ae5a",
+        "tests/integration/llvm_checkpoint_budget_test.go": "8403804882efadd68497029031daef25d1f0b7eb69ccd1fbfc1a5a5da2a98189",
+        "tests/integration/llvm_checkpoint_test.go": "e9b4f065f091021b608c811f9fa64abbf7e15d56360260a5d1a4700702ed9d46",
+        "tests/integration/llvm_collection_arguments_test.go": "d06ebc4d86c4c5968ea2f214de3d2e14e1e89338b244dfa2a081615391522ee9",
+        "tests/integration/llvm_coordinate_metadata_test.go": "9f7ec35f505f180be0fb56ae7f3c18a2f281bcad8ec1a56a42211a35a1346896",
+        "tests/integration/llvm_depth_test.go": "7546e7fcf4e30cb65631993a6f101f859243fea8147980dc85fc2904bb979db0",
+        "tests/integration/llvm_device_cli_test.go": "7a9ac889634a8c8e3ee8369e4696ca7f53e0c90eb17ce2a862992d41d986eb31",
+        "tests/integration/llvm_device_http_test.go": "e99e3856660235148eb42cae7253f2a4733782a3c38b51e201302e0532773fd3",
+        "tests/integration/llvm_device_resources_test.go": "1168db171d41b26c49a699288fd179196d00b1f4fad4f523790fa8e047738519",
+        "tests/integration/llvm_f025_file_observer_test.go": "715bc72721f4b3db766afaf26ea6ebc502d79caef1f906dc31ab4be7629b3a3d",
+        "tests/integration/llvm_file_adapters_test.go": "0be4ff45c8b8283c6c255fcb57a729f07d465fc64a6bf76ba0377406beb87a89",
+        "tests/integration/llvm_file_scaling_test.go": "b27f4677a35d0b2d964ecd12742f42209f0c7a3229126811b23745f50e72f25d",
+        "tests/integration/llvm_files_test.go": "c42a832c1b2bcd49a1c147850e73720b8d032ab20c222a40c6c0cff79badbb49",
+        "tests/integration/llvm_fixed_corpus_test.go": "4789a3084e8ba4347be2a80b357457d340e3a54904f2a6aafc7815ce544e951a",
+        "tests/integration/llvm_host_invocation_test.go": "b451cd00573ab5740cb457861511c00a68922e6ae73cca742cf84becaba29ddb",
+        "tests/integration/llvm_http_buffer_test.go": "158f143831fa69ff9e77f5c3389a641ed16092ed5039efafbbbeaa6fa48c21c1",
+        "tests/integration/llvm_http_error_input_test.go": "336d5f79d7ae4d105af9c065029d1990a3a93eccd5d5ec293b4c7a0640fc390d",
+        "tests/integration/llvm_http_oversized_test.go": "4174311e50a018a9306a590ab11752f0c5bf3243d033321e4b8754065eeaa43d",
+        "tests/integration/llvm_http_test.go": "a89f53e15c63f463cad061f4e5cd0cae1e1d772622c4cc66d64b28e11f1b7586",
+        "tests/integration/llvm_lifetime_test.go": "4b1f7facc05114f61821805f47f6dfafe13ee2a973e0dbaede61eabe5916ce9a",
+        "tests/integration/llvm_linux_checkpoint_test.go": "88ac21a4d9251852db6ff9dfdc164047e5f03371a7ab92c4dfd00c899f726e31",
+        "tests/integration/llvm_linux_numerical_test.go": "fe5e2452d765653c97d41df7f529b6de06152c0b1ee8599b0387be3fd7608811",
+        "tests/integration/llvm_linux_qualification_test.go": "36865061af0af485d1dcc4be76d2538fc6ab912e9aab54373f47332a09759844",
+        "tests/integration/llvm_literal_sequence_status_test.go": "4710d42d4f3d8ac2e44b2338815ea611ae6ef238c30f9f68c63ffe355dd89b08",
+        "tests/integration/llvm_literal_sequence_test.go": "c45578eea1ce65b3098774485957491466ad111351c6010fa2677889a7af51c5",
+        "tests/integration/llvm_location_metadata_test.go": "1d51fdaa8930832b52314a584ffdf4cd66aaad7c4b605577e26c47aadbf4c63d",
+        "tests/integration/llvm_lowering_test.go": "2ee83f20f84c165fae3d772db5d702dcfb1b93009822e3167d67afb458740226",
+        "tests/integration/llvm_metadata_helpers_test.go": "2559e3752999f1ab77cb11207797945d1dafb3ed3da56ea3d664c5531c7bc764",
+        "tests/integration/llvm_metadata_v2_test.go": "be529ecbd73409e68e7f7db281c11a7d7ddf99726855bd89ec2b28a8df2a2bd8",
+        "tests/integration/llvm_metal_build_test.go": "f35709d1effa4ada4da173471258ae9fc9502dadf808e0546a45d62eb443f9d8",
+        "tests/integration/llvm_metal_compute_test.go": "41c203ad86f068465911dc897e512843644d82c187de2e2782dc180bce8bf040",
+        "tests/integration/llvm_numerical_lifetime_test.go": "92075e0f4e29847bd9a56f896c0da7f7643d5254c460e4931ea557cfbb1ef068",
+        "tests/integration/llvm_process_cleanup_admission_test.go": "96df08b78feb6687f8128475093ea9d8f99696d96ec390eb2499e19b4c27107a",
+        "tests/integration/llvm_process_context_test.go": "5a278d50447e2c6f9c22b0c36b535d29cdd10d138dcfc1316d06eb14f4e69de5",
+        "tests/integration/llvm_process_metal_artifact_test.go": "7899968a06e679070ffc9ffb57666c7f02e7e5f4693eb767dd142e43a22f083a",
+        "tests/integration/llvm_process_test.go": "cb6c084b0c0f18fb480c0a997f8a2e2dc70008acfd422e2a3e918eaf96b8aab1",
+        "tests/integration/llvm_program_control_null_test.go": "081557e1deae43f7917537a75fc0214052d470631b75a1f67f264d19fa1c5fc3",
+        "tests/integration/llvm_program_handle_test.go": "e6f7d649cf268fe835f485eb36b9c5781c85e451924a1d188e932815499d9f9d",
+        "tests/integration/llvm_qualification_adapters_test.go": "f8a0fc70989b36b4e5cef8533f74b1afd789c5df8a4c07b670fa71c7152d3e14",
+        "tests/integration/llvm_qualification_device_test.go": "10ef6dd6b33d1bc186f0eba1293afb6c63c6d558d95054177091c572853a282e",
+        "tests/integration/llvm_qualification_effects_test.go": "cd1cb0966843ac880aff9371504553c4a5a02486a8b765b34f82ce39927036be",
+        "tests/integration/llvm_qualification_files_test.go": "239fffdc343145f282990a51e7b775cc104bf7fd665677b85bf9cd4d03f075b1",
+        "tests/integration/llvm_qualification_work_test.go": "6b55addc3b52d83d2d2676f9c12ce4f0bb6baf5f3cc506b19f49810b27f57166",
+        "tests/integration/llvm_reproducibility_test.go": "b5bd563fe1c0719f84a64ded932504cdb4b32d089b3dd76f98cb51a5284c42c0",
+        "tests/integration/llvm_runtime_metadata_test.go": "7ad43f970d932af50a2c6f1010aa01b02ab5d09b7b22c3e79ef9ceacd4864cd0",
+        "tests/integration/llvm_runtime_test.go": "26696646789eceed5499fd3e4557ea6d9810abe84ad748cf08c16fd9e6fdf07e",
+        "tests/integration/llvm_source_column_test.go": "627fcbe43e195885ef43fc52c254442f027182e0a9853c310caf80ba03dd4cc1",
+        "tests/integration/llvm_thread_admission_test.go": "8739e69118a1fdee2575359446a37e42b98d637022c2741cb7a2a8cbcb7cbd8a",
+        "tests/integration/llvm_work_budget_test.go": "461e8a4a26130be380044dd1719fc458af3211c4a0925a5b54b7afe676ea061c",
+        "tests/integration/metal_compute_test.go": "d7bbe27ad6713a4e7d27c716f876b57cb326372c96975e330f41e9e4eadc5a5d",
+        "tests/integration/metal_executor_test.go": "6ab29b61c66472d451a8ed6abede939e7d8d0d148ac9b602222ab32386ffa9a0",
+        "tests/integration/metal_live_test.go": "da6370f5f9b92ee9c98a544b782621cd0bb900c464e36e5b752324211221394d",
+        "tests/integration/metal_test.go": "f3864b60ddf681d0bf00e3b2a4bdd9c92e98cf4db41cf3918dd958713fb0b4cf",
+        "tests/integration/metal_training_test.go": "899048724515cf9aa9e123de9f00b8c040a7dc92d5d949e0eff4fd8c17813ca7",
+        "tests/integration/native_compiler_selection_test.go": "5c9b1145c051f0e0c794935cd80134892e1a2e5c3d9f798ea30043d1b2ff4421",
+        "tests/integration/native_metal_live_test.go": "a81d4f5f411409ff80ca8b70d4e8583ea0c035e500cc9d28e8e4ec6a0b30f06d",
+        "tests/integration/native_metal_test.go": "237daa2e0f7b4ab026c96f781b9ac1b6d58e2e4578c2a0248f4688df9bfdee69",
+        "tests/integration/native_paths_test.go": "174e7ba5ff220bd4607497680a16d309d6d30f508ab147faa971d50ea646bfae",
+        "tests/integration/native_test.go": "53e7f2d514bf09399b9d522e26e84abcf21f9be52fd789701df4ecd63c876ed5",
+        "tests/integration/optimizer_test.go": "97831aaaacc010feea3a884626b1303d7fa4e327531b724e61ae2968a58536c6",
+        "tests/integration/parameters_test.go": "a1eca17a8505901d9e11c2db8eaa95002590cc30a7d9d5016234539c9b96e82a",
+        "tests/integration/process_cleanup_policy_test.go": "d39d3f0ddbbfb39ac6e515c8b8fad166ccd0d56708ad8bd394120be981b59727",
+        "tests/integration/process_cleanup_test.go": "9b6e015f0a181337a05ae80b6b729bb2f3ae0378ecd58a5f08001e8a1789d1ea",
+        "tests/integration/process_context_identity_test.go": "b08fe1bd3064ce54bebbd743bd6ac3e0faf2b112f65b9d88891a3d0ff1ede00f",
+        "tests/integration/process_context_inputs_test.go": "30fbfd1a1d8d6c4f73e70ee33c2e0ce148e6c3a0997ce86c226225869de7f439",
+        "tests/integration/process_context_test.go": "6a52de7abe140487103bf5513ea760d1a8c561e32e6041147136d52c63905986",
+        "tests/integration/process_context_transport_test.go": "f400cb7d6994932af18780e650a938d6858f3ebd085ce5bf8b34064b8c3e7195",
+        "tests/integration/process_docker_cleanup_test.go": "07a0adcc56cfcd1cf00473bb6d2d37c5bb15675bf7d12e212ce36303a84c18ed",
+        "tests/integration/process_host_session_test.go": "9a51bf0cb9f7ddac76a5192497f7ff4c3ed137b463f711d23b5750362c7a0b6b",
+        "tests/integration/process_launcher_transport_test.go": "d6ebadcadf6ce45c8ce3acb439761e554b0df49f6f56f92b220dbf775089b381",
+        "tests/integration/process_package_cleanup_test.go": "c4283c14a8ac439ddcb4778ccc0e334a31b669f6db8ae3b97f5a7effcf5ea7dc",
+        "tests/integration/process_resource_only_test.go": "edc5b5f87729141347a36eabb3d1ae5c33da82c0f8ab7ec878fc0007e85107e6",
+        "tests/integration/run_test.go": "6ac8be2a9e6e6f342f4204cc4cbfbce89d480d9d6ff018c33cb7dde588a981fe",
+        "tests/integration/runtime_catalog_test.go": "ec65d12ef386520d82bd36b6ad61e3e75026f0f3da728a61e07110790832adc5",
+        "tests/integration/semantic_coverage_test.go": "49d82018357980a3c917b8183827beb0b55a3e562ec6668b4d212f51462a86ca",
+        "tests/integration/semantic_fixtures_test.go": "07dc7c3d540749bb615417027735990fb989ecbb89826025afaac953fd1b54d3",
+        "tests/integration/semantic_native_test.go": "2868a71f0d72d2d1ced76fcf71e6aae0099715b5d67e9812c45a5629f1c3c733",
+        "tests/integration/semantic_runtime_test.go": "95d95bc5d6e16a1137e8655dceb91427afb86cc7f9c4655e2e161e40325ecc2e",
+        "tests/integration/serve_test.go": "ec5abdf019065e164614cad40e5a6e27173afc989d2671d9b3278a50293c8ac3",
+        "tests/integration/tensor_budget_test.go": "1fe1fdc6d9a4ed39c0291a837d5f4f55f590e9cbe01415449a18048dae0d46fd",
+        "tests/integration/tensor_contract_test.go": "e4d944564382b07c6fa1a1d2040014732898c9f325ef1caf18a288270ad77eed",
+        "tests/integration/tensor_test.go": "7e22bb256fb6d145f38cd20ddf90c221677219450566d59d55c40b8838ad5de1",
+        "tests/integration/training_test.go": "5e18d180f4094a562ea5ed700d4f1f84087c5c441d4a81fea939b74fe4b28127",
+        "tests/integration/typed_commit_test.go": "2d66ab392519be549c3683cd1204ad480726f8698bc0c21ab8a6d5a0eb8926db",
+        "tests/integration/verifier_test.go": "da8aa86569d1b8756e39f5c7347ebc4b022bea7b0a27b880f3a399060a5a1040",
+        "tests/integration/xor_metal_live_test.go": "b7c6e5c0becf6e4c328ff5e9e960ea7b624810624b39d7cc710a5618a9e15f39",
+        "tests/integration/xor_test.go": "5e555b5e90d8a48cb6a0d0ee0e50bd6327ba62c12c8abbfd223b12273fc690e3",
+        "tools/filebench/main.go": "490383218d4825253ff798fd685506f658ad13be9783417d40c69f006baf3172",
+        "tools/filebench/main_test.go": "db1049aa15ea140781059bdf0a4b689761d07a718208d1b340cde09f6191bfff",
+        "tools/filebench/workloads.go": "06b788f3019dd7a76b5d532e3b642cfc1d4547c2d14f7e72b2037587b07e14b3",
+        "tools/loqualification/performance-runner/main.go": "3394f1af0eb5acffc0a5819f451b5946cc06a93253897f5ab38a3034d99c8bbe",
+        "tools/loqualification/performance-runner/main_test.go": "53d9e9f82e436fe0db9a35046bdeba51d94f154dd8e65292dba00290504a3bd0",
+        "tools/metalbuild/main.go": "027ac1613342b0e08c8e350e2bd9ad2d8a8c333ba43ce83647fe7c3cdf484559",
+        "tools/nativebench/main.go": "dd2867d5d597e3b391ffa6f3daf61ecc630a7fdd8b8f525ef842013480878725",
+        "tools/nativecorpus/main.go": "2689361fbec4e42a579cfff09d2d934fc21473691086b842d9ee84f93b461db2",
+        "tools/nativeruntime/generatecheckpointprint/main.go": "c8b73e324b02486aac713479a5be7a017d4be37d1efe98866d36282b86cd2a6d"
+      },
+      "overlay_replacements": [
+        "experiments/process-host-final/native_test.go",
+        "experiments/process-host/native_test.go",
+        "experiments/process-startup/native_test.go",
+        "internal/adapter/file_entries.go",
+        "internal/adapter/file_observation.go",
+        "internal/adapter/file_open_paths.go",
+        "internal/adapter/file_remove.go",
+        "internal/adapter/files.go",
+        "internal/catalog/catalog.go",
+        "internal/check/collections.go",
+        "internal/device/device.go",
+        "internal/eval/builtin.go",
+        "internal/eval/eval.go",
+        "internal/eval/list.go",
+        "internal/execution/contract.go",
+        "internal/execution/flow_progress.go",
+        "internal/execution/session.go",
+        "internal/inspect/expression.go",
+        "internal/llvmemit/emit.go",
+        "internal/nativeplan/lower.go",
+        "internal/nativeplan/lower_integration_test.go",
+        "internal/nativeplan/metadata_projection_test.go",
+        "internal/nativeplan/metadata_test.go",
+        "internal/nativeplan/plan.go",
+        "internal/runner/command.go",
+        "internal/runtimeops/arithmetic.go",
+        "internal/runtimeops/builtin.go",
+        "internal/runtimeops/control.go",
+        "internal/runtimeops/file_observations.go",
+        "internal/runtimeops/runtime.go",
+        "internal/value/error.go",
+        "internal/value/file.go",
+        "internal/value/file_observation.go",
+        "internal/value/resources.go",
+        "internal/value/tensor.go",
+        "internal/value/value.go",
+        "tests/benchmark/native_test.go",
+        "tests/benchmark/training_test.go",
+        "tests/integration/adapter_http_composition_test.go",
+        "tests/integration/adapter_process_completion_test.go",
+        "tests/integration/adapter_receipts_test.go",
+        "tests/integration/adapter_test.go",
+        "tests/integration/autodiff_contract_test.go",
+        "tests/integration/catalog_test.go",
+        "tests/integration/checkpoint_failure_test.go",
+        "tests/integration/eval_test.go",
+        "tests/integration/f025_file_observation_test.go",
+        "tests/integration/file_capacity_test.go",
+        "tests/integration/file_failures_test.go",
+        "tests/integration/file_language_test.go",
+        "tests/integration/llvm_lifetime_test.go",
+        "tests/integration/llvm_lowering_test.go",
+        "tests/integration/llvm_metadata_helpers_test.go",
+        "tests/integration/llvm_metadata_v2_test.go",
+        "tests/integration/llvm_numerical_lifetime_test.go",
+        "tests/integration/llvm_qualification_files_test.go",
+        "tests/integration/llvm_runtime_test.go",
+        "tests/integration/native_compiler_selection_test.go",
+        "tests/integration/native_paths_test.go",
+        "tests/integration/native_test.go",
+        "tests/integration/process_resource_only_test.go",
+        "tests/integration/run_test.go",
+        "tests/integration/runtime_catalog_test.go",
+        "tests/integration/tensor_budget_test.go",
+        "tools/filebench/main.go",
+        "tools/filebench/main_test.go",
+        "tools/filebench/workloads.go",
+        "tools/nativebench/main.go"
+      ],
+      "overlay_deletions": [
+        "internal/eval/worklist.go",
+        "internal/execution/ownership.go",
+        "internal/execution/worklist_progress.go",
+        "internal/value/file_leases.go",
+        "internal/value/reachable.go",
+        "tests/integration/execution_policy_test.go",
+        "tests/integration/file_observation_lifetime_test.go",
+        "tests/integration/llvm_file_observation_cleanup_test.go",
+        "tests/integration/llvm_linux_worklist_test.go",
+        "tests/integration/llvm_worklist_test.go",
+        "tests/integration/worklist_test.go"
+      ],
+      "overlay_json_sha256": "43f4b84641bb52526414826efd85ece96b186f70e547b12ef51f968d67315119",
+      "compiler": "_scratch/traversal-performance-XBB8/baseline/lo",
+      "build_flags": [
+        "-overlay=/Users/tyemirov/Development/Research/Lo/_scratch/traversal-performance-XBB8/baseline-overlay/overlay.json"
+      ],
+      "compiled_source_contract": "All tracked Go source plus go.mod and go.sum are exact HEAD bytes; additional untracked Go files are hidden by overlay.",
+      "compiler_sha256": "a98b7bab7306b11e3b4e97c6e30d9b651aae3a01fb5474fa197204bc291ba1a2",
+      "runner_source_sha256": "fe4046d9f79d822d495066a9c1243598e646a9ce85b4837dda8b2f4e7d8bdf08",
+      "runner_sha256": "87f734ab8793ad098b8416d8310e467ce5174c4963ecd41df7ffa3ad88aa6c16",
+      "runner": "_scratch/traversal-performance-XBB8/baseline/runner"
+    },
+    "native": {
+      "abi": "lo-native-2",
+      "manifest": "_scratch/traversal-performance-XBB8/baseline-distribution/toolchain.json",
+      "manifest_sha256": "a652ec00a49fe0720de2451f0bb15992622c5e2168fa695a9a8f4530fdcdb23e",
+      "runtime_source_sha256": "81c618c0c48207bce58de5baa5d07b7a5343c7e66cd8ee937dd0c63e3a74bbac",
+      "runtime_archives": {
+        "darwin/arm64": "3567c06020783c6d6e857e0b66be8183b5b3f142864b7aecef9f7aec8fa56e81",
+        "linux/arm64": "d2cb3eb8ca56edfe3331e5a2729e4f9b42b9710444910e60edd0f3d0c916bdac"
+      },
+      "exact_git_head_native_sources": true,
+      "exact_git_head_process_sources": true
+    }
+  },
+  "current_native": {
+    "abi": "lo-native-3",
+    "manifest": "_scratch/traversal-performance-XBB8/native-state/distribution/toolchain.json",
+    "manifest_sha256": "90a598325774fadb99e874a2e358e1e52e8047a9967ebc83e90319217a348ed7",
+    "runtime_source_sha256": "91512e075473ba26853e99189c1822b5ec6dd47089171cdf9bd38e0d45bfd122",
+    "runtime_archives": {
+      "darwin/arm64": "68f4a9ac348078cd830914a84546312e4e869dc9c92d51fd4c6cbc218e3afbf1",
+      "linux/arm64": "72e52379e157388d97b93c8993d7f1096ee6feb77f623edd38ab2c03358215fe"
+    }
+  },
+  "current_production_source_sha256": {
+    "experiments/process-host-final/native_test.go": "273f2ceb2cabb7514121fd755820616a2bc0fb9af6db001d9eb4a06b5377c3cf",
+    "experiments/process-host/native_test.go": "fe755449de79dc46fd5a32da690df381af4a4c3bf979611e62280ff9b44e3d5e",
+    "experiments/process-startup/native_test.go": "a05b7bf0c30423ce26ba34991a1e423975573bd0fdb2efcc236549ced70e3d7f",
+    "internal/adapter/file_entries.go": "668f7e4f24ef02ee1246d625e0d75f31d9680354907409842fcd3c3c2cbc5a65",
+    "internal/adapter/file_observation.go": "2e144951bf9522eda3b353bc0c02c9e9e1304ec8b973569bd1cf369092a9b4b4",
+    "internal/adapter/file_open_paths.go": "b8d19fb25850f04724cd3e02ff928f80578df206c72440d4d24c41c2ec6791ed",
+    "internal/adapter/file_remove.go": "fb90d0bfbb8a3da21ffa3b0dbf53e70f9ab172d4677139faabba65ed0c63b947",
+    "internal/adapter/files.go": "743ba1ba8be3ca9af3d0e07f3280a5bc8e029f99ab86c9c8fc0ed8cb5c494cf9",
+    "internal/catalog/catalog.go": "cc6db7a3e884ff2c73bd89d5ae88f8085046d5c6ad3bff360d642feaa53f4111",
+    "internal/check/collections.go": "7acbe2b2447d3269bf0ad89f50fc76cdba448ee33d7a85b8f847d71ad1e5e1ef",
+    "internal/device/device.go": "3b1c3f06e9752115a8c4b90c8d5310fd56a7eeed5ed6f36f2a0641c08b26898c",
+    "internal/eval/builtin.go": "5ebab476bfbac741ad81e4cb1be2d02f0b32a230c9d948f2dec756acbe62144b",
+    "internal/eval/eval.go": "a533c50383b339c92900b9f732787ffa0884df12892fd20f5bab3f0e95c322d7",
+    "internal/eval/list.go": "2aaaccdd8b095ba7e17e8e1232e1c21ea4ef7a9617a3c7c62e583f24fa9177d7",
+    "internal/eval/worklist.go": "284b75f53b7ee20343cb1058926639933ff72f3c06e925a2f01e32c492fd1b14",
+    "internal/execution/contract.go": "9ec3d3db7b798cc67c0b318677e1ba552c33eadc1a53e7b8ba892600c216a307",
+    "internal/execution/flow_progress.go": "0c2d5aa51d0e764f01633c5b5c54f472a1084cd30bc805012516eb1ab085bbcb",
+    "internal/execution/ownership.go": "c97a60d539ec3f5b9cb6cb4703219e29c9039ab4a22c94ce9b2cd69d993ab363",
+    "internal/execution/session.go": "a038107c00c9aeb0b52d780ac7eaae1ceed0a1dc58bb9da424a4ade211108d4c",
+    "internal/execution/worklist_progress.go": "0725d95f687a59971d8e063a48a10ef96b641dd3264c21f213fde4e5833efa3c",
+    "internal/inspect/expression.go": "bb8471543c446ff3ce447d775ce2816245f64de2e24be2d3da0ea5395efb96c2",
+    "internal/llvmemit/emit.go": "377ae99dd621e64ecbb07050fc43025bb87a50d6b643480a5047c9e9b6a65518",
+    "internal/nativeplan/lower.go": "4ba0e6a1c6842af937a0098ee8bf0cac7b030cc7a6492599abcea5d29d567792",
+    "internal/nativeplan/lower_integration_test.go": "4446dc6cebc096a6577d9eb2cba6914e9aae58b0c3fe3945488841da6a851593",
+    "internal/nativeplan/metadata_projection_test.go": "8ba2e65e3e5872dac56adbefee1b4768ea48c9301f57527e7fbc4b84e8ad7b13",
+    "internal/nativeplan/metadata_test.go": "2c77a5022c0567fcf044428de2c2892db86beb3375019eda765e1d0ad9bc0c67",
+    "internal/nativeplan/plan.go": "bbed9c9bfad4473b73695b3076e2b6f2e42c3be9c5e551ae514a93829adb2163",
+    "internal/runner/command.go": "9c7e167d244f1e9ad77e73c8dd59da6de359aec2be0be05439a8d04a521f3c80",
+    "internal/runtimeops/arithmetic.go": "750585a1e886188a700eff47d2fad07fcd138e27f9e9203ab9cfe3cd01f4fd7c",
+    "internal/runtimeops/builtin.go": "27adf3b55933197f064d11ec3ac1820ad7b900e80d79124c6b7d9cc490e2b040",
+    "internal/runtimeops/control.go": "56f20373d156def7c008f3f2ae9126a3fed11557d393c810f5f3b40f1e68a7ef",
+    "internal/runtimeops/file_observations.go": "a3ebf36b50ea9248498e50327d6e84fb17d233320bac49767db828c208771f6a",
+    "internal/runtimeops/runtime.go": "29c0c94bce4bfd0d0c652f13aaf1bda6f1f46e9aed4f4e7ec2081349481a8dd5",
+    "internal/value/error.go": "93cd825194fbf1f4f6f6288729c3941bd641f687e5c2b9b9af03535b79bd07e3",
+    "internal/value/file.go": "63da4e451a70bd148d13e5f3bedfc8edc48da382e517dc910c77842f449b41db",
+    "internal/value/file_leases.go": "96c4115fa0e2374c603a2400dae1aedf92752273c2a5d068650b2d91645c925f",
+    "internal/value/file_observation.go": "ea459743a4d66abd256bebfaea2d6a7d21e61f47b2348570f9f2ba4c5d2efeae",
+    "internal/value/reachable.go": "c27cae86b84e7311f70a9b870eeebfb7c2d4fad4969e11da98896fce65288ba7",
+    "internal/value/resources.go": "0056bd4d52acd2bd106b6180cd45e6adb0d1dfca1d5e787ec85daf21c6e9fcdd",
+    "internal/value/tensor.go": "b0c9adea403531dd4e695833628f322ebb86bc2b205d95b64b515c7c8f2740e1",
+    "internal/value/value.go": "ca8bf29fcefc9b159530a5c3ec6899f5b3e6ada238ab2226983c5ba719d9a0ba",
+    "runtime/native/include/lo_context_options.h": "07227fb44c0782aad0d650c7d2f57a229610d315e6737ed859bec879f6b09d21",
+    "runtime/native/src/adapters.rs": "5d629978edf903c1fd9bdee4f3e63190e255e070891140aaca9fe7b9a2d582e4",
+    "runtime/native/src/checkpoint.rs": "2e836e31b51c972de0997a937efdc75bc62000b59e21745e8bc61c9ca11cfc36",
+    "runtime/native/src/cli.rs": "27735fa8c0cedbcb815b192eab194c6b671f02703b7fa74992d50ea120e89bc9",
+    "runtime/native/src/collections.rs": "db4f1326a844f5e610f5bcdd92e5b616549aa4289ebf698e74de2a5966a95f46",
+    "runtime/native/src/context.rs": "20aa08232ea7b0e0e36ee3d14dcc52403c02dfb6b9cce2a5899fa2d77549bfaf",
+    "runtime/native/src/exports.rs": "af3e5d4844d00ecec7058af370394ad4c8fd3c521edcde0e439c3a3686a806bc",
+    "runtime/native/src/file_entries.rs": "63dd609d88a11114fa5eb8229f5afac2c715398e66348c746841f360704a3e70",
+    "runtime/native/src/file_leases.rs": "d9d630fb60a2906439081dc5d23a1828d4f9db2156b1ef91d040ce9e532023b7",
+    "runtime/native/src/file_probe.rs": "f3bf5ec7698510ca8fc712786fa9a2cf104d8d80a548da68ce80f97e8553e7e7",
+    "runtime/native/src/files.rs": "20f0b573dfd48f849621deb998f3dbd036274b9a2bd214ac77cbb5f3e1463c83",
+    "runtime/native/src/generated_operations.rs": "5134d7627aaffa0cf1404da9551c9699fc0bec307a84308a7e9d8a3a9e285f3a",
+    "runtime/native/src/lib.rs": "77ffdfbf4376eb4dd6746e3f7ef9753d35d201833049a295b821dc4f276a904f",
+    "runtime/native/src/operations.rs": "1838f1989d83bddaeef575ef163f41539af64996117e95b7334e60933d69b09f",
+    "runtime/native/src/resources.rs": "c64eae48a1b4f35c65ba416d2b07a1f89922cd7a4bbfa4797b3bd039c66dfab9",
+    "runtime/native/src/tensor.rs": "c8d542dd26e9f4420bac8e77cd35cee9b4f76d8f8e44a3e24fd4fbe126d7af06",
+    "runtime/native/src/training.rs": "e17a0a6bb1405adc8a3d4e5a581186fff0f0da2c3327985c116dae0537ad4081",
+    "runtime/native/src/value.rs": "496ee98761f2cd93e057776de79df85c77533247b33a14257bde801a38793d2f",
+    "runtime/native/src/value_resources.rs": "d28bfd0ee78b9eefe1b5d03108dd957b8015ff2dfd3385d5e96aa99d306c44e5",
+    "testdata/native-qualification/collection-arguments.c": "c415cda26d267be6573530676c2f61e01e001ba881707f9066ff4c4a666f0c70",
+    "testdata/native-qualification/device-immutable.c": "79d932d4a6704addbe8abff5ca44db73ff61e2e8e73e391f06cb30d1160f8ee1",
+    "testdata/native-qualification/file-failures.c": "8f8c1ed37a6d9a3b2d77cb4d6c744dbde2d6ed635538f3c8af57736c8dd354bf",
+    "testdata/native-qualification/literal-sequence-status.c": "a104d8ed8c98fb6acf8a6061559facc36a50fb7d762c5f6d0c60bd76a736cbb8",
+    "testdata/native-qualification/literal-sequence.c": "e6d40803e436df2d82dadecbe71fd23c6b6879021e7c098433fd38b340444dd0",
+    "testdata/native-qualification/metadata-v2.c": "926d2e076339a3d1496080ab3b34e048cc4454231d1f68db591da695997137b2",
+    "testdata/native-qualification/process-lifecycle.c": "20b7fbcfee202a6935d40caefb6d115f802e2380bcb0bc5a2a9240cb5ca3a66d",
+    "testdata/native-qualification/process-result.c": "a3752180e94f0a9091c1c45791c0a5d473fad011c2b55a180ba9e09ed9be2396",
+    "testdata/native-qualification/program-control-null.c": "deef3cf13944c23cac1e1f637fbcc93432665690eb39463b6652882d2b252fea",
+    "testdata/native-qualification/program-sessions.c": "d6cd65ed501055475f427779d093b9970b9297e5dcfd3c1efb08633c60891747",
+    "testdata/native-qualification/thread-admission.c": "c131247fbf5f78440c8a5841207b35114e11170f1d2e121167bcb5ca5c4b623a",
+    "testdata/native-runtime/files-observation-cleanup.c": "726b584e9df2791df5434921b36b94fdabc0853cfad706ee2f48e78cd9f086f5",
+    "testdata/native-runtime/host-invocation-input.c": "888fda7b3053655252611717587da0cb27462957c0a658239490d339d2293d4f",
+    "testdata/native-runtime/lifetime.c": "c2b2576f2bf4e82d9c96cb49db3f0dca80257a081188f69afbff9353d4cb3f57",
+    "testdata/native-runtime/numerical.c": "994da46ec67d5f9083b70895c2e0b722ba5459030c89d095a3b9814298969882",
+    "testdata/native-runtime/process-context-input.c": "d58c2b08fa2ae3a3c1679cea337ddc1328117171bd3a9563fa9ed8965121ff91",
+    "testdata/native-runtime/process-driver.c": "0a55287d2463d2b479f34ff01153348d98132405aed5603a5bd20521e79d7bac",
+    "testdata/native-runtime/resource-policy.c": "84f1c860cb0777e9dabd415bd8a5aaf9ec430ac3b7d4e48d106170852b21422f",
+    "tests/benchmark/native_test.go": "e692a55892ca20a894965a5aeb0add9c47134aeaff2c410634e8fe581eb4a98e",
+    "tests/benchmark/training_test.go": "b4326c2dfa2fa6a359425a55bd9fc12d828ebf3ba426191ecfc1bdf3eb8d45ee",
+    "tests/integration/adapter_http_composition_test.go": "9be70aeeb8221a528ee274ad7800933b664315503db44ca87b37b70baa528427",
+    "tests/integration/adapter_process_completion_test.go": "d4ecf1c4986885e906e74e3f3f118f3d35a4a86dab7b40fc3400f658572e9e24",
+    "tests/integration/adapter_receipts_test.go": "ff1f00a262e6f01994d98a172d3dcc4f59fd4f563a9c2529cf8b44592a21d1f2",
+    "tests/integration/adapter_test.go": "1fad94ac32ae40a60bcf43cb7256784957896dec7c21aa290e0a539883e58a82",
+    "tests/integration/autodiff_contract_test.go": "53ae4c6e189b4c4f6a2f730b141a3de9313200d9ebf865fd068ecb08d1c66137",
+    "tests/integration/catalog_test.go": "17a315c9d3d34306decf5aa6e3a54c62a33c6427ee8ffe88de14cd38ffe45c90",
+    "tests/integration/checkpoint_failure_test.go": "f84b921461a5a028eb7bb00f52c48b7952b6268bfd3cc0cd0d1313e1f0cbff9f",
+    "tests/integration/eval_test.go": "99db8e3560f4f0d4914d2ab7b76b4402f0fec19c8444427aa863596a228295bf",
+    "tests/integration/execution_policy_test.go": "daee2baed5f19cf26f2d9179e55e1ec7595a8e96232e944e5635d6e0cbebb5f0",
+    "tests/integration/f025_file_observation_test.go": "866a255ad30c8256cdcbc88d0773b1ee76cd521733ba0e51e2ea736ba0a14fa8",
+    "tests/integration/file_capacity_test.go": "e7677945e0b3ccb3ac213787ed0f2ee015c06936debcc5e30ce074664b51d6a4",
+    "tests/integration/file_failures_test.go": "d49d4a7aa399543aa0b39f7b77744d7c0e6265451d8957db60cfec8819a5d878",
+    "tests/integration/file_language_test.go": "249feeed8389a383467317853d2aa150321b1834d8139846f211d59977164ce2",
+    "tests/integration/file_observation_lifetime_test.go": "5880b83d252a89e87ab0caa1a82ddc0872955a11f6d2749a880b92cb6d9b812c",
+    "tests/integration/llvm_file_observation_cleanup_test.go": "fb3a720549b63637797c999c6aa6fdcb0dd0e0c7eae0e0202b0f4b33955a6fd0",
+    "tests/integration/llvm_lifetime_test.go": "17155ade103f32759d1d0fb85887480160a877c5ef4222c59016bb9bf898fdcd",
+    "tests/integration/llvm_linux_worklist_test.go": "9a9c7002ea72f1b20aad2c6f212973c1780b921c952b4cefe58b60318f04c6be",
+    "tests/integration/llvm_lowering_test.go": "4f3b2db918f0e22dee20cbf2e9569f60b41dbd46be4d24dddc26b60fefd1643d",
+    "tests/integration/llvm_metadata_helpers_test.go": "5b19bb12981bae3ba2d274d3dce9a7d0bade2c43b92709b00c6d4306d1924133",
+    "tests/integration/llvm_metadata_v2_test.go": "468e73969fba69a60248ee7ddbdd169df4c9771d67cb9d1f9b43174568976fdd",
+    "tests/integration/llvm_numerical_lifetime_test.go": "5c0d8ce6ccee0a6d21b0b7a840389a8968bfef6bb153bda6dae20741030f0627",
+    "tests/integration/llvm_qualification_files_test.go": "9a4d989bff96ddea11e5ccd131a70e48a8c5625a237f98056a0160c9fb38ea9d",
+    "tests/integration/llvm_runtime_test.go": "77eb4ee27dc2263b2ab616bbae55669507898d637961b29758f5096feca1adb8",
+    "tests/integration/llvm_worklist_test.go": "503a8b87b9ca526f7a8f85d00818dc0909ef8080fc6fdfc12f3c68827d1e7e22",
+    "tests/integration/native_compiler_selection_test.go": "a3cbc922fbee3b3190696b3bacb3414921f7ef2bde28128d5f17680637f480c1",
+    "tests/integration/native_paths_test.go": "387a0eb8374054ac28f87fc9bb04cbd30e24fbaa731d6df8f59197dfdac36cac",
+    "tests/integration/native_test.go": "287e3ee390c75047d68320efe359aa56d073f81d64d4440a79b2822a7209f9f9",
+    "tests/integration/process_resource_only_test.go": "97826ed8b7cb284054b995c81859e1f2496d4d3b2c0efa1b2195f1b2994a5bdb",
+    "tests/integration/run_test.go": "02e41dc17c199f018fca3a4524550e31d73444fd1fe3e7d4309f744c758943c7",
+    "tests/integration/runtime_catalog_test.go": "cd6d0a69c75748db812a536155c715c8687dbeca9360ffa0a34466a4bf8d6e74",
+    "tests/integration/tensor_budget_test.go": "6d0d1f79d9dc80e49000950930a2aba5fe407362f60244b2d95fffa53bfd1669",
+    "tests/integration/worklist_test.go": "bd7092def334befd8fcdee478a04adb27e396c69c2fbd04387fde66b64553628",
+    "tools/filebench/main.go": "edff25a323a88c42f853b12130a967adcb35f37c6a707b154b9c95f95787148c",
+    "tools/filebench/main_test.go": "a11811fd0a79e3f61d8c08d1616997964b451c284efc646f49e19d5428b90593",
+    "tools/filebench/workloads.go": "5fd6272e15b37579ad5c97534c25e15a78150053b7618af6f2bfe79f6cd84eb9",
+    "tools/lodistribution/package.py": "1b8670719d4e73264248a737032dc7eb6fc5d1aa9c744346a6fef5f7571aad42",
+    "tools/loqualification/performance.py": "193d2743878c4d932a630170b73757b5df5b1d20b5a59eccccad2c24997b9e4a",
+    "tools/nativebench/main.go": "83edb3e3d8c2846ba56ca4641ae907a6e3d50008579d11d128490942e5905b27",
+    "tools/nativebench/test_harness.py": "946aefcde9e2fcba45a7766eda516ee1a947a9fd0831dafe06a7592ee0165a4c",
+    "tools/nativelowering/run.py": "fa29b88e6ca8201b4e37b9db0981419fcfa009827cfb8971e46f5d98820a8ee9",
+    "tools/nativelowering/runtime.c": "7499e025005ccb8475a7d794323bc6af680b10e3aa291b1accc1a30a01b60293",
+    "tools/nativeruntime/build.py": "09d343fd7d2befff589e6f69dc1cd5cb095d3e9599186c3467dac99dc0601d64"
+  },
+  "binaries_sha256": {
+    "baseline/lo": "a98b7bab7306b11e3b4e97c6e30d9b651aae3a01fb5474fa197204bc291ba1a2",
+    "baseline/runner": "87f734ab8793ad098b8416d8310e467ce5174c4963ecd41df7ffa3ad88aa6c16",
+    "current-lo": "cb21782ceb5129755ad3d870f8566a9b269efe2fe4026ed0e04aa86064d513e0",
+    "current-runner": "14f2919f19114255cef190620a5570b16731fa6f64240d6ab64c63b68b0c787d",
+    "filebench": "96b6f8aaa376256f93c12df415b0f8e00368dd5a08b20c1ae86aef19ce2e8ba4"
+  },
+  "timing_environment": {
+    "arch": "arm64",
+    "go": "go1.27.3",
+    "logical_cpus": "18",
+    "os": "darwin"
+  },
+  "independent_review": {
+    "result": {
+      "scope": "performance_report_factual_review",
+      "production_edits": false,
+      "checks": {
+        "collection_sample_count": 828,
+        "paired_file_sample_count": 108,
+        "tree_sample_count": 54,
+        "collection_medians_and_ratios": "match_raw_samples_to_published_rounding",
+        "alias_fold_medians_and_ratios": "match_raw_samples_to_published_rounding",
+        "worklist_go_allocation_table": "match_raw_samples_to_published_rounding",
+        "paired_file_medians": "match_raw_samples_to_published_rounding",
+        "baseline_compiler_and_runner_sha256": "verified",
+        "baseline_runner_shared_source_sha256": "verified_against_current_helper_source",
+        "baseline_and_current_native_toolchain_sha256": "verified",
+        "baseline_and_current_native_archive_sha256": "verified",
+        "collection_tree_and_paired_file_source_sha256": "verified",
+        "excluded_broad_campaign": "excluded_from_file_comparison",
+        "broad_baseline_worker_counters": "explicitly_excluded_from_before_current_allocation_comparison",
+        "native_scope_cleanup_complexity": "repeated_complete_identity_walk_supported_by_source",
+        "tree_maximum": "513_directories_4096_files_4608_observed_entries"
+      },
+      "substantive_findings": [],
+      "recommended_clarifications": [
+        {
+          "location": "Comparison",
+          "change": "same_execution_budget_to_same_execution_step_budget",
+          "reason": "resource_policy_differs_by_design"
+        },
+        {
+          "location": "Growable_Worklists",
+          "change": "explicitly_label_allocation_table_as_interpreter_helper_measurements",
+          "reason": "native_worklist_allocator_counts_were_not_collected"
+        }
+      ],
+      "methodological_limits": [
+        "file_timing_three_samples_per_cell",
+        "warm_uncontrolled_filesystem_cache",
+        "native_process_startup_and_first_launch_retained",
+        "tree_has_current_only_measurements",
+        "scope_cleanup_scaling_inference_is_bounded_to_measured_sizes_and_supported_source"
+      ],
+      "conclusion": "reported_regressions_are_supported_no_performance_acceptance_claim_is_supported"
+    },
+    "clarifications_applied": [
+      "same execution step budget; different default resource policies",
+      "worklist allocation table identifies interpreter counters"
+    ]
+  },
+  "collection_sample_count": 828,
+  "file_sample_count": 108,
+  "discarded_file_baseline_sample_count": 200,
+  "tree_sample_count": 54,
+  "collection_summary": [
+    {
+      "case": "unfold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 0.836,
+        "p95_sample_ms": 1.290875,
+        "median_allocation_requests": 17297,
+        "median_allocation_bytes": 761216
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 1.639375,
+        "p95_sample_ms": 2.398334,
+        "median_allocation_requests": 26610,
+        "median_allocation_bytes": 1536728
+      },
+      "current_to_before_ratio": 1.9609748803827753
+    },
+    {
+      "case": "unfold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 7.807375,
+        "p95_sample_ms": 124.189459
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 8.66675,
+        "p95_sample_ms": 124.538333
+      },
+      "current_to_before_ratio": 1.1100722073680334
+    },
+    {
+      "case": "map",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 1.480417,
+        "p95_sample_ms": 1.70175,
+        "median_allocation_requests": 30110,
+        "median_allocation_bytes": 1270024
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 2.464625,
+        "p95_sample_ms": 3.079333,
+        "median_allocation_requests": 44604,
+        "median_allocation_bytes": 2605864
+      },
+      "current_to_before_ratio": 1.6648180884169796
+    },
+    {
+      "case": "map",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 8.690958,
+        "p95_sample_ms": 119.102875
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 8.894791,
+        "p95_sample_ms": 142.263041
+      },
+      "current_to_before_ratio": 1.023453455879087
+    },
+    {
+      "case": "filter",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 1.056334,
+        "p95_sample_ms": 1.403375,
+        "median_allocation_requests": 27040,
+        "median_allocation_bytes": 1169512
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 2.139292,
+        "p95_sample_ms": 2.604625,
+        "median_allocation_requests": 42041,
+        "median_allocation_bytes": 2427048
+      },
+      "current_to_before_ratio": 2.0252041494451567
+    },
+    {
+      "case": "filter",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 9.066458,
+        "p95_sample_ms": 120.812583
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 8.230625,
+        "p95_sample_ms": 121.414833
+      },
+      "current_to_before_ratio": 0.9078104150485227
+    },
+    {
+      "case": "list-fold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 1.462916,
+        "p95_sample_ms": 2.342083,
+        "median_allocation_requests": 27528,
+        "median_allocation_bytes": 1228040
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 2.502667,
+        "p95_sample_ms": 3.710084,
+        "median_allocation_requests": 42995,
+        "median_allocation_bytes": 2455496
+      },
+      "current_to_before_ratio": 1.7107386890293086
+    },
+    {
+      "case": "list-fold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 8.457917,
+        "p95_sample_ms": 126.932125
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 10.046542,
+        "p95_sample_ms": 122.614708
+      },
+      "current_to_before_ratio": 1.1878269791486487
+    },
+    {
+      "case": "flow-fold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 1.533583,
+        "p95_sample_ms": 2.136916,
+        "median_allocation_requests": 36250,
+        "median_allocation_bytes": 1736960
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 3.075125,
+        "p95_sample_ms": 3.662167,
+        "median_allocation_requests": 51721,
+        "median_allocation_bytes": 2997056
+      },
+      "current_to_before_ratio": 2.0051898071379246
+    },
+    {
+      "case": "flow-fold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 9.314541,
+        "p95_sample_ms": 121.641667
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 12.337542,
+        "p95_sample_ms": 132.27475
+      },
+      "current_to_before_ratio": 1.3245464269253846
+    },
+    {
+      "case": "unfold",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 2.788625,
+        "p95_sample_ms": 3.48275,
+        "median_allocation_requests": 67984,
+        "median_allocation_bytes": 2916896
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 6.431125,
+        "p95_sample_ms": 7.791166,
+        "median_allocation_requests": 105012,
+        "median_allocation_bytes": 6009424
+      },
+      "current_to_before_ratio": 2.306199291765655
+    },
+    {
+      "case": "unfold",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 9.419583,
+        "p95_sample_ms": 142.653792
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 13.493916,
+        "p95_sample_ms": 131.909083
+      },
+      "current_to_before_ratio": 1.4325385741598118
+    },
+    {
+      "case": "map",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 5.27625,
+        "p95_sample_ms": 6.052625,
+        "median_allocation_requests": 119216,
+        "median_allocation_bytes": 4974256
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 11.970625,
+        "p95_sample_ms": 13.316125,
+        "median_allocation_requests": 176845,
+        "median_allocation_bytes": 10291632
+      },
+      "current_to_before_ratio": 2.2687751717602462
+    },
+    {
+      "case": "map",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 11.531292,
+        "p95_sample_ms": 128.472958
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 16.679292,
+        "p95_sample_ms": 134.847292
+      },
+      "current_to_before_ratio": 1.4464373983418337
+    },
+    {
+      "case": "filter",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 4.574292,
+        "p95_sample_ms": 5.219208,
+        "median_allocation_requests": 106926,
+        "median_allocation_bytes": 4645008
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 11.621375,
+        "p95_sample_ms": 12.715292,
+        "median_allocation_requests": 166578,
+        "median_allocation_bytes": 9737096
+      },
+      "current_to_before_ratio": 2.5405844226822425
+    },
+    {
+      "case": "filter",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 20.928041,
+        "p95_sample_ms": 129.486042
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 23.060417,
+        "p95_sample_ms": 157.567459
+      },
+      "current_to_before_ratio": 1.1018908554317148
+    },
+    {
+      "case": "list-fold",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 3.563917,
+        "p95_sample_ms": 4.857833,
+        "median_allocation_requests": 108948,
+        "median_allocation_bytes": 4786088
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 8.199,
+        "p95_sample_ms": 10.8185,
+        "median_allocation_requests": 170554,
+        "median_allocation_bytes": 9679088
+      },
+      "current_to_before_ratio": 2.300558626926497
+    },
+    {
+      "case": "list-fold",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 17.719459,
+        "p95_sample_ms": 191.225375
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 24.466958,
+        "p95_sample_ms": 183.184292
+      },
+      "current_to_before_ratio": 1.3807959938280283
+    },
+    {
+      "case": "flow-fold",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 4.45625,
+        "p95_sample_ms": 6.884,
+        "median_allocation_requests": 143786,
+        "median_allocation_bytes": 6823416
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 8.682209,
+        "p95_sample_ms": 10.967791,
+        "median_allocation_requests": 205385,
+        "median_allocation_bytes": 11843544
+      },
+      "current_to_before_ratio": 1.9483217952314167
+    },
+    {
+      "case": "flow-fold",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 17.31975,
+        "p95_sample_ms": 165.758375
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 25.340209,
+        "p95_sample_ms": 153.680417
+      },
+      "current_to_before_ratio": 1.463081684204449
+    },
+    {
+      "case": "unfold",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 8.061208,
+        "p95_sample_ms": 10.993917,
+        "median_allocation_requests": 270758,
+        "median_allocation_bytes": 11620144
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 19.748666,
+        "p95_sample_ms": 29.91425,
+        "median_allocation_requests": 418563,
+        "median_allocation_bytes": 23944944
+      },
+      "current_to_before_ratio": 2.4498395277730087
+    },
+    {
+      "case": "unfold",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 22.018792,
+        "p95_sample_ms": 143.536167
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 31.245125,
+        "p95_sample_ms": 149.519708
+      },
+      "current_to_before_ratio": 1.4190208527334287
+    },
+    {
+      "case": "map",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 17.341292,
+        "p95_sample_ms": 19.572833,
+        "median_allocation_requests": 475575,
+        "median_allocation_bytes": 19900416
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 40.995292,
+        "p95_sample_ms": 48.013042,
+        "median_allocation_requests": 705680,
+        "median_allocation_bytes": 41152352
+      },
+      "current_to_before_ratio": 2.3640275476590786
+    },
+    {
+      "case": "map",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 18.568958,
+        "p95_sample_ms": 136.729
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 33.396792,
+        "p95_sample_ms": 166.494875
+      },
+      "current_to_before_ratio": 1.7985280595712478
+    },
+    {
+      "case": "filter",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 19.28825,
+        "p95_sample_ms": 21.40625,
+        "median_allocation_requests": 426426,
+        "median_allocation_bytes": 18591360
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 39.214708,
+        "p95_sample_ms": 46.656625,
+        "median_allocation_requests": 664661,
+        "median_allocation_bytes": 39252016
+      },
+      "current_to_before_ratio": 2.033087916218423
+    },
+    {
+      "case": "filter",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 14.098417,
+        "p95_sample_ms": 126.26775
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 27.310958,
+        "p95_sample_ms": 148.872583
+      },
+      "current_to_before_ratio": 1.9371648604236915
+    },
+    {
+      "case": "list-fold",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 13.860833,
+        "p95_sample_ms": 14.456542,
+        "median_allocation_requests": 434591,
+        "median_allocation_bytes": 19087152
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 30.881833,
+        "p95_sample_ms": 37.318458,
+        "median_allocation_requests": 680708,
+        "median_allocation_bytes": 38626288
+      },
+      "current_to_before_ratio": 2.227992574472256
+    },
+    {
+      "case": "list-fold",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 19.486166,
+        "p95_sample_ms": 132.196958
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 29.872667,
+        "p95_sample_ms": 146.632625
+      },
+      "current_to_before_ratio": 1.5330192198916912
+    },
+    {
+      "case": "flow-fold",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 18.2615,
+        "p95_sample_ms": 23.222875,
+        "median_allocation_requests": 573867,
+        "median_allocation_bytes": 27212632
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 32.266958,
+        "p95_sample_ms": 40.131542,
+        "median_allocation_requests": 819989,
+        "median_allocation_bytes": 47275008
+      },
+      "current_to_before_ratio": 1.7669390794841606
+    },
+    {
+      "case": "flow-fold",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 19.610208,
+        "p95_sample_ms": 272.143167
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 34.777375,
+        "p95_sample_ms": 148.769
+      },
+      "current_to_before_ratio": 1.773432234885015
+    },
+    {
+      "case": "alias-fold",
+      "size": 128,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 0.333875,
+        "p95_sample_ms": 0.768792,
+        "median_allocation_requests": 5901,
+        "median_allocation_bytes": 310536
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 0.522,
+        "p95_sample_ms": 0.72125,
+        "median_allocation_requests": 8803,
+        "median_allocation_bytes": 542744
+      },
+      "current_to_before_ratio": 1.5634593785099216
+    },
+    {
+      "case": "alias-fold",
+      "size": 128,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 6.326417,
+        "p95_sample_ms": 131.289833
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 7.475375,
+        "p95_sample_ms": 10.408625
+      },
+      "current_to_before_ratio": 1.1816127517360933
+    },
+    {
+      "case": "alias-fold",
+      "size": 256,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 0.437584,
+        "p95_sample_ms": 0.630417,
+        "median_allocation_requests": 11410,
+        "median_allocation_bytes": 575128
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 0.918375,
+        "p95_sample_ms": 1.20175,
+        "median_allocation_requests": 17135,
+        "median_allocation_bytes": 1037384
+      },
+      "current_to_before_ratio": 2.0987398990822337
+    },
+    {
+      "case": "alias-fold",
+      "size": 256,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 6.579334,
+        "p95_sample_ms": 111.370083
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 10.096583,
+        "p95_sample_ms": 10.638833
+      },
+      "current_to_before_ratio": 1.53459043118954
+    },
+    {
+      "case": "alias-fold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 0.81975,
+        "p95_sample_ms": 1.196167,
+        "median_allocation_requests": 22420,
+        "median_allocation_bytes": 1102648
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 1.676125,
+        "p95_sample_ms": 2.448667,
+        "median_allocation_requests": 33783,
+        "median_allocation_bytes": 2021688
+      },
+      "current_to_before_ratio": 2.0446782555657212
+    },
+    {
+      "case": "alias-fold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 8.101209,
+        "p95_sample_ms": 119.297416
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 23.883875,
+        "p95_sample_ms": 29.655083
+      },
+      "current_to_before_ratio": 2.948186499076866
+    },
+    {
+      "case": "alias-fold",
+      "size": 1024,
+      "backend": "go",
+      "before": {
+        "samples": 9,
+        "median_ms": 1.488208,
+        "p95_sample_ms": 1.705542,
+        "median_allocation_requests": 44434,
+        "median_allocation_bytes": 2178216
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 2.990958,
+        "p95_sample_ms": 3.821208,
+        "median_allocation_requests": 67098,
+        "median_allocation_bytes": 4017232
+      },
+      "current_to_before_ratio": 2.009771483556062
+    },
+    {
+      "case": "alias-fold",
+      "size": 1024,
+      "backend": "native",
+      "before": {
+        "samples": 9,
+        "median_ms": 8.882833,
+        "p95_sample_ms": 123.600709
+      },
+      "current": {
+        "samples": 9,
+        "median_ms": 90.996083,
+        "p95_sample_ms": 113.59225
+      },
+      "current_to_before_ratio": 10.24403847286108
+    },
+    {
+      "case": "worklist-wide",
+      "size": 512,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 3.09,
+        "p95_sample_ms": 4.069834,
+        "median_allocation_requests": 68188,
+        "median_allocation_bytes": 3847592
+      }
+    },
+    {
+      "case": "worklist-wide",
+      "size": 512,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 9.393667,
+        "p95_sample_ms": 125.490041
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 512,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 3.284292,
+        "p95_sample_ms": 3.807583,
+        "median_allocation_requests": 70580,
+        "median_allocation_bytes": 3277304
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 512,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 8.558542,
+        "p95_sample_ms": 149.704
+      }
+    },
+    {
+      "case": "worklist-wide",
+      "size": 2048,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 11.631542,
+        "p95_sample_ms": 12.61375,
+        "median_allocation_requests": 271054,
+        "median_allocation_bytes": 15220960
+      }
+    },
+    {
+      "case": "worklist-wide",
+      "size": 2048,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 17.557125,
+        "p95_sample_ms": 135.00625
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 2048,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 12.37425,
+        "p95_sample_ms": 14.31,
+        "median_allocation_requests": 281008,
+        "median_allocation_bytes": 12935400
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 2048,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 18.118083,
+        "p95_sample_ms": 130.072875
+      }
+    },
+    {
+      "case": "worklist-wide",
+      "size": 8192,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 54.20375,
+        "p95_sample_ms": 79.71425,
+        "median_allocation_requests": 1082465,
+        "median_allocation_bytes": 60755912
+      }
+    },
+    {
+      "case": "worklist-wide",
+      "size": 8192,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 42.3275,
+        "p95_sample_ms": 155.2215
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 8192,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 44.291834,
+        "p95_sample_ms": 45.545458,
+        "median_allocation_requests": 1122742,
+        "median_allocation_bytes": 51572808
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 8192,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 43.628125,
+        "p95_sample_ms": 163.8725
+      }
+    },
+    {
+      "case": "worklist-wide",
+      "size": 32768,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 233.937166,
+        "p95_sample_ms": 285.37675,
+        "median_allocation_requests": 4328059,
+        "median_allocation_bytes": 243531992
+      }
+    },
+    {
+      "case": "worklist-wide",
+      "size": 32768,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 165.955583,
+        "p95_sample_ms": 289.789084
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 32768,
+      "backend": "go",
+      "current": {
+        "samples": 9,
+        "median_ms": 191.742125,
+        "p95_sample_ms": 211.710625,
+        "median_allocation_requests": 4489663,
+        "median_allocation_bytes": 206119608
+      }
+    },
+    {
+      "case": "worklist-chain",
+      "size": 32768,
+      "backend": "native",
+      "current": {
+        "samples": 9,
+        "median_ms": 139.747792,
+        "p95_sample_ms": 276.343084
+      }
+    }
+  ],
+  "file_summary": [
+    {
+      "case": "startup",
+      "size": 1,
+      "backend": "interpreter",
+      "before_ms": 24.704584,
+      "current_ms": 15.824917,
+      "current_to_before_ratio": 0.6405660180313094
+    },
+    {
+      "case": "startup",
+      "size": 1,
+      "backend": "native",
+      "before_ms": 15.023375,
+      "current_ms": 14.858625,
+      "current_to_before_ratio": 0.9890337557306531
+    },
+    {
+      "case": "list",
+      "size": 5000,
+      "backend": "interpreter",
+      "before_ms": 71.132541,
+      "current_ms": 73.430583,
+      "current_to_before_ratio": 1.0323064798149133
+    },
+    {
+      "case": "list",
+      "size": 5000,
+      "backend": "native",
+      "before_ms": 132.723417,
+      "current_ms": 125.939792,
+      "current_to_before_ratio": 0.9488890118011352
+    },
+    {
+      "case": "scan",
+      "size": 5000,
+      "backend": "interpreter",
+      "before_ms": 61.737792,
+      "current_ms": 66.661625,
+      "current_to_before_ratio": 1.0797539536237384
+    },
+    {
+      "case": "scan",
+      "size": 5000,
+      "backend": "native",
+      "before_ms": 125.675292,
+      "current_ms": 112.101541,
+      "current_to_before_ratio": 0.891993479513857
+    },
+    {
+      "case": "remove",
+      "size": 1000,
+      "backend": "interpreter",
+      "before_ms": 256.687083,
+      "current_ms": 288.066833,
+      "current_to_before_ratio": 1.1222490420369147
+    },
+    {
+      "case": "remove",
+      "size": 1000,
+      "backend": "native",
+      "before_ms": 207.015041,
+      "current_ms": 145.092,
+      "current_to_before_ratio": 0.7008766092508226
+    },
+    {
+      "case": "checked-remove",
+      "size": 1000,
+      "backend": "interpreter",
+      "before_ms": 222.037417,
+      "current_ms": 232.668084,
+      "current_to_before_ratio": 1.0478778178184265
+    },
+    {
+      "case": "checked-remove",
+      "size": 1000,
+      "backend": "native",
+      "before_ms": 224.46575,
+      "current_ms": 191.906917,
+      "current_to_before_ratio": 0.854949661585342
+    },
+    {
+      "case": "read",
+      "size": 1048576,
+      "backend": "interpreter",
+      "before_ms": 23.194666,
+      "current_ms": 26.339084,
+      "current_to_before_ratio": 1.1355664272121875
+    },
+    {
+      "case": "read",
+      "size": 1048576,
+      "backend": "native",
+      "before_ms": 11.796375,
+      "current_ms": 15.367625,
+      "current_to_before_ratio": 1.3027413082408792
+    },
+    {
+      "case": "write",
+      "size": 1048576,
+      "backend": "interpreter",
+      "before_ms": 20.179084,
+      "current_ms": 27.631833,
+      "current_to_before_ratio": 1.3693303918056936
+    },
+    {
+      "case": "write",
+      "size": 1048576,
+      "backend": "native",
+      "before_ms": 12.166959,
+      "current_ms": 14.24975,
+      "current_to_before_ratio": 1.171184188259367
+    },
+    {
+      "case": "append",
+      "size": 1048576,
+      "backend": "interpreter",
+      "before_ms": 13.367667,
+      "current_ms": 13.534917,
+      "current_to_before_ratio": 1.0125115324910472
+    },
+    {
+      "case": "append",
+      "size": 1048576,
+      "backend": "native",
+      "before_ms": 20.412917,
+      "current_ms": 15.560834,
+      "current_to_before_ratio": 0.7623033004053267
+    },
+    {
+      "case": "append-many",
+      "size": 1000,
+      "backend": "interpreter",
+      "before_ms": 80.655209,
+      "current_ms": 108.949583,
+      "current_to_before_ratio": 1.3508065300531302
+    },
+    {
+      "case": "append-many",
+      "size": 1000,
+      "backend": "native",
+      "before_ms": 104.148083,
+      "current_ms": 91.745542,
+      "current_to_before_ratio": 0.8809143611409536
+    }
+  ],
+  "tree_summary": [
+    {
+      "directories": 33,
+      "files": 256,
+      "entries_observed": 288,
+      "backend": "go",
+      "samples": 9,
+      "median_ms": 8.85825,
+      "p95_sample_ms": 15.809792,
+      "median_allocation_requests": 32523,
+      "median_allocation_bytes": 2290336
+    },
+    {
+      "directories": 33,
+      "files": 256,
+      "entries_observed": 288,
+      "backend": "native",
+      "samples": 9,
+      "median_ms": 17.838875,
+      "p95_sample_ms": 135.230458
+    },
+    {
+      "directories": 129,
+      "files": 1024,
+      "entries_observed": 1152,
+      "backend": "go",
+      "samples": 9,
+      "median_ms": 35.314666,
+      "p95_sample_ms": 47.683875,
+      "median_allocation_requests": 127291,
+      "median_allocation_bytes": 8937600
+    },
+    {
+      "directories": 129,
+      "files": 1024,
+      "entries_observed": 1152,
+      "backend": "native",
+      "samples": 9,
+      "median_ms": 45.749208,
+      "p95_sample_ms": 180.855708
+    },
+    {
+      "directories": 513,
+      "files": 4096,
+      "entries_observed": 4608,
+      "backend": "go",
+      "samples": 9,
+      "median_ms": 157.317792,
+      "p95_sample_ms": 207.867834,
+      "median_allocation_requests": 506078,
+      "median_allocation_bytes": 35528344
+    },
+    {
+      "directories": 513,
+      "files": 4096,
+      "entries_observed": 4608,
+      "backend": "native",
+      "samples": 9,
+      "median_ms": 154.5335,
+      "p95_sample_ms": 312.461875
+    }
+  ],
+  "language_review": {
+    "reference_issue": 9,
+    "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "scope": {
+      "docs/dynamic-traversal-performance.md": "complete new document",
+      "docs/file-io-performance.md": "new study link only"
+    },
+    "part_1_review": "changed descriptive prose, procedures, sentence and paragraph limits",
+    "part_2_review": "changed general vocabulary and repository technical terms",
+    "mechanical_findings": [],
+    "new_findings": 0,
+    "unchanged_prose_reviewed": false
+  },
+  "correctness_validation_reference": "docs/evidence/dynamic-traversal.json",
+  "archive": {
+    "path": "docs/evidence/dynamic-traversal-performance.json.gz",
+    "sha256": "2f493886aaa5b658c09e7a1bdcb556f2047fb853948623b8ba20deea2b48183f",
+    "uncompressed_bytes": 1122279,
+    "compressed_bytes": 238444
+  },
+  "limitations": [
+    "local Darwin ARM64 timings",
+    "warm uncontrolled filesystem cache",
+    "three samples per file cell; paired rounds change phase order; initial broad campaign discarded after fixture ENOSPC",
+    "file allocation workers use current source in both phases and are excluded from before/current allocation comparisons",
+    "native process samples include startup and runtime admission",
+    "Go CPU profiles include forced GC outside timed execution",
+    "no hosted CI or Linux host throughput claim"
+  ]
+}

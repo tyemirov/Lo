@@ -16,7 +16,7 @@ bin/lo build program.lo --emit llvm --target darwin/arm64 --output program.ll --
 The other supported target is `linux/arm64`.
 The command uses the checked Lo graph without Go source generation.
 It does not invoke Go, LLVM, a linker, or an SDK.
-Its receipt identifies the output as an LLVM module with the `lo-native-2` ABI.
+Its receipt identifies the output as an LLVM module with the `lo-native-3` ABI.
 Runtime definitions are necessary before the module can become an executable.
 
 Executable builds now use LLVM and the precompiled native runtime.
@@ -95,11 +95,14 @@ The flow remains active in the depth count while its handler executes.
 Terminal host failures do not invoke Lo handlers.
 Every completed path must release its temporary owned references.
 
-The runtime owns list iteration and sequential fold behavior.
+The runtime owns list iteration, sequential folds, and dynamic worklists.
 It must charge each iteration before callback entry.
 It must keep callback order, error traces, completed-prefix receipts, and state publication.
 It must retain emitted unfold values and release temporary storage at the current scope boundaries.
 These obligations apply even when the emitter uses one runtime call for the processor.
+For `Flow.worklist`, the runtime visits newly supplied items before the remaining items.
+The runtime keeps the supplied item order and the last completed state.
+The [execution policy](../specification.md#89-dynamic-worklists-and-host-resource-quotas) controls resource admission.
 
 Integer literals keep their full decimal representation.
 Float literals keep their exact binary64 representation.

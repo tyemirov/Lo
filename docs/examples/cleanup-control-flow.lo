@@ -1,0 +1,69 @@
+flow EmptyStrings() -> List<String> {
+    return List.new()
+}
+
+flow FlattenStrings(part: List<String>) -> List<String> {
+    return part
+}
+
+flow AddLabel(labels: List<String>, label: String) -> List<String> {
+    return List.flat_map(List.new(labels, List.new(label)), FlattenStrings)
+}
+
+flow ApplyArgument(enabled: Bool, argument: String) -> Bool! {
+    return Match.new(argument, "--apply": true, _: Error.new("Control.InvalidArguments", "Expected --apply", Record.new()))
+}
+
+flow Tasks() -> List<Record{kind: String, label: String, enabled: Bool, lines: List<String>}> {
+    return List.new(
+        Record.new(kind: "write", label: "first", enabled: true, lines: List.new("first-1\n", "first-2\n")),
+        Record.new(kind: "write", label: "unselected", enabled: false, lines: List.new("UNSELECTED\n")),
+        Record.new(kind: "fail", label: "broken", enabled: true, lines: List.new("broken-before-error\n")),
+        Record.new(kind: "write", label: "second", enabled: true, lines: List.new("second-1\n", "second-2\n"))
+    )
+}
+
+flow Selected(apply: Bool, task: Record{kind: String, label: String, enabled: Bool, lines: List<String>}) -> Bool {
+    return Match.new(apply, true: task.enabled, _: false)
+}
+
+flow AppendEvent(path: File.Path, count: Int, line: String) -> Int! {
+    target = File.Append.new(path, UTF8.Bytes.new(line))
+    commit target
+    return Math.add(count, 1)
+}
+
+flow Perform(path: File.Path, task: Record{kind: String, label: String, enabled: Bool, lines: List<String>}) -> Int! {
+    lines = Match.new(task.kind, "write": task.lines, "fail": task.lines, _: EmptyStrings())
+    written = Flow.fold(lines, 0, path, AppendEvent)
+    return Match.new(task.kind,
+        "fail": Error.new("Control.ExpectedFailure", "Fixture category failed", Record.new()),
+        _: 1)
+}
+
+flow TaskError(error: Error) -> Record{completed: Int, failed: Bool, error_kind: String} {
+    return Record.new(completed: 0, failed: true, error_kind: error.kind)
+}
+
+flow Attempt(path: File.Path, task: Record{kind: String, label: String, enabled: Bool, lines: List<String>}) -> Record{completed: Int, failed: Bool, error_kind: String} onError TaskError {
+    completed = Perform(path, task)
+    return Record.new(completed: completed, failed: false, error_kind: "none")
+}
+
+flow Step(path: File.Path, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}, task: Record{kind: String, label: String, enabled: Bool, lines: List<String>}) -> Record{completed: Int, failures: List<String>, last_error: String, token: String}! {
+    outcome = Attempt(path, task)
+    failures = Match.new(outcome.failed, true: AddLabel(state.failures, task.label), _: state.failures)
+    last_error = Match.new(outcome.failed, true: outcome.error_kind, _: state.last_error)
+    return Record.new(completed: Math.add(state.completed, outcome.completed), failures: failures, last_error: last_error, token: state.token)
+}
+
+flow Main() -> Record{apply: Bool, selected_count: Int, completed: Int, failures: List<String>, last_error: String, token: String}! {
+    invocation = Host.Invocation.current()
+    apply = List.fold(invocation.arguments, false, ApplyArgument)
+    selected = List.filter(Tasks(), apply, Selected)
+    initial = Record.new(completed: 10, failures: List.new("earlier"), last_error: "none", token: "retained")
+    state = Flow.fold(selected, initial, File.Path.new("cleanup-control-events.log"), Step)
+    return Record.new(apply: apply, selected_count: List.length(selected), completed: state.completed, failures: state.failures, last_error: state.last_error, token: state.token)
+}
+
+return Main()
