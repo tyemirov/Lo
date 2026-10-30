@@ -26,8 +26,11 @@ func TestRemovalGuardAllocations(t *testing.T) {
 	guarded := must(NewCheckedRemovalEffect(session, entries, "Guard", []Value{nested, captured}))
 	wrapped := must(Success(must(types.NewFallible(types.FileRemove())), guarded))
 	contained := must(NewList(must(types.NewList(wrapped.Type())), []Value{wrapped, wrapped}))
+	progress := WithFlowProgress(must(NewError("test", "retained progress", must(NewRecord(nil)))), nested)
+	failed := must(Failure(must(types.NewFallible(types.Int())), progress))
+	failedList := must(NewList(must(types.NewList(failed.Type())), []Value{failed}))
 
-	for _, input := range []Value{guarded, wrapped, contained} {
+	for _, input := range []Value{guarded, wrapped, contained, failed, failedList} {
 		allocations := Allocations(input)
 		if len(allocations) != 1 || allocations[0] != data.Storage().Allocation() {
 			t.Fatalf("%s guard allocations = %v, want captured allocation once", input.Type(), allocations)
