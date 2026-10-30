@@ -1,3 +1,5 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef struct Program Program;
@@ -6,7 +8,7 @@ typedef struct Value Value;
 typedef struct { U32 status, code; const Value *value; } Result;
 extern const Program *lo_program_new(void);
 extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *, U64);
+extern Context *lo_context_from_program(const Program *, const ContextOptions *);
 extern void lo_context_free(Context *), lo_context_run(Context *, Result *);
 extern void lo_context_cancel_after_polls(Context *, U64);
 extern U64 lo_context_remaining_steps(const Context *), lo_context_scope_count(const Context *), lo_context_depth(const Context *);
@@ -87,7 +89,7 @@ static int session(U64 budget, U64 cancel_poll) {
     calls=owned=released=steps=charges=literal_count=closed=failed=error=0;
     list=0; for (unsigned index=0;index<3;++index) literals[index]=0;
     const Program *program=lo_program_new(); if (!program) return 11;
-    Context *context=lo_context_from_program(program,budget); if (!context) return 12;
+    Context *context=lo_context_from_program(program,LO_OPTIONS(budget)); if (!context) return 12;
     if (cancel_poll) lo_context_cancel_after_polls(context,cancel_poll);
     Result result={99,99,0}; lo_context_run(context,&result);
     U64 expected_steps=LO_CASE ? 2+LO_CASE : cancel_poll && cancel_poll<=5 ? cancel_poll-1 : budget<5 ? budget : 5;

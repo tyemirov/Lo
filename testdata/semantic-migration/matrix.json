@@ -648,6 +648,34 @@
     {
       "activation_errors": null,
       "capability": "",
+      "errors": null,
+      "operation": "Flow.worklist",
+      "positive": [
+        "TestRunBuiltinCatalog/Flow.worklist",
+        "TestWorklistDynamicDiscovery",
+        "TestWorklistEmptyAndEarlyStop",
+        "TestWorklistGrowableQueue",
+        "TestWorklistPendingTensorLifetime",
+        "TestWorklistOrderedActivation",
+        "TestWorklistInspection",
+        "TestFileObservationDynamicDirectoryTraversal"
+      ],
+      "boundary": "positive:compiler_cli_and_cli_interpreter_and_native;negative:compiler_cli;runtime_negative:cli_and_injected_cancellation",
+      "negative": [
+        "TestSemanticBuiltinRejections/Flow.worklist",
+        "TestWorklistStaticContracts"
+      ],
+      "runtime_negative": [
+        "TestWorklistFailureProgress",
+        "TestWorklistSuccessorAdmissionProgress",
+        "TestWorklistCancellationProgress"
+      ],
+      "negative_applicability": "verifier_and_callback",
+      "oracle": "literal_assertions:catalog=1;dfs=1,11,12,2,21;growable=12001;tensors=33;early_stop_state=3;ordered_activation;confirmed_failure_state"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
       "errors": [
         "Gradient.SchemaMismatch",
         "Numeric.NonFinite",
@@ -2841,6 +2869,67 @@
       "boundary": "cli_interpreter_and_native"
     },
     {
+      "id": "--max-value-bytes",
+      "tests": [
+        "TestExecutionPolicyOptions/--max-value-bytes",
+        "TestExecutionPolicyConfiguredLimits/value"
+      ],
+      "oracle": "zero_unlimited;limit1_rejects_Int;invalid_duplicate_and_nonexecution_options_rejected",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--max-live-bytes",
+      "tests": [
+        "TestExecutionPolicyOptions/--max-live-bytes",
+        "TestExecutionPolicyConfiguredLimits/live",
+        "TestExecutionPolicyLiveReads",
+        "TestExecutionPolicyRetainedData",
+        "TestWorklistSuccessorAdmissionProgress"
+      ],
+      "oracle": "512_reads_of128KiB_succeed_under4MiB_live;retained_state_and8MiB_successor_rejected;confirmed_completed_state_preserved",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--max-data-bytes",
+      "tests": [
+        "TestExecutionPolicyOptions/--max-data-bytes",
+        "TestExecutionPolicyLiveReads",
+        "TestExecutionPolicyScalarIdentity"
+      ],
+      "oracle": "default_unlimited_data_allows64MiB_total_reads;explicit1MiB_cumulative_quota_rejects;zero_unlimited;invalid_and_duplicate_options_rejected;distinct_scalar_productions_charged_once_each;aliases_not_recharged",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--max-list-items",
+      "tests": [
+        "TestExecutionPolicyOptions/--max-list-items",
+        "TestExecutionPolicyConfiguredLimits/list",
+        "TestExecutionPolicyNestedListItems"
+      ],
+      "oracle": "limit1_rejects_two_items_in_top_level_fallible_nominal_and_inherited_values;zero_unlimited",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--max-file-entries",
+      "tests": [
+        "TestExecutionPolicyOptions/--max-file-entries",
+        "TestExecutionPolicyFileQuotas/entries"
+      ],
+      "oracle": "two_entries:quota1=runtime.limit;quota2=2;quota0=2;invalid_and_duplicate_options_rejected",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--max-file-directories",
+      "tests": [
+        "TestExecutionPolicyOptions/--max-file-directories",
+        "TestExecutionPolicyFileQuotas/directories",
+        "TestFileObservationScopeLifetime",
+        "TestFileObservationDirectoryCapacity"
+      ],
+      "oracle": "two_live_observations:quota1=runtime.limit;quota2=2;quota0=2;default128_live_cap;160_sequential_observations_succeed",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
       "id": "--listen",
       "tests": [
         "TestServeHTTP",
@@ -3159,9 +3248,14 @@
         "TestRunResourceLimits",
         "TestRunExpandedValueLimit",
         "TestTensorLimits",
-        "TestSemanticMigrationFailurePreventsEffects"
+        "TestSemanticMigrationFailurePreventsEffects",
+        "TestExecutionPolicyLiveReads",
+        "TestExecutionPolicyRetainedData",
+        "TestExecutionPolicyNestedListItems",
+        "TestExecutionPolicyLogicalWeightOverflow",
+        "TestExecutionPolicyFileQuotas"
       ],
-      "oracle": "limit_diagnostic;no_stdout;later_file_absent",
+      "oracle": "limit_diagnostic;no_stdout;later_file_absent;configured_value_live_data_list_and_file_quotas;logical_weight_overflow_rejected",
       "boundary": "cli_interpreter_and_native"
     },
     {
@@ -4675,6 +4769,102 @@
     "TestHostInvocationCanonicalTransport/invalid-utf8": [
       "TestLLVMHostInvocationInjectedInputs/invalid-utf8",
       "TestLLVMLinuxHostInvocationInjectedInputs/invalid-utf8"
+    ],
+    "TestExecutionPolicyConfiguredLimits/list": [
+      "TestExecutionPolicyConfiguredLimits/list"
+    ],
+    "TestExecutionPolicyConfiguredLimits/live": [
+      "TestExecutionPolicyConfiguredLimits/live"
+    ],
+    "TestExecutionPolicyConfiguredLimits/value": [
+      "TestExecutionPolicyConfiguredLimits/value"
+    ],
+    "TestExecutionPolicyFileQuotas": [
+      "TestExecutionPolicyFileQuotas"
+    ],
+    "TestExecutionPolicyFileQuotas/directories": [
+      "TestExecutionPolicyFileQuotas/directories"
+    ],
+    "TestExecutionPolicyFileQuotas/entries": [
+      "TestExecutionPolicyFileQuotas/entries"
+    ],
+    "TestExecutionPolicyLiveReads": [
+      "TestExecutionPolicyLiveReads"
+    ],
+    "TestExecutionPolicyLogicalWeightOverflow": [
+      "TestExecutionPolicyLogicalWeightOverflow"
+    ],
+    "TestExecutionPolicyNestedListItems": [
+      "TestExecutionPolicyNestedListItems"
+    ],
+    "TestExecutionPolicyOptions/--max-data-bytes": [
+      "TestExecutionPolicyOptions/--max-data-bytes"
+    ],
+    "TestExecutionPolicyOptions/--max-file-directories": [
+      "TestExecutionPolicyOptions/--max-file-directories"
+    ],
+    "TestExecutionPolicyOptions/--max-file-entries": [
+      "TestExecutionPolicyOptions/--max-file-entries"
+    ],
+    "TestExecutionPolicyOptions/--max-list-items": [
+      "TestExecutionPolicyOptions/--max-list-items"
+    ],
+    "TestExecutionPolicyOptions/--max-live-bytes": [
+      "TestExecutionPolicyOptions/--max-live-bytes"
+    ],
+    "TestExecutionPolicyOptions/--max-value-bytes": [
+      "TestExecutionPolicyOptions/--max-value-bytes"
+    ],
+    "TestExecutionPolicyRetainedData": [
+      "TestExecutionPolicyRetainedData"
+    ],
+    "TestFileObservationDirectoryCapacity": [
+      "TestFileObservationDirectoryCapacity"
+    ],
+    "TestFileObservationDynamicDirectoryTraversal": [
+      "TestFileObservationDynamicDirectoryTraversal"
+    ],
+    "TestFileObservationScopeLifetime": [
+      "TestFileObservationScopeLifetime"
+    ],
+    "TestRunBuiltinCatalog/Flow.worklist": [
+      "TestRunBuiltinCatalog/Flow.worklist"
+    ],
+    "TestSemanticBuiltinRejections/Flow.worklist": [
+      "TestSemanticBuiltinRejections/Flow.worklist"
+    ],
+    "TestWorklistCancellationProgress": [
+      "TestLLVMWorklistCancellationProgress"
+    ],
+    "TestWorklistDynamicDiscovery": [
+      "TestWorklistDynamicDiscovery"
+    ],
+    "TestWorklistEmptyAndEarlyStop": [
+      "TestWorklistEmptyAndEarlyStop"
+    ],
+    "TestWorklistFailureProgress": [
+      "TestWorklistFailureProgress"
+    ],
+    "TestWorklistGrowableQueue": [
+      "TestWorklistGrowableQueue"
+    ],
+    "TestWorklistInspection": [
+      "TestWorklistInspection"
+    ],
+    "TestWorklistOrderedActivation": [
+      "TestWorklistOrderedActivation"
+    ],
+    "TestWorklistPendingTensorLifetime": [
+      "TestWorklistPendingTensorLifetime"
+    ],
+    "TestWorklistStaticContracts": [
+      "TestWorklistStaticContracts"
+    ],
+    "TestWorklistSuccessorAdmissionProgress": [
+      "TestWorklistSuccessorAdmissionProgress"
+    ],
+    "TestExecutionPolicyScalarIdentity": [
+      "TestExecutionPolicyScalarIdentity"
     ]
   }
 }

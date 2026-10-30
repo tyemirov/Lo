@@ -1,3 +1,5 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef struct Program Program;
@@ -6,7 +8,7 @@ typedef struct Value Value;
 typedef struct { U32 status; U32 code; const Value *value; } ResultSlot;
 extern const Program *lo_program_new(void);
 extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *, U64);
+extern Context *lo_context_from_program(const Program *, const ContextOptions *);
 extern void lo_context_free(Context *);
 extern void lo_context_run(Context *, ResultSlot *);
 extern void lo_context_cancel(Context *);
@@ -24,7 +26,7 @@ static int run(Context *context, U32 status) {
 }
 int main(void) {
  if (lo_runtime_live_programs() || lo_runtime_live_contexts() || lo_runtime_live_values()) return 1;
- if (lo_context_from_program(0, 100000)) return 2;
+ if (lo_context_from_program(0,LO_OPTIONS(100000))) return 2;
  lo_program_free(0);
  for (unsigned iteration = 0; iteration < 64; iteration++) {
   const Program *program = lo_program_new();
@@ -32,10 +34,10 @@ int main(void) {
    if (program || lo_runtime_live_programs()) return 3;
    continue;
   }
-  if (!program || lo_runtime_live_programs() != 1 || lo_context_from_program(program, 0)) return 4;
-  Context *cancelled = lo_context_from_program(program, 100000);
-  Context *first = lo_context_from_program(program, 100000);
-  Context *limited = lo_context_from_program(program, 1);
+  if (!program || lo_runtime_live_programs() != 1 || lo_context_from_program(program,LO_OPTIONS(0))) return 4;
+  Context *cancelled = lo_context_from_program(program,LO_OPTIONS(100000));
+  Context *first = lo_context_from_program(program,LO_OPTIONS(100000));
+  Context *limited = lo_context_from_program(program,LO_OPTIONS(1));
   if (!cancelled || !first || !limited || lo_runtime_live_contexts() != 3) return 5;
   lo_context_cancel(cancelled);
   if (!run(cancelled, 2) || !run(first, 0) || !run(limited, 2)) return 6;
@@ -43,7 +45,7 @@ int main(void) {
   if (remaining >= 100000 || lo_context_remaining_steps(cancelled) != 100000) return 7;
   lo_context_free(cancelled);
   lo_context_free(limited);
-  Context *second = lo_context_from_program(program, 100000);
+  Context *second = lo_context_from_program(program,LO_OPTIONS(100000));
   if (!second) return 8;
   lo_program_free(program);
   if (lo_runtime_live_programs() != 1 || !run(second, 0) || lo_context_remaining_steps(second) != remaining) return 9;

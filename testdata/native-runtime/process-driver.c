@@ -1,3 +1,5 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
@@ -7,7 +9,7 @@ typedef struct {U32 status,code;const Value *value;} ResultSlot;
 typedef struct {int stage,class_id,started,cleanup_complete,termination_kind,termination_value;Size stdin_written,stdout_size,stderr_size;unsigned int cleanup_failures;Size ownership;} NativeResult;
 typedef int (*Cancel)(const void *);
 typedef void (*Driver)(Size,const unsigned char*,Size,const unsigned char*,Size,unsigned char*,unsigned char*,Size,Cancel,const void*,U64,NativeResult*);
-extern Context *lo_context_new(U64);
+extern Context *lo_context_new(const ContextOptions *);
 extern void lo_context_run(Context*,ResultSlot*);
 extern void lo_context_free(Context*);
 extern void lo_value_release(const Value*);
@@ -46,7 +48,7 @@ static void execute(Size token,const unsigned char*frame,Size frame_size,const u
  if(LO_CASE==7){r->stage=1;r->class_id=2;r->termination_kind=0;}
 }
 int main(void){
- Context *context=lo_context_new(100000);if(!context)return 10;
+ Context *context=lo_context_new(LO_OPTIONS(100000));if(!context)return 10;
  if(!lo_context_process_driver(context,execute,0))return 11;
  if(!lo_context_process_driver_limits(context,20,20,1024))return 12;
  ResultSlot result={0,0,0};lo_context_run(context,&result);

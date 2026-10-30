@@ -1,3 +1,5 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
@@ -7,7 +9,7 @@ typedef struct Value Value;
 typedef struct {U32 status,code;const Value *value;} Result;
 extern const Program *lo_program_new(void);
 extern void lo_program_free(const Program*);
-extern Context *lo_context_from_program(const Program*,U64);
+extern Context *lo_context_from_program(const Program*,const ContextOptions *);
 extern void lo_context_free(Context*),lo_context_run(Context*,Result*),lo_context_cancel_after_polls(Context*,U64);
 extern U64 lo_context_scope_count(const Context*),lo_context_depth(const Context*),lo_context_tape_count(const Context*),lo_context_remaining_steps(const Context*),lo_context_resource_bytes(const Context*,U32),lo_context_peak_resource_bytes(const Context*,U32);
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void),lo_runtime_live_storages(void),lo_runtime_live_storage_bytes(void);
@@ -18,7 +20,7 @@ int main(void){
  const Program *program=lo_program_new();if(!program)return 10;
  U64 admitted=lo_runtime_live_values(),used=0,peak=0;
  for(unsigned iteration=0;iteration<32;++iteration){
-  Context *context=lo_context_from_program(program,10000000);if(!context)return 11;
+  Context *context=lo_context_from_program(program,LO_OPTIONS(10000000));if(!context)return 11;
   if(LO_CASE==3)lo_context_cancel_after_polls(context,128);
   Result result={99,99,0};lo_context_run(context,&result);
   U32 expected=LO_CASE==2?1:LO_CASE==3?2:0;

@@ -1,3 +1,5 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef struct Program Program;
@@ -7,7 +9,7 @@ typedef struct { U32 status, code; const Value *value; } Result;
 #define ABI(name) void name(Context *context, const Value *const *arguments, U64 count, U64 site, Result *out)
 extern const Program *lo_program_new(void);
 extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *, U64);
+extern Context *lo_context_from_program(const Program *, const ContextOptions *);
 extern void lo_context_free(Context *);
 extern ABI(lo_entry);
 extern ABI(lo_scope_enter);
@@ -74,7 +76,7 @@ void lo_literal_sequence_scope_leave(Context *context,const Value *value,U64 sit
 static int session(unsigned boundary,unsigned selected_mode){
  calls=owned=released=closed=invalid=error=failed=retains=null_releases=0;target=boundary;mode=selected_mode;
  const Program *program=lo_program_new();if(!program)return 10;
- Context *context=lo_context_from_program(program,100);if(!context)return 11;
+ Context *context=lo_context_from_program(program,LO_OPTIONS(100));if(!context)return 11;
  Result result={0,0,0};lo_entry(context,0,0,0,&result);
  unsigned rejects=mode<=2 || mode==4;
  unsigned null_fault=mode==6 && (kinds[target-1]==3 || kinds[target-1]==5);
