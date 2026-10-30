@@ -1503,3 +1503,14 @@ pub unsafe extern "C" fn lo_op_File_2ERemove_2Echecked(
 ) {
     call(c, a, n, s, o, Some("File.Remove.checked"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Flow_2Eworklist(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Flow.worklist"))
+}

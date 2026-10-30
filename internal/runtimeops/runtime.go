@@ -43,14 +43,16 @@ func Integer(n *big.Int) (value.Value, error) {
 	}
 	return value.NewInt(n)
 }
-func List(t types.List, items []value.Value) (value.Value, error) {
-	if len(items) > execution.MaxItems {
+func List(session execution.Session, t types.List, items []value.Value) (value.Value, error) {
+	if limit := session.Limits().ListItems; limit != 0 && uint64(len(items)) > limit {
 		return nil, execution.Limit("list elements")
 	}
 	return value.NewList(t, items)
 }
-func (m *machine) integer(n *big.Int) (value.Value, error)                     { return Integer(n) }
-func (m *machine) list(t types.List, items []value.Value) (value.Value, error) { return List(t, items) }
+func (m *machine) integer(n *big.Int) (value.Value, error) { return Integer(n) }
+func (m *machine) list(t types.List, items []value.Value) (value.Value, error) {
+	return List(m.Session, t, items)
+}
 func must[T any](v T, err error) T {
 	if err != nil {
 		panic(err)

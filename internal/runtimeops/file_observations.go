@@ -41,7 +41,7 @@ func FileObservation(session execution.Session, call Call, args []value.Value, f
 // FileRemoveChecked captures the resolved predicate and contexts without invoking it.
 func FileRemoveChecked(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
 	entries := args[0].(value.List)
-	if entries.Len() > execution.MaxFileEntries {
+	if limit := session.Limits().FileEntries; limit != 0 && uint64(entries.Len()) > limit {
 		return nil, execution.Limit("file removal entries")
 	}
 	flow := flows[len(args)-1]

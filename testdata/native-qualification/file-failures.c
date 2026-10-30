@@ -71,8 +71,8 @@ int main(void){
  else if(LO_CASE!=10){unsigned size=(LO_CASE>=3&&LO_CASE<=9)?4:1;for(unsigned i=0;i<size;++i){char path[]="grant/a";path[6]+=(char)i;if(put(path,"x",1))return 14;}}
  int output=open("diagnostic",CREATE,0666),saved_out=fcntl(1,0,3),saved_err=fcntl(2,0,3);
  if(output<0||saved_out<0||saved_err<0||dup2(output,1)<0||dup2(output,2)<0)return 15;
- const char *args[]={"fixture","run","--format","json","--list-root","grant","--remove-root","grant","--write-root","grant","--max-steps",LO_CASE==11?"150":"10000000"};
- int status=lo_cli_main(12,args,0);armed=0;
+ const char *args[]={"fixture","run","--format","json","--list-root","grant","--remove-root","grant","--write-root","grant","--max-steps",LO_CASE==11?"150":"10000000","--max-file-entries",LO_CASE==1?"10000":"0"};
+ int status=lo_cli_main(14,args,0);armed=0;
  if(dup2(saved_out,1)<0||dup2(saved_err,2)<0||lseek(output,0,0)<0)return 16;
  char diagnostic[65536];long count=read(output,diagnostic,sizeof(diagnostic)-1);if(count<=0||count==(long)sizeof(diagnostic)-1)return 17;
  int expected=(LO_CASE==0||LO_CASE==2||LO_CASE==3||LO_CASE==4||LO_CASE==5||LO_CASE==8)?1:2;

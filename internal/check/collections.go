@@ -136,7 +136,7 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 		return expression{}, d
 	}
 	minimum := 2
-	if op.Name() == catalog.ListFold || op.Name() == catalog.FlowFold || op.Name() == catalog.ListUnfold {
+	if op.Name() == catalog.ListFold || op.Name() == catalog.FlowFold || op.Name() == catalog.FlowWorklist || op.Name() == catalog.ListUnfold {
 		minimum = 3
 	}
 	if len(args) < minimum {
@@ -146,7 +146,7 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 	if d != nil {
 		return expression{}, d
 	}
-	if effects := f.graph.Effects(); (effects.Reads || effects.Commits) && op.Name() != catalog.FlowFold {
+	if effects := f.graph.Effects(); (effects.Reads || effects.Commits) && op.Rule() != catalog.FlowProcessor {
 		return expression{}, problem(diagnostic.EffectfulCallback, "list callback "+f.declaration.Name()+" can read host state or activate a commit", args[len(args)-1].Span)
 	}
 	params := f.signature.Parameters()
@@ -176,10 +176,16 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 			t = types.Int()
 		case i == 0:
 			t = must(types.NewList(params[len(params)-1].Type))
-		case i == 1 && (op.Name() == catalog.ListFold || op.Name() == catalog.FlowFold):
+		case i == 1 && (op.Name() == catalog.ListFold || op.Rule() == catalog.FlowProcessor):
 			t = params[contextCount].Type
 		}
-		v, d := c.processorArgument(args[i], t)
+		var v expression
+		var d diagnostic.Diagnostic
+		if op.Name() == catalog.FlowWorklist && i == 0 {
+			v, d = c.expression(args[i].Value, t)
+		} else {
+			v, d = c.processorArgument(args[i], t)
+		}
 		if d != nil {
 			return expression{}, d
 		}
@@ -205,6 +211,19 @@ func (c *checker) listProcessor(op catalog.Operation, args []syntax.Argument, sp
 	case catalog.ListFold, catalog.FlowFold:
 		if !types.Equal(output, values[1].Type()) {
 			return expression{}, diagnostic.Mismatch(values[1].Type().String(), f.signature.Output().String(), args[len(args)-1].Span)
+		}
+		result = values[1].Type()
+	case catalog.FlowWorklist:
+		if values[1].Type().Kind() == types.FallibleKind {
+			return expression{}, diagnostic.Mismatch("non-fallible worklist state", values[1].Type().String(), args[1].Span)
+		}
+		expected := must(types.NewRecord([]types.Field{
+			{Name: "state", Type: values[1].Type()},
+			{Name: "items", Type: values[0].Type()},
+			{Name: "stop", Type: types.Bool()},
+		}))
+		if !types.Equal(output, expected) {
+			return expression{}, diagnostic.Mismatch(expected.String(), f.signature.Output().String(), args[len(args)-1].Span)
 		}
 		result = values[1].Type()
 	case catalog.ListFlatMap:

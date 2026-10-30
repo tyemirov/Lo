@@ -49,13 +49,22 @@ func TestFileReadCancellation(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	session, err := execution.NewSession(ctx, files, execution.DefaultBudget(), device.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := session.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
 	writer, err := os.OpenFile(name, os.O_RDWR, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer writer.Close()
 	done := make(chan error, 1)
-	go func() { _, err := files.Read(ctx, path); done <- err }()
+	go func() { _, err := files.Read(session.Context(), path); done <- err }()
 	// More than one local pipe buffer proves that the adapter started its read.
 	if _, err := writer.WriteString(strings.Repeat("x", 1<<20)); err != nil {
 		t.Fatal(err)
@@ -186,9 +195,18 @@ func TestFileOpenDoesNotWaitForPipePeer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	session, err := execution.NewSession(context.Background(), files, execution.DefaultBudget(), device.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := session.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
 	done := make(chan error, 1)
 	go func() {
-		v, err := files.Read(context.Background(), path)
+		v, err := files.Read(session.Context(), path)
 		if err == nil && len(v.Bytes()) != 0 {
 			err = errors.New("pipe without a writer returned bytes")
 		}

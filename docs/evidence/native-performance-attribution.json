@@ -1,0 +1,331 @@
+{
+  "source_revision": "d42c89b9a7e6d9736b289f6972fdabf3894971e0",
+  "baseline_revision": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+  "scope": "Darwin ARM64 diagnostic measurements; no production runtime changes",
+  "total_timing_samples": 1092,
+  "verified_profile_invocations": 1000,
+  "reports": {
+    "measure-before-current-no-values-no-files-no-duplicate-owner-cumulative-only-no-values-owner.json": {
+      "samples": 546,
+      "summary": [
+        {
+          "case": "map",
+          "phase": "before",
+          "samples": 21,
+          "median_wall_ms": 28.884417,
+          "median_user_ms": 20.336,
+          "median_system_ms": 3.446,
+          "median_cpu_ms": 23.782,
+          "median_paired_cpu_ratio_to_current": 0.5761806513676696
+        },
+        {
+          "case": "map",
+          "phase": "current",
+          "samples": 147,
+          "median_wall_ms": 59.294625,
+          "median_user_ms": 37.485,
+          "median_system_ms": 3.733,
+          "median_cpu_ms": 41.195
+        },
+        {
+          "case": "map",
+          "phase": "no-values",
+          "samples": 21,
+          "median_wall_ms": 34.91875,
+          "median_user_ms": 23.027,
+          "median_system_ms": 3.353,
+          "median_cpu_ms": 26.431,
+          "median_paired_cpu_ratio_to_current": 0.6443624416138484
+        },
+        {
+          "case": "map",
+          "phase": "no-files",
+          "samples": 21,
+          "median_wall_ms": 56.5035,
+          "median_user_ms": 37.489,
+          "median_system_ms": 3.7,
+          "median_cpu_ms": 41.114,
+          "median_paired_cpu_ratio_to_current": 1.0007460710933551
+        },
+        {
+          "case": "map",
+          "phase": "no-duplicate-owner",
+          "samples": 21,
+          "median_wall_ms": 50.928542,
+          "median_user_ms": 36.346,
+          "median_system_ms": 3.758,
+          "median_cpu_ms": 40.361,
+          "median_paired_cpu_ratio_to_current": 0.9723054259759392
+        },
+        {
+          "case": "map",
+          "phase": "cumulative-only",
+          "samples": 21,
+          "median_wall_ms": 32.501166,
+          "median_user_ms": 23.007,
+          "median_system_ms": 3.086,
+          "median_cpu_ms": 26.217,
+          "median_paired_cpu_ratio_to_current": 0.6365664817411449
+        },
+        {
+          "case": "map",
+          "phase": "no-values-owner",
+          "samples": 21,
+          "median_wall_ms": 32.422083,
+          "median_user_ms": 22.347,
+          "median_system_ms": 3.173,
+          "median_cpu_ms": 25.757,
+          "median_paired_cpu_ratio_to_current": 0.6191449995130976
+        },
+        {
+          "case": "fold",
+          "phase": "before",
+          "samples": 21,
+          "median_wall_ms": 25.629167,
+          "median_user_ms": 18.577,
+          "median_system_ms": 2.688,
+          "median_cpu_ms": 21.102,
+          "median_paired_cpu_ratio_to_current": 0.7055147125232565
+        },
+        {
+          "case": "fold",
+          "phase": "current",
+          "samples": 147,
+          "median_wall_ms": 36.842416,
+          "median_user_ms": 27.892,
+          "median_system_ms": 2.875,
+          "median_cpu_ms": 30.924
+        },
+        {
+          "case": "fold",
+          "phase": "no-values",
+          "samples": 21,
+          "median_wall_ms": 28.486292,
+          "median_user_ms": 21.309,
+          "median_system_ms": 3.001,
+          "median_cpu_ms": 23.729,
+          "median_paired_cpu_ratio_to_current": 0.8064726774650803
+        },
+        {
+          "case": "fold",
+          "phase": "no-files",
+          "samples": 21,
+          "median_wall_ms": 34.54975,
+          "median_user_ms": 26.325,
+          "median_system_ms": 3.031,
+          "median_cpu_ms": 29.19,
+          "median_paired_cpu_ratio_to_current": 0.9395296542677785
+        },
+        {
+          "case": "fold",
+          "phase": "no-duplicate-owner",
+          "samples": 21,
+          "median_wall_ms": 35.521375,
+          "median_user_ms": 27.21,
+          "median_system_ms": 3.037,
+          "median_cpu_ms": 30.478,
+          "median_paired_cpu_ratio_to_current": 0.9856528437540121
+        },
+        {
+          "case": "fold",
+          "phase": "cumulative-only",
+          "samples": 21,
+          "median_wall_ms": 29.578417,
+          "median_user_ms": 21.918,
+          "median_system_ms": 2.913,
+          "median_cpu_ms": 24.622,
+          "median_paired_cpu_ratio_to_current": 0.8191023269399279
+        },
+        {
+          "case": "fold",
+          "phase": "no-values-owner",
+          "samples": 21,
+          "median_wall_ms": 29.604583,
+          "median_user_ms": 20.741,
+          "median_system_ms": 2.856,
+          "median_cpu_ms": 23.69,
+          "median_paired_cpu_ratio_to_current": 0.7769544395547502
+        }
+      ]
+    },
+    "measure-before-current-no-values-no-files.json": {
+      "samples": 294,
+      "summary": [
+        {
+          "case": "map",
+          "phase": "before",
+          "samples": 21,
+          "median_wall_ms": 19.612833,
+          "median_user_ms": 15.828,
+          "median_system_ms": 1.867,
+          "median_cpu_ms": 17.688,
+          "median_paired_cpu_ratio_to_current": 0.6783466708103488
+        },
+        {
+          "case": "map",
+          "phase": "current",
+          "samples": 84,
+          "median_wall_ms": 27.8698335,
+          "median_user_ms": 23.9305,
+          "median_system_ms": 2.033,
+          "median_cpu_ms": 25.911
+        },
+        {
+          "case": "map",
+          "phase": "no-values",
+          "samples": 21,
+          "median_wall_ms": 21.655084,
+          "median_user_ms": 18.038,
+          "median_system_ms": 1.916,
+          "median_cpu_ms": 19.842,
+          "median_paired_cpu_ratio_to_current": 0.7644535476889782
+        },
+        {
+          "case": "map",
+          "phase": "no-files",
+          "samples": 21,
+          "median_wall_ms": 27.970416,
+          "median_user_ms": 24.11,
+          "median_system_ms": 1.958,
+          "median_cpu_ms": 26.115,
+          "median_paired_cpu_ratio_to_current": 1.00322943770876
+        },
+        {
+          "case": "fold",
+          "phase": "before",
+          "samples": 21,
+          "median_wall_ms": 19.037291,
+          "median_user_ms": 15.23,
+          "median_system_ms": 1.755,
+          "median_cpu_ms": 16.985,
+          "median_paired_cpu_ratio_to_current": 0.7735291443120851
+        },
+        {
+          "case": "fold",
+          "phase": "current",
+          "samples": 84,
+          "median_wall_ms": 23.866854,
+          "median_user_ms": 20.0595,
+          "median_system_ms": 1.8665,
+          "median_cpu_ms": 21.971
+        },
+        {
+          "case": "fold",
+          "phase": "no-values",
+          "samples": 21,
+          "median_wall_ms": 20.664917,
+          "median_user_ms": 17.143,
+          "median_system_ms": 1.741,
+          "median_cpu_ms": 18.864,
+          "median_paired_cpu_ratio_to_current": 0.8576681268299325
+        },
+        {
+          "case": "fold",
+          "phase": "no-files",
+          "samples": 21,
+          "median_wall_ms": 22.775291,
+          "median_user_ms": 19.036,
+          "median_system_ms": 1.946,
+          "median_cpu_ms": 20.828,
+          "median_paired_cpu_ratio_to_current": 0.951864942796019
+        }
+      ]
+    },
+    "measure-before-current.json": {
+      "samples": 126,
+      "summary": [
+        {
+          "case": "map",
+          "phase": "before",
+          "samples": 21,
+          "median_wall_ms": 19.954667,
+          "median_user_ms": 16.196,
+          "median_system_ms": 1.806,
+          "median_cpu_ms": 18.075,
+          "median_paired_cpu_ratio_to_current": 0.6917035502401356
+        },
+        {
+          "case": "map",
+          "phase": "current",
+          "samples": 42,
+          "median_wall_ms": 27.9305415,
+          "median_user_ms": 24.144,
+          "median_system_ms": 1.9205,
+          "median_cpu_ms": 26.1115
+        },
+        {
+          "case": "fold",
+          "phase": "before",
+          "samples": 21,
+          "median_wall_ms": 18.800083,
+          "median_user_ms": 15.321,
+          "median_system_ms": 1.615,
+          "median_cpu_ms": 16.936,
+          "median_paired_cpu_ratio_to_current": 0.7661725841663795
+        },
+        {
+          "case": "fold",
+          "phase": "current",
+          "samples": 42,
+          "median_wall_ms": 23.968229,
+          "median_user_ms": 20.3835,
+          "median_system_ms": 1.7505,
+          "median_cpu_ms": 22.132
+        }
+      ]
+    },
+    "measure-current-no-duplicate-owner.json": {
+      "samples": 126,
+      "summary": [
+        {
+          "case": "map",
+          "phase": "current",
+          "samples": 42,
+          "median_wall_ms": 31.342625,
+          "median_user_ms": 26.048,
+          "median_system_ms": 2.9275,
+          "median_cpu_ms": 29.066
+        },
+        {
+          "case": "map",
+          "phase": "no-duplicate-owner",
+          "samples": 21,
+          "median_wall_ms": 31.800542,
+          "median_user_ms": 26.18,
+          "median_system_ms": 2.89,
+          "median_cpu_ms": 29.295,
+          "median_paired_cpu_ratio_to_current": 0.9781810253744109
+        },
+        {
+          "case": "fold",
+          "phase": "current",
+          "samples": 42,
+          "median_wall_ms": 25.713083,
+          "median_user_ms": 21.154,
+          "median_system_ms": 2.2845,
+          "median_cpu_ms": 23.5675
+        },
+        {
+          "case": "fold",
+          "phase": "no-duplicate-owner",
+          "samples": 21,
+          "median_wall_ms": 25.416042,
+          "median_user_ms": 20.884,
+          "median_system_ms": 2.361,
+          "median_cpu_ms": 23.217,
+          "median_paired_cpu_ratio_to_current": 0.985152914146997
+        }
+      ]
+    }
+  },
+  "archive": {
+    "path": "docs/evidence/native-performance-attribution.json.gz",
+    "sha256": "17549c745193d50be294d0450bcfe9d713746793632f68c31a7fd95d29258147",
+    "records": 90
+  },
+  "limitations": [
+    "Diagnostic variants omit specified behavior and are not production fixes.",
+    "Separate omitted costs can overlap and must not be added as independent percentages.",
+    "The later seven-variant campaign ran under changed host conditions; its direction supports the earlier findings but its percentages are not interchangeable."
+  ]
+}

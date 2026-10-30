@@ -102,7 +102,7 @@ A terminal host failure records its diagnostic in the execution context.
 Generated code must branch on `status` before it uses the payload.
 Unknown statuses and incorrect ABI identities are terminal build or runtime failures.
 
-Use `lo-native-2` as the canonical ABI identity in the runtime and distribution manifests.
+Use `lo-native-3` as the canonical ABI identity in the runtime and distribution manifests.
 Reject a manifest with a different identity.
 Generate operation declarations from the checked catalog with one fixed call convention:
 
@@ -119,10 +119,51 @@ Generated flows use the same convention.
 The caller supplies the original source-location identifier.
 The runtime validates externally supplied program metadata before it admits execution.
 
+### Host Execution Policy
+
+The host supplies the execution policy through the CLI or the C ABI.
+The [execution policy](../specification.md#89-dynamic-worklists-and-host-resource-quotas) defines the limits and their byte accounting.
+Use the `ContextOptions` layout from the [C header](../runtime/native/include/lo_context_options.h).
+Supply that structure to either constructor:
+
+```c
+Context *lo_context_new(const ContextOptions *options);
+Context *lo_context_from_program(const Program *program,
+                               const ContextOptions *options);
+```
+
+Both constructors reject null options and zero steps.
+Zero disables each other limit.
+The CLI uses these defaults:
+
+| Option field | CLI option | Default |
+| --- | --- | ---: |
+| `steps` | `--max-steps` | 1,000,000 |
+| `value_bytes` | `--max-value-bytes` | 16,777,216 |
+| `live_bytes` | `--max-live-bytes` | 67,108,864 |
+| `data_bytes` | `--max-data-bytes` | 0 |
+| `list_items` | `--max-list-items` | 0 |
+| `file_entries` | `--max-file-entries` | 0 |
+| `file_directories` | `--max-file-directories` | 128 |
+
+The `live_bytes` limit counts the value weight of each retained value once.
+Charges can count a container and its child separately.
+This total differs from RSS and physical allocation sizes.
+Each worklist item adds 16 bytes to `live_bytes` until its visit completes.
+That charge stops when the item completes or the worklist discards it.
+The diagnostic snapshot has a separate value weight.
+Each new snapshot replaces that value weight.
+
+Resource scopes keep the current state, pending work, and callback context.
+Each pending item keeps its values, tensor storage, and directory observations until its release.
+Scope cleanup releases resources that cannot escape through the result.
+The runtime checks new work without a separate worklist item limit.
+
 ### Program Metadata
 
-B008 changes the metadata format to `lo-native-2`.
-The runtime rejects `lo-native-1` and all other ABI identities.
+B008 introduced the shared source spans used by the current metadata format.
+The current format uses `lo-native-3` for the execution policy constructor contract.
+The runtime rejects all other ABI identities.
 The C result layout and operation call convention stay the same.
 
 The document contains `source`, `types`, `flows`, `derivatives`, `has_result`, `files`, `spans`, and `locations`.

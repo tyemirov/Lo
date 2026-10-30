@@ -1,3 +1,5 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef struct Program Program;
@@ -6,7 +8,7 @@ typedef struct Value Value;
 typedef struct { U32 status; U32 code; const Value *value; } ResultSlot;
 extern const Program *lo_program_new(void);
 extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *,U64);
+extern Context *lo_context_from_program(const Program *,const ContextOptions *);
 extern void lo_context_free(Context *);
 extern void lo_context_run(Context *,ResultSlot *);
 extern void lo_context_cancel(Context *);
@@ -23,7 +25,7 @@ int main(void){
   const Program *program=lo_program_new();
   if(LO_CASE==1){if(program || lo_runtime_live_programs() || lo_runtime_live_values())return 1;continue;}
   if(!program)return 2;
-  Context *first=lo_context_from_program(program,100000),*second=lo_context_from_program(program,100000);
+  Context *first=lo_context_from_program(program,LO_OPTIONS(100000)),*second=lo_context_from_program(program,LO_OPTIONS(100000));
   if(!first || !second)return 3;
   ResultSlot first_value={99,99,0},second_value={99,99,0};
   lo_step(first,0,0,lo_test_step_site,&first_value);

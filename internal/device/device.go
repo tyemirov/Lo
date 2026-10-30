@@ -222,6 +222,7 @@ type allocation struct {
 	buffer   Buffer
 	scope    *scope
 	classes  [4]bool
+	pins     uint64
 }
 
 func (a *allocation) Bytes() uint64    { return a.bytes }
@@ -240,6 +241,7 @@ type session struct {
 	cleanup     error
 	lost        error
 	closed      bool
+	nextPin     uint64
 }
 
 func NewSession(config Config) (Session, error) {
@@ -447,6 +449,7 @@ func (s *session) Release(receipt Allocation) {
 	}
 	delete(s.allocations, a.id)
 	delete(a.scope.allocations, a.id)
+	delete(a.scope.pinned, a.id)
 	s.live -= a.bytes
 	for class, active := range a.classes {
 		if active {
@@ -482,6 +485,9 @@ type scope struct {
 	session     *session
 	parent      *scope
 	allocations map[uint64]*allocation
+	pinned      map[uint64]*allocation
+	releases    map[uint64]func()
+	closed      bool
 }
 
 func (s *session) Scope() Scope {
@@ -493,10 +499,17 @@ func (scope *scope) own(a *allocation) {
 	if scope.allocations == nil {
 		scope.allocations = map[uint64]*allocation{}
 	}
-	scope.allocations[a.id] = a
+	if a.pins > 0 {
+		if scope.pinned == nil {
+			scope.pinned = map[uint64]*allocation{}
+		}
+		scope.pinned[a.id] = a
+	} else {
+		scope.allocations[a.id] = a
+	}
 	a.scope = scope
 }
-func (scope *scope) Empty() bool { return len(scope.allocations) == 0 }
+func (scope *scope) Empty() bool { return len(scope.allocations) == 0 && len(scope.pinned) == 0 }
 func (scope *scope) Keep(roots []Allocation) {
 	keep := map[*allocation]bool{}
 	for _, receipt := range roots {
@@ -521,11 +534,61 @@ func (scope *scope) Retain(roots []Allocation) {
 		a := receipt.receipt()
 		if a.scope == scope {
 			delete(scope.allocations, a.id)
+			delete(scope.pinned, a.id)
 			scope.parent.own(a)
 		}
 	}
 }
+
+// Pin retains queued allocations until their item is consumed.
+func releaseEmptyPin() {}
+
+func (scope *scope) Pin(roots []Allocation) func() {
+	if len(roots) == 0 {
+		return releaseEmptyPin
+	}
+	for _, receipt := range roots {
+		a := receipt.receipt()
+		a.pins++
+		delete(a.scope.allocations, a.id)
+		if a.scope.pinned == nil {
+			a.scope.pinned = map[uint64]*allocation{}
+		}
+		a.scope.pinned[a.id] = a
+	}
+	scope.session.nextPin++
+	id := scope.session.nextPin
+	if scope.releases == nil {
+		scope.releases = map[uint64]func(){}
+	}
+	released := false
+	release := func() {
+		if released {
+			return
+		}
+		released = true
+		delete(scope.releases, id)
+		for _, receipt := range roots {
+			a := receipt.receipt()
+			a.pins--
+			if a.pins == 0 {
+				delete(a.scope.pinned, a.id)
+				a.scope.own(a)
+			}
+		}
+	}
+	scope.releases[id] = release
+	return release
+}
 func (scope *scope) Close(roots []Allocation) {
+	if scope.closed {
+		return
+	}
+	scope.closed = true
+	for _, release := range scope.releases {
+		release()
+	}
+	scope.releases = nil
 	scope.Keep(roots)
 	scope.Retain(roots)
 	scope.session.current = scope.parent
@@ -562,6 +625,7 @@ func (*session) session() {}
 
 // Scope releases allocations that do not escape the current execution region.
 type Scope interface {
+	Pin([]Allocation) func()
 	Empty() bool
 	Retain([]Allocation)
 	Keep([]Allocation)

@@ -2,7 +2,6 @@ use super::*;
 use std::os::unix::process::{CommandExt, ExitStatusExt};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
-const MAX_PROBE: usize = MAX_BYTES / 2;
 pub(super) struct Probe {
     bound: Result<Bound, String>,
 }
@@ -242,8 +241,8 @@ impl Probe {
 
             loop {
                 context.check_cancel()?;
-                read_stream(&mut stdout, &mut output, &mut stdout_done)?;
-                read_stream(&mut stderr, &mut errors, &mut stderr_done)?;
+                read_stream(context, &mut stdout, &mut output, &mut stdout_done)?;
+                read_stream(context, &mut stderr, &mut errors, &mut stderr_done)?;
                 if status.is_none() {
                     status = child.try_wait().map_err(|error| host(error.to_string()))?;
                     if status.is_some() {
@@ -302,18 +301,24 @@ fn set_nonblocking_fd(fd: i32) -> io::Result<()> {
         Ok(())
     }
 }
-fn read_stream(stream: &mut impl Read, output: &mut Vec<u8>, done: &mut bool) -> Result<(), Fault> {
+fn read_stream(
+    context: &Context,
+    stream: &mut impl Read,
+    output: &mut Vec<u8>,
+    done: &mut bool,
+) -> Result<(), Fault> {
     let mut buffer = [0; 65536];
     loop {
+        context.check_cancel()?;
         match stream.read(&mut buffer) {
             Ok(0) => {
                 *done = true;
                 return Ok(());
             }
             Ok(count) => {
-                if count > MAX_PROBE - output.len() {
-                    return Err(limit("open-file probe output"));
-                }
+                context
+                    .values
+                    .preflight(output.len() as u64 + count as u64 + 16)?;
                 output.extend_from_slice(&buffer[..count])
             }
             Err(error) if error.kind() == io::ErrorKind::WouldBlock => return Ok(()),
@@ -328,9 +333,6 @@ extern "C" {
     fn kill(pid: i32, signal: i32) -> i32;
 }
 fn parse(context: &mut Context, directory: &Path, output: &[u8]) -> Outcome {
-    if output.len() > MAX_PROBE {
-        return Err(limit("open-file probe output"));
-    }
     context.reserve_file(output.len() as u64, output.len() as u64)?;
     let output =
         std::str::from_utf8(output).map_err(|_| host("open-file probe returned invalid text"))?;
@@ -397,7 +399,9 @@ fn parse(context: &mut Context, directory: &Path, output: &[u8]) -> Outcome {
                 if paths.contains(&absolute) {
                     continue;
                 }
-                if paths.len() == MAX_FILE_ENTRIES {
+                if context.values.limits.file_entries != 0
+                    && paths.len() as u64 >= context.values.limits.file_entries
+                {
                     return Err(limit("open-file probe paths"));
                 }
                 weight += 16 + absolute.as_os_str().len() as u64;

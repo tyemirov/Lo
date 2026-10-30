@@ -1,3 +1,5 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef struct Program Program;
@@ -6,7 +8,7 @@ typedef struct Value Value;
 typedef struct { U32 status,code;const Value *value; } Result;
 extern const Program *lo_program_new(void);
 extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *,U64);
+extern Context *lo_context_from_program(const Program *,const ContextOptions *);
 extern void lo_context_free(Context *),lo_context_run(Context *,Result *);
 extern void lo_value_release(const Value *);
 extern U64 lo_context_remaining_steps(const Context *),lo_context_scope_count(const Context *),lo_context_depth(const Context *);
@@ -22,7 +24,7 @@ int main(void){
   return 0;
  }
  if(!program){const char *args[]={"metadata-v2","metadata",0};return lo_cli_main(2,args,0);}
- Context *context=lo_context_from_program(program,100000);if(!context){lo_program_free(program);return 12;}
+ Context *context=lo_context_from_program(program,LO_OPTIONS(100000));if(!context){lo_program_free(program);return 12;}
  Result result={0,0,0};lo_context_run(context,&result);
  if(result.status!=(LO_CASE==3?1:0) || result.code!=result.status || !result.value || lo_context_remaining_steps(context)>=100000 || lo_context_scope_count(context) || lo_context_depth(context))return 13;
  lo_program_free(program);lo_context_free(context);

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
+	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
@@ -45,6 +46,12 @@ const (
 	openFilesRootOption       = "--open-files-root"
 	allowDeviceOption         = "--allow-device"
 	maxStepsOption            = "--max-steps"
+	maxValueBytesOption       = "--max-value-bytes"
+	maxLiveBytesOption        = "--max-live-bytes"
+	maxDataBytesOption        = "--max-data-bytes"
+	maxListItemsOption        = "--max-list-items"
+	maxFileEntriesOption      = "--max-file-entries"
+	maxFileDirectoriesOption  = "--max-file-directories"
 	formatOption              = "--format"
 	TextFormat                = "text"
 	JsonFormat                = "json"
@@ -79,7 +86,17 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	}
 	inv.command = args[0]
 	formatSet := false
-	stepsSet := false
+	budgetInput := execution.DefaultBudgetInput()
+	policyOptions := map[string]*uint64{
+		maxStepsOption:           &budgetInput.Steps,
+		maxValueBytesOption:      &budgetInput.Limits.ValueBytes,
+		maxLiveBytesOption:       &budgetInput.Limits.LiveBytes,
+		maxDataBytesOption:       &budgetInput.Limits.DataBytes,
+		maxListItemsOption:       &budgetInput.Limits.ListItems,
+		maxFileEntriesOption:     &budgetInput.Limits.FileEntries,
+		maxFileDirectoriesOption: &budgetInput.Limits.FileDirectories,
+	}
+	policySet := map[string]bool{}
 	deviceSet := false
 	backendSet := false
 	emitSet := false
@@ -233,40 +250,41 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 			ports = append(ports, uint16(port))
 			continue
 		}
-		if arg == readRootOption || arg == writeRootOption || arg == listRootOption || arg == removeRootOption || arg == openFilesRootOption || arg == maxStepsOption {
+		if limit, ok := policyOptions[arg]; ok {
+			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
+				return inv, fmt.Errorf("%s requires a value with run or serve", arg)
+			}
+			if policySet[arg] {
+				return inv, fmt.Errorf("duplicate %s", arg)
+			}
+			policySet[arg] = true
+			i++
+			amount, err := strconv.ParseUint(args[i], 10, 64)
+			if err != nil {
+				return inv, fmt.Errorf("invalid %s: %w", arg, err)
+			}
+			*limit = amount
+			continue
+		}
+		if arg == readRootOption || arg == writeRootOption || arg == listRootOption || arg == removeRootOption || arg == openFilesRootOption {
 			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
 				return inv, fmt.Errorf("%s requires a value with run or serve", arg)
 			}
 			i++
-			if arg != maxStepsOption {
-				if args[i] == "" {
-					return inv, fmt.Errorf("empty adapter root")
-				}
-				switch arg {
-				case readRootOption:
-					inv.readRoots = append(inv.readRoots, args[i])
-				case writeRootOption:
-					inv.writeRoots = append(inv.writeRoots, args[i])
-				case listRootOption:
-					inv.listRoots = append(inv.listRoots, args[i])
-				case removeRootOption:
-					inv.removeRoots = append(inv.removeRoots, args[i])
-				case openFilesRootOption:
-					inv.openFilesRoots = append(inv.openFilesRoots, args[i])
-				}
-			} else {
-				if stepsSet {
-					return inv, fmt.Errorf("duplicate --max-steps")
-				}
-				stepsSet = true
-				steps, err := strconv.ParseUint(args[i], 10, 64)
-				if err != nil {
-					return inv, fmt.Errorf("invalid --max-steps: %w", err)
-				}
-				inv.budget, err = execution.NewBudget(steps)
-				if err != nil {
-					return inv, err
-				}
+			if args[i] == "" {
+				return inv, fmt.Errorf("empty adapter root")
+			}
+			switch arg {
+			case readRootOption:
+				inv.readRoots = append(inv.readRoots, args[i])
+			case writeRootOption:
+				inv.writeRoots = append(inv.writeRoots, args[i])
+			case listRootOption:
+				inv.listRoots = append(inv.listRoots, args[i])
+			case removeRootOption:
+				inv.removeRoots = append(inv.removeRoots, args[i])
+			case openFilesRootOption:
+				inv.openFilesRoots = append(inv.openFilesRoots, args[i])
 			}
 			continue
 		}
@@ -306,6 +324,10 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 		return inv, fmt.Errorf("artifact requires run or serve without a source path")
 	}
 	var err error
+	inv.budget, err = execution.NewBudget(budgetInput)
+	if err != nil {
+		return inv, err
+	}
 	inv.listenPolicy, err = adapter.NewListenPolicy(ports)
 	if err != nil {
 		return inv, err
@@ -544,7 +566,12 @@ func ReportRuntime(stderr io.Writer, format string, err error) int {
 			message += fmt.Sprintf(" (last completed %s at %s:%d: %s)", completed.Operation(), completed.Span().File(), completed.Span().Start().Line, completed.Summary())
 		}
 		for _, flow := range flows {
-			message += fmt.Sprintf(" (Flow.fold completed %s/%s, state %s)", value.TextResult(flow.Field("completed_count")), value.TextResult(flow.Field("total_count")), value.TextResult(flow.Field("state")))
+			operation := flow.Field("operation").(value.Text).Text()
+			if operation == catalog.FlowWorklist {
+				message += fmt.Sprintf(" (%s completed %s, pending %s, state %s)", operation, value.TextResult(flow.Field("completed_count")), value.TextResult(flow.Field("pending_count")), value.TextResult(flow.Field("state")))
+			} else {
+				message += fmt.Sprintf(" (%s completed %s/%s, state %s)", operation, value.TextResult(flow.Field("completed_count")), value.TextResult(flow.Field("total_count")), value.TextResult(flow.Field("state")))
+			}
 		}
 		return Report(stderr, format, diagnostic.New(code, diagnostic.Runtime, message, nil), ExitHost)
 	}

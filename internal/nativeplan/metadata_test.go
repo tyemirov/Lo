@@ -108,7 +108,7 @@ func TestMetadataPublicLowerInternsLongSourceSpans(t *testing.T) {
 	}
 }
 func TestMetadataArtifactValueAndWhitespace(t *testing.T) {
-	base := []byte(`{"abi":"lo-native-2"}`)
+	base := []byte(`{"abi":"lo-native-3"}`)
 	artifact := json.RawMessage(strings.Repeat(" ", 1<<20) + `{"extra":[1e2,null,"a b\\\"c"],"extra":[18446744073709551615]}`)
 	encoded, err := WithArtifactMetadata(context.Background(), base, artifact)
 	if err != nil {
@@ -134,13 +134,13 @@ func TestMetadataArtifactCanceledWhitespace(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	artifact := json.RawMessage(strings.Repeat(" ", 1<<20) + `{"value":1}`)
-	if got, err := WithArtifactMetadata(ctx, []byte(`{"abi":"lo-native-2"}`), artifact); !errors.Is(err, context.Canceled) || got != nil {
+	if got, err := WithArtifactMetadata(ctx, []byte(`{"abi":"lo-native-3"}`), artifact); !errors.Is(err, context.Canceled) || got != nil {
 		t.Fatalf("canceled artifact: bytes=%d error=%v", len(got), err)
 	}
 }
 
 func TestMetadataArtifactExactByteCap(t *testing.T) {
-	base := []byte(`{"abi":"lo-native-2"}`)
+	base := []byte(`{"abi":"lo-native-3"}`)
 	overhead := len(base) + len(`,"artifact":`) + 2
 	artifact := make([]byte, MaxModuleBytes-overhead+2)
 	artifact[0] = '"'

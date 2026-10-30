@@ -434,7 +434,7 @@ func Concat(session execution.Session, call Call, args []value.Value, flows map[
 	var b strings.Builder
 	for _, v := range args {
 		s := v.(value.Text).Text()
-		if len(s) > execution.MaxBytes-b.Len() {
+		if limit := session.Limits().ValueBytes; limit != 0 && uint64(len(s))+uint64(b.Len())+16 > limit {
 			return nil, execution.Limit("string bytes")
 		}
 		b.WriteString(s)
@@ -452,7 +452,7 @@ func Upper(session execution.Session, call Call, args []value.Value, flows map[i
 	} else {
 		s = strings.ToLower(s)
 	}
-	if len(s) > execution.MaxBytes {
+	if limit := session.Limits().ValueBytes; limit != 0 && uint64(len(s))+16 > limit {
 		return nil, execution.Limit("string bytes")
 	}
 	return must(value.NewText(types.String(), s)), nil
@@ -468,7 +468,7 @@ func Lower(session execution.Session, call Call, args []value.Value, flows map[i
 	} else {
 		s = strings.ToLower(s)
 	}
-	if len(s) > execution.MaxBytes {
+	if limit := session.Limits().ValueBytes; limit != 0 && uint64(len(s))+16 > limit {
 		return nil, execution.Limit("string bytes")
 	}
 	return must(value.NewText(types.String(), s)), nil
@@ -615,7 +615,7 @@ func Length(session execution.Session, call Call, args []value.Value, flows map[
 	_ = m
 	op := catalog.Length
 	_ = op
-	return value.Int64(int64(len(args[0].(value.List).Items()))), nil
+	return value.Int64(int64(args[0].(value.List).Len())), nil
 }
 func Contains(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
 	m := &machine{session}
@@ -712,7 +712,7 @@ func FileRead(session execution.Session, call Call, args []value.Value, flows ma
 		}
 		return OperationFailure(call, args, catalog.ReadFailed, err.Error()), nil
 	}
-	if data.Len() > execution.MaxBytes {
+	if limit := session.Limits().ValueBytes; limit != 0 && data.Weight() > limit {
 		return nil, execution.Limit("file read bytes")
 	}
 	return Success(call.Type(), data), nil
@@ -787,7 +787,7 @@ func FileList(session execution.Session, call Call, args []value.Value, flows ma
 func FileRemove(session execution.Session, call Call, args []value.Value, flows map[int]identity.FlowID) (value.Value, error) {
 	entries := args[0].(value.List)
 	count := entries.Len()
-	if count > execution.MaxFileEntries {
+	if limit := session.Limits().FileEntries; limit != 0 && uint64(count) > limit {
 		return nil, execution.Limit("file removal entries")
 	}
 	weight := entries.Weight() + 32 + uint64(len(catalog.FileRemove))

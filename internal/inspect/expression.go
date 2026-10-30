@@ -353,7 +353,7 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 	flow := a.graph.flows[callback]
 	args := make([]abstract, len(flow.Parameters()))
 	contextStart := 1
-	if name == catalog.ListFold || name == catalog.FlowFold || name == catalog.ListUnfold {
+	if name == catalog.ListFold || e.Operation().Rule() == catalog.FlowProcessor || name == catalog.ListUnfold {
 		contextStart = 2
 	}
 	for i := contextStart; i < len(values)-1; i++ {
@@ -371,14 +371,17 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 			args[len(args)-1] = a.unknown(values[0].node, elementType)
 			args[len(args)-1].targets = values[0].targets
 		}
-		if name == catalog.ListFold || name == catalog.FlowFold {
+		if name == catalog.FlowWorklist {
+			args[len(args)-1] = a.join([]abstract{args[len(args)-1], a.loopState(c, values[0].node, elementType)}, values[0].node, elementType)
+		}
+		if name == catalog.ListFold || e.Operation().Rule() == catalog.FlowProcessor {
 			stateType := flow.Parameters()[len(args)-2].Type
 			state := a.join([]abstract{values[1], a.loopState(c, values[1].node, stateType)}, values[1].node, stateType)
 			args[len(args)-2] = state
 		}
 	}
 	iteration, invocation := iterationCondition, "list-callback"
-	if name == catalog.FlowFold {
+	if e.Operation().Rule() == catalog.FlowProcessor {
 		iteration, invocation = flowIterationCondition, "flow-callback"
 	}
 	child := branchContext(c, condition{Kind: iteration, Node: node, Context: c.id})
@@ -398,6 +401,13 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 		out.targets = values[0].targets
 	case catalog.ListFold, catalog.FlowFold:
 		out = a.join([]abstract{values[1], result}, node, e.Type())
+	case catalog.FlowWorklist:
+		state, ok := result.fields["state"]
+		if !ok {
+			state = a.unknown(node, e.Type())
+			state.targets = result.targets
+		}
+		out = a.join([]abstract{values[1], state}, node, e.Type())
 	case catalog.ListFlatMap:
 		out.items = result.items
 		out.targets = result.targets

@@ -644,6 +644,7 @@ It includes a contents list, operation signatures, examples, and current backend
 - [File observations and activation](specification.md#91-file-adapter)
 - [Process values, execution, and host policy](specification.md#95-process-adapter)
 - [Sequential activation with Flow.fold](specification.md#88-sequential-flow-processor)
+- [Dynamic traversal and host resource quotas](specification.md#89-dynamic-worklists-and-host-resource-quotas)
 - [Quick start](specification.md#quick-start)
 - [Autodiff and backpropagation](specification.md#245-reverse-mode-autodiff-and-backpropagation)
 - [Parameters and gradients](specification.md#246-parameters-and-gradient-lifecycle)

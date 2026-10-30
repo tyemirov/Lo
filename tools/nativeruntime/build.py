@@ -249,7 +249,7 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
         if digest(source) != pin['sha256']:
             raise ValueError(f'prepared LLVM tool digest mismatch: {name}')
         return copy_file(source, 'bin/' + name)
-    distribution: dict[str, object] = {'abi': 'lo-native-2', 'llvm': '21.1.8', 'host': 'darwin/arm64',
+    distribution: dict[str, object] = {'abi': 'lo-native-3', 'llvm': '21.1.8', 'host': 'darwin/arm64',
                                        'compiler': tool('clang'), 'targets': {}}
     target_records = {}
     for target in targets:

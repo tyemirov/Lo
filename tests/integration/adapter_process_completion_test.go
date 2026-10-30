@@ -72,9 +72,8 @@ func TestAdapterProcessCompletionBeforeResultCharge(t *testing.T) {
 		t.Fatal(err)
 	}
 	program, err := execution.NewProgram(func(session execution.Session) (value.Value, error) {
-		charge := value.NewBytes(make([]byte, execution.MaxValueWeight-16))
 		for index := 0; index < 4; index++ {
-			if err := session.ChargeValue(charge); err != nil {
+			if err := session.ChargeValue(value.NewBytes(make([]byte, execution.MaxValueWeight-16))); err != nil {
 				return nil, err
 			}
 		}

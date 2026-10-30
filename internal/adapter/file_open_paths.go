@@ -137,7 +137,7 @@ func parseOpenPaths(session execution.Session, root string, output []byte) (valu
 			if _, exists := paths[path]; exists {
 				continue
 			}
-			if len(paths) == execution.MaxFileEntries {
+			if limit := session.Limits().FileEntries; limit != 0 && uint64(len(paths)) >= limit {
 				return nil, execution.Limit("open-file probe paths")
 			}
 			weight += uint64(16 + len(path))

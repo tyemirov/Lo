@@ -22,7 +22,7 @@ func metadataV2FixtureDocument(t *testing.T, module []byte) map[string]any {
 	if err := decoder.Decode(&root); err != nil {
 		t.Fatal(err)
 	}
-	if root["abi"] != "lo-native-2" {
+	if root["abi"] != "lo-native-3" {
 		t.Fatal("fixture requires canonical ABI2 producer")
 	}
 	return root

@@ -331,14 +331,17 @@ func TestRunResourceLimits(t *testing.T) {
 		fmt.Fprintf(&weight, "v%d = String.concat(a, a)\n", i)
 	}
 	weight.WriteString("return 1")
-	for _, tc := range []struct{ name, source string }{
-		{"integer-magnitude", integer.String()},
-		{"flow-depth", depth.String()},
-		{"accumulated-values", weight.String()},
-		{"unfold-count", `flow Step(n: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: n, next_state: n) }; return List.unfold(0, 1000001, Step)`},
+	for _, tc := range []struct {
+		name, source string
+		options      []string
+	}{
+		{"integer-magnitude", integer.String(), nil},
+		{"flow-depth", depth.String(), nil},
+		{"accumulated-values", weight.String(), []string{"--max-live-bytes", "33554432"}},
+		{"unfold-count", `flow Step(n: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: n, next_state: n) }; return List.unfold(0, 1000001, Step)`, []string{"--max-list-items", "1000000"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got := run(t, "run", sourceFile(t, tc.source), "--format", "json")
+			got := run(t, append([]string{"run", sourceFile(t, tc.source), "--format", "json"}, tc.options...)...)
 			if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 				t.Fatalf("resource limit: %+v", got)
 			}

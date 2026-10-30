@@ -69,9 +69,6 @@ func newWorkload(parent, name string, size, appendBytes int) (*workload, error) 
 			w.pipeline = "File.list followed by batch removal and scalar receipt; checked guard returns true"
 		}
 		w.source = "flow Guard(original: File.Entry, current: File.Entry) -> Bool { return true }; flow Main() -> Int! { " + operation + " }; return Main()"
-		if size > execution.MaxFileEntries {
-			w.expected = "runtime.limit"
-		}
 	case "read", "write", "append":
 		readGrant()
 		w.payload = bytes.Repeat([]byte("x"), size)
@@ -109,10 +106,7 @@ func newWorkload(parent, name string, size, appendBytes int) (*workload, error) 
 			w.args = append(w.args, "--list-root", child)
 		}
 		w.source = `flow Observe(total: Int, path: File.Path) -> Int! { observed = File.directory(path); return Math.add(total, 1) }; flow Main() -> Int! { return Flow.fold(List.new(` + strings.Join(paths, ",") + `), 0, Observe) }; return Main()`
-		w.pipeline = "File.directory once per distinct granted directory; observations retained through one invocation"
-		if size > execution.MaxFileDirectories {
-			w.expected = "runtime.limit"
-		}
+		w.pipeline = "File.directory once per distinct granted directory; each observation releases after its callback"
 	case "open-paths":
 		w.args = append(w.args, "--open-files-root", directory)
 		w.source = "flow Main() -> Int! { paths = File.open_paths(" + root + "); return List.length(paths) }; return Main()"
@@ -274,10 +268,6 @@ func (w *workload) verifyFiles(success bool) error {
 
 // expectPayload models value charges for these fixed straight-line Lo programs.
 func (w *workload) expectPayload() error {
-	if w.size > execution.MaxBytes {
-		w.expected = "runtime.limit"
-		return nil
-	}
 	input, err := value.NewText(types.Path(), filepath.Join(w.directory, "input"))
 	if err != nil {
 		return err
@@ -305,9 +295,9 @@ func (w *workload) expectPayload() error {
 	weights := []uint64{input.Weight(), input.Weight(), fallibleWeight, bytesWeight}
 	commitIndex := -1
 	if w.name == "read" {
-		// Data reference, UTF-8 result, propagated string, string reference, scalar,
-		// wrapped flow return, and top-level flow-call result.
-		weights = append(weights, bytesWeight, fallibleWeight, bytesWeight, bytesWeight, integer.Weight(), wrappedInteger.Weight(), wrappedInteger.Weight())
+		// UTF-8 result, propagated string, scalar, and wrapped flow return.
+		// References and the top-level result preserve an already charged identity.
+		weights = append(weights, fallibleWeight, bytesWeight, integer.Weight(), wrappedInteger.Weight())
 	} else {
 		output, err := value.NewText(types.Path(), filepath.Join(w.directory, "output"))
 		if err != nil {
@@ -334,14 +324,16 @@ func (w *workload) expectPayload() error {
 			return err
 		}
 		targetWeight := uint64(w.size) + target.Weight()
-		weights = append(weights, output.Weight(), output.Weight(), bytesWeight, targetWeight, targetWeight)
+		weights = append(weights, output.Weight(), output.Weight(), targetWeight)
 		// The write completes before the receipt's first charge.
 		commitIndex = len(weights)
-		weights = append(weights, receipt.Weight(), receipt.Weight(), integer.Weight(), wrappedInteger.Weight(), wrappedInteger.Weight())
+		weights = append(weights, receipt.Weight(), integer.Weight(), wrappedInteger.Weight())
 	}
+	limits := execution.DefaultBudgetInput().Limits
 	var total uint64
 	for index, weight := range weights {
-		if weight > execution.MaxValueWeight || weight > execution.MaxEvaluationWeight-total {
+		if (limits.ValueBytes != 0 && weight > limits.ValueBytes) ||
+			(limits.LiveBytes != 0 && (total > limits.LiveBytes || weight > limits.LiveBytes-total)) {
 			w.expected = "runtime.limit"
 			w.limitAfterCommit = commitIndex >= 0 && index >= commitIndex
 			return nil

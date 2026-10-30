@@ -220,7 +220,7 @@ def construct(prepared_path: Path, runtime: Path, host: str, variant: str, go: P
     validate_prepared(prepared)
     runtime_receipt = validate_runtime(runtime, variant)
     manifest = copy.deepcopy(json.loads(local(runtime / 'toolchain.json').read_text()))
-    if manifest.get('abi') != 'lo-native-2' or manifest.get('llvm') != '21.1.8':
+    if manifest.get('abi') != 'lo-native-3' or manifest.get('llvm') != '21.1.8':
         raise ValueError('runtime manifest ABI or LLVM identity is incompatible')
     if set(manifest['targets']) != set(HOSTS):
         raise ValueError('runtime manifest must supply both arm64 targets')

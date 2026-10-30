@@ -30,7 +30,7 @@ func metadataLocations(t *testing.T, data []byte) []nativeplan.Location {
 	if err := json.Unmarshal(data, &document); err != nil {
 		t.Fatal(err)
 	}
-	if document.ABI != "lo-native-2" {
+	if document.ABI != "lo-native-3" {
 		t.Fatalf("unexpected metadata ABI %q", document.ABI)
 	}
 	result := make([]nativeplan.Location, len(document.Locations))

@@ -41,6 +41,7 @@ pub unsafe fn borrow(v: *const Value) -> Handle {
     Arc::from_raw(v)
 }
 pub unsafe fn write(c: &mut Context, out: *mut ResultSlot, r: Outcome) {
+    let r = r.map_err(|fault| c.combine_scope_cleanup(fault));
     let slot = match r {
         Ok(v) => ResultSlot {
             status: 0,
@@ -53,7 +54,7 @@ pub unsafe fn write(c: &mut Context, out: *mut ResultSlot, r: Outcome) {
             value: Arc::into_raw(v),
         },
         Err(f) => {
-            c.fault = Some(f);
+            c.store_fault(f);
             ResultSlot {
                 status: 2,
                 code: 2,
@@ -134,15 +135,27 @@ pub unsafe fn call(
         return;
     }
     let result = (|| -> Outcome {
-        if operation != Some("lo_derivative_host_failure") {
+        let failed_value_boundary = matches!(operation, Some("lo_charge_value" | "lo_cause"));
+        if failed_value_boundary {
+            (&*c).error_entry()?;
+        } else if operation != Some("lo_derivative_host_failure") {
             (&*c).check_fault()?;
         }
         let s = (&*c).site(site)?;
         let count = usize::try_from(n).map_err(|_| host("invalid argument count"))?;
-        if count > MAX_ITEMS || count > 0 && args.is_null() {
+        if count > 0 && args.is_null() {
             return Err(host("invalid argument array"));
         }
         let a = ArgumentValues::read(args, count)?;
+        if failed_value_boundary {
+            if let Some(error) = a.first().and_then(cause) {
+                let fault = (&mut *c).combine_scope_cleanup(Fault::Recoverable(error));
+                if !matches!(fault, Fault::Recoverable(_)) {
+                    return Err(fault);
+                }
+            }
+            (&*c).check_fault()?;
+        }
         crate::tensor::validate_inputs(&*c, &a)?;
         if let Some(op) = operation {
             if op.starts_with("lo_derivative_") {
@@ -225,6 +238,7 @@ pub unsafe fn call(
                     | "List.flat_map"
                     | "List.unfold"
                     | "Flow.fold"
+                    | "Flow.worklist"
             ) {
                 crate::collections::execute(c, &s, &a)
             } else {
@@ -324,8 +338,7 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
             Ok(c.control_null.clone())
         }
         Action::ScopeEnter => {
-            c.resources.scope_enter();
-            c.scopes += 1;
+            c.scope_enter();
             Ok(c.control_null.clone())
         }
         Action::FlowEnter => {
@@ -394,7 +407,11 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
         Action::ConvertScalarListView => {
             let mut output = vec![];
             for ch in a[0].string().chars() {
-                if output.len() == MAX_ITEMS {
+                if crate::value_resources::exceeds(
+                    0,
+                    output.len() as u64 + 1,
+                    c.values.limits.list_items,
+                ) {
                     return Err(limit("list elements"));
                 }
                 output.push(new(atom("Scalar"), Data::Text(ch.to_string())))
@@ -468,18 +485,12 @@ pub unsafe extern "C" fn lo_scope_leave(c: *mut Context, result: *const Value, _
     if c.owner != std::thread::current().id() || c.scopes == 0 {
         std::process::abort()
     }
-    let roots = if result.is_null() {
-        vec![]
-    } else {
-        let roots = [borrow(result)];
-        if crate::tensor::validate_inputs(c, &roots).is_err() {
-            std::process::abort()
-        }
-        crate::tensor::allocations(&roots)
-    };
+    let root = (!result.is_null()).then(|| borrow(result));
+    if root.is_some() && crate::tensor::validate_inputs(c, root.as_slice()).is_err() {
+        std::process::abort()
+    }
     let scope = c.resources.current_scope();
-    c.resources.scope_close(scope, &roots);
-    c.scopes -= 1;
+    c.scope_close(scope, root.as_slice());
 }
 #[no_mangle]
 pub unsafe extern "C" fn lo_flow_leave(c: *mut Context) {
@@ -503,7 +514,7 @@ pub unsafe extern "C" fn lo_flow_error(
     }
     let c = &mut *c;
     let result = (|| {
-        c.entry()?;
+        c.error_entry()?;
         let f = c
             .program
             .flows
@@ -524,6 +535,10 @@ pub unsafe extern "C" fn lo_flow_error(
             return Err(host("flow error input type"));
         };
         let framed = frame(&e, &f.name, &err.operation, record(fields));
+        let fault = c.combine_scope_cleanup(Fault::Recoverable(framed.clone()));
+        if !matches!(fault, Fault::Recoverable(_)) {
+            return Err(fault);
+        }
         if f.handler.is_some() {
             return Err(Fault::Recoverable(framed));
         }
@@ -568,7 +583,8 @@ pub unsafe fn invoke(c: *mut Context, flow: usize, a: &[Handle], site: u64) -> O
     let table = ptr::addr_of!(lo_program_flows);
     let callback = *table.add(flow);
     callback(c, raw.as_ptr(), raw.len() as u64, site, &mut out);
-    match read(&*c, out) {
+    let result = read(&*c, out).map_err(|fault| (&mut *c).combine_scope_cleanup(fault));
+    match result {
         Ok(v) => {
             if &v.typ != f.output.base_ref() {
                 return Err(host("callback result type metadata mismatch"));
@@ -624,21 +640,28 @@ pub unsafe extern "C" fn lo_program_free(program: *const Program) {
 #[no_mangle]
 pub unsafe extern "C" fn lo_context_from_program(
     program: *const Program,
-    steps: u64,
+    options: *const ContextOptions,
 ) -> *mut Context {
-    if program.is_null() || steps == 0 {
+    if program.is_null() || options.is_null() || (*options).steps == 0 {
         return ptr::null_mut();
     }
     Arc::increment_strong_count(program);
-    Box::into_raw(Box::new(Context::new(Arc::from_raw(program), steps)))
+    let mut session = Session::empty(Arc::from_raw(program), (*options).steps);
+    Arc::get_mut(&mut session).unwrap().limits = (*options).limits;
+    Box::into_raw(Box::new(Context::with_options(session)))
+}
+#[repr(C)]
+pub struct ContextOptions {
+    steps: u64,
+    limits: crate::value_resources::Limits,
 }
 #[no_mangle]
-pub unsafe extern "C" fn lo_context_new(steps: u64) -> *mut Context {
-    if steps == 0 {
+pub unsafe extern "C" fn lo_context_new(options: *const ContextOptions) -> *mut Context {
+    if options.is_null() || (*options).steps == 0 {
         return ptr::null_mut();
     }
     let program = lo_program_new();
-    let context = lo_context_from_program(program, steps);
+    let context = lo_context_from_program(program, options);
     lo_program_free(program);
     context
 }
@@ -762,21 +785,13 @@ pub unsafe extern "C" fn lo_context_run(c: *mut Context, out: *mut ResultSlot) {
         return;
     }
     (*c).resources.reclaim_orphans();
+    (*c).values.reclaim_orphans();
     lo_entry(c, ptr::null(), 0, 0, out);
-    if (*out).status == 0 && !(*out).value.is_null() {
-        let v = borrow((*out).value);
-        if let Some(e) = cause(&v) {
-            lo_value_release((*out).value);
-            ptr::write(
-                out,
-                ResultSlot {
-                    status: 1,
-                    code: 1,
-                    value: Arc::into_raw(e),
-                },
-            );
-        }
-    }
+    let result = read(&*c, ptr::read(out)).and_then(|value| match cause(&value) {
+        Some(error) => Err(Fault::Recoverable(error)),
+        None => (&*c).check_fault().map(|()| value),
+    });
+    write(&mut *c, out, result);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lo_context_cancel(c: *mut Context) {

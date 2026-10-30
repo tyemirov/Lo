@@ -317,7 +317,7 @@ func TestNativeProcessHostReviewedLane(t *testing.T) {
 				}
 				if name == "denied-command" || name == "denied-cwd" {
 					progress := execution.ProcessProgress(runErr)
-					if progress == nil || progress.Field("start_confirmed") != value.Bool(false) || progress.Field("cleanup_complete") != value.Bool(true) {
+					if progress == nil || progress.Field("start_confirmed").(value.Boolean).Bool() || !progress.Field("cleanup_complete").(value.Boolean).Bool() {
 						t.Fatal("denied authority lost precreation cleanup evidence")
 					}
 				}
@@ -331,7 +331,7 @@ func TestNativeProcessHostReviewedLane(t *testing.T) {
 					t.Fatalf("execution failure classification: %v", runErr)
 				}
 				progress := execution.ProcessProgress(runErr)
-				if progress == nil || progress.Field("cleanup_complete") != value.Bool(true) {
+				if progress == nil || !progress.Field("cleanup_complete").(value.Boolean).Bool() {
 					t.Fatal("resource failure lost complete cleanup")
 				}
 			case "output-to-file":

@@ -1,6 +1,7 @@
 use crate::{context::*, value::*};
 use num_traits::{Signed, ToPrimitive};
 use std::{
+    collections::VecDeque,
     ops::{Deref, DerefMut},
     sync::Arc,
 };
@@ -9,7 +10,7 @@ pub fn admit(site: &Site, flows: &[Flow]) -> Result<(), String> {
     let invalid = || format!("invalid native collection contract {}", site.operation);
     let operation = site.operation.as_str();
     let unfold = operation == "List.unfold";
-    let fold = matches!(operation, "List.fold" | "Flow.fold");
+    let fold = matches!(operation, "List.fold" | "Flow.fold" | "Flow.worklist");
     let context_start = if unfold || fold { 2 } else { 1 };
     if site.arguments.len() < context_start + 1 {
         return Err(invalid());
@@ -62,6 +63,20 @@ pub fn admit(site: &Site, flows: &[Flow]) -> Result<(), String> {
             }
             output
         }
+        "Flow.worklist" => {
+            if matches!(inputs[1], Type::Fallible(_)) {
+                return Err(invalid());
+            }
+            let expected = Type::Record(vec![
+                ("items".into(), inputs[0].clone()),
+                ("state".into(), inputs[1].clone()),
+                ("stop".into(), atom("Bool")),
+            ]);
+            if output != expected {
+                return Err(invalid());
+            }
+            inputs[1].clone()
+        }
         "List.flat_map" => {
             if !matches!(output, Type::List(_)) {
                 return Err(invalid());
@@ -98,16 +113,17 @@ struct Scope {
     context: *mut Context,
     id: usize,
     output: Option<Handle>,
+    queue_slots: usize,
 }
 
 impl Scope {
     unsafe fn enter(context: *mut Context) -> Self {
-        (*context).scopes += 1;
-        let id = (*context).resources.scope_enter();
+        let id = (*context).scope_enter();
         Self {
             context,
             id,
             output: None,
+            queue_slots: 0,
         }
     }
 }
@@ -115,10 +131,8 @@ impl Scope {
 impl Drop for Scope {
     fn drop(&mut self) {
         unsafe {
-            let roots =
-                crate::tensor::allocations(&self.output.iter().cloned().collect::<Vec<_>>());
-            (*self.context).resources.scope_close(self.id, &roots);
-            (*self.context).scopes -= 1;
+            (*self.context).values.release_worklist(self.queue_slots);
+            (*self.context).scope_close(self.id, self.output.as_slice());
         }
     }
 }
@@ -172,6 +186,9 @@ impl Drop for CallbackArguments<'_> {
 
 /// The context pointer permits callback reentry without retaining a Rust borrow.
 pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Outcome {
+    if site.operation == "Flow.worklist" {
+        return worklist(context, site, args);
+    }
     let mut scope = Scope::enter(context);
     let operation = site.operation.as_str();
     let unfold = operation == "List.unfold";
@@ -189,7 +206,13 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
         if count.is_positive() {
             count
                 .to_usize()
-                .filter(|count| *count <= MAX_ITEMS)
+                .filter(|count| {
+                    !crate::value_resources::exceeds(
+                        0,
+                        *count as u64,
+                        (*context).values.limits.list_items,
+                    )
+                })
                 .ok_or_else(|| limit("unfold elements"))?
         } else {
             0
@@ -246,11 +269,16 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
                     if value.bool() {
                         output.push(element.unwrap());
                     }
+                    (*context).scope_keep(scope.id, &[]);
                 }
                 "List.fold" | "Flow.fold" => state = Some(value),
                 "List.flat_map" => {
                     let extra = value.items();
-                    if extra.len() > MAX_ITEMS - output.len() {
+                    if crate::value_resources::exceeds(
+                        output.len() as u64,
+                        extra.len() as u64,
+                        (*context).values.limits.list_items,
+                    ) {
                         return Err(limit("list elements"));
                     }
                     output.extend_from_slice(extra);
@@ -258,19 +286,13 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
                 "List.unfold" => {
                     let fields = value.fields();
                     output.push(fields["value"].clone());
-                    (*context).resources.scope_retain(
-                        scope.id,
-                        &crate::tensor::allocations(&[fields["value"].clone()]),
-                    );
+                    (*context).scope_retain(scope.id, &[fields["value"].clone()]);
                     state = Some(fields["next_state"].clone());
                 }
                 _ => return Err(host("invalid collection processor")),
             }
             if fold || unfold {
-                (*context).resources.scope_keep(
-                    scope.id,
-                    &crate::tensor::allocations(&[state.as_ref().unwrap().clone()]),
-                );
+                (*context).scope_keep(scope.id, &[state.as_ref().unwrap().clone()]);
             }
             if flow_fold {
                 progress = Some((*context).record_flow_progress(
@@ -283,13 +305,16 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
         if fold {
             Ok(state.unwrap())
         } else {
+            if unfold {
+                (*context).scope_keep(scope.id, &[]);
+            }
             Ok(new(site.typ.base(), Data::List(output)))
         }
     })();
     if result
         .as_ref()
         .err()
-        .is_some_and(|fault| !matches!(fault.primary(), Fault::Recoverable(_)))
+        .is_some_and(|fault| !matches!(fault, Fault::Recoverable(_)))
     {
         if let Some(progress) = progress {
             if !(*context).flow_fault_progress {
@@ -309,6 +334,117 @@ pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Ou
                 })
             });
         }
+    }
+    if let Ok(output) = &result {
+        scope.output = Some(output.clone());
+    }
+    result
+}
+
+/// Each queued item is visited and pinned once; keeping the next state never
+/// scans the pending queue or the ledger's pinned entries.
+unsafe fn worklist(context: *mut Context, site: &Site, args: &[Handle]) -> Outcome {
+    let mut scope = Scope::enter(context);
+    let mut state = args[1].clone();
+    let parameters = &args[2..args.len() - 1];
+    let Data::Flow(flow) = args.last().unwrap().data else {
+        return Err(host("missing callback identity"));
+    };
+    let mut pending = VecDeque::new();
+    let mut completed = 0;
+    let mut progress = (*context).record_worklist_progress(0, args[0].items().len(), &state)?;
+    let mut result = (|| -> Outcome {
+        for parameter in parameters {
+            (*context).scope_pin(scope.id, &[parameter.clone()])?;
+        }
+        (*context).values.reserve_worklist(args[0].items().len())?;
+        scope.queue_slots = args[0].items().len();
+        for item in args[0].items() {
+            pending.push_back((
+                item.clone(),
+                (*context).scope_pin(scope.id, &[item.clone()])?,
+            ));
+        }
+        while let Some((item, pin)) = pending.pop_front() {
+            (*context).step()?;
+            let mut callback_args = parameters.to_vec();
+            callback_args.push(state.clone());
+            callback_args.push(item.clone());
+            let callback_value = crate::exports::invoke(context, flow, &callback_args, site.id)?;
+            let value = match &callback_value.data {
+                Data::Success(value) => value.clone(),
+                Data::Failure(cause) => {
+                    return Err(callback_failure(
+                        site,
+                        cause,
+                        completed,
+                        Some(item),
+                        Some(state.clone()),
+                        Some(&progress),
+                    ))
+                }
+                _ => callback_value,
+            };
+            let fields = value.fields();
+            state = fields["state"].clone();
+            let stop = fields["stop"].bool();
+            let children = &fields["items"];
+            (*context).scope_unpin(scope.id, pin);
+            (*context).values.release_worklist(1);
+            scope.queue_slots -= 1;
+            callback_args.clear();
+            completed += 1;
+            if stop {
+                while let Some((_, pin)) = pending.pop_front() {
+                    (*context).scope_unpin(scope.id, pin);
+                }
+                (*context).values.release_worklist(scope.queue_slots);
+                scope.queue_slots = 0;
+                (*context).scope_keep(scope.id, &[state.clone()]);
+            } else {
+                (*context).scope_keep(scope.id, &[state.clone(), children.clone()]);
+            }
+            let next_pending = if stop {
+                0
+            } else {
+                pending.len() + children.items().len()
+            };
+            progress = (*context).record_worklist_progress(completed, next_pending, &state)?;
+            if stop {
+                break;
+            }
+            (*context).values.reserve_worklist(children.items().len())?;
+            scope.queue_slots += children.items().len();
+            for item in children.items().iter().rev() {
+                pending.push_front((
+                    item.clone(),
+                    (*context).scope_pin(scope.id, &[item.clone()])?,
+                ));
+            }
+        }
+        Ok(state.clone())
+    })();
+    if result
+        .as_ref()
+        .err()
+        .is_some_and(|fault| !matches!(fault, Fault::Recoverable(_)))
+    {
+        if !(*context).flow_fault_progress {
+            (*context).flow_progress = vec![progress];
+        } else if !(*context)
+            .flow_progress
+            .first()
+            .is_some_and(|first| Arc::ptr_eq(first, &progress))
+        {
+            (*context).flow_progress.insert(0, progress);
+        }
+        (*context).flow_fault_progress = true;
+        result = result.map_err(|fault| {
+            fault.with_details(BoundaryDetails {
+                flow_progress: (*context).flow_progress.clone(),
+                ..Default::default()
+            })
+        });
     }
     if let Ok(output) = &result {
         scope.output = Some(output.clone());

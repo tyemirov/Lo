@@ -65,6 +65,7 @@ pub const SUPPORTED: &[&str] = &[
     "List.flat_map",
     "List.unfold",
     "Flow.fold",
+    "Flow.worklist",
 ];
 pub fn arity(op: &str) -> (usize, Option<usize>) {
     match op {
@@ -72,7 +73,7 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
         "Range.new" => (4, Some(4)),
         "Error.new" => (3, Some(3)),
         "List.map" | "List.filter" | "List.flat_map" => (2, None),
-        "List.fold" | "List.unfold" | "Flow.fold" => (3, None),
+        "List.fold" | "List.unfold" | "Flow.fold" | "Flow.worklist" => (3, None),
         "Math.add" | "Math.sub" | "Math.mul" | "Math.div" | "Math.mod" | "Math.lt" | "Math.lte"
         | "Math.gt" | "Math.gte" | "Math.eq" | "Float.add" | "Float.sub" | "Float.mul"
         | "Float.div" | "Float.eq" | "Float.lt" | "Float.lte" | "Float.gt" | "Float.gte"
@@ -113,7 +114,13 @@ pub fn admit(s: &Site) -> Result<(), String> {
     }
     if matches!(
         op,
-        "List.map" | "List.filter" | "List.flat_map" | "List.fold" | "List.unfold" | "Flow.fold"
+        "List.map"
+            | "List.filter"
+            | "List.flat_map"
+            | "List.fold"
+            | "List.unfold"
+            | "Flow.fold"
+            | "Flow.worklist"
     ) {
         return Ok(());
     }
@@ -344,12 +351,9 @@ fn checked_integer(n: BigInt) -> Outcome {
         Ok(int(n))
     }
 }
-fn bounded_text(s: String) -> Outcome {
-    if s.len() > MAX_BYTES {
-        Err(limit("string bytes"))
-    } else {
-        Ok(text(s))
-    }
+fn bounded_text(c: &Context, s: String) -> Outcome {
+    c.values.preflight(s.len() as u64 + 16)?;
+    Ok(text(s))
 }
 fn fail(site: &Site, args: &[Handle], kind: &str, msg: &str) -> Outcome {
     let v = operation_failure(site, args, kind, msg);
@@ -392,9 +396,11 @@ pub fn execute(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {
                 Err(_) => fail(s, a, "UTF8.InvalidBytes", "bytes are not valid UTF-8"),
             }
         }
-        "String.FromScalars.new" => bounded_text(a[0].items().iter().map(|x| x.string()).collect()),
+        "String.FromScalars.new" => {
+            bounded_text(c, a[0].items().iter().map(|x| x.string()).collect())
+        }
         "List.new" => {
-            if a.len() > MAX_ITEMS {
+            if crate::value_resources::exceeds(0, a.len() as u64, c.values.limits.list_items) {
                 return Err(limit("list elements"));
             }
             Ok(new(s.typ.clone(), Data::List(a.to_vec())))
@@ -425,13 +431,17 @@ pub fn execute(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {
         )),
         "String.concat" => {
             let n: usize = a.iter().map(|x| x.string().len()).sum();
-            if n > MAX_BYTES {
-                return Err(limit("string bytes"));
-            }
-            bounded_text(a.iter().map(|x| x.string()).collect())
+            c.values.preflight(n as u64 + 16)?;
+            bounded_text(c, a.iter().map(|x| x.string()).collect())
         }
-        "String.upper" => bounded_text(a[0].string().chars().map(crate::unicode::upper).collect()),
-        "String.lower" => bounded_text(a[0].string().chars().map(crate::unicode::lower).collect()),
+        "String.upper" => bounded_text(
+            c,
+            a[0].string().chars().map(crate::unicode::upper).collect(),
+        ),
+        "String.lower" => bounded_text(
+            c,
+            a[0].string().chars().map(crate::unicode::lower).collect(),
+        ),
         "String.length" => Ok(int(a[0].string().chars().count())),
         "String.eq" | "Scalar.eq" | "File.Path.eq" => Ok(boolean(equal(&a[0], &a[1]))),
         "Int.to_string" => Ok(text(a[0].integer().to_string())),

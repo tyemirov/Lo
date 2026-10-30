@@ -15,13 +15,6 @@ func Arithmetic(session execution.Session) derivative.Arithmetic {
 
 type tensorArithmetic struct{ machine *machine }
 
-func (d tensorArithmetic) finish(data tensor.Data, err error) (tensor.Data, error) {
-	if err != nil {
-		return nil, err
-	}
-	d.machine.AddWeight(tensor.Weight(data.Shape(), data.Location()))
-	return data, nil
-}
 func (d tensorArithmetic) Apply(op string, a, b tensor.Data, indices []*big.Int) (tensor.Data, error) {
 	if b != nil && a.Location() != b.Location() {
 		return nil, must(device.NewFault(device.Mismatch, fmt.Errorf("numeric operation %s requires matching input locations", op)))
@@ -37,13 +30,13 @@ func (d tensorArithmetic) Apply(op string, a, b tensor.Data, indices []*big.Int)
 	if err = d.machine.tensorBudget(p.Steps(), tensor.Weight(p.Shape(), a.Location())); err != nil {
 		return nil, err
 	}
-	return d.finish(tensor.Execute(d.machine.Context(), d.machine.Resources(), p, a, b))
+	return tensor.Execute(d.machine.Context(), d.machine.Resources(), p, a, b)
 }
 func (d tensorArithmetic) Constant(shape tensor.Shape, location string, v float32) (tensor.Data, error) {
 	if err := d.machine.tensorBudget(shape.Count(), tensor.Weight(shape, location)); err != nil {
 		return nil, err
 	}
-	return d.finish(tensor.Constant(d.machine.Context(), d.machine.Resources(), shape, location, v))
+	return tensor.Constant(d.machine.Context(), d.machine.Resources(), shape, location, v)
 }
 func (d tensorArithmetic) Relu(g, a tensor.Data) (tensor.Data, error) {
 	if a.Location() != g.Location() {
@@ -52,7 +45,7 @@ func (d tensorArithmetic) Relu(g, a tensor.Data) (tensor.Data, error) {
 	if err := d.machine.tensorBudget(a.Shape().Count(), tensor.Weight(a.Shape(), a.Location())); err != nil {
 		return nil, err
 	}
-	return d.finish(tensor.ReluDerivative(d.machine.Context(), d.machine.Resources(), g, a))
+	return tensor.ReluDerivative(d.machine.Context(), d.machine.Resources(), g, a)
 }
 func (d tensorArithmetic) CheckSqrt(a tensor.Data) error {
 	return tensor.CheckSqrtDerivative(d.machine.Context(), d.machine.Resources(), a)

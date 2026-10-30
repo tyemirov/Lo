@@ -296,9 +296,8 @@ func TestAdapterReceiptCanceledWriteDiagnostic(t *testing.T) {
 
 func TestAdapterReceiptPostCommitBudgetDiagnostic(t *testing.T) {
 	got, path := receiptProgramResult(t, context.Background(), adapter.NativeFileIO(), func(session execution.Session, target value.Target, span source.Span) (value.Value, error) {
-		charge := value.NewBytes(make([]byte, execution.MaxValueWeight-16))
 		for index := 0; index < 4; index++ {
-			if err := session.ChargeValue(charge); err != nil {
+			if err := session.ChargeValue(value.NewBytes(make([]byte, execution.MaxValueWeight-16))); err != nil {
 				return nil, err
 			}
 		}

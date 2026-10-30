@@ -1,0 +1,3861 @@
+{
+  "recorded_utc": "2026-10-30T05:14:42.069358+00:00",
+  "git_head": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+  "validation_scope": "current uncommitted workspace source",
+  "existing_workspace_changes_preserved": true,
+  "ci": {
+    "command": "make ci NATIVE_RUNTIME_STATE=_scratch/resource-performance-X211/native/preparation LLVM_TOOLCHAIN=_scratch/resource-performance-X211/native/after-distribution/toolchain.json 'TEST_ARGS=-count=1 -v'",
+    "log": "ci-complete.log",
+    "log_sha256": "9e56c32ba50beb329328d04506bbb1c6a47cb5ca6ea86b2b8460d4f410114466",
+    "process_exit": {
+      "ci_command": "make ci NATIVE_RUNTIME_STATE=_scratch/resource-performance-X211/native/preparation LLVM_TOOLCHAIN=_scratch/resource-performance-X211/native/after-distribution/toolchain.json 'TEST_ARGS=-count=1 -v'",
+      "raw_exit_status": 0,
+      "started_at": "2026-10-30T04:09:25.567848+00:00",
+      "finished_at": "2026-10-30T05:10:25.237622+00:00"
+    },
+    "status": "passed",
+    "integration_durations_seconds": [
+      126.121,
+      3319.163
+    ]
+  },
+  "performance_assessment": {
+    "status": "validated_fixes_with_remaining_native_performance_costs",
+    "scope": "Resource tracking and length fixes, graph lifetime summaries, and final source performance comparisons after dynamic traversal.",
+    "functional_validation": {
+      "focused_native_top_level_tests_passed": 63,
+      "native_allocation_gate_variants_passed": 18,
+      "native_algorithm_tests_passed": 11,
+      "native_targets": [
+        "darwin/arm64",
+        "linux/arm64 via QEMU"
+      ],
+      "go_focused_and_race_checks": "passed",
+      "final_make_ci": "passed",
+      "full_go_suite": {
+        "status": "passed",
+        "duration_seconds": 126.121
+      },
+      "full_native_suite": {
+        "status": "passed",
+        "duration_seconds": 3319.163
+      },
+      "qualification_layout": "canonical manifest and both archives byte-identical; three focused cases passed",
+      "qualification_tool_tests_passed": 217
+    },
+    "performance_acceptance": {
+      "large_interpreter_slowdowns_recovered_in_measured_cases": true,
+      "tested_borrowed_graph_growth_cases_linear": true,
+      "unchanged_native_collection_performance_established": false,
+      "unchanged_file_throughput_established": false
+    },
+    "remaining_costs": "Final native CLI collection medians remain about 17 to 32 percent above HEAD. Four-operation native child CPU remains about 41 percent above HEAD for map and 28 percent for fold. Some file medians remain higher.",
+    "final_sample_counts": {
+      "go_collections": 1095,
+      "native_collections": 1095,
+      "paired_files": 540,
+      "tree": 54,
+      "native_amortized_head_current": 60
+    },
+    "large_collection_comparisons": [
+      {
+        "case": "unfold",
+        "items": 8192,
+        "backends": {
+          "go": {
+            "median_ms": {
+              "before": 6.655584,
+              "initial": 15.600084,
+              "current": 6.753083
+            },
+            "corrected_vs_prechange_percent": 1.4649202834792652
+          },
+          "native": {
+            "median_ms": {
+              "before": 9.32525,
+              "initial": 16.3205,
+              "current": 11.257083
+            },
+            "corrected_vs_prechange_percent": 20.716152381973664
+          }
+        }
+      },
+      {
+        "case": "map",
+        "items": 8192,
+        "backends": {
+          "go": {
+            "median_ms": {
+              "before": 12.142375,
+              "initial": 28.096792,
+              "current": 12.334208
+            },
+            "corrected_vs_prechange_percent": 1.579863906361001
+          },
+          "native": {
+            "median_ms": {
+              "before": 16.329916,
+              "initial": 30.026459,
+              "current": 21.570792
+            },
+            "corrected_vs_prechange_percent": 32.093710708616015
+          }
+        }
+      },
+      {
+        "case": "filter",
+        "items": 8192,
+        "backends": {
+          "go": {
+            "median_ms": {
+              "before": 11.418458,
+              "initial": 27.859208,
+              "current": 10.53025
+            },
+            "corrected_vs_prechange_percent": -7.7787035692560185
+          },
+          "native": {
+            "median_ms": {
+              "before": 16.41575,
+              "initial": 29.447,
+              "current": 20.036792
+            },
+            "corrected_vs_prechange_percent": 22.058340313418512
+          }
+        }
+      },
+      {
+        "case": "list-fold",
+        "items": 8192,
+        "backends": {
+          "go": {
+            "median_ms": {
+              "before": 11.017333,
+              "initial": 25.266542,
+              "current": 9.9785
+            },
+            "corrected_vs_prechange_percent": -9.429078707160798
+          },
+          "native": {
+            "median_ms": {
+              "before": 12.354916,
+              "initial": 21.983625,
+              "current": 14.748084
+            },
+            "corrected_vs_prechange_percent": 19.37016811769503
+          }
+        }
+      },
+      {
+        "case": "flow-fold",
+        "items": 8192,
+        "backends": {
+          "go": {
+            "median_ms": {
+              "before": 13.991792,
+              "initial": 29.254417,
+              "current": 13.243458
+            },
+            "corrected_vs_prechange_percent": -5.348378535072563
+          },
+          "native": {
+            "median_ms": {
+              "before": 15.3925,
+              "initial": 24.146958,
+              "current": 18.07225
+            },
+            "corrected_vs_prechange_percent": 17.40945265551406
+          }
+        }
+      }
+    ],
+    "historical_campaigns": "Earlier correction stages, interrupted stage12 CI, and superseded measurements remain historical or diagnostic evidence."
+  },
+  "performance_assessment_source": "root acceptance-summary.json; CI success alone does not establish performance acceptance",
+  "measurement_policy": {
+    "workload_max_steps": 100000000,
+    "defaults_follow_each_implementation": true,
+    "before": {
+      "expanded_value_bytes": 16777216,
+      "cumulative_value_bytes": 67108864,
+      "list_items": 1000000,
+      "file_entries": 10000,
+      "directory_observations_per_invocation": 128
+    },
+    "initial_and_current": {
+      "value_bytes": 16777216,
+      "live_bytes": 67108864,
+      "data_bytes": 0,
+      "list_items": 0,
+      "file_entries": 0,
+      "simultaneously_retained_directory_observations": 128
+    },
+    "source_of_truth": "phase-specific internal/execution/contract.go and native runtime source receipts"
+  },
+  "collection_sample_counts": {
+    "go": 1095,
+    "native": 1095
+  },
+  "collection_summary": [
+    {
+      "case": "unfold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 0.609209,
+        "p95_sample_ms": 0.921584,
+        "median_allocation_requests": 17292,
+        "median_allocation_bytes": 760976
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 1.152542,
+        "p95_sample_ms": 2.006292,
+        "median_allocation_requests": 26603,
+        "median_allocation_bytes": 1536312
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.640417,
+        "p95_sample_ms": 1.661042,
+        "median_allocation_requests": 14266,
+        "median_allocation_bytes": 663048
+      },
+      "current_to_before_ratio": 1.0512270829879402,
+      "current_to_initial_ratio": 0.5556561062416815
+    },
+    {
+      "case": "unfold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 4.438459,
+        "p95_sample_ms": 30.766542
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 5.329417,
+        "p95_sample_ms": 29.922292
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 4.640792,
+        "p95_sample_ms": 118.077958
+      },
+      "current_to_before_ratio": 1.0455863172330757,
+      "current_to_initial_ratio": 0.8707879304621875
+    },
+    {
+      "case": "map",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 0.89,
+        "p95_sample_ms": 1.176708,
+        "median_allocation_requests": 30103,
+        "median_allocation_bytes": 1269688
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 1.710334,
+        "p95_sample_ms": 2.3325,
+        "median_allocation_requests": 44602,
+        "median_allocation_bytes": 2605800
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.810042,
+        "p95_sample_ms": 1.143291,
+        "median_allocation_requests": 24554,
+        "median_allocation_bytes": 1149312
+      },
+      "current_to_before_ratio": 0.9101595505617978,
+      "current_to_initial_ratio": 0.473616264425545
+    },
+    {
+      "case": "map",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 4.843166,
+        "p95_sample_ms": 31.244458
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 5.928292,
+        "p95_sample_ms": 29.094833
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 4.976375,
+        "p95_sample_ms": 116.508625
+      },
+      "current_to_before_ratio": 1.0275045290621878,
+      "current_to_initial_ratio": 0.8394281185879509
+    },
+    {
+      "case": "filter",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 0.839208,
+        "p95_sample_ms": 1.1635,
+        "median_allocation_requests": 27035,
+        "median_allocation_bytes": 1168952
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 1.736083,
+        "p95_sample_ms": 2.233833,
+        "median_allocation_requests": 42034,
+        "median_allocation_bytes": 2426664
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.754709,
+        "p95_sample_ms": 1.104916,
+        "median_allocation_requests": 21454,
+        "median_allocation_bytes": 925448
+      },
+      "current_to_before_ratio": 0.8993110170541749,
+      "current_to_initial_ratio": 0.4347194229768968
+    },
+    {
+      "case": "filter",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 4.600333,
+        "p95_sample_ms": 30.454875
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 5.816583,
+        "p95_sample_ms": 29.65475
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 5.05425,
+        "p95_sample_ms": 128.493667
+      },
+      "current_to_before_ratio": 1.0986704658119313,
+      "current_to_initial_ratio": 0.8689380001970229
+    },
+    {
+      "case": "list-fold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 0.886417,
+        "p95_sample_ms": 1.063125,
+        "median_allocation_requests": 27528,
+        "median_allocation_bytes": 1227672
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 1.565792,
+        "p95_sample_ms": 2.121917,
+        "median_allocation_requests": 42991,
+        "median_allocation_bytes": 2454504
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.723709,
+        "p95_sample_ms": 1.095583,
+        "median_allocation_requests": 21437,
+        "median_allocation_bytes": 931400
+      },
+      "current_to_before_ratio": 0.8164430510696433,
+      "current_to_initial_ratio": 0.46219996014796344
+    },
+    {
+      "case": "list-fold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 5.016334,
+        "p95_sample_ms": 29.437167
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 5.982667,
+        "p95_sample_ms": 29.892792
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 4.886875,
+        "p95_sample_ms": 126.815459
+      },
+      "current_to_before_ratio": 0.9741925079151429,
+      "current_to_initial_ratio": 0.8168388780455271
+    },
+    {
+      "case": "flow-fold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 1.008,
+        "p95_sample_ms": 1.422292,
+        "median_allocation_requests": 36248,
+        "median_allocation_bytes": 1736496
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 1.809666,
+        "p95_sample_ms": 2.684041,
+        "median_allocation_requests": 51712,
+        "median_allocation_bytes": 2996288
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.883583,
+        "p95_sample_ms": 1.358583,
+        "median_allocation_requests": 30158,
+        "median_allocation_bytes": 1473472
+      },
+      "current_to_before_ratio": 0.8765704365079365,
+      "current_to_initial_ratio": 0.4882575016605274
+    },
+    {
+      "case": "flow-fold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 5.106417,
+        "p95_sample_ms": 30.742458
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 6.009291,
+        "p95_sample_ms": 31.162459
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 5.160917,
+        "p95_sample_ms": 119.637458
+      },
+      "current_to_before_ratio": 1.0106728455588332,
+      "current_to_initial_ratio": 0.8588229460014501
+    },
+    {
+      "case": "unfold",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 1.74325,
+        "p95_sample_ms": 2.233459,
+        "median_allocation_requests": 67980,
+        "median_allocation_bytes": 2916736
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 4.15275,
+        "p95_sample_ms": 5.722084,
+        "median_allocation_requests": 105009,
+        "median_allocation_bytes": 6005984
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 1.608417,
+        "p95_sample_ms": 2.255458,
+        "median_allocation_requests": 55758,
+        "median_allocation_bytes": 2522104
+      },
+      "current_to_before_ratio": 0.9226542377742722,
+      "current_to_initial_ratio": 0.38731370778399854
+    },
+    {
+      "case": "unfold",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 5.6375,
+        "p95_sample_ms": 30.565583
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 7.504208,
+        "p95_sample_ms": 31.640333
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 5.994958,
+        "p95_sample_ms": 119.397875
+      },
+      "current_to_before_ratio": 1.0634071840354766,
+      "current_to_initial_ratio": 0.7988795086703353
+    },
+    {
+      "case": "map",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 3.0065,
+        "p95_sample_ms": 3.747333,
+        "median_allocation_requests": 119205,
+        "median_allocation_bytes": 4968520
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 6.654291,
+        "p95_sample_ms": 7.802,
+        "median_allocation_requests": 176836,
+        "median_allocation_bytes": 10286072
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 2.877583,
+        "p95_sample_ms": 3.669417,
+        "median_allocation_requests": 96812,
+        "median_allocation_bytes": 4527816
+      },
+      "current_to_before_ratio": 0.9571205720937968,
+      "current_to_initial_ratio": 0.4324402103845474
+    },
+    {
+      "case": "map",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 6.383875,
+        "p95_sample_ms": 32.560917
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 9.088792,
+        "p95_sample_ms": 34.414583
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 7.206417,
+        "p95_sample_ms": 119.663
+      },
+      "current_to_before_ratio": 1.1288468210922051,
+      "current_to_initial_ratio": 0.792890518343912
+    },
+    {
+      "case": "filter",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 2.790625,
+        "p95_sample_ms": 3.463458,
+        "median_allocation_requests": 106923,
+        "median_allocation_bytes": 4640584
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 6.552875,
+        "p95_sample_ms": 7.28625,
+        "median_allocation_requests": 166579,
+        "median_allocation_bytes": 9743168
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 2.580917,
+        "p95_sample_ms": 3.521083,
+        "median_allocation_requests": 84463,
+        "median_allocation_bytes": 3641224
+      },
+      "current_to_before_ratio": 0.9248526763717805,
+      "current_to_initial_ratio": 0.39386025217938686
+    },
+    {
+      "case": "filter",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 6.256167,
+        "p95_sample_ms": 32.674125
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 9.1855,
+        "p95_sample_ms": 32.600583
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 6.722958,
+        "p95_sample_ms": 126.184
+      },
+      "current_to_before_ratio": 1.0746129379218938,
+      "current_to_initial_ratio": 0.7319098579282566
+    },
+    {
+      "case": "list-fold",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 2.678875,
+        "p95_sample_ms": 3.489875,
+        "median_allocation_requests": 108948,
+        "median_allocation_bytes": 4785640
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 6.111958,
+        "p95_sample_ms": 6.973042,
+        "median_allocation_requests": 170549,
+        "median_allocation_bytes": 9674472
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 2.370166,
+        "p95_sample_ms": 3.173959,
+        "median_allocation_requests": 84442,
+        "median_allocation_bytes": 3588984
+      },
+      "current_to_before_ratio": 0.8847617003406281,
+      "current_to_initial_ratio": 0.38779160458890594
+    },
+    {
+      "case": "list-fold",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 6.921916,
+        "p95_sample_ms": 32.436375
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 9.766709,
+        "p95_sample_ms": 32.961125
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 7.672417,
+        "p95_sample_ms": 117.553167
+      },
+      "current_to_before_ratio": 1.1084238814802143,
+      "current_to_initial_ratio": 0.7855683014616285
+    },
+    {
+      "case": "flow-fold",
+      "size": 2048,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 3.521667,
+        "p95_sample_ms": 4.501084,
+        "median_allocation_requests": 143778,
+        "median_allocation_bytes": 6822584
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 7.243125,
+        "p95_sample_ms": 10.904708,
+        "median_allocation_requests": 205379,
+        "median_allocation_bytes": 11838496
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 3.077333,
+        "p95_sample_ms": 3.967042,
+        "median_allocation_requests": 119274,
+        "median_allocation_bytes": 5752432
+      },
+      "current_to_before_ratio": 0.8738285022405582,
+      "current_to_initial_ratio": 0.4248626110967296
+    },
+    {
+      "case": "flow-fold",
+      "size": 2048,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 7.078458,
+        "p95_sample_ms": 35.487
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 9.331625,
+        "p95_sample_ms": 35.503292
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 7.75775,
+        "p95_sample_ms": 119.90525
+      },
+      "current_to_before_ratio": 1.0959660988311295,
+      "current_to_initial_ratio": 0.8313396648493696
+    },
+    {
+      "case": "unfold",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 6.655584,
+        "p95_sample_ms": 7.746166,
+        "median_allocation_requests": 270751,
+        "median_allocation_bytes": 11614136
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 15.600084,
+        "p95_sample_ms": 17.684042,
+        "median_allocation_requests": 418556,
+        "median_allocation_bytes": 23939784
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 6.753083,
+        "p95_sample_ms": 9.116458,
+        "median_allocation_requests": 221714,
+        "median_allocation_bytes": 10039112
+      },
+      "current_to_before_ratio": 1.0146492028347927,
+      "current_to_initial_ratio": 0.4328876049641784
+    },
+    {
+      "case": "unfold",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 9.32525,
+        "p95_sample_ms": 35.80225
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 16.3205,
+        "p95_sample_ms": 40.612959
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 11.257083,
+        "p95_sample_ms": 122.324375
+      },
+      "current_to_before_ratio": 1.2071615238197366,
+      "current_to_initial_ratio": 0.6897511105664655
+    },
+    {
+      "case": "map",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 12.142375,
+        "p95_sample_ms": 13.031916,
+        "median_allocation_requests": 475569,
+        "median_allocation_bytes": 19897576
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 28.096792,
+        "p95_sample_ms": 31.178917,
+        "median_allocation_requests": 705679,
+        "median_allocation_bytes": 41149144
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 12.334208,
+        "p95_sample_ms": 15.144791,
+        "median_allocation_requests": 385744,
+        "median_allocation_bytes": 18272424
+      },
+      "current_to_before_ratio": 1.01579863906361,
+      "current_to_initial_ratio": 0.4389899031889477
+    },
+    {
+      "case": "map",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 16.329916,
+        "p95_sample_ms": 37.322
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 30.026459,
+        "p95_sample_ms": 48.745541
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 21.570792,
+        "p95_sample_ms": 129.524917
+      },
+      "current_to_before_ratio": 1.3209371070861602,
+      "current_to_initial_ratio": 0.7183928014955078
+    },
+    {
+      "case": "filter",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 11.418458,
+        "p95_sample_ms": 12.75775,
+        "median_allocation_requests": 426419,
+        "median_allocation_bytes": 18588208
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 27.859208,
+        "p95_sample_ms": 32.2925,
+        "median_allocation_requests": 664653,
+        "median_allocation_bytes": 39245736
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 10.53025,
+        "p95_sample_ms": 11.539083,
+        "median_allocation_requests": 336433,
+        "median_allocation_bytes": 14593696
+      },
+      "current_to_before_ratio": 0.9222129643074398,
+      "current_to_initial_ratio": 0.3779809533709645
+    },
+    {
+      "case": "filter",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 16.41575,
+        "p95_sample_ms": 42.801167
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 29.447,
+        "p95_sample_ms": 53.800792
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 20.036792,
+        "p95_sample_ms": 127.329208
+      },
+      "current_to_before_ratio": 1.2205834031341851,
+      "current_to_initial_ratio": 0.680435765952389
+    },
+    {
+      "case": "list-fold",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 11.017333,
+        "p95_sample_ms": 14.168542,
+        "median_allocation_requests": 434581,
+        "median_allocation_bytes": 19080792
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 25.266542,
+        "p95_sample_ms": 26.274083,
+        "median_allocation_requests": 680705,
+        "median_allocation_bytes": 38621784
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 9.9785,
+        "p95_sample_ms": 12.458708,
+        "median_allocation_requests": 336402,
+        "median_allocation_bytes": 14299416
+      },
+      "current_to_before_ratio": 0.905709212928392,
+      "current_to_initial_ratio": 0.39492938922944026
+    },
+    {
+      "case": "list-fold",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 12.354916,
+        "p95_sample_ms": 36.107916
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 21.983625,
+        "p95_sample_ms": 43.697625
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 14.748084,
+        "p95_sample_ms": 135.148875
+      },
+      "current_to_before_ratio": 1.1937016811769503,
+      "current_to_initial_ratio": 0.6708667928969858
+    },
+    {
+      "case": "flow-fold",
+      "size": 8192,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 13.991792,
+        "p95_sample_ms": 15.737875,
+        "median_allocation_requests": 573863,
+        "median_allocation_bytes": 27209544
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 29.254417,
+        "p95_sample_ms": 33.26375,
+        "median_allocation_requests": 819985,
+        "median_allocation_bytes": 47275008
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 13.243458,
+        "p95_sample_ms": 17.045958,
+        "median_allocation_requests": 475683,
+        "median_allocation_bytes": 22952976
+      },
+      "current_to_before_ratio": 0.9465162146492744,
+      "current_to_initial_ratio": 0.45269943338812735
+    },
+    {
+      "case": "flow-fold",
+      "size": 8192,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 15.3925,
+        "p95_sample_ms": 38.190042
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 24.146958,
+        "p95_sample_ms": 48.18
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 18.07225,
+        "p95_sample_ms": 154.908958
+      },
+      "current_to_before_ratio": 1.1740945265551406,
+      "current_to_initial_ratio": 0.7484276073201436
+    },
+    {
+      "case": "alias-fold",
+      "size": 128,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 0.27325,
+        "p95_sample_ms": 0.441667,
+        "median_allocation_requests": 5901,
+        "median_allocation_bytes": 310296
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 0.439958,
+        "p95_sample_ms": 0.625959,
+        "median_allocation_requests": 8802,
+        "median_allocation_bytes": 542488
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.244084,
+        "p95_sample_ms": 0.425958,
+        "median_allocation_requests": 4538,
+        "median_allocation_bytes": 239208
+      },
+      "current_to_before_ratio": 0.8932625800548948,
+      "current_to_initial_ratio": 0.5547893207988035
+    },
+    {
+      "case": "alias-fold",
+      "size": 128,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 4.605292,
+        "p95_sample_ms": 30.634375
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 6.114417,
+        "p95_sample_ms": 31.088875
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 4.892625,
+        "p95_sample_ms": 109.163834
+      },
+      "current_to_before_ratio": 1.0623919178197603,
+      "current_to_initial_ratio": 0.8001784961673368
+    },
+    {
+      "case": "alias-fold",
+      "size": 256,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 0.439166,
+        "p95_sample_ms": 0.652334,
+        "median_allocation_requests": 11406,
+        "median_allocation_bytes": 574856
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 0.735083,
+        "p95_sample_ms": 1.00225,
+        "median_allocation_requests": 17132,
+        "median_allocation_bytes": 1036888
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.355834,
+        "p95_sample_ms": 0.557125,
+        "median_allocation_requests": 8639,
+        "median_allocation_bytes": 429288
+      },
+      "current_to_before_ratio": 0.8102494273236088,
+      "current_to_initial_ratio": 0.4840732271049663
+    },
+    {
+      "case": "alias-fold",
+      "size": 256,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 4.7405,
+        "p95_sample_ms": 30.288958
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 8.289458,
+        "p95_sample_ms": 32.576333
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 4.992,
+        "p95_sample_ms": 108.497584
+      },
+      "current_to_before_ratio": 1.0530534753717962,
+      "current_to_initial_ratio": 0.6022106632303342
+    },
+    {
+      "case": "alias-fold",
+      "size": 512,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 0.707166,
+        "p95_sample_ms": 0.964875,
+        "median_allocation_requests": 22414,
+        "median_allocation_bytes": 1101960
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 1.361792,
+        "p95_sample_ms": 1.759916,
+        "median_allocation_requests": 33781,
+        "median_allocation_bytes": 2021528
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 0.591458,
+        "p95_sample_ms": 0.907625,
+        "median_allocation_requests": 16835,
+        "median_allocation_bytes": 804552
+      },
+      "current_to_before_ratio": 0.8363778801582656,
+      "current_to_initial_ratio": 0.4343233034119749
+    },
+    {
+      "case": "alias-fold",
+      "size": 512,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 4.789958,
+        "p95_sample_ms": 30.680792
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 17.928083,
+        "p95_sample_ms": 44.176542
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 5.0265,
+        "p95_sample_ms": 130.566541
+      },
+      "current_to_before_ratio": 1.0493828964679857,
+      "current_to_initial_ratio": 0.28037018793364576
+    },
+    {
+      "case": "alias-fold",
+      "size": 1024,
+      "backend": "go",
+      "before": {
+        "samples": 15,
+        "median_ms": 1.26575,
+        "p95_sample_ms": 1.675375,
+        "median_allocation_requests": 44432,
+        "median_allocation_bytes": 2177496
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 2.681792,
+        "p95_sample_ms": 3.415083,
+        "median_allocation_requests": 67094,
+        "median_allocation_bytes": 4013304
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 1.111125,
+        "p95_sample_ms": 1.4525,
+        "median_allocation_requests": 33226,
+        "median_allocation_bytes": 1574184
+      },
+      "current_to_before_ratio": 0.8778392257554809,
+      "current_to_initial_ratio": 0.4143218415149273
+    },
+    {
+      "case": "alias-fold",
+      "size": 1024,
+      "backend": "native",
+      "before": {
+        "samples": 15,
+        "median_ms": 5.357833,
+        "p95_sample_ms": 31.674
+      },
+      "initial": {
+        "samples": 15,
+        "median_ms": 57.568625,
+        "p95_sample_ms": 87.581583
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 5.561042,
+        "p95_sample_ms": 165.243833
+      },
+      "current_to_before_ratio": 1.0379274605983426,
+      "current_to_initial_ratio": 0.09659848572030337
+    },
+    {
+      "case": "worklist-wide",
+      "size": 512,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 2.779166,
+        "p95_sample_ms": 3.467458,
+        "median_allocation_requests": 68179,
+        "median_allocation_bytes": 3842368
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 1.212,
+        "p95_sample_ms": 1.666334,
+        "median_allocation_requests": 37865,
+        "median_allocation_bytes": 1923128
+      },
+      "current_to_initial_ratio": 0.436102053637674
+    },
+    {
+      "case": "worklist-wide",
+      "size": 512,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 6.74975,
+        "p95_sample_ms": 32.077208
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 6.534625,
+        "p95_sample_ms": 112.254542
+      },
+      "current_to_initial_ratio": 0.9681284492018224
+    },
+    {
+      "case": "worklist-chain",
+      "size": 512,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 2.993125,
+        "p95_sample_ms": 3.580958,
+        "median_allocation_requests": 70568,
+        "median_allocation_bytes": 3271344
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 1.309042,
+        "p95_sample_ms": 1.698541,
+        "median_allocation_requests": 41377,
+        "median_allocation_bytes": 1686264
+      },
+      "current_to_initial_ratio": 0.437349592816872
+    },
+    {
+      "case": "worklist-chain",
+      "size": 512,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 6.186958,
+        "p95_sample_ms": 32.621833
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 6.470416,
+        "p95_sample_ms": 110.780916
+      },
+      "current_to_initial_ratio": 1.0458154071839505
+    },
+    {
+      "case": "worklist-wide",
+      "size": 2048,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 10.605708,
+        "p95_sample_ms": 13.08925,
+        "median_allocation_requests": 271045,
+        "median_allocation_bytes": 15211168
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 4.530792,
+        "p95_sample_ms": 5.722584,
+        "median_allocation_requests": 150036,
+        "median_allocation_bytes": 7568760
+      },
+      "current_to_initial_ratio": 0.4272031626742882
+    },
+    {
+      "case": "worklist-wide",
+      "size": 2048,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 11.614666,
+        "p95_sample_ms": 39.840125
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 9.64725,
+        "p95_sample_ms": 129.556125
+      },
+      "current_to_initial_ratio": 0.8306093347841428
+    },
+    {
+      "case": "worklist-chain",
+      "size": 2048,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 11.250417,
+        "p95_sample_ms": 12.388375,
+        "median_allocation_requests": 281004,
+        "median_allocation_bytes": 12932144
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 4.890084,
+        "p95_sample_ms": 5.90325,
+        "median_allocation_requests": 164265,
+        "median_allocation_bytes": 6590808
+      },
+      "current_to_initial_ratio": 0.43465802200931747
+    },
+    {
+      "case": "worklist-chain",
+      "size": 2048,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 11.461,
+        "p95_sample_ms": 41.436584
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 10.03225,
+        "p95_sample_ms": 125.852167
+      },
+      "current_to_initial_ratio": 0.8753381031323618
+    },
+    {
+      "case": "worklist-wide",
+      "size": 8192,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 43.967041,
+        "p95_sample_ms": 52.954916,
+        "median_allocation_requests": 1082458,
+        "median_allocation_bytes": 60750848
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 19.676375,
+        "p95_sample_ms": 20.606792,
+        "median_allocation_requests": 598658,
+        "median_allocation_bytes": 30225592
+      },
+      "current_to_initial_ratio": 0.44752556807268423
+    },
+    {
+      "case": "worklist-wide",
+      "size": 8192,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 32.583666,
+        "p95_sample_ms": 63.884875
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 23.370708,
+        "p95_sample_ms": 164.308
+      },
+      "current_to_initial_ratio": 0.7172522576188941
+    },
+    {
+      "case": "worklist-chain",
+      "size": 8192,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 41.367542,
+        "p95_sample_ms": 48.916875,
+        "median_allocation_requests": 1122733,
+        "median_allocation_bytes": 51567968
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 17.561583,
+        "p95_sample_ms": 18.2865,
+        "median_allocation_requests": 655784,
+        "median_allocation_bytes": 26204328
+      },
+      "current_to_initial_ratio": 0.42452565830476463
+    },
+    {
+      "case": "worklist-chain",
+      "size": 8192,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 31.648917,
+        "p95_sample_ms": 59.741625
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 25.738458,
+        "p95_sample_ms": 163.067
+      },
+      "current_to_initial_ratio": 0.8132492495714783
+    },
+    {
+      "case": "worklist-wide",
+      "size": 32768,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 187.039166,
+        "p95_sample_ms": 198.437417,
+        "median_allocation_requests": 4328053,
+        "median_allocation_bytes": 243530984
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 80.994916,
+        "p95_sample_ms": 86.7195,
+        "median_allocation_requests": 2393108,
+        "median_allocation_bytes": 121572456
+      },
+      "current_to_initial_ratio": 0.43303719607047436
+    },
+    {
+      "case": "worklist-wide",
+      "size": 32768,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 110.920583,
+        "p95_sample_ms": 141.476625
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 74.760542,
+        "p95_sample_ms": 215.827959
+      },
+      "current_to_initial_ratio": 0.6740006225895874
+    },
+    {
+      "case": "worklist-chain",
+      "size": 32768,
+      "backend": "go",
+      "initial": {
+        "samples": 15,
+        "median_ms": 185.711375,
+        "p95_sample_ms": 230.565709,
+        "median_allocation_requests": 4489665,
+        "median_allocation_bytes": 206112176
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 73.209666,
+        "p95_sample_ms": 77.613,
+        "median_allocation_requests": 2621874,
+        "median_allocation_bytes": 104665920
+      },
+      "current_to_initial_ratio": 0.39421207236228795
+    },
+    {
+      "case": "worklist-chain",
+      "size": 32768,
+      "backend": "native",
+      "initial": {
+        "samples": 15,
+        "median_ms": 102.771125,
+        "p95_sample_ms": 131.140042
+      },
+      "current": {
+        "samples": 15,
+        "median_ms": 84.189792,
+        "p95_sample_ms": 219.585834
+      },
+      "current_to_initial_ratio": 0.8191969485592379
+    }
+  ],
+  "optional_reports": {
+    "paired-files-repeat15/report.json": {
+      "records": 9,
+      "samples": 540,
+      "role": "current_supporting_measurement"
+    },
+    "tree/report.json": {
+      "records": 6,
+      "samples": 54,
+      "role": "current_supporting_measurement"
+    }
+  },
+  "optional_native_amortized": {
+    "samples": 60,
+    "summary": [
+      {
+        "case": "map",
+        "phase": "before",
+        "samples": 15,
+        "median_wall_ms": 19.3495,
+        "median_child_cpu_ms": 17.439999,
+        "median_wall_ms_per_repetition": 4.837375,
+        "median_child_cpu_ms_per_repetition": 4.35999975
+      },
+      {
+        "case": "map",
+        "phase": "current",
+        "samples": 15,
+        "median_wall_ms": 26.550958,
+        "median_child_cpu_ms": 24.671999,
+        "median_wall_ms_per_repetition": 6.6377395,
+        "median_child_cpu_ms_per_repetition": 6.16799975
+      },
+      {
+        "case": "fold",
+        "phase": "before",
+        "samples": 15,
+        "median_wall_ms": 18.528709,
+        "median_child_cpu_ms": 16.666,
+        "median_wall_ms_per_repetition": 4.63217725,
+        "median_child_cpu_ms_per_repetition": 4.1665
+      },
+      {
+        "case": "fold",
+        "phase": "current",
+        "samples": 15,
+        "median_wall_ms": 23.539208,
+        "median_child_cpu_ms": 21.369999,
+        "median_wall_ms_per_repetition": 5.884802,
+        "median_child_cpu_ms_per_repetition": 5.34249975
+      }
+    ],
+    "scope": "four repetitions per native invocation; separate from the main collection sample gates"
+  },
+  "changed_source": {
+    "sha256": {
+      ".mprlab/TERMINOLOGY.md": "c3ac27f8f82b02e744f967ebdb5b8d4437cbe7e00bcf80faf9f32bc44eba3b0b",
+      "README.md": "089257a98b1fcc09c603b55a777a75b147c9695f7c5031987947c2950ffaa638",
+      "docs/dynamic-traversal-performance.md": "7001be190a861d009e80c98826d96bbb98bf2599ed54c3e56a4b5ac2cc73469f",
+      "docs/evidence/cleanup-control-composition.json": "c2a4eadeb75af23c609f30202861f3ce1deb8c5c6c5ba8779d765fc4bd1d87a3",
+      "docs/evidence/dynamic-traversal-20261029.log.gz": "5ea0cf8ff067a8d8be38d4540c2370bf9d356eab7f60949aa319b4b22ad153ba",
+      "docs/evidence/dynamic-traversal-performance.json": "0b928c2dbc544649e081475cbcd8a89e75a229eebb582c2d96aa4ca65980e032",
+      "docs/evidence/dynamic-traversal-performance.json.gz": "2f493886aaa5b658c09e7a1bdcb556f2047fb853948623b8ba20deea2b48183f",
+      "docs/evidence/dynamic-traversal.json": "d235660b2906f10a1216152086f3f9ab91842f5e95d654e0eedca78a70f1d6d9",
+      "docs/examples/cleanup-control-flow.lo": "560d197cb515be888690dc0e8698a4b630a2e00cd93b60d3224fd9f15bec338d",
+      "docs/examples/mac-cleanup.lo": "5193b0f5f072fcafed744ef58ad1a1665d779ee697b4283dda84b662e1fec172",
+      "docs/file-io-performance.md": "f95d644339c690f78190a5a3813fc000ff8c450e24e11e3ba49f27203864e5de",
+      "docs/file-observation-extension-design.md": "9c07085aa7cd13dddb22679a81862b0e962b6a35bcec46b1660f147281a21321",
+      "docs/mac-cleanup-plan.md": "6d24348c9b58835666d8f0f9f43f5809d1ed94cf68b18257c1773c90497fae79",
+      "docs/mac-cleanup-script-design.md": "2501e772a47fd7502cb015a6b7609dd3fa54e9a22c8ee8d0dc2e1244834a017d",
+      "docs/native-lowering.md": "80bffaa64f31b3211e9836296246ed4cf1c9172142faee35c8194871a673d3ee",
+      "docs/native-qualification-findings.md": "da0cc50692abdfc45e760a45feeac9bc30b722b1fcaea312e34bdc3596036f09",
+      "docs/native-runtime-contract.md": "759fc3c3d1d11530ec78de78001247dc62c0c73f9707061f6c41475af09b8e51",
+      "docs/resource-performance-remediation.md": "5c59787468d395476893b84c863490d6551c44e369c271eb4d0004248db1ed3d",
+      "experiments/process-host-final/native_test.go": "273f2ceb2cabb7514121fd755820616a2bc0fb9af6db001d9eb4a06b5377c3cf",
+      "experiments/process-host/native_test.go": "fe755449de79dc46fd5a32da690df381af4a4c3bf979611e62280ff9b44e3d5e",
+      "experiments/process-startup/native_test.go": "a05b7bf0c30423ce26ba34991a1e423975573bd0fdb2efcc236549ced70e3d7f",
+      "internal/adapter/file_entries.go": "668f7e4f24ef02ee1246d625e0d75f31d9680354907409842fcd3c3c2cbc5a65",
+      "internal/adapter/file_observation.go": "2e144951bf9522eda3b353bc0c02c9e9e1304ec8b973569bd1cf369092a9b4b4",
+      "internal/adapter/file_open_paths.go": "b8d19fb25850f04724cd3e02ff928f80578df206c72440d4d24c41c2ec6791ed",
+      "internal/adapter/file_remove.go": "fb90d0bfbb8a3da21ffa3b0dbf53e70f9ab172d4677139faabba65ed0c63b947",
+      "internal/adapter/files.go": "743ba1ba8be3ca9af3d0e07f3280a5bc8e029f99ab86c9c8fc0ed8cb5c494cf9",
+      "internal/catalog/catalog.go": "cc6db7a3e884ff2c73bd89d5ae88f8085046d5c6ad3bff360d642feaa53f4111",
+      "internal/check/collections.go": "7acbe2b2447d3269bf0ad89f50fc76cdba448ee33d7a85b8f847d71ad1e5e1ef",
+      "internal/device/device.go": "f25d255f75e97aaae7c571ee50f8c695a63d1592caada0991b22cb22fed68b32",
+      "internal/eval/builtin.go": "5ebab476bfbac741ad81e4cb1be2d02f0b32a230c9d948f2dec756acbe62144b",
+      "internal/eval/eval.go": "cea6bb5f1a38d50536677a394f380e61a2b9d5ca87d787cff987faf8bfc30dcf",
+      "internal/eval/list.go": "926e9920ade04e161c703364990fa56b764b0a20172a3eb1c2dc8868bac1bf34",
+      "internal/eval/worklist.go": "284b75f53b7ee20343cb1058926639933ff72f3c06e925a2f01e32c492fd1b14",
+      "internal/execution/contract.go": "9ec3d3db7b798cc67c0b318677e1ba552c33eadc1a53e7b8ba892600c216a307",
+      "internal/execution/flow_progress.go": "25c802649e17a2ab9d5699ff915a5517105e260b35f2d19b572089e52509f614",
+      "internal/execution/ownership.go": "7797bf5196d10aace5abdcd55af939e23b2c793b2eb5ae4945d5ce7373b1affe",
+      "internal/execution/session.go": "6bf31d209a825bca9f5e277c964547e321f8c0ae86252d15f2f25a7bdeb1cf0e",
+      "internal/execution/value_graph.go": "731891cd3c7eb1a1a2f0798cd63b40f71128963749a104acd0ffecaedbac46ed",
+      "internal/execution/worklist_progress.go": "0725d95f687a59971d8e063a48a10ef96b641dd3264c21f213fde4e5833efa3c",
+      "internal/inspect/expression.go": "bb8471543c446ff3ce447d775ce2816245f64de2e24be2d3da0ea5395efb96c2",
+      "internal/llvmemit/emit.go": "377ae99dd621e64ecbb07050fc43025bb87a50d6b643480a5047c9e9b6a65518",
+      "internal/nativeplan/lower.go": "4ba0e6a1c6842af937a0098ee8bf0cac7b030cc7a6492599abcea5d29d567792",
+      "internal/nativeplan/lower_integration_test.go": "4446dc6cebc096a6577d9eb2cba6914e9aae58b0c3fe3945488841da6a851593",
+      "internal/nativeplan/metadata_projection_test.go": "8ba2e65e3e5872dac56adbefee1b4768ea48c9301f57527e7fbc4b84e8ad7b13",
+      "internal/nativeplan/metadata_test.go": "2c77a5022c0567fcf044428de2c2892db86beb3375019eda765e1d0ad9bc0c67",
+      "internal/nativeplan/plan.go": "bbed9c9bfad4473b73695b3076e2b6f2e42c3be9c5e551ae514a93829adb2163",
+      "internal/runner/command.go": "9c7e167d244f1e9ad77e73c8dd59da6de359aec2be0be05439a8d04a521f3c80",
+      "internal/runtimeops/arithmetic.go": "750585a1e886188a700eff47d2fad07fcd138e27f9e9203ab9cfe3cd01f4fd7c",
+      "internal/runtimeops/builtin.go": "bf860383f3bbac2939ab6c2ad1448d1bfdc6ddf517c691874f2e62f451727ef9",
+      "internal/runtimeops/control.go": "56f20373d156def7c008f3f2ae9126a3fed11557d393c810f5f3b40f1e68a7ef",
+      "internal/runtimeops/file_observations.go": "a3ebf36b50ea9248498e50327d6e84fb17d233320bac49767db828c208771f6a",
+      "internal/runtimeops/runtime.go": "29c0c94bce4bfd0d0c652f13aaf1bda6f1f46e9aed4f4e7ec2081349481a8dd5",
+      "internal/value/error.go": "93cd825194fbf1f4f6f6288729c3941bd641f687e5c2b9b9af03535b79bd07e3",
+      "internal/value/file.go": "63da4e451a70bd148d13e5f3bedfc8edc48da382e517dc910c77842f449b41db",
+      "internal/value/file_leases.go": "96c4115fa0e2374c603a2400dae1aedf92752273c2a5d068650b2d91645c925f",
+      "internal/value/file_observation.go": "ea459743a4d66abd256bebfaea2d6a7d21e61f47b2348570f9f2ba4c5d2efeae",
+      "internal/value/reachable.go": "7b68e31088969c3720ceedc2df8bac1d15bbe4103f87b7bb4182431d9c9218d2",
+      "internal/value/resources.go": "0056bd4d52acd2bd106b6180cd45e6adb0d1dfca1d5e787ec85daf21c6e9fcdd",
+      "internal/value/tensor.go": "b0c9adea403531dd4e695833628f322ebb86bc2b205d95b64b515c7c8f2740e1",
+      "internal/value/value.go": "ca8bf29fcefc9b159530a5c3ec6899f5b3e6ada238ab2226983c5ba719d9a0ba",
+      "runtime/native/include/lo_context_options.h": "07227fb44c0782aad0d650c7d2f57a229610d315e6737ed859bec879f6b09d21",
+      "runtime/native/src/adapters.rs": "5d629978edf903c1fd9bdee4f3e63190e255e070891140aaca9fe7b9a2d582e4",
+      "runtime/native/src/checkpoint.rs": "2e836e31b51c972de0997a937efdc75bc62000b59e21745e8bc61c9ca11cfc36",
+      "runtime/native/src/cli.rs": "27735fa8c0cedbcb815b192eab194c6b671f02703b7fa74992d50ea120e89bc9",
+      "runtime/native/src/collections.rs": "7704d26ef69e675505679c5b6985286671b5f48114f202190b68c8e4011530d3",
+      "runtime/native/src/context.rs": "9355bed5a9f984b2bc1c2e9791d84c66b83eed71365bbf73a95d71c35c3efe29",
+      "runtime/native/src/exports.rs": "78af1f97d06ac73fbe26d29bb3eed00d9d700baa3c4519647a8ba99350c7191f",
+      "runtime/native/src/file_entries.rs": "63dd609d88a11114fa5eb8229f5afac2c715398e66348c746841f360704a3e70",
+      "runtime/native/src/file_leases.rs": "d9d630fb60a2906439081dc5d23a1828d4f9db2156b1ef91d040ce9e532023b7",
+      "runtime/native/src/file_probe.rs": "f3bf5ec7698510ca8fc712786fa9a2cf104d8d80a548da68ce80f97e8553e7e7",
+      "runtime/native/src/files.rs": "20f0b573dfd48f849621deb998f3dbd036274b9a2bd214ac77cbb5f3e1463c83",
+      "runtime/native/src/generated_operations.rs": "5134d7627aaffa0cf1404da9551c9699fc0bec307a84308a7e9d8a3a9e285f3a",
+      "runtime/native/src/lib.rs": "fccff20a27d63fa35430bb8ecc1721b75b046b296017b1fe53891222573d690d",
+      "runtime/native/src/operations.rs": "1838f1989d83bddaeef575ef163f41539af64996117e95b7334e60933d69b09f",
+      "runtime/native/src/resources.rs": "314ae8431708801ff126685d4f61ce1280ad27cd77f32fc2c914a6104ea87fca",
+      "runtime/native/src/tensor.rs": "c8d542dd26e9f4420bac8e77cd35cee9b4f76d8f8e44a3e24fd4fbe126d7af06",
+      "runtime/native/src/training.rs": "e17a0a6bb1405adc8a3d4e5a581186fff0f0da2c3327985c116dae0537ad4081",
+      "runtime/native/src/value.rs": "496ee98761f2cd93e057776de79df85c77533247b33a14257bde801a38793d2f",
+      "runtime/native/src/value_entry_map.rs": "d6f9262ed27dd9c0ec76bcc84432337b8299f3fb6d3cb3d3c3f0846ddf2efd40",
+      "runtime/native/src/value_graph.rs": "598a4b142f7527dc276363e6543eb74cfc7e14be32954b500efbbd93ae86a97a",
+      "runtime/native/src/value_id_hash.rs": "af7435aa47ada6bb49d90c91f41ce75242f3169316fb9387a73b4368cfd1e4ad",
+      "runtime/native/src/value_id_set.rs": "06a13332833e51c9f8c3c0b23f12c19f25e57aa61fddea98bb565f58554b7d57",
+      "runtime/native/src/value_resources.rs": "8f78c58dae242bbd7ce94feb419a24f2070667b98359668329d5a1dd8e8e47df",
+      "runtime/native/src/value_stack.rs": "2db38a3dbe7efb3db1b71adb732137e178938a9a622d1d059ae186d77c9b9f8e",
+      "specification.md": "924e15283fbf6b19afb76f72ee4088629932ef7e2e0ee9b931c116fbc732f11d",
+      "testdata/native-qualification/collection-arguments.c": "c415cda26d267be6573530676c2f61e01e001ba881707f9066ff4c4a666f0c70",
+      "testdata/native-qualification/device-immutable.c": "79d932d4a6704addbe8abff5ca44db73ff61e2e8e73e391f06cb30d1160f8ee1",
+      "testdata/native-qualification/file-failures.c": "8f8c1ed37a6d9a3b2d77cb4d6c744dbde2d6ed635538f3c8af57736c8dd354bf",
+      "testdata/native-qualification/literal-sequence-status.c": "a104d8ed8c98fb6acf8a6061559facc36a50fb7d762c5f6d0c60bd76a736cbb8",
+      "testdata/native-qualification/literal-sequence.c": "e6d40803e436df2d82dadecbe71fd23c6b6879021e7c098433fd38b340444dd0",
+      "testdata/native-qualification/metadata-v2.c": "926d2e076339a3d1496080ab3b34e048cc4454231d1f68db591da695997137b2",
+      "testdata/native-qualification/process-lifecycle.c": "20b7fbcfee202a6935d40caefb6d115f802e2380bcb0bc5a2a9240cb5ca3a66d",
+      "testdata/native-qualification/process-result.c": "a3752180e94f0a9091c1c45791c0a5d473fad011c2b55a180ba9e09ed9be2396",
+      "testdata/native-qualification/program-control-null.c": "deef3cf13944c23cac1e1f637fbcc93432665690eb39463b6652882d2b252fea",
+      "testdata/native-qualification/program-sessions.c": "d6cd65ed501055475f427779d093b9970b9297e5dcfd3c1efb08633c60891747",
+      "testdata/native-qualification/thread-admission.c": "c131247fbf5f78440c8a5841207b35114e11170f1d2e121167bcb5ca5c4b623a",
+      "testdata/native-runtime/borrowed-graph-policy.c": "b4cd554e6dfdd98be8c610dfac3f688714a5ee47e32ae96aa2cf483730ca7d4b",
+      "testdata/native-runtime/collection-scope-allocations.c": "381628e960e6057ab1bd29c98dc5eab86bf3e1526a16d6ea0b32b789033adcb8",
+      "testdata/native-runtime/files-observation-cleanup.c": "726b584e9df2791df5434921b36b94fdabc0853cfad706ee2f48e78cd9f086f5",
+      "testdata/native-runtime/host-invocation-input.c": "888fda7b3053655252611717587da0cb27462957c0a658239490d339d2293d4f",
+      "testdata/native-runtime/lifetime.c": "c2b2576f2bf4e82d9c96cb49db3f0dca80257a081188f69afbff9353d4cb3f57",
+      "testdata/native-runtime/numerical.c": "994da46ec67d5f9083b70895c2e0b722ba5459030c89d095a3b9814298969882",
+      "testdata/native-runtime/process-context-input.c": "d58c2b08fa2ae3a3c1679cea337ddc1328117171bd3a9563fa9ed8965121ff91",
+      "testdata/native-runtime/process-driver.c": "0a55287d2463d2b479f34ff01153348d98132405aed5603a5bd20521e79d7bac",
+      "testdata/native-runtime/resource-policy.c": "84f1c860cb0777e9dabd415bd8a5aaf9ec430ac3b7d4e48d106170852b21422f",
+      "testdata/semantic-migration/matrix.json": "c30d978c8289483ccd112718621bb6ed2c151e1af71e127ce171b01162dc6c38",
+      "tests/benchmark/native_test.go": "e692a55892ca20a894965a5aeb0add9c47134aeaff2c410634e8fe581eb4a98e",
+      "tests/benchmark/training_test.go": "b4326c2dfa2fa6a359425a55bd9fc12d828ebf3ba426191ecfc1bdf3eb8d45ee",
+      "tests/integration/adapter_http_composition_test.go": "9be70aeeb8221a528ee274ad7800933b664315503db44ca87b37b70baa528427",
+      "tests/integration/adapter_process_completion_test.go": "d4ecf1c4986885e906e74e3f3f118f3d35a4a86dab7b40fc3400f658572e9e24",
+      "tests/integration/adapter_receipts_test.go": "ff1f00a262e6f01994d98a172d3dcc4f59fd4f563a9c2529cf8b44592a21d1f2",
+      "tests/integration/adapter_test.go": "1fad94ac32ae40a60bcf43cb7256784957896dec7c21aa290e0a539883e58a82",
+      "tests/integration/autodiff_contract_test.go": "53ae4c6e189b4c4f6a2f730b141a3de9313200d9ebf865fd068ecb08d1c66137",
+      "tests/integration/catalog_test.go": "17a315c9d3d34306decf5aa6e3a54c62a33c6427ee8ffe88de14cd38ffe45c90",
+      "tests/integration/checkpoint_failure_test.go": "f84b921461a5a028eb7bb00f52c48b7952b6268bfd3cc0cd0d1313e1f0cbff9f",
+      "tests/integration/collection_lifetime_test.go": "9eb9e7843c6757e0ca82f88b1aba4cbecefed6b048ead20c2eb095d6b5def4aa",
+      "tests/integration/eval_frames_test.go": "ed700daf4c6fea983b0543db425856ddb02e74f6324b8900b7fdc7c9515def5c",
+      "tests/integration/eval_test.go": "99db8e3560f4f0d4914d2ab7b76b4402f0fec19c8444427aa863596a228295bf",
+      "tests/integration/execution_allocation_test.go": "4c410026748a28ad16b5a2202704174eec092a66db8b05d64f40f32d01aba1b0",
+      "tests/integration/execution_policy_test.go": "daee2baed5f19cf26f2d9179e55e1ec7595a8e96232e944e5635d6e0cbebb5f0",
+      "tests/integration/f025_file_observation_test.go": "866a255ad30c8256cdcbc88d0773b1ee76cd521733ba0e51e2ea736ba0a14fa8",
+      "tests/integration/file_capacity_test.go": "e7677945e0b3ccb3ac213787ed0f2ee015c06936debcc5e30ce074664b51d6a4",
+      "tests/integration/file_failures_test.go": "d49d4a7aa399543aa0b39f7b77744d7c0e6265451d8957db60cfec8819a5d878",
+      "tests/integration/file_language_test.go": "249feeed8389a383467317853d2aa150321b1834d8139846f211d59977164ce2",
+      "tests/integration/file_observation_lifetime_test.go": "5880b83d252a89e87ab0caa1a82ddc0872955a11f6d2749a880b92cb6d9b812c",
+      "tests/integration/inherited_graph_allocation_test.go": "02858a16590d048e967c1aeebd2f99e4cd2960f366ee8e62b3132d03a2aba3e3",
+      "tests/integration/inherited_graph_lifetime_test.go": "44ddda5800259d880c7a94dc46e8ad4179c793d7e2dbff355ccb8388e92113ef",
+      "tests/integration/list_length_allocation_test.go": "4904ca8c48b11102ad8e571fe6a8b990ffff5a266cc113ae3099c08e3b095b81",
+      "tests/integration/llvm_collection_borrowed_graph_test.go": "8eccdfe10347b70c4232349bb755d0336e491c86f6ae5a76615c08f5216d21c9",
+      "tests/integration/llvm_collection_scaling_test.go": "77b3bfcd4e34ad5d095222d9b9afbb9e6617203868372e09a477a50dd539d27c",
+      "tests/integration/llvm_file_observation_cleanup_test.go": "fb3a720549b63637797c999c6aa6fdcb0dd0e0c7eae0e0202b0f4b33955a6fd0",
+      "tests/integration/llvm_lifetime_test.go": "17155ade103f32759d1d0fb85887480160a877c5ef4222c59016bb9bf898fdcd",
+      "tests/integration/llvm_linux_worklist_test.go": "9a9c7002ea72f1b20aad2c6f212973c1780b921c952b4cefe58b60318f04c6be",
+      "tests/integration/llvm_lowering_test.go": "4f3b2db918f0e22dee20cbf2e9569f60b41dbd46be4d24dddc26b60fefd1643d",
+      "tests/integration/llvm_metadata_helpers_test.go": "5b19bb12981bae3ba2d274d3dce9a7d0bade2c43b92709b00c6d4306d1924133",
+      "tests/integration/llvm_metadata_v2_test.go": "468e73969fba69a60248ee7ddbdd169df4c9771d67cb9d1f9b43174568976fdd",
+      "tests/integration/llvm_numerical_lifetime_test.go": "5c0d8ce6ccee0a6d21b0b7a840389a8968bfef6bb153bda6dae20741030f0627",
+      "tests/integration/llvm_qualification_files_test.go": "9a4d989bff96ddea11e5ccd131a70e48a8c5625a237f98056a0160c9fb38ea9d",
+      "tests/integration/llvm_runtime_test.go": "77eb4ee27dc2263b2ab616bbae55669507898d637961b29758f5096feca1adb8",
+      "tests/integration/llvm_worklist_test.go": "503a8b87b9ca526f7a8f85d00818dc0909ef8080fc6fdfc12f3c68827d1e7e22",
+      "tests/integration/native_compiler_selection_test.go": "a3cbc922fbee3b3190696b3bacb3414921f7ef2bde28128d5f17680637f480c1",
+      "tests/integration/native_paths_test.go": "387a0eb8374054ac28f87fc9bb04cbd30e24fbaa731d6df8f59197dfdac36cac",
+      "tests/integration/native_test.go": "287e3ee390c75047d68320efe359aa56d073f81d64d4440a79b2822a7209f9f9",
+      "tests/integration/process_resource_only_test.go": "97826ed8b7cb284054b995c81859e1f2496d4d3b2c0efa1b2195f1b2994a5bdb",
+      "tests/integration/run_test.go": "02e41dc17c199f018fca3a4524550e31d73444fd1fe3e7d4309f744c758943c7",
+      "tests/integration/runtime_catalog_test.go": "cd6d0a69c75748db812a536155c715c8687dbeca9360ffa0a34466a4bf8d6e74",
+      "tests/integration/tensor_budget_test.go": "6d0d1f79d9dc80e49000950930a2aba5fe407362f60244b2d95fffa53bfd1669",
+      "tests/integration/worklist_retained_state_test.go": "fb6bd980e2c038edac39ea5ef738a78d027393c69ad82cd914dc3c5c132859be",
+      "tests/integration/worklist_test.go": "bd7092def334befd8fcdee478a04adb27e396c69c2fbd04387fde66b64553628",
+      "tools/filebench/main.go": "edff25a323a88c42f853b12130a967adcb35f37c6a707b154b9c95f95787148c",
+      "tools/filebench/main_test.go": "a11811fd0a79e3f61d8c08d1616997964b451c284efc646f49e19d5428b90593",
+      "tools/filebench/workloads.go": "5fd6272e15b37579ad5c97534c25e15a78150053b7618af6f2bfe79f6cd84eb9",
+      "tools/lodistribution/package.py": "1b8670719d4e73264248a737032dc7eb6fc5d1aa9c744346a6fef5f7571aad42",
+      "tools/loqualification/performance.py": "193d2743878c4d932a630170b73757b5df5b1d20b5a59eccccad2c24997b9e4a",
+      "tools/nativebench/allocation.c.txt": "e9dc1da721e56b8dbe395185e28b372168ce9b04edc2223a4a387cf2e255264b",
+      "tools/nativebench/harness.c.txt": "7c20fa31ec84ece7f9642fe5266fc9c648e65e1293fe33f221433c0c258813a4",
+      "tools/nativebench/main.go": "83edb3e3d8c2846ba56ca4641ae907a6e3d50008579d11d128490942e5905b27",
+      "tools/nativebench/test_harness.py": "946aefcde9e2fcba45a7766eda516ee1a947a9fd0831dafe06a7592ee0165a4c",
+      "tools/nativelowering/run.py": "fa29b88e6ca8201b4e37b9db0981419fcfa009827cfb8971e46f5d98820a8ee9",
+      "tools/nativelowering/runtime.c": "7499e025005ccb8475a7d794323bc6af680b10e3aa291b1accc1a30a01b60293",
+      "tools/nativeruntime/build.py": "09d343fd7d2befff589e6f69dc1cd5cb095d3e9599186c3467dac99dc0601d64"
+    },
+    "deleted_paths": [],
+    "scope": "all existing changed or untracked repository files, excluding this evidence output"
+  },
+  "source_and_artifact_identities": {
+    "go_before": {
+      "revision": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+      "source_sha256": {
+        "cmd/lo/main.go": "bb0c9f640b76bfc35276d6326115db2cf7478934afdb0492399e668fa72bd67f",
+        "internal/adapter/file_entries.go": "09eb2d3de44472d2da8d55570ca8a6a579691bdaa92d3832b2d04e63c4dccbb5",
+        "internal/adapter/file_identity_darwin.go": "a8ce2812d976cc3bb0d21823cf36b4b40af06908de51c7cab520cc417f08d55a",
+        "internal/adapter/file_identity_linux.go": "25a5c1672bed2368e45b57855caed4e991c79c93ab73c87e885584e61b86d0b4",
+        "internal/adapter/file_io.go": "01a5a1c66aa6f998c6c7ec336b20b2026c1f23ff2042b6b5494dc4dc29dd8fae",
+        "internal/adapter/file_metadata.go": "1811ece58cb24ae7670fdac17197ffc5ccece5d09dfc2ab1f2f3bb76cd4884ce",
+        "internal/adapter/file_observation.go": "d373192057d0793c85eebf9f7946fa058e27ff77dbcd32188a3ad6ba9e475cc1",
+        "internal/adapter/file_observer_forward.go": "a16b46f639d79e167ceec456bd681cb6f2b946c4bce7ebd2947297adabd333ba",
+        "internal/adapter/file_open_paths.go": "329a7c1c9d0836313f59201a8d1b89e344eb4ac88fdfc74f5cc5dc882a89b67e",
+        "internal/adapter/file_probe.go": "d8c32818390c0db8205074d4e707539f320a95bff6840c11e83bd68773784f3f",
+        "internal/adapter/file_probe_process.go": "a7051ca0afe1d61cc7d0babfa6cef1bd31a453ef55ad0c0e0a9152890d5d857c",
+        "internal/adapter/file_remove.go": "24f3d4a335a4d8393fd7636a007eedad792136edc57148c09a8691fcbd4a10fa",
+        "internal/adapter/files.go": "c8d9bef21c7e0a0285db3afe355e15532a80696c7fa5a2c575f8d0297f135f5b",
+        "internal/adapter/http.go": "a25babdae307e8828be2e4c3d046fac28793e18f92c9f2e1403b75833e682aad",
+        "internal/adapter/http_client.go": "101150bda2905e28fc50d204c07e67d78b9798bf891eada3c46d429b37a0f42f",
+        "internal/adapter/http_policy.go": "de2a5d4f167aee5d987c130ae58011fb6a60fb2b059bc00d91a4abf4d48a78d8",
+        "internal/adapter/process.go": "40594780a97982550a1d69c10b0b90f979ad28304c85b1f2a45cf85fda24ba48",
+        "internal/adapter/process_discovery.go": "9159be61e088c6e9aaef7b5f7c3e1a4b1dace481228be234988a3ef411fca76c",
+        "internal/adapter/process_failure.go": "9dd1c5b0b073fd4c4dbd32f75aa8c203addbc00a62a895e8010a13c9c2b699a8",
+        "internal/adapter/process_lifecycle.go": "775138a8f71b4f91e025de1f5efbd213e83b26ece662e68c897048667ac4ff41",
+        "internal/adapter/process_policy.go": "25b5d2ca50ff509d312fa6a6cd70361fa0145377a4dc9191c8504ab7830d1f41",
+        "internal/adapter/process_registry.go": "ddc296d45cb5043e4ca1fad74019c7f4f28990f9f9c0613e6128d8c943827dc4",
+        "internal/adapter/process_registry_files.go": "6ab78d7628ff93980ea9acc93b6f68c0c1a294d9c2dcd40b5d275600ec2b4237",
+        "internal/adapter/process_scope.go": "6d93587b94b25d2e22b2ec78c0f568c6f82d201eb40c328f022d4086c3d27ef5",
+        "internal/adapter/server.go": "d613b33c4eeba1cc9d15ce600850ad4b229c7008937057a3d17546014c1a828f",
+        "internal/autodiff/plan.go": "5e4e5e51033e5073e174911d3bd455bc2d572bbac4484dabf4d541f7a381f777",
+        "internal/catalog/autodiff.go": "750fda11c969fd188d6dddf497ed76253813dac9806859eeb0ee8856c2164b65",
+        "internal/catalog/catalog.go": "580eb8bf8bb574c16d46464bbf7ee6801c81d2b5e5aea9e682dc3047e179cfa2",
+        "internal/catalog/checkpoint.go": "18ff7cbd4fdd22b11c971572b0737a7721e04fce600b718bd611c04e8f41440a",
+        "internal/catalog/observations.go": "45c3a8e8cf2f05158fb80aea9cad31d8dcc294303a6b29d0eaf623fd0b5b4b5d",
+        "internal/catalog/optimizer.go": "e86ef0da21332d37bcd120450df99c75d241ea1e27aadc421a2a5650f9fa5dbe",
+        "internal/catalog/parameters.go": "00f38b5260ecf015aa318a209fd6568d2a659e83e1b9bfc4cca39e002f1185e6",
+        "internal/catalog/process_context.go": "c27125197962ad19eee4e1cdc6ab27217b2482e13e355181ab394f8ebf71ad0a",
+        "internal/catalog/tensor.go": "e6be8c898d76c6eeba8ac33c2b5a7173ad130e13741bddfecc73beae2d3acb36",
+        "internal/check/autodiff.go": "5a85270b627bfad3f1d253cb3957353694c5cb6605aa8e499cb0d367e01609fe",
+        "internal/check/call.go": "dcb7c94583cfb1f0770a086df73fc5d1f13b93f8f4d362fa4e8761c3e726fc89",
+        "internal/check/check.go": "0e704fb242f9d3bf234387d137b743d9e3389d16942e31f04990d472a27712be",
+        "internal/check/checkpoint.go": "89760844818292c3a33751ac5125407bd9d549718b2ed147822ed3982526f8d1",
+        "internal/check/collections.go": "f8777520c658b01d30ba81ff109b80bd4bace22856c75503dd700465dfe3caae",
+        "internal/check/expression.go": "3c27d322f4b997b580e30cc9591b77e5908511d68e0145634b81fa43be435b04",
+        "internal/check/file.go": "4638a51120390cb9e4c0867624ec7a60f7679692d37da834c6933d4be0f12ba7",
+        "internal/check/match.go": "9a5551b25fcb5deef07d35c1aeeb66573e2e701b51d7deb970727b4fb6387449",
+        "internal/check/optimizer.go": "75de8def75a753e60092bb6abd6a346c5036ed89b63f57ab655198e4be2641e4",
+        "internal/check/parameters.go": "b6afd937389bafebd0d9568a6aeb2729166322a5d134f9a6ef865ac05e63441a",
+        "internal/check/type.go": "ef6079d876eea30c67d281231ae8f380db01bc12c8dabe685e575a02eb40f39a",
+        "internal/compiler/compiler.go": "a37489303ed387f8ada4cc977c643c96517bad47cd1a4843464fdf80b8178380",
+        "internal/derivative/vjp.go": "e12a6e750d368af4565b27ed736cfcecb595beeea48b4c6e5ab614bbea0167dd",
+        "internal/device/build.go": "713dad1e5cab521f6da6d3ac44c1e59c63dc764b9b12d45532e5c5317b805972",
+        "internal/device/compute.go": "6753afc97e6d1cfa8103845e2a45b1bb10a564d6f8f50759c50bff59e47ea989",
+        "internal/device/device.go": "b7d141e6debf1db8cfc936a39c12e567a04105c7cb51b518d1393a157af3029f",
+        "internal/device/metal_darwin.go": "9850d3975e2c6920a9c136abfed11c9be6756eba1da22500ceb26d90f04cd36d",
+        "internal/device/metal_disabled.go": "ddccb1685eb958264a91ca3e3cd9d86808f7f81aace289e5951fac4981586d65",
+        "internal/diagnostic/diagnostic.go": "4b56533f7cae515ce2e423d64116d419a31e9079b9b9be87544a6591618fda69",
+        "internal/eval/autodiff.go": "598443afb24f8fe11051224e6113347a4ee32c58662564ee4e61a9715ae9a0b3",
+        "internal/eval/builtin.go": "3e8843ae0c8d619784feb095bbb0616664628f8e7ddb3a14461b079daaabe6e4",
+        "internal/eval/eval.go": "07524cf27e5bbc026433cd2317bd90688f889f59fdce5e85efd13302b8b73268",
+        "internal/eval/list.go": "6eb19d89cadc32086a21d91505a350c92bec3ef91d8ed6ddc0a44ef5532ac221",
+        "internal/execution/activation_progress.go": "e0db8b7c5aac92fa500b87488c84ac78878a9beb206e8e5c993b371d4e350f40",
+        "internal/execution/contract.go": "a8a554955e4abcf9e14930b462d7630b08266d132ab4492cecd13db47c377cd6",
+        "internal/execution/failure_capture.go": "2134f4f3ca2fb84529dd80ec1bff063359df7c4911b648901d03509d8f8e2c12",
+        "internal/execution/file.go": "19caf10a701384b4e7540b9ce16925f3aa8e20f7910583eb852f8efe63deaab7",
+        "internal/execution/file_guard.go": "f1f548d4023205928e1adc18872943ad40ab4038c80f926db45b302deccd5cea",
+        "internal/execution/file_write_progress.go": "675892824dcca6ae77d0e5cda97f541b2e862e27c74f9ac4ca5cda37fbf02b99",
+        "internal/execution/flow_progress.go": "b914f748f7a5c5da4a991088c762b8296e0a94e54619db915d58e7da701ca4cc",
+        "internal/execution/host_invocation.go": "6425d7b5cc4c509ea16ba7a3693ef5ab14874585496180fc348c1ab5bff7318a",
+        "internal/execution/http_progress.go": "95e320a22d4f6f9008b072f0524fd8d2961cf51c2eef385c0c0aaffead585a0a",
+        "internal/execution/operation_cleanup.go": "ac774842566e7c3ea97f28e580f1b3a33d50c6073fb17abf1c276a75145a54bc",
+        "internal/execution/process_context.go": "8c5e0e792469ff79d46bef8cd5493ffee0d44005cc0b42d297b84d48e3d91cb8",
+        "internal/execution/process_progress.go": "c4919a2e1f8660e8c620d895c637ddfcef36abd35e752405e1185b6b434ccb57",
+        "internal/execution/program.go": "936b6a379748469c208b8f5987def07472e078f8b84a34b571cca200542590d0",
+        "internal/execution/session.go": "8c50f369a618f27fa2b6738080cf0304216d7d0c6a2e98160844c0809993f5a7",
+        "internal/identity/flow.go": "ee15f4ac26587b22dd15def1280cdf73e2b3f73ece81d93666c441bc6c6ddf39",
+        "internal/inspect/analyze.go": "b592c399df4188a938fe8bbc89528d4fa089f633205bdc54fcd7ea0ba722c707",
+        "internal/inspect/autodiff.go": "728f882d823f526bd0af06b5c438be756fd656d7d2d184a36de8edfe5e98fce4",
+        "internal/inspect/expression.go": "72bd01fe802063035e6b87b9a7c78ba3c11c7906edf19e10b1b40abeb14a2874",
+        "internal/inspect/index.go": "758754b5dedb0f0e5145818bbd27e5e5fefc2855b83298400e5c098012c0124f",
+        "internal/inspect/process.go": "9d322d4185b8655510de79494d91ecda2ddd26067556ea1f24504ff8966c1162",
+        "internal/inspect/report.go": "b67d667b5027d621de82a6fd97f799726395a18d9f239d74c6e736b6c9bb0303",
+        "internal/ir/ir.go": "28e554a3c1ebfa6fe155869dae9c165404cd26c19b4819c15c7265821b71faff",
+        "internal/llvmemit/emit.go": "4a9952b4d167b3c45bb025f97b20c90ba69b761a34d8ad71d3b6361005928015",
+        "internal/metalconfig/config.go": "7946af24fdc32e91192279057779e9b77e18e1ecc1f8baa2fe228f436c874b90",
+        "internal/nativebuild/build.go": "5e4fb95a743cf7645ac79209d182229dc30267dffa37a18af8bff7491e2b6b5c",
+        "internal/nativebuild/llvm.go": "b09d202d9ceda40e45d6a7a14080b4213a729ad8d852d89826cb7e2d002b4afa",
+        "internal/nativebuild/llvm_executable.go": "49e36c0e6ae6c41422fe4881f38f36366aa203910756d8e6056b80678768c64b",
+        "internal/nativebuild/llvm_metal.go": "389cdc734abafd59b0f43b65fe1d099982e14f713c8ec573d3a0e4032d3ce1b8",
+        "internal/nativebuild/llvm_snapshot.go": "5e2a3d508dd0542dd38f860274a83b05489dc453378f4682f7ef6d378905b9e4",
+        "internal/nativebuild/llvm_snapshot_darwin.go": "272e79c9614f05a5adbb798223f86eaaa5f02f97d37b7c0df10396e68f48ff19",
+        "internal/nativebuild/llvm_snapshot_linux.go": "4482beaee9659ffe035394e119c073e59e286b26326df4d0dc8761c9f9f65ccb",
+        "internal/nativebuild/llvm_snapshot_other.go": "230d95e819c5ac5a8aac64ed440e472f7b314f60613453a09ce4d3fd5395fbdf",
+        "internal/nativebuild/paths.go": "ba4f4d9a6b14bc00bced0f0943beb68de75d6e005b48e234618642a199e19e66",
+        "internal/nativeplan/gradient.go": "89aabf8acca82a402bfed12a4c6adeb0d1953a8d77f5d1ab131387b259c47df5",
+        "internal/nativeplan/lower.go": "3f6ec434523df8912793d712c3f8f12e543fcece35e7b572288122cb66193753",
+        "internal/nativeplan/metadata.go": "40906f2a9585b9cb0e69ebbc261dbee80915222e038d3106c8a2e0fabb15b82e",
+        "internal/nativeplan/plan.go": "83a4213b2c850edf306997fa5fd45392f81d67d1fef14452c1cc3023d7ea6a71",
+        "internal/nativeplan/verify.go": "827f3856dd615ede2841c0d616be1acea2693641f871526ca2af0d121ab577f6",
+        "internal/processhost/helper_identity.go": "46aef4e7a8df22a0ca4de132a5ba2780a16bd18e4695605aff02d5d816cec287",
+        "internal/processhost/native_cleanup_darwin.go": "1a16171114861ed643d45ca75b51b4f65b027c01df3b43c53ade5fe6d4403f4d",
+        "internal/processhost/native_config_darwin.go": "36a908913b4b149600d6c4ac69bb51a7bd2bc12880f3d006df53d55e95e5bed7",
+        "internal/processhost/native_darwin.go": "a514e29a7fe8ed0af30622a2d09a7b7de375a0c13588488e3e15c0f6a9c6fb07",
+        "internal/processhost/native_other.go": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16",
+        "internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+        "internal/processhost/session.go": "354cd1752728fb4d573ce8b18a6b2e0c38aec0c8383ce48893f51c868cbcabe5",
+        "internal/processhost/startup.go": "37e1c11b4f066d0dacc00ad584beee5da273bd69ac5025a92baa3ce0653c2dd0",
+        "internal/resolve/scope.go": "59ee6ebda753d154d1c511edf669ef5d0b01566e711716f229596871df8ce742",
+        "internal/runner/command.go": "a73a6ff21e359d0efc13478a0a1a2f051a4db8ad4cc3a18c8f1027ab182d9ed2",
+        "internal/runner/execute.go": "bb07c93232bb10328c4ea84e4a6778b76c19ebea79330f3a40293cbb01e32ea4",
+        "internal/runtimeops/arithmetic.go": "05fd5c8ceecafddfab7563b3af0f4fbd04ffd7b138f25858b17abece5c44d169",
+        "internal/runtimeops/builtin.go": "4a1de8704cf1678b9aef4658548388ad7b097b78b23bec2d67f6f7657774dc77",
+        "internal/runtimeops/checkpoint.go": "5e6e0b3c3caac5533119299f0d056579da24397e02c2e71f9c416566394fe0a7",
+        "internal/runtimeops/control.go": "490271cfe61153ea2262a980f2159d7e76f47ea43195932be2a01d3bd5ea34c0",
+        "internal/runtimeops/derivative.go": "65d78ba3447b9ad81de66ce688de1a8e8973ba5ec2d770d2e5bd39b7a8625a0a",
+        "internal/runtimeops/file_observations.go": "253c1f4806bc762cbae794b000f06062f2f1639189040ead2534f0de3e61985a",
+        "internal/runtimeops/float.go": "646fef81daf610e10288ba0e5dc07ecc0eb2cbb78cbf0d33a5061ee6ea5d9aba",
+        "internal/runtimeops/helpers.go": "2d656c28f37ccacda47ee3e087ba24eef2f9ab4d56511fa38327905ed7cf5b14",
+        "internal/runtimeops/host_invocation.go": "28e9fe9151ab0a2a3f27499cdf43a4e60037f8252bd96999906f96ed71300047",
+        "internal/runtimeops/http_client.go": "8eb796d5b11cf94cc40448b61f4ce33eee79275fff85a94ea5608744c8e4dbee",
+        "internal/runtimeops/optimizer.go": "5a2f07557ea7b9674d3e9d63e01872c5c014b8e98a770ea3387d5d67f3e14782",
+        "internal/runtimeops/parameters.go": "40cd6e052b4dfc639ad0f03731f193173e2dac456715a4c75e735060b648b4ee",
+        "internal/runtimeops/process.go": "42ea4b30ea88abfc91d29f10fbf1b08558673c05d24757d2d1623ad978165009",
+        "internal/runtimeops/process_context.go": "def05b1ae9ddb70982a63f36b65aca7943b56b9574eb9e1a9047b09f838d4162",
+        "internal/runtimeops/runtime.go": "abd865024be4f874797db19772fac82e78a26628c0204cba4b4e7e14ed7659b5",
+        "internal/runtimeops/tensor.go": "30c64760f69cf0d4949ffc62d238319829ee63f543e2b9c8d550adaca6d3e318",
+        "internal/source/source.go": "6612c2bad62638c79aad2f1ecc61a7faa8887382452e299488250dd5b9dc3521",
+        "internal/syntax/ast.go": "ed1002b6508bf1834e0ab53c0816afb31d3d53e750db256e2275a68f97e2fe40",
+        "internal/syntax/lexer.go": "c1213cae056971402d9fc1f1a91e81a96ffb5e830f9945bc73ea3f79fe886038",
+        "internal/syntax/parser.go": "d6f1f4d0ed72cffe4df618a99036f6af3b67054b09cbe026db773ea173c89880",
+        "internal/tensor/compute.go": "63379f95df09dc89eaf3fac409c41138d71705eb16346f1edc254d036752b0e4",
+        "internal/tensor/cpu.go": "a82c9542f91b43d71e1b0bae70c8721647f6154bec08fda08136aeef336de00f",
+        "internal/tensor/device.go": "e9c7f1fdfc18f596773f4bb45f59148ec45382939467d201d140c70a67c628d6",
+        "internal/tensor/shape.go": "15aefdc0b82cc111063ac03234c5a5064c9a773e6dadd1dc63c51a3d247fd649",
+        "internal/tensorfacts/analyze.go": "f4271c9425af0bdad0dedbb5ec584ccb08c81275af5f1a0eb5b10db82e2ddedc",
+        "internal/tensorfacts/scope.go": "3bd17cd566ad2bf775296a38e2a185278d2131fa1b41e9b08cb0d686cc443788",
+        "internal/types/training.go": "8f67e2579f1b6572a6a870c062a120785831c5ef3dad117502e5266274ccd598",
+        "internal/types/types.go": "c158393654c7da620c75690b095b3f738a938e7e9f894f6d6046340709ff3b22",
+        "internal/value/error.go": "5ec3c8c799a8ae2ab285af5f1cbfd83d9582a975c6fca8ae18ee8afdecc86b74",
+        "internal/value/file.go": "cc8a6fb463e81d890629be6ba00eaed88c91483707b1b258c11019fd2823fb73",
+        "internal/value/file_observation.go": "0039544dccabb78c202e895477dc9c0c6a823d642b9a8cc8f2ba17b9c39a82bd",
+        "internal/value/headers.go": "04b3263cfa0cd56bd838af116190e8290a0d8840b6cde6a092e517eb677eb236",
+        "internal/value/host_invocation.go": "c09c3b337e061ec3940227f177f7264697c07bed7e78b4869726990e0a86154c",
+        "internal/value/http_client.go": "3f04db38d0d767f0b54eef416ddc54a0f1ff4f3701fd9f43ae4b494088366a06",
+        "internal/value/optimizer.go": "65ba9f205caf5db47b9b94d84b1b7017f890837dabed8fcff78964ffbc5c974a",
+        "internal/value/parameters.go": "dd1470ba363ba43d308bdc9d387a3b18b81fb9546bd1bd24aa026870f8665283",
+        "internal/value/process.go": "8296d5978583dc7f89da014bf337d0105b8ea235dd28d7ef62a4f4474d672b8c",
+        "internal/value/process_context.go": "41dad83a3a77bfb25cba7ff37535875be67459a8617f52e44db364059074e0df",
+        "internal/value/process_result.go": "cf9bcddc214dc2189cd0d935b24914a35567824d014042e444273f1440fcbc66",
+        "internal/value/receipt.go": "3c90f7426a5569d625d5e738c4f0193c27fbac704bc4e3486ceade18980946c8",
+        "internal/value/resources.go": "8fba6d656989f853e8363379746135a916e90a929b72a935e159eb59a05d7292",
+        "internal/value/snapshot_weight.go": "b311c1ceedfae6665706e574970eb25588cb009da15ce9f1a953fdc2d5bd6485",
+        "internal/value/target.go": "4d983b7fcbd26a170bb32a3f3709828e5bf3ba0b3d499087aa2b8a4145fa0652",
+        "internal/value/tensor.go": "d1328d3ff4e201a25f398aa539658e3add4834121dffc7b727f2711e8871b3f8",
+        "internal/value/value.go": "479e36fa5c61271c8afbc64bb5150819046c0693fcaea34529e82cf185589114",
+        "go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+        "go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03"
+      },
+      "deleted_new_sources": [
+        "internal/eval/worklist.go",
+        "internal/execution/ownership.go",
+        "internal/execution/worklist_progress.go",
+        "internal/value/file_leases.go",
+        "internal/value/reachable.go"
+      ],
+      "compiled_source_contract": "Exact HEAD cmd/internal production Go sources, with unchanged module manifest and sums, through primary-checkout Go overlay.",
+      "binary_sha256": {
+        "baseline/lo": "a98b7bab7306b11e3b4e97c6e30d9b651aae3a01fb5474fa197204bc291ba1a2",
+        "baseline/runner": "cf223560ec4206b36f77ad5b5213075318364993cf7406d13f867a3d38132f28"
+      },
+      "runner_source_sha256": "fe4046d9f79d822d495066a9c1243598e646a9ce85b4837dda8b2f4e7d8bdf08"
+    },
+    "go_initial": {
+      "git_head": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+      "source_sha256": {
+        "cmd/lo/main.go": "bb0c9f640b76bfc35276d6326115db2cf7478934afdb0492399e668fa72bd67f",
+        "internal/adapter/file_entries.go": "668f7e4f24ef02ee1246d625e0d75f31d9680354907409842fcd3c3c2cbc5a65",
+        "internal/adapter/file_identity_darwin.go": "a8ce2812d976cc3bb0d21823cf36b4b40af06908de51c7cab520cc417f08d55a",
+        "internal/adapter/file_identity_linux.go": "25a5c1672bed2368e45b57855caed4e991c79c93ab73c87e885584e61b86d0b4",
+        "internal/adapter/file_io.go": "01a5a1c66aa6f998c6c7ec336b20b2026c1f23ff2042b6b5494dc4dc29dd8fae",
+        "internal/adapter/file_metadata.go": "1811ece58cb24ae7670fdac17197ffc5ccece5d09dfc2ab1f2f3bb76cd4884ce",
+        "internal/adapter/file_observation.go": "2e144951bf9522eda3b353bc0c02c9e9e1304ec8b973569bd1cf369092a9b4b4",
+        "internal/adapter/file_observer_forward.go": "a16b46f639d79e167ceec456bd681cb6f2b946c4bce7ebd2947297adabd333ba",
+        "internal/adapter/file_open_paths.go": "b8d19fb25850f04724cd3e02ff928f80578df206c72440d4d24c41c2ec6791ed",
+        "internal/adapter/file_probe.go": "d8c32818390c0db8205074d4e707539f320a95bff6840c11e83bd68773784f3f",
+        "internal/adapter/file_probe_process.go": "a7051ca0afe1d61cc7d0babfa6cef1bd31a453ef55ad0c0e0a9152890d5d857c",
+        "internal/adapter/file_remove.go": "fb90d0bfbb8a3da21ffa3b0dbf53e70f9ab172d4677139faabba65ed0c63b947",
+        "internal/adapter/files.go": "743ba1ba8be3ca9af3d0e07f3280a5bc8e029f99ab86c9c8fc0ed8cb5c494cf9",
+        "internal/adapter/http.go": "a25babdae307e8828be2e4c3d046fac28793e18f92c9f2e1403b75833e682aad",
+        "internal/adapter/http_client.go": "101150bda2905e28fc50d204c07e67d78b9798bf891eada3c46d429b37a0f42f",
+        "internal/adapter/http_policy.go": "de2a5d4f167aee5d987c130ae58011fb6a60fb2b059bc00d91a4abf4d48a78d8",
+        "internal/adapter/process.go": "40594780a97982550a1d69c10b0b90f979ad28304c85b1f2a45cf85fda24ba48",
+        "internal/adapter/process_discovery.go": "9159be61e088c6e9aaef7b5f7c3e1a4b1dace481228be234988a3ef411fca76c",
+        "internal/adapter/process_failure.go": "9dd1c5b0b073fd4c4dbd32f75aa8c203addbc00a62a895e8010a13c9c2b699a8",
+        "internal/adapter/process_lifecycle.go": "775138a8f71b4f91e025de1f5efbd213e83b26ece662e68c897048667ac4ff41",
+        "internal/adapter/process_policy.go": "25b5d2ca50ff509d312fa6a6cd70361fa0145377a4dc9191c8504ab7830d1f41",
+        "internal/adapter/process_registry.go": "ddc296d45cb5043e4ca1fad74019c7f4f28990f9f9c0613e6128d8c943827dc4",
+        "internal/adapter/process_registry_files.go": "6ab78d7628ff93980ea9acc93b6f68c0c1a294d9c2dcd40b5d275600ec2b4237",
+        "internal/adapter/process_scope.go": "6d93587b94b25d2e22b2ec78c0f568c6f82d201eb40c328f022d4086c3d27ef5",
+        "internal/adapter/server.go": "d613b33c4eeba1cc9d15ce600850ad4b229c7008937057a3d17546014c1a828f",
+        "internal/autodiff/plan.go": "5e4e5e51033e5073e174911d3bd455bc2d572bbac4484dabf4d541f7a381f777",
+        "internal/catalog/autodiff.go": "750fda11c969fd188d6dddf497ed76253813dac9806859eeb0ee8856c2164b65",
+        "internal/catalog/catalog.go": "cc6db7a3e884ff2c73bd89d5ae88f8085046d5c6ad3bff360d642feaa53f4111",
+        "internal/catalog/checkpoint.go": "18ff7cbd4fdd22b11c971572b0737a7721e04fce600b718bd611c04e8f41440a",
+        "internal/catalog/observations.go": "45c3a8e8cf2f05158fb80aea9cad31d8dcc294303a6b29d0eaf623fd0b5b4b5d",
+        "internal/catalog/optimizer.go": "e86ef0da21332d37bcd120450df99c75d241ea1e27aadc421a2a5650f9fa5dbe",
+        "internal/catalog/parameters.go": "00f38b5260ecf015aa318a209fd6568d2a659e83e1b9bfc4cca39e002f1185e6",
+        "internal/catalog/process_context.go": "c27125197962ad19eee4e1cdc6ab27217b2482e13e355181ab394f8ebf71ad0a",
+        "internal/catalog/tensor.go": "e6be8c898d76c6eeba8ac33c2b5a7173ad130e13741bddfecc73beae2d3acb36",
+        "internal/check/autodiff.go": "5a85270b627bfad3f1d253cb3957353694c5cb6605aa8e499cb0d367e01609fe",
+        "internal/check/call.go": "dcb7c94583cfb1f0770a086df73fc5d1f13b93f8f4d362fa4e8761c3e726fc89",
+        "internal/check/check.go": "0e704fb242f9d3bf234387d137b743d9e3389d16942e31f04990d472a27712be",
+        "internal/check/checkpoint.go": "89760844818292c3a33751ac5125407bd9d549718b2ed147822ed3982526f8d1",
+        "internal/check/collections.go": "7acbe2b2447d3269bf0ad89f50fc76cdba448ee33d7a85b8f847d71ad1e5e1ef",
+        "internal/check/expression.go": "3c27d322f4b997b580e30cc9591b77e5908511d68e0145634b81fa43be435b04",
+        "internal/check/file.go": "4638a51120390cb9e4c0867624ec7a60f7679692d37da834c6933d4be0f12ba7",
+        "internal/check/match.go": "9a5551b25fcb5deef07d35c1aeeb66573e2e701b51d7deb970727b4fb6387449",
+        "internal/check/optimizer.go": "75de8def75a753e60092bb6abd6a346c5036ed89b63f57ab655198e4be2641e4",
+        "internal/check/parameters.go": "b6afd937389bafebd0d9568a6aeb2729166322a5d134f9a6ef865ac05e63441a",
+        "internal/check/type.go": "ef6079d876eea30c67d281231ae8f380db01bc12c8dabe685e575a02eb40f39a",
+        "internal/compiler/compiler.go": "a37489303ed387f8ada4cc977c643c96517bad47cd1a4843464fdf80b8178380",
+        "internal/derivative/vjp.go": "e12a6e750d368af4565b27ed736cfcecb595beeea48b4c6e5ab614bbea0167dd",
+        "internal/device/build.go": "713dad1e5cab521f6da6d3ac44c1e59c63dc764b9b12d45532e5c5317b805972",
+        "internal/device/compute.go": "6753afc97e6d1cfa8103845e2a45b1bb10a564d6f8f50759c50bff59e47ea989",
+        "internal/device/device.go": "3b1c3f06e9752115a8c4b90c8d5310fd56a7eeed5ed6f36f2a0641c08b26898c",
+        "internal/device/metal_darwin.go": "9850d3975e2c6920a9c136abfed11c9be6756eba1da22500ceb26d90f04cd36d",
+        "internal/device/metal_disabled.go": "ddccb1685eb958264a91ca3e3cd9d86808f7f81aace289e5951fac4981586d65",
+        "internal/diagnostic/diagnostic.go": "4b56533f7cae515ce2e423d64116d419a31e9079b9b9be87544a6591618fda69",
+        "internal/eval/autodiff.go": "598443afb24f8fe11051224e6113347a4ee32c58662564ee4e61a9715ae9a0b3",
+        "internal/eval/builtin.go": "5ebab476bfbac741ad81e4cb1be2d02f0b32a230c9d948f2dec756acbe62144b",
+        "internal/eval/eval.go": "a533c50383b339c92900b9f732787ffa0884df12892fd20f5bab3f0e95c322d7",
+        "internal/eval/list.go": "2aaaccdd8b095ba7e17e8e1232e1c21ea4ef7a9617a3c7c62e583f24fa9177d7",
+        "internal/eval/worklist.go": "284b75f53b7ee20343cb1058926639933ff72f3c06e925a2f01e32c492fd1b14",
+        "internal/execution/activation_progress.go": "e0db8b7c5aac92fa500b87488c84ac78878a9beb206e8e5c993b371d4e350f40",
+        "internal/execution/contract.go": "9ec3d3db7b798cc67c0b318677e1ba552c33eadc1a53e7b8ba892600c216a307",
+        "internal/execution/failure_capture.go": "2134f4f3ca2fb84529dd80ec1bff063359df7c4911b648901d03509d8f8e2c12",
+        "internal/execution/file.go": "19caf10a701384b4e7540b9ce16925f3aa8e20f7910583eb852f8efe63deaab7",
+        "internal/execution/file_guard.go": "f1f548d4023205928e1adc18872943ad40ab4038c80f926db45b302deccd5cea",
+        "internal/execution/file_write_progress.go": "675892824dcca6ae77d0e5cda97f541b2e862e27c74f9ac4ca5cda37fbf02b99",
+        "internal/execution/flow_progress.go": "0c2d5aa51d0e764f01633c5b5c54f472a1084cd30bc805012516eb1ab085bbcb",
+        "internal/execution/host_invocation.go": "6425d7b5cc4c509ea16ba7a3693ef5ab14874585496180fc348c1ab5bff7318a",
+        "internal/execution/http_progress.go": "95e320a22d4f6f9008b072f0524fd8d2961cf51c2eef385c0c0aaffead585a0a",
+        "internal/execution/operation_cleanup.go": "ac774842566e7c3ea97f28e580f1b3a33d50c6073fb17abf1c276a75145a54bc",
+        "internal/execution/ownership.go": "c97a60d539ec3f5b9cb6cb4703219e29c9039ab4a22c94ce9b2cd69d993ab363",
+        "internal/execution/process_context.go": "8c5e0e792469ff79d46bef8cd5493ffee0d44005cc0b42d297b84d48e3d91cb8",
+        "internal/execution/process_progress.go": "c4919a2e1f8660e8c620d895c637ddfcef36abd35e752405e1185b6b434ccb57",
+        "internal/execution/program.go": "936b6a379748469c208b8f5987def07472e078f8b84a34b571cca200542590d0",
+        "internal/execution/session.go": "a038107c00c9aeb0b52d780ac7eaae1ceed0a1dc58bb9da424a4ade211108d4c",
+        "internal/execution/worklist_progress.go": "0725d95f687a59971d8e063a48a10ef96b641dd3264c21f213fde4e5833efa3c",
+        "internal/identity/flow.go": "ee15f4ac26587b22dd15def1280cdf73e2b3f73ece81d93666c441bc6c6ddf39",
+        "internal/inspect/analyze.go": "b592c399df4188a938fe8bbc89528d4fa089f633205bdc54fcd7ea0ba722c707",
+        "internal/inspect/autodiff.go": "728f882d823f526bd0af06b5c438be756fd656d7d2d184a36de8edfe5e98fce4",
+        "internal/inspect/expression.go": "bb8471543c446ff3ce447d775ce2816245f64de2e24be2d3da0ea5395efb96c2",
+        "internal/inspect/index.go": "758754b5dedb0f0e5145818bbd27e5e5fefc2855b83298400e5c098012c0124f",
+        "internal/inspect/process.go": "9d322d4185b8655510de79494d91ecda2ddd26067556ea1f24504ff8966c1162",
+        "internal/inspect/report.go": "b67d667b5027d621de82a6fd97f799726395a18d9f239d74c6e736b6c9bb0303",
+        "internal/ir/ir.go": "28e554a3c1ebfa6fe155869dae9c165404cd26c19b4819c15c7265821b71faff",
+        "internal/llvmemit/emit.go": "377ae99dd621e64ecbb07050fc43025bb87a50d6b643480a5047c9e9b6a65518",
+        "internal/metalconfig/config.go": "7946af24fdc32e91192279057779e9b77e18e1ecc1f8baa2fe228f436c874b90",
+        "internal/nativebuild/build.go": "5e4fb95a743cf7645ac79209d182229dc30267dffa37a18af8bff7491e2b6b5c",
+        "internal/nativebuild/llvm.go": "b09d202d9ceda40e45d6a7a14080b4213a729ad8d852d89826cb7e2d002b4afa",
+        "internal/nativebuild/llvm_executable.go": "49e36c0e6ae6c41422fe4881f38f36366aa203910756d8e6056b80678768c64b",
+        "internal/nativebuild/llvm_metal.go": "389cdc734abafd59b0f43b65fe1d099982e14f713c8ec573d3a0e4032d3ce1b8",
+        "internal/nativebuild/llvm_snapshot.go": "5e2a3d508dd0542dd38f860274a83b05489dc453378f4682f7ef6d378905b9e4",
+        "internal/nativebuild/llvm_snapshot_darwin.go": "272e79c9614f05a5adbb798223f86eaaa5f02f97d37b7c0df10396e68f48ff19",
+        "internal/nativebuild/llvm_snapshot_linux.go": "4482beaee9659ffe035394e119c073e59e286b26326df4d0dc8761c9f9f65ccb",
+        "internal/nativebuild/llvm_snapshot_other.go": "230d95e819c5ac5a8aac64ed440e472f7b314f60613453a09ce4d3fd5395fbdf",
+        "internal/nativebuild/paths.go": "ba4f4d9a6b14bc00bced0f0943beb68de75d6e005b48e234618642a199e19e66",
+        "internal/nativeplan/gradient.go": "89aabf8acca82a402bfed12a4c6adeb0d1953a8d77f5d1ab131387b259c47df5",
+        "internal/nativeplan/lower.go": "4ba0e6a1c6842af937a0098ee8bf0cac7b030cc7a6492599abcea5d29d567792",
+        "internal/nativeplan/metadata.go": "40906f2a9585b9cb0e69ebbc261dbee80915222e038d3106c8a2e0fabb15b82e",
+        "internal/nativeplan/plan.go": "bbed9c9bfad4473b73695b3076e2b6f2e42c3be9c5e551ae514a93829adb2163",
+        "internal/nativeplan/verify.go": "827f3856dd615ede2841c0d616be1acea2693641f871526ca2af0d121ab577f6",
+        "internal/processhost/helper_identity.go": "46aef4e7a8df22a0ca4de132a5ba2780a16bd18e4695605aff02d5d816cec287",
+        "internal/processhost/native_cleanup_darwin.go": "1a16171114861ed643d45ca75b51b4f65b027c01df3b43c53ade5fe6d4403f4d",
+        "internal/processhost/native_config_darwin.go": "36a908913b4b149600d6c4ac69bb51a7bd2bc12880f3d006df53d55e95e5bed7",
+        "internal/processhost/native_darwin.go": "a514e29a7fe8ed0af30622a2d09a7b7de375a0c13588488e3e15c0f6a9c6fb07",
+        "internal/processhost/native_other.go": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16",
+        "internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+        "internal/processhost/session.go": "354cd1752728fb4d573ce8b18a6b2e0c38aec0c8383ce48893f51c868cbcabe5",
+        "internal/processhost/startup.go": "37e1c11b4f066d0dacc00ad584beee5da273bd69ac5025a92baa3ce0653c2dd0",
+        "internal/resolve/scope.go": "59ee6ebda753d154d1c511edf669ef5d0b01566e711716f229596871df8ce742",
+        "internal/runner/command.go": "9c7e167d244f1e9ad77e73c8dd59da6de359aec2be0be05439a8d04a521f3c80",
+        "internal/runner/execute.go": "bb07c93232bb10328c4ea84e4a6778b76c19ebea79330f3a40293cbb01e32ea4",
+        "internal/runtimeops/arithmetic.go": "750585a1e886188a700eff47d2fad07fcd138e27f9e9203ab9cfe3cd01f4fd7c",
+        "internal/runtimeops/builtin.go": "27adf3b55933197f064d11ec3ac1820ad7b900e80d79124c6b7d9cc490e2b040",
+        "internal/runtimeops/checkpoint.go": "5e6e0b3c3caac5533119299f0d056579da24397e02c2e71f9c416566394fe0a7",
+        "internal/runtimeops/control.go": "56f20373d156def7c008f3f2ae9126a3fed11557d393c810f5f3b40f1e68a7ef",
+        "internal/runtimeops/derivative.go": "65d78ba3447b9ad81de66ce688de1a8e8973ba5ec2d770d2e5bd39b7a8625a0a",
+        "internal/runtimeops/file_observations.go": "a3ebf36b50ea9248498e50327d6e84fb17d233320bac49767db828c208771f6a",
+        "internal/runtimeops/float.go": "646fef81daf610e10288ba0e5dc07ecc0eb2cbb78cbf0d33a5061ee6ea5d9aba",
+        "internal/runtimeops/helpers.go": "2d656c28f37ccacda47ee3e087ba24eef2f9ab4d56511fa38327905ed7cf5b14",
+        "internal/runtimeops/host_invocation.go": "28e9fe9151ab0a2a3f27499cdf43a4e60037f8252bd96999906f96ed71300047",
+        "internal/runtimeops/http_client.go": "8eb796d5b11cf94cc40448b61f4ce33eee79275fff85a94ea5608744c8e4dbee",
+        "internal/runtimeops/optimizer.go": "5a2f07557ea7b9674d3e9d63e01872c5c014b8e98a770ea3387d5d67f3e14782",
+        "internal/runtimeops/parameters.go": "40cd6e052b4dfc639ad0f03731f193173e2dac456715a4c75e735060b648b4ee",
+        "internal/runtimeops/process.go": "42ea4b30ea88abfc91d29f10fbf1b08558673c05d24757d2d1623ad978165009",
+        "internal/runtimeops/process_context.go": "def05b1ae9ddb70982a63f36b65aca7943b56b9574eb9e1a9047b09f838d4162",
+        "internal/runtimeops/runtime.go": "29c0c94bce4bfd0d0c652f13aaf1bda6f1f46e9aed4f4e7ec2081349481a8dd5",
+        "internal/runtimeops/tensor.go": "30c64760f69cf0d4949ffc62d238319829ee63f543e2b9c8d550adaca6d3e318",
+        "internal/source/source.go": "6612c2bad62638c79aad2f1ecc61a7faa8887382452e299488250dd5b9dc3521",
+        "internal/syntax/ast.go": "ed1002b6508bf1834e0ab53c0816afb31d3d53e750db256e2275a68f97e2fe40",
+        "internal/syntax/lexer.go": "c1213cae056971402d9fc1f1a91e81a96ffb5e830f9945bc73ea3f79fe886038",
+        "internal/syntax/parser.go": "d6f1f4d0ed72cffe4df618a99036f6af3b67054b09cbe026db773ea173c89880",
+        "internal/tensor/compute.go": "63379f95df09dc89eaf3fac409c41138d71705eb16346f1edc254d036752b0e4",
+        "internal/tensor/cpu.go": "a82c9542f91b43d71e1b0bae70c8721647f6154bec08fda08136aeef336de00f",
+        "internal/tensor/device.go": "e9c7f1fdfc18f596773f4bb45f59148ec45382939467d201d140c70a67c628d6",
+        "internal/tensor/shape.go": "15aefdc0b82cc111063ac03234c5a5064c9a773e6dadd1dc63c51a3d247fd649",
+        "internal/tensorfacts/analyze.go": "f4271c9425af0bdad0dedbb5ec584ccb08c81275af5f1a0eb5b10db82e2ddedc",
+        "internal/tensorfacts/scope.go": "3bd17cd566ad2bf775296a38e2a185278d2131fa1b41e9b08cb0d686cc443788",
+        "internal/types/training.go": "8f67e2579f1b6572a6a870c062a120785831c5ef3dad117502e5266274ccd598",
+        "internal/types/types.go": "c158393654c7da620c75690b095b3f738a938e7e9f894f6d6046340709ff3b22",
+        "internal/value/error.go": "93cd825194fbf1f4f6f6288729c3941bd641f687e5c2b9b9af03535b79bd07e3",
+        "internal/value/file.go": "63da4e451a70bd148d13e5f3bedfc8edc48da382e517dc910c77842f449b41db",
+        "internal/value/file_leases.go": "96c4115fa0e2374c603a2400dae1aedf92752273c2a5d068650b2d91645c925f",
+        "internal/value/file_observation.go": "ea459743a4d66abd256bebfaea2d6a7d21e61f47b2348570f9f2ba4c5d2efeae",
+        "internal/value/headers.go": "04b3263cfa0cd56bd838af116190e8290a0d8840b6cde6a092e517eb677eb236",
+        "internal/value/host_invocation.go": "c09c3b337e061ec3940227f177f7264697c07bed7e78b4869726990e0a86154c",
+        "internal/value/http_client.go": "3f04db38d0d767f0b54eef416ddc54a0f1ff4f3701fd9f43ae4b494088366a06",
+        "internal/value/optimizer.go": "65ba9f205caf5db47b9b94d84b1b7017f890837dabed8fcff78964ffbc5c974a",
+        "internal/value/parameters.go": "dd1470ba363ba43d308bdc9d387a3b18b81fb9546bd1bd24aa026870f8665283",
+        "internal/value/process.go": "8296d5978583dc7f89da014bf337d0105b8ea235dd28d7ef62a4f4474d672b8c",
+        "internal/value/process_context.go": "41dad83a3a77bfb25cba7ff37535875be67459a8617f52e44db364059074e0df",
+        "internal/value/process_result.go": "cf9bcddc214dc2189cd0d935b24914a35567824d014042e444273f1440fcbc66",
+        "internal/value/reachable.go": "c27cae86b84e7311f70a9b870eeebfb7c2d4fad4969e11da98896fce65288ba7",
+        "internal/value/receipt.go": "3c90f7426a5569d625d5e738c4f0193c27fbac704bc4e3486ceade18980946c8",
+        "internal/value/resources.go": "0056bd4d52acd2bd106b6180cd45e6adb0d1dfca1d5e787ec85daf21c6e9fcdd",
+        "internal/value/snapshot_weight.go": "b311c1ceedfae6665706e574970eb25588cb009da15ce9f1a953fdc2d5bd6485",
+        "internal/value/target.go": "4d983b7fcbd26a170bb32a3f3709828e5bf3ba0b3d499087aa2b8a4145fa0652",
+        "internal/value/tensor.go": "b0c9adea403531dd4e695833628f322ebb86bc2b205d95b64b515c7c8f2740e1",
+        "internal/value/value.go": "ca8bf29fcefc9b159530a5c3ec6899f5b3e6ada238ab2226983c5ba719d9a0ba"
+      },
+      "overlay_json": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/assets/initial-overlay.json",
+      "helper_source_sha256": "fe4046d9f79d822d495066a9c1243598e646a9ce85b4837dda8b2f4e7d8bdf08",
+      "snapshot_kind": "current initial dynamic production Go bytes in primary-checkout overlay",
+      "binary_sha256": {
+        "initial-lo": "cb21782ceb5129755ad3d870f8566a9b269efe2fe4026ed0e04aa86064d513e0",
+        "initial-runner": "46662f2de19dedeb71c412514aa244151c9ab788f50418e760a16ee6c819b9f9"
+      },
+      "runner_source_sha256": "fe4046d9f79d822d495066a9c1243598e646a9ce85b4837dda8b2f4e7d8bdf08"
+    },
+    "go_current": {
+      "source_sha256": {
+        "cmd/lo/main.go": "bb0c9f640b76bfc35276d6326115db2cf7478934afdb0492399e668fa72bd67f",
+        "go.mod": "6317a79bf471bb0d1bdfeeab06a18506a34a20415b55db6fa5912a83b5933fbd",
+        "go.sum": "cde7b21c6627bd3cfc042453150e8eaf8b6c80aa2df25d96f48b038050945f03",
+        "internal/adapter/file_entries.go": "668f7e4f24ef02ee1246d625e0d75f31d9680354907409842fcd3c3c2cbc5a65",
+        "internal/adapter/file_identity_darwin.go": "a8ce2812d976cc3bb0d21823cf36b4b40af06908de51c7cab520cc417f08d55a",
+        "internal/adapter/file_identity_linux.go": "25a5c1672bed2368e45b57855caed4e991c79c93ab73c87e885584e61b86d0b4",
+        "internal/adapter/file_io.go": "01a5a1c66aa6f998c6c7ec336b20b2026c1f23ff2042b6b5494dc4dc29dd8fae",
+        "internal/adapter/file_metadata.go": "1811ece58cb24ae7670fdac17197ffc5ccece5d09dfc2ab1f2f3bb76cd4884ce",
+        "internal/adapter/file_observation.go": "2e144951bf9522eda3b353bc0c02c9e9e1304ec8b973569bd1cf369092a9b4b4",
+        "internal/adapter/file_observer_forward.go": "a16b46f639d79e167ceec456bd681cb6f2b946c4bce7ebd2947297adabd333ba",
+        "internal/adapter/file_open_paths.go": "b8d19fb25850f04724cd3e02ff928f80578df206c72440d4d24c41c2ec6791ed",
+        "internal/adapter/file_probe.go": "d8c32818390c0db8205074d4e707539f320a95bff6840c11e83bd68773784f3f",
+        "internal/adapter/file_probe_process.go": "a7051ca0afe1d61cc7d0babfa6cef1bd31a453ef55ad0c0e0a9152890d5d857c",
+        "internal/adapter/file_remove.go": "fb90d0bfbb8a3da21ffa3b0dbf53e70f9ab172d4677139faabba65ed0c63b947",
+        "internal/adapter/files.go": "743ba1ba8be3ca9af3d0e07f3280a5bc8e029f99ab86c9c8fc0ed8cb5c494cf9",
+        "internal/adapter/http.go": "a25babdae307e8828be2e4c3d046fac28793e18f92c9f2e1403b75833e682aad",
+        "internal/adapter/http_client.go": "101150bda2905e28fc50d204c07e67d78b9798bf891eada3c46d429b37a0f42f",
+        "internal/adapter/http_policy.go": "de2a5d4f167aee5d987c130ae58011fb6a60fb2b059bc00d91a4abf4d48a78d8",
+        "internal/adapter/process.go": "40594780a97982550a1d69c10b0b90f979ad28304c85b1f2a45cf85fda24ba48",
+        "internal/adapter/process_discovery.go": "9159be61e088c6e9aaef7b5f7c3e1a4b1dace481228be234988a3ef411fca76c",
+        "internal/adapter/process_failure.go": "9dd1c5b0b073fd4c4dbd32f75aa8c203addbc00a62a895e8010a13c9c2b699a8",
+        "internal/adapter/process_lifecycle.go": "775138a8f71b4f91e025de1f5efbd213e83b26ece662e68c897048667ac4ff41",
+        "internal/adapter/process_policy.go": "25b5d2ca50ff509d312fa6a6cd70361fa0145377a4dc9191c8504ab7830d1f41",
+        "internal/adapter/process_registry.go": "ddc296d45cb5043e4ca1fad74019c7f4f28990f9f9c0613e6128d8c943827dc4",
+        "internal/adapter/process_registry_files.go": "6ab78d7628ff93980ea9acc93b6f68c0c1a294d9c2dcd40b5d275600ec2b4237",
+        "internal/adapter/process_scope.go": "6d93587b94b25d2e22b2ec78c0f568c6f82d201eb40c328f022d4086c3d27ef5",
+        "internal/adapter/server.go": "d613b33c4eeba1cc9d15ce600850ad4b229c7008937057a3d17546014c1a828f",
+        "internal/autodiff/plan.go": "5e4e5e51033e5073e174911d3bd455bc2d572bbac4484dabf4d541f7a381f777",
+        "internal/catalog/autodiff.go": "750fda11c969fd188d6dddf497ed76253813dac9806859eeb0ee8856c2164b65",
+        "internal/catalog/catalog.go": "cc6db7a3e884ff2c73bd89d5ae88f8085046d5c6ad3bff360d642feaa53f4111",
+        "internal/catalog/checkpoint.go": "18ff7cbd4fdd22b11c971572b0737a7721e04fce600b718bd611c04e8f41440a",
+        "internal/catalog/observations.go": "45c3a8e8cf2f05158fb80aea9cad31d8dcc294303a6b29d0eaf623fd0b5b4b5d",
+        "internal/catalog/optimizer.go": "e86ef0da21332d37bcd120450df99c75d241ea1e27aadc421a2a5650f9fa5dbe",
+        "internal/catalog/parameters.go": "00f38b5260ecf015aa318a209fd6568d2a659e83e1b9bfc4cca39e002f1185e6",
+        "internal/catalog/process_context.go": "c27125197962ad19eee4e1cdc6ab27217b2482e13e355181ab394f8ebf71ad0a",
+        "internal/catalog/tensor.go": "e6be8c898d76c6eeba8ac33c2b5a7173ad130e13741bddfecc73beae2d3acb36",
+        "internal/check/autodiff.go": "5a85270b627bfad3f1d253cb3957353694c5cb6605aa8e499cb0d367e01609fe",
+        "internal/check/call.go": "dcb7c94583cfb1f0770a086df73fc5d1f13b93f8f4d362fa4e8761c3e726fc89",
+        "internal/check/check.go": "0e704fb242f9d3bf234387d137b743d9e3389d16942e31f04990d472a27712be",
+        "internal/check/checkpoint.go": "89760844818292c3a33751ac5125407bd9d549718b2ed147822ed3982526f8d1",
+        "internal/check/collections.go": "7acbe2b2447d3269bf0ad89f50fc76cdba448ee33d7a85b8f847d71ad1e5e1ef",
+        "internal/check/expression.go": "3c27d322f4b997b580e30cc9591b77e5908511d68e0145634b81fa43be435b04",
+        "internal/check/file.go": "4638a51120390cb9e4c0867624ec7a60f7679692d37da834c6933d4be0f12ba7",
+        "internal/check/match.go": "9a5551b25fcb5deef07d35c1aeeb66573e2e701b51d7deb970727b4fb6387449",
+        "internal/check/optimizer.go": "75de8def75a753e60092bb6abd6a346c5036ed89b63f57ab655198e4be2641e4",
+        "internal/check/parameters.go": "b6afd937389bafebd0d9568a6aeb2729166322a5d134f9a6ef865ac05e63441a",
+        "internal/check/type.go": "ef6079d876eea30c67d281231ae8f380db01bc12c8dabe685e575a02eb40f39a",
+        "internal/compiler/compiler.go": "a37489303ed387f8ada4cc977c643c96517bad47cd1a4843464fdf80b8178380",
+        "internal/derivative/vjp.go": "e12a6e750d368af4565b27ed736cfcecb595beeea48b4c6e5ab614bbea0167dd",
+        "internal/device/build.go": "713dad1e5cab521f6da6d3ac44c1e59c63dc764b9b12d45532e5c5317b805972",
+        "internal/device/compute.go": "6753afc97e6d1cfa8103845e2a45b1bb10a564d6f8f50759c50bff59e47ea989",
+        "internal/device/device.go": "f25d255f75e97aaae7c571ee50f8c695a63d1592caada0991b22cb22fed68b32",
+        "internal/device/metal_darwin.go": "9850d3975e2c6920a9c136abfed11c9be6756eba1da22500ceb26d90f04cd36d",
+        "internal/device/metal_disabled.go": "ddccb1685eb958264a91ca3e3cd9d86808f7f81aace289e5951fac4981586d65",
+        "internal/diagnostic/diagnostic.go": "4b56533f7cae515ce2e423d64116d419a31e9079b9b9be87544a6591618fda69",
+        "internal/eval/autodiff.go": "598443afb24f8fe11051224e6113347a4ee32c58662564ee4e61a9715ae9a0b3",
+        "internal/eval/builtin.go": "5ebab476bfbac741ad81e4cb1be2d02f0b32a230c9d948f2dec756acbe62144b",
+        "internal/eval/eval.go": "cea6bb5f1a38d50536677a394f380e61a2b9d5ca87d787cff987faf8bfc30dcf",
+        "internal/eval/list.go": "926e9920ade04e161c703364990fa56b764b0a20172a3eb1c2dc8868bac1bf34",
+        "internal/eval/worklist.go": "284b75f53b7ee20343cb1058926639933ff72f3c06e925a2f01e32c492fd1b14",
+        "internal/execution/activation_progress.go": "e0db8b7c5aac92fa500b87488c84ac78878a9beb206e8e5c993b371d4e350f40",
+        "internal/execution/contract.go": "9ec3d3db7b798cc67c0b318677e1ba552c33eadc1a53e7b8ba892600c216a307",
+        "internal/execution/failure_capture.go": "2134f4f3ca2fb84529dd80ec1bff063359df7c4911b648901d03509d8f8e2c12",
+        "internal/execution/file.go": "19caf10a701384b4e7540b9ce16925f3aa8e20f7910583eb852f8efe63deaab7",
+        "internal/execution/file_guard.go": "f1f548d4023205928e1adc18872943ad40ab4038c80f926db45b302deccd5cea",
+        "internal/execution/file_write_progress.go": "675892824dcca6ae77d0e5cda97f541b2e862e27c74f9ac4ca5cda37fbf02b99",
+        "internal/execution/flow_progress.go": "25c802649e17a2ab9d5699ff915a5517105e260b35f2d19b572089e52509f614",
+        "internal/execution/host_invocation.go": "6425d7b5cc4c509ea16ba7a3693ef5ab14874585496180fc348c1ab5bff7318a",
+        "internal/execution/http_progress.go": "95e320a22d4f6f9008b072f0524fd8d2961cf51c2eef385c0c0aaffead585a0a",
+        "internal/execution/operation_cleanup.go": "ac774842566e7c3ea97f28e580f1b3a33d50c6073fb17abf1c276a75145a54bc",
+        "internal/execution/ownership.go": "7797bf5196d10aace5abdcd55af939e23b2c793b2eb5ae4945d5ce7373b1affe",
+        "internal/execution/process_context.go": "8c5e0e792469ff79d46bef8cd5493ffee0d44005cc0b42d297b84d48e3d91cb8",
+        "internal/execution/process_progress.go": "c4919a2e1f8660e8c620d895c637ddfcef36abd35e752405e1185b6b434ccb57",
+        "internal/execution/program.go": "936b6a379748469c208b8f5987def07472e078f8b84a34b571cca200542590d0",
+        "internal/execution/session.go": "6bf31d209a825bca9f5e277c964547e321f8c0ae86252d15f2f25a7bdeb1cf0e",
+        "internal/execution/value_graph.go": "731891cd3c7eb1a1a2f0798cd63b40f71128963749a104acd0ffecaedbac46ed",
+        "internal/execution/worklist_progress.go": "0725d95f687a59971d8e063a48a10ef96b641dd3264c21f213fde4e5833efa3c",
+        "internal/identity/flow.go": "ee15f4ac26587b22dd15def1280cdf73e2b3f73ece81d93666c441bc6c6ddf39",
+        "internal/inspect/analyze.go": "b592c399df4188a938fe8bbc89528d4fa089f633205bdc54fcd7ea0ba722c707",
+        "internal/inspect/autodiff.go": "728f882d823f526bd0af06b5c438be756fd656d7d2d184a36de8edfe5e98fce4",
+        "internal/inspect/expression.go": "bb8471543c446ff3ce447d775ce2816245f64de2e24be2d3da0ea5395efb96c2",
+        "internal/inspect/index.go": "758754b5dedb0f0e5145818bbd27e5e5fefc2855b83298400e5c098012c0124f",
+        "internal/inspect/process.go": "9d322d4185b8655510de79494d91ecda2ddd26067556ea1f24504ff8966c1162",
+        "internal/inspect/report.go": "b67d667b5027d621de82a6fd97f799726395a18d9f239d74c6e736b6c9bb0303",
+        "internal/ir/ir.go": "28e554a3c1ebfa6fe155869dae9c165404cd26c19b4819c15c7265821b71faff",
+        "internal/llvmemit/emit.go": "377ae99dd621e64ecbb07050fc43025bb87a50d6b643480a5047c9e9b6a65518",
+        "internal/metalconfig/config.go": "7946af24fdc32e91192279057779e9b77e18e1ecc1f8baa2fe228f436c874b90",
+        "internal/nativebuild/build.go": "5e4fb95a743cf7645ac79209d182229dc30267dffa37a18af8bff7491e2b6b5c",
+        "internal/nativebuild/llvm.go": "b09d202d9ceda40e45d6a7a14080b4213a729ad8d852d89826cb7e2d002b4afa",
+        "internal/nativebuild/llvm_executable.go": "49e36c0e6ae6c41422fe4881f38f36366aa203910756d8e6056b80678768c64b",
+        "internal/nativebuild/llvm_metal.go": "389cdc734abafd59b0f43b65fe1d099982e14f713c8ec573d3a0e4032d3ce1b8",
+        "internal/nativebuild/llvm_snapshot.go": "5e2a3d508dd0542dd38f860274a83b05489dc453378f4682f7ef6d378905b9e4",
+        "internal/nativebuild/llvm_snapshot_darwin.go": "272e79c9614f05a5adbb798223f86eaaa5f02f97d37b7c0df10396e68f48ff19",
+        "internal/nativebuild/llvm_snapshot_linux.go": "4482beaee9659ffe035394e119c073e59e286b26326df4d0dc8761c9f9f65ccb",
+        "internal/nativebuild/llvm_snapshot_other.go": "230d95e819c5ac5a8aac64ed440e472f7b314f60613453a09ce4d3fd5395fbdf",
+        "internal/nativebuild/paths.go": "ba4f4d9a6b14bc00bced0f0943beb68de75d6e005b48e234618642a199e19e66",
+        "internal/nativeplan/gradient.go": "89aabf8acca82a402bfed12a4c6adeb0d1953a8d77f5d1ab131387b259c47df5",
+        "internal/nativeplan/lower.go": "4ba0e6a1c6842af937a0098ee8bf0cac7b030cc7a6492599abcea5d29d567792",
+        "internal/nativeplan/metadata.go": "40906f2a9585b9cb0e69ebbc261dbee80915222e038d3106c8a2e0fabb15b82e",
+        "internal/nativeplan/plan.go": "bbed9c9bfad4473b73695b3076e2b6f2e42c3be9c5e551ae514a93829adb2163",
+        "internal/nativeplan/verify.go": "827f3856dd615ede2841c0d616be1acea2693641f871526ca2af0d121ab577f6",
+        "internal/processhost/helper_identity.go": "46aef4e7a8df22a0ca4de132a5ba2780a16bd18e4695605aff02d5d816cec287",
+        "internal/processhost/native_cleanup_darwin.go": "1a16171114861ed643d45ca75b51b4f65b027c01df3b43c53ade5fe6d4403f4d",
+        "internal/processhost/native_config_darwin.go": "36a908913b4b149600d6c4ac69bb51a7bd2bc12880f3d006df53d55e95e5bed7",
+        "internal/processhost/native_darwin.go": "a514e29a7fe8ed0af30622a2d09a7b7de375a0c13588488e3e15c0f6a9c6fb07",
+        "internal/processhost/native_other.go": "ee9c4d4e0a397e50e44db67c2a3ae947129d493d1346cf84ab86a36cc3d03d16",
+        "internal/processhost/pending.go": "1af92af31feed708bd0bea6c5d98353e3a6096ecf5e5f78d5f5980c7c5dc3e64",
+        "internal/processhost/session.go": "354cd1752728fb4d573ce8b18a6b2e0c38aec0c8383ce48893f51c868cbcabe5",
+        "internal/processhost/startup.go": "37e1c11b4f066d0dacc00ad584beee5da273bd69ac5025a92baa3ce0653c2dd0",
+        "internal/resolve/scope.go": "59ee6ebda753d154d1c511edf669ef5d0b01566e711716f229596871df8ce742",
+        "internal/runner/command.go": "9c7e167d244f1e9ad77e73c8dd59da6de359aec2be0be05439a8d04a521f3c80",
+        "internal/runner/execute.go": "bb07c93232bb10328c4ea84e4a6778b76c19ebea79330f3a40293cbb01e32ea4",
+        "internal/runtimeops/arithmetic.go": "750585a1e886188a700eff47d2fad07fcd138e27f9e9203ab9cfe3cd01f4fd7c",
+        "internal/runtimeops/builtin.go": "bf860383f3bbac2939ab6c2ad1448d1bfdc6ddf517c691874f2e62f451727ef9",
+        "internal/runtimeops/checkpoint.go": "5e6e0b3c3caac5533119299f0d056579da24397e02c2e71f9c416566394fe0a7",
+        "internal/runtimeops/control.go": "56f20373d156def7c008f3f2ae9126a3fed11557d393c810f5f3b40f1e68a7ef",
+        "internal/runtimeops/derivative.go": "65d78ba3447b9ad81de66ce688de1a8e8973ba5ec2d770d2e5bd39b7a8625a0a",
+        "internal/runtimeops/file_observations.go": "a3ebf36b50ea9248498e50327d6e84fb17d233320bac49767db828c208771f6a",
+        "internal/runtimeops/float.go": "646fef81daf610e10288ba0e5dc07ecc0eb2cbb78cbf0d33a5061ee6ea5d9aba",
+        "internal/runtimeops/helpers.go": "2d656c28f37ccacda47ee3e087ba24eef2f9ab4d56511fa38327905ed7cf5b14",
+        "internal/runtimeops/host_invocation.go": "28e9fe9151ab0a2a3f27499cdf43a4e60037f8252bd96999906f96ed71300047",
+        "internal/runtimeops/http_client.go": "8eb796d5b11cf94cc40448b61f4ce33eee79275fff85a94ea5608744c8e4dbee",
+        "internal/runtimeops/optimizer.go": "5a2f07557ea7b9674d3e9d63e01872c5c014b8e98a770ea3387d5d67f3e14782",
+        "internal/runtimeops/parameters.go": "40cd6e052b4dfc639ad0f03731f193173e2dac456715a4c75e735060b648b4ee",
+        "internal/runtimeops/process.go": "42ea4b30ea88abfc91d29f10fbf1b08558673c05d24757d2d1623ad978165009",
+        "internal/runtimeops/process_context.go": "def05b1ae9ddb70982a63f36b65aca7943b56b9574eb9e1a9047b09f838d4162",
+        "internal/runtimeops/runtime.go": "29c0c94bce4bfd0d0c652f13aaf1bda6f1f46e9aed4f4e7ec2081349481a8dd5",
+        "internal/runtimeops/tensor.go": "30c64760f69cf0d4949ffc62d238319829ee63f543e2b9c8d550adaca6d3e318",
+        "internal/source/source.go": "6612c2bad62638c79aad2f1ecc61a7faa8887382452e299488250dd5b9dc3521",
+        "internal/syntax/ast.go": "ed1002b6508bf1834e0ab53c0816afb31d3d53e750db256e2275a68f97e2fe40",
+        "internal/syntax/lexer.go": "c1213cae056971402d9fc1f1a91e81a96ffb5e830f9945bc73ea3f79fe886038",
+        "internal/syntax/parser.go": "d6f1f4d0ed72cffe4df618a99036f6af3b67054b09cbe026db773ea173c89880",
+        "internal/tensor/compute.go": "63379f95df09dc89eaf3fac409c41138d71705eb16346f1edc254d036752b0e4",
+        "internal/tensor/cpu.go": "a82c9542f91b43d71e1b0bae70c8721647f6154bec08fda08136aeef336de00f",
+        "internal/tensor/device.go": "e9c7f1fdfc18f596773f4bb45f59148ec45382939467d201d140c70a67c628d6",
+        "internal/tensor/shape.go": "15aefdc0b82cc111063ac03234c5a5064c9a773e6dadd1dc63c51a3d247fd649",
+        "internal/tensorfacts/analyze.go": "f4271c9425af0bdad0dedbb5ec584ccb08c81275af5f1a0eb5b10db82e2ddedc",
+        "internal/tensorfacts/scope.go": "3bd17cd566ad2bf775296a38e2a185278d2131fa1b41e9b08cb0d686cc443788",
+        "internal/types/training.go": "8f67e2579f1b6572a6a870c062a120785831c5ef3dad117502e5266274ccd598",
+        "internal/types/types.go": "c158393654c7da620c75690b095b3f738a938e7e9f894f6d6046340709ff3b22",
+        "internal/value/error.go": "93cd825194fbf1f4f6f6288729c3941bd641f687e5c2b9b9af03535b79bd07e3",
+        "internal/value/file.go": "63da4e451a70bd148d13e5f3bedfc8edc48da382e517dc910c77842f449b41db",
+        "internal/value/file_leases.go": "96c4115fa0e2374c603a2400dae1aedf92752273c2a5d068650b2d91645c925f",
+        "internal/value/file_observation.go": "ea459743a4d66abd256bebfaea2d6a7d21e61f47b2348570f9f2ba4c5d2efeae",
+        "internal/value/headers.go": "04b3263cfa0cd56bd838af116190e8290a0d8840b6cde6a092e517eb677eb236",
+        "internal/value/host_invocation.go": "c09c3b337e061ec3940227f177f7264697c07bed7e78b4869726990e0a86154c",
+        "internal/value/http_client.go": "3f04db38d0d767f0b54eef416ddc54a0f1ff4f3701fd9f43ae4b494088366a06",
+        "internal/value/optimizer.go": "65ba9f205caf5db47b9b94d84b1b7017f890837dabed8fcff78964ffbc5c974a",
+        "internal/value/parameters.go": "dd1470ba363ba43d308bdc9d387a3b18b81fb9546bd1bd24aa026870f8665283",
+        "internal/value/process.go": "8296d5978583dc7f89da014bf337d0105b8ea235dd28d7ef62a4f4474d672b8c",
+        "internal/value/process_context.go": "41dad83a3a77bfb25cba7ff37535875be67459a8617f52e44db364059074e0df",
+        "internal/value/process_result.go": "cf9bcddc214dc2189cd0d935b24914a35567824d014042e444273f1440fcbc66",
+        "internal/value/reachable.go": "7b68e31088969c3720ceedc2df8bac1d15bbe4103f87b7bb4182431d9c9218d2",
+        "internal/value/receipt.go": "3c90f7426a5569d625d5e738c4f0193c27fbac704bc4e3486ceade18980946c8",
+        "internal/value/resources.go": "0056bd4d52acd2bd106b6180cd45e6adb0d1dfca1d5e787ec85daf21c6e9fcdd",
+        "internal/value/snapshot_weight.go": "b311c1ceedfae6665706e574970eb25588cb009da15ce9f1a953fdc2d5bd6485",
+        "internal/value/target.go": "4d983b7fcbd26a170bb32a3f3709828e5bf3ba0b3d499087aa2b8a4145fa0652",
+        "internal/value/tensor.go": "b0c9adea403531dd4e695833628f322ebb86bc2b205d95b64b515c7c8f2740e1",
+        "internal/value/value.go": "ca8bf29fcefc9b159530a5c3ec6899f5b3e6ada238ab2226983c5ba719d9a0ba"
+      },
+      "binary_sha256": {
+        "_scratch/resource-performance-X211/assets/current-lo": "b853fbd732f1bac459a3d145eba77f036c9b83b7b3a0599329b32dee435d9298",
+        "_scratch/resource-performance-X211/assets/current-runner": "0156bbbc97199d4220d3c7e0d49e450008894b5b5e03c339a73303aacf3fc45e"
+      }
+    },
+    "native_completion": {
+      "preparation": "_scratch/resource-performance-X211/native/preparation",
+      "before": {
+        "toolchain": "_scratch/resource-performance-X211/native/before-distribution/toolchain.json",
+        "abi": "lo-native-3",
+        "runtime_source_sha256": "91512e075473ba26853e99189c1822b5ec6dd47089171cdf9bd38e0d45bfd122",
+        "archives": {
+          "darwin/arm64": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711"
+        }
+      },
+      "after": {
+        "toolchain": "_scratch/resource-performance-X211/native/after-distribution/toolchain.json",
+        "abi": "lo-native-3",
+        "runtime_source_sha256": "532387e89659568d9d192dbdbe615bed99f013a3401e60990a82a86c6698e78c",
+        "archives": {
+          "darwin/arm64": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+          "linux/arm64": "b129daba1d100873e8518a80a9070be56d594d552e3df93426d420bb5bb3ffd9"
+        },
+        "manifest_sha256": "8384e2bfb441f0b3d533b2f46734f18e01850640ab882d49a69aef430d8ea1b5",
+        "stage": 14
+      },
+      "red": {
+        "counts": [
+          128,
+          256,
+          512
+        ],
+        "allocations": [
+          9009,
+          34909,
+          132783
+        ],
+        "bytes": [
+          1353632,
+          5472192,
+          21376208
+        ],
+        "log": "native/allocation-red.log",
+        "status": "expected_failure"
+      },
+      "green": {
+        "status": "passed",
+        "log": "native/focused-final.log",
+        "allocations": {
+          "TestLLVMFallibleListAliasFoldAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 908,
+              "bytes": 77528
+            },
+            {
+              "items": 256,
+              "requests": 1805,
+              "bytes": 154848
+            },
+            {
+              "items": 512,
+              "requests": 3598,
+              "bytes": 309480
+            }
+          ],
+          "TestLLVMLinuxFallibleListAliasFoldAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 908,
+              "bytes": 77528
+            },
+            {
+              "items": 256,
+              "requests": 1805,
+              "bytes": 154848
+            },
+            {
+              "items": 512,
+              "requests": 3598,
+              "bytes": 309480
+            }
+          ],
+          "TestLLVMListAliasFoldUnusedLocalAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 396,
+              "bytes": 36568
+            },
+            {
+              "items": 256,
+              "requests": 781,
+              "bytes": 72928
+            },
+            {
+              "items": 512,
+              "requests": 1550,
+              "bytes": 145640
+            }
+          ],
+          "TestLLVMLinuxListAliasFoldUnusedLocalAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 396,
+              "bytes": 36568
+            },
+            {
+              "items": 256,
+              "requests": 781,
+              "bytes": 72928
+            },
+            {
+              "items": 512,
+              "requests": 1550,
+              "bytes": 145640
+            }
+          ],
+          "TestLLVMFallibleListAliasFoldListQuotaAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 1036,
+              "bytes": 81624
+            },
+            {
+              "items": 256,
+              "requests": 2061,
+              "bytes": 163040
+            },
+            {
+              "items": 512,
+              "requests": 4110,
+              "bytes": 325864
+            }
+          ],
+          "TestLLVMLinuxFallibleListAliasFoldListQuotaAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 1036,
+              "bytes": 81624
+            },
+            {
+              "items": 256,
+              "requests": 2061,
+              "bytes": 163040
+            },
+            {
+              "items": 512,
+              "requests": 4110,
+              "bytes": 325864
+            }
+          ],
+          "TestLLVMRecordListStateAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 2709,
+              "bytes": 191244
+            },
+            {
+              "items": 256,
+              "requests": 5399,
+              "bytes": 382236
+            },
+            {
+              "items": 512,
+              "requests": 10777,
+              "bytes": 764204
+            }
+          ],
+          "TestLLVMLinuxRecordListStateAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 2709,
+              "bytes": 191244
+            },
+            {
+              "items": 256,
+              "requests": 5399,
+              "bytes": 382236
+            },
+            {
+              "items": 512,
+              "requests": 10777,
+              "bytes": 764204
+            }
+          ],
+          "TestLLVMFiveListRecordStateAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 5043,
+              "bytes": 303332
+            },
+            {
+              "items": 256,
+              "requests": 10040,
+              "bytes": 605964
+            },
+            {
+              "items": 512,
+              "requests": 20029,
+              "bytes": 1211188
+            }
+          ],
+          "TestLLVMLinuxFiveListRecordStateAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 5043,
+              "bytes": 303332
+            },
+            {
+              "items": 256,
+              "requests": 10040,
+              "bytes": 605964
+            },
+            {
+              "items": 512,
+              "requests": 20029,
+              "bytes": 1211188
+            }
+          ],
+          "TestLLVMListAliasFoldAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 2,
+              "bytes": 56
+            },
+            {
+              "items": 256,
+              "requests": 2,
+              "bytes": 56
+            },
+            {
+              "items": 512,
+              "requests": 2,
+              "bytes": 56
+            }
+          ],
+          "TestLLVMLinuxListAliasFoldAllocationScaling": [
+            {
+              "items": 128,
+              "requests": 2,
+              "bytes": 56
+            },
+            {
+              "items": 256,
+              "requests": 2,
+              "bytes": 56
+            },
+            {
+              "items": 512,
+              "requests": 2,
+              "bytes": 56
+            }
+          ],
+          "TestLLVMScalarFoldAllocationBudget": [
+            {
+              "items": 128,
+              "requests": 257,
+              "bytes": 26672
+            },
+            {
+              "items": 512,
+              "requests": 1025,
+              "bytes": 106544
+            },
+            {
+              "items": 2048,
+              "requests": 4097,
+              "bytes": 426032
+            }
+          ],
+          "TestLLVMLinuxScalarFoldAllocationBudget": [
+            {
+              "items": 128,
+              "requests": 257,
+              "bytes": 26672
+            },
+            {
+              "items": 512,
+              "requests": 1025,
+              "bytes": 106544
+            },
+            {
+              "items": 2048,
+              "requests": 4097,
+              "bytes": 426032
+            }
+          ],
+          "TestLLVMWorklistPinAllocationBudget": [
+            {
+              "items": 128,
+              "requests": 6661,
+              "bytes": 675890
+            },
+            {
+              "items": 512,
+              "requests": 26265,
+              "bytes": 2683186
+            },
+            {
+              "items": 2048,
+              "requests": 104621,
+              "bytes": 10711986
+            }
+          ],
+          "TestLLVMLinuxWorklistPinAllocationBudget": [
+            {
+              "items": 128,
+              "requests": 6661,
+              "bytes": 675890
+            },
+            {
+              "items": 512,
+              "requests": 26265,
+              "bytes": 2683186
+            },
+            {
+              "items": 2048,
+              "requests": 104621,
+              "bytes": 10711986
+            }
+          ],
+          "TestLLVMUnfoldTraversalAllocationBudget": [
+            {
+              "items": 128,
+              "requests": 1305,
+              "bytes": 168104
+            },
+            {
+              "items": 512,
+              "requests": 5151,
+              "bytes": 671176
+            },
+            {
+              "items": 2048,
+              "requests": 20517,
+              "bytes": 2683368
+            }
+          ],
+          "TestLLVMLinuxUnfoldTraversalAllocationBudget": [
+            {
+              "items": 128,
+              "requests": 1305,
+              "bytes": 168104
+            },
+            {
+              "items": 512,
+              "requests": 5151,
+              "bytes": 671176
+            },
+            {
+              "items": 2048,
+              "requests": 20517,
+              "bytes": 2683368
+            }
+          ]
+        }
+      },
+      "focused": {
+        "log": "native/focused-final.log",
+        "status": "passed",
+        "duration_seconds": 179.134,
+        "top_level_tests": 63,
+        "targets": [
+          "darwin/arm64",
+          "linux/arm64"
+        ]
+      },
+      "head": {
+        "git_revision": "0be6847ccf3d2a66b57f0505ded7ae5b4be9888a",
+        "bounded_input_count": 2702,
+        "runtime_source_sha256": "81c618c0c48207bce58de5baa5d07b7a5343c7e66cd8ee937dd0c63e3a74bbac",
+        "abi": "lo-native-2",
+        "toolchain": "_scratch/resource-performance-X211/native/head-distribution/toolchain.json",
+        "archives": {
+          "darwin/arm64": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a"
+        },
+        "process_sources": {
+          "launcher.c": {
+            "path": "_scratch/resource-performance-X211/native/head-inputs/internal/processhost/native/launcher.c",
+            "sha256": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc"
+          },
+          "normalization.c": {
+            "path": "_scratch/resource-performance-X211/native/head-inputs/internal/processhost/native/normalization.c",
+            "sha256": "b1b6b9e1adf7d1e76a59ecb6d07e4ce2b6418d4d809e932bf0b4f084978c4732"
+          },
+          "protocol.h": {
+            "path": "_scratch/resource-performance-X211/native/head-inputs/internal/processhost/native/protocol.h",
+            "sha256": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b"
+          }
+        },
+        "verification": "all_staged_bytes_match_recorded_HEAD_blobs"
+      },
+      "stage1_green": {
+        "counts": [
+          128,
+          256,
+          512
+        ],
+        "allocations": [
+          131,
+          259,
+          515
+        ],
+        "bytes": [
+          1088,
+          2112,
+          4160
+        ],
+        "log": "native/allocation-green.log",
+        "status": "passed"
+      },
+      "stage1_focused": {
+        "log": "native/focused.log",
+        "status": "passed",
+        "duration_seconds": 131.505
+      },
+      "source_sha256": {
+        "runtime/native/src/collections.rs": "7704d26ef69e675505679c5b6985286671b5f48114f202190b68c8e4011530d3",
+        "runtime/native/src/context.rs": "9355bed5a9f984b2bc1c2e9791d84c66b83eed71365bbf73a95d71c35c3efe29",
+        "runtime/native/src/exports.rs": "78af1f97d06ac73fbe26d29bb3eed00d9d700baa3c4519647a8ba99350c7191f",
+        "runtime/native/src/resources.rs": "314ae8431708801ff126685d4f61ce1280ad27cd77f32fc2c914a6104ea87fca",
+        "runtime/native/src/lib.rs": "fccff20a27d63fa35430bb8ecc1721b75b046b296017b1fe53891222573d690d",
+        "runtime/native/src/value_resources.rs": "8f78c58dae242bbd7ce94feb419a24f2070667b98359668329d5a1dd8e8e47df",
+        "runtime/native/src/value_id_set.rs": "06a13332833e51c9f8c3c0b23f12c19f25e57aa61fddea98bb565f58554b7d57",
+        "runtime/native/src/value_entry_map.rs": "d6f9262ed27dd9c0ec76bcc84432337b8299f3fb6d3cb3d3c3f0846ddf2efd40",
+        "runtime/native/src/value_stack.rs": "2db38a3dbe7efb3db1b71adb732137e178938a9a622d1d059ae186d77c9b9f8e",
+        "runtime/native/src/value_id_hash.rs": "af7435aa47ada6bb49d90c91f41ce75242f3169316fb9387a73b4368cfd1e4ad",
+        "runtime/native/src/value_graph.rs": "598a4b142f7527dc276363e6543eb74cfc7e14be32954b500efbbd93ae86a97a",
+        "tests/integration/llvm_collection_scaling_test.go": "77b3bfcd4e34ad5d095222d9b9afbb9e6617203868372e09a477a50dd539d27c",
+        "tests/integration/llvm_collection_borrowed_graph_test.go": "8eccdfe10347b70c4232349bb755d0336e491c86f6ae5a76615c08f5216d21c9",
+        "tests/integration/worklist_retained_state_test.go": "fb6bd980e2c038edac39ea5ef738a78d027393c69ad82cd914dc3c5c132859be",
+        "testdata/native-runtime/collection-scope-allocations.c": "381628e960e6057ab1bd29c98dc5eab86bf3e1526a16d6ea0b32b789033adcb8",
+        "testdata/native-runtime/borrowed-graph-policy.c": "b4cd554e6dfdd98be8c610dfac3f688714a5ee47e32ae96aa2cf483730ca7d4b"
+      },
+      "additional_red": {
+        "unfold_traversal": "native/unfold-traversal-red.log",
+        "worklist_pin_requests": "native/worklist-pin-red-stage10.log",
+        "worklist_pin_queue_bytes": "native/worklist-pin-bytes-red-stage11.log",
+        "borrowed_graph": "native/borrowed-graph-red.log",
+        "borrowed_graph_list_quota": "native/borrowed-graph-quota-red.log",
+        "fresh_record_two_lists": "native/borrowed-record-red.log",
+        "fresh_record_five_independent_lists": "native/borrowed-five-list-red.log",
+        "scalar_intrinsic_allocation_diagnostic": {
+          "log": "native/scalar-pin-red-stage10.log",
+          "interpretation": "N request budget was invalid: Int computation intrinsically allocates BigInt digits plus Value Arc; final cap is 2N+32 requests"
+        }
+      },
+      "structures": {
+        "log": "native/identity-structures-final.log",
+        "status": "passed",
+        "tests": 11
+      },
+      "profile": {
+        "sample": "native/profile-stage9/sample.txt",
+        "public_result_verified": true,
+        "baseline_profile_limitation": "HEAD ABI2 hard 16MiB cumulative evaluation-byte limit rejects long nested pipeline; no baseline profiling claims",
+        "hasher_paired_campaign": "native/long-pair/report.json"
+      },
+      "review": "record-final-native-stage14.json",
+      "stage12_after": {
+        "toolchain": "_scratch/resource-performance-X211/native/after-distribution/toolchain.json",
+        "abi": "lo-native-3",
+        "runtime_source_sha256": "a35b1743ecb9d096fa3793405842fa79d514cde81334f3a10e86abe1634b7a19",
+        "archives": {
+          "darwin/arm64": "b6ef1a5da3079f95af20a72f274febe70d137710c2cb4ba0c4bfab606442c0ef",
+          "linux/arm64": "218fd733a12e8ce9bcf55cb09f7412265588b5fe63222a831ba6cbc2d7c3265e"
+        },
+        "manifest_sha256": "a9fc327dedf3ab54fb89c1b3cc93ce95a33879e28b1b98b3446c48093fd77bba",
+        "stage": 12
+      },
+      "stage12_focused": {
+        "log": "native/focused-stage12.log",
+        "status": "passed",
+        "duration_seconds": 154.257,
+        "top_level_tests": 51,
+        "targets": [
+          "darwin/arm64",
+          "linux/arm64"
+        ]
+      },
+      "stage13_after": {
+        "toolchain": "_scratch/resource-performance-X211/native/after-distribution/toolchain.json",
+        "abi": "lo-native-3",
+        "runtime_source_sha256": "a2bab16593599034aff90a5b1494b847b91768577fdcdd2e14b76ca17360e708",
+        "archives": {
+          "darwin/arm64": "b6422cbe1011487065254bd1b190050d2ea2932ded8b2f975f9b935f15d3e249",
+          "linux/arm64": "8fa232f9ea576a1c03236455baa36fe922be23016372fb7e92d7e307092be7eb"
+        },
+        "manifest_sha256": "de738d2cd095444ddea499428c43b88f7e7cbcef5ac46dd8c4d918f7d0b175bc",
+        "stage": 13
+      },
+      "stage13_focused": {
+        "log": "native/focused-stage13.log",
+        "status": "passed",
+        "duration_seconds": 184.73,
+        "top_level_tests": 61,
+        "targets": [
+          "darwin/arm64",
+          "linux/arm64"
+        ]
+      }
+    },
+    "native_phases": {
+      "before": {
+        "abi": "lo-native-2",
+        "runtime_source_sha256": "81c618c0c48207bce58de5baa5d07b7a5343c7e66cd8ee937dd0c63e3a74bbac",
+        "toolchain_sha256": "821054059280ac64a7737d6e682bc9db4db55d661ffe550d50b5f38f8f67fd11",
+        "toolchain": "_scratch/resource-performance-X211/native/head-distribution/toolchain.json",
+        "archives": {
+          "darwin/arm64": {
+            "sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+            "path": "_scratch/resource-performance-X211/native/head-distribution/runtime/aarch64-apple-darwin/liblo_runtime.a"
+          }
+        },
+        "build_receipt": {
+          "runtime_source_sha256": "81c618c0c48207bce58de5baa5d07b7a5343c7e66cd8ee937dd0c63e3a74bbac",
+          "rust": {
+            "version": "1.85.1",
+            "prefix": "_scratch/native-runtime/rust-prefix",
+            "archives": [
+              {
+                "archive": "rustc.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+                "bytes": 55006972
+              },
+              {
+                "archive": "cargo.tar.xz",
+                "url": "https://static.rust-lang.org/dist/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+                "bytes": 6766048
+              },
+              {
+                "archive": "rust-std.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+                "bytes": 27522824
+              },
+              {
+                "archive": "rust-std-linux.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-unknown-linux-gnu.tar.xz",
+                "sha256": "760fa132058ed45a67d0cd7d04638fde86fd26adc563dff1a3e6d97d300446ff",
+                "bytes": 33440220
+              },
+              {
+                "archive": "rustfmt.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rustfmt-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "90adc209908355ee7e315b98c84f16e6773c8664291b0981a4ff80992bc0fb66",
+                "bytes": 1594560
+              }
+            ],
+            "prefix_sha256": "e4145ce1962bb49ba45667d082625415f007524ed0f2df0f380b16976422fe2a",
+            "rustc": {
+              "path": "_scratch/native-runtime/rust-prefix/bin/rustc",
+              "sha256": "731d78259541b7e845568083df94b541176af5669509d077ee23a88d81f27d41",
+              "identity": "rustc 1.85.1 (4eb161250 2025-03-15)"
+            },
+            "cargo": {
+              "path": "_scratch/native-runtime/rust-prefix/bin/cargo",
+              "sha256": "ca274de824f0741d809e115eab77c40208c5ad6484646c381c04f12ec49e6a79",
+              "identity": "cargo 1.85.1 (d73d2caf9 2024-12-31)"
+            }
+          },
+          "llvm": {
+            "version": "21.1.8",
+            "archive": {
+              "archive": "llvm.tar.xz",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+              "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+              "bytes": 1503047352
+            },
+            "tools": {
+              "clang": {
+                "path": "_scratch/native-runtime/tools/bin/clang",
+                "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+              },
+              "clang-21": {
+                "path": "_scratch/native-runtime/tools/bin/clang-21",
+                "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+              },
+              "ld.lld": {
+                "path": "_scratch/native-runtime/tools/bin/ld.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "ld64.lld": {
+                "path": "_scratch/native-runtime/tools/bin/ld64.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "llc": {
+                "path": "_scratch/native-runtime/tools/bin/llc",
+                "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e"
+              },
+              "lld": {
+                "path": "_scratch/native-runtime/tools/bin/lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "llvm-ar": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-ar",
+                "sha256": "c2640fc0a747413fe27818531d4a22f979d91b7e299723a68225917c42574b50"
+              },
+              "llvm-dwarfdump": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-dwarfdump",
+                "sha256": "36b66049cc0995fdd7623235b260ecccd0239d87cc719488f7658f36a18fbc9b"
+              },
+              "llvm-nm": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-nm",
+                "sha256": "a011020cab7ca848ebb10948c636cde63a83cf81e81156285f96f577ea70e426"
+              },
+              "llvm-objdump": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-objdump",
+                "sha256": "f67fda63d4f65df56e76fe8ba47f03eb81e8bbfb20ef1615c18f685c7177e28c"
+              },
+              "llvm-readobj": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-readobj",
+                "sha256": "73efdbad7294e02ed570d7156d1d1c8d77ed922c2df281435a7a1f8ad90eeb30"
+              },
+              "opt": {
+                "path": "_scratch/native-runtime/tools/bin/opt",
+                "sha256": "66e9c199539e80e7cdeb1a6dc370e5278a6e90ad3b18e984d1af746b1ede35c7"
+              }
+            }
+          },
+          "cargo_environment": {
+            "CI": "1",
+            "CARGO_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/cargo-home",
+            "RUSTUP_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/rustup-home",
+            "RUSTC": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin/rustc",
+            "CARGO_TARGET_DIR": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/cargo-target",
+            "CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/host-linker/linker",
+            "SDKROOT": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/host-linker/sdk",
+            "TMPDIR": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation",
+            "PATH": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin",
+            "MACOSX_DEPLOYMENT_TARGET": "27.0",
+            "LC_ALL": "C",
+            "TZ": "UTC",
+            "CRATE_CC_NO_DEFAULTS": "1",
+            "CC_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+            "AR_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+            "CFLAGS_aarch64_apple_darwin": "-target aarch64-apple-darwin -nostdinc -I/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/head-inputs/runtime/native/include -fPIC -I/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/head-inputs/runtime/native/include/darwin -mmacosx-version-min=27.0",
+            "CC_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+            "AR_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+            "CFLAGS_aarch64_unknown_linux_gnu": "-target aarch64-unknown-linux-gnu -nostdinc -I/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/head-inputs/runtime/native/include -fPIC"
+          },
+          "manifest_sha256": "821054059280ac64a7737d6e682bc9db4db55d661ffe550d50b5f38f8f67fd11",
+          "process_sources": {
+            "launcher.c": {
+              "path": "_scratch/resource-performance-X211/native/head-inputs/internal/processhost/native/launcher.c",
+              "sha256": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc"
+            },
+            "normalization.c": {
+              "path": "_scratch/resource-performance-X211/native/head-inputs/internal/processhost/native/normalization.c",
+              "sha256": "b1b6b9e1adf7d1e76a59ecb6d07e4ce2b6418d4d809e932bf0b4f084978c4732"
+            },
+            "protocol.h": {
+              "path": "_scratch/resource-performance-X211/native/head-inputs/internal/processhost/native/protocol.h",
+              "sha256": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b"
+            }
+          },
+          "host_linker": {
+            "executable": {
+              "path": "_scratch/resource-performance-X211/native/preparation/host-linker/linker",
+              "sha256": "f04d19abea99045f910ad3133080c9276bc525d47370c530293ea72eefc4d321"
+            },
+            "source": {
+              "path": "_scratch/resource-performance-X211/native/head-inputs/tools/nativeruntime/host_linker.c",
+              "sha256": "a38238083cbf2448d3c754509b4be10b1c3c586c8bc95ad1e2f4521a9680a916"
+            },
+            "sdk_sha256": "d704b948b5ceb409853ac5fdebb7962ee65c6fc7ef4cf5635ca3f65743a1be91"
+          }
+        },
+        "toolchain_manifest": {
+          "abi": "lo-native-2",
+          "llvm": "21.1.8",
+          "host": "darwin/arm64",
+          "compiler": {
+            "path": "bin/clang",
+            "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+          },
+          "targets": {
+            "darwin/arm64": {
+              "triple": "aarch64-apple-darwin",
+              "linker": {
+                "path": "bin/ld64.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "runtime": {
+                "path": "runtime/aarch64-apple-darwin/liblo_runtime.a",
+                "sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a"
+              },
+              "inputs": {
+                "system": {
+                  "path": "platform/darwin/libSystem.tbd",
+                  "sha256": "4f580a6c62cd72d7c6ed71aa064ca58011581e065b6cbffc39716983903aca79"
+                },
+                "security": {
+                  "path": "platform/darwin/Security.tbd",
+                  "sha256": "c3450a9c40dfd718bd5708772db06d01efcd5a887a42f2398e6edbaea43faadf"
+                },
+                "corefoundation": {
+                  "path": "platform/darwin/CoreFoundation.tbd",
+                  "sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991"
+                }
+              },
+              "link_args": [
+                "-dead_strip",
+                "-arch",
+                "arm64",
+                "-platform_version",
+                "macos",
+                "27.0",
+                "27.0",
+                "-o",
+                "{output}",
+                "{object}",
+                "{runtime}",
+                "{input:system}",
+                "{input:security}",
+                "{input:corefoundation}"
+              ]
+            }
+          }
+        }
+      },
+      "initial": {
+        "abi": "lo-native-3",
+        "runtime_source_sha256": "91512e075473ba26853e99189c1822b5ec6dd47089171cdf9bd38e0d45bfd122",
+        "toolchain_sha256": "0938ef1ba1763759bc24a9649f2e3899f9e55a233bad185fd8322f8bcfe31343",
+        "toolchain": "_scratch/resource-performance-X211/native/before-distribution/toolchain.json",
+        "archives": {
+          "darwin/arm64": {
+            "sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+            "path": "_scratch/resource-performance-X211/native/before-distribution/runtime/aarch64-apple-darwin/liblo_runtime.a"
+          }
+        },
+        "build_receipt": {
+          "runtime_source_sha256": "91512e075473ba26853e99189c1822b5ec6dd47089171cdf9bd38e0d45bfd122",
+          "rust": {
+            "version": "1.85.1",
+            "prefix": "_scratch/native-runtime/rust-prefix",
+            "archives": [
+              {
+                "archive": "rustc.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+                "bytes": 55006972
+              },
+              {
+                "archive": "cargo.tar.xz",
+                "url": "https://static.rust-lang.org/dist/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+                "bytes": 6766048
+              },
+              {
+                "archive": "rust-std.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+                "bytes": 27522824
+              },
+              {
+                "archive": "rust-std-linux.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-unknown-linux-gnu.tar.xz",
+                "sha256": "760fa132058ed45a67d0cd7d04638fde86fd26adc563dff1a3e6d97d300446ff",
+                "bytes": 33440220
+              },
+              {
+                "archive": "rustfmt.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rustfmt-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "90adc209908355ee7e315b98c84f16e6773c8664291b0981a4ff80992bc0fb66",
+                "bytes": 1594560
+              }
+            ],
+            "prefix_sha256": "e4145ce1962bb49ba45667d082625415f007524ed0f2df0f380b16976422fe2a",
+            "rustc": {
+              "path": "_scratch/native-runtime/rust-prefix/bin/rustc",
+              "sha256": "731d78259541b7e845568083df94b541176af5669509d077ee23a88d81f27d41",
+              "identity": "rustc 1.85.1 (4eb161250 2025-03-15)"
+            },
+            "cargo": {
+              "path": "_scratch/native-runtime/rust-prefix/bin/cargo",
+              "sha256": "ca274de824f0741d809e115eab77c40208c5ad6484646c381c04f12ec49e6a79",
+              "identity": "cargo 1.85.1 (d73d2caf9 2024-12-31)"
+            }
+          },
+          "llvm": {
+            "version": "21.1.8",
+            "archive": {
+              "archive": "llvm.tar.xz",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+              "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+              "bytes": 1503047352
+            },
+            "tools": {
+              "clang": {
+                "path": "_scratch/native-runtime/tools/bin/clang",
+                "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+              },
+              "clang-21": {
+                "path": "_scratch/native-runtime/tools/bin/clang-21",
+                "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+              },
+              "ld.lld": {
+                "path": "_scratch/native-runtime/tools/bin/ld.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "ld64.lld": {
+                "path": "_scratch/native-runtime/tools/bin/ld64.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "llc": {
+                "path": "_scratch/native-runtime/tools/bin/llc",
+                "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e"
+              },
+              "lld": {
+                "path": "_scratch/native-runtime/tools/bin/lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "llvm-ar": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-ar",
+                "sha256": "c2640fc0a747413fe27818531d4a22f979d91b7e299723a68225917c42574b50"
+              },
+              "llvm-dwarfdump": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-dwarfdump",
+                "sha256": "36b66049cc0995fdd7623235b260ecccd0239d87cc719488f7658f36a18fbc9b"
+              },
+              "llvm-nm": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-nm",
+                "sha256": "a011020cab7ca848ebb10948c636cde63a83cf81e81156285f96f577ea70e426"
+              },
+              "llvm-objdump": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-objdump",
+                "sha256": "f67fda63d4f65df56e76fe8ba47f03eb81e8bbfb20ef1615c18f685c7177e28c"
+              },
+              "llvm-readobj": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-readobj",
+                "sha256": "73efdbad7294e02ed570d7156d1d1c8d77ed922c2df281435a7a1f8ad90eeb30"
+              },
+              "opt": {
+                "path": "_scratch/native-runtime/tools/bin/opt",
+                "sha256": "66e9c199539e80e7cdeb1a6dc370e5278a6e90ad3b18e984d1af746b1ede35c7"
+              }
+            }
+          },
+          "cargo_environment": {
+            "CI": "1",
+            "CARGO_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/cargo-home",
+            "RUSTUP_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/rustup-home",
+            "RUSTC": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin/rustc",
+            "CARGO_TARGET_DIR": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/cargo-target",
+            "CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/host-linker/linker",
+            "SDKROOT": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/host-linker/sdk",
+            "TMPDIR": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation",
+            "PATH": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin",
+            "MACOSX_DEPLOYMENT_TARGET": "27.0",
+            "LC_ALL": "C",
+            "TZ": "UTC",
+            "CRATE_CC_NO_DEFAULTS": "1",
+            "CC_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+            "AR_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+            "CFLAGS_aarch64_apple_darwin": "-target aarch64-apple-darwin -nostdinc -I/Users/tyemirov/Development/Research/Lo/runtime/native/include -fPIC -I/Users/tyemirov/Development/Research/Lo/runtime/native/include/darwin -mmacosx-version-min=27.0",
+            "CC_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+            "AR_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+            "CFLAGS_aarch64_unknown_linux_gnu": "-target aarch64-unknown-linux-gnu -nostdinc -I/Users/tyemirov/Development/Research/Lo/runtime/native/include -fPIC"
+          },
+          "manifest_sha256": "0938ef1ba1763759bc24a9649f2e3899f9e55a233bad185fd8322f8bcfe31343",
+          "process_sources": {
+            "launcher.c": {
+              "path": "internal/processhost/native/launcher.c",
+              "sha256": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc"
+            },
+            "normalization.c": {
+              "path": "internal/processhost/native/normalization.c",
+              "sha256": "b1b6b9e1adf7d1e76a59ecb6d07e4ce2b6418d4d809e932bf0b4f084978c4732"
+            },
+            "protocol.h": {
+              "path": "internal/processhost/native/protocol.h",
+              "sha256": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b"
+            }
+          },
+          "host_linker": {
+            "executable": {
+              "path": "_scratch/resource-performance-X211/native/preparation/host-linker/linker",
+              "sha256": "f04d19abea99045f910ad3133080c9276bc525d47370c530293ea72eefc4d321"
+            },
+            "source": {
+              "path": "tools/nativeruntime/host_linker.c",
+              "sha256": "a38238083cbf2448d3c754509b4be10b1c3c586c8bc95ad1e2f4521a9680a916"
+            },
+            "sdk_sha256": "d704b948b5ceb409853ac5fdebb7962ee65c6fc7ef4cf5635ca3f65743a1be91"
+          }
+        },
+        "toolchain_manifest": {
+          "abi": "lo-native-3",
+          "llvm": "21.1.8",
+          "host": "darwin/arm64",
+          "compiler": {
+            "path": "bin/clang",
+            "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+          },
+          "targets": {
+            "darwin/arm64": {
+              "triple": "aarch64-apple-darwin",
+              "linker": {
+                "path": "bin/ld64.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "runtime": {
+                "path": "runtime/aarch64-apple-darwin/liblo_runtime.a",
+                "sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711"
+              },
+              "inputs": {
+                "system": {
+                  "path": "platform/darwin/libSystem.tbd",
+                  "sha256": "4f580a6c62cd72d7c6ed71aa064ca58011581e065b6cbffc39716983903aca79"
+                },
+                "security": {
+                  "path": "platform/darwin/Security.tbd",
+                  "sha256": "c3450a9c40dfd718bd5708772db06d01efcd5a887a42f2398e6edbaea43faadf"
+                },
+                "corefoundation": {
+                  "path": "platform/darwin/CoreFoundation.tbd",
+                  "sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991"
+                }
+              },
+              "link_args": [
+                "-dead_strip",
+                "-arch",
+                "arm64",
+                "-platform_version",
+                "macos",
+                "27.0",
+                "27.0",
+                "-o",
+                "{output}",
+                "{object}",
+                "{runtime}",
+                "{input:system}",
+                "{input:security}",
+                "{input:corefoundation}"
+              ]
+            }
+          }
+        }
+      },
+      "current": {
+        "abi": "lo-native-3",
+        "runtime_source_sha256": "532387e89659568d9d192dbdbe615bed99f013a3401e60990a82a86c6698e78c",
+        "toolchain_sha256": "8384e2bfb441f0b3d533b2f46734f18e01850640ab882d49a69aef430d8ea1b5",
+        "toolchain": "_scratch/resource-performance-X211/native/after-distribution/toolchain.json",
+        "archives": {
+          "darwin/arm64": {
+            "sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+            "path": "_scratch/resource-performance-X211/native/after-distribution/runtime/aarch64-apple-darwin/liblo_runtime.a"
+          },
+          "linux/arm64": {
+            "sha256": "b129daba1d100873e8518a80a9070be56d594d552e3df93426d420bb5bb3ffd9",
+            "path": "_scratch/resource-performance-X211/native/after-distribution/runtime/aarch64-unknown-linux-gnu/liblo_runtime.a"
+          }
+        },
+        "build_receipt": {
+          "runtime_source_sha256": "532387e89659568d9d192dbdbe615bed99f013a3401e60990a82a86c6698e78c",
+          "rust": {
+            "version": "1.85.1",
+            "prefix": "_scratch/native-runtime/rust-prefix",
+            "archives": [
+              {
+                "archive": "rustc.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rustc-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "93a6fd55cf1a88bb50e133c5bdb629197b80ad0ccab128ce3a84902992786b4c",
+                "bytes": 55006972
+              },
+              {
+                "archive": "cargo.tar.xz",
+                "url": "https://static.rust-lang.org/dist/cargo-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "21edfaa6d97dd5eca08c50d2520d1a821e917be98d3515cbf00ddafd9001b634",
+                "bytes": 6766048
+              },
+              {
+                "archive": "rust-std.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "a066d9b033f5fc74283ca86e38da8178c201e86b17113e184383904573734a67",
+                "bytes": 27522824
+              },
+              {
+                "archive": "rust-std-linux.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rust-std-1.85.1-aarch64-unknown-linux-gnu.tar.xz",
+                "sha256": "760fa132058ed45a67d0cd7d04638fde86fd26adc563dff1a3e6d97d300446ff",
+                "bytes": 33440220
+              },
+              {
+                "archive": "rustfmt.tar.xz",
+                "url": "https://static.rust-lang.org/dist/rustfmt-1.85.1-aarch64-apple-darwin.tar.xz",
+                "sha256": "90adc209908355ee7e315b98c84f16e6773c8664291b0981a4ff80992bc0fb66",
+                "bytes": 1594560
+              }
+            ],
+            "prefix_sha256": "e4145ce1962bb49ba45667d082625415f007524ed0f2df0f380b16976422fe2a",
+            "rustc": {
+              "path": "_scratch/native-runtime/rust-prefix/bin/rustc",
+              "sha256": "731d78259541b7e845568083df94b541176af5669509d077ee23a88d81f27d41",
+              "identity": "rustc 1.85.1 (4eb161250 2025-03-15)"
+            },
+            "cargo": {
+              "path": "_scratch/native-runtime/rust-prefix/bin/cargo",
+              "sha256": "ca274de824f0741d809e115eab77c40208c5ad6484646c381c04f12ec49e6a79",
+              "identity": "cargo 1.85.1 (d73d2caf9 2024-12-31)"
+            }
+          },
+          "llvm": {
+            "version": "21.1.8",
+            "archive": {
+              "archive": "llvm.tar.xz",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/LLVM-21.1.8-macOS-ARM64.tar.xz",
+              "sha256": "b95bdd32a33a81ee4d40363aaeb26728a26783fcef26a4d80f65457433ea4669",
+              "bytes": 1503047352
+            },
+            "tools": {
+              "clang": {
+                "path": "_scratch/native-runtime/tools/bin/clang",
+                "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+              },
+              "clang-21": {
+                "path": "_scratch/native-runtime/tools/bin/clang-21",
+                "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+              },
+              "ld.lld": {
+                "path": "_scratch/native-runtime/tools/bin/ld.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "ld64.lld": {
+                "path": "_scratch/native-runtime/tools/bin/ld64.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "llc": {
+                "path": "_scratch/native-runtime/tools/bin/llc",
+                "sha256": "07ba92b98ccf4318ef42477ab16f2e0eea9845a8517f5a3d5e707ca05ec58a4e"
+              },
+              "lld": {
+                "path": "_scratch/native-runtime/tools/bin/lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "llvm-ar": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-ar",
+                "sha256": "c2640fc0a747413fe27818531d4a22f979d91b7e299723a68225917c42574b50"
+              },
+              "llvm-dwarfdump": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-dwarfdump",
+                "sha256": "36b66049cc0995fdd7623235b260ecccd0239d87cc719488f7658f36a18fbc9b"
+              },
+              "llvm-nm": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-nm",
+                "sha256": "a011020cab7ca848ebb10948c636cde63a83cf81e81156285f96f577ea70e426"
+              },
+              "llvm-objdump": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-objdump",
+                "sha256": "f67fda63d4f65df56e76fe8ba47f03eb81e8bbfb20ef1615c18f685c7177e28c"
+              },
+              "llvm-readobj": {
+                "path": "_scratch/native-runtime/tools/bin/llvm-readobj",
+                "sha256": "73efdbad7294e02ed570d7156d1d1c8d77ed922c2df281435a7a1f8ad90eeb30"
+              },
+              "opt": {
+                "path": "_scratch/native-runtime/tools/bin/opt",
+                "sha256": "66e9c199539e80e7cdeb1a6dc370e5278a6e90ad3b18e984d1af746b1ede35c7"
+              }
+            }
+          },
+          "cargo_environment": {
+            "CI": "1",
+            "CARGO_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/cargo-home",
+            "RUSTUP_HOME": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/rustup-home",
+            "RUSTC": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin/rustc",
+            "CARGO_TARGET_DIR": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/cargo-target",
+            "CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/host-linker/linker",
+            "SDKROOT": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation/host-linker/sdk",
+            "TMPDIR": "/Users/tyemirov/Development/Research/Lo/_scratch/resource-performance-X211/native/preparation",
+            "PATH": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/rust-prefix/bin",
+            "MACOSX_DEPLOYMENT_TARGET": "27.0",
+            "LC_ALL": "C",
+            "TZ": "UTC",
+            "CRATE_CC_NO_DEFAULTS": "1",
+            "CC_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+            "AR_aarch64_apple_darwin": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+            "CFLAGS_aarch64_apple_darwin": "-target aarch64-apple-darwin -nostdinc -I/Users/tyemirov/Development/Research/Lo/runtime/native/include -fPIC -I/Users/tyemirov/Development/Research/Lo/runtime/native/include/darwin -mmacosx-version-min=27.0",
+            "CC_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/clang",
+            "AR_aarch64_unknown_linux_gnu": "/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/tools/bin/llvm-ar",
+            "CFLAGS_aarch64_unknown_linux_gnu": "-target aarch64-unknown-linux-gnu -nostdinc -I/Users/tyemirov/Development/Research/Lo/runtime/native/include -fPIC"
+          },
+          "manifest_sha256": "8384e2bfb441f0b3d533b2f46734f18e01850640ab882d49a69aef430d8ea1b5",
+          "process_sources": {
+            "launcher.c": {
+              "path": "internal/processhost/native/launcher.c",
+              "sha256": "91e83324f99af866adbddbfe6472c6748011e9b54ef2ca1ef30912e72a5bebdc"
+            },
+            "normalization.c": {
+              "path": "internal/processhost/native/normalization.c",
+              "sha256": "b1b6b9e1adf7d1e76a59ecb6d07e4ce2b6418d4d809e932bf0b4f084978c4732"
+            },
+            "protocol.h": {
+              "path": "internal/processhost/native/protocol.h",
+              "sha256": "689e448cb7ed89208e82a96b85353da1232b65b9191ca7cfcf834986d8e65e2b"
+            }
+          },
+          "host_linker": {
+            "executable": {
+              "path": "_scratch/resource-performance-X211/native/preparation/host-linker/linker",
+              "sha256": "f04d19abea99045f910ad3133080c9276bc525d47370c530293ea72eefc4d321"
+            },
+            "source": {
+              "path": "tools/nativeruntime/host_linker.c",
+              "sha256": "a38238083cbf2448d3c754509b4be10b1c3c586c8bc95ad1e2f4521a9680a916"
+            },
+            "sdk_sha256": "d704b948b5ceb409853ac5fdebb7962ee65c6fc7ef4cf5635ca3f65743a1be91"
+          }
+        },
+        "toolchain_manifest": {
+          "abi": "lo-native-3",
+          "llvm": "21.1.8",
+          "host": "darwin/arm64",
+          "compiler": {
+            "path": "bin/clang",
+            "sha256": "8501bb9d3deb0250f23422a759b94651c89479937a0af29a7c7f0b98eaf3ca5a"
+          },
+          "targets": {
+            "darwin/arm64": {
+              "triple": "aarch64-apple-darwin",
+              "linker": {
+                "path": "bin/ld64.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "runtime": {
+                "path": "runtime/aarch64-apple-darwin/liblo_runtime.a",
+                "sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf"
+              },
+              "inputs": {
+                "system": {
+                  "path": "platform/darwin/libSystem.tbd",
+                  "sha256": "4f580a6c62cd72d7c6ed71aa064ca58011581e065b6cbffc39716983903aca79"
+                },
+                "security": {
+                  "path": "platform/darwin/Security.tbd",
+                  "sha256": "c3450a9c40dfd718bd5708772db06d01efcd5a887a42f2398e6edbaea43faadf"
+                },
+                "corefoundation": {
+                  "path": "platform/darwin/CoreFoundation.tbd",
+                  "sha256": "be09ceafcb93291cbd45de539d6a61698586e9a428c4ad6378e9f6f3436e5991"
+                }
+              },
+              "link_args": [
+                "-dead_strip",
+                "-arch",
+                "arm64",
+                "-platform_version",
+                "macos",
+                "27.0",
+                "27.0",
+                "-o",
+                "{output}",
+                "{object}",
+                "{runtime}",
+                "{input:system}",
+                "{input:security}",
+                "{input:corefoundation}"
+              ]
+            },
+            "linux/arm64": {
+              "triple": "aarch64-unknown-linux-gnu",
+              "linker": {
+                "path": "bin/ld.lld",
+                "sha256": "0c4381c70e4229b9988e120710de371c031cedd1d6da8f415a9aa7bac21a3620"
+              },
+              "runtime": {
+                "path": "runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+                "sha256": "b129daba1d100873e8518a80a9070be56d594d552e3df93426d420bb5bb3ffd9"
+              },
+              "inputs": {
+                "crt1": {
+                  "path": "platform/linux/crt1.o",
+                  "sha256": "a8e2c0dd808011c9d9c5910daa44c64b70e4f2eee20e23de0b6ff24abab887cc"
+                },
+                "crti": {
+                  "path": "platform/linux/crti.o",
+                  "sha256": "93bb05d2d87f3464fd89a70d26d8ed29f0797e4b97a60786a2724a7e3ffbeba5"
+                },
+                "crtn": {
+                  "path": "platform/linux/crtn.o",
+                  "sha256": "1c741c1f9499461b6f1e531e21fc5f86a216cc5d0c49d18bdcf97d7d922342d5"
+                },
+                "libc": {
+                  "path": "platform/linux/libc.so.6",
+                  "sha256": "e4ac8ae1d81e4865e3aadedb962879cf9415903b3f2ba81ec75e9962b86ab8b0"
+                },
+                "libm": {
+                  "path": "platform/linux/libm.so.6",
+                  "sha256": "3c4cb3be0b974edf05f023f85ab15107fb5afc2687163593d0d4cf8e80c17b39"
+                },
+                "libgcc": {
+                  "path": "platform/linux/libgcc_s.so.1",
+                  "sha256": "046856f95f4636f1fc7c3a12bf4f3cd5634c2fc5145c3fdf7395d4f349fa69c7"
+                },
+                "nonshared": {
+                  "path": "platform/linux/libc_nonshared.a",
+                  "sha256": "8adf461e26c490063760dede217809d092c797d1633e1420ce90df1f3d09553f"
+                }
+              },
+              "link_args": [
+                "-m",
+                "aarch64elf",
+                "-dynamic-linker",
+                "/lib/ld-linux-aarch64.so.1",
+                "-o",
+                "{output}",
+                "{input:crt1}",
+                "{input:crti}",
+                "{object}",
+                "{runtime}",
+                "{input:libgcc}",
+                "{input:libm}",
+                "{input:libc}",
+                "{input:nonshared}",
+                "{input:crtn}"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "native_workload_artifact_sha256": {
+    "assets/collections/unfold-512-before": {
+      "sha256": "4800832752cdffe0ea0bd8022994a3766e182b339b5628490aea67c7f8d41622",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "5f4490e5a9832a5612dfddf279b22e9100ade483eec08bcb4aa09c30d0a7e102",
+      "phase": "before"
+    },
+    "assets/collections/unfold-512-initial": {
+      "sha256": "f6ba92fb426534525e1ce3d67d68e4518c15cec5d0dd157b488ae4e1cd968a94",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "5f4490e5a9832a5612dfddf279b22e9100ade483eec08bcb4aa09c30d0a7e102",
+      "phase": "initial"
+    },
+    "assets/collections/unfold-512-current": {
+      "sha256": "ca6079ac5dd9588fbb75ca07f462549168668874f2bc8390c365afee7f9cf1d5",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "5f4490e5a9832a5612dfddf279b22e9100ade483eec08bcb4aa09c30d0a7e102",
+      "phase": "current"
+    },
+    "assets/collections/map-512-before": {
+      "sha256": "0d4f88f92035f8e2e93e3512089c02cfe4f188949fa26a99b26a54f47b94dc23",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "6596cb3e6aea8093961bfe18fcbcf0afb64516271c2fc35324b173891acf5e56",
+      "phase": "before"
+    },
+    "assets/collections/map-512-initial": {
+      "sha256": "724f0f70ec10a670afcd1f2a1e25503a3cd333463f7bdd106881169d8d6951b3",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "6596cb3e6aea8093961bfe18fcbcf0afb64516271c2fc35324b173891acf5e56",
+      "phase": "initial"
+    },
+    "assets/collections/map-512-current": {
+      "sha256": "6fb4f36de8a975dad077578a35bd25318bbce5bc8b68bb41281160ea01722a0d",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "6596cb3e6aea8093961bfe18fcbcf0afb64516271c2fc35324b173891acf5e56",
+      "phase": "current"
+    },
+    "assets/collections/filter-512-before": {
+      "sha256": "84868087e9960563c24dd8553e576765f8d875fe63cc5239f0423b87d4cbb4ee",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "bf328b74bb179cf2b6bc29d5f5acd9c6857223786654919ce924ad6c062a107f",
+      "phase": "before"
+    },
+    "assets/collections/filter-512-initial": {
+      "sha256": "9f4406014b248bed83b19cbf0155b6267c815562dd957133339f3e19d76a8bc2",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "bf328b74bb179cf2b6bc29d5f5acd9c6857223786654919ce924ad6c062a107f",
+      "phase": "initial"
+    },
+    "assets/collections/filter-512-current": {
+      "sha256": "a949377693e993e7798ac7f34635cbb0bb16c95e104f63386fb190cfb2b70cc5",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "bf328b74bb179cf2b6bc29d5f5acd9c6857223786654919ce924ad6c062a107f",
+      "phase": "current"
+    },
+    "assets/collections/list-fold-512-before": {
+      "sha256": "46776c403daa716bb889b9640d4f4e06fd2a08943cc3b805c088fa2357b585cc",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "835547fdb45508f527722f47dde679de04cee468b3dd191d27868e58e1ec105f",
+      "phase": "before"
+    },
+    "assets/collections/list-fold-512-initial": {
+      "sha256": "269b8aa34cd91f012f26c0a62c429db7ab407f99b104cc15ef87dd2103a23e14",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "835547fdb45508f527722f47dde679de04cee468b3dd191d27868e58e1ec105f",
+      "phase": "initial"
+    },
+    "assets/collections/list-fold-512-current": {
+      "sha256": "991fefd7acbc1d0b470927a044b101c832ddd60957e04f004e206031ba00a607",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "835547fdb45508f527722f47dde679de04cee468b3dd191d27868e58e1ec105f",
+      "phase": "current"
+    },
+    "assets/collections/flow-fold-512-before": {
+      "sha256": "4019c05e6bfee854e7f1ba26afb855cbd3984b7fb069be18997fd1cd23c47125",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "0249079f755493fd88a78348566249c603be550d079faed5376021ac16a43746",
+      "phase": "before"
+    },
+    "assets/collections/flow-fold-512-initial": {
+      "sha256": "9f2b0ba7cc025edad9ae2649b2ca358733b3427f89cc999ee1817f31391f7e65",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "0249079f755493fd88a78348566249c603be550d079faed5376021ac16a43746",
+      "phase": "initial"
+    },
+    "assets/collections/flow-fold-512-current": {
+      "sha256": "a37e611590c8704b536247ef084f35cf69eab9288b4f609f8d0f1a9da5e72067",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "0249079f755493fd88a78348566249c603be550d079faed5376021ac16a43746",
+      "phase": "current"
+    },
+    "assets/collections/unfold-2048-before": {
+      "sha256": "c32bc9ff663d7182e8c12d1318751958a555e1805ae34003cbabf9d85320405c",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "0d531985530b3195f278882aeece832c4c1de77c7c4793007ffa206fbb9ecff5",
+      "phase": "before"
+    },
+    "assets/collections/unfold-2048-initial": {
+      "sha256": "8887388d0cbc98ad47c0b1dc2fcc53bc2a7c8258256216d7c63378bb0f349996",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "0d531985530b3195f278882aeece832c4c1de77c7c4793007ffa206fbb9ecff5",
+      "phase": "initial"
+    },
+    "assets/collections/unfold-2048-current": {
+      "sha256": "11b8a45dd4d01ee45af14145164f341caa77b204ae921b4b1fdb3c8817ae1a19",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "0d531985530b3195f278882aeece832c4c1de77c7c4793007ffa206fbb9ecff5",
+      "phase": "current"
+    },
+    "assets/collections/map-2048-before": {
+      "sha256": "249cbc7ca69bb08352657933b51d26e388ae6313573456881c22615b732c1aa8",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "1011afbeadd495553f9ff4e7c8b882b24790d803b0d82174af8757f8e3732288",
+      "phase": "before"
+    },
+    "assets/collections/map-2048-initial": {
+      "sha256": "45bc77a15bebe2f65843c892807d12bed87bea024865f78070d53c9e551606c5",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "1011afbeadd495553f9ff4e7c8b882b24790d803b0d82174af8757f8e3732288",
+      "phase": "initial"
+    },
+    "assets/collections/map-2048-current": {
+      "sha256": "381f031e2b7ef1b9056a067023ccbd6796ba701933be3111832173d09b8f330d",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "1011afbeadd495553f9ff4e7c8b882b24790d803b0d82174af8757f8e3732288",
+      "phase": "current"
+    },
+    "assets/collections/filter-2048-before": {
+      "sha256": "2dff77475a276a82e2381d3ef5c0181d7e21903d233e2196e5c4f74384345930",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "c72d2881d3f0b1eb974481d8adc9fe144d75e887ff8e59e86ab0b7a2ccc6d56d",
+      "phase": "before"
+    },
+    "assets/collections/filter-2048-initial": {
+      "sha256": "9b86ef480486e935f0bab4edb36bd36a669afb3d3d28058e84055b15a751a90b",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "c72d2881d3f0b1eb974481d8adc9fe144d75e887ff8e59e86ab0b7a2ccc6d56d",
+      "phase": "initial"
+    },
+    "assets/collections/filter-2048-current": {
+      "sha256": "87ad9a3673e4eecd706df0fbd3c31df3b60c22cc9e0995d4c8e87c4ed9dd983a",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "c72d2881d3f0b1eb974481d8adc9fe144d75e887ff8e59e86ab0b7a2ccc6d56d",
+      "phase": "current"
+    },
+    "assets/collections/list-fold-2048-before": {
+      "sha256": "90bd3ed4f1674cf9fedf41d5d3b9c341095bf193a90b9526132fa2de528cb2b5",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "7b7130c37002964d41665cafff158bfc24714fc4516558c58c7d887565db9829",
+      "phase": "before"
+    },
+    "assets/collections/list-fold-2048-initial": {
+      "sha256": "546fc2414c055dd107e0e7807c04915533643baad959c9ca1666c2677b77179a",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "7b7130c37002964d41665cafff158bfc24714fc4516558c58c7d887565db9829",
+      "phase": "initial"
+    },
+    "assets/collections/list-fold-2048-current": {
+      "sha256": "915ce2ac317d8a184c62293b5c237bf53c4877c3fcb58ad16ae09992e7af09e7",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "7b7130c37002964d41665cafff158bfc24714fc4516558c58c7d887565db9829",
+      "phase": "current"
+    },
+    "assets/collections/flow-fold-2048-before": {
+      "sha256": "cd85b0d4fd2ac216e24f0a15377dfe5fe0e422465e9417fde5e4e4bec3293d35",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "2df6b0522349bebd487670b1a61c55d26e7af3d3abe4a753f0d35af593c0d12e",
+      "phase": "before"
+    },
+    "assets/collections/flow-fold-2048-initial": {
+      "sha256": "b603b0f8dc0e31bd03503a2a1f07fa4666c4e55d21228a95d635f94cc8522c7c",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "2df6b0522349bebd487670b1a61c55d26e7af3d3abe4a753f0d35af593c0d12e",
+      "phase": "initial"
+    },
+    "assets/collections/flow-fold-2048-current": {
+      "sha256": "1dde301b6cb221ad6cb1fa4fcd0136daa31f69a8f08f522ccb662dc365f90dcf",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "2df6b0522349bebd487670b1a61c55d26e7af3d3abe4a753f0d35af593c0d12e",
+      "phase": "current"
+    },
+    "assets/collections/unfold-8192-before": {
+      "sha256": "ad58826f3ef1fb321e7978d9d5cf264631115fa5908ffc2af10c34a1639fd6f3",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "21c58c7826cb28cc0220c17757814c32131090b35162dbf52f67758a8f29dc14",
+      "phase": "before"
+    },
+    "assets/collections/unfold-8192-initial": {
+      "sha256": "2d5d1a7aba57b31a42c5f69f44e1a0ef9ca8ccc1be63231dc45065ab89ccedae",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "21c58c7826cb28cc0220c17757814c32131090b35162dbf52f67758a8f29dc14",
+      "phase": "initial"
+    },
+    "assets/collections/unfold-8192-current": {
+      "sha256": "3c21ee773f5dcdc4c2a6e2197f33e53443506b18cdf60312d18393687decfb09",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "21c58c7826cb28cc0220c17757814c32131090b35162dbf52f67758a8f29dc14",
+      "phase": "current"
+    },
+    "assets/collections/map-8192-before": {
+      "sha256": "da4f46e0516e5dc787b59b414df09253875be222ef52f6e14e0e9be64b985932",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "96dac7f1b3c345b0e208d3015a733dadbfab5458dfa4b7548605f912a3888ec3",
+      "phase": "before"
+    },
+    "assets/collections/map-8192-initial": {
+      "sha256": "7b26e0d400c23d0712cbbb11d1fd182ab86db8bde4a19bcd3278925d0ae44bae",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "96dac7f1b3c345b0e208d3015a733dadbfab5458dfa4b7548605f912a3888ec3",
+      "phase": "initial"
+    },
+    "assets/collections/map-8192-current": {
+      "sha256": "447cc7437fad635d3509f883ea3810bcae523f676b318173ae1c138e2ab361de",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "96dac7f1b3c345b0e208d3015a733dadbfab5458dfa4b7548605f912a3888ec3",
+      "phase": "current"
+    },
+    "assets/collections/filter-8192-before": {
+      "sha256": "4410295ec32763d2c75caf28a320945ecb1b77cfbae43e0795ef5e857e1b573b",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "32977d3d9e3075ceead9eaa5a2795108db27c9affcd740ee65a24cf174580666",
+      "phase": "before"
+    },
+    "assets/collections/filter-8192-initial": {
+      "sha256": "4c5d0a3363aedc95f3001caab4d1d87652718d7646429160d9104fd8ac9293ac",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "32977d3d9e3075ceead9eaa5a2795108db27c9affcd740ee65a24cf174580666",
+      "phase": "initial"
+    },
+    "assets/collections/filter-8192-current": {
+      "sha256": "0d3d6a6af62e126c9da7c4d64f7f292a43ec8fc5bd18c1878af015b5b199995c",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "32977d3d9e3075ceead9eaa5a2795108db27c9affcd740ee65a24cf174580666",
+      "phase": "current"
+    },
+    "assets/collections/list-fold-8192-before": {
+      "sha256": "6a0367bf8c96f06f4c7fddd7496e6078b1b34be5cc06d8da264c64743bcbba8a",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "3996523823d20835c8c6c03e590f8168a45ef668f011f8016b8143e7f424f396",
+      "phase": "before"
+    },
+    "assets/collections/list-fold-8192-initial": {
+      "sha256": "6ba87ee474c755aa44b61468f552d235b4a8cc524da740954e19db22a25bc88d",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "3996523823d20835c8c6c03e590f8168a45ef668f011f8016b8143e7f424f396",
+      "phase": "initial"
+    },
+    "assets/collections/list-fold-8192-current": {
+      "sha256": "72323d4cc0850a9caea8bb0c086b6054ffa3da44a38d4aa32d684dbd7042930a",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "3996523823d20835c8c6c03e590f8168a45ef668f011f8016b8143e7f424f396",
+      "phase": "current"
+    },
+    "assets/collections/flow-fold-8192-before": {
+      "sha256": "9528d7f9ef12d9a2b8fda34862f31942c946fe5322b94d4a3658227bceab0f69",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "bcd7ee3683316ff727fea16cd5c0b7d60efe42d31bc0571eb23439f77c1d7d34",
+      "phase": "before"
+    },
+    "assets/collections/flow-fold-8192-initial": {
+      "sha256": "a7cfd9ced18e2a0e337232378154426d6ebfcd84608fc07822407f67a1d93822",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "bcd7ee3683316ff727fea16cd5c0b7d60efe42d31bc0571eb23439f77c1d7d34",
+      "phase": "initial"
+    },
+    "assets/collections/flow-fold-8192-current": {
+      "sha256": "afa7494c3befb7041c6ebf13bdd0017bfa9f9ea90aa60e2dee07574472019ebf",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "bcd7ee3683316ff727fea16cd5c0b7d60efe42d31bc0571eb23439f77c1d7d34",
+      "phase": "current"
+    },
+    "assets/collections/alias-fold-128-before": {
+      "sha256": "4aaf3ced3245380a54419bff0e299395634b4bdf29788709cad844dc4c8122ec",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "2a301eaef67caeb9ca620ec0f64188026c29e211046adf19e61bda5094bd8c55",
+      "phase": "before"
+    },
+    "assets/collections/alias-fold-128-initial": {
+      "sha256": "a8461fef37add8dd20947323c7f7fafba94e83c3ee24833937b25e0b9c258ded",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "2a301eaef67caeb9ca620ec0f64188026c29e211046adf19e61bda5094bd8c55",
+      "phase": "initial"
+    },
+    "assets/collections/alias-fold-128-current": {
+      "sha256": "7f5e02d916353ce90424fd0b11e5b96fd8d68b1b4e0678997837b1cfc575a9ef",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "2a301eaef67caeb9ca620ec0f64188026c29e211046adf19e61bda5094bd8c55",
+      "phase": "current"
+    },
+    "assets/collections/alias-fold-256-before": {
+      "sha256": "a1ea66ee6d3bce140b604a8416ca4ee5885bb0a8ba8afc93554547a904015f89",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "325f56291bf153cc1b20bf3de3eb3f3e48e43c73d8f276ae0b94fac1125a1d20",
+      "phase": "before"
+    },
+    "assets/collections/alias-fold-256-initial": {
+      "sha256": "30aba06523c8dff631ef3cb20891a6e3ddef4d77b6cff68dfb596650c4d09d0b",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "325f56291bf153cc1b20bf3de3eb3f3e48e43c73d8f276ae0b94fac1125a1d20",
+      "phase": "initial"
+    },
+    "assets/collections/alias-fold-256-current": {
+      "sha256": "6ebe21e3f3fc1d5966d2b61b51ef8a650af427fd733e8d13cdd789afdf452175",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "325f56291bf153cc1b20bf3de3eb3f3e48e43c73d8f276ae0b94fac1125a1d20",
+      "phase": "current"
+    },
+    "assets/collections/alias-fold-512-before": {
+      "sha256": "eabb1ececdc4542c8846f71821f40a610e959cdf9d06e9fb96e68380d0375384",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "d4efebda6b8a175ef1fc33a609d031c7fab1857deb80f4bc38842779cdf8552d",
+      "phase": "before"
+    },
+    "assets/collections/alias-fold-512-initial": {
+      "sha256": "f66c6ac4f88865f256a05f81cfb4e9552184b6d3b8d94d5dae2c53aec9223160",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "d4efebda6b8a175ef1fc33a609d031c7fab1857deb80f4bc38842779cdf8552d",
+      "phase": "initial"
+    },
+    "assets/collections/alias-fold-512-current": {
+      "sha256": "f2b3ce146d94abba5e564a93ddea0b2ba18848a146dcd440a4fdea97d21e0899",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "d4efebda6b8a175ef1fc33a609d031c7fab1857deb80f4bc38842779cdf8552d",
+      "phase": "current"
+    },
+    "assets/collections/alias-fold-1024-before": {
+      "sha256": "71073cfefe74a4ab79bdf9884fb11558e7b336b568de53cf6baf13b90ea7af18",
+      "runtime_sha256": "458d78ace18c15853e3b41bbf4be264db8c5e3d6696b64c2fab1d52dfdbcb83a",
+      "source_sha256": "4be15585a22f2701201517079131b402bf93ad85f8f8a6109eb5a57f2e425663",
+      "phase": "before"
+    },
+    "assets/collections/alias-fold-1024-initial": {
+      "sha256": "bc27b0a2d2be9aa32a96d7566a61d3934edd7f1c2ad6b0df82e28290c7c4cb70",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "4be15585a22f2701201517079131b402bf93ad85f8f8a6109eb5a57f2e425663",
+      "phase": "initial"
+    },
+    "assets/collections/alias-fold-1024-current": {
+      "sha256": "1e01185d4de226302fd6aa8f5038a9d390be065313dccb8cc7f2b581e1f64c42",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "4be15585a22f2701201517079131b402bf93ad85f8f8a6109eb5a57f2e425663",
+      "phase": "current"
+    },
+    "assets/collections/worklist-wide-512-initial": {
+      "sha256": "ea77d549b1a1e81714f1d1cf76d183a8f0ad3c5f00411037400782928193da5b",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "6a1a443d0b5eab43c68a04d3ecbd49b562fc68e30bebcbc687848bba22a5d8bb",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-wide-512-current": {
+      "sha256": "9b7a6bf7826c8d8df7ac62ad2195e6b08306966e36c4e16c6d607729ac9ce43a",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "6a1a443d0b5eab43c68a04d3ecbd49b562fc68e30bebcbc687848bba22a5d8bb",
+      "phase": "current"
+    },
+    "assets/collections/worklist-chain-512-initial": {
+      "sha256": "077fe99b2b7bedae9ddb1b921a1e26e010873620c9e2721c232f3e027c01efeb",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "32cb204ee5344a736016eb5956181ffa580aaf293f0d4c90073da67a42bbc320",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-chain-512-current": {
+      "sha256": "0372ff349c318bf0248039871a8bb8dd4e45af79d5cf737c238b041727159942",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "32cb204ee5344a736016eb5956181ffa580aaf293f0d4c90073da67a42bbc320",
+      "phase": "current"
+    },
+    "assets/collections/worklist-wide-2048-initial": {
+      "sha256": "6a22429484e185f39888818e79d2c03966bf51c49f7be130de34ba5c2014a0a6",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "cd87bbe526ceb8fa93f8cf74072d4058a890cc8f66bbd68bd738df802e4f81ac",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-wide-2048-current": {
+      "sha256": "19e62afe27c77d3864b4c2dc2c5cb340d97266e0a26b1070101716b075081daa",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "cd87bbe526ceb8fa93f8cf74072d4058a890cc8f66bbd68bd738df802e4f81ac",
+      "phase": "current"
+    },
+    "assets/collections/worklist-chain-2048-initial": {
+      "sha256": "6b06de44b09fa0b397ccc4bd96e88e1b28b74effa9ee68aaaf3946f60d14b2ba",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "00f180f4ea55ae5bdaaa5c4c987a0a8e5c239725f894f242e68ffa86b8755e6b",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-chain-2048-current": {
+      "sha256": "a31f3dda53bd7cbc4cb450f5e66c7ffab4487306dc04148023aea10c5200508e",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "00f180f4ea55ae5bdaaa5c4c987a0a8e5c239725f894f242e68ffa86b8755e6b",
+      "phase": "current"
+    },
+    "assets/collections/worklist-wide-8192-initial": {
+      "sha256": "e038d5477f3e2ea3c43af3443250e14b9c41cbcb18ff69a519b681684eaf8d43",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "1a00004135056ed20e7fd4b49862206f41b07b02f43495f60b72fe7ce01fa0db",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-wide-8192-current": {
+      "sha256": "52ceab7150d62fffaae723e16bbaecc7258d0f9f806ab7af8b778eefdb48e84b",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "1a00004135056ed20e7fd4b49862206f41b07b02f43495f60b72fe7ce01fa0db",
+      "phase": "current"
+    },
+    "assets/collections/worklist-chain-8192-initial": {
+      "sha256": "e8b3b5bef1c42067afbc6b62aed767278acc29ddbad00df6eadf5c89a5902a38",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "ecb7a6dea2f44bacf138c26746a39dd44edabd1d6db9b3fe8d3e691bfc2d47f5",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-chain-8192-current": {
+      "sha256": "48ac23d2abcb91c149a7ea78594d681878cb1509adf1dd5df61f658ae4cc5e7f",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "ecb7a6dea2f44bacf138c26746a39dd44edabd1d6db9b3fe8d3e691bfc2d47f5",
+      "phase": "current"
+    },
+    "assets/collections/worklist-wide-32768-initial": {
+      "sha256": "cc88aa96919f381da4da063c39dc866ceed972bf6c753f6bd72388c8646cdca4",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "748e66f534eee8e0f48064b6f93691c85efd5c69a2cd36b8cefa5aaf0240d4e0",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-wide-32768-current": {
+      "sha256": "85a233c94373e60ee44206d1294daa7d07f19a5b5883bcdffcd73a8ffb85c10c",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "748e66f534eee8e0f48064b6f93691c85efd5c69a2cd36b8cefa5aaf0240d4e0",
+      "phase": "current"
+    },
+    "assets/collections/worklist-chain-32768-initial": {
+      "sha256": "1fa8c14dd4738e5aa58dbb9416bd3098162b203edf1f08566dabc758dc4688b0",
+      "runtime_sha256": "8d3218000243ea1c35c02f3a532e4fb11325dfaa6ad5c3328f331cb5a1f03711",
+      "source_sha256": "5d07eb6a22fcae20978c1d28045a128d4cebe13a2ad4e6b9c56ffc47d2377ca1",
+      "phase": "initial"
+    },
+    "assets/collections/worklist-chain-32768-current": {
+      "sha256": "f63b0fbd053081bc919b0138fcabe306b0e1b127311c246ca19105af14369c73",
+      "runtime_sha256": "c6cc17c2b1e7a705c1f0ab691b505f5d057ba01a6ae7498d40be25b6a5dcecaf",
+      "source_sha256": "5d07eb6a22fcae20978c1d28045a128d4cebe13a2ad4e6b9c56ffc47d2377ca1",
+      "phase": "current"
+    }
+  },
+  "language_review": {
+    "new_findings": 0,
+    "mechanical_findings": 0,
+    "reference_issue": 9,
+    "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "reviewed_scope": {
+      "docs/dynamic-traversal-performance.md": "Changed introduction and comparison sentence only; unchanged historical prose is outside this review.",
+      "docs/resource-performance-remediation.md": "Complete document: descriptive prose, measurement tables, limits, and evidence links."
+    },
+    "part_1_review": "Reviewed complete new report and changed historical introduction: sentence and paragraph length, active voice, verb forms, technical nouns, numbers, and tables.",
+    "part_2_review": "Reviewed final changed prose against dictionary meaning and part of speech; retained source literals and subject-field technical nouns.",
+    "mechanical_log": "docs-final.log",
+    "source_sha256": {
+      "docs/dynamic-traversal-performance.md": "7001be190a861d009e80c98826d96bbb98bf2599ed54c3e56a4b5ac2cc73469f",
+      "docs/resource-performance-remediation.md": "5c59787468d395476893b84c863490d6551c44e369c271eb4d0004248db1ed3d"
+    },
+    "final_status_text_review": "Reviewed the final CI and preparation-layout statements against Part1 and Part2; no new findings."
+  },
+  "archive": {
+    "path": "docs/evidence/resource-performance-remediation.json.gz",
+    "sha256": "3ef513f2af7b368a6b876f2b724dc7eca5f9a79aedeaa9d0518a8146e14bf51d",
+    "compressed_bytes": 1041834,
+    "uncompressed_bytes": 8372862,
+    "record_count": 2052
+  },
+  "limits": [
+    "Local Darwin ARM64 timing evidence; Linux ARM64 QEMU correctness and allocation evidence.",
+    "Each implementation uses its own default resource quotas with the same execution-step budget.",
+    "Interpreter counters measure runner execution after source compilation; native timings include process startup and admission.",
+    "No hosted CI, installed distribution, physical-device, GPU, or production throughput claim."
+  ]
+}

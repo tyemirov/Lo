@@ -665,7 +665,7 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 		return fmt.Errorf("native lowering: %s requires %d arguments, got %d", op.Name(), len(op.Parameters()), count)
 	}
 	minimum := 2
-	if op.Name() == catalog.ListFold || op.Name() == catalog.ListUnfold || op.Name() == catalog.FlowFold {
+	if op.Name() == catalog.ListFold || op.Name() == catalog.ListUnfold || op.Rule() == catalog.FlowProcessor {
 		minimum = 3
 	}
 	if (processor || guarded) && count < minimum {

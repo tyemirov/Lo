@@ -1,8 +1,11 @@
 # File I/O Performance
 
-This study measures the current File operations through public Lo entry points.
+This study records File operation measurements before the dynamic traversal revision.
+The [dynamic traversal study](dynamic-traversal-performance.md) compares the current resource contract with the preceding implementation.
 Each removal uses a generated fixture directory inside Lo.
-The resource limits and File authority rules remain unchanged.
+The measurement archive keeps the earlier resource contract.
+The current benchmark uses the [host resource quotas](../specification.md#89-dynamic-worklists-and-host-resource-quotas).
+File authority rules remain unchanged.
 
 ## Run The Benchmarks
 
@@ -50,7 +53,8 @@ Darwin samples supply execution times for this host and these fixtures.
 The Linux emulator checks correctness and allocation growth.
 
 The benchmark requests 100,000,000 execution steps for these workloads.
-This request does not change the default execution budget or the data limits.
+This request sets the work budget for each sample.
+The sample uses the default host resource quotas.
 Native builds and fixture setup occur outside the measured interval.
 The filesystem cache is uncontrolled after fixture setup.
 The report retains the first process launch and all later launches.
@@ -62,25 +66,26 @@ Keep filesystem timing as descriptive evidence.
 
 ## Capacity Limits
 
-| Resource | Current limit |
+| Resource | Current default |
 | --- | --- |
-| Enumerated directory children | 10,000 |
-| Selected removal entries | 10,000 |
-| Retained directory observations | 128 per invocation |
-| Raw file read | 16 MiB |
+| Enumerated directory children | No count quota. |
+| Selected removal entries | No count quota. |
+| Simultaneously retained directory observations | 128 |
 | Expanded value | 16 MiB |
-| Cumulative evaluation data | 64 MiB |
+| Live value weight | 64 MiB |
+| Cumulative evaluation data | No quota. |
 
-Value headers, paths, conversions, and intermediate values also consume the evaluation budget.
-A workload can reach a value or evaluation limit before the raw read limit.
-The benchmark verifies the typed `runtime.limit` result for capacity cases.
-If the workload requires more capacity, define a separate traversal contract.
+Value headers, paths, conversions, and retained intermediate values consume the live-value budget.
+A file read also needs space for its result wrapper.
+The benchmark verifies typed `runtime.limit` results when a resource quota is exceeded.
+Sequential directory samples release completed observations and can exceed 128 total visits.
 
+The following result used the earlier cumulative-data contract.
 A selected batch of 10,000 entries can exceed the cumulative budget during guarded removal.
 One fixture stopped after 9,276 removals and retained 724 files.
 The interpreter and native artifact produced identical progress with the same source, arguments, and 149-byte fixture path.
 A separate native fixture with a shorter path completed all 10,000 removals.
-The entry limit does not guarantee that every permitted batch fits the data budget.
+That result does not measure the current live-value contract.
 The default removal samples stop at 5,000 entries.
 
 ## Regression Checks
@@ -105,8 +110,9 @@ It measures execution allocations and verifies the complete returned payload.
 A separate case verifies the typed rejection of an oversized boundary result.
 Real filesystem workloads supply the end-to-end measurements.
 
-The directory test verifies 128 distinct observations and reuse of an existing observation.
-It verifies that the 129th distinct observation returns `runtime.limit`.
+The directory test retains 128 distinct observations and verifies reuse of an existing observation.
+It verifies that the 129th simultaneously retained observation returns `runtime.limit`.
+Separate tests verify 160 sequential observations and dynamic discovery through `Flow.worklist`.
 
 Exact negative timestamp checks use injected metadata in the interpreter and both native targets.
 Real filesystem checks verify the owner and stable timestamp fields.
@@ -183,8 +189,9 @@ It retains the incomplete baseline removal campaign and its typed capacity failu
 The archive also records the same-path budget comparison.
 The benchmark rejects unexpected failures and reports the observations collected before the failure.
 
-These fixtures show costs for the current bounded operations.
+These recorded fixtures show costs under the earlier resource contract.
 They do not show throughput for an unbounded filesystem traversal or a cold filesystem cache.
 Longer paths, larger payloads, and retained intermediate values consume additional budget.
 Applications must stay within the current limits.
-Larger traversals require a separate language design for bounded observation lifetime and incremental results.
+`Flow.worklist` now supplies dynamic traversal with observation release and host resource quotas.
+The archive does not establish throughput for that new processor.

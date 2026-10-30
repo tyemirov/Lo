@@ -866,8 +866,9 @@ The [candidate record](evidence/i011-qualification-20261022/literal-loop-candida
 
 ## Installed ABI2 Candidate
 
-B008 uses shared source spans and removes fields that have no meaning for an action.
-The compiler and runtime use only `lo-native-2`.
+B008 introduced shared source spans and removed fields that had no meaning for an action.
+The compiler and runtime used `lo-native-2` for that qualification.
+The current [runtime contract](native-runtime-contract.md#host-execution-policy) uses `lo-native-3` with explicit execution policy options.
 Both targets passed the selected public checks, including all 43 metadata admission cases.
 The initial field and table hashes stayed unchanged across all 38 actions.
 The parser and encoder reviews found no blocking issue.

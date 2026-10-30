@@ -34,7 +34,7 @@ func TestNativeStandalone(t *testing.T) {
 	if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil {
 		t.Fatal(err)
 	}
-	if receipt.Command != "build" || receipt.Status != "ok" || receipt.Artifact != artifact || receipt.Target != runtime.GOOS+"/"+runtime.GOARCH || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-2" || len(receipt.Runtime) != 64 {
+	if receipt.Command != "build" || receipt.Status != "ok" || receipt.Artifact != artifact || receipt.Target != runtime.GOOS+"/"+runtime.GOARCH || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-3" || len(receipt.Runtime) != 64 {
 		t.Fatalf("build receipt: %+v", receipt)
 	}
 	if err := os.Remove(source); err != nil {
@@ -114,7 +114,7 @@ func buildForTest(t *testing.T, path string) (string, result) {
 				Codegen, ABI string
 				Runtime      string `json:"runtime_sha256"`
 			}
-			if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-2" || len(receipt.Runtime) != 64 {
+			if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil || receipt.Codegen != "llvm" || receipt.ABI != "lo-native-3" || len(receipt.Runtime) != 64 {
 				t.Fatalf("native fixture requires an LLVM runtime receipt: %+v", built)
 			}
 			t.Logf("LO_NATIVE_RUNTIME=%s", receipt.Runtime)

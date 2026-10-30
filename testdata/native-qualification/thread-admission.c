@@ -1,10 +1,12 @@
+#include "lo_context_options.h"
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __UINTPTR_TYPE__ Thread;
 typedef struct Context Context;
 typedef struct Value Value;
 typedef struct { U32 status; U32 code; const Value *value; } ResultSlot;
-extern Context *lo_context_new(U64);
+extern Context *lo_context_new(const ContextOptions *);
 extern void lo_context_free(Context *);
 extern void lo_context_run(Context *,ResultSlot *);
 extern void lo_context_cancel_after_polls(Context *,U64);
@@ -48,7 +50,7 @@ static int owner_step(Context *context,U32 status) {
 }
 int main(void) {
  for(unsigned iteration=0;iteration<32;++iteration) {
-  Context *context=lo_context_new(100000);
+  Context *context=lo_context_new(LO_OPTIONS(100000));
   if(!context || lo_runtime_live_contexts()!=1)return 1;
   if(LO_CASE<2) {
    if(!foreign_rejected_unchanged(context))return 2;

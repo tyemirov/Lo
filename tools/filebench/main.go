@@ -25,18 +25,18 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
 	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
-	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/runner"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 )
 
 const (
-	reportName = "report.json"
-	maxSamples = 20
-	maxEntries = execution.MaxFileEntries + 1
-	maxPayload = execution.MaxBytes + 1
-	stepBudget = "100000000"
-	maxCapture = 8 << 20
+	reportName     = "report.json"
+	maxSamples     = 20
+	maxEntries     = 10_001
+	maxPayload     = (16 << 20) + 1
+	maxDirectories = 129
+	stepBudget     = "100000000"
+	maxCapture     = 8 << 20
 )
 
 var knownCases = []string{"startup", "list", "scan", "remove", "checked-remove", "read", "write", "append", "append-many", "directories", "open-paths"}
@@ -151,7 +151,7 @@ func parse(args []string) (configuration, error) {
 	flags.StringVar(&c.cases, "cases", "startup,list,scan,remove,checked-remove,read,write,append,append-many,directories", "comma-separated workloads")
 	flags.StringVar(&c.sizes, "sizes", "100,1000,5000", "entry or append-commit counts; at most 10001")
 	flags.StringVar(&c.ioSizes, "io-sizes", "4096,65536,1048576", "payload bytes; at most 16777217")
-	flags.StringVar(&c.directories, "directory-counts", "1,32,128,129", "retained directory counts; at most 129")
+	flags.StringVar(&c.directories, "directory-counts", "1,32,128,129", "sequential directory observations; at most 129")
 	flags.StringVar(&c.label, "label", "measurement", "report phase label")
 	flags.IntVar(&c.samples, "samples", 3, "fresh verified samples per workload")
 	flags.IntVar(&c.appendBytes, "append-bytes", 64, "bytes per append-many commit")
@@ -330,7 +330,7 @@ func execute(args []string, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	directoryCounts, err := numbers(c.directories, execution.MaxFileDirectories+1)
+	directoryCounts, err := numbers(c.directories, maxDirectories)
 	if err != nil {
 		return err
 	}
@@ -344,7 +344,7 @@ func execute(args []string, stdout io.Writer) error {
 		"interpreter_allocations": "separate fresh worker linked from current checkout; compile before observation; runtime.ReadMemStats deltas across runner.Execute including host setup, execution, cleanup, and scalar serialization; worker executable/runtime-source hashes identify its implementation, which may differ from configured CLI compiler; no cross-implementation allocator ratio is claimed; worker result and filesystem independently verified",
 		"native_allocations":      "not collected by generic CLI runner; commit-scoped native allocator regression supplies separate removal allocation evidence",
 		"cache":                   "freshly prepared fixtures before each invocation; filesystem cache uncontrolled and normally warm after fixture writes; no global cache purge; first sample retained; no subtraction or discarded samples",
-		"bounds":                  "current Lo resource limits retained; directory and entry overflow require runtime.limit; fixed read/write/append pipelines model ordered value charges, including path/target/receipt headers and cumulative budget; child stdout/stderr capped at 8 MiB each",
+		"bounds":                  "default host resource quotas; sequential directory observations release after each callback; fixed read/write/append pipelines model distinct live values and their headers; child stdout/stderr capped at 8 MiB each",
 		"summary":                 "median uses the midpoint for even sample counts; p95 uses nearest rank; all samples retained",
 	}, Identities: map[string]string{}}
 	inputs := map[string]string{"compiler_sha256": c.compiler}

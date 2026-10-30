@@ -322,7 +322,7 @@ func TestMetadataProjectionBeforeCompaction(t *testing.T) {
 
 func metadataProjectionDecode(t *testing.T, root map[string]json.RawMessage) []metadataProjectionLocation {
 	t.Helper()
-	if string(root["abi"]) != `"lo-native-2"` {
+	if string(root["abi"]) != `"lo-native-3"` {
 		t.Fatal("projection requires canonical ABI2")
 	}
 	var files []string

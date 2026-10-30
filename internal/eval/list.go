@@ -22,7 +22,8 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 		contextStart, state = 2, args[0]
 		n := args[1].(value.Integer).Big()
 		if n.Sign() > 0 {
-			if !n.IsInt64() || n.Int64() > execution.MaxItems {
+			limit := m.Limits().ListItems
+			if !n.IsInt64() || int64(int(n.Int64())) != n.Int64() || (limit != 0 && n.Uint64() > limit) {
 				return nil, execution.Limit("unfold elements")
 			}
 			count = int(n.Int64())
@@ -87,11 +88,13 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 			if v.(value.Boolean).Bool() {
 				output = append(output, items[index])
 			}
+			scope.Keep()
 		case catalog.ListFold, catalog.FlowFold:
 			state = v
 		case catalog.ListFlatMap:
 			extra := v.(value.List).Items()
-			if len(extra) > execution.MaxItems-len(output) {
+			limit := m.Limits().ListItems
+			if limit != 0 && uint64(len(extra))+uint64(len(output)) > limit {
 				return nil, execution.Limit("list elements")
 			}
 			output = append(output, extra...)
@@ -115,11 +118,14 @@ func (m *machine) listProcessor(call ir.BuiltinCall, args []value.Value, callbac
 	if op == catalog.ListFold || op == catalog.FlowFold {
 		return runtimeops.Success(call.Type(), state), nil
 	}
+	if op == catalog.ListUnfold {
+		scope.Keep()
+	}
 	outType := call.Type()
 	if ft, ok := outType.(types.Fallible); ok {
 		outType = ft.Base()
 	}
-	result, err := runtimeops.List(outType.(types.List), output)
+	result, err := runtimeops.List(m.Session, outType.(types.List), output)
 	if err != nil {
 		return nil, err
 	}

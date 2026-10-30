@@ -105,6 +105,7 @@ const (
 	ListFilter           = "List.filter"
 	ListFold             = "List.fold"
 	FlowFold             = "Flow.fold"
+	FlowWorklist         = "Flow.worklist"
 	ListFlatMap          = "List.flat_map"
 	ListUnfold           = "List.unfold"
 	Length               = "List.length"
@@ -363,7 +364,7 @@ func build() map[string]Operation {
 		{HasKey, MapLookup, []string{"target_map", "target_key"}}, {Get, MapLookup, []string{"target_map", "target_key"}},
 		{Contains, RangeProcessor, []string{"target_range", "target_value"}}, {IsEmpty, RangeProcessor, []string{"target_range"}},
 		{Length, ListLength, []string{"target_list"}}, {ServerNew, ServerConstructor, []string{"port", "handler", "onError"}},
-		{FlowFold, FlowProcessor, nil}, {ListMap, ListProcessor, nil}, {ListFilter, ListProcessor, nil}, {ListFold, ListProcessor, nil}, {ListFlatMap, ListProcessor, nil}, {ListUnfold, ListProcessor, nil},
+		{FlowFold, FlowProcessor, nil}, {FlowWorklist, FlowProcessor, nil}, {ListMap, ListProcessor, nil}, {ListFilter, ListProcessor, nil}, {ListFold, ListProcessor, nil}, {ListFlatMap, ListProcessor, nil}, {ListUnfold, ListProcessor, nil},
 	} {
 		params := make([]types.Parameter, len(spec.params))
 		for i, p := range spec.params {

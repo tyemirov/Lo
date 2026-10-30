@@ -1,7 +1,7 @@
 # Cleanup Script in Lo
 
 Status: application design source with proposed generic operations.
-The [Lo source](examples/mac-cleanup.lo) describes the full current cleanup workflow.
+The [Lo source](examples/mac-cleanup.lo) describes the cleanup workflow observed on October 28, 2026.
 It is not executable with the current compiler and runtimes.
 This document keeps proposed interfaces outside the implemented language reference.
 
@@ -110,51 +110,102 @@ Negation applies to the Boolean match result.
 The program does not require special negative-mask syntax or a regex engine.
 The exact digit rule in `GatewayName` uses ordinary scalar predicates after filename selection.
 
-## Proposed Generic Control Operations
+## Control Composition
 
-### Conditional Evaluation
+### Selected Effects
 
-`Flow.select(selector, key, expression, ..., otherwise: expression)` is a proposed lazy expression processor.
-Its spelling uses the current call grammar.
-It requires compiler and runtime support for selected evaluation regions.
-It is not an ordinary eager function call.
+The application uses the implemented `Match.new`, `List.filter`, and `Flow.fold` operations for conditional activation.
+`Match.new` evaluates only its selected branch.
+Its selector and branches can read host state, but they cannot activate commits.
+A bound result can supply the selector after an earlier flow completes its commits.
+A direct committing call in the selector remains invalid.
 
-- Evaluate the selector once.
-- Require pure total case keys with the selector's comparison type.
-- Validate every branch and its result type before execution.
-- Evaluate exactly one matching expression, or the `otherwise` expression.
-- Permit reads and commits in the selected expression under the caller's effect contract.
-- Preserve ordinary error propagation, evaluation order, and resource charges.
+Each selection first binds its selector once.
+A Match expression then produces one integer branch identifier.
+Each branch filters a list with one item for its own identifier and passes the result to `Flow.fold`.
+The matching callback runs once.
+Other callbacks receive empty input lists and do not run.
+Successive folds carry the selected result through a valid accumulator.
 
-The current `Match.new` contract continues to reject branches that transitively commit.
-The source uses `Flow.select` for those branches.
-Pure branches continue to use `Match.new`.
-This proposal does not add anonymous functions or change the implemented Match contract.
+All callback context arguments are previously bound values.
+Branch-specific lookups, fallible projections, host observations, and commits stay inside the callback.
+This placement matters because an empty fold still evaluates its argument expressions.
+For example, an unselected branch must not project a failed `captured.result` or index an empty executable list.
+The callbacks keep the original command order and application decisions.
 
-### Recoverable Results
+The source now has 100 named branch callbacks for its 47 selections.
+These callbacks use the existing language contract.
+This revision removes the proposed `Flow.select` operation from the application.
+The additional folds, lists, and callbacks have their normal logical charges and diagnostic frames.
+The revision does not claim the cost or trace shape of a proposed processor.
 
-`Flow.capture(context..., NamedFlow)` returns `Record{result: T!, errors: List<Error>}` for a flow with output `T!`.
-It invokes the named flow once.
-Success stores its result and an empty error list.
-A recoverable error occupies both the fallible result and the single-element error list.
-Cancellation, host faults, and budget failures remain terminal.
-The application reads `errors` before it projects a failed `result`.
+### Recoverable Category Results
 
-### Bounded Worklists
+The application uses concrete self-handling flows for recoverable category results.
+For example, `TryPerform` has the output type `Record{result: Int!, errors: List<Error>}`.
+It calls `Perform` once.
+Success stores the result and an empty error list.
+Its pure total `CapturedPerformError` handler stores the received error in both the fallible field and a singleton error list.
 
-`Flow.worklist(items, state, context..., Step)` invokes a named step sequentially without a flow-call cycle.
-The step returns `Record{state: S, items: List<T>, stop: Bool}!`.
-The processor infers concrete item, state, and context types from that signature.
-New items go before pending items in their supplied order.
-This gives the application its sorted depth-first visit order.
-A true `stop` ends traversal and returns the last state.
-Recoverable step errors propagate unless the application captures them.
+The caller retains its context, task label, and accumulator.
+It examines `errors` before a selected callback projects `result`.
+The handler needs only its declared Error argument.
+This pattern uses the existing flow-level `onError` contract and replaces all nine proposed `Flow.capture` calls.
+Cancellation, host failures, and budget failures remain terminal under the implemented error contract.
 
-The processor bounds pending items, callback work, and live value weight.
-Retained handles remain subject to explicit resource limits and session cleanup.
-The proposal does not remove existing directory or value limits.
+The [executable control example](examples/cleanup-control-flow.lo) demonstrates selection, ordered commits, category recovery, and continuation.
+It also demonstrates that a capability denial remains terminal.
+The example uses only implemented operations and writes only its explicitly authorized fixture file.
+The full cleanup source still uses the other proposals in this document.
+
+### Run the Control Example
+
+From the primary Lo checkout, run these commands.
+The commands create a fresh fixture directory inside Lo.
+
+```bash
+make build
+cleanup_control_repo="$PWD"
+cleanup_control_work="$(mktemp -d "$PWD/_scratch/cleanup-control-example.XXXXXX")"
+bin/lo check docs/examples/cleanup-control-flow.lo --format json
+(
+  cd "$cleanup_control_work"
+  "$cleanup_control_repo/bin/lo" run "$cleanup_control_repo/docs/examples/cleanup-control-flow.lo" --format json
+  "$cleanup_control_repo/bin/lo" run "$cleanup_control_repo/docs/examples/cleanup-control-flow.lo" --write-root "$cleanup_control_work" --format json -- --apply
+)
+cat "$cleanup_control_work/cleanup-control-events.log"
+```
+
+Preview returns `selected_count: 0` and leaves the fixture file absent.
+Apply returns `selected_count: 3`, `completed: 12`, and failure labels `earlier` and `broken`.
+The event file contains `first-1`, `first-2`, `broken-before-error`, `second-1`, and `second-2` in that order.
+The failed category keeps its confirmed append and permits the second category to run.
+These fixture actions do not execute installed cleaners.
+
+## Dynamic Traversal
+
+`Flow.worklist(items, state, context..., Step)` now supplies dynamic sequential traversal.
+The [language contract](../specification.md#89-dynamic-worklists-and-host-resource-quotas) defines its callback signature, visit order, failure progress, and resource quotas.
+New items precede pending items in their supplied order.
+The cleanup application can retain its sorted depth-first visit order.
+A true `stop` discards pending work and returns the completed state.
+
+The queue has no fixed item-count maximum.
+Host resource quotas bound retained value weight and simultaneous directory observations.
+Completed helpers release unreferenced observations before later visits.
+A long scan can exceed 128 total directory observations while retaining fewer than 128 at once.
+The host can change that live-observation quota.
+Value-byte and live-value quotas default to 16 MiB and 64 MiB.
+Cumulative data has no default quota.
+
+Steps and cancellation still stop excessive work.
+
+This processor preserves existing authority boundaries.
+A parent directory grant does not authorize an unopened child.
+The proposed descendant operations below still need their own authority and ownership contracts.
 The application opens a child only when its work item is visited.
-Ordinary failures retain partial counters and stop later file work before the final report.
+Retained state and pending items keep the resources they require.
+Snapshots keep public data without executable authority.
 
 ## Proposed Generic File Operations
 
@@ -224,7 +275,7 @@ The cleanup lock remains held until program cleanup completes, including failure
 Child timeouts are 1800 seconds for cleaners, 60 for pip discovery, 30 for probes, and 180 for inventory.
 
 A command deadline produces recoverable `Process.Timeout` only after owned-process cleanup finishes.
-`Flow.capture` can then record the failed task and continue.
+A self-handling flow can then return error data for category reports and continuation.
 Caller cancellation, session cancellation, budget failures, and uncertain process ownership remain terminal.
 A timeout does not undo confirmed filesystem or daemon effects.
 This proposed command deadline is distinct from the current terminal host lifetime limit.
@@ -236,19 +287,30 @@ Runnable acceptance still requires supported execution profiles and repository-c
 
 ## Validation Status
 
-On October 28, 2026, the parser accepted all 182 application flows.
-The source has 47 `Flow.select` calls and one `Flow.worklist` call.
+On October 29, 2026, the public parser accepted all 301 application flows after the control revision.
+The source has no `Flow.select` or `Flow.capture` calls and retains one `Flow.worklist` call.
+The audit compared all 100 branch bodies with the previous source AST.
+It verified unchanged selection heads, one selector evaluation, callback contexts, branch order, and accumulator chains.
 Static review found no flow-call cycles or commit-bearing Match expressions.
-The API inventory identifies all 68 proposed operation names used by the source.
-Independent reviews found no unresolved source design findings after correction.
+The earlier catalog comparison identified 66 proposed operation names after the control revision.
+The current catalog implements `Flow.worklist`, which leaves 65 proposed names.
+This list records draft dependencies and does not establish a minimal language backlog.
 
-The current parser accepts the full application source.
-Static review checks application flow names, call cycles, command order, and the selected file policies.
-Independent review compares the Lo source with the installed tool source.
-No check executes cleanup, reads real cache contents, or changes an installed script.
+The full application still fails type checking at the proposed `Program.Exit` type.
+Parser acceptance and structural review do not establish type correctness or runtime parity for the full application.
+The compiler and runtimes must implement or remove the other selected proposals before executable acceptance.
 
-Syntax acceptance does not prove type correctness for proposed operations.
-It does not prove runtime parity.
-The compiler and both runtimes must implement each selected proposal before executable acceptance.
-Future public fixtures must cover preview, report, malformed output, contention, cancellation, partial progress, and final status.
+The public control example passed `parse`, `check`, and interpreter execution.
+Fresh Darwin artifacts passed native checks.
+Fresh Linux artifacts passed the same checks under QEMU.
+Preview selected no actions, required no write grant, and created no fixture file.
+Apply preserved ordered effects before and after a recoverable category failure.
+It retained existing counters, failure labels, and state.
+Missing write authority remained terminal, and invalid arguments failed explicitly.
+A separate exact outcome probe verified nested fallible result storage and lazy result projection in all three runtimes.
+
+The [evidence record](evidence/cleanup-control-composition.json) contains source hashes, structural results, public commands, raw output, and native identities.
+These checks use fixtures inside Lo and do not execute the full cleanup program or installed cleaners.
+They do not establish large-tree capacity or complete cleanup parity.
+Future application fixtures must cover preview, report, malformed output, contention, cancellation, partial progress, and final status.
 All fixture paths and process state must remain inside Lo.

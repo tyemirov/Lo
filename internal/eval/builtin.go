@@ -249,6 +249,8 @@ func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int
 		return m.listProcessor(call, args, flows[len(args)-1], f)
 	case catalog.ListFold, catalog.FlowFold:
 		return m.listProcessor(call, args, flows[len(args)-1], f)
+	case catalog.FlowWorklist:
+		return m.worklistProcessor(call, args, flows[len(args)-1], f)
 	case catalog.ListFlatMap:
 		return m.listProcessor(call, args, flows[len(args)-1], f)
 	case catalog.ListUnfold:

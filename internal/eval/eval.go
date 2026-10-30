@@ -18,7 +18,20 @@ import (
 
 type machine struct {
 	execution.Session
-	flows map[identity.FlowID]ir.Flow
+	flows  map[identity.FlowID]*compiledFlow
+	frames map[identity.FlowID]*flowFrame
+}
+type compiledFlow struct {
+	name       string
+	parameters []ir.Parameter
+	body       []ir.Statement
+	handler    identity.FlowID
+	output     types.Type
+	bindings   int
+}
+type flowFrame struct {
+	bindings map[ir.BindingID]value.Value
+	inUse    bool
 }
 type frame struct {
 	name     string
@@ -29,21 +42,35 @@ func Program(p ir.Program) (execution.Program, error) {
 	if p == nil {
 		return nil, fmt.Errorf("execution requires a checked program")
 	}
-	flows := map[identity.FlowID]ir.Flow{}
-	for _, f := range p.Flows() {
-		flows[f.ID()] = f
+	checkedFlows := p.Flows()
+	flows := make(map[identity.FlowID]*compiledFlow, len(checkedFlows))
+	for _, f := range checkedFlows {
+		parameters, body := f.Parameters(), f.Body()
+		bindings := len(parameters)
+		for _, statement := range body {
+			switch statement := statement.(type) {
+			case ir.Binding:
+				bindings++
+			case ir.Commit:
+				if statement.ID() != "" {
+					bindings++
+				}
+			}
+		}
+		flows[f.ID()] = &compiledFlow{name: f.Name(), parameters: parameters, body: body, handler: f.Handler(), output: f.Signature().Output(), bindings: bindings}
 	}
 	handlers := make([]execution.Handler, 0, len(flows))
-	for _, f := range p.Flows() {
+	for _, f := range checkedFlows {
 		id := f.ID()
 		handlers = append(handlers, execution.Handler{ID: id, Name: f.Name(), Parameters: f.Signature().Parameters(), Span: f.Span(), Call: func(s execution.Session, args []value.Value, span source.Span) (value.Value, error) {
 			m := &machine{Session: s, flows: flows}
 			return m.invoke(id, args, span)
 		}})
 	}
+	body := p.Body()
 	return execution.NewProgram(func(s execution.Session) (value.Value, error) {
 		m := &machine{Session: s, flows: flows}
-		return m.body(p.Body(), frame{bindings: map[ir.BindingID]value.Value{}})
+		return m.body(body, frame{bindings: map[ir.BindingID]value.Value{}})
 	}, handlers)
 }
 func Run(ctx context.Context, p ir.Program, boundary execution.Boundary, budget execution.Budget, config device.Config) (value.Value, error) {
@@ -182,8 +209,9 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 			return must(value.Success(x.Type().(types.Fallible), value.RecordView(result.(value.Record)))), nil
 		case ir.ScalarListView:
 			items := []value.Value{}
+			limit := m.Limits().ListItems
 			for _, r := range v.(value.Text).Text() {
-				if len(items) == execution.MaxItems {
+				if limit != 0 && uint64(len(items)) >= limit {
 					return nil, execution.Limit("list elements")
 				}
 				items = append(items, must(value.NewText(types.Scalar(), string(r))))
@@ -193,8 +221,9 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 			panic("unknown checked conversion")
 		}
 	case ir.FlowCall:
-		args := make([]value.Value, len(x.Arguments()))
-		for _, a := range x.Arguments() {
+		arguments := x.Arguments()
+		args := make([]value.Value, len(arguments))
+		for _, a := range arguments {
 			v, err := m.expression(a.Value(), f)
 			if err != nil {
 				return nil, err
@@ -203,9 +232,10 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 		}
 		return m.invoke(x.Flow(), args, x.Span())
 	case ir.BuiltinCall:
-		args := make([]value.Value, len(x.Arguments()))
-		flows := map[int]identity.FlowID{}
-		for _, a := range x.Arguments() {
+		arguments := x.Arguments()
+		args := make([]value.Value, len(arguments))
+		var flows map[int]identity.FlowID
+		for _, a := range arguments {
 			switch a := a.(type) {
 			case ir.ValueArgument:
 				v, err := m.expression(a.Value(), f)
@@ -214,6 +244,9 @@ func (m *machine) evaluate(expr ir.Expression, f frame) (value.Value, error) {
 				}
 				args[a.Position()] = v
 			case ir.FlowArgument:
+				if flows == nil {
+					flows = map[int]identity.FlowID{}
+				}
 				flows[a.Position()] = a.Flow()
 			default:
 				panic("unknown checked argument")
@@ -267,13 +300,7 @@ func (m *machine) invoke(id identity.FlowID, args []value.Value, span source.Spa
 	if f == nil {
 		panic("absent checked flow")
 	}
-	bindings := map[ir.BindingID]value.Value{}
-	fields := make([]value.Field, len(args))
-	for i, p := range f.Parameters() {
-		bindings[p.ID] = args[i]
-		fields[i] = value.Field{Name: p.Name, Value: args[i]}
-	}
-	result, err := m.body(f.Body(), frame{f.Name(), bindings})
+	result, err := m.flowBody(id, f, args)
 	var cause value.Error
 	if err != nil {
 		if e, ok := err.(execution.Failure); ok {
@@ -285,19 +312,49 @@ func (m *machine) invoke(id identity.FlowID, args []value.Value, span source.Spa
 	if v, ok := result.(value.Fallible); ok {
 		_, cause = v.Outcome()
 	}
+	if cause != nil {
+		fields := make([]value.Field, len(args))
+		for i, parameter := range f.parameters {
+			fields[i] = value.Field{Name: parameter.Name, Value: args[i]}
+		}
+		cause = value.WithFrame(cause, f.name, cause.Operation(), must(value.NewRecord(fields)))
+	}
+	if err := m.CheckCleanup(cause); err != nil {
+		return nil, err
+	}
 	if cause == nil {
 		return result, nil
 	}
-	cause = value.WithFrame(cause, f.Name(), cause.Operation(), must(value.NewRecord(fields)))
-	if f.Handler() != "" {
-		return m.invoke(f.Handler(), []value.Value{cause}, span)
+	if f.handler != "" {
+		return m.invoke(f.handler, []value.Value{cause}, span)
 	}
-	out, ok := f.Signature().Output().(types.Fallible)
+	out, ok := f.output.(types.Fallible)
 	if !ok {
 		panic("unhandled failure in checked total flow")
 	}
-	cause = value.At(cause, f.Name(), span)
+	cause = value.At(cause, f.name, span)
 	return must(value.Failure(out, cause)), nil
+}
+func (m *machine) flowBody(id identity.FlowID, flow *compiledFlow, args []value.Value) (value.Value, error) {
+	cached := m.frames[id]
+	if cached == nil {
+		cached = &flowFrame{bindings: make(map[ir.BindingID]value.Value, flow.bindings)}
+		if m.frames == nil {
+			m.frames = map[identity.FlowID]*flowFrame{}
+		}
+		m.frames[id] = cached
+	} else if cached.inUse {
+		cached = &flowFrame{bindings: make(map[ir.BindingID]value.Value, flow.bindings)}
+	}
+	cached.inUse = true
+	defer func() {
+		clear(cached.bindings)
+		cached.inUse = false
+	}()
+	for index, parameter := range flow.parameters {
+		cached.bindings[parameter.ID] = args[index]
+	}
+	return m.body(flow.body, frame{name: flow.name, bindings: cached.bindings})
 }
 func must[T any](v T, err error) T {
 	if err != nil {

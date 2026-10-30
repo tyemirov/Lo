@@ -88,8 +88,8 @@ The application design identifies each proposed operation outside the implemente
 Further work follows this sequence:
 
 1. Review the proposed generic operations against other application uses.
-2. Select small contracts for globs, collections, text, and structured parsing.
-3. Specify generic selected effects, recoverable results, and bounded worklists.
+2. Reuse current Match, self-handling flows, and sequential folds for branch effects and category recovery.
+3. Select small contracts for value helpers and descendant resource lifetime.
 4. Specify retained descendant observations, metadata additions, and descriptor-safe tree removal with explicit grants and resource limits.
 5. Specify program identity, locks, console output, process output and timeouts, and terminal results.
 6. Add public fixture failures before implementation of each selected contract.
@@ -98,7 +98,14 @@ Further work follows this sequence:
 
 Do not add a language operation for a named application or workflow step.
 Keep the implemented Match effect rules and flow-cycle rules unchanged unless a separate language contract explicitly changes them.
-The source proposes generic `Flow.select` and `Flow.worklist` operations with the current call grammar.
+The source now uses current `Match.new`, `onError`, and `Flow.fold` contracts for its conditional effects and recovery.
+All 47 selections and nine captures now use named application flows.
+The [control example](examples/cleanup-control-flow.lo) passes interpreter and native software checks.
+`Flow.worklist` now supplies dynamic traversal with host resource quotas and resource release when scopes close.
+The [resource contract](../specification.md#89-dynamic-worklists-and-host-resource-quotas) separates cumulative work from retained values and observations.
+Proposed descendant operations still need explicit authority contracts.
+The other proposed APIs still prevent execution of the full source.
+The [control evidence](evidence/cleanup-control-composition.json) records the validation scope.
 
 ## Acceptance Boundary
 

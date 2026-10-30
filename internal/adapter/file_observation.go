@@ -18,7 +18,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-func (f *files) observeDirectory(session execution.Session, root *os.Root, directory value.FileDirectory, priorWeight uint64) (value.FileDirectoryObservation, error) {
+func (f *files) observeDirectory(session execution.Session, root *os.Root, directory value.FileDirectory, lease value.FileLease, priorWeight uint64) (value.FileDirectoryObservation, error) {
 	if err := session.ReserveFile(1, priorWeight); err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (f *files) observeDirectory(session execution.Session, root *os.Root, direc
 	if err := session.ReserveFile(0, priorWeight+weight); err != nil {
 		return nil, err
 	}
-	observation := value.FileObservation{Session: session.FileSession(), Directory: directory, Identity: directory.Identity}
+	observation := value.FileObservation{Session: session.FileSession(), Lease: lease, Directory: directory, Identity: directory.Identity}
 	return value.NewFileDirectoryObservation(observation, path, owner, accessed, modified, changed)
 }
 
@@ -63,16 +63,16 @@ func (f *files) Directory(ctx context.Context, path value.Text) (result value.Va
 	if err != nil {
 		return nil, err
 	}
-	root, fresh, err := f.directory(session, selected, directory)
+	root, lease, fresh, err := f.directory(session, selected, directory)
 	if err != nil {
 		return nil, observationFailure(catalog.FileDirectory, catalog.DirectoryFailed, path.Text(), err)
 	}
 	defer func() {
 		if resultErr != nil && fresh {
-			resultErr = execution.PreserveCleanup(resultErr, f.discardDirectory(session, directory))
+			resultErr = execution.PreserveCleanup(resultErr, f.releaseDirectory(session.FileSession(), directory, lease))
 		}
 	}()
-	observation, err := f.observeDirectory(session, root, directory, 16)
+	observation, err := f.observeDirectory(session, root, directory, lease, 16)
 	if err != nil {
 		return nil, observationFailure(catalog.FileDirectory, catalog.DirectoryFailed, path.Text(), err)
 	}
@@ -104,16 +104,16 @@ func (f *files) Scan(ctx context.Context, path value.Text) (result value.Value, 
 	if err != nil {
 		return nil, err
 	}
-	root, fresh, err := f.directory(session, selected, directory)
+	root, lease, fresh, err := f.directory(session, selected, directory)
 	if err != nil {
 		return nil, observationFailure(catalog.FileScan, catalog.ListFailed, path.Text(), err)
 	}
 	defer func() {
 		if resultErr != nil && fresh {
-			resultErr = execution.PreserveCleanup(resultErr, f.discardDirectory(session, directory))
+			resultErr = execution.PreserveCleanup(resultErr, f.releaseDirectory(session.FileSession(), directory, lease))
 		}
 	}()
-	directoryValue, err := f.observeDirectory(session, root, directory, 128)
+	directoryValue, err := f.observeDirectory(session, root, directory, lease, 128)
 	if err != nil {
 		return nil, observationFailure(catalog.FileScan, catalog.ListFailed, path.Text(), err)
 	}
@@ -141,7 +141,7 @@ func (f *files) Scan(ctx context.Context, path value.Text) (result value.Value, 
 			return nil, observationFailure(catalog.FileScan, catalog.ListFailed, path.Text(), readErr)
 		}
 		for _, child := range children {
-			if len(names) == execution.MaxFileEntries {
+			if limit := session.Limits().FileEntries; limit != 0 && uint64(len(names)) >= limit {
 				return nil, execution.Limit("directory entries")
 			}
 			if err := session.ReserveFile(1, weight); err != nil {
@@ -171,7 +171,7 @@ func (f *files) Scan(ctx context.Context, path value.Text) (result value.Value, 
 			if err != nil {
 				return nil, observationFailure(catalog.FileScan, catalog.ListFailed, filepath.Join(directory.Path, name), err)
 			}
-			entry, err := observeEntry(session, directory, name, info, weight)
+			entry, err := observeEntry(session, directory, lease, name, info, weight)
 			if err != nil {
 				return nil, observationFailure(catalog.FileScan, catalog.ListFailed, filepath.Join(directory.Path, name), err)
 			}

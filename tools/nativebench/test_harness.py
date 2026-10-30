@@ -13,6 +13,7 @@ FAKE_ABI = r'''
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
+typedef struct { U64 steps,value_bytes,live_bytes,data_bytes,list_items,file_entries,file_directories; } ContextOptions;
 typedef struct Program { int live; } Program;
 typedef struct Context { int live; } Context;
 typedef struct Value { int live; } Value;
@@ -37,8 +38,8 @@ void lo_program_free(const Program *value) {
  if(value!=&program || !program.live || phase) violation=2;
  program.live=0;
 }
-Context *lo_context_from_program(const Program *value,U64 steps) {
- if(value!=&program || !program.live || steps!=10000000 || phase) violation=3;
+Context *lo_context_from_program(const Program *value,const ContextOptions *options) {
+ if(value!=&program || !program.live || !options || options->steps!=10000000 || options->value_bytes!=(16ULL<<20) || options->live_bytes!=(64ULL<<20) || options->data_bytes || options->list_items || options->file_entries || options->file_directories!=128 || phase) violation=3;
  context.live=1; phase=1; ++created; return &context;
 }
 void lo_context_run(Context *value,ResultSlot *out) {

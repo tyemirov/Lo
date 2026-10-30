@@ -71,7 +71,7 @@ var sink value.Value
 func BenchmarkExecution(b *testing.B){
  file,err:=source.New(%q,%q);if err!=nil{b.Fatal(err)};p,d:=compiler.Check(file);if d!=nil{b.Fatal(d)}
  interpreted,err:=eval.Program(p);if err!=nil{b.Fatal(err)}
- budget,err:=execution.NewBudget(10000000);if err!=nil{b.Fatal(err)}
+ policy:=execution.DefaultBudgetInput();policy.Steps=10000000;budget,err:=execution.NewBudget(policy);if err!=nil{b.Fatal(err)}
  reference,err:=interpreted.Run(context.Background(),boundary{},budget,device.DefaultConfig());if err!=nil{b.Fatal(err)}
  expected:=value.TextResult(reference);if independent:=%q;independent!=""&&expected!=independent{b.Fatalf("reference %%s want %%s",expected,independent)}
  b.ReportAllocs();b.ResetTimer();for b.Loop(){v,err:=interpreted.Run(context.Background(),boundary{},budget,device.DefaultConfig());if err!=nil{b.Fatal(err)};sink=v}

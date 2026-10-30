@@ -76,7 +76,17 @@ func (f *scheduledFileIO) CloseDirectory(root *os.Root) error {
 
 func injectedFileProgram(t *testing.T, ctx context.Context, root, text string, filesystem adapter.FileIO) (value.Value, error, result) {
 	t.Helper()
-	files, err := adapter.OpenFiles(adapter.FileRoots{List: []string{root}, Remove: []string{root}, OpenFiles: []string{root}}, filesystem)
+	return injectedFileProgramWithBudget(t, ctx, root, text, filesystem, execution.DefaultBudget())
+}
+
+func injectedFileProgramWithBudget(t *testing.T, ctx context.Context, root, text string, filesystem adapter.FileIO, budget execution.Budget) (value.Value, error, result) {
+	t.Helper()
+	return injectedFileProgramWithRoots(t, ctx, adapter.FileRoots{List: []string{root}, Remove: []string{root}, OpenFiles: []string{root}}, text, filesystem, budget)
+}
+
+func injectedFileProgramWithRoots(t *testing.T, ctx context.Context, roots adapter.FileRoots, text string, filesystem adapter.FileIO, budget execution.Budget) (value.Value, error, result) {
+	t.Helper()
+	files, err := adapter.OpenFiles(roots, filesystem)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +98,7 @@ func injectedFileProgram(t *testing.T, ctx context.Context, root, text string, f
 	if diagnostic != nil {
 		t.Fatal(diagnostic)
 	}
-	output, err := eval.Run(ctx, checked, files, execution.DefaultBudget(), device.DefaultConfig())
+	output, err := eval.Run(ctx, checked, files, budget, device.DefaultConfig())
 	err = execution.PreserveCleanup(err, files.Close())
 	var stderr bytes.Buffer
 	status := 0
@@ -147,7 +157,7 @@ func progressFields(t *testing.T, got result, completed, total int, stage, kind 
 }
 
 func TestFileRemovalFailures(t *testing.T) {
-	for _, scenario := range []string{"preflight-change", "per-entry-change", "remove-failure", "cancel-after-remove", "cleanup-failure", "failure-and-cleanup"} {
+	for _, scenario := range []string{"preflight-change", "per-entry-change", "remove-failure", "cancel-after-remove", "cleanup-failure", "failure-and-cleanup", "failure-and-cleanup-handler"} {
 		t.Run(scenario, func(t *testing.T) {
 			root := fileFixtureRoot(t)
 			for _, name := range []string{"a", "b", "c", "d"} {
@@ -176,7 +186,7 @@ func TestFileRemovalFailures(t *testing.T) {
 					}
 					return boundary.Lstat(name)
 				}
-			case "remove-failure", "failure-and-cleanup":
+			case "remove-failure", "failure-and-cleanup", "failure-and-cleanup-handler":
 				completed, attempts, stage, kind = 2, 3, "remove", "File.RemoveFailed"
 				filesystem.remove = func(boundary *os.Root, name string, count int) error {
 					if count == 3 {
@@ -202,6 +212,9 @@ func TestFileRemovalFailures(t *testing.T) {
 				}
 			}
 			program := fmt.Sprintf(`flow Clean() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return 7 }; return Clean()`, root)
+			if scenario == "failure-and-cleanup-handler" {
+				program = fmt.Sprintf(`flow Failed(error: Error) -> Int { return 0 }; flow Clean() -> Int onError Failed { entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return 7 }; return Clean()`, root)
+			}
 			_, err, got := injectedFileProgram(t, ctx, root, program, filesystem)
 			if err == nil {
 				t.Fatal("expected failure")
@@ -284,6 +297,7 @@ func TestFileDiscoveryFailures(t *testing.T) {
 			root := fileFixtureRoot(t)
 			filesystem := &scheduledFileIO{FileIO: adapter.NativeFileIO()}
 			want := "File.ListFailed"
+			policy := execution.DefaultBudgetInput()
 			switch scenario {
 			case "invalid-name":
 				fileFixture(t, root, "a", "bad")
@@ -296,6 +310,7 @@ func TestFileDiscoveryFailures(t *testing.T) {
 				}
 				want = "File.InvalidName"
 			case "entry-limit":
+				policy.Limits.FileEntries = 10_000
 				want = "runtime.limit"
 				for index := 0; index < 10001; index++ {
 					fileFixture(t, root, fmt.Sprintf("entry-%05d", index), "")
@@ -310,7 +325,11 @@ func TestFileDiscoveryFailures(t *testing.T) {
 				}
 			}
 			program := fmt.Sprintf(`return File.list(File.Path.new(%q))`, root)
-			_, err, got := injectedFileProgram(t, context.Background(), root, program, filesystem)
+			budget, err := execution.NewBudget(policy)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err, got := injectedFileProgramWithBudget(t, context.Background(), root, program, filesystem, budget)
 			if err == nil || !strings.Contains(got.stderr, want) || got.stdout != "" {
 				t.Fatalf("discovery failure %q: %+v", want, got)
 			}

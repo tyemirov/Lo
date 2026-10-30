@@ -513,7 +513,7 @@ func TestNativeProcessStartupReviewedLane(t *testing.T) {
 				select {
 				case raw := <-failures:
 					var failure adapter.ProcessFailure
-					if !errors.As(raw, &failure) || failure.ProcessProgress().Field("cleanup_complete") != value.Bool(true) || failure.ProcessProgress().Field("start_confirmed") != value.Bool(true) {
+					if !errors.As(raw, &failure) || !failure.ProcessProgress().Field("cleanup_complete").(value.Boolean).Bool() || !failure.ProcessProgress().Field("start_confirmed").(value.Boolean).Bool() {
 						t.Fatalf("negative native case lost confirmed cleanup: %v", raw)
 					}
 				default:

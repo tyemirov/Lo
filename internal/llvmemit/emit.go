@@ -649,7 +649,7 @@ func newDebug(module nativeplan.Module) *debugInfo {
 	path := module.SourcePath
 	name, dir := filepath.Base(path), filepath.Dir(path)
 	d.files[path] = 1
-	d.lines[0] = "distinct !DICompileUnit(language: DW_LANG_C, file: !1, producer: \"Lo lo-native-2\", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug)"
+	d.lines[0] = "distinct !DICompileUnit(language: DW_LANG_C, file: !1, producer: \"Lo lo-native-3\", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug)"
 	d.lines[1] = fmt.Sprintf("!DIFile(filename: %s, directory: %s)", quoted(name), quoted(dir))
 	d.lines[2] = "!{i32 2, !\"Dwarf Version\", i32 4}"
 	d.lines[3] = "!{i32 2, !\"Debug Info Version\", i32 3}"

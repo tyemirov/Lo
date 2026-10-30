@@ -135,7 +135,7 @@ func TestCheckpointEncodingLimit(t *testing.T) {
  return Checkpoint.encode(parameters)
  };return Main()`
 	got, receipts := runWithDevices(t, context.Background(), text, device.SoftwareFactory{}, "--max-steps", "10000000")
-	if got.status != 2 || got.stdout != "" || !strings.Contains(got.stderr, "runtime.limit") || !strings.Contains(got.stderr, "expanded tensor result bytes") {
+	if got.status != 2 || got.stdout != "" || !strings.Contains(got.stderr, "runtime.limit") || !strings.Contains(got.stderr, "expanded value bytes") {
 		t.Fatalf("checkpoint byte limit: %+v", got)
 	}
 	assertReleased(t, receipts)

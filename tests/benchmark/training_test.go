@@ -52,7 +52,9 @@ func BenchmarkTraining(b *testing.B) {
 		if d != nil {
 			b.Fatal(d)
 		}
-		budget, err := execution.NewBudget(10_000_000)
+		budgetInput := execution.DefaultBudgetInput()
+		budgetInput.Steps = 10_000_000
+		budget, err := execution.NewBudget(budgetInput)
 		if err != nil {
 			b.Fatal(err)
 		}

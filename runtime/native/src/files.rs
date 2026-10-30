@@ -16,6 +16,8 @@ use std::{
 
 #[path = "file_entries.rs"]
 mod entries;
+#[path = "file_leases.rs"]
+mod leases;
 #[path = "file_observer.rs"]
 mod observer;
 #[path = "file_probe.rs"]
@@ -33,8 +35,6 @@ pub const SUPPORTED: &[&str] = &[
     "File.Remove.new",
     "File.Remove.checked",
 ];
-const MAX_FILE_ENTRIES: usize = 10_000;
-const MAX_FILE_DIRECTORIES: usize = 128;
 static SESSION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 pub fn admit(site: &Site) -> Result<(), String> {
     let args: Vec<_> = site
@@ -193,6 +193,12 @@ pub struct Files {
     removes: Vec<Grant>,
     open_files: Vec<Grant>,
     observed: BTreeMap<entries::Directory, File>,
+    observed_leases: BTreeMap<entries::Directory, u64>,
+    observation_directories: BTreeMap<u64, entries::Directory>,
+    next_observation_lease: u64,
+    observation_owners: BTreeMap<u64, usize>,
+    observation_scopes: BTreeMap<usize, leases::ObservationScope>,
+    observation_stack: Vec<usize>,
     session: u64,
     probe: Option<probe::Probe>,
     last_removal: Option<(Handle, Handle)>,
@@ -216,6 +222,14 @@ pub fn empty() -> Files {
         removes: vec![],
         open_files: vec![],
         observed: BTreeMap::new(),
+        observed_leases: BTreeMap::new(),
+        observation_directories: BTreeMap::new(),
+        next_observation_lease: 1,
+        observation_owners: BTreeMap::new(),
+        observation_scopes: [(0, leases::ObservationScope::default())]
+            .into_iter()
+            .collect(),
+        observation_stack: vec![0],
         session: SESSION.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
         probe: None,
         last_removal: None,
@@ -446,6 +460,11 @@ impl Files {
                 ));
             }
         }
+        self.observed_leases.clear();
+        self.observation_directories.clear();
+        self.observation_owners.clear();
+        self.observation_scopes.clear();
+        self.observation_stack.clear();
         if let Some(probe) = self.probe.take() {
             if let Err(error) = probe.close() {
                 errors.push(error)
@@ -594,7 +613,16 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
     let result: Result<(), Fault> = (|| {
         loop {
             context.check_cancel()?;
-            let remaining = (MAX_BYTES + 1 - data.len()).min(buffer.len());
+            let maximum = context.values.limits.value_bytes;
+            let remaining = if maximum == 0 {
+                buffer.len()
+            } else {
+                maximum
+                    .saturating_sub(16)
+                    .saturating_sub(data.len() as u64)
+                    .saturating_add(1)
+                    .min(buffer.len() as u64) as usize
+            };
             let count = match file.read(&mut buffer[..remaining]) {
                 Ok(count) => count,
                 Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
@@ -624,10 +652,13 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
             if count == 0 {
                 break;
             }
+            context.reserve_file(
+                1,
+                (data.len() as u64)
+                    .saturating_add(count as u64)
+                    .saturating_add(16),
+            )?;
             data.extend_from_slice(&buffer[..count]);
-            if data.len() > MAX_BYTES {
-                return Err(limit("file read bytes"));
-            }
         }
         Ok(())
     })();
@@ -721,7 +752,7 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     }
     let progress = context.files.write_progress.borrow_mut().take();
     result.map_err(|fault| {
-        if matches!(fault.primary(), Fault::Recoverable(_)) {
+        if matches!(&fault, Fault::Recoverable(_)) {
             fault
         } else {
             fault.with_details(BoundaryDetails {

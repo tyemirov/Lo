@@ -381,7 +381,7 @@ void lo_program_admit(lo_context *c, const unsigned char *metadata, u64 bytes, c
     int offset = 0;
     if (parse_json(c, &offset, -1) != 0) { terminal(c, out, UNSUPPORTED); return; }
     whitespace(c, &offset);
-    if (offset != c->metadata_bytes || !token_equal(c, field(c, 0, "abi"), "lo-native-2")) { terminal(c, out, UNSUPPORTED); return; }
+    if (offset != c->metadata_bytes || !token_equal(c, field(c, 0, "abi"), "lo-native-3")) { terminal(c, out, UNSUPPORTED); return; }
     c->types = field(c, 0, "types"); c->locations = field(c, 0, "locations"); c->flows = field(c, 0, "flows");
     require(c->types >= 0 && c->locations >= 0 && c->flows >= 0 && (u64)c->tokens[c->flows].children == count);
     int files = field(c,0,"files"), spans = field(c,0,"spans");
