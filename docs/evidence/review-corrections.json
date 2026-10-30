@@ -1,0 +1,248 @@
+{
+  "scope": "Go allocation traversal pruning and independent native probe stream limits",
+  "status": "passed",
+  "current_source_sha256": {
+    "internal/value/resources.go": "40714882563952bde472526f75e3e6707e1cae52f6140dbc4d1d443e56ae2b95",
+    "internal/value/resources_test.go": "3af489a5fd7bcdedf7c996f60e0ad3b53fb198d578721c87b8d93652b818e2e8",
+    "runtime/native/src/file_probe.rs": "e0c8d03655b0aca3358d9f70667784726f9f80a0ebbce4fd323c78fb1440fe2c",
+    "testdata/native-runtime/files-probe-output.c": "73201c377f4e4dde393838b8b1e848e02cee53e3e29f5507ae05bca63a4596f8",
+    "tests/integration/llvm_file_probe_output_test.go": "25bbd183e8b2bc7e559eaa551f56f4ec6689949852d9d7a79b428fb68fc99b95",
+    "tests/integration/scalar_resource_allocation_test.go": "5775dc2e82570dec313f8762f24af7d81e8fa6e01111f75623c567d8a3650dd9"
+  },
+  "runtime_source_sha256": "40ee1ed1f03e7a271abcb972ac89579d1a405c56974a26162f2e0b9a8128eae2",
+  "runtime_archives": {
+    "darwin/arm64": {
+      "path": "_scratch/review-corrections-X4A7/native/preparation/distribution/runtime/aarch64-apple-darwin/liblo_runtime.a",
+      "sha256": "ee59fa99c71422355c6055d194acdb2548a4ee884419fb24dc92a5a2854cac5f"
+    },
+    "linux/arm64": {
+      "path": "_scratch/review-corrections-X4A7/native/preparation/distribution/runtime/aarch64-unknown-linux-gnu/liblo_runtime.a",
+      "sha256": "81799d5302add589e0094ecd7e092275569c3a0fced3edbdf653f7a44101b7da"
+    }
+  },
+  "actual_ci_exit_status": 0,
+  "ci_command": [
+    "make",
+    "ci",
+    "NATIVE_RUNTIME_STATE=_scratch/review-corrections-X4A7/native/preparation",
+    "LLVM_TOOLCHAIN=_scratch/review-corrections-X4A7/native/preparation/distribution/toolchain.json",
+    "TEST_ARGS=-count=1 -v"
+  ],
+  "tdd": {
+    "checks": [
+      {
+        "stage": "red",
+        "log": "scalar-resource-red.log",
+        "raw_exit_status": 2,
+        "expected_failure": true,
+        "provenance": "exec write_stdin session63110, chunk7bef23, returnedexit_code2",
+        "log_sha256": "ec47829d481cd932463544d355ce2e618e80d6d21c6032f4f2798fb01269afa2"
+      },
+      {
+        "stage": "green",
+        "log": "go-focused-final.log",
+        "raw_exit_status": 0,
+        "provenance": "exec write_stdin session22425, chunk1cec26, returnedexit_code0",
+        "log_sha256": "174c6b85baa0f09c92730814792e0345013daad3947176c0f1514651c7db499e"
+      },
+      {
+        "stage": "green",
+        "log": "private-resource-green.log",
+        "raw_exit_status": 0,
+        "provenance": "exec_command make test returnedexit_code0, chunk0ff212",
+        "log_sha256": "5942514f4867ed1c28620291c062ea84f3b262bab4fc83e25b6a099c0952fb4f"
+      },
+      {
+        "stage": "red",
+        "log": "native/probe-transport-red-final-harness.log",
+        "raw_exit_status": 2,
+        "expected_failure": true,
+        "command": [
+          "make",
+          "test-native",
+          "PROCESS_LAUNCHER=",
+          "NATIVE_RUNTIME_STATE=_scratch/review-corrections-X4A7/native/preparation",
+          "LLVM_TOOLCHAIN=_scratch/review-corrections-X4A7/native/before-distribution/toolchain.json",
+          "TEST_ARGS=-run 'TestLLVM.*FileProbeOutputTransportLimit' -count=1 -v"
+        ],
+        "provenance": "native/probe-transport-red-final-harness-status.json",
+        "log_sha256": "ab2a9a959dacc6f78498268fbbd5f591cb1359a429af43fb92956e227b81d52a"
+      },
+      {
+        "stage": "green",
+        "log": "native/probe-transport-green-final-harness.log",
+        "raw_exit_status": 0,
+        "expected_failure": false,
+        "command": [
+          "make",
+          "test-native",
+          "PROCESS_LAUNCHER=",
+          "NATIVE_RUNTIME_STATE=_scratch/review-corrections-X4A7/native/preparation",
+          "LLVM_TOOLCHAIN=_scratch/review-corrections-X4A7/native/preparation/distribution/toolchain.json",
+          "TEST_ARGS=-run 'TestLLVM.*FileProbeOutputTransportLimit' -count=1 -v"
+        ],
+        "provenance": "native/probe-transport-green-final-harness-status.json",
+        "log_sha256": "290a93e58883c51bbd31907a9e6b4bb5c5c65cb24318c9d003d455cd9ce2273d"
+      }
+    ],
+    "allocation_samples": {
+      "scalar-resource-red.log": [
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/128",
+          "items": 128,
+          "allocation_requests": 8209,
+          "allocation_bytes": 1848320
+        },
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/256",
+          "items": 256,
+          "allocation_requests": 16540,
+          "allocation_bytes": 6743776
+        },
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/512",
+          "items": 512,
+          "allocation_requests": 33700,
+          "allocation_bytes": 25254192
+        }
+      ],
+      "go-focused-final.log": [
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/list/128",
+          "items": 128,
+          "allocation_requests": 6671,
+          "allocation_bytes": 356096
+        },
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/list/256",
+          "items": 256,
+          "allocation_requests": 12953,
+          "allocation_bytes": 671168
+        },
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/list/512",
+          "items": 512,
+          "allocation_requests": 25503,
+          "allocation_bytes": 1296192
+        },
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/record/128",
+          "items": 128,
+          "allocation_requests": 7089,
+          "allocation_bytes": 389488
+        },
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/record/256",
+          "items": 256,
+          "allocation_requests": 13757,
+          "allocation_bytes": 738320
+        },
+        {
+          "test": "TestInterpreterScalarStateTemporaryTensorAllocations/record/512",
+          "items": 512,
+          "allocation_requests": 27081,
+          "allocation_bytes": 1429552
+        }
+      ]
+    },
+    "go_red_coverage": "The retained before log has three List<Int> cases. The final public source adds Record coverage; no observed Record RED is claimed.",
+    "native_transport_cases": {
+      "red": [
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stdout-exact-boundary"
+        },
+        {
+          "outcome": "FAIL",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stdout-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stderr-exact-boundary"
+        },
+        {
+          "outcome": "FAIL",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stderr-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/independent-stream-boundaries"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stdout-exact-boundary"
+        },
+        {
+          "outcome": "FAIL",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stdout-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stderr-exact-boundary"
+        },
+        {
+          "outcome": "FAIL",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stderr-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/independent-stream-boundaries"
+        }
+      ],
+      "green": [
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stdout-exact-boundary"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stdout-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stderr-exact-boundary"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/stderr-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMFileProbeOutputTransportLimit/independent-stream-boundaries"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stdout-exact-boundary"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stdout-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stderr-exact-boundary"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/stderr-overflow"
+        },
+        {
+          "outcome": "PASS",
+          "case": "TestLLVMLinuxFileProbeOutputTransportLimit/independent-stream-boundaries"
+        }
+      ]
+    },
+    "native_final_handoff": "native/completion.json",
+    "native_acceptance_scope": "Final three-argument ABI harness and ECHILD assertions only; earlier harness runs are diagnostic.",
+    "source_before": "before-source.json"
+  },
+  "archive": {
+    "path": "docs/evidence/review-corrections.json.gz",
+    "sha256": "746548b5ac8a48fc7c52923c84d6483d0ebe226eadb541364fa636a3aed029a8",
+    "records": 43
+  },
+  "limitations": [
+    "No new CPU timing campaign; allocation regression samples and contract tests only.",
+    "Earlier native harness attempts are historical diagnostics, not acceptance evidence."
+  ]
+}
