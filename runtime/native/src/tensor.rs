@@ -749,7 +749,6 @@ pub fn apply(
     let weight = p.shape.weight() - 3 + a.storage.location.len() as u64;
     c.tensor_budget(p.steps, weight)?;
     let out = execute_plan(c, &p, a, b)?;
-    c.weight += out.weight();
     Ok(out)
 }
 pub fn constant(c: &mut Context, shape: &Shape, location: &str, n: f32) -> Result<Tensor, Fault> {
@@ -758,12 +757,10 @@ pub fn constant(c: &mut Context, shape: &Shape, location: &str, n: f32) -> Resul
         let mut operation = device_layout(crate::device::FILL, shape, None, None);
         operation.scalar = n.to_bits();
         let out = device_compute(c, location, &operation, shape, &[])?;
-        c.weight += out.weight();
         return Ok(out);
     }
     c.resources.check_allocation(4 * shape.count)?;
     let out = construct(c, shape, vec![n; shape.count as usize])?;
-    c.weight += out.weight();
     Ok(out)
 }
 pub fn relu_derivative(c: &mut Context, g: &Tensor, a: &Tensor) -> Result<Tensor, Fault> {
@@ -779,7 +776,6 @@ pub fn relu_derivative(c: &mut Context, g: &Tensor, a: &Tensor) -> Result<Tensor
     if a.storage.location != "cpu" {
         let operation = device_layout(crate::device::RELU_GRAD, &a.shape, Some(a), Some(g));
         let out = device_compute(c, &a.storage.location, &operation, &a.shape, &[a, g])?;
-        c.weight += out.weight();
         return Ok(out);
     }
     c.resources.check_allocation(4 * a.shape.count)?;
@@ -791,7 +787,6 @@ pub fn relu_derivative(c: &mut Context, g: &Tensor, a: &Tensor) -> Result<Tensor
         }
     }
     let out = construct(c, &a.shape, out)?;
-    c.weight += out.weight();
     Ok(out)
 }
 pub fn check_sqrt(c: &mut Context, a: &Tensor) -> Result<(), Fault> {

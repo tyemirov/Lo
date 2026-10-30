@@ -702,7 +702,7 @@ fn on_cpu(value: &Handle) -> Result<(), Fault> {
     Ok(())
 }
 pub fn execute(c: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
-    let scope = c.resources.scope_enter();
+    let scope = c.scope_enter();
     let result = execute_inner(c, site, args).map_err(boundary_host_fault);
     let result = match result {
         Ok(value) => training::classify(c, &value)
@@ -717,10 +717,10 @@ pub fn execute(c: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
         Err(error) => Err(error),
     };
     let roots = match &result {
-        Ok(value) => tensor::allocations(&[value.clone()]),
+        Ok(value) => vec![value.clone()],
         Err(_) => vec![],
     };
-    c.resources.scope_close(scope, &roots);
+    c.scope_close(scope, &roots);
     result
 }
 fn execute_inner(c: &mut Context, site: &Site, args: &[Handle]) -> Outcome {

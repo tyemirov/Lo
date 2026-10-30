@@ -93,12 +93,21 @@ fn host_progress_text(diagnostic: &Json) -> String {
     if let Some(flows) = diagnostic["flow_progress"].as_array() {
         for flow in flows {
             let fields = &flow["value"];
-            message.push_str(&format!(
-                " (Flow.fold completed {}/{}, state {})",
-                value_text(&fields["completed_count"]),
-                value_text(&fields["total_count"]),
-                value_text(&fields["state"])
-            ));
+            if fields["operation"]["value"] == "Flow.worklist" {
+                message.push_str(&format!(
+                    " (Flow.worklist completed {}, pending {}, state {})",
+                    value_text(&fields["completed_count"]),
+                    value_text(&fields["pending_count"]),
+                    value_text(&fields["state"])
+                ));
+            } else {
+                message.push_str(&format!(
+                    " (Flow.fold completed {}/{}, state {})",
+                    value_text(&fields["completed_count"]),
+                    value_text(&fields["total_count"]),
+                    value_text(&fields["state"])
+                ));
+            }
         }
     }
     message
@@ -315,6 +324,8 @@ pub unsafe extern "C" fn lo_cli_main(
     let mut error = None;
     let mut format_set = false;
     let mut steps_set = false;
+    let mut limits = crate::value_resources::Limits::default();
+    let mut limit_flags = std::collections::BTreeSet::new();
     let mut roots = crate::files::Options::default();
     let mut process_grants = vec![];
     let mut process_roots = vec![];
@@ -361,6 +372,36 @@ pub unsafe extern "C" fn lo_cli_main(
             match args[i].parse::<u64>() {
                 Ok(v) if v > 0 => steps = v,
                 _ => error = Some("invalid --max-steps: execution steps must be positive".into()),
+            }
+        } else if matches!(
+            arg,
+            "--max-value-bytes"
+                | "--max-live-bytes"
+                | "--max-data-bytes"
+                | "--max-list-items"
+                | "--max-file-entries"
+                | "--max-file-directories"
+        ) {
+            if !limit_flags.insert(arg) || i + 1 == args.len() {
+                error = Some(format!("{arg} requires one non-negative integer"));
+                break;
+            }
+            i += 1;
+            let value = match args[i].parse::<u64>() {
+                Ok(value) => value,
+                Err(_) => {
+                    error = Some(format!("invalid {arg}: expected a non-negative integer"));
+                    break;
+                }
+            };
+            match arg {
+                "--max-value-bytes" => limits.value_bytes = value,
+                "--max-live-bytes" => limits.live_bytes = value,
+                "--max-data-bytes" => limits.data_bytes = value,
+                "--max-list-items" => limits.list_items = value,
+                "--max-file-entries" => limits.file_entries = value,
+                "--max-file-directories" => limits.file_directories = value,
+                _ => unreachable!(),
             }
         } else if arg == "--allow-device" {
             if device_set || i + 1 == args.len() {
@@ -531,6 +572,7 @@ pub unsafe extern "C" fn lo_cli_main(
         initial_host_invocation: captured.host,
         program: program.clone(),
         steps,
+        limits,
         processes,
         http: Arc::new(http.unwrap()),
         files: std::sync::Mutex::new(files),

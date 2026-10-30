@@ -3,7 +3,7 @@ use crate::metadata::{Document, Fields, SourceSpan};
 use crate::{action::Action, value::*};
 use serde_json::Value as Json;
 use std::{
-    cell::Cell,
+    cell::{Cell, RefCell},
     sync::{
         atomic::{AtomicBool, AtomicU64, Ordering},
         Arc,
@@ -14,7 +14,6 @@ use std::{
 pub static LIVE_PROGRAMS: AtomicU64 = AtomicU64::new(0);
 pub static LIVE_CONTEXTS: AtomicU64 = AtomicU64::new(0);
 pub const MAX_BYTES: usize = 16 << 20;
-pub const MAX_ITEMS: usize = 1_000_000;
 pub const MAX_BITS: u64 = 1_048_576;
 pub type Outcome = Result<Handle, Fault>;
 #[derive(Clone)]
@@ -293,6 +292,7 @@ pub struct Context {
     pub files: crate::files::Files,
     pub last_activation: Option<Json>,
     pub resources: crate::resources::Ledger,
+    pub values: crate::value_resources::Ledger,
     pub device_grant: String,
     pub tapes: Vec<crate::autodiff::Tape>,
     pub program: Arc<Program>,
@@ -301,12 +301,19 @@ pub struct Context {
     pub weight: u64,
     pub depth: u32,
     pub fault: Option<Fault>,
+    scope_cleanup: RefCell<Option<Fault>>,
+    scope_fault_active: bool,
     pub scopes: u64,
     pub cancelled: bool,
     pub cancel_polls: Cell<u64>,
     pub cancel_after_polls: Option<u64>,
     pub flow_progress: Vec<Handle>,
     pub flow_fault_progress: bool,
+}
+pub struct ScopePin {
+    values: crate::value_resources::PinnedValues,
+    tensors: Vec<u64>,
+    files: Vec<u64>,
 }
 fn uint(v: &impl Fields, key: &str) -> Result<usize, String> {
     v.field(key)
@@ -393,7 +400,7 @@ impl Program {
             ],
             "program",
         )?;
-        if v["abi"] != "lo-native-2" {
+        if v["abi"] != "lo-native-3" {
             return Err("program ABI identity mismatch".into());
         }
         if !v["source"]["path"].is_string()
@@ -692,7 +699,6 @@ impl Program {
                             .map_err(|_| "invalid native Float metadata")?;
                         Literal::Value(new(atom("Float"), Data::Float(f64::from_bits(bits))))
                     }
-                    "String" if t.len() > MAX_BYTES => Literal::Limit("string bytes"),
                     "String" => Literal::Value(text(t)),
                     "Bool" => Literal::Value(boolean(t == "true")),
                     "Null" => Literal::Value(new(atom("Null"), Data::Null)),
@@ -721,6 +727,7 @@ impl Program {
                         | "List.flat_map"
                         | "List.unfold"
                         | "Flow.fold"
+                        | "Flow.worklist"
                 ) {
                     crate::collections::admit(site, &flows)?;
                 }
@@ -747,8 +754,99 @@ impl Drop for ProgramLifetime {
     }
 }
 impl Context {
+    pub fn scope_enter(&mut self) -> usize {
+        let id = self.resources.scope_enter();
+        self.values.scope_enter(id);
+        self.files.scope_enter(id);
+        self.scopes += 1;
+        id
+    }
+    fn scope_fault(&mut self, result: Result<(), String>) {
+        if let Err(message) = result {
+            let fault = host(message);
+            let prior = self.scope_cleanup.get_mut().take();
+            *self.scope_cleanup.get_mut() = combine_cleanup(prior, Some(fault.clone()));
+            if self.fault.is_none() {
+                self.fault = Some(fault);
+                self.scope_fault_active = true;
+            }
+        }
+    }
+    pub fn error_entry(&self) -> Result<(), Fault> {
+        if self.scope_fault_active {
+            self.check_owner()
+        } else {
+            self.entry()
+        }
+    }
+    pub fn combine_scope_cleanup(&mut self, primary: Fault) -> Fault {
+        match self.scope_cleanup.get_mut().take() {
+            Some(cleanup) => {
+                let fault = combine_cleanup(Some(primary), Some(cleanup)).unwrap();
+                self.fault = Some(fault.clone());
+                self.scope_fault_active = false;
+                fault
+            }
+            None => primary,
+        }
+    }
+    pub fn store_fault(&mut self, fault: Fault) {
+        self.fault = Some(fault);
+        self.scope_fault_active = false;
+    }
+    pub fn scope_keep(&mut self, id: usize, roots: &[Handle]) {
+        self.values.scope_keep(id, roots);
+        let allocations = self.scope_allocations(id, roots);
+        self.resources.scope_keep(id, &allocations);
+        let result = self.files.scope_keep(id, roots);
+        self.scope_fault(result);
+    }
+    pub fn scope_retain(&mut self, id: usize, roots: &[Handle]) {
+        self.values.scope_retain(id, roots);
+        let allocations = self.scope_allocations(id, roots);
+        self.resources.scope_retain(id, &allocations);
+        let result = self.files.scope_retain(id, roots);
+        self.scope_fault(result);
+    }
+    pub fn scope_pin(&mut self, id: usize, roots: &[Handle]) -> Result<ScopePin, Fault> {
+        self.check_cancel()?;
+        for root in roots {
+            self.values.retain_root(root)?;
+        }
+        let files = self.files.scope_pin(id, roots).map_err(host)?;
+        let allocations = self.scope_allocations(id, roots);
+        Ok(ScopePin {
+            values: self.values.scope_pin(id, roots),
+            tensors: self.resources.scope_pin(id, &allocations),
+            files,
+        })
+    }
+    pub fn scope_unpin(&mut self, id: usize, pin: ScopePin) {
+        self.values.scope_unpin(id, &pin.values);
+        self.resources.scope_unpin(id, &pin.tensors);
+        let result = self.files.scope_unpin(id, &pin.files);
+        self.scope_fault(result);
+    }
+    pub fn scope_close(&mut self, id: usize, roots: &[Handle]) {
+        self.values.scope_close(id, roots);
+        let allocations = self.scope_allocations(id, roots);
+        self.resources.scope_close(id, &allocations);
+        let result = self.files.scope_close(id, roots);
+        self.scope_fault(result);
+        self.scopes -= 1;
+    }
+    fn scope_allocations(&self, id: usize, roots: &[Handle]) -> Vec<u64> {
+        if self.resources.scope_is_empty(id) {
+            vec![]
+        } else {
+            crate::tensor::allocations(roots)
+        }
+    }
     pub fn new(program: Arc<Program>, steps: u64) -> Self {
         let session = Session::empty(program, steps);
+        Self::with_session(session, crate::files::empty(), true)
+    }
+    pub fn with_options(session: Arc<Session>) -> Self {
         Self::with_session(session, crate::files::empty(), true)
     }
     fn with_session(
@@ -765,6 +863,7 @@ impl Context {
             files,
             last_activation: None,
             resources: crate::resources::Ledger::with_config(session.devices.clone()),
+            values: crate::value_resources::Ledger::new(session.limits),
             device_grant: session.devices.grant.clone(),
             tapes: vec![],
             program: session.program.clone(),
@@ -774,6 +873,8 @@ impl Context {
             weight: 0,
             depth: 0,
             fault: None,
+            scope_cleanup: RefCell::new(None),
+            scope_fault_active: false,
             scopes: 0,
             cancelled: false,
             cancel_polls: Cell::new(0),
@@ -792,7 +893,10 @@ impl Context {
     pub fn close(&mut self) -> Result<(), Fault> {
         let files = self.files.close().err().map(host);
         let devices = self.resources.close().err();
-        match combine_cleanup(files, devices) {
+        match combine_cleanup(
+            self.scope_cleanup.get_mut().take(),
+            combine_cleanup(files, devices),
+        ) {
             None => Ok(()),
             Some(fault) => {
                 let message = format!("close runtime resources \"program\": {}", fault.message());
@@ -819,7 +923,7 @@ impl Context {
         (&mut self.resources, control)
     }
     pub fn capture_fault(&self, fault: Fault) -> Fault {
-        if matches!(fault.primary(), Fault::Recoverable(_)) {
+        if matches!(fault, Fault::Recoverable(_)) {
             return fault;
         }
         let removal = self.files.last_removal();
@@ -844,20 +948,12 @@ impl Context {
     }
     pub fn reserve_file(&mut self, steps: u64, weight: u64) -> Result<(), Fault> {
         self.check_cancel()?;
-        if weight > MAX_BYTES as u64 {
-            return Err(limit("expanded file value bytes"));
-        }
-        if weight > (64u64 << 20).saturating_sub(self.weight) {
-            return Err(limit("evaluation file value bytes"));
-        }
+        self.values.preflight(weight)?;
         if steps > self.remaining {
             return Err(limit("file work steps"));
         }
         self.remaining -= steps;
         Ok(())
-    }
-    pub fn add_file_weight(&mut self, weight: u64) {
-        self.weight += weight;
     }
     fn check_owner(&self) -> Result<(), Fault> {
         if self.owner != thread::current().id() {
@@ -867,6 +963,11 @@ impl Context {
         }
     }
     pub fn check_fault(&self) -> Result<(), Fault> {
+        if self.scope_fault_active {
+            if let Some(fault) = self.scope_cleanup.borrow_mut().take() {
+                return Err(fault);
+            }
+        }
         self.fault
             .as_ref()
             .map_or(Ok(()), |fault| Err(fault.clone()))
@@ -885,6 +986,15 @@ impl Context {
     }
     pub fn check_cancel(&self) -> Result<(), Fault> {
         self.check_fault()?;
+        self.check_cancellation()
+    }
+    fn check_progress(&self) -> Result<(), Fault> {
+        if !self.scope_fault_active {
+            self.check_fault()?;
+        }
+        self.check_cancellation()
+    }
+    fn check_cancellation(&self) -> Result<(), Fault> {
         let polls = self.cancel_polls.get().saturating_add(1);
         self.cancel_polls.set(polls);
         if self.cancelled
@@ -905,12 +1015,7 @@ impl Context {
     }
     pub fn tensor_budget(&mut self, steps: u64, weight: u64) -> Result<(), Fault> {
         self.check_cancel()?;
-        if weight > MAX_BYTES as u64 {
-            return Err(limit("expanded tensor result bytes"));
-        }
-        if weight > (64 << 20) - self.weight {
-            return Err(limit("evaluation tensor result bytes"));
-        }
+        self.values.preflight(weight)?;
         if steps > self.remaining {
             return Err(limit("tensor work steps"));
         }
@@ -918,7 +1023,7 @@ impl Context {
         Ok(())
     }
     pub fn charge(&mut self, v: &Handle) -> Result<(), Fault> {
-        if v.weight > MAX_BYTES as u64 || v.weight > (64 << 20) - self.weight {
+        if let Err(fault) = self.values.charge(v) {
             let e = match &v.data {
                 Data::Failure(e) => Some(e),
                 Data::Error(_) => Some(v),
@@ -932,13 +1037,9 @@ impl Context {
                     }
                 }
             }
-            return Err(limit(if v.weight > MAX_BYTES as u64 {
-                "expanded value bytes"
-            } else {
-                "evaluation value bytes"
-            }));
+            return Err(fault);
         }
-        self.weight += v.weight;
+        self.weight = self.values.data;
         Ok(())
     }
     pub fn record_flow_progress(
@@ -947,7 +1048,7 @@ impl Context {
         completed: usize,
         state: &Handle,
     ) -> Result<Handle, Fault> {
-        self.check_cancel()?;
+        self.check_progress()?;
         let progress = record([
             ("operation".into(), text("Flow.fold")),
             ("total_count".into(), int(total)),
@@ -955,13 +1056,25 @@ impl Context {
             ("next_index".into(), int(completed)),
             ("state".into(), crate::value::snapshot(state)),
         ]);
-        if progress.weight > MAX_BYTES as u64 {
-            return Err(limit("expanded flow progress bytes"));
-        }
-        if progress.weight > (64 << 20) - self.weight {
-            return Err(limit("evaluation flow progress bytes"));
-        }
-        self.weight += progress.weight;
+        self.values.replace_progress(progress.weight)?;
+        self.flow_progress = vec![progress.clone()];
+        self.flow_fault_progress = false;
+        Ok(progress)
+    }
+    pub fn record_worklist_progress(
+        &mut self,
+        completed: usize,
+        pending: usize,
+        state: &Handle,
+    ) -> Result<Handle, Fault> {
+        self.check_progress()?;
+        let progress = record([
+            ("operation".into(), text("Flow.worklist")),
+            ("completed_count".into(), int(completed)),
+            ("pending_count".into(), int(pending)),
+            ("state".into(), crate::value::snapshot(state)),
+        ]);
+        self.values.replace_progress(progress.weight)?;
         self.flow_progress = vec![progress.clone()];
         self.flow_fault_progress = false;
         Ok(progress)

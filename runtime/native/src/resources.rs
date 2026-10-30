@@ -24,10 +24,12 @@ struct Entry {
     storage: Arc<Storage>,
     scope: usize,
     classes: [bool; 4],
+    pins: usize,
 }
 struct Scope {
     parent: Option<usize>,
     owned: BTreeSet<u64>,
+    pinned: BTreeSet<u64>,
 }
 pub struct Ledger {
     pub session: u64,
@@ -70,6 +72,7 @@ impl Ledger {
                 scopes.push(Some(Scope {
                     parent: None,
                     owned: BTreeSet::new(),
+                    pinned: BTreeSet::new(),
                 }));
                 scopes
             },
@@ -126,6 +129,7 @@ impl Ledger {
                 storage: storage.clone(),
                 scope: self.current,
                 classes: [false; 4],
+                pins: 0,
             },
         );
         self.scopes[self.current]
@@ -248,6 +252,7 @@ impl Ledger {
                 storage: storage.clone(),
                 scope: self.current,
                 classes: [false; 4],
+                pins: 0,
             },
         );
         self.scopes[self.current]
@@ -481,6 +486,7 @@ impl Ledger {
             }
             if let Some(s) = &mut self.scopes[e.scope] {
                 s.owned.remove(&id);
+                s.pinned.remove(&id);
             }
         }
     }
@@ -489,9 +495,14 @@ impl Ledger {
         self.scopes.push(Some(Scope {
             parent: Some(self.current),
             owned: BTreeSet::new(),
+            pinned: BTreeSet::new(),
         }));
         self.current = id;
         id
+    }
+    pub fn scope_is_empty(&self, id: usize) -> bool {
+        let scope = self.scopes[id].as_ref().unwrap();
+        scope.owned.is_empty() && scope.pinned.is_empty()
     }
     pub fn scope_keep(&mut self, id: usize, roots: &[u64]) {
         let keep: BTreeSet<u64> = roots.iter().copied().collect();
@@ -514,8 +525,39 @@ impl Ledger {
             if let Some(e) = self.entries.get_mut(root) {
                 if e.scope == id {
                     self.scopes[id].as_mut().unwrap().owned.remove(root);
+                    self.scopes[id].as_mut().unwrap().pinned.remove(root);
                     self.scopes[parent].as_mut().unwrap().owned.insert(*root);
                     e.scope = parent;
+                    e.pins = 0;
+                }
+            }
+        }
+    }
+    pub fn scope_pin(&mut self, id: usize, roots: &[u64]) -> Vec<u64> {
+        let mut pinned = vec![];
+        for root in roots {
+            if let Some(entry) = self.entries.get_mut(root) {
+                if entry.scope == id {
+                    entry.pins += 1;
+                    let scope = self.scopes[id].as_mut().unwrap();
+                    scope.owned.remove(root);
+                    scope.pinned.insert(*root);
+                    pinned.push(*root);
+                }
+            }
+        }
+        pinned
+    }
+    pub fn scope_unpin(&mut self, id: usize, roots: &[u64]) {
+        for root in roots {
+            if let Some(entry) = self.entries.get_mut(root) {
+                if entry.scope == id {
+                    entry.pins -= 1;
+                    if entry.pins == 0 {
+                        let scope = self.scopes[id].as_mut().unwrap();
+                        scope.pinned.remove(root);
+                        scope.owned.insert(*root);
+                    }
                 }
             }
         }
@@ -524,6 +566,8 @@ impl Ledger {
         if id != self.current || id == 0 {
             std::process::abort()
         }
+        let scope = self.scopes[id].as_mut().unwrap();
+        scope.owned.append(&mut scope.pinned);
         self.scope_keep(id, roots);
         self.scope_retain(id, roots);
         self.current = self.scopes[id].as_ref().unwrap().parent.unwrap();

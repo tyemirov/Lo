@@ -352,7 +352,7 @@ pub fn recoverable(site: &Site, args: &[Handle], kind: &str, message: &str) -> F
 }
 
 pub fn execute(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {
-    let scope = c.resources.scope_enter();
+    let scope = c.scope_enter();
     let result = match execute_inner(c, s, a) {
         Err(Fault::Numeric(kind, message)) => Err(recoverable(s, a, kind, &message)),
         other => other,
@@ -365,10 +365,10 @@ pub fn execute(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {
         Err(error) => Err(error),
     };
     let roots = match &result {
-        Ok(value) => tensor::allocations(&[value.clone()]),
+        Ok(value) => vec![value.clone()],
         Err(_) => vec![],
     };
-    c.resources.scope_close(scope, &roots);
+    c.scope_close(scope, &roots);
     result
 }
 fn execute_inner(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {

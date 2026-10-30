@@ -14,6 +14,7 @@ pub struct Directory {
 #[derive(Clone)]
 pub struct Observation {
     pub session: u64,
+    pub lease: u64,
     pub directory: Directory,
     pub identity: (u64, u64),
 }
@@ -578,6 +579,7 @@ fn entry_value(
     context: &mut Context,
     site: &Site,
     observation: &Directory,
+    lease: u64,
     name: &str,
     info: &FileInfo,
     prior_weight: u64,
@@ -631,6 +633,7 @@ fn entry_value(
             fields: record(fields.into_iter().map(|(k, v)| (k.into(), v))),
             observation: Some(Observation {
                 session: context.files.session,
+                lease,
                 directory: observation.clone(),
                 identity: info.identity,
             }),
@@ -643,6 +646,7 @@ fn directory_value(
     root: &Handle,
     directory: &File,
     observation: &Directory,
+    lease: u64,
     prior_weight: u64,
 ) -> Outcome {
     context.reserve_file(1, prior_weight)?;
@@ -695,6 +699,7 @@ fn directory_value(
             fields: record(fields.into_iter().map(|(k, v)| (k.into(), v))),
             observation: Some(Observation {
                 session: context.files.session,
+                lease,
                 directory: observation.clone(),
                 identity: observation.identity,
             }),
@@ -707,6 +712,7 @@ fn finish_observation(
     directory: File,
     retained: File,
     fresh: bool,
+    lease: u64,
     result: Outcome,
 ) -> Outcome {
     let mut result = match (result, close_file(directory)) {
@@ -716,7 +722,9 @@ fn finish_observation(
         (Ok(value), Ok(())) => Ok(value),
     };
     if result.is_ok() && fresh {
-        context.files.observed.insert(observation, retained);
+        context
+            .files
+            .retain_observation(observation, lease, retained);
     } else if let Err(cleanup) = close_file(retained) {
         result = Err(match result {
             Err(primary) => cleanup_failure(primary, cleanup),
@@ -736,14 +744,24 @@ pub(super) fn directory(context: &mut Context, site: &Site, root: &Handle) -> Ou
         root,
     )?;
     let fresh = !context.files.observed.contains_key(&observation);
-    if fresh && context.files.observed.len() == MAX_FILE_DIRECTORIES {
+    if fresh
+        && context.values.limits.file_directories != 0
+        && context.files.observed.len() as u64 >= context.values.limits.file_directories
+    {
         return Err(limit("retained file directories"));
     }
+    let lease = if fresh {
+        let lease = context.files.next_observation_lease;
+        context.files.next_observation_lease += 1;
+        lease
+    } else {
+        context.files.observed_leases[&observation]
+    };
     let retained = directory
         .try_clone()
         .map_err(|error| host(error.to_string()))?;
     let result = (|| {
-        let value = directory_value(context, site, root, &directory, &observation, 16)?;
+        let value = directory_value(context, site, root, &directory, &observation, lease, 16)?;
         let (check, current) = exact_grant(
             &context.files.lists,
             &context.files.base,
@@ -758,7 +776,15 @@ pub(super) fn directory(context: &mut Context, site: &Site, root: &Handle) -> Ou
         }
         Ok(value)
     })();
-    finish_observation(context, observation, directory, retained, fresh, result)
+    finish_observation(
+        context,
+        observation,
+        directory,
+        retained,
+        fresh,
+        lease,
+        result,
+    )
 }
 #[derive(Clone, Copy, PartialEq)]
 enum Discovery {
@@ -787,9 +813,19 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
         root,
     )?;
     let fresh = !context.files.observed.contains_key(&observation);
-    if fresh && context.files.observed.len() == MAX_FILE_DIRECTORIES {
+    if fresh
+        && context.values.limits.file_directories != 0
+        && context.files.observed.len() as u64 >= context.values.limits.file_directories
+    {
         return Err(limit("retained file directories"));
     }
+    let lease = if fresh {
+        let lease = context.files.next_observation_lease;
+        context.files.next_observation_lease += 1;
+        lease
+    } else {
+        context.files.observed_leases[&observation]
+    };
     let retained = directory
         .try_clone()
         .map_err(|error| host(error.to_string()))?;
@@ -810,6 +846,7 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
                 root,
                 &directory,
                 &observation,
+                lease,
                 128,
             )?)
         } else {
@@ -835,7 +872,9 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
             else {
                 break;
             };
-            if names.len() == MAX_FILE_ENTRIES {
+            if context.values.limits.file_entries != 0
+                && names.len() as u64 >= context.values.limits.file_entries
+            {
                 return Err(limit("directory entries"));
             }
             context.reserve_file(1, weight)?;
@@ -883,6 +922,7 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
                 context,
                 site,
                 &observation,
+                lease,
                 name,
                 &info,
                 weight,
@@ -940,12 +980,22 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
         ))),
         (Ok(value), Ok(())) => Ok(value),
     };
-    finish_observation(context, observation, directory, retained, fresh, result)
+    finish_observation(
+        context,
+        observation,
+        directory,
+        retained,
+        fresh,
+        lease,
+        result,
+    )
 }
 
 pub(super) fn selection(context: &mut Context, site: &Site, entries: &Handle) -> Outcome {
     let items = entries.items();
-    if items.len() > MAX_FILE_ENTRIES {
+    if context.values.limits.file_entries != 0
+        && items.len() as u64 > context.values.limits.file_entries
+    {
         return Err(limit("file removal entries"));
     }
     context.reserve_file(
@@ -954,6 +1004,7 @@ pub(super) fn selection(context: &mut Context, site: &Site, entries: &Handle) ->
     )?;
     let mut names = BTreeSet::new();
     let mut directory = None;
+    let mut lease = None;
     for entry in items {
         let Data::Adapter(crate::adapters::AdapterValue::File(Value::Entry {
             fields,
@@ -969,6 +1020,7 @@ pub(super) fn selection(context: &mut Context, site: &Site, entries: &Handle) ->
         };
         let name = fields.fields()["name"].string();
         if observation.session != context.files.session
+            || lease.is_some_and(|prior| prior != observation.lease)
             || fields.fields()["kind"].string() != "regular"
             || !names.insert(name)
             || directory
@@ -983,6 +1035,7 @@ pub(super) fn selection(context: &mut Context, site: &Site, entries: &Handle) ->
             ));
         }
         directory = Some(observation.directory.clone());
+        lease = Some(observation.lease);
     }
     Ok(adapter(
         "File.Remove",
@@ -1093,6 +1146,7 @@ fn evaluate_guard(
         context,
         site,
         &observation.directory,
+        observation.lease,
         entry.fields()["name"].string(),
         info,
         0,
@@ -1214,7 +1268,7 @@ extern "C" {
 pub(super) fn remove(context: &mut Context, site: &Site, target: &Value) -> Outcome {
     let result = remove_inner(context, site, target);
     result.map_err(|fault| {
-        if matches!(fault.primary(), Fault::Recoverable(_))
+        if matches!(&fault, Fault::Recoverable(_))
             || matches!(&fault,Fault::Boundary{details,..} if details.removal_progress.is_some())
         {
             fault
@@ -1316,6 +1370,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
             .files
             .observed
             .get(&first.directory)
+            .filter(|_| context.files.observed_leases.get(&first.directory) == Some(&first.lease))
             .ok_or_else(|| {
                 fail(
                     0,
@@ -1331,7 +1386,6 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
         let mutation = (|| {
             let diagnostic_weight = entries.weight + 2048;
             context.reserve_file((3 * total) as u64, diagnostic_weight)?;
-            context.add_file_weight(diagnostic_weight);
             for (index, entry) in entries.items().iter().enumerate() {
                 record_removal(
                     context,
@@ -1365,7 +1419,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                                 guard,
                             ))
                         }
-                        Err(fault) if matches!(fault.primary(), Fault::Recoverable(_)) => {
+                        Err(fault) if matches!(&fault, Fault::Recoverable(_)) => {
                             return Err(fail(
                                 0,
                                 &bytes,
@@ -1431,7 +1485,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                                 site, entries, total, completed, &bytes, index, "remove", guard,
                             ))
                         }
-                        Err(fault) if matches!(fault.primary(), Fault::Recoverable(_)) => {
+                        Err(fault) if matches!(&fault, Fault::Recoverable(_)) => {
                             return Err(fail(
                                 completed,
                                 &bytes,
