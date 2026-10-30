@@ -25,5 +25,6 @@ mod value_entry_map;
 mod value_graph;
 mod value_id_hash;
 mod value_id_set;
-mod value_stack;
+mod value_receipts;
 mod value_resources;
+mod value_stack;

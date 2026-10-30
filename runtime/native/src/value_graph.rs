@@ -12,17 +12,14 @@ use std::{
 const MIN_CACHE_IDENTITIES: usize = 16;
 
 struct Summary {
+    root: Weak<Value>,
     identities: IdentitySet,
     max_list_items: usize,
-}
-struct Cached {
-    _root: Weak<Value>,
-    summary: Arc<Summary>,
 }
 #[derive(Default)]
 pub(crate) struct GraphCache {
     // Ledger receipt release removes the entry; weak roots do not retain data.
-    entries: HashMap<usize, Cached, IdentityBuildHasher>,
+    entries: HashMap<usize, Arc<Summary>, IdentityBuildHasher>,
 }
 
 #[derive(Default)]
@@ -51,6 +48,9 @@ impl Reachability {
             .iter()
             .flat_map(|graph| graph.identities.iter())
     }
+    pub fn cached_roots(&self) -> impl Iterator<Item = &Weak<Value>> {
+        self.borrowed.iter().map(|graph| &graph.root)
+    }
     pub fn cached_parts(&self) -> usize {
         self.borrowed.len()
     }
@@ -63,9 +63,10 @@ impl Reachability {
         self.direct.extend(graph.direct);
         self.borrowed.extend(graph.borrowed);
     }
-    fn into_summary(self) -> Arc<Summary> {
+    fn into_summary(self, root: &Handle) -> Arc<Summary> {
         assert!(self.borrowed.is_empty());
         Arc::new(Summary {
+            root: Arc::downgrade(root),
             identities: self.direct,
             max_list_items: self.max_list_items,
         })
@@ -74,18 +75,10 @@ impl Reachability {
 
 impl GraphCache {
     fn get(&self, root: &Handle) -> Option<Arc<Summary>> {
-        self.entries
-            .get(&(Arc::as_ptr(root) as usize))
-            .map(|entry| entry.summary.clone())
+        self.entries.get(&(Arc::as_ptr(root) as usize)).cloned()
     }
     fn insert(&mut self, root: &Handle, summary: Arc<Summary>) {
-        self.entries.insert(
-            Arc::as_ptr(root) as usize,
-            Cached {
-                _root: Arc::downgrade(root),
-                summary,
-            },
-        );
+        self.entries.insert(Arc::as_ptr(root) as usize, summary);
     }
     pub fn remove(&mut self, root: usize) {
         self.entries.remove(&root);
@@ -96,6 +89,79 @@ impl GraphCache {
         ancestor: impl Fn(usize) -> bool,
     ) -> Reachability {
         self.scan(roots, &ancestor, true, false).0
+    }
+    pub fn reachable_keep(
+        &mut self,
+        roots: &[Handle],
+        eligible: impl Fn(usize) -> bool,
+    ) -> Reachability {
+        self.discover_keep_fragments(roots, &eligible);
+        self.scan(roots, &eligible, false, false).0
+    }
+    fn discover_keep_fragments(&mut self, roots: &[Handle], eligible: &impl Fn(usize) -> bool) {
+        #[derive(Clone, Copy)]
+        struct Completed {
+            count: usize,
+            cached: bool,
+        }
+        let mut completed: HashMap<usize, Completed, IdentityBuildHasher> = HashMap::default();
+        let mut pending = PendingStack::default();
+        for root in roots {
+            pending.push((root, false));
+        }
+        while let Some((value, children_done)) = pending.pop() {
+            let id = Arc::as_ptr(value) as usize;
+            if completed.contains_key(&id) {
+                continue;
+            }
+            if self.entries.contains_key(&id) {
+                completed.insert(
+                    id,
+                    Completed {
+                        count: 0,
+                        cached: true,
+                    },
+                );
+                continue;
+            }
+            if is_leaf(value) {
+                completed.insert(
+                    id,
+                    Completed {
+                        count: 1,
+                        cached: false,
+                    },
+                );
+                continue;
+            }
+            if !children_done {
+                pending.push((value, true));
+                for_each_child(value, |child| pending.push((child, false)));
+                continue;
+            }
+            let mut result = Completed {
+                count: 1,
+                cached: false,
+            };
+            for_each_child(value, |child| {
+                let child = completed.get(&(Arc::as_ptr(child) as usize)).unwrap();
+                result.count = result
+                    .count
+                    .saturating_add(child.count)
+                    .min(MIN_CACHE_IDENTITIES);
+                result.cached |= child.cached;
+            });
+            if !result.cached && result.count >= MIN_CACHE_IDENTITIES && eligible(id) {
+                let graph = self
+                    .scan(std::slice::from_ref(value), eligible, false, false)
+                    .0;
+                if !graph.has_cached() && graph.direct.len() >= MIN_CACHE_IDENTITIES {
+                    self.insert(value, graph.into_summary(value));
+                    result.cached = true;
+                }
+            }
+            completed.insert(id, result);
+        }
     }
     fn scan(
         &mut self,
@@ -133,7 +199,7 @@ impl GraphCache {
                     let (subgraph, child) =
                         self.scan(std::slice::from_ref(value), ancestor, false, true);
                     if !subgraph.has_cached() && subgraph.direct.len() >= MIN_CACHE_IDENTITIES {
-                        let summary = subgraph.into_summary();
+                        let summary = subgraph.into_summary(value);
                         self.insert(value, summary.clone());
                         if let Some(child) = child.filter(|child| child.weight >= value.weight / 2)
                         {
@@ -143,7 +209,7 @@ impl GraphCache {
                             if !child_graph.has_cached()
                                 && child_graph.direct.len() >= MIN_CACHE_IDENTITIES
                             {
-                                self.insert(&child, child_graph.into_summary());
+                                self.insert(&child, child_graph.into_summary(&child));
                             }
                         }
                         graph.add_summary(summary);
@@ -175,38 +241,42 @@ pub(crate) fn is_leaf(value: &Handle) -> bool {
 }
 
 fn push_children<'a>(value: &'a Handle, stack: &mut PendingStack<&'a Handle>) {
+    for_each_child(value, |child| stack.push(child));
+}
+
+fn for_each_child<'a>(value: &'a Handle, mut push: impl FnMut(&'a Handle)) {
     match &value.data {
-        Data::Wrapped(value) | Data::Success(value) | Data::Failure(value) => stack.push(value),
-        Data::List(values) => stack.extend(values),
-        Data::Record(fields) => stack.extend(fields.values()),
+        Data::Wrapped(value) | Data::Success(value) | Data::Failure(value) => push(value),
+        Data::List(values) => values.iter().for_each(&mut push),
+        Data::Record(fields) => fields.values().for_each(&mut push),
         Data::Map(values) => {
             for (key, value) in values {
-                stack.push(key);
-                stack.push(value);
+                push(key);
+                push(value);
             }
         }
         Data::Range(first, last, _, _) => {
-            stack.push(first);
-            stack.push(last);
+            push(first);
+            push(last);
         }
         Data::Error(error) => {
-            stack.push(&error.input);
-            stack.extend(&error.trace);
-            stack.extend(&error.flow_progress);
+            push(&error.input);
+            error.trace.iter().for_each(&mut push);
+            error.flow_progress.iter().for_each(&mut push);
         }
         Data::Adapter(crate::adapters::AdapterValue::File(crate::files::Value::Remove {
             entries,
             guard,
             ..
         })) => {
-            stack.push(entries);
+            push(entries);
             if let Some(guard) = guard {
-                stack.extend(&guard.contexts);
+                guard.contexts.iter().for_each(&mut push);
             }
         }
         Data::Adapter(value) => {
             if let Some(fields) = value.fields() {
-                stack.extend(fields.values());
+                fields.values().for_each(&mut push);
             }
         }
         _ => (),

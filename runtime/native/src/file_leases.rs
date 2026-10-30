@@ -49,8 +49,6 @@ fn observation_leases(roots: &[Handle]) -> BTreeSet<u64> {
 
 impl Files {
     pub fn scope_enter(&mut self, id: usize) {
-        self.observation_scopes
-            .insert(id, ObservationScope::default());
         self.observation_stack.push(id);
     }
     pub(super) fn retain_observation(
@@ -158,15 +156,17 @@ impl Files {
     }
     pub fn scope_close(&mut self, id: usize, roots: &[Handle]) -> Result<(), String> {
         self.scope_retain(id, roots)?;
-        let scope = self.observation_scopes.remove(&id).unwrap_or_default();
-        self.observation_stack.retain(|current| *current != id);
-        self.release_observations(
-            scope
-                .owned
-                .into_iter()
-                .chain(scope.pinned.into_keys())
-                .collect(),
-        )
+        assert_eq!(self.observation_stack.pop(), Some(id));
+        match self.observation_scopes.remove(&id) {
+            Some(scope) => self.release_observations(
+                scope
+                    .owned
+                    .into_iter()
+                    .chain(scope.pinned.into_keys())
+                    .collect(),
+            ),
+            None => Ok(()),
+        }
     }
     pub fn scope_pin(&mut self, id: usize, roots: &[Handle]) -> Result<Vec<u64>, String> {
         if self
