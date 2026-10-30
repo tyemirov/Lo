@@ -101,7 +101,10 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `application`: A program or service that uses language operations for a specific task.
 - `general-purpose language`: A programming language with contracts that apply across application domains.
 - `glob`: A wildcard pattern that matches a complete string.
-- `worklist`: An ordered collection of items that a bounded flow processor has yet to visit.
+- `worklist`: An ordered collection of items that a sequential flow processor has yet to visit.
+- `resource quota`: A host-configured maximum for a specified execution resource.
+- `live value weight`: Logical value weight retained by active execution scopes and pending work.
+- `branch identifier`: An integer that selects one named branch callback in an application flow.
 - `tree snapshot`: Immutable observations of a filesystem tree with relative names and retained directory identities.
 - `HTTP origin`: The canonical scheme, hostname, and effective port of an HTTP destination.
 - `IP literal`: An explicit IPv4 or IPv6 address without a hostname lookup.
@@ -294,7 +297,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `basic block`: An ordered instruction sequence with one entry point and one final control transfer.
 - `source map`: Data that connects generated code or runtime failures to positions in the original source.
 - `allocation receipt`: A session record that identifies one reserved buffer and its release.
-- `resource ledger`: Per-invocation records for live tensor storage and storage budgets.
+- `resource ledger`: Per-invocation records for retained resources and their execution budgets.
 - `backing allocation`: The reserved buffer shared by immutable tensor views.
 - `allocation`: A runtime operation that reserves memory for a value or internal object.
 - `garbage collector`: A runtime component that reclaims memory which a program can no longer access.
