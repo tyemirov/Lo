@@ -2,6 +2,9 @@ use super::*;
 use std::os::unix::process::{CommandExt, ExitStatusExt};
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
+
+const MAX_PROBE_STREAM_BYTES: usize = 8 << 20;
+
 pub(super) struct Probe {
     bound: Result<Bound, String>,
 }
@@ -316,6 +319,9 @@ fn read_stream(
                 return Ok(());
             }
             Ok(count) => {
+                if count > MAX_PROBE_STREAM_BYTES - output.len() {
+                    return Err(limit("open-file probe output"));
+                }
                 context
                     .values
                     .preflight(output.len() as u64 + count as u64 + 16)?;
