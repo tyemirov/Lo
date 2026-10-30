@@ -33,7 +33,9 @@ func minimumTensorSteps(t *testing.T, text string) uint64 {
 	lo, hi := uint64(1), uint64(10000)
 	for lo < hi {
 		mid := (lo + hi) / 2
-		budget, err := execution.NewBudget(mid)
+		budgetInput := execution.DefaultBudgetInput()
+		budgetInput.Steps = mid
+		budget, err := execution.NewBudget(budgetInput)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -104,7 +106,9 @@ flow Work() -> Int onError Handle { seed=Tensor.new(List.new(1.0),List.new()); a
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	controlled := &tensorCancellation{Context: ctx, cancel: cancel}
-	budget, err := execution.NewBudget(10000000)
+	budgetInput := execution.DefaultBudgetInput()
+	budgetInput.Steps = 10000000
+	budget, err := execution.NewBudget(budgetInput)
 	if err != nil {
 		t.Fatal(err)
 	}

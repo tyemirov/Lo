@@ -95,6 +95,7 @@ func builtinExamples() []builtinExample {
 		{"List.filter", `flow F(x: Scalar) -> Bool { return true }; return List.filter("abc", F)`, "List<Scalar>"},
 		{"List.fold", `flow F(acc: Int, x: Int) -> Int { return Math.add(acc, x) }; return List.fold(List.new(1), 0, F)`, "Int"},
 		{"Flow.fold", `flow F(acc: Int, x: Int) -> Int { return Math.add(acc, x) }; return Flow.fold(List.new(1), 0, F)`, "Int"},
+		{"Flow.worklist", `flow F(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, item), items: List.new(), stop: false) }; return Flow.worklist(List.new(1), 0, F)`, "Int"},
 		{"List.flat_map", `flow F(x: Int) -> List<Int>! { return List.new(x) }; return List.flat_map(List.new(1), F)`, "List<Int>!"},
 		{"List.unfold", `flow F(x: Int) -> Record{value: String, next_state: Int}! { return Record.new(value: Int.to_string(x), next_state: Math.add(x, 1)) }; return List.unfold(0, 2, F)`, "List<String>!"},
 		{"List.length", `return List.length("héllo")`, "Int"},

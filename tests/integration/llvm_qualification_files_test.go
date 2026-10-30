@@ -36,9 +36,14 @@ func TestLLVMFileRemovalFailures(t *testing.T) {
 	for index, fixture := range []struct {
 		name, kind, stage string
 		completed         int
-	}{{"preflight-change", "File.EntryChanged", "preflight", 0}, {"per-entry-change", "File.EntryChanged", "remove", 1}, {"remove-failure", "File.RemoveFailed", "remove", 2}, {"cancel-after-remove", "", "remove", 1}, {"cleanup-failure", "", "finalize", 4}, {"failure-and-cleanup", "File.RemoveFailed", "remove", 2}} {
+	}{{"preflight-change", "File.EntryChanged", "preflight", 0}, {"per-entry-change", "File.EntryChanged", "remove", 1}, {"remove-failure", "File.RemoveFailed", "remove", 2}, {"cancel-after-remove", "", "remove", 1}, {"cleanup-failure", "", "finalize", 4}, {"failure-and-cleanup", "File.RemoveFailed", "remove", 2}, {"failure-and-cleanup-handler", "File.RemoveFailed", "remove", 2}} {
 		text := `flow Clean()->Int!{entries=File.list(File.Path.new("grant"));removal=File.Remove.new(entries);commit removal;return 7};return Clean()`
-		scenario := qualificationFileScenario(fixture.name, text, index+3)
+		number := index + 3
+		if fixture.name == "failure-and-cleanup-handler" {
+			text = `flow Failed(error:Error)->Int{return 0};flow Clean()->Int onError Failed{entries=File.list(File.Path.new("grant"));removal=File.Remove.new(entries);commit removal;return 7};return Clean()`
+			number = 8
+		}
+		scenario := qualificationFileScenario(fixture.name, text, number)
 		scenario.verify = func(t *testing.T, got result) {
 			if got.status != 0 || got.stderr != "" {
 				t.Fatalf("removal fixture: %+v", got)
@@ -83,6 +88,34 @@ func TestLLVMNestedFoldCancellationProgress(t *testing.T) {
 				valueJSON(t, fields[field], expected)
 			}
 		}
+		progressFields(t, result{stderr: got.stdout}, 1, 1, "remove", "")
+	}
+	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), []llvmRuntimeScenario{scenario})
+}
+
+func TestLLVMWorklistCancellationProgress(t *testing.T) {
+	text := `flow Step(state:Int,entry:File.Entry)->Record{state:Int,items:List<File.Entry>,stop:Bool}!{target=File.Remove.new(List.new(entry));commit target;return Record.new(state:Math.add(state,1),items:List.new(),stop:false)};flow Clean()->Int!{entries=File.list(File.Path.new("grant"));return Flow.worklist(entries,0,Step)};return Clean()`
+	scenario := qualificationFileScenario("worklist-third-removal", text, 9)
+	scenario.verify = func(t *testing.T, got result) {
+		if got.status != 0 || got.stderr != "" || !strings.Contains(got.stdout, "runtime.cancelled") {
+			t.Fatalf("worklist cancellation: %+v", got)
+		}
+		var report struct {
+			Diagnostics []struct {
+				Progress []runtimeValue `json:"flow_progress"`
+			}
+		}
+		if err := json.Unmarshal([]byte(got.stdout), &report); err != nil {
+			t.Fatal(err)
+		}
+		if len(report.Diagnostics) != 1 || len(report.Diagnostics[0].Progress) != 1 {
+			t.Fatalf("missing worklist progress: %s", got.stdout)
+		}
+		fields := foldProgressFields(t, report.Diagnostics[0].Progress[0])
+		valueJSON(t, fields["operation"], `"Flow.worklist"`)
+		valueJSON(t, fields["completed_count"], `"2"`)
+		valueJSON(t, fields["state"], `"2"`)
+		valueJSON(t, fields["pending_count"], `"2"`)
 		progressFields(t, result{stderr: got.stdout}, 1, 1, "remove", "")
 	}
 	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), []llvmRuntimeScenario{scenario})

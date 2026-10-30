@@ -38,7 +38,7 @@ func TestLLVMLoweringBuild(t *testing.T) {
 			if receipt.Command != "build" || receipt.Status != "ok" || receipt.Artifact != output || receipt.Target != target {
 				t.Fatalf("LLVM build receipt: %+v", receipt)
 			}
-			if receipt.Emit != "llvm" || receipt.ABI != "lo-native-2" {
+			if receipt.Emit != "llvm" || receipt.ABI != "lo-native-3" {
 				t.Fatalf("module receipt omits artifact kind or ABI: %+v", receipt)
 			}
 			module, err := os.ReadFile(output)
@@ -70,7 +70,7 @@ func TestLLVMLoweringBuild(t *testing.T) {
 					found = true
 				}
 			}
-			if description.ABI != "lo-native-2" || !found {
+			if description.ABI != "lo-native-3" || !found {
 				t.Fatalf("metadata lost the ABI or full integer literal: %+v", description)
 			}
 		})

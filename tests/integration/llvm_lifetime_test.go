@@ -94,7 +94,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 		t.Fatal(err)
 	}
 	host := runtime.GOOS + "/" + runtime.GOARCH
-	if distribution.ABI != "lo-native-2" || distribution.LLVM != "21.1.8" || distribution.Host != host {
+	if distribution.ABI != "lo-native-3" || distribution.LLVM != "21.1.8" || distribution.Host != host {
 		t.Fatal("toolchain identity mismatch")
 	}
 	defaultTarget, exists := distribution.Targets[selectedTarget]

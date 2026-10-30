@@ -60,7 +60,7 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.ListUnfold:  `{"type":"List<String>","value":[{"type":"String","value":"0"},{"type":"String","value":"1"}]}`, catalog.Length: `"5"`, catalog.FileRead: `{"type":"Bytes","value":"eA=="}`,
 		catalog.FileAppend:    `{"operation":"File.Append.new","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
 		catalog.FileWrite:     `{"operation":"File.Write.new","file_path":{"type":"File.Path","value":"unwritten"},"file_content":{"type":"Bytes","value":"ZGF0YQ=="}}`,
-		catalog.FilePathEqual: `true`, catalog.FlowFold: `"1"`,
+		catalog.FilePathEqual: `true`, catalog.FlowFold: `"1"`, catalog.FlowWorklist: `"1"`,
 		catalog.FileList:      `{"type":"List<File.Entry>","value":[]}`,
 		catalog.FileOpenPaths: `{"type":"List<File.Path>","value":[]}`,
 		catalog.FileRemove:    `{"type":"File.Remove","value":{"operation":"File.Remove.new","entries":{"type":"List<File.Entry>","value":[]}}}`,

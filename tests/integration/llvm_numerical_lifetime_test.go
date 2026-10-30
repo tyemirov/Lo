@@ -119,13 +119,13 @@ func TestLLVMNumericalTapeBudgetBoundary(t *testing.T) {
 	}
 	expected := runExecutable(t, binary, "run", source, "--format", "json", "--max-steps", "100000000")
 	actual := runExecutable(t, artifact, "run", "--format", "json", "--max-steps", "100000000")
-	if expected.status != 2 || !strings.Contains(expected.stderr, "boundary operation failed: execution limit: evaluation value bytes") {
+	if expected.status != 2 || !strings.Contains(expected.stderr, "boundary operation failed: execution limit: live value bytes") {
 		t.Fatalf("evaluator tape boundary: %+v", expected)
 	}
 	if actual != expected {
 		t.Fatalf("tape boundary native %+v evaluator %+v", actual, expected)
 	}
-	scenarios := []llvmRuntimeScenario{{name: "tape-class-logical-boundary-cleanup", source: llvmTapeBudgetSource(), number: 8, harness: "testdata/native-runtime/numerical.c"}}
+	scenarios := []llvmRuntimeScenario{{name: "live-value-boundary-tape-cleanup", source: llvmTapeBudgetSource(), number: 8, harness: "testdata/native-runtime/numerical.c"}}
 	runLLVMRuntimeScenarios(t, scenarios)
 	if runtime.GOOS != "linux" || runtime.GOARCH != "arm64" {
 		runLLVMRuntimeTargetScenarios(t, "linux/arm64", scenarios)

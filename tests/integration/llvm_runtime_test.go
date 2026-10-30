@@ -121,7 +121,7 @@ return List.fold(List.new(1,2,3),123456789012345678901234567890,Add)`)
 	if err := json.Unmarshal([]byte(built.stdout), &receipt); err != nil {
 		t.Fatal(err)
 	}
-	if receipt.Codegen != "llvm" || receipt.ABI != "lo-native-2" || len(receipt.Runtime) != 64 {
+	if receipt.Codegen != "llvm" || receipt.ABI != "lo-native-3" || len(receipt.Runtime) != 64 {
 		t.Fatalf("LLVM build identity: %+v", receipt)
 	}
 	if err := os.Remove(input); err != nil {

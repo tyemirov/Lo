@@ -204,7 +204,9 @@ func FuzzRuntimeSource(f *testing.F) {
 			return
 		}
 		b := &observedBoundary{read: func(string, int) (value.Bytes, error) { return value.NewBytes([]byte("input")), nil }}
-		budget, err := execution.NewBudget(1000)
+		budgetInput := execution.DefaultBudgetInput()
+		budgetInput.Steps = 1000
+		budget, err := execution.NewBudget(budgetInput)
 		if err != nil {
 			t.Fatal(err)
 		}

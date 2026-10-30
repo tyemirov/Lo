@@ -90,7 +90,7 @@ func TestProcessResourceOnlyFailurePublicProgress(t *testing.T) {
 		t.Fatal("resource-only failure did not settle within its lifecycle")
 	}
 	progress := execution.ProcessProgress(runErr)
-	if progress == nil || progress.Field("start_confirmed") != value.Bool(false) || progress.Field("cleanup_complete") != value.Bool(false) {
+	if progress == nil || progress.Field("start_confirmed").(value.Boolean).Bool() || progress.Field("cleanup_complete").(value.Boolean).Bool() {
 		t.Fatalf("resource-only ownership fabricated creation or cleanup: %v", progress)
 	}
 	var diagnostic bytes.Buffer

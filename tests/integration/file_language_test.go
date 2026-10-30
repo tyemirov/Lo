@@ -379,13 +379,12 @@ func TestFileLanguageConstructionBudget(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer files.Close()
+			entries, err := value.NewList(fileLanguageListType(t), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			expectedWeight := entries.Weight() + 32 + uint64(len(catalog.FileRemove))
 			program, err := execution.NewProgram(func(session execution.Session) (value.Value, error) {
-				entries, err := value.NewList(fileLanguageListType(t), nil)
-				if err != nil {
-					return nil, err
-				}
-				expectedWeight := entries.Weight() + 32 + uint64(len(catalog.FileRemove))
-				session.AddWeight(execution.MaxEvaluationWeight - expectedWeight + missing)
 				fixture, err := source.New("budget.lo", "fixture")
 				if err != nil {
 					return nil, err
@@ -413,7 +412,13 @@ func TestFileLanguageConstructionBudget(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, err = program.Run(context.Background(), files, execution.DefaultBudget(), device.DefaultConfig())
+			budgetInput := execution.DefaultBudgetInput()
+			budgetInput.Limits.LiveBytes = expectedWeight - missing
+			budget, err := execution.NewBudget(budgetInput)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = program.Run(context.Background(), files, budget, device.DefaultConfig())
 			if missing == 0 && err != nil {
 				t.Fatal(err)
 			}

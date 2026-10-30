@@ -237,7 +237,7 @@ func controlledLLVMManifest(t *testing.T, root, tool, action string) string {
 	for _, name := range names {
 		inputs[name] = identity("input")
 	}
-	manifest := map[string]any{"abi": "lo-native-2", "llvm": "21.1.8", "host": host, "compiler": identity(compilerName), "targets": map[string]any{host: map[string]any{"triple": triple, "linker": identity(linkerName), "runtime": identity("input"), "inputs": inputs, "link_args": recipe}}}
+	manifest := map[string]any{"abi": "lo-native-3", "llvm": "21.1.8", "host": host, "compiler": identity(compilerName), "targets": map[string]any{host: map[string]any{"triple": triple, "linker": identity(linkerName), "runtime": identity("input"), "inputs": inputs, "link_args": recipe}}}
 	if host == "linux/arm64" {
 		selectedManifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 		data, err := os.ReadFile(selectedManifest)

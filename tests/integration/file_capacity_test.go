@@ -26,7 +26,7 @@ func TestFileObservationDirectoryCapacity(t *testing.T) {
 				paths[index] = fmt.Sprintf("File.Path.new(%q)", root)
 				arguments = append(arguments, "--list-root", root)
 			}
-			text := fmt.Sprintf(`flow Observe(count: Int, path: File.Path) -> Int! { directory = File.directory(path); return Math.add(count, 1) }; flow Main() -> Int! { count = Flow.fold(List.new(%s), 0, Observe); repeated = File.directory(File.Path.new(%q)); return count }; return Main()`, strings.Join(paths, ","), first)
+			text := fmt.Sprintf(`flow Keep(directories: List<File.Directory>) -> List<File.Directory> { return directories }; flow Observe(directories: List<File.Directory>, path: File.Path) -> List<File.Directory>! { directory = File.directory(path); return List.flat_map(List.new(directories, List.new(directory)), Keep) }; flow Main() -> Int! { directories = Flow.fold(List.new(%s), List.new(), Observe); repeated = File.directory(File.Path.new(%q)); return List.length(directories) }; return Main()`, strings.Join(paths, ","), first)
 			arguments = append([]string{"run", sourceFile(t, text)}, arguments...)
 			arguments = append(arguments, "--format", "json")
 			got := run(t, arguments...)
@@ -35,7 +35,7 @@ func TestFileObservationDirectoryCapacity(t *testing.T) {
 				return
 			}
 			if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
-				t.Fatalf("129th directory must fail at the public capacity boundary: %+v", got)
+				t.Fatalf("129th live directory must fail at the configured host capacity boundary: %+v", got)
 			}
 		})
 	}

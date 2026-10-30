@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
@@ -259,6 +260,9 @@ func TestF025ScanVanishedLimit(t *testing.T) {
 			entries = append(entries, f025NamedEntry{name: fmt.Sprintf("vanished-%05d", enumerated)})
 			enumerated++
 		}
+		if enumerated == 10_001 {
+			return entries, io.EOF
+		}
 		return entries, nil
 	}
 	filesystem.stat = func(dir *os.Root, name string, occurrence int) (os.FileInfo, error) {
@@ -267,7 +271,13 @@ func TestF025ScanVanishedLimit(t *testing.T) {
 		}
 		return filesystem.FileIO.Lstat(dir, name)
 	}
-	_, err, got := injectedFileProgram(t, context.Background(), root, fmt.Sprintf(`return File.scan(File.Path.new(%q))`, root), filesystem)
+	policy := execution.DefaultBudgetInput()
+	policy.Limits.FileEntries = 10_000
+	budget, err := execution.NewBudget(policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err, got := injectedFileProgramWithBudget(t, context.Background(), root, fmt.Sprintf(`return File.scan(File.Path.new(%q))`, root), filesystem, budget)
 	if err == nil || !strings.Contains(got.stderr, "runtime.limit") || !strings.Contains(got.stderr, "directory entries") {
 		t.Fatalf("vanished names escaped discovery bound: %v %+v", err, got)
 	}
