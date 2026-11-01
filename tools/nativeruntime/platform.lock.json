@@ -172,9 +172,9 @@
     },
     {
       "archive": "brotli.tbz2",
-      "url": "https://packages.macports.org/brotli/brotli-1.2.0_0.darwin_20.arm64.tbz2",
-      "sha256": "50bc7c54e0e8d10aeeb594237cdce4ed67e83c78256a9b453f0ca4ffeec2e37f",
-      "bytes": 418325
+      "url": "https://packages.macports.org/brotli/brotli-1.2.1_0.darwin_25.arm64.tbz2",
+      "sha256": "e52e15b884ee0c3b74e5ac5292550cdad29619f48d7e182d3024ce4ebe81a01b",
+      "bytes": 411321
     },
     {
       "archive": "gmp.tbz2",

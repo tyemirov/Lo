@@ -1,0 +1,32 @@
+{
+  "failed_runs": [
+    "https://github.com/tyemirov/Lo/actions/runs/41363096417",
+    "https://github.com/tyemirov/Lo/actions/runs/41363091983"
+  ],
+  "missing_url": "https://packages.macports.org/brotli/brotli-1.2.0_0.darwin_20.arm64.tbz2",
+  "http_status": 404,
+  "replacement": {
+    "archive": "brotli.tbz2",
+    "url": "https://packages.macports.org/brotli/brotli-1.2.1_0.darwin_25.arm64.tbz2",
+    "sha256": "e52e15b884ee0c3b74e5ac5292550cdad29619f48d7e182d3024ce4ebe81a01b",
+    "bytes": 411321
+  },
+  "verified_platform_archives": 43,
+  "platform_lock_sha256": "9938e5c4e01aa59df18fd32844e0149073cb9bc456e4d2d2d9947e4a0b6149e7",
+  "preparation": "pass",
+  "download_diagnostic_tests": {
+    "result": "pass",
+    "count": 3
+  },
+  "diagnostic_stability": {
+    "result": "pass",
+    "runs": 5,
+    "seconds": 13.792
+  },
+  "independent_review": "pass",
+  "runtime_tools": {
+    "result": "pass",
+    "count": 21,
+    "seconds": 26.1
+  }
+}
