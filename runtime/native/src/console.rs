@@ -256,7 +256,7 @@ impl Console {
                         }
                     }
                 }
-                Ok(())
+                check().map_err(WriteFailure::Terminal)
             }
         }
     }
