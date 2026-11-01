@@ -135,7 +135,7 @@ func TestFileLanguageSessionIsolation(t *testing.T) {
 		}
 		empty, err = value.NewRemovalEffect(session.FileSession(), emptyList)
 		return value.Int64(0), err
-	}, nil)
+	}, nil, types.Int())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +152,7 @@ func TestFileLanguageSessionIsolation(t *testing.T) {
 			t.Errorf("foreign empty removal: %v", err)
 		}
 		return value.Int64(0), nil
-	}, nil)
+	}, nil, types.Int())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -220,7 +220,7 @@ func TestFileLanguageDirectoryBudget(t *testing.T) {
 		}
 		_, err = files.List(session.Context(), next)
 		return nil, err
-	}, nil)
+	}, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestFileLanguageLateFailureProgress(t *testing.T) {
 					return nil, session.ChargeValue(value.NewBytes(make([]byte, execution.MaxValueWeight)))
 				}
 				return nil, session.ReserveFile(execution.DefaultSteps+1, 0)
-			}, nil)
+			}, nil, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -317,7 +317,7 @@ func TestFileLanguageHTTPDisconnectProgress(t *testing.T) {
 			return nil, err
 		}
 		return session.Boundary().Commit(session.Context(), target)
-	}, []execution.Handler{handler})
+	}, []execution.Handler{handler}, types.ServerReceipt())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -408,7 +408,7 @@ func TestFileLanguageConstructionBudget(t *testing.T) {
 					return nil, err
 				}
 				return value.Int64(0), nil
-			}, nil)
+			}, nil, types.Int())
 			if err != nil {
 				t.Fatal(err)
 			}

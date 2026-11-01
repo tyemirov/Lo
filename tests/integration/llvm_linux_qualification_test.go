@@ -20,7 +20,35 @@ func runLinuxLLVMExecutable(t *testing.T, executable string, arguments ...string
 
 func runLinuxLLVMExecutableWithCapture(t *testing.T, executable, capture string, arguments ...string) result {
 	t.Helper()
-	if runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
+	return runLinuxLLVMExecutableWithInputs(t, executable, capture, "", arguments...)
+}
+
+func runLinuxLLVMExecutableWithCompanion(t *testing.T, executable, companion string, arguments ...string) result {
+	t.Helper()
+	if companion == "" {
+		t.Fatal("Linux companion executable is required")
+	}
+	return runLinuxLLVMExecutableWithInputs(t, executable, "", companion, arguments...)
+}
+
+func runLinuxLLVMExecutableWithInputs(t *testing.T, executable, capture, companion string, arguments ...string) result {
+	t.Helper()
+	if companion != "" {
+		selected, err := filepath.Abs(companion)
+		if err != nil {
+			t.Fatal(err)
+		}
+		selected, err = filepath.EvalSymlinks(selected)
+		if err != nil {
+			t.Fatal(err)
+		}
+		relative, err := filepath.Rel(repository, selected)
+		if err != nil || !filepath.IsLocal(relative) {
+			t.Fatal("Linux companion executable leaves repository")
+		}
+		companion = selected
+	}
+	if companion == "" && runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
 		return runExecutableAt(t, filepath.Dir(executable), executable, arguments...)
 	}
 	preparation := os.Getenv("LO_NATIVE_PREPARATION")
@@ -48,6 +76,10 @@ func runLinuxLLVMExecutableWithCapture(t *testing.T, executable, capture string,
 	args := []string{"-B", filepath.Join(repository, "tools/nativeruntime/run.py"), "--preparation", preparation}
 	if capture != "" {
 		args = append(args, "--capture-file", capture)
+	}
+	if companion != "" {
+		args = append(args, "--companion", companion)
+		arguments = append([]string{"/companion"}, arguments...)
 	}
 	args = append(args, executable)
 	args = append(args, arguments...)

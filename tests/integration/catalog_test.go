@@ -14,6 +14,9 @@ func builtinExamples() []builtinExample {
 	executablePath := repository + "/testdata/inert-process/executable"
 	directoryPath := repository + "/testdata/inert-process/directory"
 	examples := []builtinExample{
+		{catalog.ConsoleLineNew, `return Console.Line.new("stdout", "catalog", true)`, "Console.Line!"},
+		{catalog.ProgramExitNew, `flow Main() -> Record{terminal: Program.Exit}! { terminal = Program.Exit.new(2, Bytes.new("out"), Bytes.new("err")); return Record.new(terminal: terminal) }; return Main()`, "Record{terminal: Program.Exit}!"},
+		{catalog.CLIParse, `return CLI.parse(List.new("--verbose"), List.new(Record.new(name: "--verbose", aliases: List.new("-v"), group: "", help: "Show detail")), "catalog", "", true)`, "CLI.Options!"},
 		{"Host.Invocation.current", `flow Main() -> Int! { initial = Host.Invocation.current(); return List.length(initial.arguments) }; return Main()`, "Int!"},
 		{"Process.Context.current", `return Process.Context.current()`, "Process.Context!"},
 		{"Process.Context.new", fmt.Sprintf(`return Process.Context.new(Map.new(), File.Path.new(%q))`, directoryPath), "Process.Context!"},

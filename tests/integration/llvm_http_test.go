@@ -227,14 +227,9 @@ func TestLLVMHTTPErrorHandlerOnce(t *testing.T) {
 	}
 }
 
-func TestLLVMLinuxHTTPVerifiedTLS(t *testing.T) {
-	artifact := linuxLLVMArtifact(t, httpClientSource("https://127.0.0.1:34443/resource", "GET", `List.new()`, "", `response=commit target; return response`))
+func linuxHTTPDriver(t *testing.T) string {
+	t.Helper()
 	directory := t.TempDir()
-	data, err := os.ReadFile(artifact)
-	if err != nil {
-		t.Fatal(err)
-	}
-	writeLLVMFixture(t, filepath.Join(directory, "program"), data)
 	output := qualificationFixture(t, "linux-http-driver")
 	if output == "" {
 		helper, err := os.ReadFile(filepath.Join(repository, "tests/integration/testdata/native-http/linux_driver.go.txt"))
@@ -255,7 +250,20 @@ func TestLLVMLinuxHTTPVerifiedTLS(t *testing.T) {
 			t.Fatalf("build isolated guest HTTP driver: %v: %s", err, data)
 		}
 	}
-	got := runLinuxLLVMExecutable(t, output)
+	return output
+}
+
+func TestLLVMLinuxCompanionExecutable(t *testing.T) {
+	artifact := linuxLLVMArtifact(t, cliStackProgram("Program.Exit", `return Program.Exit.new(7, Bytes.new("companion stdout"), Bytes.new("companion stderr"))`))
+	got := runLinuxLLVMExecutableWithCompanion(t, linuxHTTPDriver(t), artifact, "--run-companion")
+	if got.status != 7 || got.stdout != "companion stdout" || got.stderr != "companion stderr" {
+		t.Fatalf("Linux companion executable: %+v", got)
+	}
+}
+
+func TestLLVMLinuxHTTPVerifiedTLS(t *testing.T) {
+	artifact := linuxLLVMArtifact(t, httpClientSource("https://127.0.0.1:34443/resource", "GET", `List.new()`, "", `response=commit target; return response`))
+	got := runLinuxLLVMExecutableWithCompanion(t, linuxHTTPDriver(t), artifact)
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("Linux verified TLS: %+v", got)
 	}
