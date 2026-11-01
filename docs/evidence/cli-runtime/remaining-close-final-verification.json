@@ -1,0 +1,570 @@
+{
+  "sha256": {
+    "testdata/native-qualification/http-cancel-cleanup.c": "69d2ceed1f823990a585ce86377b1e298136110e1607d176b7eca3eae44531ac",
+    "testdata/native-qualification/file-failures.c": "8da28b2aea3d062b9da5e9e826ac25c8fa16707a4ee0d1c3bba1979b400f4d3f",
+    "testdata/native-qualification/server-process-cleanup.c": "338af4acdf0d50fb103aea87fffa2b5c8bf7d346daef447dc5f911dd361c18e3",
+    "tests/integration/llvm_qualification_files_test.go": "6831aaf366b5c353d6f860866b2669a47ec4236f2dac46102d08062fe87147e6"
+  },
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "runtime_receipt_matches": true,
+  "darwin_seconds": 7.775,
+  "linux_seconds": 21.951,
+  "results": [
+    {
+      "target": "darwin/arm64",
+      "status": 0,
+      "outer_timeout": false,
+      "seconds": 9.275,
+      "owned_processes": {
+        "14397": [
+          14396,
+          14397,
+          "/Applications/Xcode.app/Contents/Developer/usr/bin/make test-native NATIVE_RUNTIME_STATE=_scratch/cli-stack-20261031/preparation-proc LLVM_TOOLCHAIN=_scratch/cli-stack-20261031/runtime-proc/toolchain.json TEST_ARGS=-run '^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup)' -count=1 -v -timeout=120s"
+        ],
+        "14402": [
+          14397,
+          14397,
+          "(bash)"
+        ],
+        "14403": [
+          14402,
+          14397,
+          "(Python)"
+        ],
+        "14404": [
+          14403,
+          14397,
+          "(clang)"
+        ],
+        "14407": [
+          14404,
+          14397,
+          "(ld)"
+        ],
+        "14409": [
+          14397,
+          14397,
+          "/bin/sh -c LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN=\"/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json\" LO_NATIVE_PREPARATION=\"/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc\" go test -timeout=120m ./tests/integration -run '^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup)' -count=1 -v -timeout=120s </dev/null"
+        ],
+        "14410": [
+          14409,
+          14397,
+          "go test -timeout=120m ./tests/integration -run ^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup) -count=1 -v -timeout=120s"
+        ],
+        "14434": [
+          14410,
+          14397,
+          "(compile)"
+        ],
+        "14443": [
+          14410,
+          14397,
+          "/opt/homebrew/Cellar/go/1.27.3/libexec/pkg/tool/darwin_arm64/link -o /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build1356185938/b001/integration.test -importcfg /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build1356185938/b001/importcfg.link -s -w -buildmode=pie -buildid=gknFQpJryURwnCJ-qLBO/oYfDZ6wBu2jJAJzByPhv/yE6KNUQmrWF7kCU6M-uN/gknFQpJryURwnCJ-qLBO -X testing.testBinary=1 -extld=cc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build1356185938/b001/_pkg_.a"
+        ],
+        "14441": [
+          14410,
+          14397,
+          "/opt/homebrew/Cellar/go/1.27.3/libexec/pkg/tool/darwin_arm64/vet -atomic -bools -buildtag -directive -errorsas -ifaceassert -nilfunc -printf -slog -stdversion -stringintconv -tests /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build1356185938/b130/vet.cfg"
+        ],
+        "14446": [
+          14410,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build1356185938/b001/integration.test -test.paniconexit0 -test.timeout=2h0m0s -test.run=^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup) -test.count=1 -test.v=true -test.timeout=2m0s"
+        ],
+        "14449": [
+          14446,
+          14397,
+          "go build -o /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/lo-integration-3580497594/lo ./cmd/lo"
+        ],
+        "14458": [
+          14449,
+          14397,
+          "(compile)"
+        ],
+        "14462": [
+          14449,
+          14397,
+          "/opt/homebrew/Cellar/go/1.27.3/libexec/pkg/tool/darwin_arm64/link -o /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build3698443412/b001/exe/a.out -importcfg /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build3698443412/b001/importcfg.link -buildmode=pie -buildid=Ea1Uq_fH-0pek42yKaWn/4lk8ceBypyaXiuEqPczF/dyfvVm8aN1gRYmPFOZ-J/Ea1Uq_fH-0pek42yKaWn -extld=cc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build/f4/f4987c8bf68538bc42c71e9f824f7883a4cd14a5c74ad09ec5f3dd580f371415-d"
+        ],
+        "14466": [
+          14446,
+          14397,
+          "(lo)"
+        ],
+        "14474": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMServerCallbackIndependentCleanupcallback-write-false-an3510382422/001/lifetime"
+        ],
+        "14484": [
+          14446,
+          14397,
+          "(ld64.lld)"
+        ],
+        "14486": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMServerCallbackIndependentCleanupcallback-write-true-and892364120/001/lifetime"
+        ],
+        "14496": [
+          14446,
+          14397,
+          "(ld64.lld)"
+        ],
+        "14501": [
+          14446,
+          14397,
+          "(lifetime)"
+        ],
+        "14512": [
+          14446,
+          14397,
+          "(clang)"
+        ],
+        "14516": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMHTTPClientCleanupEvidencecancelled-read-failure3797108625/001/lifetime"
+        ],
+        "14527": [
+          14446,
+          14397,
+          "(lifetime)"
+        ],
+        "14538": [
+          14446,
+          14397,
+          "(clang)"
+        ],
+        "14541": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileDiscoveryFailuresentry-limit839898535/001/lifetime"
+        ],
+        "14561": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileDiscoveryFailuresmissing-child3743895178/001/lifetime"
+        ],
+        "14566": [
+          14446,
+          14397,
+          "(lo)"
+        ],
+        "14573": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailurespreflight-change1178195053/001/lifetime"
+        ],
+        "14583": [
+          14446,
+          14397,
+          "(lifetime)"
+        ],
+        "14590": [
+          14446,
+          14397,
+          "(clang)"
+        ],
+        "14594": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailuresremove-failure544309357/001/lifetime"
+        ],
+        "14598": [
+          14446,
+          14397,
+          "(clang)"
+        ],
+        "14604": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailurescancel-after-remove204777397/001/lifetime"
+        ],
+        "14614": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailurescleanup-failure2766661162/001/lifetime"
+        ],
+        "14625": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailuresfailure-and-cleanup4217096030/001/lifetime"
+        ],
+        "14634": [
+          14446,
+          14397,
+          "(ld64.lld)"
+        ],
+        "14636": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailuresfailure-and-cleanup-handler1693508732/001/lifetime"
+        ],
+        "14646": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMNestedFoldCancellationProgressthird-removal205250318/001/lifetime"
+        ],
+        "14650": [
+          14446,
+          14397,
+          "(lo)"
+        ],
+        "14657": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMWorklistCancellationProgressworklist-third-removal1943219966/001/lifetime"
+        ],
+        "14670": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMReceiptSessionCleanupDiagnosticcompleted-write2786100199/001/lifetime"
+        ],
+        "14679": [
+          14446,
+          14397,
+          "(ld64.lld)"
+        ],
+        "14681": [
+          14446,
+          14397,
+          "(lifetime)"
+        ],
+        "14688": [
+          14446,
+          14397,
+          "(integration.test)"
+        ],
+        "14691": [
+          14446,
+          14397,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileLateFailureProgressvalue1180895979/001/lifetime"
+        ]
+      },
+      "remaining_owned": {},
+      "log": "_scratch/cli-stack-20261031/remaining-close-darwin-focused.log"
+    },
+    {
+      "target": "linux/arm64",
+      "status": 0,
+      "outer_timeout": false,
+      "seconds": 22.836,
+      "owned_processes": {
+        "14697": [
+          14396,
+          14697,
+          "/Applications/Xcode.app/Contents/Developer/usr/bin/make test-native NATIVE_RUNTIME_STATE=_scratch/cli-stack-20261031/preparation-proc LLVM_TOOLCHAIN=_scratch/cli-stack-20261031/runtime-proc/toolchain.json TEST_ARGS=-run '^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup)' -count=1 -v -timeout=120s"
+        ],
+        "14702": [
+          14697,
+          14697,
+          "(bash)"
+        ],
+        "14703": [
+          14702,
+          14697,
+          "(Python)"
+        ],
+        "14705": [
+          14703,
+          14697,
+          "(clang)"
+        ],
+        "14708": [
+          14705,
+          14697,
+          "(ld)"
+        ],
+        "14710": [
+          14697,
+          14697,
+          "/bin/sh -c LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN=\"/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json\" LO_NATIVE_PREPARATION=\"/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc\" go test -timeout=120m ./tests/integration -run '^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup)' -count=1 -v -timeout=120s </dev/null"
+        ],
+        "14711": [
+          14710,
+          14697,
+          "go test -timeout=120m ./tests/integration -run ^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup) -count=1 -v -timeout=120s"
+        ],
+        "14719": [
+          14711,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build2449810464/b001/integration.test -test.paniconexit0 -test.timeout=2h0m0s -test.run=^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup) -test.count=1 -test.v=true -test.timeout=2m0s"
+        ],
+        "14721": [
+          14719,
+          14697,
+          "(go)"
+        ],
+        "14722": [
+          14721,
+          14697,
+          "git status --porcelain"
+        ],
+        "14733": [
+          14721,
+          14697,
+          "/opt/homebrew/Cellar/go/1.27.3/libexec/pkg/tool/darwin_arm64/link -o /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build1177797203/b001/exe/a.out -importcfg /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/go-build1177797203/b001/importcfg.link -buildmode=pie -buildid=Ea1Uq_fH-0pek42yKaWn/4lk8ceBypyaXiuEqPczF/dyfvVm8aN1gRYmPFOZ-J/Ea1Uq_fH-0pek42yKaWn -extld=cc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build/f4/f4987c8bf68538bc42c71e9f824f7883a4cd14a5c74ad09ec5f3dd580f371415-d"
+        ],
+        "14737": [
+          14719,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/lo-integration-1968888306/lo build /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMServerCallbackIndependentCleanupcallback-write-false-an2828715271/002/3673960592.lo --emit llvm --target linux/arm64 --output /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMServerCallbackIndependentCleanupcallback-write-false-an2828715271/001/program.ll --format json"
+        ],
+        "14744": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMServerCallbackIndependentCleanupcallback-write-false-an2828715271/001/lifetime"
+        ],
+        "14748": [
+          14744,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-c7v0qjjl/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14757": [
+          14719,
+          14697,
+          "(clang)"
+        ],
+        "14763": [
+          14719,
+          14697,
+          "(Python)"
+        ],
+        "14766": [
+          14763,
+          14697,
+          "(qemu-system-aarc)"
+        ],
+        "14782": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMHTTPClientCleanupEvidenceordinary-read-failure2910393624/001/lifetime"
+        ],
+        "14785": [
+          14782,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-n_jk3emm/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14800": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMHTTPClientCleanupEvidencecancelled-read-failure3037689966/001/lifetime"
+        ],
+        "14803": [
+          14800,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-j5y__889/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14815": [
+          14719,
+          14697,
+          "(clang)"
+        ],
+        "14818": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileDiscoveryFailuresinvalid-name239347114/001/lifetime"
+        ],
+        "14822": [
+          14818,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-xixchlun/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14834": [
+          14719,
+          14697,
+          "(ld.lld)"
+        ],
+        "14836": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileDiscoveryFailuresentry-limit3901771473/001/lifetime"
+        ],
+        "14839": [
+          14836,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-4mhvc2m2/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14857": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileDiscoveryFailuresmissing-child4055900203/001/lifetime"
+        ],
+        "14860": [
+          14857,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-5feix2ui/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14876": [
+          14719,
+          14697,
+          "(ld.lld)"
+        ],
+        "14878": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailurespreflight-change724124583/001/lifetime"
+        ],
+        "14881": [
+          14878,
+          14697,
+          "(qemu-system-aarc)"
+        ],
+        "14892": [
+          14719,
+          14697,
+          "(clang)"
+        ],
+        "14896": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailuresper-entry-change2098710065/001/lifetime"
+        ],
+        "14899": [
+          14896,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-txaweeqg/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14908": [
+          14719,
+          14697,
+          "(clang)"
+        ],
+        "14914": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailuresremove-failure3687044716/001/lifetime"
+        ],
+        "14917": [
+          14914,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-t8u6dh59/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14927": [
+          14719,
+          14697,
+          "(lo)"
+        ],
+        "14933": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailurescancel-after-remove1067911348/001/lifetime"
+        ],
+        "14936": [
+          14933,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-ehr_p2f6/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14954": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailurescleanup-failure1117895178/001/lifetime"
+        ],
+        "14957": [
+          14954,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-mjwvh5_4/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14971": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailuresfailure-and-cleanup2665475990/001/lifetime"
+        ],
+        "14973": [
+          14971,
+          14697,
+          "(bsdtar)"
+        ],
+        "14975": [
+          14971,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-spn7szl4/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "14989": [
+          14719,
+          14697,
+          "(ld.lld)"
+        ],
+        "14990": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileRemovalFailuresfailure-and-cleanup-handler220378733/001/lifetime"
+        ],
+        "14993": [
+          14990,
+          14697,
+          "(qemu-system-aarc)"
+        ],
+        "15008": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMNestedFoldCancellationProgressthird-removal673634188/001/lifetime"
+        ],
+        "15012": [
+          15008,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-uvsw0x0x/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "15020": [
+          14719,
+          14697,
+          "(clang)"
+        ],
+        "15027": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMWorklistCancellationProgressworklist-third-removal2325763862/001/lifetime"
+        ],
+        "15030": [
+          15027,
+          14697,
+          "(qemu-system-aarc)"
+        ],
+        "15044": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMReceiptSessionCleanupDiagnosticcompleted-write3728827088/001/lifetime"
+        ],
+        "15048": [
+          15044,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-_yy7c1hd/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "15059": [
+          14719,
+          14697,
+          "(clang)"
+        ],
+        "15063": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileLateFailureProgresssteps4142886121/001/lifetime"
+        ],
+        "15066": [
+          15063,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-79mns8tq/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ],
+        "15075": [
+          14719,
+          14697,
+          "(clang)"
+        ],
+        "15081": [
+          14719,
+          14697,
+          "/opt/homebrew/Cellar/python@3.12/3.12.16/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -B /Users/tyemirov/Development/Research/Lo/tools/nativeruntime/run.py --preparation /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc /Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMFileLateFailureProgressvalue3388438171/001/lifetime"
+        ],
+        "15084": [
+          15081,
+          14697,
+          "/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/emulation/qemu-system-aarch64 -machine virt -accel tcg -cpu cortex-a72 -m 256 -display none -monitor none -serial stdio -no-reboot -nodefaults -nic none -kernel /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/vmlinuz-virt -initrd /Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc/guest-qu4cnas4/root.cpio -append console=ttyAMA0 rdinit=/init panic=-1 loglevel=3"
+        ]
+      },
+      "remaining_owned": {},
+      "log": "_scratch/cli-stack-20261031/remaining-close-linux-focused.log"
+    }
+  ],
+  "source_frozen": true
+}

@@ -1,0 +1,15 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run ^TestLLVMConsoleReadinessCancellation -count=1 -v </dev/null
+=== RUN   TestLLVMConsoleReadinessCancellation
+=== RUN   TestLLVMConsoleReadinessCancellation/stop-before-ready-acknowledgment
+    llvm_lifetime_test.go:365: lifetime: exit status 2
+        {"command":"serve","status":"ready","servers":[{"address":"127.0.0.1:62771"}]}
+        {"diagnostics":[{"code":"runtime.cancelled","stage":"runtime","message":"execution cancelled: context canceled","last_completed_activation":{"operation":"HTTP.listen","span":{"file":"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestLLVMConsoleReadinessCancellationstop-before-ready-acknowled2251669465/002/677109658.lo","start":{"offset":249,"line":1,"column":250},"end":{"offset":262,"line":1,"column":263}},"receipt":{"type":"HTTP.ServerReceipt","value":{"address":{"type":"String","value":"127.0.0.1:62771"},"port":{"type":"Int","value":"62771"}}}}}]}
+=== RUN   TestLLVMConsoleReadinessCancellation/fresh-stopped-event-deadline
+--- FAIL: TestLLVMConsoleReadinessCancellation (2.78s)
+    --- FAIL: TestLLVMConsoleReadinessCancellation/stop-before-ready-acknowledgment (0.67s)
+    --- PASS: TestLLVMConsoleReadinessCancellation/fresh-stopped-event-deadline (1.98s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	3.940s
+FAIL
+make: *** [test-native] Error 1

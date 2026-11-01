@@ -1,0 +1,6 @@
+{
+  "reason": "Linux HTTP fixture requires loopback initialization for lifecycle regression",
+  "test_pid": 4032,
+  "interruption": "SIGINT after active compiler children exited",
+  "active_children_at_interrupt": []
+}

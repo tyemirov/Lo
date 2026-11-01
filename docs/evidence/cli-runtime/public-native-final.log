@@ -1,0 +1,110 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run ^TestCLIStack -count=1 -v </dev/null
+=== RUN   TestCLIStackConsoleText
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackConsoleText (2.52s)
+=== RUN   TestCLIStackConsoleReceipt
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackConsoleReceipt (2.08s)
+=== RUN   TestCLIStackConsoleJSON
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackConsoleJSON (2.07s)
+=== RUN   TestCLIStackConsoleInertAndRedacted
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackConsoleInertAndRedacted (2.02s)
+=== RUN   TestCLIStackTerminalStatus
+=== RUN   TestCLIStackTerminalStatus/0
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackTerminalStatus/1
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackTerminalStatus/2
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackTerminalStatus (6.60s)
+    --- PASS: TestCLIStackTerminalStatus/0 (1.99s)
+    --- PASS: TestCLIStackTerminalStatus/1 (2.13s)
+    --- PASS: TestCLIStackTerminalStatus/2 (2.48s)
+=== RUN   TestCLIStackTerminalJSON
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackTerminalJSON (2.54s)
+=== RUN   TestCLIStackNestedTerminalIsInert
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackNestedTerminalIsInert (2.13s)
+=== RUN   TestCLIStackDeclaredArguments
+=== RUN   TestCLIStackDeclaredArguments/default
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackDeclaredArguments/canonical
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackDeclaredArguments/alias
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackDeclaredArguments/abbreviation
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackDeclaredArguments/repeat
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackDeclaredArguments (10.29s)
+    --- PASS: TestCLIStackDeclaredArguments/default (2.02s)
+    --- PASS: TestCLIStackDeclaredArguments/canonical (2.05s)
+    --- PASS: TestCLIStackDeclaredArguments/alias (2.07s)
+    --- PASS: TestCLIStackDeclaredArguments/abbreviation (2.14s)
+    --- PASS: TestCLIStackDeclaredArguments/repeat (2.01s)
+=== RUN   TestCLIStackDeclaredHelp
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackDeclaredHelp (2.06s)
+=== RUN   TestCLIStackInvalidConstructorsRedactPayload
+=== RUN   TestCLIStackInvalidConstructorsRedactPayload/destination
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackInvalidConstructorsRedactPayload/negative
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackInvalidConstructorsRedactPayload/large
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackInvalidConstructorsRedactPayload (6.38s)
+    --- PASS: TestCLIStackInvalidConstructorsRedactPayload/destination (2.20s)
+    --- PASS: TestCLIStackInvalidConstructorsRedactPayload/negative (2.11s)
+    --- PASS: TestCLIStackInvalidConstructorsRedactPayload/large (2.07s)
+=== RUN   TestCLIStackQuotaPreservesPrefixAndReservesTerminal
+=== RUN   TestCLIStackQuotaPreservesPrefixAndReservesTerminal/prefix
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackQuotaPreservesPrefixAndReservesTerminal/terminal
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackQuotaPreservesPrefixAndReservesTerminal (4.20s)
+    --- PASS: TestCLIStackQuotaPreservesPrefixAndReservesTerminal/prefix (2.12s)
+    --- PASS: TestCLIStackQuotaPreservesPrefixAndReservesTerminal/terminal (2.08s)
+=== RUN   TestCLIStackServeRejectsTerminalBeforeEvaluation
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackServeRejectsTerminalBeforeEvaluation (2.02s)
+=== RUN   TestCLIStackConsoleInspection
+--- PASS: TestCLIStackConsoleInspection (0.01s)
+=== RUN   TestCLIStackExecutableExample
+=== RUN   TestCLIStackExecutableExample/default
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackExecutableExample/dry-run
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackExecutableExample/report
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackExecutableExample/error
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== NAME  TestCLIStackExecutableExample
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackExecutableExample (11.11s)
+    --- PASS: TestCLIStackExecutableExample/default (2.25s)
+    --- PASS: TestCLIStackExecutableExample/dry-run (2.24s)
+    --- PASS: TestCLIStackExecutableExample/report (2.19s)
+    --- PASS: TestCLIStackExecutableExample/error (2.16s)
+=== RUN   TestCLIStackHelpPrecedesHostActions
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackHelpPrecedesHostActions (2.33s)
+=== RUN   TestCLIStackRecordSizeBoundaries
+=== RUN   TestCLIStackRecordSizeBoundaries/line-over-limit
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackRecordSizeBoundaries/terminal-over-limit
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+=== RUN   TestCLIStackRecordSizeBoundaries/line-at-limit
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackRecordSizeBoundaries (6.67s)
+    --- PASS: TestCLIStackRecordSizeBoundaries/line-over-limit (2.43s)
+    --- PASS: TestCLIStackRecordSizeBoundaries/terminal-over-limit (2.13s)
+    --- PASS: TestCLIStackRecordSizeBoundaries/line-at-limit (2.10s)
+=== RUN   TestCLIStackTerminalBinaryPayload
+    native_test.go:120: LO_NATIVE_RUNTIME=7e0668b09fadf758bc946c5233bd50f11a822fefc4e7c6a10b4f4e3d207e06f7
+--- PASS: TestCLIStackTerminalBinaryPayload (2.10s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	67.859s

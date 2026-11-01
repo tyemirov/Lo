@@ -111,6 +111,7 @@ The `Factory`, `Backend`, and `Buffer` interfaces isolate backend initialization
 A compute tensor has metadata and opaque storage.
 CPU numeric kernels require CPU data.
 `runner.RunContext` accepts a factory and receipt observer for tests through the public CLI execution contract.
+It also requires an explicit Console host under the [Go host API](go-console-host.md).
 The production CLI selects a backend through the factory for its build.
 The standard build provides simulation. The Metal build also provides authorized Metal transfers and computation.
 Open receipts record the selected backend identity without tensor contents.

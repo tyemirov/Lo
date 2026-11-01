@@ -1,0 +1,32 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+python3 -B tools/processbuild/identity.py build bin/lo-process-launcher internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:129:9: warning: 'sandbox_init' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  129 |     if (sandbox_init(profile, 0, &sandbox_error) != 0) {
+      |         ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:49:5: note: 'sandbox_init' has been explicitly marked deprecated here
+   49 | int sandbox_init(const char *profile, uint64_t flags, char **errorbuf);
+      |     ^
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:130:36: warning: 'sandbox_free_error' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  130 |         if (sandbox_error != NULL) sandbox_free_error(sandbox_error);
+      |                                    ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:68:6: note: 'sandbox_free_error' has been explicitly marked deprecated here
+   68 | void sandbox_free_error(char *errorbuf);
+      |      ^
+2 warnings generated.
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run '^TestLLVMLinux(CompanionExecutable|HTTPVerifiedTLS|Core)' -count=1 -v </dev/null
+=== RUN   TestLLVMLinuxCompanionExecutable
+--- PASS: TestLLVMLinuxCompanionExecutable (3.06s)
+=== RUN   TestLLVMLinuxHTTPVerifiedTLS
+--- PASS: TestLLVMLinuxHTTPVerifiedTLS (3.36s)
+=== RUN   TestLLVMLinuxCore
+=== RUN   TestLLVMLinuxCore/big-integer
+=== RUN   TestLLVMLinuxCore/unicode
+=== RUN   TestLLVMLinuxCore/callbacks
+=== RUN   TestLLVMLinuxCore/fold
+--- PASS: TestLLVMLinuxCore (10.90s)
+    --- PASS: TestLLVMLinuxCore/big-integer (2.69s)
+    --- PASS: TestLLVMLinuxCore/unicode (2.74s)
+    --- PASS: TestLLVMLinuxCore/callbacks (2.75s)
+    --- PASS: TestLLVMLinuxCore/fold (2.72s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	17.828s

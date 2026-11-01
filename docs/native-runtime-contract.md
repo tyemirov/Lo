@@ -159,6 +159,40 @@ Each pending item keeps its values, tensor storage, and directory observations u
 Scope cleanup releases resources that cannot escape through the result.
 The runtime checks new work without a separate worklist item limit.
 
+### Console Registration And Completion
+
+The [Console header](../runtime/native/include/lo_console.h) defines explicit native output registration and completion.
+`lo_context_set_console` accepts the context, destination mask, host data pointer, write callback, flush callback, and logical-byte quota.
+Mask 1 enables stdout, mask 2 enables stderr, and mask 3 enables both.
+A context starts without enabled output destinations.
+Registration requires the owner thread, a unique session, and no evaluation work.
+The setter rejects a second registration.
+
+Callbacks must return without blocking.
+Callbacks can execute on request threads.
+The session serializes callback access.
+The write callback receives a destination, byte pointer, byte count, and confirmed-count output pointer.
+It confirms only a consumed prefix.
+The count cannot exceed the supplied byte count.
+Success requires positive progress for nonempty input.
+The header defines success, would-block, closed, and failed results.
+Would-block requests another bounded attempt with cancellation checks.
+An invalid result or count is a terminal host failure.
+
+`lo_context_complete(context, final_value, application_status)` returns 1 after successful completion or 0 after failure.
+It accepts only the actual final value from that context, with its declared result type.
+It rejects active scopes, a different thread, a different value, or a second completion.
+The host must keep callback data alive through completion and context release.
+The API never exits the host process.
+It assigns the status output only when it returns 1.
+An ordinary root selects status zero without an automatic value renderer.
+The embedding host owns that renderer.
+
+Completion closes runtime resources and joins retained session ownership before terminal bytes.
+Output and cleanup failures override the requested application status.
+The caller owns the final value and must release it through the existing value API.
+The [CLI contract](cli-runtime-design.md) defines output bounds, byte framing, redaction, and failure progress.
+
 ### Program Metadata
 
 B008 introduced the shared source spans used by the current metadata format.
@@ -166,8 +200,10 @@ The current format uses `lo-native-3` for the execution policy constructor contr
 The runtime rejects all other ABI identities.
 The C result layout and operation call convention stay the same.
 
-The document contains `source`, `types`, `flows`, `derivatives`, `has_result`, `files`, `spans`, and `locations`.
+The document contains `source`, `types`, `flows`, `derivatives`, `has_result`, `result_type`, `files`, `spans`, and `locations`.
 It also contains `abi` and an optional `artifact` value.
+`result_type` is a type-table index, or null for an entry without a result.
+Its presence must agree with `has_result`.
 The compiler keeps source, type, flow, derivative, and location order.
 The location array index identifies each initial runtime site.
 

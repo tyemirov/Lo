@@ -45,6 +45,10 @@ The [adapter design](adapter-design.md) owns shared adapter rules and domain con
 Its [implementation plan](adapter-plan.md) maps the changes to compiler components and public acceptance.
 
 The compiler includes the shared purity rules, nominal File targets, typed receipts, and bound commits.
+It also includes nominal Console targets, terminal results, and pure declared option parsing.
+The [CLI contract](cli-runtime-design.md) defines output ownership, terminal completion, and option behavior.
+Checked root result metadata permits terminal entry rejection before serve evaluation.
+Both native metadata and trusted Go program construction carry that declared result type.
 HTTP headers, client actions, and automatic trace summaries pass focused interpreter and native qualification.
 Independent source review closed the current findings.
 
@@ -684,12 +688,20 @@ The default budget is 1,000,000 steps.
 `--max-steps POSITIVE_INTEGER` replaces that budget for one command.
 This option can occur only once.
 
+Console output has a separate host session quota.
+`--max-console-bytes UINT64` selects its cumulative logical-byte limit, with a default of 1048576.
+Zero disables this quota.
+The per-record bound and terminal payload bound remain active.
+JSON event bytes do not change logical-byte charges.
+
 | Resource | Limit |
 | --- | --- |
 | Active flow invocations | 256 |
 | Integer magnitude | 1,048,576 bits |
 | List elements or positive unfold count | 1,000,000 |
 | One file read or string payload | 16 MiB |
+| One Console line, including LF | 1 MiB |
+| Combined terminal stdout and stderr | 1 MiB |
 | One expanded value | 16 MiB of value weight |
 | All evaluated expression results | 64 MiB of accumulated value weight |
 | Tensor rank | 8 |

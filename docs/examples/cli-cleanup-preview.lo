@@ -1,0 +1,36 @@
+// Executable CLI selection example. This source does not remove files.
+
+flow StartupFailure(error: Error) -> Record{code: Int, stdout: Bytes, stderr: Bytes, lines: List<String>} {
+    code = Match.new(error.kind, "CLI.InvalidArguments": 2, _: 1)
+    return Record.new(code: code, stdout: Bytes.new(""), stderr: UTF8.Bytes.new(error.message), lines: List.new())
+}
+
+flow Startup() -> Record{code: Int, stdout: Bytes, stderr: Bytes, lines: List<String>} onError StartupFailure {
+    invocation = Host.Invocation.current()
+    flags = List.new(
+        Record.new(name: "--dry-run", aliases: List.new("-n"), group: "mode", help: "preview changes"),
+        Record.new(name: "--report", aliases: List.new("-r"), group: "mode", help: "show storage")
+    )
+    options = CLI.parse(invocation.arguments, flags, "cleanup-preview", "Select an application mode.", true)
+    dry_run = Map.get(options.flags, "--dry-run")
+    report = Map.get(options.flags, "--report")
+    mode = Match.new(dry_run, true: "dry-run selected", _: Match.new(report, true: "report selected", _: "default selected"))
+    return Match.new(options.help_requested,
+        true: Record.new(code: 0, stdout: UTF8.Bytes.new(options.help_text), stderr: Bytes.new(""), lines: List.new()),
+        _: Record.new(code: 0, stdout: Bytes.new(""), stderr: Bytes.new(""), lines: List.new(mode))
+    )
+}
+
+flow Print(count: Int, text: String) -> Int! {
+    line = Console.Line.new("stdout", text, true)
+    commit line
+    return Math.add(count, 1)
+}
+
+flow Main() -> Program.Exit! {
+    startup = Startup()
+    printed = Flow.fold(startup.lines, 0, Print)
+    return Program.Exit.new(startup.code, startup.stdout, startup.stderr)
+}
+
+return Main()

@@ -69,6 +69,8 @@ Those rules remain visible Lo code.
 The source reuses `Host.Invocation.current`, Process context operations, executable discovery, command construction, and typed termination results.
 It also reuses immutable File entries, `File.Remove.checked`, `Flow.fold`, pure List processors, records, maps, and scalar comparisons.
 UTF-8 conversion uses existing `UTF8.Bytes.new` and `UTF8.String.new`.
+The [CLI contract](cli-runtime-design.md) defines implemented Console, terminal, and declared option operations.
+The [executable CLI example](examples/cli-cleanup-preview.lo) verifies those operations without cleanup effects.
 The application does not require another Process namespace or a command for each named tool.
 
 The current reference remains authoritative for these implemented interfaces.
@@ -257,14 +259,11 @@ Resource admission and handle release require explicit tests before this example
 | Operations | Proposed contract |
 | --- | --- |
 | `Clock.now_unix_ns()` | Read fresh signed Unix nanoseconds for each application cutoff. |
-| `CLI.parse(arguments, flags, name, description, abbreviations)` | Parse declared Boolean flags, exclusive groups, repeated flags, unique prefixes, and automatic help. Invalid input gives `CLI.InvalidArguments`. |
-| `Console.Line.new(stream, text, flush)` | Construct an explicit line-output target for stdout or stderr. |
 | `Process.Arguments.format_shell(arguments)` | Pure shell quoting for display only. Execution continues to use argument lists. |
 | `Process.Command.with_output(command, output)` | Pure command copy with `capture` or inherited stdout/stderr. Stdin remains closed. |
 | `Process.Command.with_timeout(command, seconds)` | Pure command copy with a timeout subject to host admission limits. |
 | `Program.path()` | Observe the interpreted entry source or the native entry executable for program-scoped identity. |
 | `Lock.File.new(path, access, wait)` | Construct a lock target. Activation returns a session-owned lease or `Lock.Busy` for contention. |
-| `Program.Exit.new(code, stdout, stderr)` | Pure terminal result that selects the process status after session cleanup and final output. Returning an ordinary Int does not select a process status. |
 
 `CLI.Options` exposes `flags: Map<String,Bool>`, `help_requested: Bool`, and `help_text: String`.
 All declared flags are present and false until selected.
@@ -293,10 +292,13 @@ The audit compared all 100 branch bodies with the previous source AST.
 It verified unchanged selection heads, one selector evaluation, callback contexts, branch order, and accumulator chains.
 Static review found no flow-call cycles or commit-bearing Match expressions.
 The earlier catalog comparison identified 66 proposed operation names after the control revision.
-The current catalog implements `Flow.worklist`, which leaves 65 proposed names.
+The current catalog also implements `Flow.worklist`, Console, terminal construction, and declared options.
+The draft retains 62 proposed operation names after exclusion of implemented Match behavior.
 This list records draft dependencies and does not establish a minimal language backlog.
 
-The full application still fails type checking at the proposed `Program.Exit` type.
+The revised source contains 302 flows after the startup handler correction.
+The public parser accepts the revised source.
+The full application fails type checking at the proposed `Glob` type.
 Parser acceptance and structural review do not establish type correctness or runtime parity for the full application.
 The compiler and runtimes must implement or remove the other selected proposals before executable acceptance.
 

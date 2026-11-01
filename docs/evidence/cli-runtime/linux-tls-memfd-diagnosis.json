@@ -1,0 +1,88 @@
+{
+  "scope": "read-only CI9 Linux TLS driver diagnosis; no maintained source changes or builds",
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "bundle_receipt_matches": true,
+  "files_sha256": {
+    "runtime/native/src/cli.rs": "b0d570cdd9354e6ecffc21274ae27ae98ee41cba27582b032c6b5f38268b21b9",
+    "runtime/native/src/console_process.rs": "58b69fec2750c48b6b957ec67d66040a11fbd69204b74cefbc66a1df29e0c4df",
+    "runtime/native/src/console.rs": "b94202d80106bdda907689211060a5ec64e09f5116dff8a89698912247b1cd94",
+    "tests/integration/llvm_http_test.go": "a89f53e15c63f463cad061f4e5cd0cae1e1d772622c4cc66d64b28e11f1b7586",
+    "tests/integration/llvm_linux_qualification_test.go": "36865061af0af485d1dcc4be76d2538fc6ab912e9aab54373f47332a09759844",
+    "tests/integration/testdata/native-http/linux_driver.go.txt": "681a4059f51e7bc58819296ee8b7ce51cf84fe13b567a60e5750df8365004693",
+    "tools/nativeruntime/run.py": "3a27535e0ab53090eadaa8c5f4524abd79facace3e9670221b95b3f2347dddc3"
+  },
+  "observed_failure": {
+    "test": "TestLLVMLinuxHTTPVerifiedTLS",
+    "log": "_scratch/cli-stack-20261031/ci-final.log",
+    "line": 10316,
+    "status": 2,
+    "stdout": "",
+    "stderr": ""
+  },
+  "source_trace": [
+    {
+      "file": "tests/integration/testdata/native-http/linux_driver.go.txt",
+      "line": 35,
+      "fact": "execute creates memfd using syscall 279, writes embedded native artifact, then executes /proc/self/fd/3 through ExtraFiles."
+    },
+    {
+      "file": "runtime/native/src/console_process.rs",
+      "line": 20,
+      "fact": "Image.bind gets current_exe and immediately canonicalizes that pathname before registry protection."
+    },
+    {
+      "file": "runtime/native/src/console.rs",
+      "line": 92,
+      "fact": "Console.cli propagates Image.bind failure."
+    },
+    {
+      "file": "runtime/native/src/cli.rs",
+      "line": 272,
+      "fact": "lo_cli_main returns status2 without output if Console.cli admission fails."
+    }
+  ],
+  "diagnosis": "Linux current_exe for memfd execution names the anonymous deleted memfd image; that pathname cannot canonicalize to a retained filesystem artifact. This causes pre-evaluation Console admission failure. The reported failure does not establish a TLS or certificate failure.",
+  "verification_limit": "Source diagnosis and matching CI failure signature; no new instrumented guest run while CI9 source is frozen.",
+  "family_scan": {
+    "roots": [
+      "tests/integration/testdata",
+      "tests/integration"
+    ],
+    "patterns": [
+      "memfd",
+      "SYS_MEMFD",
+      "Syscall(279",
+      "/proc/self/fd/3"
+    ],
+    "only_native_memfd_child": "tests/integration/testdata/native-http/linux_driver.go.txt"
+  },
+  "existing_packaging": {
+    "simple_runner": "tools/nativeruntime/run.py packages only /probe, libraries, argument/stdin protocol, optional opted-in empty capture file; no general companion API.",
+    "batch_runner": "tools/loqualification/batch.py supports declared source/path payloads, but moving this single integration test to the batch lane would expand its dependencies."
+  },
+  "recommended_patch": {
+    "runtime_changes": [],
+    "files": [
+      "tools/nativeruntime/run.py",
+      "tests/integration/llvm_linux_qualification_test.go",
+      "tests/integration/llvm_http_test.go",
+      "tests/integration/testdata/native-http/linux_driver.go.txt"
+    ],
+    "changes": [
+      "Add explicit repository-local ELF companion packaging at one fixed guest path /companion, using the existing built native artifact without permission-mode operations.",
+      "Add Go helper for driver+companion: QEMU passes /companion; direct Linux ARM64 passes the original absolute artifact path.",
+      "Require TLS driver argv[1] and execute that stable artifact; remove embedded program, memfd creation and ExtraFiles.",
+      "Preserve trusted, wrong-name, untrusted, payload/status assertions and exactly-one remote request oracle."
+    ],
+    "acceptance": [
+      "Existing CI9 failure is the public red.",
+      "Focused TestLLVMLinuxHTTPVerifiedTLS must pass all three receipt scenarios.",
+      "Focused existing Linux core/Console output must remain green."
+    ],
+    "not_selected": [
+      "Runtime current_exe/argv0 fallback",
+      "memfd-specific image identity or helper transport",
+      "Guest-time executable materialization"
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+python3 -B tools/processbuild/identity.py build bin/lo-process-launcher internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:129:9: warning: 'sandbox_init' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  129 |     if (sandbox_init(profile, 0, &sandbox_error) != 0) {
+      |         ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:49:5: note: 'sandbox_init' has been explicitly marked deprecated here
+   49 | int sandbox_init(const char *profile, uint64_t flags, char **errorbuf);
+      |     ^
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:130:36: warning: 'sandbox_free_error' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  130 |         if (sandbox_error != NULL) sandbox_free_error(sandbox_error);
+      |                                    ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:68:6: note: 'sandbox_free_error' has been explicitly marked deprecated here
+   68 | void sandbox_free_error(char *errorbuf);
+      |      ^
+2 warnings generated.
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run '^TestLLVM(HTTPClientCleanupEvidence|FileDiscoveryFailures|FileRemovalFailures|NestedFoldCancellationProgress|WorklistCancellationProgress|ReceiptSessionCleanupDiagnostic|FileLateFailureProgress|ServerCallbackIndependentCleanup)' -count=1 -v -timeout=120s </dev/null
+=== RUN   TestLLVMServerCallbackIndependentCleanup
+=== RUN   TestLLVMServerCallbackIndependentCleanup/callback-write-false-and-session-cleanup
+=== RUN   TestLLVMServerCallbackIndependentCleanup/callback-write-true-and-session-cleanup
+--- PASS: TestLLVMServerCallbackIndependentCleanup (0.94s)
+    --- PASS: TestLLVMServerCallbackIndependentCleanup/callback-write-false-and-session-cleanup (0.54s)
+    --- PASS: TestLLVMServerCallbackIndependentCleanup/callback-write-true-and-session-cleanup (0.33s)
+=== RUN   TestLLVMHTTPClientCleanupEvidence
+=== RUN   TestLLVMHTTPClientCleanupEvidence/ordinary-read-failure
+=== RUN   TestLLVMHTTPClientCleanupEvidence/cancelled-read-failure
+--- PASS: TestLLVMHTTPClientCleanupEvidence (0.65s)
+    --- PASS: TestLLVMHTTPClientCleanupEvidence/ordinary-read-failure (0.29s)
+    --- PASS: TestLLVMHTTPClientCleanupEvidence/cancelled-read-failure (0.29s)
+=== RUN   TestLLVMFileDiscoveryFailures
+=== RUN   TestLLVMFileDiscoveryFailures/invalid-name
+=== RUN   TestLLVMFileDiscoveryFailures/entry-limit
+=== RUN   TestLLVMFileDiscoveryFailures/missing-child
+--- PASS: TestLLVMFileDiscoveryFailures (1.63s)
+    --- PASS: TestLLVMFileDiscoveryFailures/invalid-name (0.29s)
+    --- PASS: TestLLVMFileDiscoveryFailures/entry-limit (0.96s)
+    --- PASS: TestLLVMFileDiscoveryFailures/missing-child (0.30s)
+=== RUN   TestLLVMFileRemovalFailures
+=== RUN   TestLLVMFileRemovalFailures/preflight-change
+=== RUN   TestLLVMFileRemovalFailures/per-entry-change
+=== RUN   TestLLVMFileRemovalFailures/remove-failure
+=== RUN   TestLLVMFileRemovalFailures/cancel-after-remove
+=== RUN   TestLLVMFileRemovalFailures/cleanup-failure
+=== RUN   TestLLVMFileRemovalFailures/failure-and-cleanup
+=== RUN   TestLLVMFileRemovalFailures/failure-and-cleanup-handler
+--- PASS: TestLLVMFileRemovalFailures (2.16s)
+    --- PASS: TestLLVMFileRemovalFailures/preflight-change (0.30s)
+    --- PASS: TestLLVMFileRemovalFailures/per-entry-change (0.31s)
+    --- PASS: TestLLVMFileRemovalFailures/remove-failure (0.30s)
+    --- PASS: TestLLVMFileRemovalFailures/cancel-after-remove (0.30s)
+    --- PASS: TestLLVMFileRemovalFailures/cleanup-failure (0.29s)
+    --- PASS: TestLLVMFileRemovalFailures/failure-and-cleanup (0.29s)
+    --- PASS: TestLLVMFileRemovalFailures/failure-and-cleanup-handler (0.30s)
+=== RUN   TestLLVMNestedFoldCancellationProgress
+=== RUN   TestLLVMNestedFoldCancellationProgress/third-removal
+--- PASS: TestLLVMNestedFoldCancellationProgress (0.37s)
+    --- PASS: TestLLVMNestedFoldCancellationProgress/third-removal (0.30s)
+=== RUN   TestLLVMWorklistCancellationProgress
+=== RUN   TestLLVMWorklistCancellationProgress/worklist-third-removal
+--- PASS: TestLLVMWorklistCancellationProgress (0.36s)
+    --- PASS: TestLLVMWorklistCancellationProgress/worklist-third-removal (0.29s)
+=== RUN   TestLLVMReceiptSessionCleanupDiagnostic
+=== RUN   TestLLVMReceiptSessionCleanupDiagnostic/completed-write
+--- PASS: TestLLVMReceiptSessionCleanupDiagnostic (0.36s)
+    --- PASS: TestLLVMReceiptSessionCleanupDiagnostic/completed-write (0.29s)
+=== RUN   TestLLVMFileLateFailureProgress
+=== RUN   TestLLVMFileLateFailureProgress/steps
+=== RUN   TestLLVMFileLateFailureProgress/value
+--- PASS: TestLLVMFileLateFailureProgress (0.68s)
+    --- PASS: TestLLVMFileLateFailureProgress/steps (0.29s)
+    --- PASS: TestLLVMFileLateFailureProgress/value (0.32s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	7.775s

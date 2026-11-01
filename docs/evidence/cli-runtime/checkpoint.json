@@ -1,0 +1,246 @@
+{
+  "completed_at_utc": "2026-11-01T05:45:05.061346+00:00",
+  "issues": [
+    "F026",
+    "F027",
+    "F028"
+  ],
+  "milestone": "M1",
+  "status": "passed",
+  "expected_public_failure": "public-red.log",
+  "scope": "Working tree implementation and local software validation",
+  "source_identities": "source-identities.json",
+  "native_runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "runtime_manifest_sha256": "4d70ede76c8c514e541feadc5b49947b293468efaf09ff6223c2c88ddb9f6d33",
+  "toolchains": {
+    "rust": "1.85.1",
+    "llvm": "21.1.8"
+  },
+  "ci": {
+    "exit_code": 0,
+    "command": "make ci NATIVE_RUNTIME_STATE=_scratch/cli-stack-20261031/preparation-proc NATIVE_RUNTIME_OUTPUT=_scratch/cli-stack-20261031/runtime-proc SEMANTIC_COMPILER=_scratch/cli-stack-20261031/runtime-proc/bin/lo SEMANTIC_TOOLCHAIN=_scratch/cli-stack-20261031/runtime-proc/toolchain.json TEST_ARGS='-count=1 -v'",
+    "log": "ci-final.log",
+    "stages": [
+      "fmt",
+      "lint",
+      "test",
+      "test-native",
+      "build",
+      "test-semantic-report",
+      "test-native-qualification-tools"
+    ],
+    "interpreter_integration_seconds": 158.134,
+    "native_integration_seconds": 3571.604,
+    "native_top_level_passes": 748,
+    "native_top_level_skips": [],
+    "python_results": [
+      "217 passed in 127.03s (0:02:07)"
+    ],
+    "semantic_report_tests": 21,
+    "semantic_report_seconds": 5.373
+  },
+  "requirements": {
+    "F026": {
+      "contract": "../../cli-runtime-design.md",
+      "implementation": [
+        "internal/adapter/console.go",
+        "internal/adapter/console_process.go",
+        "internal/execution/console.go",
+        "runtime/native/src/console.rs",
+        "runtime/native/src/console_process.rs",
+        "runtime/native/include/lo_console.h"
+      ],
+      "tests": [
+        "tests/integration/cli_runtime_test.go",
+        "tests/integration/console_boundary_test.go",
+        "tests/integration/llvm_console_boundary_test.go",
+        "tests/integration/llvm_console_spawn_test.go",
+        "tests/integration/llvm_console_ready_test.go"
+      ]
+    },
+    "F027": {
+      "implementation": [
+        "internal/value/application.go",
+        "internal/execution/program.go",
+        "internal/runner/execute.go",
+        "internal/nativeplan/metadata.go",
+        "runtime/native/src/program_exit.rs",
+        "runtime/native/src/exports.rs",
+        "runtime/native/src/value_graph.rs"
+      ],
+      "tests": [
+        "tests/integration/cli_runtime_test.go",
+        "tests/integration/llvm_console_boundary_test.go",
+        "tests/integration/llvm_program_exit_resources_test.go"
+      ]
+    },
+    "F028": {
+      "implementation": [
+        "internal/clioptions/parse.go",
+        "internal/catalog/application.go",
+        "internal/runtimeops/application.go",
+        "runtime/native/src/cli_options.rs"
+      ],
+      "tests": [
+        "internal/clioptions/parse_test.go",
+        "tests/integration/cli_options_test.go",
+        "tests/integration/cli_runtime_test.go",
+        "tests/integration/llvm_cli_runtime_test.go"
+      ],
+      "example": "../../examples/cli-cleanup-preview.lo"
+    }
+  },
+  "environments": [
+    "Go interpreter",
+    "Darwin arm64 native CPU",
+    "Linux arm64 under QEMU TCG",
+    "Darwin Metal-linked generic CLI without GPU work"
+  ],
+  "independent_review": {
+    "status": "passed",
+    "record": "review.md",
+    "cleanup_fixture_record": "cleanup-fixtures-independent-review.json",
+    "lifecycle_fixture_record": "http-error-input-final-review.json",
+    "qualification_fixture_record": "remaining-close-final-review.json",
+    "companion_fixture_record": "linux-tls-companion-final-review.json",
+    "scope": "Source and focused tests before final stack CI"
+  },
+  "previous_ci": [
+    {
+      "log": "ci-initial.log",
+      "status": "failed",
+      "reason": "Readiness acknowledgment cancellation"
+    },
+    {
+      "log": "ci-interrupted.log",
+      "status": "interrupted",
+      "reason": "Confirmed terminal byte retention difference",
+      "interruption_record": "ci-interruption.json"
+    },
+    {
+      "log": "ci-harness-failure.log",
+      "status": "failed",
+      "reason": "C fixture entry extraction before preprocessing"
+    },
+    {
+      "log": "ci-probe-interposition-failure.log",
+      "status": "failed",
+      "reason": "Probe fixture intercepted Console diagnostic writer startup"
+    },
+    {
+      "log": "ci-fixture-close-interrupted.log",
+      "status": "interrupted",
+      "reason": "Confirmed global close stubs interfere with Console channel completion",
+      "interruption_record": "ci5-interruption.json"
+    },
+    {
+      "log": "ci-sequential-cli-failure.log",
+      "status": "failed",
+      "reason": "A stopped serve invocation left stale cancellation for a later CLI invocation"
+    },
+    {
+      "log": "ci-linux-loopback-interrupted.log",
+      "status": "interrupted",
+      "reason": "New Linux lifecycle regression requires guest loopback setup",
+      "interruption_record": "ci7-interruption.json"
+    },
+    {
+      "log": "ci-qualification-hooks-interrupted.log",
+      "status": "interrupted",
+      "reason": "Confirmed remaining HTTP qualification close stub prevents Console channel completion",
+      "interruption_record": "ci8-interruption.json"
+    },
+    {
+      "log": "ci-tls-companion-failure.log",
+      "status": "failed",
+      "reason": "TLS fixture launches a memfd image without a retained executable path"
+    }
+  ],
+  "native_runtime_tool_tests": {
+    "status": "passed",
+    "log": "native-tools.log",
+    "tests": 20
+  },
+  "documentation": {
+    "reference": "ASD-STE100 Issue 9",
+    "reference_sha256": "d1f4ea9e7cd6e46b47aa9057209f99e78c0e9cfc4e27a5b07895b05c1a166431",
+    "scope": "New and changed technical prose",
+    "validation_record": "documentation-validation.json",
+    "mechanical_findings_in_changed_paragraphs": 0,
+    "mechanical_findings_in_unchanged_paragraphs": 36,
+    "new_local_links_checked": 31
+  },
+  "next_issue": "F029",
+  "full_mac_cleanup_acceptance": "open under I013",
+  "evidence_sha256": {
+    "ci-final.log": "b0b32dde95aeeeafd4c08ff6176bd713d22aad0a5ea41d9786a25e8394f22449",
+    "ci-fixture-close-interrupted.log": "755de5f9422936eed0be3fd468f74aa9e67c9ae552de1c43abe63f4cc52f8a2f",
+    "ci-harness-failure.log": "0da1ce8bead7083ecf6017636c1252d893d6f88ea40e93728f08abd425737f53",
+    "ci-initial.log": "5bee352c66fafbffebe48a66d14b866c3b9a9c916b4c7c85ffa4d39405cd2736",
+    "ci-interrupted.log": "300a31117ff6652b6ba9734824b27be1686a26444800f2337bc6fefcc5d9c6d5",
+    "ci-interruption.json": "6ca6eca3a11ed2c53a9384518f609afab6639cd470d1aed4a1ba0d2c74e6dc02",
+    "ci-linux-loopback-interrupted.log": "92f08ba1d738824b171b5a23eac406fdb27523d3bb74ac5c15e4224c7b4b8a34",
+    "ci-probe-interposition-failure.log": "347815e10a053f07ea37461d355947394ae97ee0247e3c883cd2b36647e797a1",
+    "ci-qualification-hooks-interrupted.log": "410e35d29aab8967e3abdc4efd5e18b1545506cf9df530129d45d6c82e9e637e",
+    "ci-sequential-cli-failure.log": "6bbc337d3410f48ee94ab131dc40d64c88f937a953e0d305dc6b01c63dfcf2b0",
+    "ci-tls-companion-failure.log": "d292e07068292977e8a2e8152fa0cbfecaf891567b78b632361816b2762ff007",
+    "ci5-interruption.json": "f12b577c9a4029d6a1d7f9e0bce61c6cbe9cc63a60150e84cc718b689222180c",
+    "ci7-interruption.json": "b42bfc3d85ee00c59be48a999b86baf6961e0a2775ab0abc7ee86825ee6d0d25",
+    "ci8-interruption.json": "fef53a5378d1d1ab152da09a0508398e82c96d91ab6292804fa6b0c3546e1f72",
+    "cleanup-fixtures-independent-review.json": "c152275bfca46ac43fc5a7bb496b7fa3fe10dfec3ca7113e9fb31a78ee580bad",
+    "cli-cancellation-both-targets.log": "c08e4920db4295bfdced87373b4c9aa27c5509be7aa8c9f5758e6d9bbb5057b5",
+    "cli-cancellation-build.log": "2ab7ddef977feb620d8a4a77a218dffc4f8ae5fc5566b589c9856bcd2f6971b6",
+    "cli-cancellation-final-verification.json": "a8d4438780ac3536ff1d52dfe66aa84a6d74433e8b51270d265fd0d06c0c60e7",
+    "cli-cancellation-focused.log": "bc32ee1d670521bc9f24bf69474929246804a972b321759b1b569f82912bebc1",
+    "cli-cancellation-linux.log": "33352e88112bc5633fdafadea3e1646cda5cc6cd88020b72926c5b3afeae7d26",
+    "cli-cancellation-red.log": "e0e7b38fdba695674a5546483e377450ed77f7bb0f15502ed4406b47524c0b7a",
+    "cli-cancellation-verification.json": "6f2ef81a48d941eced81d24a1c6598ae6e64de4761336d6d415234fca1664c14",
+    "console-spawn-deadline-red.log": "c3dd1306d97820b7d413d6e2068e322013b458678de7bf0d43e17b08fe57a706",
+    "console-spawn-inheritance-red.log": "3e62f35ce6f611be71d11b3bf2f6e89e41b9270b7226210270ff902ae90a0b8d",
+    "documentation-validation.json": "f8087dd469d509df7e94601a89e9fa37c0961a8274f325a12f1b73ecc010654e",
+    "final-review-output-status.log": "eefb17a69d557ac1c34109fbfad1389065489c460e71b8ba6e6537e4dc36621b",
+    "harness-preprocessing.log": "c180d4673e7f8ac1d6f42fa158f900942c380e21ab55762b9781772aba0d4240",
+    "http-error-input-final-review.json": "69b73299dd603490bd69bcc19166263cb0b9d5f2f64bb52fcff16e1b4ba2d9a9",
+    "http-error-input-final-review.md": "88cdc18f3fb170f2f9ef32917fdee24908b38d285463a05d6a2986ddccb140fe",
+    "linux-tls-companion-final-review.json": "b2c6da43c52887be158d9249a84ba99e21ecfb7e2a1905c9393fa82dd0dddcfd",
+    "linux-tls-companion-final-review.md": "074cda9f052c79e9de61ea8a70b1685b5208c9175a62d6d30151ae6dd4d3d4de",
+    "linux-tls-companion-final-verification.json": "122365b02bef0ea0053cd2a2d4be0c520f0edf3c2cf95715781c05743b2fb187",
+    "linux-tls-companion-green.log": "0122eec5255170af597c25a5630eea8b8f0bb44105abaa14e960116224f9d4b6",
+    "linux-tls-companion-red.log": "1a76c04828642d9d7a4f64e64261f08565b5d207883476c7da0f9ac77697379d",
+    "linux-tls-companion-tools.log": "a46b52c55d8d1349c0bbc7f0fe4456be95ee8401ffdde37125a34008c15f6a03",
+    "linux-tls-memfd-diagnosis.json": "47ed52d965d69d3e501227f722f63ad98c7095b949ac8dbc4ee597676a9941a4",
+    "native-crossplatform-final.log": "b288476d293a054f4cf921b8bfa1644c7deca6e427076c66231f355ecfad21f7",
+    "native-ready-cancellation-red.log": "01689cb56fd1063102987ead66812fd84d826a9076684ec7ac7f6e7ac4ae855f",
+    "native-ready-focused.log": "f1dd8bb5e5109f19f9307d2357885d89906682f6d0dc2eab42bd258550037556",
+    "native-spawn-deadline-focused.log": "3dff3b037ca799f208426815c5c95a0b607a3619aeb17d86aa736750a27599bb",
+    "native-spawn-focused.log": "3162301063c75224f145ba4a642c046283c8ba9d6e92f33bce4da4d20aa937e8",
+    "native-tools.log": "a46b52c55d8d1349c0bbc7f0fe4456be95ee8401ffdde37125a34008c15f6a03",
+    "pre-correction-tool-stages.log": "4dcc54e27c5eda0a71845d0da597dfae6f13b4b0d8881b856d9f7714c06b9cf0",
+    "probe-interposition-focused.log": "f07374dc0d5c3f0208ada2e46141cdc1d7f3bcbaf02c2a7e9d6dc1a82c438f19",
+    "program-exit-parity/aliases-thresholds.json": "34bac2a69d9e97d9bf4cfa97d69c862fa7a9bcaf22b05b2b9e7cf54f41fbe3be",
+    "program-exit-parity/focused.log": "f8f21566c357e3995c09b8341c2991dd84b5962087b2ce47d1db2d8a94c6adb1",
+    "program-exit-parity/maintained-red.log": "77934b6d7186550d56bf4f951dfd79249c20df3466b0456677425bbbf3c95697",
+    "program-exit-parity/result.json": "3faf8315e3e8abc0c0703f46a642fb01dbe2d379f76ec74f43adcd7e8867f141",
+    "public-native-final.log": "b41e6c81d644b893dda0261ed40a71e7439300fbefb3e209ec3c4f998cb09420",
+    "public-red.log": "29ad50d89aae2dbd5b19c8d3d46c38b1711390741b9cae60c85e2cba5bf445df",
+    "qualification-close-characterization.json": "c31b38749f8bafb53f775bda6e38a8277132f59e641cfead3df615c97f86e42b",
+    "readiness-go-final.log": "f6994e006aaa01314ccb32254e61337ecccd70b870a7227f7d15a222f2b3e267",
+    "readiness-go-red.log": "f972098cf080b90ca474dde0bef7d927ead83d40fb8ef2d4760e28c99a576575",
+    "related-close-focused-final.log": "237556f19098767622399ad10b2676060e19423946a3bfe53b4948680da005c5",
+    "related-http-hook.log": "baf4f1fbab945935ac1fa830f06ecf5a00d3f5f4bf1b2a37c96abb810706bcca",
+    "related-process-hook.log": "de37365613fd16bd88b656894eb69d40774370a995e4d6e9ddf850a408d4e576",
+    "related-syscall-fixtures.log": "5256f1b8677bea8e78a9431b026a7f5c60da82ddbe5b2b1fd982983a8e59f4b0",
+    "remaining-close-case7-report.json": "c55dd9b2f18f7381e903c782f50dd3e4e3963277b5a51cde8efe77601d5aa3f3",
+    "remaining-close-case8-file-red.log": "efc0324d1abd56d566886519c00c37d034e909f6044f1cb1ad994da38d97878b",
+    "remaining-close-darwin-focused.log": "fee1f20dec487ae049eed78de64287d2e9ef3a276467f23be8817a69dad0d322",
+    "remaining-close-file-red.log": "17cb253d34a88f856ec1f5729254745f42fcdaa8bb474a02bd71633bb4a25688",
+    "remaining-close-final-review.json": "f2e4abf73fcb426f2700141876baa68cbf1e3a1d962ef9a702a65ca4e4b26a6c",
+    "remaining-close-final-review.md": "154a97a98e38dd7096db31dbf016dcbe8b844074c37597918c617e2c70e169ab",
+    "remaining-close-final-verification.json": "c67b4f3d9669c9cdc48ecadcabf6e1e965f7f8ddaf567d87fddaee831cce3210",
+    "remaining-close-http-red.log": "05424fbe1383ceb5f26db34cf66fb4a169bd7a88e98ef760ad63c8c2145b1681",
+    "remaining-close-linux-focused.log": "19016107d055e81bc01b86ad6381bbe229c258981e682f75014a70f1b356e134",
+    "remaining-close-server-red.log": "8519e903af654f7386f1d5ea8e263c4a5e519effccce09dce60e259c15b2dbf3",
+    "review.md": "c113203aa039c7ba37bb6e060a0ce97710215585f293fc077090abee82a48b23",
+    "source-identities.json": "2a2277a8eeaef9cb4e542da3ee08f728f35048f916e5e70ea60564bf18217bfa"
+  }
+}

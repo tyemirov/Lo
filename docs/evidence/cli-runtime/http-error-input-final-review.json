@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "scope": [
+    "testdata/native-qualification/http-error-input.c",
+    "tests/integration/llvm_http_error_input_test.go"
+  ],
+  "reviewed_sha256": {
+    "testdata/native-qualification/http-error-input.c": "a02b72f08e41107b27b6a484e95bfa2586e871a151f022f7fa763b94ba00040e",
+    "tests/integration/llvm_http_error_input_test.go": "531d7d2749cc643f02996b90586a91889755315788eb71c1ad1202adfed14640"
+  },
+  "findings": [],
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "runtime_changes": false,
+  "evidence": {
+    "red": {
+      "log": "cli-cancellation-linux.log",
+      "status": 14,
+      "failed_cases": 10,
+      "stage": "service connection before cancellation path"
+    },
+    "green": {
+      "log": "cli-cancellation-both-targets.log",
+      "seconds": 21.361,
+      "groups": [
+        "TestLLVMHTTPErrorInputs",
+        "TestLLVMLinuxHTTPErrorInputs"
+      ],
+      "passed_cases": 20,
+      "targets": [
+        "darwin/arm64 software",
+        "linux/arm64 QEMU"
+      ]
+    }
+  },
+  "evidence_limit": "Full stack CI remains pending."
+}

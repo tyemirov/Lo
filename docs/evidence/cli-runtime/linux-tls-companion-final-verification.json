@@ -1,0 +1,53 @@
+{
+  "status": "focused checks passed; source frozen",
+  "source_sha256": {
+    "tools/nativeruntime/run.py": "cdead00d74b7fb066612a762480c6d1651d51c8c64a34660825202d730f50c4f",
+    "tests/integration/llvm_linux_qualification_test.go": "59ba40b614d73a6f67583bd97a7c58b87dbf62e46da3af8d326704523232b0f3",
+    "tests/integration/llvm_http_test.go": "c6a8d3408cd31bdb31f240f1a435916f91c0e83441d35e00b7ef37dd96ad004d",
+    "tests/integration/testdata/native-http/linux_driver.go.txt": "7a216d767f6ae2a95b1688baf91dc3d596fa889384529b72ce9372ef8c2bc86a"
+  },
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "bundle_receipt_matches": true,
+  "runtime_bundle_rebuilt": false,
+  "source_changes_outside_owned_four_files": false,
+  "public_red": {
+    "test": "TestLLVMLinuxCompanionExecutable",
+    "result": "expected failure: old runner rejects --companion, status2",
+    "test_seconds": 2.47,
+    "log": "linux-tls-companion-red.log"
+  },
+  "focused_green": {
+    "command": "make test-native NATIVE_RUNTIME_STATE=_scratch/cli-stack-20261031/preparation-proc LLVM_TOOLCHAIN=_scratch/cli-stack-20261031/runtime-proc/toolchain.json TEST_ARGS=\"-run '^TestLLVMLinux(CompanionExecutable|HTTPVerifiedTLS|Core)' -count=1 -v\"",
+    "result": "PASS",
+    "package_seconds": 17.828,
+    "tests": {
+      "TestLLVMLinuxCompanionExecutable": 3.06,
+      "TestLLVMLinuxHTTPVerifiedTLS": 3.36,
+      "TestLLVMLinuxCore": 10.9
+    },
+    "tls_oracle": [
+      "trusted payload success",
+      "wrong-name rejection",
+      "untrusted-authority rejection",
+      "exactly one server invocation"
+    ],
+    "log": "linux-tls-companion-green.log"
+  },
+  "tool_green": {
+    "command": "make test-native-runtime-tools NATIVE_RUNTIME_STATE=_scratch/cli-stack-20261031/preparation-proc",
+    "result": "20 passed",
+    "seconds": 5.67,
+    "log": "linux-tls-companion-tools.log"
+  },
+  "guest_isolation": {
+    "companion_helper": "always invokes prepared QEMU guest; direct Linux ARM64 execution remains only for ordinary helper without companion",
+    "driver": "no proc creation/mount; TLS loopback and /tls files occur only inside controlled guest",
+    "supported_preparation_host": "aarch64-apple-darwin",
+    "host_evidence": [
+      "tools/nativeruntime/platform.lock.json:host",
+      "tools/nativeruntime/preparation.lock.json:host"
+    ],
+    "no_linux_host_fallback": true
+  },
+  "review": "cli_stack_final_review approved final draft before staged application; awaiting maintained-byte/log closure"
+}

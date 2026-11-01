@@ -1,0 +1,127 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+python3 -B tools/processbuild/identity.py build bin/lo-process-launcher internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:129:9: warning: 'sandbox_init' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  129 |     if (sandbox_init(profile, 0, &sandbox_error) != 0) {
+      |         ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:49:5: note: 'sandbox_init' has been explicitly marked deprecated here
+   49 | int sandbox_init(const char *profile, uint64_t flags, char **errorbuf);
+      |     ^
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:130:36: warning: 'sandbox_free_error' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  130 |         if (sandbox_error != NULL) sandbox_free_error(sandbox_error);
+      |                                    ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:68:6: note: 'sandbox_free_error' has been explicitly marked deprecated here
+   68 | void sandbox_free_error(char *errorbuf);
+      |      ^
+2 warnings generated.
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run ^TestLLVMHTTPClientCleanupEvidence/ordinary-read-failure -count=1 -v -timeout=12s </dev/null
+=== RUN   TestLLVMHTTPClientCleanupEvidence
+=== RUN   TestLLVMHTTPClientCleanupEvidence/ordinary-read-failure
+panic: test timed out after 12s
+	running tests:
+		TestLLVMHTTPClientCleanupEvidence (12s)
+		TestLLVMHTTPClientCleanupEvidence/ordinary-read-failure (12s)
+
+goroutine 71 [running]:
+testing.(*M).startAlarm.func1()
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2961 +0x2c4
+created by time.goFunc
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/time/sleep.go:182 +0x38
+
+goroutine 1 [chan receive]:
+testing.(*T).Run(0x3d99f8364488, {0x101390c1e?, 0x3d99f819f948?}, 0x101a93568)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2268 +0x3cc
+testing.runTests.func1(0x3d99f8364488)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2744 +0x38
+testing.tRunner(0x3d99f8364488, 0x3d99f819fa78)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0xc4
+testing.runTests({0x1013932ac, 0x22}, {0x1013ad096, 0x34}, 0x3d99f8328240, {0x101b088b8, 0x2e8, 0x2e8}, {0x1f819fc78?, 0x100e56170?, ...})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2742 +0x400
+testing.(*M).Run(0x3d99f837ca00)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2602 +0x578
+github.com/MarcoPoloResearchLab/Lo/tests/integration_test.TestMain(0x3d99f837ca00)
+	/Users/tyemirov/Development/Research/Lo/tests/integration/cli_test.go:75 +0x680
+main.main()
+	_testmain.go:1540 +0x88
+
+goroutine 37 [chan receive]:
+testing.(*T).Run(0x3d99f83646c8, {0x10137ae1d?, 0x3d99f8361c98?}, 0x3d99f83da420)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2268 +0x3cc
+github.com/MarcoPoloResearchLab/Lo/tests/integration_test.runLLVMRuntimeTargetScenarios(0x3d99f83646c8, {0x10136e41e, 0xc}, {0x3d99f83b61e0, 0x2, 0x1017203f8?})
+	/Users/tyemirov/Development/Research/Lo/tests/integration/llvm_lifetime_test.go:145 +0x7e4
+github.com/MarcoPoloResearchLab/Lo/tests/integration_test.TestLLVMHTTPClientCleanupEvidence(0x3d99f83646c8)
+	/Users/tyemirov/Development/Research/Lo/tests/integration/llvm_qualification_adapters_test.go:59 +0x2f4
+testing.tRunner(0x3d99f83646c8, 0x101a93568)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0xc4
+created by testing.(*T).Run in goroutine 1
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x3b8
+
+goroutine 56 [syscall]:
+syscall.syscalln(0x100da5100, {0x3d99f835d178, 0x6, 0x6})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/sys_darwin.go:27 +0x20
+syscall.syscall6(0x1f835d348?, 0x100e56170?, 0x1085552f8?, 0x90?, 0x101b10180?, 0x3d99f8189b00?, 0x3d99f835d218?)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/syscall/syscall_darwin.go:407 +0x28
+syscall.wait4(0x3d99f835d248?, 0x100dc380c?, 0x90?, 0x101a7bf00?)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/syscall/zsyscall_darwin_arm64.go:44 +0x4c
+syscall.Wait4(0x1f835d2b8?, 0x3d99f835d284, 0x3d99f829eee0?, 0x90?)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/syscall/syscall_bsd.go:144 +0x28
+os.(*Process).pidWait.func1(...)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec_unix.go:64
+os.ignoringEINTR2[...](...)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/file_posix.go:273
+os.(*Process).pidWait(0x3d99f830b100)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec_unix.go:63 +0x9c
+os.(*Process).wait(0x0?)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec_unix.go:28 +0x24
+os.(*Process).Wait(...)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec.go:347
+os/exec.(*Cmd).Wait(0x3d99f839d040)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec/exec.go:944 +0x34
+os/exec.(*Cmd).Run(0x3d99f839d040)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec/exec.go:643 +0x38
+os/exec.(*Cmd).CombinedOutput(0x3d99f839d040)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec/exec.go:1061 +0x84
+github.com/MarcoPoloResearchLab/Lo/tests/integration_test.runLLVMRuntimeTargetScenarios.func2.2({0x3d99f83925a0, 0x8e}, {0x0, 0x0, 0x0})
+	/Users/tyemirov/Development/Research/Lo/tests/integration/llvm_lifetime_test.go:217 +0x40c
+github.com/MarcoPoloResearchLab/Lo/tests/integration_test.runLLVMRuntimeTargetScenarios.func2(0x3d99f8364008)
+	/Users/tyemirov/Development/Research/Lo/tests/integration/llvm_lifetime_test.go:367 +0x26d0
+testing.tRunner(0x3d99f8364008, 0x3d99f83da420)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0xc4
+created by testing.(*T).Run in goroutine 37
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x3b8
+
+goroutine 70 [IO wait]:
+internal/poll.runtime_pollWait(0x10f1ac200, 0x72)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/netpoll.go:351 +0xa0
+internal/poll.(*pollDesc).wait(0x3d99f8210780?, 0x3d99f8236a00?, 0x1)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/internal/poll/fd_poll_runtime.go:84 +0x28
+internal/poll.(*pollDesc).waitRead(...)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x3d99f8210780, {0x3d99f8236a00, 0x200, 0x200})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/internal/poll/fd_unix.go:170 +0x22c
+os.(*File).read(...)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/file_posix.go:30
+os.(*File).Read(0x3d99f8282108, {0x3d99f8236a00?, 0x0?, 0x0?})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/file.go:144 +0x68
+bytes.(*Buffer).ReadFrom(0x3d99f829a330, {0x101a88790, 0x3d99f8282108})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/bytes/buffer.go:229 +0x90
+io.copyBuffer({0x101a888d0, 0x3d99f829a330}, {0x101a88790, 0x3d99f8282108}, {0x0, 0x0, 0x0})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/io/io.go:415 +0x14c
+io.Copy(...)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/io/io.go:388
+os.genericWriteTo(0x1?, {0x101a888d0?, 0x3d99f829a330?})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/file.go:295 +0x44
+os.(*File).WriteTo(0x101ae8fe0?, {0x101a888d0?, 0x3d99f829a330?})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/file.go:273 +0x5c
+io.copyBuffer({0x101a888d0, 0x3d99f829a330}, {0x101a88850, 0x3d99f8282108}, {0x0, 0x0, 0x0})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/io/io.go:411 +0x98
+io.Copy(...)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/io/io.go:388
+os/exec.(*Cmd).writerDescriptor.func1()
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec/exec.go:613 +0x40
+os/exec.(*Cmd).Start.func2(0x0?)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec/exec.go:768 +0x30
+created by os/exec.(*Cmd).Start in goroutine 56
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/os/exec/exec.go:767 +0x6d8
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	12.735s
+FAIL
+make[1]: *** [test-native] Error 1

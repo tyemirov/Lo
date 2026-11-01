@@ -1,0 +1,203 @@
+{
+  "diagnostics": [
+    {
+      "code": "runtime.host-failure",
+      "stage": "runtime",
+      "message": "input/output error",
+      "removal_entries": {
+        "type": "List<File.Entry>",
+        "value": [
+          {
+            "type": "File.Entry",
+            "value": {
+              "accessed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390612000000"
+              },
+              "changed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390612000000"
+              },
+              "kind": {
+                "type": "String",
+                "value": "regular"
+              },
+              "link_count": {
+                "type": "Int",
+                "value": "1"
+              },
+              "modified_unix_ns": {
+                "type": "Int",
+                "value": "1793503390612000000"
+              },
+              "name": {
+                "type": "String",
+                "value": "a"
+              },
+              "owner_uid": {
+                "type": "Int",
+                "value": "0"
+              },
+              "path": {
+                "type": "File.Path",
+                "value": "/grant/a"
+              },
+              "size_bytes": {
+                "type": "Int",
+                "value": "1"
+              }
+            }
+          },
+          {
+            "type": "File.Entry",
+            "value": {
+              "accessed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "changed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "kind": {
+                "type": "String",
+                "value": "regular"
+              },
+              "link_count": {
+                "type": "Int",
+                "value": "1"
+              },
+              "modified_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "name": {
+                "type": "String",
+                "value": "b"
+              },
+              "owner_uid": {
+                "type": "Int",
+                "value": "0"
+              },
+              "path": {
+                "type": "File.Path",
+                "value": "/grant/b"
+              },
+              "size_bytes": {
+                "type": "Int",
+                "value": "1"
+              }
+            }
+          },
+          {
+            "type": "File.Entry",
+            "value": {
+              "accessed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "changed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "kind": {
+                "type": "String",
+                "value": "regular"
+              },
+              "link_count": {
+                "type": "Int",
+                "value": "1"
+              },
+              "modified_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "name": {
+                "type": "String",
+                "value": "c"
+              },
+              "owner_uid": {
+                "type": "Int",
+                "value": "0"
+              },
+              "path": {
+                "type": "File.Path",
+                "value": "/grant/c"
+              },
+              "size_bytes": {
+                "type": "Int",
+                "value": "1"
+              }
+            }
+          },
+          {
+            "type": "File.Entry",
+            "value": {
+              "accessed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "changed_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "kind": {
+                "type": "String",
+                "value": "regular"
+              },
+              "link_count": {
+                "type": "Int",
+                "value": "1"
+              },
+              "modified_unix_ns": {
+                "type": "Int",
+                "value": "1793503390613000000"
+              },
+              "name": {
+                "type": "String",
+                "value": "d"
+              },
+              "owner_uid": {
+                "type": "Int",
+                "value": "0"
+              },
+              "path": {
+                "type": "File.Path",
+                "value": "/grant/d"
+              },
+              "size_bytes": {
+                "type": "Int",
+                "value": "1"
+              }
+            }
+          }
+        ]
+      },
+      "removal_progress": {
+        "type": "Record{completed_bytes: Int, completed_count: Int, failed_index: Int, stage: String, total_count: Int}",
+        "value": {
+          "completed_bytes": {
+            "type": "Int",
+            "value": "4"
+          },
+          "completed_count": {
+            "type": "Int",
+            "value": "4"
+          },
+          "failed_index": {
+            "type": "Int",
+            "value": "-1"
+          },
+          "stage": {
+            "type": "String",
+            "value": "finalize"
+          },
+          "total_count": {
+            "type": "Int",
+            "value": "4"
+          }
+        }
+      }
+    }
+  ]
+}

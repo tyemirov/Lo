@@ -1,0 +1,14 @@
+{
+  "distinct": {
+    "--max-live-bytes": 4242,
+    "--max-value-bytes": 872
+  },
+  "shared": {
+    "--max-live-bytes": 3826,
+    "--max-value-bytes": 872
+  },
+  "record-alias": {
+    "--max-live-bytes": 6028,
+    "--max-value-bytes": 1318
+  }
+}
