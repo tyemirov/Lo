@@ -106,6 +106,18 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `live value weight`: Logical value weight retained by active execution scopes and pending work.
 - `branch identifier`: An integer that selects one named branch callback in an application flow.
 - `tree snapshot`: Immutable observations of a filesystem tree with relative names and retained directory identities.
+- `console stream`: The stdout or stderr destination selected for explicit application output.
+- `output sink`: A host-owned interface that receives console bytes and reports write and flush results.
+- `writer process`: A host-owned child process that writes bounded bytes to inherited console destinations.
+- `parent liveness`: A pipe state that tells a writer process whether its parent retains ownership.
+- `terminal result`: A nominal entry result that selects an application exit status after resource cleanup.
+- `partial write`: An output operation that confirms fewer bytes than the supplied byte count.
+- `process tree`: An initial child process and the descendants whose ownership the host must retain.
+- `tree row`: Authority-free metadata for one relative entry in a tree snapshot.
+- `recursive authority`: An explicit host grant for specified operations on descendants of a selected directory.
+- `allocated size`: Observed filesystem storage, distinct from logical file size and guaranteed reclaimed space.
+- `NDJSON`: A console format with one complete JSON object on each output line.
+- `milestone`: A planned application capability with observable acceptance criteria.
 - `HTTP origin`: The canonical scheme, hostname, and effective port of an HTTP destination.
 - `IP literal`: An explicit IPv4 or IPv6 address without a hostname lookup.
 - `DNS`: The system that resolves a hostname to network addresses.
@@ -412,6 +424,8 @@ Use the simple present, simple past, simple future, imperative, or infinitive fo
 
 ## Repository Technical Verbs
 
+- `flush`: Complete the output sink action that publishes bytes already accepted by that sink. Forms: flush, flushes, flushed.
+- `join`: Wait for an owned operation or process to finish and receive its final result. Forms: join, joins, joined.
 - `capture`: Get host inputs once and keep their immutable result. Forms: capture, captures, captured.
 - `redact`: Hide specified private data in automatic output under a nominal value's output contract. Forms: redact, redacts, redacted.
 - `encode`: Convert a typed value into its specified byte representation. Forms: encode, encodes, encoded.
