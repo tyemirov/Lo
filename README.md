@@ -20,6 +20,7 @@ Its [implementation plan](docs/adapter-plan.md) records implementation status an
 Lo implements the **v0.4 language contract**, with native compilation, CPU and Metal training, explicit device transfers, and model checkpoints.
 
 The [implemented contract](specification.md#version-and-scope) includes File, HTTP, and Process adapters with explicit grants and activation results.
+It also includes Console commits, terminal results, and declared application options.
 This version records the implemented language.
 The [planned features](specification.md#planned-features) are outside v0.4.
 They include NVIDIA arithmetic, mixed precision, modules, user-defined types, generics, packages, and development tools.
@@ -399,6 +400,19 @@ lo inspect program.lo
 The report includes flows, boundary reads, constructed targets, commit sites, error kinds, and capability requirements.
 Each resource description identifies its source and invocation context.
 The [inspection contract](docs/compiler-design.md#inspection-contract) defines the text and JSON formats.
+
+Applications can parse declared flags with `CLI.parse` and write lines through committed `Console.Line` targets.
+A final `Program.Exit` result selects the application status after output and resource cleanup.
+The [CLI contract](docs/cli-runtime-design.md) defines text, JSON, quotas, and embedding behavior.
+Run the [mode selection example](docs/examples/cli-cleanup-preview.lo) inside this repository:
+
+```sh
+bin/lo run docs/examples/cli-cleanup-preview.lo -- --help
+bin/lo run docs/examples/cli-cleanup-preview.lo -- --dry-run
+```
+
+The example performs no cleanup.
+The [mac-cleanup roadmap](docs/mac-cleanup-implementation-plan.md) records the remaining application dependencies.
 
 ## Repository Layout
 
