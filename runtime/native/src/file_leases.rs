@@ -30,6 +30,7 @@ fn observation_leases(roots: &[Handle]) -> BTreeSet<u64> {
                 }
                 _ => (),
             },
+            Data::Adapter(value) => pending.extend_from_slice(value.retained_children()),
             Data::Wrapped(inner) | Data::Success(inner) | Data::Failure(inner) => {
                 pending.push(inner.clone())
             }

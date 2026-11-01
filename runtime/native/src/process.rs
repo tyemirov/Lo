@@ -610,7 +610,23 @@ pub fn configure(
     }
     Ok(p)
 }
+pub fn protection(paths: &[String]) -> Result<Processes, String> {
+    let mut registry = empty();
+    for path in paths {
+        let file = open_read(path).map_err(|e| e.to_string())?;
+        let digest = hashing::hex(&hashing::digest(&file)?);
+        registry.register(path, &digest)?;
+    }
+    Ok(registry)
+}
 impl Processes {
+    pub fn validate_image(
+        &self,
+        path: &str,
+        check: impl FnMut() -> Result<(), Fault>,
+    ) -> Result<(), Fault> {
+        self.validate(path, check)
+    }
     fn register(&mut self, path: &str, digest: &str) -> Result<(), String> {
         let file = open_read(path).map_err(|e| registry_error("open executable", e.to_string()))?;
         if !file.metadata().map_err(|e| e.to_string())?.is_file() {

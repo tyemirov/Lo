@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #endif
 
+extern void *lo_native_spawn_acquire(int (*cancelled)(void *),void *token);
+extern void lo_native_spawn_release(void *ownership);
+
 /* A single synchronous owner retains every endpoint and primary until reap.
  * The Rust caller can stop waiting; this owner still completes cleanup. */
 struct lo_process_result {
@@ -32,6 +35,11 @@ static void retain_ambiguous(int descriptor,int error){owned->descriptors[owned-
 static uint64_t now_ms(void) {
     struct timespec now; clock_gettime(CLOCK_MONOTONIC, &now);
     return (uint64_t)now.tv_sec * 1000 + (uint64_t)now.tv_nsec / 1000000;
+}
+struct startup_cancellation {int (*cancelled)(void *);void *token;uint64_t deadline;};
+static int startup_cancelled(void *token) {
+    const struct startup_cancellation *startup=token;
+    return startup->cancelled(startup->token)||now_ms()>=startup->deadline;
 }
 static int release_fd(int *fd) {
     if (*fd < 0) return 0;
@@ -59,8 +67,12 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     int pipes[7][2],queue=-1; pid_t pid=-1;
     for(int i=0;i<7;i++) pipes[i][0]=pipes[i][1]=-1;
     uint64_t deadline=now_ms()+timeout_ms;
+    struct startup_cancellation startup={cancelled,token,deadline};
+    void *spawn_ownership=lo_native_spawn_acquire(startup_cancelled,&startup);
+    if(!spawn_ownership){fail(r,1,startup_cancelled(&startup)?1:2);goto finish;}
     for(int i=0;i<7;i++) {
         if(pipe(pipes[i])) {fail(r,1,2);goto finish;}
+        for(int j=0;j<2;j++) if(fcntl(pipes[i][j],F_SETFD,FD_CLOEXEC)) {fail(r,1,2);goto finish;}
         /* Move every source above destination descriptors before spawn actions. */
         for(int j=0;j<2;j++) {
             int original=pipes[i][j];
@@ -88,7 +100,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     if(!temporary) setup=1;
     else {memcpy(temporary,"TMPDIR=",7);strcpy(temporary+7,directory);}
     char *environment[]={"CI=1",temporary,NULL};
-    if(cancelled(token)) {fail(r,1,1);setup=1;}
+    if(startup_cancelled(&startup)) {fail(r,1,1);setup=1;}
     int spawned=setup ? -1 : posix_spawn(&pid,launcher,&actions,&attributes,arguments,environment);
     free(temporary);
     int destroyed=posix_spawn_file_actions_destroy(&actions);
@@ -103,6 +115,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
         if(release_fd(&pipes[i][child_end])) fail(r,1,2);
         if(nonblock(pipes[i][1-child_end])) fail(r,1,2);
     }
+    lo_native_spawn_release(spawn_ownership);spawn_ownership=NULL;
     struct kevent watch;
     EV_SET(&watch,(uintptr_t)pid,EVFILT_PROC,EV_ADD|EV_ENABLE|EV_CLEAR,NOTE_EXIT,0,NULL);
     if(kevent(queue,&watch,1,NULL,0,NULL)<0) fail(r,1,0);
@@ -194,6 +207,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
 finish:
     for(int i=0;i<7;i++) for(int j=0;j<2;j++) if(release_fd(&pipes[i][j])) {fail(r,6,2);r->cleanup_complete=-1;}
     if(release_fd(&queue)) {fail(r,6,2);r->cleanup_complete=-1;}
+    if(spawn_ownership)lo_native_spawn_release(spawn_ownership);
     r->cleanup_failures=owned->failures;
     if(owned->count||owned->uncertain_pid||owned->actions||owned->attributes){r->cleanup_complete=0;r->ownership=(uintptr_t)owned;}
     else {r->cleanup_complete=1;free(owned);}

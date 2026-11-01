@@ -212,6 +212,15 @@ pub unsafe fn call(
             if crate::tensor::SUPPORTED.contains(&op) {
                 return crate::tensor::execute(&mut *c, &s, &a);
             }
+            if op == crate::console::OPERATION {
+                return crate::console::execute(&mut *c, &s, &a);
+            }
+            if op == crate::program_exit::OPERATION {
+                return crate::program_exit::execute(&mut *c, &s, &a);
+            }
+            if op == crate::cli_options::OPERATION {
+                return crate::cli_options::execute(&mut *c, &s, &a);
+            }
             if op == crate::host_invocation::OPERATION {
                 return crate::host_invocation::execute(&mut *c, &s);
             }
@@ -791,6 +800,7 @@ pub unsafe extern "C" fn lo_context_run(c: *mut Context, out: *mut ResultSlot) {
         Some(error) => Err(Fault::Recoverable(error)),
         None => (&*c).check_fault().map(|()| value),
     });
+    (*c).final_result = result.as_ref().ok().map(Arc::downgrade);
     write(&mut *c, out, result);
 }
 #[no_mangle]
@@ -856,4 +866,103 @@ pub extern "C" fn lo_runtime_live_storages() -> u64 {
 #[no_mangle]
 pub extern "C" fn lo_runtime_live_storage_bytes() -> u64 {
     crate::resources::LIVE_STORAGE_BYTES.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_set_console(
+    c: *mut Context,
+    enabled: u32,
+    userdata: *mut std::ffi::c_void,
+    write: Option<crate::console::WriteCallback>,
+    flush: Option<crate::console::FlushCallback>,
+    maximum: u64,
+) -> i32 {
+    if c.is_null() || enabled == 0 || enabled > 3 {
+        return 0;
+    }
+    let context = &mut *c;
+    if context.entry().is_err()
+        || context.final_result.is_some()
+        || context.remaining != context.session.steps
+        || context.weight != 0
+        || context.scopes != 0
+        || context.depth != 0
+        || !context.session.console.unconfigured()
+        || Arc::strong_count(&context.session) != 1
+    {
+        return 0;
+    }
+    let (Some(write), Some(flush)) = (write, flush) else {
+        return 0;
+    };
+    Arc::get_mut(&mut context.session).unwrap().console = Arc::new(
+        crate::console::Console::callbacks(enabled, userdata, write, flush, maximum),
+    );
+    1
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_complete(
+    c: *mut Context,
+    value: *const Value,
+    status: *mut i32,
+) -> i32 {
+    if c.is_null() || value.is_null() || status.is_null() {
+        return 0;
+    }
+    let context = &mut *c;
+    if context.owner != std::thread::current().id()
+        || context.completed
+        || context.scopes != 0
+        || context.depth != 0
+        || !context.tapes.is_empty()
+    {
+        return 0;
+    }
+    let value = borrow(value);
+    let declared = context.program.result_type.as_ref();
+    let type_matches = declared.map_or(value.typ == atom("Null"), |typ| value.typ == *typ);
+    if !type_matches
+        || context
+            .final_result
+            .as_ref()
+            .and_then(std::sync::Weak::upgrade)
+            .is_none_or(|root| !Arc::ptr_eq(&root, &value))
+    {
+        return 0;
+    }
+    let session = context.session.clone();
+    let primary = context
+        .check_cancel()
+        .err()
+        .or_else(|| cause(&value).map(Fault::Recoverable));
+    let cleanup = combine_cleanup(context.close().err(), session.close().err());
+    let fault = combine_cleanup(
+        combine_cleanup(primary, cleanup),
+        session.wait_retained().err(),
+    );
+    let result = if let Some(fault) = fault {
+        Err(fault)
+    } else if let Some(terminal) = crate::program_exit::payload(&value) {
+        session
+            .console
+            .terminal(context, terminal)
+            .map(|_| terminal.code as i32)
+    } else {
+        Ok(0)
+    };
+    let result = match (result, session.console.close()) {
+        (Ok(status), Ok(())) => Ok(status),
+        (result, cleanup) => Err(combine_cleanup(result.err(), cleanup.err()).unwrap()),
+    };
+    context.completed = true;
+    match result {
+        Ok(code) => {
+            *status = code;
+            1
+        }
+        Err(fault) => {
+            context.store_fault(fault);
+            0
+        }
+    }
 }

@@ -3,6 +3,37 @@ use crate::{
     exports::{call, ResultSlot},
     value::Value,
 };
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Console_2ELine_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Console.Line.new"))
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Program_2EExit_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Program.Exit.new"))
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_CLI_2Eparse(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("CLI.parse"))
+}
 #[no_mangle]
 pub unsafe extern "C" fn lo_op_Int_2Enew(
     c: *mut Context,

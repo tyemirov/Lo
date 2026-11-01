@@ -223,6 +223,10 @@ const ATOM_NAMES: &[&str] = &[
     "File.Directory",
     "File.Scan",
     "Host.Invocation",
+    "Console.Line",
+    "Console.Receipt",
+    "Program.Exit",
+    "CLI.Options",
     "File.Append",
     "File.Remove",
     "File.AppendReceipt",
@@ -739,6 +743,8 @@ pub fn canonical_json_value(value: &Json) -> String {
 
 fn canonical_typed_payload(typ: Option<&str>, value: &Json) -> String {
     let names: &[&str] = match typ {
+        Some("Console.Line") => &["stream", "bytes", "flush", "redacted"],
+        Some("Program.Exit") => &["code", "stdout_bytes", "stderr_bytes", "redacted"],
         Some("Process.Executable") => &["path"],
         Some("Process.Context") => &["origin", "redacted"],
         Some("Host.Invocation") => &[

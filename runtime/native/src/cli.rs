@@ -2,7 +2,6 @@ use crate::{context::*, exports::*, value::*};
 use serde_json::{json, Value as Json};
 use std::{
     ffi::CStr,
-    io::Write,
     os::raw::{c_char, c_int},
     ptr,
     sync::{
@@ -10,7 +9,18 @@ use std::{
         Arc,
     },
 };
-macro_rules! checked_stderr {($($argument:tt)*)=>{if writeln!(std::io::stderr().lock(),$($argument)*).is_err(){return 2}};}
+thread_local! {static OUTPUT:std::cell::RefCell<Option<Arc<crate::console::Console>>>=const {std::cell::RefCell::new(None)};}
+fn raw(stream: &str, bytes: &[u8]) -> Result<(), Fault> {
+    OUTPUT.with(|output| {
+        output
+            .borrow()
+            .as_ref()
+            .ok_or_else(|| host("Console unavailable"))?
+            .raw(stream, bytes)
+    })
+}
+macro_rules! checked_stderr {($($argument:tt)*)=>{if raw("stderr",format!("{}\n",format_args!($($argument)*)).as_bytes()).is_err(){return 2}};}
+
 static CANCELLED: AtomicBool = AtomicBool::new(false);
 const SIGPIPE: c_int = 13;
 const SIG_IGN: usize = 1;
@@ -255,6 +265,30 @@ pub unsafe extern "C" fn lo_cli_main(
     argv: *const *const c_char,
     _entry_environment: *const *const c_char,
 ) -> c_int {
+    if argc == 2 && CStr::from_ptr(*argv.add(1)).to_bytes() == b"--lo-console-writer" {
+        return crate::console::worker();
+    }
+    CANCELLED.store(false, Ordering::Relaxed);
+    let console = match crate::console::Console::cli() {
+        Ok(console) => Arc::new(console),
+        Err(_) => return 2,
+    };
+    OUTPUT.with(|output| *output.borrow_mut() = Some(console.clone()));
+    let status = cli_main(argc, argv, _entry_environment, console.clone());
+    let cleanup = console.close();
+    OUTPUT.with(|output| *output.borrow_mut() = None);
+    if cleanup.is_err() {
+        2
+    } else {
+        status
+    }
+}
+unsafe fn cli_main(
+    argc: c_int,
+    argv: *const *const c_char,
+    _entry_environment: *const *const c_char,
+    console: Arc<crate::console::Console>,
+) -> c_int {
     #[cfg(target_os = "macos")]
     if argc == 2 && CStr::from_ptr(*argv.add(1)).to_bytes() == b"--lo-process-launcher" {
         extern "C" {
@@ -309,12 +343,12 @@ pub unsafe extern "C" fn lo_cli_main(
             checked_stderr!("runtime.host-failure: absent artifact metadata");
             return 2;
         };
-        if let Err(error) = writeln!(
-            std::io::stdout().lock(),
-            "{}",
-            canonical_json_value(&artifact)
-        ) {
-            checked_stderr!("runtime.host-failure: write artifact metadata: {error}");
+        if raw(
+            "stdout",
+            format!("{}\n", canonical_json_value(&artifact)).as_bytes(),
+        )
+        .is_err()
+        {
             return 2;
         }
         return 0;
@@ -324,6 +358,8 @@ pub unsafe extern "C" fn lo_cli_main(
     let mut error = None;
     let mut format_set = false;
     let mut steps_set = false;
+    let mut console_maximum = 1048576u64;
+    let mut console_limit_set = false;
     let mut limits = crate::value_resources::Limits::default();
     let mut limit_flags = std::collections::BTreeSet::new();
     let mut roots = crate::files::Options::default();
@@ -365,6 +401,13 @@ pub unsafe extern "C" fn lo_cli_main(
             format_set = true;
             if format != "text" && format != "json" {
                 error = Some(format!("unknown output format {format:?}"))
+            }
+        } else if arg == "--max-console-bytes" && !console_limit_set && i + 1 < args.len() {
+            console_limit_set = true;
+            i += 1;
+            match args[i].parse::<u64>() {
+                Ok(value) => console_maximum = value,
+                Err(_) => error = Some("invalid --max-console-bytes".into()),
             }
         } else if arg == "--max-steps" && !steps_set && i + 1 < args.len() {
             i += 1;
@@ -496,6 +539,12 @@ pub unsafe extern "C" fn lo_cli_main(
         &process_prunes,
         &process_endpoints,
     );
+    console.configure(console_maximum, format == "json", serving);
+    if let Ok(policy) = &process_policy {
+        if let Err(message) = policy.protect_images(&console.image_paths()) {
+            error = Some(message);
+        }
+    }
     if let Err(message) = &process_policy {
         error = Some(message.clone());
     }
@@ -536,6 +585,19 @@ pub unsafe extern "C" fn lo_cli_main(
             return 2;
         }
     };
+    if serving
+        && program
+            .result_type
+            .as_ref()
+            .is_some_and(|typ| typ.base_ref() == &atom("Program.Exit"))
+    {
+        return report(
+            host("serve does not accept a Program.Exit entry result"),
+            &Context::new(program.clone(), steps),
+            format == "json",
+            None,
+        );
+    }
     signal(2, stop as *const () as usize);
     signal(15, stop as *const () as usize);
     let processes = match crate::process::configure(&process_policy.unwrap(), 5000, 1 << 20, 1000) {
@@ -578,16 +640,17 @@ pub unsafe extern "C" fn lo_cli_main(
         files: std::sync::Mutex::new(files),
         devices: devices.unwrap(),
         serving,
+        console: console.clone(),
     });
     let mut context = match Context::request(session.clone()) {
         Ok(context) => context,
         Err(fault) => {
-            let cleanup = session.close().err().map(|f| f.message());
+            let cleanup = combine_cleanup(session.close().err(), session.wait_retained().err());
             return report(
-                fault,
+                combine_cleanup(Some(fault), cleanup).unwrap(),
                 &Context::new(program.clone(), steps),
                 format == "json",
-                cleanup.as_deref(),
+                None,
             );
         }
     };
@@ -621,15 +684,16 @@ pub unsafe extern "C" fn lo_cli_main(
             let value = result.as_ref().unwrap_or_else(|_| unreachable!());
             let servers = session.http.snapshot();
             if servers.is_empty() {
-                let cleanup = session.close().err().map(|f| f.message());
+                let cleanup = combine_cleanup(session.close().err(), session.wait_retained().err());
+                let fault = Fault::Host(
+                    "runtime.no-server",
+                    "serve requires an active HTTP server".into(),
+                );
                 return report(
-                    Fault::Host(
-                        "runtime.no-server",
-                        "serve requires an active HTTP server".into(),
-                    ),
+                    combine_cleanup(Some(fault), cleanup).unwrap(),
                     &context,
                     format == "json",
-                    cleanup.as_deref(),
+                    None,
                 );
             }
             let ready = if format == "json" {
@@ -649,11 +713,12 @@ pub unsafe extern "C" fn lo_cli_main(
                     .collect::<Vec<_>>()
                     .join("\n")
             };
-            let serving_result = match writeln!(std::io::stdout().lock(), "{ready}") {
-                Ok(()) => session.http.serve(session.clone()),
-                Err(e) => Err(host(format!("write readiness \"\": {e}"))),
-            };
-            let cleanup = session.close().err();
+            let serving_result =
+                match console.raw_completion("stdout", format!("{ready}\n").as_bytes()) {
+                    Ok(()) => session.http.serve(session.clone()),
+                    Err(e) => Err(e),
+                };
+            let cleanup = combine_cleanup(session.close().err(), session.wait_retained().err());
             if let Err(fault) = serving_result {
                 return report(
                     combine_cleanup(Some(fault), cleanup).unwrap(),
@@ -670,24 +735,34 @@ pub unsafe extern "C" fn lo_cli_main(
             } else {
                 "stopped"
             };
-            if let Err(e) = writeln!(std::io::stdout().lock(), "{stopped}") {
-                return report(
-                    host(format!("write shutdown result \"\": {e}")),
-                    &context,
-                    format == "json",
-                    None,
-                );
+            if let Err(e) = console.raw_completion("stdout", format!("{stopped}\n").as_bytes()) {
+                return report(e, &context, format == "json", None);
             }
             return 0;
         }
-        let session_cleanup = session.close().err();
+        let session_cleanup = combine_cleanup(session.close().err(), session.wait_retained().err());
         let cleanup = combine_cleanup(request_cleanup, session_cleanup);
         match result {
             Ok(v) => {
                 if let Some(fault) = cleanup {
                     return report(fault, &context, format == "json", None);
                 }
-                let payload = if program.has_result {
+                let terminal = crate::program_exit::payload(&v);
+                if let Some(value) = terminal {
+                    if let Err(fault) = console.terminal(&context, value) {
+                        return report(fault, &context, format == "json", None);
+                    }
+                }
+                let payload = if let Some(value) = terminal {
+                    if format == "json" {
+                        Some(format!(
+                            "{{\"command\":\"run\",\"status\":\"ok\",\"exit_code\":{}}}",
+                            value.code
+                        ))
+                    } else {
+                        None
+                    }
+                } else if program.has_result {
                     Some(if format == "json" {
                         format!(
                             "{{\"command\":\"run\",\"status\":\"ok\",\"result\":{}}}",
@@ -702,16 +777,13 @@ pub unsafe extern "C" fn lo_cli_main(
                     None
                 };
                 if let Some(payload) = payload {
-                    if let Err(e) = writeln!(std::io::stdout().lock(), "{payload}") {
-                        return report(
-                            host(format!("write command result \"\": {e}")),
-                            &context,
-                            format == "json",
-                            None,
-                        );
+                    if let Err(e) =
+                        console.raw_context(&context, "stdout", format!("{payload}\n").as_bytes())
+                    {
+                        return report(e, &context, format == "json", None);
                     }
                 }
-                0
+                terminal.map_or(0, |value| value.code as i32)
             }
             Err(f) => report(
                 combine_cleanup(Some(f), cleanup).unwrap(),
@@ -721,12 +793,5 @@ pub unsafe extern "C" fn lo_cli_main(
             ),
         }
     })();
-    // The bounded failure is printed before this mandatory ownership join.
-    let retained = session.wait_retained();
-    if status == 0 {
-        if let Err(fault) = retained {
-            return report(fault, &context, format == "json", None);
-        }
-    }
     status
 }

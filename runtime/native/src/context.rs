@@ -282,6 +282,7 @@ pub struct Program {
     pub sites: Vec<Site>,
     pub flows: Vec<Flow>,
     pub has_result: bool,
+    pub result_type: Option<Type>,
 }
 pub struct Context {
     pub control_null: Handle,
@@ -305,6 +306,8 @@ pub struct Context {
     scope_fault_active: bool,
     pub scopes: u64,
     pub cancelled: bool,
+    pub completed: bool,
+    pub final_result: Option<std::sync::Weak<crate::value::Value>>,
     pub cancel_polls: Cell<u64>,
     pub cancel_after_polls: Option<u64>,
     pub flow_progress: Vec<Handle>,
@@ -391,6 +394,7 @@ impl Program {
             &[
                 "abi",
                 "has_result",
+                "result_type",
                 "source",
                 "types",
                 "files",
@@ -736,6 +740,22 @@ impl Program {
         let has_result = v["has_result"]
             .as_bool()
             .ok_or("invalid program result presence")?;
+        if v.get("result_type").is_none() {
+            return Err("missing program result type".into());
+        }
+        let result_type = if v["result_type"].is_null() {
+            None
+        } else {
+            Some(
+                types
+                    .get(uint(&v, "result_type")?)
+                    .ok_or("invalid result type")?
+                    .clone(),
+            )
+        };
+        if has_result != result_type.is_some() {
+            return Err("program result type presence mismatch".into());
+        }
         LIVE_PROGRAMS.fetch_add(1, Ordering::Relaxed);
         Ok(Self {
             _lifetime: ProgramLifetime,
@@ -745,6 +765,7 @@ impl Program {
             sites,
             flows,
             has_result,
+            result_type,
         })
     }
 }
@@ -877,6 +898,8 @@ impl Context {
             scope_fault_active: false,
             scopes: 0,
             cancelled: false,
+            completed: false,
+            final_result: None,
             cancel_polls: Cell::new(0),
             cancel_after_polls: None,
             flow_progress: vec![],
@@ -963,6 +986,9 @@ impl Context {
         }
     }
     pub fn check_fault(&self) -> Result<(), Fault> {
+        if self.completed {
+            return Err(host("context has completed"));
+        }
         if self.scope_fault_active {
             if let Some(fault) = self.scope_cleanup.borrow_mut().take() {
                 return Err(fault);

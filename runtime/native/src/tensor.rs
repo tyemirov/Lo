@@ -165,6 +165,7 @@ fn visit_storages(
                 if let Some(fields) = value.fields() {
                     stack.extend(fields.values().cloned());
                 }
+                stack.extend_from_slice(value.retained_children());
             }
             _ => (),
         }
