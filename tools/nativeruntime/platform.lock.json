@@ -22,9 +22,9 @@
     },
     {
       "archive": "qemu.tbz2",
-      "url": "https://packages.macports.org/qemu/qemu-11.1.2_0+cocoa+curses+spice+spice_protocol+target_arm+target_i386+target_x86_64+usb+vnc.darwin_25.arm64.tbz2",
-      "sha256": "b828e5a59e6931548474e2997a0ffab3811c1a22af582566a73e4803c2c75780",
-      "bytes": 50057453
+      "url": "https://packages.macports.org/qemu/qemu-11.1.3_0+cocoa+curses+spice+spice_protocol+target_arm+target_i386+target_x86_64+usb+vnc.darwin_25.arm64.tbz2",
+      "sha256": "93f05f904a30d1c29e41e390520f05506fff83100c0676b9ac1d4ef982cc340a",
+      "bytes": 50053580
     },
     {
       "archive": "glib2.tbz2",
@@ -196,9 +196,9 @@
     },
     {
       "archive": "libunistring.tbz2",
-      "url": "https://packages.macports.org/libunistring/libunistring-1.4.2_0.darwin_20.arm64.tbz2",
-      "sha256": "dac313d06d96eb09f1f94651f7611fde17328a800d23b831b349a8bd24423883",
-      "bytes": 1596851
+      "url": "https://packages.macports.org/libunistring/libunistring-1.5_0.darwin_25.arm64.tbz2",
+      "sha256": "6c077bb6541b4fe5ea894e12614944952411698e2ea25baecbf414a6c175c700",
+      "bytes": 1653573
     },
     {
       "archive": "p11-kit.tbz2",
