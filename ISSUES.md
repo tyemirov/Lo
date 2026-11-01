@@ -467,6 +467,29 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   - Verify that package boundaries cannot hide effects or grant capabilities.
   - Resolve each syntax and semantic decision before its dependent feature starts.
 
+- [ ] [P007] (P1) {F024} Select a confined descendant process ownership model
+  Goal:
+  Select a generic execution profile that owns supported child processes through complete cleanup.
+
+  Requirements:
+  - Keep current fork and spawn denial until additional behavior passes qualification.
+  - Specify ownership across fork, spawn, registered exec chains, detached sessions, and inherited pipes.
+  - Preserve the initial executable's scope without authority union across commands.
+  - Specify process identity, creation races, resource bounds, cancellation, and uncertain-ownership failures.
+  - Distinguish qualified Darwin activation from unavailable platform behavior.
+
+  Deliverables:
+  - Add a selected design, controlled probe evidence, and explicit guarantees for F036.
+  - Record unsupported behavior and rejected mechanisms without an execution fallback.
+
+  Validation:
+  - Use repository-owned helpers for detach, late creation, inherited pipes, and leader-exit races.
+  - Prove containment and complete descendant cleanup before additional activation authority.
+  - Reject process-group termination alone as proof for detached descendants.
+  - Complete independent design review before F036 implementation.
+
+  The [implementation roadmap](docs/mac-cleanup-implementation-plan.md) records scope and acceptance boundaries.
+
 ## Features
 
 - [x] [F001] (P1) Build native Lo executables
@@ -1293,6 +1316,285 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Keep all fixture state, process helpers, caches, and artifacts inside Lo.
   Subsequent issues own cleanup locking, candidate-path probes, complete categories, and final application orchestration.
 
+- [x] [F026] (P1) {F025} Add explicit committed console output
+  Goal:
+  Let applications write ordered console lines through host-owned output sinks.
+
+  Requirements:
+  - Select the Console target, closed destination set, host grants, quotas, and embedding sink contract.
+  - Keep construction pure and write only during commit activation.
+  - Define Unicode, newlines, flush behavior, partial writes, and confirmed progress.
+  - Select a canonical JSON output protocol before implementation.
+  - Keep output payloads out of constructor diagnostics and uncommitted snapshots.
+  - Preserve cancellation and terminal failure behavior without abandoned output workers.
+
+  Deliverables:
+  - Add nominal values, catalog operations, effect metadata, injected adapters, runner wiring, and native parity.
+  - Add the Console contract and an executable public example.
+
+  Validation:
+  - Confirm public fixture failures before production changes.
+  - Verify inert construction, both destinations, ordered commits, Unicode, empty lines, and invalid destinations.
+  - Exercise short writes, flush errors, closed pipes, blocked-write cancellation, and output quotas.
+  - Verify text and JSON output without an ambiguous mixture of raw text and result envelopes.
+  - Complete interpreter/native checks, independent review, and final stack CI.
+
+  Results (October 31, 2026):
+  Console lines now activate through explicit output sinks in the interpreter and native runtimes.
+  Text and NDJSON output tests passed.
+  Quota, cancellation, and partial write tests passed.
+  Automatic snapshots exclude Console payloads.
+  The [completion record](docs/evidence/cli-runtime/checkpoint.json) contains successful local CI and independent review.
+
+- [x] [F027] (P1) {F026} Add terminal application results after owned-resource cleanup
+  Goal:
+  Select an application exit status through an inert nominal result returned by the run entry.
+
+  Requirements:
+  - Select one terminal payload shape, valid status range, final-output order, and serve behavior.
+  - Preserve reporting from pure startup handlers without permitting commits in those handlers.
+  - Keep total startup handlers type-correct through validated terminal inputs or an outer fallible reporting flow.
+  - Select application status only after required output and complete resource cleanup succeed.
+  - Let execution, output, cancellation, budget, or cleanup failure override a requested application status.
+  - Separate execution failure from successful application statuses such as 1 and 2.
+  - Keep ordinary Int results and nested terminal values free of terminal-selection effects.
+
+  Deliverables:
+  - Add the terminal value contract and equivalent interpreter, native CLI, and embedding behavior.
+  - Update the application draft to the selected constructor without duplicate forms.
+
+  Validation:
+  - Confirm public failures for missing status selection before production changes.
+  - Exercise statuses 0, 1, and 2, invalid statuses, type-correct pure startup handlers, and nested values.
+  - Verify output and retained-ownership failure after every requested application status.
+  - Verify JSON results and explicit rejection of unsupported terminal contexts.
+  - Complete parity checks, independent review, and final stack CI.
+
+  Results (October 31, 2026):
+  Terminal entry results now select status after required output and resource cleanup.
+  Output and cleanup failures override that status.
+  Resource tests confirmed the same retained bytes and quota results across runtimes.
+  The [completion record](docs/evidence/cli-runtime/checkpoint.json) contains successful local CI and independent review.
+
+- [x] [F028] (P1) {F025,F027} Add declared application flags and executable help
+  Goal:
+  Turn captured program arguments into pure declared options and deterministic help.
+
+  Requirements:
+  - Reuse existing literal argument capture after the runner's `--` separator.
+  - Select exact names, repeated flags, exclusive groups, abbreviation rules, and operand handling.
+  - Keep option names, descriptions, and argument-error status in application data.
+  - Add only the generic value helpers necessary for the selected parser.
+  - Keep modules, packages, and user-defined types outside the initial dependency chain.
+
+  Deliverables:
+  - Add the selected pure parser contract and a small executable CLI example.
+  - Complete help, invalid-argument, and dry-run selection fixtures with Console and terminal results.
+
+  Validation:
+  - Confirm public fixture failures before implementation.
+  - Verify literal arguments, unknown flags, repeated flags, conflicts, abbreviations, and unexpected operands.
+  - Verify help completes before lock acquisition, probes, cleaners, or removal.
+  - Compare visible output and actual exit statuses in all software runtimes.
+  - Complete independent review and final stack CI.
+
+  Results (October 31, 2026):
+  Declared flags now support aliases, exclusive groups, and selected abbreviations.
+  The help text follows declaration order.
+  The [CLI example](docs/examples/cli-cleanup-preview.lo) executes mode selection and reports invalid arguments with application status 2.
+  The [completion record](docs/evidence/cli-runtime/checkpoint.json) contains successful local CI and independent review.
+
+- [ ] [F029] (P1) {F025} Add program entry identity and scoped exclusive file locks
+  Goal:
+  Supply identity-checked exclusive nonblocking lock leases for application lifetimes.
+
+  Requirements:
+  - Identify the interpreted source entry or actual native executable without trusting `argv[0]`.
+  - Define explicit injected identity for embeddings and typed absence when identity is unavailable.
+  - Require explicit lock authority independently of ordinary path values.
+  - Keep lock construction pure and acquire the lease only during commit activation.
+  - Hold the lease through child cleanup, failure, cancellation, and retained-ownership joins.
+  - Prevent child inheritance and premature release through ordinary value disposal.
+
+  Deliverables:
+  - Add entry observation, nominal lock targets, host grants, and lifetime-owned leases in both runtimes.
+  - Specify replacement and symlink guarantees for the selected file identity.
+
+  Validation:
+  - Confirm public failures before implementation.
+  - Verify two-process contention, mixed interpreted/native callers, relocation, replacement, and missing identity.
+  - Verify release after success, recoverable error, cancellation, and delayed child cleanup.
+  - Inject close failures and reject false successful release.
+  - Complete parity checks, independent review, and final stack CI.
+
+- [ ] [F030] (P1) {F025,F028} Add selected generic text, byte, collection, path, and glob processors
+  Goal:
+  Supply the pure value operations needed by executable file policies and exact probe protocols.
+
+  Requirements:
+  - Select the minimal operation inventory from current application call sites.
+  - Keep F028 parser helpers under one canonical owner before selecting remaining processors.
+  - Reuse Match, scalar predicates, UTF-8 conversion, and named flows where sufficient.
+  - Own pure lexical path helpers and shell quoting for display without filesystem access or shell execution.
+  - Specify text and byte indices, bounds, separators, empty input, invalid sizes, and malformed data.
+  - Define stable order and typed equality for sorting, chunks, duplicate removal, and comparisons.
+  - Keep glob matching generic and application filename rules outside the runtime.
+  - Apply current logical work and live-value quotas without duplicate builtin aliases.
+
+  Deliverables:
+  - Add selected canonical processors, diagnostics, inspection metadata, and native implementations.
+  - Add executable direct-file predicates and exact NUL-framed probe parsing examples.
+
+  Validation:
+  - Confirm public fixture failures before production changes.
+  - Verify Unicode boundaries, malformed UTF-8, embedded NUL, empty cases, and invalid bounds.
+  - Verify stable sorting, comparator purity, wildcard classes, escapes, separators, and leading dots.
+  - Reject probe names outside the selected candidate batch.
+  - Complete resource checks, parity, independent review, and final stack CI.
+
+- [ ] [F031] (P1) {F030} Add generic JSON extraction and numeric presentation
+  Goal:
+  Supply typed JSON values, decimal integer parsing, and deterministic numeric formatting for application reports.
+
+  Requirements:
+  - Select one JSON value, decode, lookup, and extraction contract.
+  - Select decimal integer parsing and report-template formatting without application-specific schema names.
+  - Reject malformed input, missing fields, wrong kinds, and unsupported numeric values explicitly.
+  - Define precision, rounding, grouping, width, and invalid-format behavior for selected presentation operations.
+  - Keep Docker schema names and report templates in application code.
+  - Keep decoder depth, work, and value limits under explicit host quotas.
+
+  Deliverables:
+  - Add selected pure processors and interpreter/native implementations.
+  - Add local JSON and report fixtures without a live Docker dependency.
+
+  Validation:
+  - Confirm public fixture failures before implementation.
+  - Exercise malformed Unicode, duplicate fields, deep input, numeric bounds, missing fields, and wrong kinds.
+  - Verify deterministic formatting, nonfinite failures, invalid precision, and quota exhaustion.
+  - Compare local Docker-like metadata extraction and report outputs across runtimes.
+  - Complete independent review and final stack CI.
+
+- [ ] [F032] (P1) {F025} Add coherent file identity, allocation, clock, and volume observations
+  Goal:
+  Supply public metadata and fresh host measurements for generic filesystem decisions.
+
+  Requirements:
+  - Add public device, inode, and allocated bytes from the same native observation as existing File metadata.
+  - Define allocation arithmetic and reject invalid metadata without changing logical-size receipts.
+  - Add a fresh clock observation independently of the immutable invocation clock.
+  - Add containing-volume total, used, and free byte observations with explicit failure behavior.
+  - Keep metadata projections pure and automatic snapshots free of executable authority.
+
+  Deliverables:
+  - Extend the current File schema, Host operations, adapters, transports, and native runtime consistently.
+  - Add public observation examples and update canonical inventories together.
+
+  Validation:
+  - Confirm public fixture failures before implementation.
+  - Verify coherent identities, empty and sparse files, allocated versus logical size, and arithmetic bounds.
+  - Inject advancing clocks, volume failures, and changed metadata through public boundaries.
+  - Verify Darwin and Linux software parity and current removal receipt semantics.
+  - Complete independent review and final stack CI.
+
+- [ ] [F033] (P1) {F025} Add explicit descendant directory authority and retained child observations
+  Goal:
+  Support recursive filesystem traversal without expanding existing exact grants.
+
+  Requirements:
+  - Select separate recursive observation and recursive removal grants.
+  - Reuse current exact-root operations without alternative root constructor names.
+  - Select equivalent exact operations or explicit authority for canonical-path, absence, and kind observations.
+  - Require valid recursive scope, parent identity, entry provenance, and execution lifetime for child operations.
+  - Reject foreign sessions, released observations, mismatched parents, replaced ancestors, and symlink traversal.
+  - Keep owner and device descent decisions in application predicates.
+  - Release completed handles under existing worklist resource accounting.
+
+  Deliverables:
+  - Add selected child, refresh, entry, and re-observation operations with Go and native parity.
+  - Specify bounded retained handles and snapshot authority rules.
+
+  Validation:
+  - Confirm public failures before production changes.
+  - Verify an exact parent grant cannot authorize a child or recursive removal.
+  - Exercise replacement, symlinks, foreign sessions, released leases, cancellation, and close failures.
+  - Visit more than 128 cumulative directories under bounded live quotas in deep and wide fixtures.
+  - Complete public parity checks, independent review, and final stack CI.
+
+- [ ] [F034] (P1) {F032,F033} Add bounded tree snapshots and checked recursive removal
+  Goal:
+  Bind descriptor-safe recursive removal to an approved tree observation with complete eligibility preflight.
+
+  Requirements:
+  - Select bounded snapshot ownership without retaining a descriptor for every tree row.
+  - Use retained parent/root authority and authority-free metadata rows, or prove an equivalent bounded representation.
+  - Include the root row, rejected subtree rows, and sorted depth-first relative names.
+  - Keep symlink rows observable without following their targets.
+  - Bind removal to expected tree state and reject unobserved additions or replacements.
+  - Recheck identities before each removal and remove the root last.
+  - Report confirmed partial progress without a claim of atomic deletion or rollback.
+
+  Deliverables:
+  - Add the selected snapshot, removal target, guard, receipt, and resource-lifetime contracts in both runtimes.
+  - Update the draft's parent/root-only target if it cannot enforce expected state.
+
+  Validation:
+  - Confirm public fixture failures before implementation.
+  - Exercise more than 128 directories, quota exhaustion, row ordering, and rejected subtree visibility.
+  - Verify symlink unlinking without traversal, snapshot inequality, additions, replacements, and vanished entries.
+  - Verify complete preflight, postorder removal, late failure progress, cancellation, and close failures.
+  - Complete parity checks, independent review, and final stack CI.
+
+- [ ] [F035] (P1) {F024,F026} Add host-admitted command deadlines and forwarded output
+  Goal:
+  Support bounded command duration and explicit forwarded output under trusted host policy.
+
+  Requirements:
+  - Replace the current five-second admission ceiling through one selected host-limit contract.
+  - Keep per-command requests within host-authorized duration, cleanup, output, and destination limits.
+  - Reject excessive requests before launch without silent shortening.
+  - Coordinate Go, C, Rust, CLI, embedding, and trusted launcher framing changes.
+  - Make a command timeout recoverable only after complete owned-process cleanup succeeds.
+  - Keep cancellation, budget failure, cleanup failure, and uncertain ownership terminal.
+  - Bound forwarded output without exposing unrelated descriptors or bypassing output accounting.
+  - Keep confirmed filesystem and daemon effects after timeout or cancellation.
+
+  Deliverables:
+  - Add the selected command transformations, host policy, output result shapes, and canonical transport.
+  - Qualify application requests from 30 through 1800 seconds through controlled clocks and limits.
+
+  Validation:
+  - Confirm public failures before production changes.
+  - Verify below-limit, exact-limit, and excessive requests without long real-time waits.
+  - Exercise capture and forwarding, sink failure, backpressure, retained pipes, and complete cleanup.
+  - Verify timeout recovery permits the next category only after ownership resolves.
+  - Preserve explicit Linux activation unavailability unless a separate platform contract changes it.
+  - Complete independent review and final stack CI.
+
+- [ ] [F036] (P1) {P007,F035} Implement the qualified descendant process profile
+  Goal:
+  Enable only the process-tree behavior selected and qualified by P007.
+
+  Requirements:
+  - Implement complete ownership, confinement, identity, and lifetime behavior for the selected profile.
+  - Preserve the initial executable's scope through registered exec chains.
+  - Keep unrelated executable scopes separate and reject unsupported child behavior explicitly.
+  - Keep current descendant denial until the additional profile passes public acceptance.
+  - Keep trusted-host assumptions and platform availability explicit.
+
+  Deliverables:
+  - Add host policy, launcher, transport, and runtime support for the selected profile.
+  - Add repository-owned command helpers with the process shapes required by the application.
+
+  Validation:
+  - Confirm public failures before production changes.
+  - Verify fork, spawn, detach, leader exit, creation races, inherited pipes, and registered exec behavior.
+  - Verify denied authority, output failure, cancellation, and complete owned-descendant cleanup.
+  - Reject arbitrary installed-tool compatibility claims based only on fixture results.
+  - Complete independent review and final stack CI.
+
+  The [implementation roadmap](docs/mac-cleanup-implementation-plan.md) defines milestones and shared acceptance requirements for F026 through F036.
+
 ## BugFixes
 
 - [x] [B001] (P1) Preserve enclosing fold progress after native cancellation
@@ -2067,6 +2369,34 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Execute artifacts without Lo and compare independent expected results.
   - Verify package errors, denied capabilities, execution limits, and diagnostics across modules.
   - Verify the formatter, test runner, editor navigation, and source-level debugging on these applications.
+
+- [ ] [I013] (P1) {F028,F029,F030,F031,F032,F034,F035,F036} Complete the mac-cleanup Lo application with confined workflow acceptance
+  Goal:
+  Replace proposed calls with accepted generic contracts and validate one complete cleanup application inside Lo.
+
+  Requirements:
+  - Obey the [implementation roadmap](docs/mac-cleanup-implementation-plan.md) and current application behavior record.
+  - Keep names, paths, ages, command arguments, probe rules, messages, and exit policy in application flows.
+  - Share canonical workflow flows between default and explicit repository-fixture entry sources.
+  - Complete executable CLI, direct-file, recursive-cache, whole-tree, and full-workflow milestones in order.
+  - Keep dry run free of cleaners, probes, and removal.
+  - Keep report mode free of cleanup while allowing declared read-only inventory operations.
+  - Preserve ordinary failure labels, confirmed progress, later independent categories, and terminal failure stop.
+  - Use each probe policy's exact framing and stderr contract.
+  - Keep actual package-cache and Docker cleanup outside acceptance.
+
+  Deliverables:
+  - Make the complete application pass type checking and executable fixture acceptance without proposed APIs.
+  - Add public fixtures, documented commands, source identities, and a category-level behavior matrix.
+  - Keep later modules and packages outside the initial implementation dependency chain.
+
+  Validation:
+  - Verify help, arguments, UID rejection, locks, literal inputs, command order, and actual process statuses.
+  - Verify file selection, allocation, open handles, changed entries, sibling preservation, and partial progress.
+  - Verify temporary-root validation and Docker context, builder, endpoint, JSON, and response handling.
+  - Compare complete interpreter and native Darwin fixtures under the selected Process profile.
+  - Verify portable contracts under Linux QEMU while preserving explicit Process unavailability.
+  - Complete independent review and final repository-native CI after the last implementation correction.
 
 ## Maintenance
 
