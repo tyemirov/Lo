@@ -71,7 +71,7 @@ func Program(p ir.Program) (execution.Program, error) {
 	return execution.NewProgram(func(s execution.Session) (value.Value, error) {
 		m := &machine{Session: s, flows: flows}
 		return m.body(body, frame{bindings: map[ir.BindingID]value.Value{}})
-	}, handlers)
+	}, handlers, p.ResultType())
 }
 func Run(ctx context.Context, p ir.Program, boundary execution.Boundary, budget execution.Budget, config device.Config) (value.Value, error) {
 	program, err := Program(p)

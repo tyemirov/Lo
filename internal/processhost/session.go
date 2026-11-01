@@ -3,6 +3,7 @@ package processhost
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
@@ -16,17 +17,20 @@ import (
 type Config interface {
 	Policy() adapter.ProcessPolicy
 	Limits() adapter.ProcessLimits
+	ProtectedImages() []adapter.ProcessExecutableGrant
 	config()
 }
 
 type config struct {
-	policy adapter.ProcessPolicy
-	limits adapter.ProcessLimits
+	policy    adapter.ProcessPolicy
+	limits    adapter.ProcessLimits
+	protected []adapter.ProcessExecutableGrant
 }
 
-func (config) config()                         {}
-func (c config) Policy() adapter.ProcessPolicy { return c.policy }
-func (c config) Limits() adapter.ProcessLimits { return c.limits }
+func (config) config()                                             {}
+func (c config) Policy() adapter.ProcessPolicy                     { return c.policy }
+func (c config) Limits() adapter.ProcessLimits                     { return c.limits }
+func (c config) ProtectedImages() []adapter.ProcessExecutableGrant { return slices.Clone(c.protected) }
 
 // NewConfig constructs a description without filesystem access or activation.
 func NewConfig(policy adapter.ProcessPolicy, limits adapter.ProcessLimits) (Config, error) {
@@ -34,6 +38,20 @@ func NewConfig(policy adapter.ProcessPolicy, limits adapter.ProcessLimits) (Conf
 		return nil, host("missing session configuration")
 	}
 	return config{policy: policy, limits: limits}, nil
+}
+
+// WithProtectedImages selects host-owned images which participating mutations
+// must preserve, without authorizing their activation as Process commands.
+func WithProtectedImages(configuration Config, images []adapter.ProcessExecutableGrant) (Config, error) {
+	if configuration == nil {
+		return nil, host("missing session configuration")
+	}
+	for _, image := range images {
+		if image == nil {
+			return nil, host("missing protected image")
+		}
+	}
+	return config{policy: configuration.Policy(), limits: configuration.Limits(), protected: append(configuration.ProtectedImages(), images...)}, nil
 }
 
 // Session owns the host boundary and a single retained shutdown owner. Close's
@@ -84,8 +102,8 @@ func Open(ctx context.Context, configuration Config, roots adapter.FileRoots) (S
 
 // OpenTrusted is a trusted Go-embedding boundary, not native qualification. The
 // Creator must honor Primary ownership, confinement, execution-witness, and
-// resource contracts. Only configured command grants are protected here; a
-// production native assembly must additionally protect its reviewed helper.
+// resource contracts. File mutations preserve configured command grants and
+// protection-only images. Production native assembly also protects its helper.
 func OpenTrusted(ctx context.Context, configuration Config, roots adapter.FileRoots, creator Creator) (Session, error) {
 	if configuration == nil || creator == nil {
 		return nil, host("missing trusted session dependencies")
@@ -98,12 +116,13 @@ func openSession(ctx context.Context, configuration Config, roots adapter.FileRo
 		return nil, err
 	}
 	grants := configuration.Policy().Grants()
+	protectedImages := configuration.ProtectedImages()
 	if protected, ok := creator.(interface {
 		protectedImages() []adapter.ProcessExecutableGrant
 	}); ok {
-		grants = append(grants, protected.protectedImages()...)
+		protectedImages = append(protectedImages, protected.protectedImages()...)
 	}
-	registry, err := adapter.OpenProcessRegistry(ctx, grants, adapter.DefaultProcessRegistryLimits())
+	registry, err := adapter.OpenProtectedProcessRegistry(ctx, grants, protectedImages, adapter.DefaultProcessRegistryLimits())
 	if err != nil {
 		return nil, err
 	}

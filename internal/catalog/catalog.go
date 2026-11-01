@@ -219,6 +219,8 @@ func (operation) operation()            {}
 func (o operation) TargetPosition() int { return o.targetPosition }
 func (o operation) Capability() string {
 	switch o.name {
+	case ConsoleLineNew:
+		return ConsoleWrite
 	case ProcessCommandNew:
 		return ProcessRun
 	case ClientRequestNew:
@@ -272,6 +274,7 @@ func build() map[string]Operation {
 	fixed(ProcessExecutableNew, []types.Parameter{{Name: "path", Type: types.Path()}}, must(types.NewFallible(types.ProcessExecutable())))
 	fixed(ProcessCommandNew, []types.Parameter{{Name: "context", Type: types.ProcessContext()}, {Name: "executable", Type: types.ProcessExecutable()}, {Name: "arguments", Type: must(types.NewList(types.String()))}, {Name: "stdin", Type: types.Bytes()}}, must(types.NewFallible(types.ProcessCommand())))
 	addProcessContexts(m, fixed)
+	addApplications(m, fixed)
 	executable := m[ProcessExecutableNew].(operation)
 	executable.errors = []string{ProcessInvalidExecutable}
 	m[ProcessExecutableNew] = executable
@@ -446,7 +449,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
+	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "CLI", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
 		return true
 	}
 	return false
@@ -485,6 +488,7 @@ type activationTarget struct {
 }
 
 var activationTargets = map[types.Kind]activationTarget{
+	types.ConsoleLineKind:    {ConsoleLineNew, types.ConsoleReceipt()},
 	types.ProcessCommandKind: {ProcessCommandNew, types.ProcessResult()},
 	types.FileWriteKind:      {FileWrite, types.FileWriteReceipt()},
 	types.FileAppendKind:     {FileAppend, types.FileAppendReceipt()},

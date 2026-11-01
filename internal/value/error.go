@@ -142,6 +142,8 @@ func Failure(t types.Fallible, e Error) (Fallible, error) {
 
 func Project(v Value, field string) Value {
 	switch x := v.(type) {
+	case CLIOptions:
+		return x.FieldsRecord().Field(field)
 	case HostInvocation:
 		return x.FieldsRecord().Field(field)
 	case FileDirectoryObservation:

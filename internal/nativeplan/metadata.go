@@ -47,6 +47,7 @@ type metadataRow struct {
 type metadataDocument struct {
 	ABI         string               `json:"abi"`
 	HasResult   bool                 `json:"has_result"`
+	ResultType  *uint64              `json:"result_type"`
 	Source      sourceMetadata       `json:"source"`
 	Types       []typeMetadata       `json:"types"`
 	Files       []string             `json:"files"`
@@ -238,7 +239,7 @@ func (l *lowering) encodeMetadata() ([]byte, error) {
 		}
 		rows[index] = metadataRow{l.siteSpans[index], location.Action, location.Type, location.Owner, location.Flow, payload}
 	}
-	return marshalMetadata(l.ctx, metadataDocument{l.metadata.ABI, l.metadata.HasResult, l.metadata.Source, l.metadata.Types, l.files, l.spans, rows, l.metadata.Flows, l.metadata.Derivatives})
+	return marshalMetadata(l.ctx, metadataDocument{l.metadata.ABI, l.metadata.HasResult, l.metadata.ResultType, l.metadata.Source, l.metadata.Types, l.files, l.spans, rows, l.metadata.Flows, l.metadata.Derivatives})
 }
 
 // WithArtifactMetadata adds the artifact JSON value without buffering its full

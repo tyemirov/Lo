@@ -11,6 +11,12 @@ import (
 
 func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int]identity.FlowID, f frame) (value.Value, error) {
 	switch call.Operation().Name() {
+	case catalog.ConsoleLineNew:
+		return runtimeops.ConsoleLineNew(m.Session, call, args, flows)
+	case catalog.ProgramExitNew:
+		return runtimeops.ProgramExitNew(m.Session, call, args, flows)
+	case catalog.CLIParse:
+		return runtimeops.CLIParse(m.Session, call, args, flows)
 	case catalog.CheckpointEncode, catalog.CheckpointDecode, catalog.ParametersTo, catalog.SGDStateTo, catalog.AdamWStateTo:
 		return runtimeops.Checkpoint(m.Session, call, args, flows)
 	case catalog.TensorTo:

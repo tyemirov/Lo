@@ -90,6 +90,7 @@ type processNamespaceEdge struct {
 }
 type processRegistry struct {
 	registrations                           map[string]processRegistration
+	executablePaths                         map[string]bool
 	identities                              map[value.FileIdentity]struct{}
 	namespace                               map[processNamespaceEdge]struct{}
 	directories                             map[value.FileIdentity]*os.Root
@@ -111,10 +112,25 @@ func registryHost(subject string, cause error) error {
 // excluded. Future rename, arbitrary link, symlink, or directory removal APIs must
 // revisit that scope.
 func OpenProcessRegistry(ctx context.Context, grants []ProcessExecutableGrant, limits ProcessRegistryLimits) (ProcessRegistry, error) {
+	return OpenProtectedProcessRegistry(ctx, grants, nil, limits)
+}
+
+// OpenProtectedProcessRegistry protects additional images without granting their
+// activation through the Process driver.
+func OpenProtectedProcessRegistry(ctx context.Context, grants, protected []ProcessExecutableGrant, limits ProcessRegistryLimits) (ProcessRegistry, error) {
 	if limits == nil {
 		return nil, registryHost("registration", errors.New("missing registry limits"))
 	}
-	r := &processRegistry{registrations: map[string]processRegistration{}, identities: map[value.FileIdentity]struct{}{}, namespace: map[processNamespaceEdge]struct{}{}, directories: map[value.FileIdentity]*os.Root{}, maximum: limits.MaxBytes()}
+	r := &processRegistry{registrations: map[string]processRegistration{}, executablePaths: map[string]bool{}, identities: map[value.FileIdentity]struct{}{}, namespace: map[processNamespaceEdge]struct{}{}, directories: map[value.FileIdentity]*os.Root{}, maximum: limits.MaxBytes()}
+	for _, grant := range grants {
+		if grant != nil {
+			if r.executablePaths[grant.Path()] {
+				return nil, registryHost("registration", errors.New("duplicate executable grant"))
+			}
+			r.executablePaths[grant.Path()] = true
+		}
+	}
+	grants = append(append([]ProcessExecutableGrant(nil), grants...), protected...)
 	fail := func(err error) (ProcessRegistry, error) { return nil, errors.Join(err, r.Close()) }
 	for _, grant := range grants {
 		if err := ctx.Err(); err != nil {
@@ -124,7 +140,10 @@ func OpenProcessRegistry(ctx context.Context, grants []ProcessExecutableGrant, l
 			return fail(registryHost("registration", errors.New("missing executable grant")))
 		}
 		if _, exists := r.registrations[grant.Path()]; exists {
-			return fail(registryHost("registration", errors.New("duplicate executable grant")))
+			if r.registrations[grant.Path()].grant.Digest() != grant.Digest() {
+				return fail(registryHost("registration", errors.New("conflicting executable identity")))
+			}
+			continue
 		}
 		file, err := os.OpenFile(grant.Path(), os.O_RDONLY|unix.O_NONBLOCK, 0)
 		if err != nil {
@@ -349,6 +368,9 @@ func (r *processRegistry) validate(ctx context.Context, invocation ProcessInvoca
 	}
 	if invocation == nil {
 		return registryHost("admission", errors.New("missing invocation"))
+	}
+	if !r.executablePaths[invocation.Executable()] {
+		return execution.Denied(catalog.ProcessRun, "executable")
 	}
 	return r.validateExecutable(ctx, invocation.Executable())
 }

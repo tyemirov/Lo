@@ -37,6 +37,7 @@ type flowMetadata struct {
 type programMetadata struct {
 	ABI         string               `json:"abi"`
 	HasResult   bool                 `json:"has_result"`
+	ResultType  *uint64              `json:"result_type"`
 	Source      sourceMetadata       `json:"source"`
 	Types       []typeMetadata       `json:"types"`
 	Locations   []Location           `json:"locations"`
@@ -130,6 +131,10 @@ func Lower(ctx context.Context, program ir.Program) (Plan, error) {
 		module.Functions = append(module.Functions, l.function(flow, flow.Body(), flow.Span()))
 	}
 	module.Functions = append(module.Functions, l.synthetic...)
+	if program.ResultType() != nil {
+		id := l.typeID(program.ResultType())
+		l.metadata.ResultType = &id
+	}
 	if l.err != nil {
 		return nil, l.err
 	}

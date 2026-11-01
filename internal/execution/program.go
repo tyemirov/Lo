@@ -24,15 +24,20 @@ type Handler struct {
 type Program interface {
 	Run(context.Context, Boundary, Budget, device.Config) (value.Value, error)
 	NewInvocation(context.Context, Boundary, Budget, device.Config) (Invocation, error)
+	ResultType() types.Type
 	program()
 }
 type program struct {
-	body     func(Session) (value.Value, error)
-	handlers map[identity.FlowID]Handler
+	body       func(Session) (value.Value, error)
+	handlers   map[identity.FlowID]Handler
+	resultType types.Type
 }
 
 func (*program) program() {}
-func NewProgram(body func(Session) (value.Value, error), handlers []Handler) (Program, error) {
+
+// NewProgram requires trusted entry result metadata. A nil resultType declares a
+// no-result body. Successful callbacks must return exactly the declared type.
+func NewProgram(body func(Session) (value.Value, error), handlers []Handler, resultType types.Type) (Program, error) {
 	if body == nil {
 		return nil, fmt.Errorf("program requires a top-level entry")
 	}
@@ -52,8 +57,9 @@ func NewProgram(body func(Session) (value.Value, error), handlers []Handler) (Pr
 		h.Parameters = slices.Clone(h.Parameters)
 		table[h.ID] = h
 	}
-	return &program{body, table}, nil
+	return &program{body: body, handlers: table, resultType: resultType}, nil
 }
+func (p *program) ResultType() types.Type { return p.resultType }
 func (p *program) Run(ctx context.Context, b Boundary, budget Budget, config device.Config) (output value.Value, resultErr error) {
 	s, err := NewSession(ctx, b, budget, config)
 	if err != nil {
@@ -69,6 +75,9 @@ func (p *program) Run(ctx context.Context, b Boundary, budget Budget, config dev
 	v, err := p.body(s)
 	if err != nil {
 		return nil, err
+	}
+	if (v == nil) != (p.resultType == nil) || (v != nil && !types.Equal(v.Type(), p.resultType)) {
+		return nil, HostFailure("program result", "entry", fmt.Errorf("declared result type differs"))
 	}
 	return Published(v)
 }
