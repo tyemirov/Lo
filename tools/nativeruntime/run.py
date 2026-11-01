@@ -11,12 +11,24 @@ import tempfile
 
 from prepare import ROOT, local
 
+COMPANION_NAME = 'companion'
 
-def run(preparation: Path, executable: Path, arguments: list[str], stdin: bytes, capture_file: Path | None = None) -> int:
-    if not executable.is_file():
-        raise ValueError(f'missing guest executable: {executable}')
-    if executable.read_bytes()[:4] != b'\x7fELF':
-        raise ValueError(f'guest executable must be ELF: {executable}')
+
+def executable_input(path: Path) -> Path:
+    selected = local(path)
+    if not selected.is_file():
+        raise ValueError(f'missing guest executable: {selected}')
+    with selected.open('rb') as source:
+        if source.read(4) != b'\x7fELF':
+            raise ValueError(f'guest executable must be ELF: {selected}')
+    return selected
+
+
+def run(preparation: Path, executable: Path, arguments: list[str], stdin: bytes,
+        capture_file: Path | None = None, companion: Path | None = None) -> int:
+    executable = executable_input(executable)
+    if companion is not None:
+        companion = executable_input(companion)
     encoded_arguments = b'\0'.join(os.fsencode(argument) for argument in [str(executable), *arguments]) + b'\0'
     if len(encoded_arguments) >= 1048576 or len(arguments) >= 4094:
         raise ValueError('guest arguments exceed the declared limit')
@@ -25,7 +37,10 @@ def run(preparation: Path, executable: Path, arguments: list[str], stdin: bytes,
         work = local(Path(temporary))
         guest = local(work / 'root')
         (guest / 'dev').mkdir(parents=True)
+        (guest / 'proc').mkdir()
         shutil.copy2(executable, guest / 'probe')
+        if companion is not None:
+            os.link(companion, guest / COMPANION_NAME)
         if capture_file is not None:
             selected = local(capture_file)
             if selected.name != '.lo-native-capture' or not selected.is_file() or selected.read_bytes() != b'':
@@ -64,11 +79,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--preparation', required=True, type=Path)
     parser.add_argument('--capture-file', type=Path)
+    parser.add_argument('--companion', type=Path)
     parser.add_argument('executable', type=Path)
     parser.add_argument('arguments', nargs=argparse.REMAINDER)
     arguments = parser.parse_args()
     try:
-        return run(local(arguments.preparation), local(arguments.executable), arguments.arguments, sys.stdin.buffer.read(), local(arguments.capture_file) if arguments.capture_file else None)
+        return run(local(arguments.preparation), arguments.executable, arguments.arguments,
+                   sys.stdin.buffer.read(), local(arguments.capture_file) if arguments.capture_file else None,
+                   arguments.companion)
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         print(f'native guest: {error}', file=sys.stderr)
         return 1
