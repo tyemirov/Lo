@@ -490,6 +490,32 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
 
   The [implementation roadmap](docs/mac-cleanup-implementation-plan.md) records scope and acceptance boundaries.
 
+- [x] [P008] (P0) Define the self-contained native compiler implementation
+  Goal:
+  Select a compiler implementation that produces native machine code without external development tools or companion compiler files.
+
+  Requirements:
+  - Use the [self-contained compiler requirement](docs/self-contained-compiler.md) as the acceptance contract.
+  - Permit any implementation language and preserve the complete current Lo language.
+  - Permit only the target OS loader and system libraries as host software dependencies.
+  - Define the embedded backend, runtime inputs, platform data, and complete compiler closure.
+  - Separate initial compiler production from execution of the built compiler.
+  - Define isolated acceptance with only the compiler executable, Lo inputs, output workspace, and declared OS components.
+
+  Deliverables:
+  - Add the [implementation design](docs/self-contained-compiler-design.md) and its ordered implementation issues.
+
+  Validation:
+  - Verify the compiler source inventory and every host dependency against current source.
+  - Review all design decisions and acceptance gates independently.
+  - Keep F037 open until implementation and isolated native compilation acceptance pass.
+
+  P008 completed the design on November 1, 2026.
+  The selected executable embeds the Go frontend's backend tools, libraries, runtime archives, and platform inputs.
+  Independent review passed after corrections to the variant matrix and publication ownership.
+  Changed-prose, local-link, issue-structure, dependency, and whitespace checks passed.
+  F038 through F041 remain open for implementation. F037 retains final qualification.
+
 ## Features
 
 - [x] [F001] (P1) Build native Lo executables
@@ -1128,6 +1154,130 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify navigation and diagnostics across imported modules.
   - Verify source locations for native breakpoints and error traces.
   - Run the test command offline with declared grants and controlled failures.
+
+### Self-contained compiler
+
+- [ ] [F037] (P0) {P008,F041} Implement and qualify the self-contained native compiler
+  Goal:
+  Supply a compiler executable that converts Lo source into native machine code without external development tools or companion compiler files.
+
+  Requirements:
+  - Implement the [self-contained compiler contract](docs/self-contained-compiler.md) in any selected language.
+  - Preserve current syntax, diagnostics, effects, resource limits, authority, and native behavior.
+  - Include the complete non-OS compiler closure in the compiler executable.
+  - Permit only the target OS loader and declared system libraries as external software dependencies.
+  - Remove producer toolchain dependence from execution of the built compiler.
+  - Reject dependence on external backend executables, runtime archives, SDK files, or companion manifests.
+  - Remove obsolete compiler routes after the replacement passes acceptance.
+
+  Deliverables:
+  - Add the self-contained executable, its producer workflow, isolated acceptance, and complete dependency records.
+
+  Validation:
+  - Copy only the compiler executable and Lo inputs into an environment with the declared OS components.
+  - Deny producer tools, companion files, caches, and network access during native compilation.
+  - Execute the resulting machine-code programs without the compiler or Lo source.
+  - Exercise independent programs and the complete language corpus.
+  - Verify file, tool, library, and network isolation after relocation with empty build state.
+  - Complete required repository checks and independent implementation review.
+
+  Current state:
+  The compiler frontend and transformations use Go.
+  Native builds invoke packaged LLVM and LLD and link the precompiled Rust runtime.
+  F017 and I011 completed the earlier offline distribution scope only.
+  Their completion does not satisfy F037.
+
+- [ ] [F038] (P0) {P008} Produce the embedded compiler payload
+  Goal:
+  Supply deterministic embedded backend, runtime, platform, and identity resources for every supported compiler variant.
+
+  Requirements:
+  - Use the [P008 producer design](docs/self-contained-compiler-design.md#payload-representation-and-producer).
+  - Verify fresh source, ABI, tool, runtime, and platform identities before payload construction.
+  - Pin the complete Darwin and Linux frontend and backend dependency inventories.
+  - Keep all non-OS compiler dependencies inside the payload.
+  - Deduplicate identical content and preserve LLD driver identities.
+  - Enforce the selected index, member, and payload limits with deterministic gzip output.
+  - Preserve notices, source provenance, and corresponding-source obligations.
+
+  Deliverables:
+  - Add the payload producer, canonical index, embedded Go package, and per-variant inventories.
+
+  Validation:
+  - Start with producer integration cases for missing members, altered bytes, stale ABI, and incomplete dependency graphs.
+  - Verify identical payload bytes from identical pinned inputs.
+  - Reject truncated data, duplicate member names, traversal paths, and size overflow.
+  - Inspect every resulting frontend and backend import against its declared OS or embedded origin.
+  - Record compressed size, expanded size, and source identity without claiming final compiler acceptance.
+
+- [ ] [F039] (P0) {F038} Materialize embedded compiler resources with owned cleanup
+  Goal:
+  Supply verified private compiler inputs for one bounded native build invocation.
+
+  Requirements:
+  - Use the [P008 ownership design](docs/self-contained-compiler-design.md#runtime-interfaces-and-ownership).
+  - Admit the embedded index once and select only required members.
+  - Stream decompression with exact length, digest, cancellation, and resource checks.
+  - Verify every selected member before backend execution.
+  - Keep all extracted files, aliases, and backend diagnostics inside the invocation workspace.
+  - Use no persistent materialization cache or caller-supplied compiler payload.
+  - Join owned backend processes before workspace removal and output publication.
+
+  Deliverables:
+  - Add admitted bundle types, bounded materialization, workspace ownership, and cleanup diagnostics.
+
+  Validation:
+  - Exercise the real resource entry point with injected corruption, cancellation, and filesystem failures.
+  - Verify malformed compression, trailing bytes, concatenated streams, alias isolation, concurrency, and interrupted extraction.
+  - Verify tool cleanup and previous-output preservation on cancellation and publication failure.
+  - Preserve destination-local staging and linker cleanup when the build root uses another filesystem.
+  - Use actual embedded backend members in integration coverage.
+
+- [ ] [F040] (P0) {F039} Use the embedded payload for native compilation
+  Goal:
+  Compile Lo source through one embedded native backend route without companion file discovery.
+
+  Requirements:
+  - Use the [P008 transition design](docs/self-contained-compiler-design.md#product-integration-and-forward-transition).
+  - Replace external manifest admission with the owned embedded selection.
+  - Remove installed-directory discovery, external toolchain flags, and compatibility dispatch.
+  - Preserve lowering, numeric behavior, link recipes, diagnostics, and atomic output publication.
+  - Include resource admission and extraction in the existing build deadline.
+  - Clear inherited toolchain and loader controls from child execution.
+  - Bind compiler receipts and semantic identities to the consumed payload.
+  - Add the embedded inventory command without a source file or backend extraction.
+
+  Deliverables:
+  - Update the builder, CLI, native fixtures, semantic tooling, and development build integration.
+
+  Validation:
+  - Start with a public build that fails when the current companion installation is inaccessible.
+  - Verify successful native builds through embedded resources on both targets.
+  - Verify removed options, corrupt payloads, hostile environments, cancellation, and prior-output preservation.
+  - Verify the pinned driver plan uses no external assembler, SDK, configuration, or signing tool.
+  - Run focused native semantic and resource-lifetime coverage.
+
+- [ ] [F041] (P0) {F040} Deliver and verify isolated compiler executables
+  Goal:
+  Deliver one compiler executable per host and variant with executable-only dependency acceptance.
+
+  Requirements:
+  - Replace runtime package-directory assumptions in producers, Make targets, and acceptance helpers.
+  - Admit only the compiler executable, Lo inputs, output workspace, and declared OS components during compilation.
+  - Deny producer directories, companion files, caches, undeclared executables, and network access.
+  - Retain separate compiler host and generated-application dependency records.
+  - Preserve source and license records without runtime dependence on those records.
+
+  Deliverables:
+  - Add executable-only delivery, isolated acceptance, relocation coverage, and updated compiler documentation.
+
+  Validation:
+  - Verify all seven compiler-variant and target pairs from the selected matrix through software environments.
+  - Include both software targets and the Metal target from the Darwin Metal compiler variant.
+  - Execute generated artifacts separately without the compiler or source files.
+  - Verify dependency guards, child execution, loaded libraries, relocation, and empty build state.
+  - Record compiler and payload hashes, resource use, cold build time, and cleanup outcomes.
+  - Keep F037 open for final corpus, performance, CI, and independent qualification.
 
 ### Process workflows
 
