@@ -169,6 +169,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `predicate`: A pure named flow that returns a total Bool value for supplied inputs.
 
 - `standalone compiler`: An installed compiler distribution that supplies its compile and link tools without a separate development toolchain.
+- `self-contained compiler`: A native compiler executable that contains all necessary compiler components except the declared OS loader and system libraries.
+- `compiler closure`: All executable code, libraries, and data necessary to compile source into a native artifact.
+- `compiler payload`: Embedded backend images, libraries, runtime archives, platform inputs, and identities supplied by the compiler executable.
+- `payload member`: One named component of the compiler payload with a declared content identity.
+- `materialization`: Creation of private build files from verified compiler payload members.
 - `linker`: A tool that combines object files and libraries into an executable.
 - `object file`: Machine code and relocation data prepared for a linker.
 - `sysroot`: A directory that supplies target headers and libraries to build tools.
