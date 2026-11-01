@@ -14,6 +14,7 @@ extern int accept(int,void *,void *);
 extern int setsockopt(int,int,int,const void *,unsigned int);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *);
 extern int pthread_join(Thread,void **);
+extern void *dlsym(void *,const char *);
 extern int lo_cli_main(int,const char *const *,const char *const *);
 #if defined(__APPLE__)
 extern int *__error(void);
@@ -28,16 +29,30 @@ struct Address{unsigned short family,port;unsigned int address;unsigned char zer
 extern int ioctl(int,unsigned long,...);
 #endif
 static int descriptor_invariant=0;
+static int cleanup_descriptor=-1,close_failures;
+int connect(int descriptor,const void *address,unsigned int length){
+ cleanup_descriptor=descriptor;
 #if LO_CASE == 0
-int connect(int descriptor,const void *address,unsigned int length){(void)address;(void)length;if((fcntl(descriptor,1)&1)==0)descriptor_invariant=1;
+ (void)address;(void)length;if((fcntl(descriptor,1)&1)==0)descriptor_invariant=1;
 #if defined(__APPLE__)
  *ERROR_ADDRESS()=61;
 #else
  *ERROR_ADDRESS()=111;
 #endif
- return -1;}
+ return -1;
+#else
+ int (*real_connect)(int,const void *,unsigned int)=(int (*)(int,const void *,unsigned int))dlsym((void *)-1,"connect");
+ if(!real_connect){*ERROR_ADDRESS()=5;return -1;}
+ return real_connect(descriptor,address,length);
 #endif
-int close(int descriptor){(void)descriptor;*ERROR_ADDRESS()=5;return -1;}
+}
+int close(int descriptor){
+ int (*real_close)(int)=(int (*)(int))dlsym((void *)-1,"close");
+ if(!real_close){*ERROR_ADDRESS()=5;return -1;}
+ int result=real_close(descriptor);
+ if(descriptor==cleanup_descriptor&&result==0){cleanup_descriptor=-1;++close_failures;*ERROR_ADDRESS()=5;return -1;}
+ return result;
+}
 static void *server(void *pointer){int descriptor=*(int *)pointer;int client=accept(descriptor,0,0);if(client<0)return (void *)1;char request[4096];if(read(client,request,sizeof(request))<=0)return (void *)2;static const char response[] =
 #if LO_CASE == 2
 "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n";
@@ -73,6 +88,7 @@ if(bind(listening,&address,16)||listen(listening,1)||pthread_create(&thread,0,se
  "GET,http://127.0.0.1:34448,127.0.0.1";
 #endif
  const char *arguments[]={"fixture","run","--format","json","--http-allow",grant};int status=lo_cli_main(6,arguments,0);
+ if(close_failures!=1)return 25;
 #if LO_CASE != 0
  void *result=0;if(pthread_join(thread,&result)||result)return 13;
 #endif

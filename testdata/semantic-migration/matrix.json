@@ -88,6 +88,35 @@
       "activation_errors": null,
       "capability": "",
       "errors": [
+        "CLI.InvalidDefinition",
+        "CLI.InvalidArguments"
+      ],
+      "operation": "CLI.parse",
+      "positive": [
+        "TestRunBuiltinCatalog/CLI.parse",
+        "TestCLIStackDeclaredArguments",
+        "TestCLIStackDeclaredHelp",
+        "TestCLIOptionsCanonicalResolution",
+        "TestCLIOptionsHelpDoesNotRetainSkippedArguments",
+        "TestCLIOptionsPureCallback"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/CLI.parse"
+      ],
+      "runtime_negative": [
+        "TestCLIOptionsArgumentFailures",
+        "TestCLIOptionsDefinitionFailuresBeforeHelp",
+        "TestCLIOptionsFailureEvidence",
+        "TestCLIOptionsWorkLimit"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/CLI.parse"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
+      "errors": [
         "Checkpoint.InvalidData",
         "Checkpoint.SchemaMismatch",
         "Tensor.HostObservationRequired",
@@ -128,6 +157,33 @@
       ],
       "negative_applicability": "catalog_failure_or_activation",
       "oracle": "literal_assertions:TestRunBuiltinCatalog/Checkpoint.encode"
+    },
+    {
+      "activation_errors": [
+        "Console.WriteFailed"
+      ],
+      "capability": "Console.write",
+      "errors": [
+        "Console.InvalidLine"
+      ],
+      "operation": "Console.Line.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Console.Line.new",
+        "TestCLIStackConsoleText",
+        "TestCLIStackConsoleReceipt",
+        "TestCLIStackConsoleJSON",
+        "TestCLIStackConsoleInertAndRedacted"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Console.Line.new"
+      ],
+      "runtime_negative": [
+        "TestCLIStackInvalidConstructorsRedactPayload/destination",
+        "TestConsoleBoundaryOwnership"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Console.Line.new"
     },
     {
       "activation_errors": null,
@@ -1954,6 +2010,32 @@
     {
       "activation_errors": null,
       "capability": "",
+      "errors": [
+        "Program.InvalidExit"
+      ],
+      "operation": "Program.Exit.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Program.Exit.new",
+        "TestCLIStackTerminalStatus",
+        "TestCLIStackTerminalJSON",
+        "TestCLIStackNestedTerminalIsInert",
+        "TestConsoleTerminalCompletion"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Program.Exit.new"
+      ],
+      "runtime_negative": [
+        "TestCLIStackInvalidConstructorsRedactPayload/negative",
+        "TestCLIStackInvalidConstructorsRedactPayload/large",
+        "TestCLIStackQuotaPreservesPrefixAndReservesTerminal/terminal"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Program.Exit.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "",
       "errors": null,
       "operation": "Range.contains",
       "positive": [
@@ -3046,9 +3128,11 @@
       "tests": [
         "TestCLIErrorBoundary",
         "TestRunRecoverableErrors",
-        "TestSemanticMigrationStepBoundary"
+        "TestSemanticMigrationStepBoundary",
+        "TestCLIStackTerminalStatus",
+        "TestCLIStackTerminalJSON"
       ],
-      "oracle": "success=0;rejected_or_Lo_error=1;host_error=2",
+      "oracle": "ordinary_success=0;rejected_or_Lo_error=1;host_error=2;terminal_success=requested_0_through_255",
       "boundary": "cli_interpreter_and_native"
     },
     {
@@ -3082,6 +3166,14 @@
       ],
       "oracle": "canonical_llvm_build;installed_manifest_binding;no_Go_tools;missing_distribution_rejected;backend_selection_rejected;no_output_on_failure",
       "boundary": "compiler_cli"
+    },
+    {
+      "id": "--max-console-bytes",
+      "tests": [
+        "TestCLIStackQuotaPreservesPrefixAndReservesTerminal"
+      ],
+      "oracle": "logical_quota:prefix_preserved;terminal_payloads_reserved_together;failure=exit2",
+      "boundary": "cli_interpreter_and_native"
     }
   ],
   "semantics": [
@@ -4865,6 +4957,93 @@
     ],
     "TestExecutionPolicyScalarIdentity": [
       "TestExecutionPolicyScalarIdentity"
+    ],
+    "TestRunBuiltinCatalog/Console.Line.new": [
+      "TestRunBuiltinCatalog/Console.Line.new"
+    ],
+    "TestSemanticBuiltinRejections/Console.Line.new": [
+      "TestSemanticBuiltinRejections/Console.Line.new"
+    ],
+    "TestCLIStackConsoleText": [
+      "TestCLIStackConsoleText"
+    ],
+    "TestCLIStackConsoleReceipt": [
+      "TestCLIStackConsoleReceipt"
+    ],
+    "TestCLIStackConsoleJSON": [
+      "TestCLIStackConsoleJSON"
+    ],
+    "TestCLIStackConsoleInertAndRedacted": [
+      "TestCLIStackConsoleInertAndRedacted"
+    ],
+    "TestCLIStackInvalidConstructorsRedactPayload/destination": [
+      "TestCLIStackInvalidConstructorsRedactPayload/destination"
+    ],
+    "TestConsoleBoundaryOwnership": [
+      "TestLLVMConsoleEmbeddingBoundary"
+    ],
+    "TestRunBuiltinCatalog/Program.Exit.new": [
+      "TestRunBuiltinCatalog/Program.Exit.new"
+    ],
+    "TestSemanticBuiltinRejections/Program.Exit.new": [
+      "TestSemanticBuiltinRejections/Program.Exit.new"
+    ],
+    "TestCLIStackTerminalStatus": [
+      "TestCLIStackTerminalStatus"
+    ],
+    "TestCLIStackTerminalJSON": [
+      "TestCLIStackTerminalJSON"
+    ],
+    "TestCLIStackNestedTerminalIsInert": [
+      "TestCLIStackNestedTerminalIsInert"
+    ],
+    "TestConsoleTerminalCompletion": [
+      "TestLLVMConsoleCompletionCleanupPrecedence"
+    ],
+    "TestCLIStackInvalidConstructorsRedactPayload/negative": [
+      "TestCLIStackInvalidConstructorsRedactPayload/negative"
+    ],
+    "TestCLIStackInvalidConstructorsRedactPayload/large": [
+      "TestCLIStackInvalidConstructorsRedactPayload/large"
+    ],
+    "TestCLIStackQuotaPreservesPrefixAndReservesTerminal/terminal": [
+      "TestCLIStackQuotaPreservesPrefixAndReservesTerminal/terminal"
+    ],
+    "TestRunBuiltinCatalog/CLI.parse": [
+      "TestRunBuiltinCatalog/CLI.parse"
+    ],
+    "TestSemanticBuiltinRejections/CLI.parse": [
+      "TestSemanticBuiltinRejections/CLI.parse"
+    ],
+    "TestCLIStackDeclaredArguments": [
+      "TestCLIStackDeclaredArguments"
+    ],
+    "TestCLIStackDeclaredHelp": [
+      "TestCLIStackDeclaredHelp"
+    ],
+    "TestCLIOptionsCanonicalResolution": [
+      "TestCLIOptionsCanonicalResolution"
+    ],
+    "TestCLIOptionsHelpDoesNotRetainSkippedArguments": [
+      "TestCLIOptionsHelpDoesNotRetainSkippedArguments"
+    ],
+    "TestCLIOptionsPureCallback": [
+      "TestCLIOptionsPureCallback"
+    ],
+    "TestCLIOptionsArgumentFailures": [
+      "TestCLIOptionsArgumentFailures"
+    ],
+    "TestCLIOptionsDefinitionFailuresBeforeHelp": [
+      "TestCLIOptionsDefinitionFailuresBeforeHelp"
+    ],
+    "TestCLIOptionsFailureEvidence": [
+      "TestCLIOptionsFailureEvidence"
+    ],
+    "TestCLIOptionsWorkLimit": [
+      "TestCLIOptionsWorkLimit"
+    ],
+    "TestCLIStackQuotaPreservesPrefixAndReservesTerminal": [
+      "TestCLIStackQuotaPreservesPrefixAndReservesTerminal"
     ]
   }
 }

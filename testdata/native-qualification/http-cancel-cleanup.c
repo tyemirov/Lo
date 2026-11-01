@@ -15,6 +15,7 @@ extern int setsockopt(int,int,int,const void *,unsigned int);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *);
 extern int pthread_join(Thread,void **);
 extern int kill(int,int),getpid(void);
+extern void *dlsym(void *,const char *);
 extern int lo_cli_main(int,const char *const *,const char *const *);
 #if defined(__APPLE__)
 extern int *__error(void);
@@ -29,19 +30,36 @@ struct Address{unsigned short family,port;unsigned int address;unsigned char zer
 extern int ioctl(int,unsigned long,...);
 #endif
 static int descriptor_invariant=0;
+static int cleanup_descriptor=-1,close_failures;
 #if LO_CASE == 3
-long recv(int descriptor,void *buffer,Size count,int flags){(void)descriptor;(void)buffer;(void)count;(void)flags;kill(getpid(),2);*ERROR_ADDRESS()=4;return -1;}
+long recv(int descriptor,void *buffer,Size count,int flags){
+ if(descriptor==cleanup_descriptor){kill(getpid(),2);*ERROR_ADDRESS()=4;return -1;}
+ long (*real_recv)(int,void *,Size,int)=(long (*)(int,void *,Size,int))dlsym((void *)-1,"recv");
+ if(!real_recv){*ERROR_ADDRESS()=5;return -1;}return real_recv(descriptor,buffer,count,flags);
+}
 #endif
+int connect(int descriptor,const void *address,unsigned int length){
+ cleanup_descriptor=descriptor;
 #if LO_CASE == 0
-int connect(int descriptor,const void *address,unsigned int length){(void)address;(void)length;if((fcntl(descriptor,1)&1)==0)descriptor_invariant=1;
+ (void)address;(void)length;if((fcntl(descriptor,1)&1)==0)descriptor_invariant=1;
 #if defined(__APPLE__)
  *ERROR_ADDRESS()=61;
 #else
  *ERROR_ADDRESS()=111;
 #endif
- return -1;}
+ return -1;
+#else
+ int (*real_connect)(int,const void *,unsigned int)=(int (*)(int,const void *,unsigned int))dlsym((void *)-1,"connect");
+ if(!real_connect){*ERROR_ADDRESS()=5;return -1;}return real_connect(descriptor,address,length);
 #endif
-int close(int descriptor){(void)descriptor;*ERROR_ADDRESS()=5;return -1;}
+}
+int close(int descriptor){
+ int (*real_close)(int)=(int (*)(int))dlsym((void *)-1,"close");
+ if(!real_close){*ERROR_ADDRESS()=5;return -1;}
+ int result=real_close(descriptor);
+ if(descriptor==cleanup_descriptor&&result==0){cleanup_descriptor=-1;++close_failures;*ERROR_ADDRESS()=5;return -1;}
+ return result;
+}
 static void *server(void *pointer){int descriptor=*(int *)pointer;int client=accept(descriptor,0,0);if(client<0)return (void *)1;char request[4096];if(read(client,request,sizeof(request))<=0)return (void *)2;if(LO_CASE==3)return 0;static const char response[] =
 #if LO_CASE == 2
 "close-cause-private-sentinel 200 OK\r\nContent-Length: 0\r\n\r\n";
@@ -52,7 +70,7 @@ if(write(client,response,sizeof(response)-1)!=(long)(sizeof(response)-1))return 
 static int contains(const char *text,const char *needle){for(;*text;text++){Size n=0;while(needle[n]&&text[n]==needle[n])n++;if(!needle[n])return 1;}return 0;}
 int main(void){
 #if !defined(__APPLE__)
- int control=socket(2,2,0);if(control<0)return 70;unsigned char request[40]={0};request[0]='l';request[1]='o';if(ioctl(control,0x8913UL,request))return 71;request[16]|=1;if(ioctl(control,0x8914UL,request))return 72;
+ int control=socket(2,2,0);if(control<0)return 70;unsigned char request[40]={0};request[0]='l';request[1]='o';if(ioctl(control,0x8913UL,request))return 71;request[16]|=1;if(ioctl(control,0x8914UL,request))return 72;close(control);
 #endif
  int output=open("http-cleanup-diagnostic.json",CREATE_FLAGS,0666);int saved=fcntl(2,0,3);if(output<0||saved<0||dup2(output,2)<0)return 10;Thread thread;int listening=-1;
 #if LO_CASE != 0
@@ -79,6 +97,7 @@ if(bind(listening,&address,16)||listen(listening,1)||pthread_create(&thread,0,se
  "GET,http://127.0.0.1:34449,127.0.0.1";
 #endif
  const char *arguments[]={"fixture","run","--format","json","--http-allow",grant};int status=lo_cli_main(6,arguments,0);
+ if(close_failures!=1)return 26;
 #if LO_CASE != 0
  void *result=0;if(pthread_join(thread,&result)||result)return 13;
 #endif
