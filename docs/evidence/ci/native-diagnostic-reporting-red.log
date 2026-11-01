@@ -1,0 +1,4 @@
+https://github.com/tyemirov/Lo/actions/runs/41336988419
+make ci	UNKNOWN STEP	2026-11-01T19:13:45.3448440Z --- FAIL: TestFlowFoldErrorProgressValueBudget (1.64s)
+make ci	UNKNOWN STEP	2026-11-01T19:13:45.3449850Z     native_test.go:120: LO_NATIVE_RUNTIME=fb3aa6f95f01a9b245154adcc074a7a9b6ef2820ab3ff3b139695249e9d6da4f
+make ci	UNKNOWN STEP	2026-11-01T19:13:45.3450460Z     flow_fold_budget_progress_test.go:32: unexpected end of JSON input

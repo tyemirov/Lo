@@ -1,0 +1,29 @@
+{
+  "failed_runs": [
+    "https://github.com/tyemirov/Lo/actions/runs/41336988419",
+    "https://github.com/tyemirov/Lo/actions/runs/41336984519"
+  ],
+  "preparation": "pass",
+  "distribution_build": "pass",
+  "failure": {
+    "test": "TestFlowFoldErrorProgressValueBudget",
+    "message": "unexpected end of JSON input",
+    "stderr_byte_count": "unrecorded"
+  },
+  "transport": {
+    "protocol": "LCW2",
+    "frame_bytes": 2097152,
+    "writer_processes_per_raw_buffer": 1,
+    "reporting_deadline_seconds": 1
+  },
+  "red": {
+    "protocol_cases_failed": 3,
+    "log": "native-console-framing-red.log"
+  },
+  "green": {
+    "seconds": 26.867,
+    "pattern": "TestFlowFoldErrorProgressValueBudget|TestNativeConsoleWriterFrames|TestLLVMConsole",
+    "log": "native-console-framing-green.log"
+  },
+  "independent_review": "pass"
+}

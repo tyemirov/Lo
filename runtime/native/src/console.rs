@@ -319,11 +319,7 @@ impl Console {
             }
         };
         let _state = self.lock(&mut check)?;
-        for chunk in bytes.chunks(2097152) {
-            self.write(stream, chunk, true, &mut check)
-                .map_err(|failure| failure.terminal())?;
-        }
-        Ok(())
+        self.raw_write(stream, bytes, &mut check)
     }
     pub fn raw_completion(&self, stream: &str, bytes: &[u8]) -> Result<(), Fault> {
         let deadline = Instant::now() + Duration::from_secs(1);
@@ -335,17 +331,31 @@ impl Console {
             }
         };
         let _state = self.lock(&mut check)?;
-        for chunk in bytes.chunks(2097152) {
-            self.write(stream, chunk, true, &mut check)
-                .map_err(|failure| failure.terminal())?;
-        }
-        Ok(())
+        self.raw_write(stream, bytes, &mut check)
     }
     pub fn raw_context(&self, context: &Context, stream: &str, bytes: &[u8]) -> Result<(), Fault> {
         let mut check = || context.check_cancel();
         let _state = self.lock(&mut check)?;
-        for chunk in bytes.chunks(2097152) {
-            self.write(stream, chunk, true, &mut check)
+        self.raw_write(stream, bytes, &mut check)
+    }
+
+    fn raw_write(
+        &self,
+        stream: &str,
+        bytes: &[u8],
+        check: &mut impl FnMut() -> Result<(), Fault>,
+    ) -> Result<(), Fault> {
+        if bytes.is_empty() {
+            return Ok(());
+        }
+        if let Sink::Cli(image) = &self.sink {
+            let destination = if stream == "stdout" { 1 } else { 2 };
+            return image
+                .stream(destination, bytes, check)
+                .map_err(|failure| failure.terminal());
+        }
+        for chunk in bytes.chunks(transport::FRAME_BYTES) {
+            self.write(stream, chunk, true, check)
                 .map_err(|failure| failure.terminal())?;
         }
         Ok(())

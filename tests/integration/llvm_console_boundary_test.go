@@ -100,7 +100,7 @@ func TestLLVMConsoleWriterParentLiveness(t *testing.T) {
 	defer liveRead.Close()
 	defer liveWrite.Close()
 	body := bytes.Repeat([]byte("x"), 1<<20)
-	frame := append([]byte("LCW1"), 1, 0, 0, 0, 0)
+	frame := append([]byte("LCW2"), 1, 0, 0, 0, 0)
 	encodingbinary.BigEndian.PutUint32(frame[5:9], uint32(len(body)))
 	frame = append(frame, body...)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

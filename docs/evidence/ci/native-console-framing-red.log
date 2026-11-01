@@ -1,0 +1,23 @@
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/ci-qemu-20261101/preparation/distribution/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/ci-qemu-20261101/preparation" go test -timeout=120m ./tests/integration -run TestNativeConsoleWriterFrames -count=1 -v </dev/null
+=== RUN   TestNativeConsoleWriterFrames
+    native_test.go:120: LO_NATIVE_RUNTIME=99d72fce0c16ac27292f35b7c96348d3c73c27fa4500ebc095f329a1619ef42d
+=== RUN   TestNativeConsoleWriterFrames/multiple_frames
+    llvm_console_writer_test.go:75: writer status=125 stdout bytes=0 stderr bytes=0
+=== RUN   TestNativeConsoleWriterFrames/oversized_frame
+=== RUN   TestNativeConsoleWriterFrames/truncated_frame
+=== RUN   TestNativeConsoleWriterFrames/truncated_header
+=== RUN   TestNativeConsoleWriterFrames/obsolete_protocol
+    llvm_console_writer_test.go:75: writer status=0 stdout bytes=0 stderr bytes=0
+=== RUN   TestNativeConsoleWriterFrames/truncated_next_frame
+    llvm_console_writer_test.go:75: writer status=125 stdout bytes=0 stderr bytes=0
+--- FAIL: TestNativeConsoleWriterFrames (2.36s)
+    --- FAIL: TestNativeConsoleWriterFrames/multiple_frames (0.11s)
+    --- PASS: TestNativeConsoleWriterFrames/oversized_frame (0.01s)
+    --- PASS: TestNativeConsoleWriterFrames/truncated_frame (0.01s)
+    --- PASS: TestNativeConsoleWriterFrames/truncated_header (0.01s)
+    --- FAIL: TestNativeConsoleWriterFrames/obsolete_protocol (0.01s)
+    --- FAIL: TestNativeConsoleWriterFrames/truncated_next_frame (0.01s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	3.338s
+FAIL
+make: *** [test-native] Error 1

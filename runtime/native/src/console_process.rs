@@ -10,6 +10,8 @@ use std::{
     process::{Command, Stdio},
     time::Duration,
 };
+pub const FRAME_BYTES: usize = 2097152;
+
 pub struct Image {
     pub paths: Vec<String>,
     pub registry: crate::process::Processes,
@@ -44,11 +46,19 @@ impl Image {
         bytes: &[u8],
         check: &mut impl FnMut() -> Result<(), Fault>,
     ) -> Result<(), WriteFailure> {
-        if bytes.len() > 2097152 {
+        if bytes.len() > FRAME_BYTES {
             return Err(WriteFailure::Terminal(crate::context::limit(
                 "Console encoded record bytes",
             )));
         }
+        self.stream(destination, bytes, check)
+    }
+    pub fn stream(
+        &self,
+        destination: u32,
+        bytes: &[u8],
+        check: &mut impl FnMut() -> Result<(), Fault>,
+    ) -> Result<(), WriteFailure> {
         for path in &self.paths {
             self.registry
                 .validate_image(path, &mut *check)
@@ -88,57 +98,64 @@ impl Image {
             let operation = (|| -> Result<Result<(), WriteFailure>, Fault> {
                 nonblocking(&request_write)?;
                 nonblocking(&ack_read)?;
-                let mut request = Vec::with_capacity(bytes.len() + 9);
-                request.extend_from_slice(b"LCW1");
-                request.push(destination as u8);
-                request.extend_from_slice(&(bytes.len() as u32).to_be_bytes());
-                request.extend_from_slice(bytes);
-                let mut sent = 0;
-                while sent < request.len() {
-                    check()?;
-                    match request_write.write(&request[sent..]) {
-                        Ok(0) => return Err(host("Console request closed")),
-                        Ok(n) => sent += n,
-                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                            std::thread::sleep(Duration::from_millis(1))
+                for (index, frame) in bytes.chunks(FRAME_BYTES).enumerate() {
+                    let offset = index * FRAME_BYTES;
+                    let mut request = Vec::with_capacity(frame.len() + 9);
+                    request.extend_from_slice(b"LCW2");
+                    request.push(destination as u8);
+                    request.extend_from_slice(&(frame.len() as u32).to_be_bytes());
+                    request.extend_from_slice(frame);
+                    let mut sent = 0;
+                    while sent < request.len() {
+                        check()?;
+                        match request_write.write(&request[sent..]) {
+                            Ok(0) => return Err(host("Console request closed")),
+                            Ok(n) => sent += n,
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                std::thread::sleep(Duration::from_millis(1))
+                            }
+                            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => (),
+                            Err(_) => return Err(host("Console request failed")),
                         }
-                        Err(e) if e.kind() == std::io::ErrorKind::Interrupted => (),
-                        Err(_) => return Err(host("Console request failed")),
+                    }
+                    let mut confirmed = 0u64;
+                    let mut ack = [0u8; 10];
+                    let mut received = 0;
+                    loop {
+                        check()?;
+                        match ack_read.read(&mut ack[received..]) {
+                            Ok(0) => return Err(host("Console acknowledgment ended early")),
+                            Ok(n) => received += n,
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                std::thread::sleep(Duration::from_millis(1));
+                                continue;
+                            }
+                            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+                            Err(_) => return Err(host("Console acknowledgment failed")),
+                        }
+                        if received < 10 {
+                            continue;
+                        }
+                        received = 0;
+                        let count = u64::from_be_bytes(ack[1..9].try_into().unwrap());
+                        if count < confirmed || count > frame.len() as u64 {
+                            return Err(host("Console acknowledgment count invalid"));
+                        }
+                        match (ack[0], ack[9]) {
+                            (1, 0) if count > confirmed => confirmed = count,
+                            (2, 0) if count == frame.len() as u64 => break,
+                            (3, 1 | 2) => {
+                                return Ok(Err(WriteFailure::Recoverable(
+                                    offset + count as usize,
+                                    "write",
+                                )))
+                            }
+                            _ => return Err(host("Console acknowledgment invalid")),
+                        }
                     }
                 }
                 drop(request_write);
-                let mut confirmed = 0u64;
-                let mut ack = [0u8; 10];
-                let mut received = 0;
-                loop {
-                    check()?;
-                    match ack_read.read(&mut ack[received..]) {
-                        Ok(0) => return Err(host("Console acknowledgment ended early")),
-                        Ok(n) => received += n,
-                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                            std::thread::sleep(Duration::from_millis(1));
-                            continue;
-                        }
-                        Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
-                        Err(_) => return Err(host("Console acknowledgment failed")),
-                    }
-                    if received < 10 {
-                        continue;
-                    }
-                    received = 0;
-                    let count = u64::from_be_bytes(ack[1..9].try_into().unwrap());
-                    if count < confirmed || count > bytes.len() as u64 {
-                        return Err(host("Console acknowledgment count invalid"));
-                    }
-                    match (ack[0], ack[9]) {
-                        (1, 0) if count > confirmed => confirmed = count,
-                        (2, 0) if count == bytes.len() as u64 => break Ok(Ok(())),
-                        (3, 1 | 2) => {
-                            break Ok(Err(WriteFailure::Recoverable(count as usize, "write")))
-                        }
-                        _ => return Err(host("Console acknowledgment invalid")),
-                    }
-                }
+                Ok(Ok(()))
             })();
             let operation = match operation {
                 Ok(result) => loop {
@@ -228,65 +245,67 @@ pub fn worker() -> i32 {
         return 125;
     }
     let mut input = std::io::stdin().lock();
-    let mut header = [0u8; 9];
-    if input.read_exact(&mut header).is_err()
-        || &header[..4] != b"LCW1"
-        || ![1, 2].contains(&header[4])
-    {
-        return 125;
-    }
-    let length = u32::from_be_bytes(header[5..9].try_into().unwrap()) as usize;
-    if length > 2097152 {
-        return 125;
-    }
-    let mut body = vec![0; length];
-    if input.read_exact(&mut body).is_err() {
-        return 125;
-    }
-    let mut end = [0u8; 1];
-    if !matches!(input.read(&mut end), Ok(0)) {
-        return 125;
-    }
-    let mut confirmed = 0;
-    while confirmed < length {
-        let count = unsafe {
-            libc::write(
-                header[4] as i32,
-                body[confirmed..].as_ptr().cast(),
-                length - confirmed,
-            )
-        };
-        if count < 0 {
-            let error = std::io::Error::last_os_error();
-            if error.kind() == std::io::ErrorKind::Interrupted {
-                continue;
-            }
-            return if ack(
-                3,
-                confirmed,
-                if error.raw_os_error() == Some(libc::EPIPE) {
-                    1
-                } else {
-                    2
-                },
-            ) {
-                0
-            } else {
-                125
-            };
+    loop {
+        let mut header = [0u8; 9];
+        match input.read(&mut header[..1]) {
+            Ok(0) => return 0,
+            Ok(1) => (),
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            _ => return 125,
         }
-        if count == 0 {
-            return if ack(3, confirmed, 2) { 0 } else { 125 };
-        }
-        confirmed += count as usize;
-        if !ack(1, confirmed, 0) {
+        if input.read_exact(&mut header[1..]).is_err()
+            || &header[..4] != b"LCW2"
+            || ![1, 2].contains(&header[4])
+        {
             return 125;
         }
-    }
-    if ack(2, confirmed, 0) {
-        0
-    } else {
-        125
+        let length = u32::from_be_bytes(header[5..9].try_into().unwrap()) as usize;
+        if length > FRAME_BYTES {
+            return 125;
+        }
+        let mut body = vec![0; length];
+        if input.read_exact(&mut body).is_err() {
+            return 125;
+        }
+        let mut confirmed = 0;
+        while confirmed < length {
+            let count = unsafe {
+                libc::write(
+                    header[4] as i32,
+                    body[confirmed..].as_ptr().cast(),
+                    length - confirmed,
+                )
+            };
+            if count < 0 {
+                let error = std::io::Error::last_os_error();
+                if error.kind() == std::io::ErrorKind::Interrupted {
+                    continue;
+                }
+                return if ack(
+                    3,
+                    confirmed,
+                    if error.raw_os_error() == Some(libc::EPIPE) {
+                        1
+                    } else {
+                        2
+                    },
+                ) {
+                    0
+                } else {
+                    125
+                };
+            }
+            if count == 0 {
+                return if ack(3, confirmed, 2) { 0 } else { 125 };
+            }
+            confirmed += count as usize;
+            if !ack(1, confirmed, 0) {
+                return 125;
+            }
+        }
+        if !ack(2, confirmed, 0) {
+            return 125;
+        }
     }
 }
 fn ack(kind: u8, count: usize, class: u8) -> bool {

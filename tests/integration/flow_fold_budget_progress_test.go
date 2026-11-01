@@ -29,7 +29,7 @@ func TestFlowFoldErrorProgressValueBudget(t *testing.T) {
 		} `json:"diagnostics"`
 	}
 	if err := json.Unmarshal([]byte(got.stderr), &document); err != nil {
-		t.Fatal(err)
+		t.Fatalf("decode diagnostic: %v (status=%d stdout bytes=%d stderr bytes=%d)", err, got.status, len(got.stdout), len(got.stderr))
 	}
 	if len(document.Diagnostics) != 1 {
 		t.Fatalf("diagnostic count %d", len(document.Diagnostics))
