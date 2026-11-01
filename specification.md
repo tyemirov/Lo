@@ -26,6 +26,7 @@ Proposed operations and syntax stay outside the implemented contract until the c
 | Typed failures, transitive effects, explicit commits, and activation result bindings | Sections 5, 12, 13, and 22 |
 | File observations, nominal targets, receipts, and sequential activation | Sections 8.8, 9.1, and 23.6 |
 | HTTP headers, responses, server receipts, and client actions | Sections 9.2 through 9.4 and 23.7 |
+| Committed Console output, terminal results, and declared CLI options | Section 9.7 |
 | Process commands, results, grants, and qualified host execution | Section 9.5 |
 | Binary64 arithmetic, FP32 tensors, and shape checks | Sections 24.1 through 24.4 |
 | First-order reverse-mode autodiff, Parameters, gradients, SGD, and AdamW | Sections 24.5 through 24.7 |
@@ -441,6 +442,7 @@ Examples:
 * `File.Directory`
 * `File.Scan`
 * `Host.Invocation`
+* `Console.Line`
 * `HTTP.Server`
 
 Some adapter operations produce committable targets.
@@ -510,7 +512,8 @@ A committable target may be:
 
 1. a nominal File target: `File.Write`, `File.Append`, or `File.Remove`, or
 2. an HTTP target: `HTTP.Server` or `HTTP.Client.Request`, or
-3. a `Process.Command` target, under the selected host execution profile.
+3. a `Process.Command` target, under the selected host execution profile, or
+4. a `Console.Line` target, with an enabled host output sink.
 
 Examples:
 
@@ -743,6 +746,10 @@ The initial boundary-oriented built-in types are:
 * `File.Directory`
 * `File.Scan`
 * `Host.Invocation`
+* `Console.Line`
+* `Console.Receipt`
+* `Program.Exit`
+* `CLI.Options`
 * `HTTP.Request`
 * `HTTP.Response`
 * `HTTP.Server`
@@ -1542,6 +1549,84 @@ Automatic output redacts home and argument values recursively, including capture
 Explicit projections provide the selected values under ordinary output rules.
 Inspection does not capture host inputs or execute observations.
 
+### 9.7 Console Output, Terminal Results, And Declared Options
+
+`Console.Line.new(stream: String, text: String, flush: Bool) -> Console.Line!` constructs a pure inert target.
+The destination must be `stdout` or `stderr`.
+The UTF-8 text and one appended LF byte must fit within 1048576 bytes.
+Invalid inputs produce `Console.InvalidLine` without payload text in the error input.
+Automatic output and snapshots contain destination, byte count, flush selection, and redaction metadata.
+
+A bound Console commit writes one complete record through the selected host output sink.
+It returns `Console.Receipt` with `stream: String`, `bytes_written: Int`, and `flushed: Bool`.
+The count includes the LF byte.
+The receipt confirms a complete write and any requested flush.
+Construction does not supply output authority.
+Commits serialize records within the session without an external stdout/stderr merge-order guarantee.
+
+`Console.WriteFailed` reports the destination, confirmed encoded-byte count, and `write` or `flush` stage.
+It contains no output text.
+This recoverable failure requires resolved output ownership.
+Cancellation, invalid sink progress, quota exhaustion, and unresolved ownership remain terminal.
+Confirmed earlier output remains visible after a later failure.
+
+The CLI enables inherited stdout and stderr.
+`--max-console-bytes` selects a cumulative logical-byte quota with a default of 1048576.
+Zero disables this quota but keeps the per-record bound.
+An admitted attempt charges its requested logical bytes before output.
+Overflow and quota exhaustion produce `runtime.limit`.
+Embedding hosts register cooperative output sinks explicitly.
+
+`Program.Exit.new(code: Int, stdout: Bytes, stderr: Bytes) -> Program.Exit!` constructs pure terminal data.
+Terminal values retain the supplied byte values and preserve shared identities.
+The status must be from 0 through 255.
+The combined payloads must fit within 1048576 bytes.
+Invalid inputs produce `Program.InvalidExit` without payload bytes in the error input.
+Automatic output and snapshots contain status, payload lengths, and redaction metadata.
+
+Only the final run result selects terminal behavior.
+Nested terminal values remain data, and an ordinary Int return remains an ordinary result.
+Serve rejects a terminal entry type before evaluation.
+The host joins Program, File, and Process cleanup before terminal output.
+It verifies both destinations and reserves both payloads before either output action.
+It writes stdout before stderr, with a flush for each nonempty payload.
+
+The requested status applies only after all required output and cleanup succeed.
+Execution, output, cancellation, budget, and cleanup failures override that status.
+Successful application statuses 1 and 2 remain distinct from execution failure.
+Pure total startup handlers return structured status and message data.
+An outer flow constructs the fallible terminal result.
+Embedding completion returns a status without exiting its caller's process.
+
+`CLI.parse(arguments, flags, name, description, abbreviations) -> CLI.Options!` is a pure operation.
+Its arguments have these types:
+
+| Input | Type |
+| --- | --- |
+| `arguments` | `List<String>` |
+| `flags` | `List<Record{name: String, aliases: List<String>, group: String, help: String}>` |
+| `name`, `description` | `String` |
+| `abbreviations` | `Bool` |
+
+`CLI.Options` exposes `flags: Map<String, Bool>`, `help_requested: Bool`, and `help_text: String`.
+Each canonical flag starts false and keeps declaration order.
+The result retains no raw argument vector.
+Invalid declarations produce `CLI.InvalidDefinition`.
+Invalid arguments produce `CLI.InvalidArguments`.
+Error inputs contain only the reason, index, and declared canonical candidates.
+
+Declarations are validated before tokens are processed from left to right.
+Exact spellings precede optional long-option prefix selection.
+Repeated selection is idempotent, and distinct flags in one nonempty group conflict.
+The reserved `-h` and `--help` options return immediately and ignore later tokens.
+The parser rejects operands, bare `--`, short bundles, and assigned values.
+Declaration, argument, and prefix scans charge execution steps and observe cancellation.
+
+The [CLI contract](docs/cli-runtime-design.md) defines exact spellings, error reasons, deterministic help, and JSON console events.
+JSON mode uses base64 console events on each selected destination, then the normal result envelope.
+Terminal envelopes contain `exit_code` and retain `status: "ok"` for successful execution.
+The [executable example](docs/examples/cli-cleanup-preview.lo) demonstrates help, argument errors, and application mode selection.
+
 ## 10. Flow Definitions
 
 A flow is a named reusable graph template.
@@ -1831,7 +1916,7 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 
 ### 15.5 Commit Rules
 
-* Commit accepts bound nominal File targets, `HTTP.Server`, `HTTP.Client.Request`, and `Process.Command`.
+* Commit accepts bound nominal File targets, `HTTP.Server`, `HTTP.Client.Request`, `Process.Command`, and `Console.Line`.
 * A committed target activates exactly once per commit statement evaluation.
 
 ### 15.6 Null, Absence, and Record Rules
@@ -2127,6 +2212,7 @@ Section 8.8 defines callback failure propagation for `Flow.fold`.
 Sections 9.2 and 9.4 define HTTP constructor failure kinds.
 Section 9.5 defines context observation, discovery, Process construction, termination accessors, activation errors, and host unavailability.
 Section 9.6 defines the invocation snapshot and `Host.InvocationFailed`.
+Section 9.7 defines Console construction and activation, terminal construction, and declared option parsing failures.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
