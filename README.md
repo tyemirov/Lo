@@ -44,6 +44,12 @@ F001 qualified the previous Go-generation implementation on macOS arm64 and Linu
 Its [historical acceptance report](docs/native-compilation-results.md) records those measurements.
 I011 completed qualification under the [focused acceptance update](docs/standalone-compiler-plan.md).
 
+The [required self-contained compiler](docs/self-contained-compiler.md) can use any implementation language.
+Once built, it must compile Lo source into native machine code without external tools, SDKs, runtimes, or companion compiler files.
+Only the target OS loader and system libraries are permitted host dependencies.
+P008 selects the [embedded payload design](docs/self-contained-compiler-design.md).
+F038 through F041 track implementation. F037 retains final qualification.
+
 The selected [training extension design](docs/training-extension-design.md) defines FP32 tensors, reverse-mode autodiff, immutable optimizer state, and explicit device execution.
 P001 completed the design task.
 F002, F003, and F004 implement binary64 arithmetic, immutable FP32 tensors, shape checks, and the CPU operation set.
