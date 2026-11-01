@@ -53,6 +53,26 @@ func TestLLVMConsoleCompletionCleanupPrecedence(t *testing.T) {
 	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), scenarios)
 }
 
+func TestLLVMConsoleCompletionFlushCancellation(t *testing.T) {
+	var scenarios []llvmRuntimeScenario
+	for code := 0; code <= 2; code++ {
+		for stream, stderr := range []string{"", "err"} {
+			name := "stdout"
+			if stream == 1 {
+				name = "stderr"
+			}
+			source := cliStackProgram("Program.Exit", fmt.Sprintf(`return Program.Exit.new(%d,Bytes.new("out"),Bytes.new(%q))`, code, stderr))
+			scenarios = append(scenarios, llvmRuntimeScenario{
+				name:    fmt.Sprintf("status-%d/%s", code, name),
+				source:  source,
+				number:  17 + 2*code + stream,
+				harness: "testdata/native-runtime/console-boundary.c",
+			})
+		}
+	}
+	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), scenarios)
+}
+
 func TestLLVMConsoleWriterParentLiveness(t *testing.T) {
 	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
 		t.Skip("requires LLVM runtime inputs")
