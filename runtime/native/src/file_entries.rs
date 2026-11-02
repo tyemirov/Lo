@@ -1500,6 +1500,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                 }
                 let name = entry.fields()["name"].string();
                 let name_c = CString::new(name).unwrap();
+                context.session.console.protect_removal(&retained, name)?;
                 context.session.processes.protect_removal(&retained, name)?;
                 if let Some(probe) = &context.files.probe {
                     probe.protect_removal(&retained, name)?;

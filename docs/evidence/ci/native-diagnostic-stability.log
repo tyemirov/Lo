@@ -1,0 +1,18 @@
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/native-large-diagnostic-20261101/distribution/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/ci-qemu-20261101/preparation" go test -timeout=120m ./tests/integration -run TestFlowFoldErrorProgressValueBudget -count=5 -v </dev/null
+=== RUN   TestFlowFoldErrorProgressValueBudget
+    native_test.go:120: LO_NATIVE_RUNTIME=3cc0246754f2955df1abd0692db6ca05eb823454aaf116e518a115a04adbed63
+--- PASS: TestFlowFoldErrorProgressValueBudget (2.72s)
+=== RUN   TestFlowFoldErrorProgressValueBudget
+    native_test.go:120: LO_NATIVE_RUNTIME=3cc0246754f2955df1abd0692db6ca05eb823454aaf116e518a115a04adbed63
+--- PASS: TestFlowFoldErrorProgressValueBudget (2.59s)
+=== RUN   TestFlowFoldErrorProgressValueBudget
+    native_test.go:120: LO_NATIVE_RUNTIME=3cc0246754f2955df1abd0692db6ca05eb823454aaf116e518a115a04adbed63
+--- PASS: TestFlowFoldErrorProgressValueBudget (2.68s)
+=== RUN   TestFlowFoldErrorProgressValueBudget
+    native_test.go:120: LO_NATIVE_RUNTIME=3cc0246754f2955df1abd0692db6ca05eb823454aaf116e518a115a04adbed63
+--- PASS: TestFlowFoldErrorProgressValueBudget (2.61s)
+=== RUN   TestFlowFoldErrorProgressValueBudget
+    native_test.go:120: LO_NATIVE_RUNTIME=3cc0246754f2955df1abd0692db6ca05eb823454aaf116e518a115a04adbed63
+--- PASS: TestFlowFoldErrorProgressValueBudget (2.56s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	13.792s

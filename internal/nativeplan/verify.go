@@ -86,7 +86,9 @@ func successors(t Terminator) []BlockID {
 
 func verify(ctx context.Context, module Module) error {
 	var metadata struct {
-		Types []typeMetadata `json:"types"`
+		Types      []typeMetadata `json:"types"`
+		HasResult  bool           `json:"has_result"`
+		ResultType *uint64        `json:"result_type"`
 	}
 	if err := json.Unmarshal(module.Metadata, &metadata); err != nil {
 		return fmt.Errorf("invalid native metadata: %w", err)
@@ -99,6 +101,14 @@ func verify(ctx context.Context, module Module) error {
 		}
 		types[value.ID] = value
 		typeNames[value.Name] = true
+	}
+	if metadata.HasResult != (metadata.ResultType != nil) {
+		return fmt.Errorf("inconsistent native entry result metadata")
+	}
+	if metadata.ResultType != nil {
+		if _, exists := types[*metadata.ResultType]; !exists {
+			return fmt.Errorf("missing native entry result type")
+		}
 	}
 	sequenceSites := map[uint64]bool{}
 	functions := map[string]Function{}

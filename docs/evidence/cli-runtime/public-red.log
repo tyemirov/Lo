@@ -1,0 +1,70 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/distribution/toolchain.json" go test -timeout=120m ./tests/integration -run ^TestCLIStack -count=1 -v </dev/null
+=== RUN   TestCLIStackConsoleText
+    cli_runtime_test.go:20: ordered console output: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackConsoleText1519105983/001/1616931116.lo:1:31: resolve.unknown-name: unknown flow Console.Line.new
+         status:1}
+--- FAIL: TestCLIStackConsoleText (0.20s)
+=== RUN   TestCLIStackConsoleReceipt
+    cli_runtime_test.go:28: logical UTF-8 receipt: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackConsoleReceipt2972687322/001/3049622225.lo:1:30: resolve.unknown-name: unknown flow Console.Line.new
+         status:1}
+--- FAIL: TestCLIStackConsoleReceipt (0.01s)
+=== RUN   TestCLIStackConsoleJSON
+    cli_runtime_test.go:68: console JSON execution: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow Console.Line.new","span":{"file":"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackConsoleJSON1309384239/001/45512198.lo","start":{"offset":29,"line":1,"column":30},"end":{"offset":70,"line":1,"column":71}}}]}
+         status:1}
+--- FAIL: TestCLIStackConsoleJSON (0.01s)
+=== RUN   TestCLIStackConsoleInertAndRedacted
+    cli_runtime_test.go:85: inert nominal snapshot: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type Console.Line","span":{"file":"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackConsoleInertAndRedacted1023885865/001/429095865.lo","start":{"offset":28,"line":1,"column":29},"end":{"offset":40,"line":1,"column":41}}}]}
+         status:1}
+--- FAIL: TestCLIStackConsoleInertAndRedacted (0.01s)
+=== RUN   TestCLIStackTerminalStatus
+=== RUN   TestCLIStackTerminalStatus/0
+    cli_runtime_test.go:95: terminal result: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackTerminalStatus03054264252/001/1217076202.lo:1:16: resolve.unknown-name: unknown type Program.Exit
+         status:1}
+=== RUN   TestCLIStackTerminalStatus/1
+    cli_runtime_test.go:95: terminal result: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackTerminalStatus1977462953/001/1251186386.lo:1:16: resolve.unknown-name: unknown type Program.Exit
+         status:1}
+=== RUN   TestCLIStackTerminalStatus/2
+    cli_runtime_test.go:95: terminal result: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackTerminalStatus2695644364/001/889366579.lo:1:16: resolve.unknown-name: unknown type Program.Exit
+         status:1}
+--- FAIL: TestCLIStackTerminalStatus (0.02s)
+    --- FAIL: TestCLIStackTerminalStatus/0 (0.01s)
+    --- FAIL: TestCLIStackTerminalStatus/1 (0.01s)
+    --- FAIL: TestCLIStackTerminalStatus/2 (0.01s)
+=== RUN   TestCLIStackTerminalJSON
+    cli_runtime_test.go:105: terminal status: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type Program.Exit","span":{"file":"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackTerminalJSON4046195619/001/2705713292.lo","start":{"offset":15,"line":1,"column":16},"end":{"offset":27,"line":1,"column":28}}}]}
+         status:1}
+--- FAIL: TestCLIStackTerminalJSON (0.01s)
+=== RUN   TestCLIStackNestedTerminalIsInert
+    cli_runtime_test.go:122: nested terminal value selected effects: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown type Program.Exit","span":{"file":"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackNestedTerminalIsInert877847888/001/3530455255.lo","start":{"offset":32,"line":1,"column":33},"end":{"offset":44,"line":1,"column":45}}}]}
+         status:1}
+--- FAIL: TestCLIStackNestedTerminalIsInert (0.01s)
+=== RUN   TestCLIStackDeclaredArguments
+=== RUN   TestCLIStackDeclaredArguments/default
+    cli_runtime_test.go:149: declared options: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackDeclaredArgumentsdefault1475286222/001/29075382.lo:1:71: resolve.unknown-name: unknown flow CLI.parse
+         status:1}
+=== RUN   TestCLIStackDeclaredArguments/canonical
+    cli_runtime_test.go:149: declared options: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackDeclaredArgumentscanonical3946448959/001/698853634.lo:1:71: resolve.unknown-name: unknown flow CLI.parse
+         status:1}
+=== RUN   TestCLIStackDeclaredArguments/alias
+    cli_runtime_test.go:149: declared options: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackDeclaredArgumentsalias4227725280/001/1043987737.lo:1:71: resolve.unknown-name: unknown flow CLI.parse
+         status:1}
+=== RUN   TestCLIStackDeclaredArguments/abbreviation
+    cli_runtime_test.go:149: declared options: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackDeclaredArgumentsabbreviation4102505106/001/1803057802.lo:1:71: resolve.unknown-name: unknown flow CLI.parse
+         status:1}
+=== RUN   TestCLIStackDeclaredArguments/repeat
+    cli_runtime_test.go:149: declared options: {stdout: stderr:/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackDeclaredArgumentsrepeat2194993428/001/2849979139.lo:1:71: resolve.unknown-name: unknown flow CLI.parse
+         status:1}
+--- FAIL: TestCLIStackDeclaredArguments (0.03s)
+    --- FAIL: TestCLIStackDeclaredArguments/default (0.01s)
+    --- FAIL: TestCLIStackDeclaredArguments/canonical (0.01s)
+    --- FAIL: TestCLIStackDeclaredArguments/alias (0.01s)
+    --- FAIL: TestCLIStackDeclaredArguments/abbreviation (0.01s)
+    --- FAIL: TestCLIStackDeclaredArguments/repeat (0.01s)
+=== RUN   TestCLIStackDeclaredHelp
+    cli_runtime_test.go:159: declared help: {stdout: stderr:{"diagnostics":[{"code":"resolve.unknown-name","stage":"resolve","message":"unknown flow CLI.parse","span":{"file":"/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/TestCLIStackDeclaredHelp4103586886/001/506014193.lo","start":{"offset":35,"line":1,"column":36},"end":{"offset":339,"line":1,"column":340}}}]}
+         status:1}
+--- FAIL: TestCLIStackDeclaredHelp (0.01s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.077s
+FAIL
+make: *** [test-integration] Error 1

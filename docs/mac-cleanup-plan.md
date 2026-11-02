@@ -77,11 +77,19 @@ F024 supplies inherited Process contexts, executable discovery, bounded transpor
 The [F024 evidence](evidence/process-context-cleanup/checkpoint.json) records its validation boundary.
 F025 supplies host snapshots, immutable file metadata, directory observations, scans, and guarded removal.
 Its [contract](file-observation-extension-design.md) records completed implementation acceptance.
+F026 through F028 supply Console output, terminal results, declared flags, and deterministic help.
+The [CLI contract](cli-runtime-design.md) defines these interfaces.
+The [CLI example](examples/cli-cleanup-preview.lo) executes mode selection without file removal.
 The existing [direct log example](examples/gateway-log-cleanup.lo) remains a focused executable fixture.
 The [package example](examples/package-cache-cleanup.lo) remains a focused Process fixture.
 Neither focused example establishes full script parity.
 
 ## Work Derived From the Script
+
+The [implementation roadmap](mac-cleanup-implementation-plan.md) defines the next work packages, dependencies, source targets, and executable milestones.
+F029 supplies program identity and exclusive file leases for the next application milestone.
+P007 and F036 separately own the stronger descendant Process profile.
+I013 owns the complete application and its confined fixture acceptance.
 
 The full source now supplies the application intent before further language implementation.
 The application design identifies each proposed operation outside the implemented reference.
@@ -91,7 +99,7 @@ Further work follows this sequence:
 2. Reuse current Match, self-handling flows, and sequential folds for branch effects and category recovery.
 3. Select small contracts for value helpers and descendant resource lifetime.
 4. Specify retained descendant observations, metadata additions, and descriptor-safe tree removal with explicit grants and resource limits.
-5. Specify program identity, locks, console output, process output and timeouts, and terminal results.
+5. Specify program identity, locks, process output, and timeouts.
 6. Add public fixture failures before implementation of each selected contract.
 7. Implement each selected contract in the interpreter and native runtime.
 8. Validate the full application with repository-contained command and filesystem fixtures.
@@ -114,7 +122,9 @@ Fixtures verify argument lists, process environment, closed input, output modes,
 File fixtures verify preview, observations, open-file skips, changed entries, partial progress, and untouched siblings.
 Whole-tree fixtures verify retained identities and full eligibility before eviction.
 Lock fixtures verify contention and release on success, failure, and cancellation.
-Equivalent fixtures must cover the interpreter and both native software targets.
+Complete application fixtures must cover the interpreter and native Darwin under the selected Process profile.
+Portable contracts must also run under native Linux software emulation.
+Linux Process activation keeps its explicit unavailable result until a separate platform contract changes it.
 
 The [repository policy](../.mprlab/POLICY.md#lo-repository-boundary) controls every operation.
 No acceptance step runs actual package-cache or Docker cleanup.

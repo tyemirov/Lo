@@ -1,0 +1,16 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_TEST_COMPILER="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/bin/lo" LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" python3 -B tools/semanticcoverage/test_report.py </dev/null
+.....................
+----------------------------------------------------------------------
+Ran 21 tests in 5.794s
+
+OK
+go test ./tools/loqualification/performance-runner </dev/null
+ok  	github.com/MarcoPoloResearchLab/Lo/tools/loqualification/performance-runner	0.171s
+go vet ./tools/loqualification/performance-runner </dev/null
+LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider --basetemp "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/qualification-tests" -q tools/loqualification tools/nativebench  </dev/null
+........................................................................ [ 33%]
+........................................................................ [ 66%]
+........................................................................ [ 99%]
+.                                                                        [100%]
+217 passed in 132.69s (0:02:12)

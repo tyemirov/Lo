@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -230,6 +231,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 				t.Fatal("harness leaves repository")
 			}
 			selectedHarness := filepath.Join(repository, harnessSource)
+			originalHarnessDirectory := filepath.Dir(selectedHarness)
 			if scenario.harnessTransform != nil {
 				contents, err := os.ReadFile(selectedHarness)
 				if err != nil {
@@ -246,12 +248,66 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 					t.Fatalf("write harness: %v, %v", writeErr, closeErr)
 				}
 			}
-			runTool(compiler, append(append([]string{}, flags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-fno-stack-protector", "-nostdinc", "-c", selectedHarness, "-o", harness)...)
+			preprocessed := filepath.Join(work, "preprocessed-harness.c")
+			runTool(compiler, append(append([]string{}, flags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-I", originalHarnessDirectory, "-nostdinc", "-E", "-P", selectedHarness, "-o", preprocessed)...)
+			contents, err := os.ReadFile(preprocessed)
+			if err != nil {
+				t.Fatal(err)
+			}
+			signature := regexp.MustCompile(`\bint\s+main\s*\(([^)]*)\)`).FindSubmatch(contents)
+			if signature == nil {
+				t.Fatal("runtime harness requires a main declaration")
+			}
+			parameters := strings.TrimSpace(string(signature[1]))
+			ownedHarness := filepath.Join(work, "owned-harness.c")
+			renamed := regexp.MustCompile(`\bint\s+main\s*\(`).ReplaceAll(contents, []byte("int lo_test_main("))
+			harnessFile, err := os.Create(ownedHarness)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, harnessWriteErr := harnessFile.Write(renamed)
+			harnessCloseErr := harnessFile.Close()
+			if harnessWriteErr != nil || harnessCloseErr != nil {
+				t.Fatalf("write owned harness: %v, %v", harnessWriteErr, harnessCloseErr)
+			}
+			callArguments := ""
+			if parameters != "void" && parameters != "" {
+				switch strings.Count(parameters, ",") {
+				case 1:
+					callArguments = "argc, (void *)argv"
+				case 2:
+					callArguments = "argc, (void *)argv, (void *)environment"
+				default:
+					t.Fatal("runtime harness has an unsupported main signature")
+				}
+			}
+			entrySource, entryObject := filepath.Join(work, "entry.c"), filepath.Join(work, "entry.o")
+			entry := fmt.Sprintf(`extern int lo_cli_main(int, const char *const *, const char *const *);
+extern int lo_test_main(%s);
+static int equal(const char *a, const char *b) { while (*a && *a == *b) { ++a; ++b; } return *a == *b; }
+int main(int argc, char **argv, char **environment) {
+    if (argc > 1 && equal(argv[1], "--lo-console-writer")) {
+        return lo_cli_main(argc, (const char *const *)argv, (const char *const *)environment);
+    }
+    return lo_test_main(%s);
+}
+`, parameters, callArguments)
+			entryFile, err := os.Create(entrySource)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, writeErr := entryFile.WriteString(entry)
+			closeErr := entryFile.Close()
+			if writeErr != nil || closeErr != nil {
+				t.Fatalf("write runtime entry: %v, %v", writeErr, closeErr)
+			}
+			runTool(compiler, append(append([]string{}, flags...), "-fno-stack-protector", "-nostdinc", "-c", entrySource, "-o", entryObject)...)
+			runTool(compiler, append(append([]string{}, flags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-I", originalHarnessDirectory, "-fno-stack-protector", "-nostdinc", "-c", ownedHarness, "-o", harness)...)
 			var arguments []string
 			for _, argument := range target.LinkArgs {
 				switch argument {
 				case "{object}":
-					arguments = append(arguments, object, harness)
+					arguments = append(arguments, object, harness, entryObject)
 				case "{runtime}":
 					arguments = append(arguments, archive)
 				case "{output}":

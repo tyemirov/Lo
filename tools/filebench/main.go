@@ -125,6 +125,9 @@ func (capture *boundedCapture) Write(data []byte) (int, error) {
 func (capture *boundedCapture) Bytes() []byte { return capture.buffer.Bytes() }
 
 func main() {
+	if adapter.HandleConsoleWriter(os.Args[1:]) {
+		return
+	}
 	if adapter.HandleFileProbe(os.Args[1:]) {
 		return
 	}
@@ -628,7 +631,11 @@ func runWorker(args []string) error {
 	var before, after runtime.MemStats
 	runtime.ReadMemStats(&before)
 	start := time.Now()
-	status := runner.Execute(program, args[2:], os.Stdout, os.Stderr)
+	console, err := adapter.OpenCLIConsole(context.Background(), adapter.ConsoleOptions{Format: adapter.ConsoleText, MaxBytes: adapter.DefaultConsoleBytes}, os.Stdout, os.Stderr)
+	if err != nil {
+		return err
+	}
+	status := runner.Execute(program, args[2:], console)
 	elapsed := time.Since(start).Nanoseconds()
 	runtime.ReadMemStats(&after)
 	stats := struct {

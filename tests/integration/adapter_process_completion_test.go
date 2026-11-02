@@ -78,7 +78,7 @@ func TestAdapterProcessCompletionBeforeResultCharge(t *testing.T) {
 			}
 		}
 		return runtimeops.Commit(session, command, span)
-	}, nil)
+	}, nil, types.ProcessResult())
 	if err != nil {
 		t.Fatal(err)
 	}

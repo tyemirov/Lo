@@ -24,6 +24,9 @@ var installedToolchainSHA256 string
 
 func main() { os.Exit(execute(os.Args[1:], os.Stdout, os.Stderr)) }
 func execute(args []string, stdout, stderr io.Writer) int {
+	if adapter.HandleConsoleWriter(args) {
+		return 0
+	}
 	if adapter.HandleFileProbe(args) {
 		return 0
 	}
@@ -120,7 +123,16 @@ func execute(args []string, stdout, stderr io.Writer) int {
 			if err != nil {
 				return runner.ReportRuntime(stderr, inv.Format(), err)
 			}
-			return runner.Run(inv, program, stdout, stderr)
+			out, okOut := stdout.(*os.File)
+			errout, okErr := stderr.(*os.File)
+			if !okOut || !okErr {
+				return runner.ReportRuntime(stderr, inv.Format(), fmt.Errorf("CLI output requires owned console descriptors"))
+			}
+			console, err := adapter.OpenCLIConsole(context.Background(), adapter.ConsoleOptions{Command: inv.Command(), Format: inv.Format(), MaxBytes: inv.MaxConsoleBytes()}, out, errout)
+			if err != nil {
+				return runner.ReportRuntime(stderr, inv.Format(), err)
+			}
+			return runner.Run(inv, program, console)
 		}
 		output := ""
 		if t := result.ResultType(); t != nil {

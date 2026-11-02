@@ -1,0 +1,100 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run 'TestLLVMCoordinateReceiptSpans|TestLLVMRuntimeLifetime|TestLLVMConsole' -count=1 -failfast -v </dev/null
+=== RUN   TestLLVMConsoleEmbeddingBoundary
+=== RUN   TestLLVMConsoleEmbeddingBoundary/partial-progress
+=== RUN   TestLLVMConsoleEmbeddingBoundary/partial-write-failure
+=== RUN   TestLLVMConsoleEmbeddingBoundary/flush-failure
+=== RUN   TestLLVMConsoleEmbeddingBoundary/cooperative-cancel
+=== RUN   TestLLVMConsoleEmbeddingBoundary/logical-quota
+=== RUN   TestLLVMConsoleEmbeddingBoundary/disabled-stream
+=== RUN   TestLLVMConsoleEmbeddingBoundary/invalid-callback-progress
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-zero
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-one
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-two
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-flush-failure
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-cancel
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-reservation
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-disabled-stream
+=== RUN   TestLLVMConsoleEmbeddingBoundary/empty-root-registration-gate
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-zero-flush-failure
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-one-flush-failure
+--- PASS: TestLLVMConsoleEmbeddingBoundary (5.26s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/partial-progress (0.48s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/partial-write-failure (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/flush-failure (0.31s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/cooperative-cancel (0.30s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/logical-quota (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/disabled-stream (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/invalid-callback-progress (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-zero (0.28s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-one (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-two (0.30s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-flush-failure (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-cancel (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-reservation (0.29s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-disabled-stream (0.30s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/empty-root-registration-gate (0.30s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-zero-flush-failure (0.30s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-one-flush-failure (0.30s)
+=== RUN   TestLLVMConsoleCompletionCleanupPrecedence
+=== RUN   TestLLVMConsoleCompletionCleanupPrecedence/status-0
+=== RUN   TestLLVMConsoleCompletionCleanupPrecedence/status-1
+=== RUN   TestLLVMConsoleCompletionCleanupPrecedence/status-2
+--- PASS: TestLLVMConsoleCompletionCleanupPrecedence (1.00s)
+    --- PASS: TestLLVMConsoleCompletionCleanupPrecedence/status-0 (0.32s)
+    --- PASS: TestLLVMConsoleCompletionCleanupPrecedence/status-1 (0.31s)
+    --- PASS: TestLLVMConsoleCompletionCleanupPrecedence/status-2 (0.30s)
+=== RUN   TestLLVMConsoleWriterParentLiveness
+    native_test.go:120: LO_NATIVE_RUNTIME=be5a810d033376e8b412fca7998d62e3d6d729c742cd31f2d3e036a10606f690
+--- PASS: TestLLVMConsoleWriterParentLiveness (1.94s)
+=== RUN   TestLLVMConsoleWriterImageProtection
+=== RUN   TestLLVMConsoleWriterImageProtection/Write
+    native_test.go:120: LO_NATIVE_RUNTIME=be5a810d033376e8b412fca7998d62e3d6d729c742cd31f2d3e036a10606f690
+=== RUN   TestLLVMConsoleWriterImageProtection/Append
+    native_test.go:120: LO_NATIVE_RUNTIME=be5a810d033376e8b412fca7998d62e3d6d729c742cd31f2d3e036a10606f690
+=== RUN   TestLLVMConsoleWriterImageProtection/Remove
+    native_test.go:120: LO_NATIVE_RUNTIME=be5a810d033376e8b412fca7998d62e3d6d729c742cd31f2d3e036a10606f690
+--- PASS: TestLLVMConsoleWriterImageProtection (6.13s)
+    --- PASS: TestLLVMConsoleWriterImageProtection/Write (2.11s)
+    --- PASS: TestLLVMConsoleWriterImageProtection/Append (2.02s)
+    --- PASS: TestLLVMConsoleWriterImageProtection/Remove (1.99s)
+=== RUN   TestLLVMConsoleReadinessCancellation
+=== RUN   TestLLVMConsoleReadinessCancellation/stop-before-ready-acknowledgment
+=== RUN   TestLLVMConsoleReadinessCancellation/fresh-stopped-event-deadline
+--- PASS: TestLLVMConsoleReadinessCancellation (2.30s)
+    --- PASS: TestLLVMConsoleReadinessCancellation/stop-before-ready-acknowledgment (0.38s)
+    --- PASS: TestLLVMConsoleReadinessCancellation/fresh-stopped-event-deadline (1.85s)
+=== RUN   TestLLVMConsoleSpawnInheritance
+=== RUN   TestLLVMConsoleSpawnInheritance/liveness-endpoint-excluded-from-concurrent-probe
+--- PASS: TestLLVMConsoleSpawnInheritance (1.41s)
+    --- PASS: TestLLVMConsoleSpawnInheritance/liveness-endpoint-excluded-from-concurrent-probe (1.33s)
+=== RUN   TestLLVMConsoleSpawnQueuedDeadline
+=== RUN   TestLLVMConsoleSpawnQueuedDeadline/process-deadline-while-console-owns-creation
+--- PASS: TestLLVMConsoleSpawnQueuedDeadline (0.46s)
+    --- PASS: TestLLVMConsoleSpawnQueuedDeadline/process-deadline-while-console-owns-creation (0.38s)
+=== RUN   TestLLVMCoordinateReceiptSpans
+=== RUN   TestLLVMCoordinateReceiptSpans/file-write
+=== RUN   TestLLVMCoordinateReceiptSpans/file-remove
+=== RUN   TestLLVMCoordinateReceiptSpans/http-listen
+=== RUN   TestLLVMCoordinateReceiptSpans/http-request
+=== RUN   TestLLVMCoordinateReceiptSpans/process
+--- PASS: TestLLVMCoordinateReceiptSpans (1.75s)
+    --- PASS: TestLLVMCoordinateReceiptSpans/file-write (0.31s)
+    --- PASS: TestLLVMCoordinateReceiptSpans/file-remove (0.32s)
+    --- PASS: TestLLVMCoordinateReceiptSpans/http-listen (0.37s)
+    --- PASS: TestLLVMCoordinateReceiptSpans/http-request (0.32s)
+    --- PASS: TestLLVMCoordinateReceiptSpans/process (0.35s)
+=== RUN   TestLLVMRuntimeLifetime
+=== RUN   TestLLVMRuntimeLifetime/success
+=== RUN   TestLLVMRuntimeLifetime/recoverable
+=== RUN   TestLLVMRuntimeLifetime/budget
+=== RUN   TestLLVMRuntimeLifetime/cancelled
+=== RUN   TestLLVMRuntimeLifetime/thread-owner
+--- PASS: TestLLVMRuntimeLifetime (1.74s)
+    --- PASS: TestLLVMRuntimeLifetime/success (0.33s)
+    --- PASS: TestLLVMRuntimeLifetime/recoverable (0.32s)
+    --- PASS: TestLLVMRuntimeLifetime/budget (0.33s)
+    --- PASS: TestLLVMRuntimeLifetime/cancelled (0.32s)
+    --- PASS: TestLLVMRuntimeLifetime/thread-owner (0.35s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	22.656s

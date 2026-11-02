@@ -106,7 +106,7 @@ func runWithDevices(t *testing.T, ctx context.Context, text string, factory devi
 	}
 	var stdout, stderr bytes.Buffer
 	var receipts []device.Receipt
-	status := runner.RunContext(ctx, invocation, program, factory, func(r device.Receipt) { receipts = append(receipts, r) }, &stdout, &stderr)
+	status := runner.RunContext(ctx, invocation, program, factory, func(r device.Receipt) { receipts = append(receipts, r) }, newRunnerConsole(t, &stdout, &stderr))
 	return result{stdout.String(), stderr.String(), status}, receipts
 }
 

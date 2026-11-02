@@ -227,9 +227,11 @@ impl Probe {
                 Ok(())
             });
         }
+        let spawn_ownership = crate::spawn_ownership::acquire(|| context.check_cancel())?;
         let mut child = command
             .spawn()
             .map_err(|error| host(format!("probe open files: {error}")))?;
+        drop(spawn_ownership);
         let mut stdout = child.stdout.take().unwrap();
         let mut stderr = child.stderr.take().unwrap();
         let mut output = Vec::new();

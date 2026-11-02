@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "scope": [
+    "tools/nativeruntime/run.py",
+    "tests/integration/llvm_linux_qualification_test.go",
+    "tests/integration/llvm_http_test.go",
+    "tests/integration/testdata/native-http/linux_driver.go.txt"
+  ],
+  "reviewed_sha256": {
+    "tools/nativeruntime/run.py": "cdead00d74b7fb066612a762480c6d1651d51c8c64a34660825202d730f50c4f",
+    "tests/integration/llvm_linux_qualification_test.go": "59ba40b614d73a6f67583bd97a7c58b87dbf62e46da3af8d326704523232b0f3",
+    "tests/integration/llvm_http_test.go": "c6a8d3408cd31bdb31f240f1a435916f91c0e83441d35e00b7ef37dd96ad004d",
+    "tests/integration/testdata/native-http/linux_driver.go.txt": "7a216d767f6ae2a95b1688baf91dc3d596fa889384529b72ce9372ef8c2bc86a"
+  },
+  "maintained_bytes_match_approved_draft": {
+    "tools/nativeruntime/run.py": true,
+    "tests/integration/llvm_linux_qualification_test.go": true,
+    "tests/integration/llvm_http_test.go": true,
+    "tests/integration/testdata/native-http/linux_driver.go.txt": true
+  },
+  "findings": [],
+  "resolved_finding": {
+    "id": "tls-driver-direct-linux-boundary",
+    "resolution": "Companion requests always use prepared QEMU. Only ordinary requests keep direct Linux execution. Driver proc mount removed; loopback and TLS effects remain inside controlled guest."
+  },
+  "public_red": {
+    "log": "linux-tls-companion-red.log",
+    "status": 2,
+    "cause": "Old runner rejects --companion"
+  },
+  "focused_checks": [
+    {
+      "log": "linux-tls-companion-green.log",
+      "result": "PASS",
+      "seconds": 17.828,
+      "groups": [
+        "TestLLVMLinuxCompanionExecutable",
+        "TestLLVMLinuxHTTPVerifiedTLS",
+        "TestLLVMLinuxCore"
+      ],
+      "companion_exit_status": 7,
+      "companion_stdout": "companion stdout",
+      "companion_stderr": "companion stderr",
+      "tls_scenarios": 3,
+      "tls_successful_request_count": 1,
+      "core_cases": 4
+    },
+    {
+      "log": "linux-tls-companion-tools.log",
+      "result": "PASS",
+      "passed_tests": 20,
+      "seconds": 5.67
+    }
+  ],
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "runtime_changes": false,
+  "runtime_bundle_rebuilt": false,
+  "evidence_limit": "Full stack CI remains pending. Focused guest evidence uses the pinned Darwin arm64 preparation profile."
+}

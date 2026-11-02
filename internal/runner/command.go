@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -47,6 +49,7 @@ const (
 	allowDeviceOption         = "--allow-device"
 	maxStepsOption            = "--max-steps"
 	maxValueBytesOption       = "--max-value-bytes"
+	maxConsoleBytesOption     = "--max-console-bytes"
 	maxLiveBytesOption        = "--max-live-bytes"
 	maxDataBytesOption        = "--max-data-bytes"
 	maxListItemsOption        = "--max-list-items"
@@ -77,10 +80,11 @@ type invocation struct {
 	httpPolicy            adapter.HTTPPolicy
 	processPolicy         adapter.ProcessPolicy
 	programArguments      []string
+	maxConsoleBytes       uint64
 }
 
 func parseArgs(args []string, embedded bool) (invocation, error) {
-	inv := invocation{format: TextFormat, budget: execution.DefaultBudget(), devices: device.DefaultConfig(), deviceBackend: device.SoftwareBuild}
+	inv := invocation{format: TextFormat, budget: execution.DefaultBudget(), devices: device.DefaultConfig(), deviceBackend: device.SoftwareBuild, maxConsoleBytes: adapter.DefaultConsoleBytes}
 	if len(args) == 0 {
 		return inv, fmt.Errorf("expected a command: parse, check, inspect, run, or serve")
 	}
@@ -90,6 +94,7 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	policyOptions := map[string]*uint64{
 		maxStepsOption:           &budgetInput.Steps,
 		maxValueBytesOption:      &budgetInput.Limits.ValueBytes,
+		maxConsoleBytesOption:    &inv.maxConsoleBytes,
 		maxLiveBytesOption:       &budgetInput.Limits.LiveBytes,
 		maxDataBytesOption:       &budgetInput.Limits.DataBytes,
 		maxListItemsOption:       &budgetInput.Limits.ListItems,
@@ -446,6 +451,7 @@ type Options interface {
 	Emit() string
 	Toolchain() string
 	DeviceBackend() device.BuildBackend
+	MaxConsoleBytes() uint64
 	options()
 }
 
@@ -453,21 +459,37 @@ func (inv invocation) options()                    {}
 func (inv invocation) Command() string             { return inv.command }
 func (inv invocation) Path() string                { return inv.path }
 func (inv invocation) Format() string              { return inv.format }
+func (inv invocation) MaxConsoleBytes() uint64     { return inv.maxConsoleBytes }
 func ParseCompiler(args []string) (Options, error) { return parseArgs(args, false) }
-func Execute(program execution.Program, args []string, stdout, stderr io.Writer) int {
+func Execute(program execution.Program, args []string, console *adapter.Console) int {
 	if adapter.HandleFileProbe(args) {
 		return ExitSuccess
 	}
 	inv, err := parseArgs(args, true)
 	if err != nil {
-		return Report(stderr, inv.format, diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), ExitHost)
+		reporting, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		return finishConsole(console, Report(console.Writer(reporting, adapter.ConsoleStderr), inv.format, diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), ExitHost))
 	}
-	return executeProgram(inv, program, stdout, stderr)
+	return executeProgram(inv, program, console)
 }
-func Run(inv Options, program execution.Program, stdout, stderr io.Writer) int {
-	return executeProgram(inv.(invocation), program, stdout, stderr)
+func Run(inv Options, program execution.Program, console *adapter.Console) int {
+	return executeProgram(inv.(invocation), program, console)
 }
-func Main(program execution.Program) { os.Exit(Execute(program, os.Args[1:], os.Stdout, os.Stderr)) }
+func Main(program execution.Program) {
+	if adapter.HandleConsoleWriter(os.Args[1:]) || adapter.HandleFileProbe(os.Args[1:]) {
+		return
+	}
+	inv, err := parseArgs(os.Args[1:], true)
+	if err != nil {
+		os.Exit(Report(os.Stderr, inv.format, diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), ExitHost))
+	}
+	console, err := adapter.OpenCLIConsole(context.Background(), adapter.ConsoleOptions{Command: inv.command, Format: inv.format, MaxBytes: inv.maxConsoleBytes}, os.Stdout, os.Stderr)
+	if err != nil {
+		os.Exit(ReportRuntime(os.Stderr, inv.format, err))
+	}
+	os.Exit(executeProgram(inv, program, console))
+}
 func ReportRuntime(stderr io.Writer, format string, err error) int {
 	var failure execution.Failure
 	if errors.As(err, &failure) {

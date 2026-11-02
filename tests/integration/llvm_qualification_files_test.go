@@ -52,8 +52,36 @@ func TestLLVMFileRemovalFailures(t *testing.T) {
 			if fixture.name == "cancel-after-remove" && !strings.Contains(got.stdout, "runtime.cancelled") {
 				t.Fatal("cancellation lost host class")
 			}
-			if strings.Contains(fixture.name, "cleanup") && !strings.Contains(got.stdout, "cleanup") {
-				t.Fatal("cleanup evidence missing")
+			if strings.Contains(fixture.name, "cleanup") {
+				var document struct {
+					Diagnostics []struct {
+						Code, Message string
+						Error         *runtimeValue
+						Cleanup       []string                     `json:"cleanup_errors"`
+						LastCompleted *receiptActivationDiagnostic `json:"last_completed_activation"`
+						Progress      *runtimeValue                `json:"removal_progress"`
+					}
+				}
+				if err := json.Unmarshal([]byte(got.stdout), &document); err != nil {
+					t.Fatal(err)
+				}
+				if len(document.Diagnostics) != 1 {
+					t.Fatalf("missing cleanup diagnostic: %s", got.stdout)
+				}
+				diagnostic := document.Diagnostics[0]
+				if fixture.name == "cleanup-failure" {
+					if diagnostic.Code != "runtime.host-failure" || diagnostic.Message != "input/output error" || diagnostic.Error != nil || len(diagnostic.Cleanup) != 0 || diagnostic.LastCompleted != nil || diagnostic.Progress == nil {
+						t.Fatalf("finalize close failure changed: %s", got.stdout)
+					}
+					var fields map[string]runtimeValue
+					if err := json.Unmarshal(diagnostic.Progress.Value, &fields); err != nil {
+						t.Fatal(err)
+					}
+					valueJSON(t, fields["completed_bytes"], `"4"`)
+					valueJSON(t, fields["failed_index"], `"-1"`)
+				} else if !strings.Contains(strings.Join(diagnostic.Cleanup, "\n"), "close observed directory") {
+					t.Fatalf("observed-directory cleanup evidence missing: %s", got.stdout)
+				}
 			}
 		}
 		scenarios = append(scenarios, scenario)

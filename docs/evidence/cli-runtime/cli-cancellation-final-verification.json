@@ -1,0 +1,12 @@
+{
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "runtime_receipt_matches": true,
+  "fixture_sha256": "a02b72f08e41107b27b6a484e95bfa2586e871a151f022f7fa763b94ba00040e",
+  "focused_log": "_scratch/cli-stack-20261031/cli-cancellation-both-targets.log",
+  "focused_seconds": 21.361,
+  "result": "pass",
+  "targets": [
+    "darwin/arm64",
+    "linux/arm64"
+  ]
+}

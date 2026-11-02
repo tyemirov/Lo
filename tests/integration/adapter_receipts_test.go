@@ -207,7 +207,7 @@ func receiptProgramResult(t *testing.T, ctx context.Context, filesystem adapter.
 	if err != nil {
 		t.Fatal(err)
 	}
-	program, err := execution.NewProgram(func(session execution.Session) (value.Value, error) { return body(session, target, text.Span(0, 13)) }, nil)
+	program, err := execution.NewProgram(func(session execution.Session) (value.Value, error) { return body(session, target, text.Span(0, 13)) }, nil, types.FileWriteReceipt())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -354,7 +354,7 @@ func TestAdapterReceiptInvalidBoundaryResult(t *testing.T) {
 	for _, invalid := range []value.Value{nil, value.Int64(0)} {
 		t.Run(fmt.Sprintf("%v", invalid), func(t *testing.T) {
 			got, _ := receiptProgramResult(t, context.Background(), adapter.NativeFileIO(), func(session execution.Session, target value.Target, span source.Span) (value.Value, error) {
-				nested, err := execution.NewProgram(func(inner execution.Session) (value.Value, error) { return runtimeops.Commit(inner, target, span) }, nil)
+				nested, err := execution.NewProgram(func(inner execution.Session) (value.Value, error) { return runtimeops.Commit(inner, target, span) }, nil, types.FileWriteReceipt())
 				if err != nil {
 					return nil, err
 				}

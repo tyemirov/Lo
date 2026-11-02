@@ -128,7 +128,7 @@ The later oversized-request correction and focused qualification are recorded in
 
 ## Required Outcome
 
-The user selected this acceptance criterion:
+The user selected the following earlier offline distribution criterion:
 
 > On a supported clean machine with no Go installation, an installed Lo distribution can compile and link a representative program offline, and the resulting executable runs without Lo installed.
 
@@ -137,9 +137,13 @@ It needs no separate Go, Rust, Clang, or developer SDK installation.
 The executable can use the declared operating-system libraries.
 It needs no Lo installation, source checkout, source file, or separate Lo runtime library.
 
-The compiler frontend can remain a prebuilt Go executable.
-The compiler implementation language does not impose an installed Go requirement.
-Self-hosting is outside this plan.
+The earlier acceptance permitted a prebuilt Go frontend.
+The implementation language remains unrestricted.
+The user requires the built compiler to produce native machine code without external dependencies except the OS loader and system libraries.
+The [self-contained compiler requirement](self-contained-compiler.md) owns that outcome, implementation gaps, and acceptance gates.
+The compiler does not need to be written in Lo or compile its own implementation source.
+P008 selects the [embedded payload design](self-contained-compiler-design.md).
+F038 through F041 implement it. F037 retains final qualification.
 
 ## Current Contract
 
@@ -351,7 +355,8 @@ The existing immutable values, named flows, explicit commits, and error values r
 
 Recursion, closures, concurrency, and foreign-function access need separate proposals.
 They change termination, inspection, ownership, or authority.
-New operating systems, new architectures, and self-hosting remain outside this sequence.
+New operating systems and new architectures remain outside this sequence.
+P008 and F037 own the required self-contained compiler work under the [current contract](self-contained-compiler.md).
 
 ## Decision Owners
 

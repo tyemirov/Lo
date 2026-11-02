@@ -1,0 +1,29 @@
+[
+  {
+    "name": "http",
+    "selector": "^TestLLVMHTTPClientCleanupEvidence/ordinary-read-failure",
+    "owner_pid": 11380,
+    "status": 2,
+    "outer_timeout": false,
+    "remaining_owned_group": [],
+    "log": "_scratch/cli-stack-20261031/remaining-close-http-red.log"
+  },
+  {
+    "name": "file",
+    "selector": "^TestLLVMFileRemovalFailures/cleanup-failure",
+    "owner_pid": 11575,
+    "status": 0,
+    "outer_timeout": false,
+    "remaining_owned_group": [],
+    "log": "_scratch/cli-stack-20261031/remaining-close-file-red.log"
+  },
+  {
+    "name": "server",
+    "selector": "^TestLLVMServerCallbackIndependentCleanup/callback-write-false-and-session-cleanup",
+    "owner_pid": 11643,
+    "status": 0,
+    "outer_timeout": false,
+    "remaining_owned_group": [],
+    "log": "_scratch/cli-stack-20261031/remaining-close-server-red.log"
+  }
+]

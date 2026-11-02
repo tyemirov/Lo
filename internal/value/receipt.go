@@ -35,7 +35,7 @@ func NewReceipt(t types.Type, fields Record) (Receipt, error) {
 	switch t.Kind() {
 	case types.FileWriteReceiptKind, types.FileAppendReceiptKind, types.ServerReceiptKind:
 		count = 2
-	case types.FileRemoveReceiptKind:
+	case types.FileRemoveReceiptKind, types.ConsoleReceiptKind:
 		count = 3
 	default:
 		return nil, fmt.Errorf("invalid receipt type %s", t)

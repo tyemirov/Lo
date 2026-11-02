@@ -1,0 +1,77 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/ci-qemu-20261101/preparation" UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q tools/nativeruntime </dev/null
+...........F........F                                                    [100%]
+=================================== FAILURES ===================================
+_________________ test_runtime_build_uses_prepared_host_linker _________________
+
+    def test_runtime_build_uses_prepared_host_linker() -> None:
+        import json
+        import pytest
+    
+        supplied = os.environ.get('LO_NATIVE_PREPARATION')
+        if supplied is None:
+            pytest.skip('LO_NATIVE_PREPARATION selects the prepared compiler inputs')
+        state = (ROOT / supplied).resolve()
+        assert state.is_relative_to(ROOT / '_scratch')
+        result = subprocess.run([sys.executable, '-B', str(CLI.with_name('build.py')),
+                                 '--preparation', str(state), '--output', str(state / 'distribution')],
+                                cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
+                                capture_output=True, text=True, check=False)
+>       assert result.returncode == 0, result.stderr
+E       AssertionError: native runtime build: prepared Linux platform differs from receipt; select a fresh preparation state
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmpK88cbo/bin...ut='', stderr='native runtime build: prepared Linux platform differs from receipt; select a fresh preparation state\n').returncode
+
+tools/nativeruntime/test_prepare.py:73: AssertionError
+_______________ test_download_failure_identifies_archive_and_url _______________
+
+tmp_path = PosixPath('/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp/pytest-of-tyemirov/pytest-46/test_download_failure_identifi0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a11040>
+capsys = <_pytest.capture.CaptureFixture object at 0x108a16cf0>
+
+    def test_download_failure_identifies_archive_and_url(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        import http.server
+        import json
+        import threading
+    
+        import prepare as preparation
+    
+        assert tmp_path.resolve().is_relative_to(ROOT / '_scratch')
+        requests: list[str] = []
+    
+        class MissingArchive(http.server.BaseHTTPRequestHandler):
+            def do_GET(self) -> None:
+                requests.append(self.path)
+                self.send_error(404, 'Missing pinned archive')
+    
+            def log_message(self, message: str, *arguments: object) -> None:
+                pass
+    
+        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), MissingArchive)
+        thread = threading.Thread(target=server.serve_forever)
+        thread.start()
+        try:
+            url = f'http://127.0.0.1:{server.server_port}/llvm.tar.xz'
+            lock = tmp_path / 'preparation.lock.json'
+            lock.write_text(json.dumps({'artifacts': [
+                {'archive': 'llvm.tar.xz', 'url': url, 'bytes': 1, 'sha256': '0' * 64},
+            ]}))
+            monkeypatch.setattr(preparation, 'LOCK', lock)
+            monkeypatch.setattr(sys, 'argv', [str(CLI), '--state', str(tmp_path / 'state'), '--download'])
+            assert preparation.main() == 1
+            diagnostic = capsys.readouterr().err
+>           assert 'llvm.tar.xz' in diagnostic
+E           AssertionError: assert 'llvm.tar.xz' in 'native preparation: HTTP Error 404: Missing pinned archive\n'
+
+tools/nativeruntime/test_prepare.py:313: AssertionError
+=========================== short test summary info ============================
+FAILED tools/nativeruntime/test_prepare.py::test_runtime_build_uses_prepared_host_linker - AssertionError: native runtime build: prepared Linux platform differs from receipt; select a fresh preparation state
+  
+assert 1 == 0
+ +  where 1 = CompletedProcess(args=['/Users/tyemirov/Development/Research/Lo/_scratch/build-state/uv-cache/builds-v0/.tmpK88cbo/bin...ut='', stderr='native runtime build: prepared Linux platform differs from receipt; select a fresh preparation state\n').returncode
+FAILED tools/nativeruntime/test_prepare.py::test_download_failure_identifies_archive_and_url - AssertionError: assert 'llvm.tar.xz' in 'native preparation: HTTP Error 404: Missing pinned archive\n'
+2 failed, 19 passed in 10.99s
+make: *** [test-native-runtime-tools] Error 1

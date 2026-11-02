@@ -1,0 +1,24 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run ^TestLLVMCLIStack -count=1 -v </dev/null
+=== RUN   TestLLVMCLIStackLinuxExample
+=== RUN   TestLLVMCLIStackLinuxExample/default
+=== RUN   TestLLVMCLIStackLinuxExample/preview
+=== RUN   TestLLVMCLIStackLinuxExample/report
+=== RUN   TestLLVMCLIStackLinuxExample/invalid
+--- PASS: TestLLVMCLIStackLinuxExample (12.21s)
+    --- PASS: TestLLVMCLIStackLinuxExample/default (5.80s)
+    --- PASS: TestLLVMCLIStackLinuxExample/preview (1.06s)
+    --- PASS: TestLLVMCLIStackLinuxExample/report (1.11s)
+    --- PASS: TestLLVMCLIStackLinuxExample/invalid (1.04s)
+=== RUN   TestLLVMCLIStackLinuxTerminal
+=== RUN   TestLLVMCLIStackLinuxTerminal/0
+=== RUN   TestLLVMCLIStackLinuxTerminal/1
+=== RUN   TestLLVMCLIStackLinuxTerminal/2
+--- PASS: TestLLVMCLIStackLinuxTerminal (12.46s)
+    --- PASS: TestLLVMCLIStackLinuxTerminal/0 (4.10s)
+    --- PASS: TestLLVMCLIStackLinuxTerminal/1 (4.20s)
+    --- PASS: TestLLVMCLIStackLinuxTerminal/2 (4.17s)
+=== RUN   TestLLVMCLIStackMetalArtifact
+--- PASS: TestLLVMCLIStackMetalArtifact (2.15s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	27.425s

@@ -33,6 +33,7 @@ static void emit(FILE *file) {
 
 int main(void) {
     if (mount("devtmpfs", "/dev", "devtmpfs", 0, 0) != 0) return 70;
+    if (mount("proc", "/proc", "proc", 0, 0) != 0) return 81;
     int console = open("/dev/console", 2);
     if (console < 0) return 71;
     for (int fd = 0; fd < 3; fd++) if (dup2(console, fd) < 0) return 72;

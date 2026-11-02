@@ -805,8 +805,14 @@ fn commit_inner(context: &mut Context, site: &Site, target: &Handle) -> Outcome 
     let opened = (|| {
         context
             .session
-            .processes
+            .console
             .protect_name(&parent, &name.to_string_lossy())
+            .and_then(|_| {
+                context
+                    .session
+                    .processes
+                    .protect_name(&parent, &name.to_string_lossy())
+            })
             .map_err(|fault| mutation_failure(fault, operation, &absolute))?;
         if let Some(probe) = &context.files.probe {
             probe
@@ -858,8 +864,9 @@ fn commit_inner(context: &mut Context, site: &Site, target: &Handle) -> Outcome 
         let mutation = (|| {
             context
                 .session
-                .processes
+                .console
                 .protect_file(&file)
+                .and_then(|_| context.session.processes.protect_file(&file))
                 .map_err(|fault| mutation_failure(fault, operation, &absolute))?;
             if let Some(probe) = &context.files.probe {
                 probe

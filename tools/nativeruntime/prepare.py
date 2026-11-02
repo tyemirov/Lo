@@ -63,8 +63,11 @@ def archive(state: Path, pin: dict[str, object], download: bool) -> Path:
             raise ValueError(f'missing pinned archive {path}; preparation requires --download')
         temporary = local(path.with_suffix(path.suffix + '.download'))
         request = urllib.request.Request(str(pin['url']), headers={'User-Agent': 'Lo-native-runtime-preparation'})
-        with urllib.request.urlopen(request, timeout=120) as response, temporary.open('wb') as output:
-            shutil.copyfileobj(response, output)
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response, temporary.open('wb') as output:
+                shutil.copyfileobj(response, output)
+        except OSError as error:
+            raise ValueError(f"download {path.name} from {pin['url']}: {error}") from error
         if temporary.stat().st_size != pin['bytes'] or digest(temporary) != pin['sha256']:
             raise ValueError(f'download does not match pin: {path.name}')
         temporary.replace(path)

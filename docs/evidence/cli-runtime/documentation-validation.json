@@ -1,0 +1,163 @@
+{
+  "status": "passed",
+  "reviewed_scope": "New and changed technical prose",
+  "documents": [
+    ".mprlab/TERMINOLOGY.md",
+    "ISSUES.md",
+    "README.md",
+    "docs/cli-runtime-design.md",
+    "docs/compiler-design.md",
+    "docs/device-resources.md",
+    "docs/evidence/cli-runtime/http-error-input-final-review.md",
+    "docs/evidence/cli-runtime/linux-tls-companion-final-review.md",
+    "docs/evidence/cli-runtime/remaining-close-final-review.md",
+    "docs/evidence/cli-runtime/review.md",
+    "docs/go-console-host.md",
+    "docs/mac-cleanup-implementation-plan.md",
+    "docs/mac-cleanup-plan.md",
+    "docs/mac-cleanup-script-design.md",
+    "docs/native-adapters.md",
+    "docs/native-runtime-contract.md",
+    "specification.md"
+  ],
+  "mechanical_findings_in_unchanged_paragraphs": 36,
+  "mechanical_findings_in_changed_paragraphs": 0,
+  "manual_language_review": "Applicable Part 1 rules and Part 2 meanings",
+  "new_local_links_checked": 31,
+  "new_local_links": [
+    {
+      "document": "ISSUES.md",
+      "target": "docs/examples/cli-cleanup-preview.lo"
+    },
+    {
+      "document": "ISSUES.md",
+      "target": "docs/evidence/cli-runtime/checkpoint.json"
+    },
+    {
+      "document": "ISSUES.md",
+      "target": "docs/mac-cleanup-implementation-plan.md"
+    },
+    {
+      "document": "README.md",
+      "target": "docs/examples/cli-cleanup-preview.lo"
+    },
+    {
+      "document": "README.md",
+      "target": "docs/cli-runtime-design.md"
+    },
+    {
+      "document": "README.md",
+      "target": "docs/mac-cleanup-implementation-plan.md"
+    },
+    {
+      "document": "docs/cli-runtime-design.md",
+      "target": "examples/cli-cleanup-preview.lo"
+    },
+    {
+      "document": "docs/cli-runtime-design.md",
+      "target": "evidence/cli-runtime/checkpoint.json"
+    },
+    {
+      "document": "docs/cli-runtime-design.md",
+      "target": "go-console-host.md"
+    },
+    {
+      "document": "docs/compiler-design.md",
+      "target": "cli-runtime-design.md"
+    },
+    {
+      "document": "docs/device-resources.md",
+      "target": "go-console-host.md"
+    },
+    {
+      "document": "docs/go-console-host.md",
+      "target": "cli-runtime-design.md"
+    },
+    {
+      "document": "docs/mac-cleanup-implementation-plan.md",
+      "target": "mac-cleanup-script-design.md"
+    },
+    {
+      "document": "docs/mac-cleanup-implementation-plan.md",
+      "target": "evidence/cli-runtime/review.md"
+    },
+    {
+      "document": "docs/mac-cleanup-implementation-plan.md",
+      "target": "mac-cleanup-plan.md"
+    },
+    {
+      "document": "docs/mac-cleanup-implementation-plan.md",
+      "target": "evidence/mac-cleanup-planning.json"
+    },
+    {
+      "document": "docs/mac-cleanup-implementation-plan.md",
+      "target": "evidence/cli-runtime/checkpoint.json"
+    },
+    {
+      "document": "docs/mac-cleanup-implementation-plan.md",
+      "target": "cli-runtime-design.md"
+    },
+    {
+      "document": "docs/mac-cleanup-implementation-plan.md",
+      "target": "evidence/cleanup-control-composition.json"
+    },
+    {
+      "document": "docs/mac-cleanup-plan.md",
+      "target": "examples/cli-cleanup-preview.lo"
+    },
+    {
+      "document": "docs/mac-cleanup-plan.md",
+      "target": "cli-runtime-design.md"
+    },
+    {
+      "document": "docs/mac-cleanup-plan.md",
+      "target": "mac-cleanup-implementation-plan.md"
+    },
+    {
+      "document": "docs/mac-cleanup-script-design.md",
+      "target": "examples/cli-cleanup-preview.lo"
+    },
+    {
+      "document": "docs/mac-cleanup-script-design.md",
+      "target": "cli-runtime-design.md"
+    },
+    {
+      "document": "docs/native-adapters.md",
+      "target": "cli-runtime-design.md"
+    },
+    {
+      "document": "docs/native-adapters.md",
+      "target": "native-runtime-contract.md#console-registration-and-completion"
+    },
+    {
+      "document": "docs/native-adapters.md",
+      "target": "../runtime/native/include/lo_console.h"
+    },
+    {
+      "document": "docs/native-runtime-contract.md",
+      "target": "cli-runtime-design.md"
+    },
+    {
+      "document": "docs/native-runtime-contract.md",
+      "target": "../runtime/native/include/lo_console.h"
+    },
+    {
+      "document": "specification.md",
+      "target": "docs/examples/cli-cleanup-preview.lo"
+    },
+    {
+      "document": "specification.md",
+      "target": "docs/cli-runtime-design.md"
+    }
+  ],
+  "issue_closure": [
+    "F026",
+    "F027",
+    "F028"
+  ],
+  "open_followup": [
+    "F029",
+    "I013"
+  ],
+  "source_identities_verified": 93
+}

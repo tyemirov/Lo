@@ -1,0 +1,64 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+go fmt ./... </dev/null
+go vet ./... </dev/null
+python3 -B tools/processbuild/identity.py build bin/lo-process-launcher internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:129:9: warning: 'sandbox_init' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  129 |     if (sandbox_init(profile, 0, &sandbox_error) != 0) {
+      |         ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:49:5: note: 'sandbox_init' has been explicitly marked deprecated here
+   49 | int sandbox_init(const char *profile, uint64_t flags, char **errorbuf);
+      |     ^
+/Users/tyemirov/Development/Research/Lo/internal/processhost/native/launcher.c:130:36: warning: 'sandbox_free_error' is deprecated: first deprecated in macOS 10.8 - No longer supported [-Wdeprecated-declarations]
+  130 |         if (sandbox_error != NULL) sandbox_free_error(sandbox_error);
+      |                                    ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sandbox.h:68:6: note: 'sandbox_free_error' has been explicitly marked deprecated here
+   68 | void sandbox_free_error(char *errorbuf);
+      |      ^
+2 warnings generated.
+LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" go test -timeout=120m ./... -count=1 -failfast </dev/null
+?   	github.com/MarcoPoloResearchLab/Lo/cmd/lo	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/adapter	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/autodiff	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/catalog	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/check	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/internal/clioptions	0.136s
+?   	github.com/MarcoPoloResearchLab/Lo/internal/compiler	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/derivative	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/device	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/diagnostic	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/eval	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/execution	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/identity	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/inspect	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/ir	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/internal/llvmemit	1.239s
+?   	github.com/MarcoPoloResearchLab/Lo/internal/metalconfig	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/internal/nativebuild	0.918s
+ok  	github.com/MarcoPoloResearchLab/Lo/internal/nativeplan	0.859s
+ok  	github.com/MarcoPoloResearchLab/Lo/internal/processhost	0.248s
+?   	github.com/MarcoPoloResearchLab/Lo/internal/resolve	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/runner	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/runtimeops	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/source	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/syntax	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensor	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/tensorfacts	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/internal/types	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/internal/value	0.125s
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/benchmark	0.157s [no tests to run]
+?   	github.com/MarcoPoloResearchLab/Lo/tests/corpus	[no test files]
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	183.167s
+ok  	github.com/MarcoPoloResearchLab/Lo/tools/filebench	8.008s
+ok  	github.com/MarcoPoloResearchLab/Lo/tools/loqualification/performance-runner	0.198s
+?   	github.com/MarcoPoloResearchLab/Lo/tools/metalbuild	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/tools/nativebench	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/tools/nativecorpus	[no test files]
+?   	github.com/MarcoPoloResearchLab/Lo/tools/nativeruntime/generatecheckpointprint	[no test files]
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -count=1 -failfast </dev/null
+--- FAIL: TestLLVMCoordinateReceiptSpans (0.23s)
+    --- FAIL: TestLLVMCoordinateReceiptSpans/file-write (0.13s)
+        llvm_lifetime_test.go:257: runtime harness requires a main declaration
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	1886.518s
+FAIL
+make: *** [test-native] Error 1

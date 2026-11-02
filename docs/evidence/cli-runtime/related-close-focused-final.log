@@ -1,0 +1,46 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run 'TestLLVMCheckpointFileCleanup|TestLLVMLinuxCheckpointFileCleanup|TestLLVMHTTPCheckedCleanup|TestLLVMLinuxHTTPCheckedCleanup|TestLLVMFileObservationCallbackCleanupProgress|TestLLVMProcessAdmissionHashCancellation' -count=1 -v </dev/null
+=== RUN   TestLLVMFileObservationCallbackCleanupProgress
+=== RUN   TestLLVMFileObservationCallbackCleanupProgress/fold
+=== RUN   TestLLVMFileObservationCallbackCleanupProgress/worklist
+--- PASS: TestLLVMFileObservationCallbackCleanupProgress (0.92s)
+    --- PASS: TestLLVMFileObservationCallbackCleanupProgress/fold (0.47s)
+    --- PASS: TestLLVMFileObservationCallbackCleanupProgress/worklist (0.35s)
+=== RUN   TestLLVMCheckpointFileCleanup
+=== RUN   TestLLVMCheckpointFileCleanup/recoverable
+=== RUN   TestLLVMCheckpointFileCleanup/success
+=== RUN   TestLLVMCheckpointFileCleanup/host-limit
+--- PASS: TestLLVMCheckpointFileCleanup (1.08s)
+    --- PASS: TestLLVMCheckpointFileCleanup/recoverable (0.34s)
+    --- PASS: TestLLVMCheckpointFileCleanup/success (0.32s)
+    --- PASS: TestLLVMCheckpointFileCleanup/host-limit (0.33s)
+=== RUN   TestLLVMLinuxCheckpointFileCleanup
+=== RUN   TestLLVMLinuxCheckpointFileCleanup/recoverable
+=== RUN   TestLLVMLinuxCheckpointFileCleanup/success
+=== RUN   TestLLVMLinuxCheckpointFileCleanup/host-limit
+--- PASS: TestLLVMLinuxCheckpointFileCleanup (4.05s)
+    --- PASS: TestLLVMLinuxCheckpointFileCleanup/recoverable (1.28s)
+    --- PASS: TestLLVMLinuxCheckpointFileCleanup/success (1.33s)
+    --- PASS: TestLLVMLinuxCheckpointFileCleanup/host-limit (1.35s)
+=== RUN   TestLLVMHTTPCheckedCleanup
+=== RUN   TestLLVMHTTPCheckedCleanup/connect
+=== RUN   TestLLVMHTTPCheckedCleanup/finalize
+=== RUN   TestLLVMHTTPCheckedCleanup/read-response
+--- PASS: TestLLVMHTTPCheckedCleanup (1.12s)
+    --- PASS: TestLLVMHTTPCheckedCleanup/connect (0.35s)
+    --- PASS: TestLLVMHTTPCheckedCleanup/finalize (0.34s)
+    --- PASS: TestLLVMHTTPCheckedCleanup/read-response (0.34s)
+=== RUN   TestLLVMLinuxHTTPCheckedCleanup
+=== RUN   TestLLVMLinuxHTTPCheckedCleanup/connect
+=== RUN   TestLLVMLinuxHTTPCheckedCleanup/finalize
+=== RUN   TestLLVMLinuxHTTPCheckedCleanup/read-response
+--- PASS: TestLLVMLinuxHTTPCheckedCleanup (4.26s)
+    --- PASS: TestLLVMLinuxHTTPCheckedCleanup/connect (1.27s)
+    --- PASS: TestLLVMLinuxHTTPCheckedCleanup/finalize (1.46s)
+    --- PASS: TestLLVMLinuxHTTPCheckedCleanup/read-response (1.45s)
+=== RUN   TestLLVMProcessAdmissionHashCancellation
+=== RUN   TestLLVMProcessAdmissionHashCancellation/cancel-between-admission-hash-chunks
+--- PASS: TestLLVMProcessAdmissionHashCancellation (0.41s)
+    --- PASS: TestLLVMProcessAdmissionHashCancellation/cancel-between-admission-hash-chunks (0.33s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	12.511s

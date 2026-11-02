@@ -19,6 +19,16 @@ pub struct Policy {
 }
 
 impl Policy {
+    pub fn protect_images(&self, paths: &[String]) -> Result<(), String> {
+        for scope in self.scopes.values() {
+            for root in scope.writes.iter().chain(&scope.prunes) {
+                if paths.iter().any(|path| contains(root, path)) {
+                    return Err("Process mutation root contains the Console writer image".into());
+                }
+            }
+        }
+        Ok(())
+    }
     pub fn new(
         grants: Vec<String>,
         launcher: String,

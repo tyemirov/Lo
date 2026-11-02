@@ -1,0 +1,21 @@
+{
+  "scope": [
+    "testdata/native-runtime/file-cleanup.c",
+    "testdata/native-runtime/http-cleanup.c"
+  ],
+  "result": "approved",
+  "findings": [],
+  "sha256": {
+    "testdata/native-runtime/file-cleanup.c": "158f5ecb4154b57c022209f9f9a7040a5a572406f110868bb21f916094faa791",
+    "testdata/native-runtime/http-cleanup.c": "8bc9ab185ffc3f860153d85619b7a9fa584abb190323165fc78bd4141fa26baf"
+  },
+  "validation_log": "related-close-focused-final.log",
+  "validation_seconds": 12.511,
+  "checks": [
+    "File close injection selects only the exact retained read-root path and occurs once.",
+    "Both hooks call real close before reporting injected EIO.",
+    "HTTP close injection selects the connected client descriptor and clears its selection.",
+    "Original primary, cleanup, progress-stage, and status assertions remain intact.",
+    "The final focused log passes the Darwin and Linux fixture groups."
+  ]
+}

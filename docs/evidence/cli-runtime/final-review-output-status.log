@@ -1,0 +1,28 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/runtime-proc/toolchain.json" LO_NATIVE_PREPARATION="/Users/tyemirov/Development/Research/Lo/_scratch/cli-stack-20261031/preparation-proc" go test -timeout=120m ./tests/integration -run 'TestConsoleFinalRenderingFlush|TestLLVMConsoleEmbeddingBoundary/terminal.*flush.failure' -count=1 -v </dev/null
+=== RUN   TestConsoleFinalRenderingFlush
+=== RUN   TestConsoleFinalRenderingFlush/ordinary
+=== RUN   TestConsoleFinalRenderingFlush/terminal0
+=== RUN   TestConsoleFinalRenderingFlush/terminal1
+=== RUN   TestConsoleFinalRenderingFlush/terminal2
+=== RUN   TestConsoleFinalRenderingFlush/terminal0_failure
+=== RUN   TestConsoleFinalRenderingFlush/terminal1_failure
+=== RUN   TestConsoleFinalRenderingFlush/terminal2_failure
+--- PASS: TestConsoleFinalRenderingFlush (0.00s)
+    --- PASS: TestConsoleFinalRenderingFlush/ordinary (0.00s)
+    --- PASS: TestConsoleFinalRenderingFlush/terminal0 (0.00s)
+    --- PASS: TestConsoleFinalRenderingFlush/terminal1 (0.00s)
+    --- PASS: TestConsoleFinalRenderingFlush/terminal2 (0.00s)
+    --- PASS: TestConsoleFinalRenderingFlush/terminal0_failure (0.00s)
+    --- PASS: TestConsoleFinalRenderingFlush/terminal1_failure (0.00s)
+    --- PASS: TestConsoleFinalRenderingFlush/terminal2_failure (0.00s)
+=== RUN   TestLLVMConsoleEmbeddingBoundary
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-flush-failure
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-zero-flush-failure
+=== RUN   TestLLVMConsoleEmbeddingBoundary/terminal-one-flush-failure
+--- PASS: TestLLVMConsoleEmbeddingBoundary (1.11s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-flush-failure (0.42s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-zero-flush-failure (0.30s)
+    --- PASS: TestLLVMConsoleEmbeddingBoundary/terminal-one-flush-failure (0.31s)
+PASS
+ok  	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.781s

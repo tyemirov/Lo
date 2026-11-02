@@ -1,0 +1,10 @@
+mkdir -p "/Users/tyemirov/Development/Research/Lo/_scratch/build-state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/home" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/tmp" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/go-build" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/modules" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/gopath" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/cache" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/config" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/data" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/state" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/clang" "/Users/tyemirov/Development/Research/Lo/_scratch/build-state/ccache" </dev/null
+LO_LLVM_TOOLCHAIN="/Users/tyemirov/Development/Research/Lo/_scratch/native-runtime/distribution/toolchain.json" go test -timeout=120m ./tests/integration -run ^TestConsoleServeReadinessStopDuringFlush -count=1 -v </dev/null
+=== RUN   TestConsoleServeReadinessStopDuringFlush
+    console_boundary_test.go:491: ready-to-stop ownership: status=2 flushes=1 stdout={"command":"serve","status":"ready","servers":[{"address":"127.0.0.1:62631"}]}
+         stderr={"diagnostics":[{"code":"runtime.host-failure","stage":"runtime","message":"write readiness \"readiness.lo\": context canceled"}]}
+--- FAIL: TestConsoleServeReadinessStopDuringFlush (0.00s)
+FAIL
+FAIL	github.com/MarcoPoloResearchLab/Lo/tests/integration	1.154s
+FAIL
+make: *** [test-integration] Error 1

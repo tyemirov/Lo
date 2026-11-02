@@ -16,6 +16,15 @@ import (
 // A trusted replacement entry publishes it through the ordinary CLI formatter.
 // This does not model persistence between two legal Lo program evaluations.
 func TestLLVMHTTPErrorInputs(t *testing.T) {
+	testLLVMHTTPErrorInputs(t, semanticNativeTarget())
+}
+
+func TestLLVMLinuxHTTPErrorInputs(t *testing.T) {
+	testLLVMHTTPErrorInputs(t, "linux/arm64")
+}
+
+func testLLVMHTTPErrorInputs(t *testing.T, target string) {
+	t.Helper()
 	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
 		t.Skip("requires the explicit LLVM runtime lane")
 	}
@@ -94,7 +103,7 @@ func TestLLVMHTTPErrorInputs(t *testing.T) {
 			}
 		}})
 	}
-	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), scenarios)
+	runLLVMRuntimeTargetScenarios(t, target, scenarios)
 }
 
 func httpErrorInputCapture(t *testing.T, module []byte) []byte {

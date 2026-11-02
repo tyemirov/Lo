@@ -1,0 +1,239 @@
+{
+  "thresholds": {
+    "interpreter": 4242,
+    "native": 3410
+  },
+  "records": [
+    {
+      "backend": "interpreter",
+      "quota": 10000,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 5000,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 2500,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "interpreter",
+      "quota": 3750,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4375,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4063,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4219,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4297,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4258,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4239,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4249,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4244,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4242,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4241,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 10000,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 5000,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 2500,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 3750,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 3125,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 3438,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 3282,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 3360,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 3399,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 3419,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 3409,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 3414,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 3412,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 3411,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 3410,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 3410,
+      "status": 2,
+      "stdout": "",
+      "stderr": "runtime.limit: execution limit: live value bytes\n"
+    },
+    {
+      "backend": "native",
+      "quota": 3410,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "interpreter",
+      "quota": 4242,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "backend": "native",
+      "quota": 4242,
+      "status": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    }
+  ]
+}

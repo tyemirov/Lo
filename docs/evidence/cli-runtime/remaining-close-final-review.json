@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "scope": [
+    "testdata/native-qualification/http-cancel-cleanup.c",
+    "testdata/native-qualification/file-failures.c",
+    "testdata/native-qualification/server-process-cleanup.c",
+    "tests/integration/llvm_qualification_files_test.go"
+  ],
+  "reviewed_sha256": {
+    "testdata/native-qualification/http-cancel-cleanup.c": "69d2ceed1f823990a585ce86377b1e298136110e1607d176b7eca3eae44531ac",
+    "testdata/native-qualification/file-failures.c": "8da28b2aea3d062b9da5e9e826ac25c8fa16707a4ee0d1c3bba1979b400f4d3f",
+    "testdata/native-qualification/server-process-cleanup.c": "338af4acdf0d50fb103aea87fffa2b5c8bf7d346daef447dc5f911dd361c18e3",
+    "tests/integration/llvm_qualification_files_test.go": "6831aaf366b5c353d6f860866b2669a47ec4236f2dac46102d08062fe87147e6"
+  },
+  "findings": [],
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "runtime_changes": false,
+  "public_results": [
+    {
+      "target": "darwin/arm64 software",
+      "log": "remaining-close-darwin-focused.log",
+      "seconds": 7.775,
+      "groups": 8,
+      "passed_cases": 19
+    },
+    {
+      "target": "linux/arm64 QEMU",
+      "log": "remaining-close-linux-focused.log",
+      "seconds": 21.951,
+      "groups": 8,
+      "passed_cases": 19
+    }
+  ],
+  "runner_results": [
+    {
+      "target": "darwin/arm64",
+      "status": 0,
+      "outer_timeout": false,
+      "seconds": 9.275,
+      "remaining_owned": {},
+      "log": "_scratch/cli-stack-20261031/remaining-close-darwin-focused.log"
+    },
+    {
+      "target": "linux/arm64",
+      "status": 0,
+      "outer_timeout": false,
+      "seconds": 22.836,
+      "remaining_owned": {},
+      "log": "_scratch/cli-stack-20261031/remaining-close-linux-focused.log"
+    }
+  ],
+  "cause_evidence": "remaining-close-case7-report.json",
+  "evidence_limit": "Full stack CI remains pending."
+}

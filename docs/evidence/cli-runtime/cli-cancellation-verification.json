@@ -1,0 +1,8 @@
+{
+  "runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "receipt_runtime_source_sha256": "b3eb0376362bafe13e6c5e7f2609100544f6f355bcb699b36f0a593051b4670d",
+  "source_matches_receipt": true,
+  "cli_rs_sha256": "b0d570cdd9354e6ecffc21274ae27ae98ee41cba27582b032c6b5f38268b21b9",
+  "focused_log": "_scratch/cli-stack-20261031/cli-cancellation-focused.log",
+  "focused_seconds": 24.194
+}

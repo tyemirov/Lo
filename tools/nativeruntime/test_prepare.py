@@ -275,3 +275,47 @@ def test_metal_bridge_declarations_match_runtime_abi(tmp_path: Path) -> None:
         method = runtime.protocol_getMethodDescription(handle, runtime.sel_registerName(selector.encode()), True, True)
         assert method.types is not None, (protocol, selector)
         assert method.types.decode() == encoding, (protocol, selector, method.types)
+
+
+def test_download_failure_identifies_archive_and_url(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    import http.server
+    import json
+    import threading
+
+    import prepare as preparation
+
+    assert tmp_path.resolve().is_relative_to(ROOT / '_scratch')
+    requests: list[str] = []
+
+    class MissingArchive(http.server.BaseHTTPRequestHandler):
+        def do_GET(self) -> None:
+            requests.append(self.path)
+            self.send_error(404, 'Missing pinned archive')
+
+        def log_message(self, message: str, *arguments: object) -> None:
+            pass
+
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), MissingArchive)
+    thread = threading.Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        url = f'http://127.0.0.1:{server.server_port}/llvm.tar.xz'
+        lock = tmp_path / 'preparation.lock.json'
+        lock.write_text(json.dumps({'artifacts': [
+            {'archive': 'llvm.tar.xz', 'url': url, 'bytes': 1, 'sha256': '0' * 64},
+        ]}))
+        monkeypatch.setattr(preparation, 'LOCK', lock)
+        monkeypatch.setattr(sys, 'argv', [str(CLI), '--state', str(tmp_path / 'state'), '--download'])
+        assert preparation.main() == 1
+        diagnostic = capsys.readouterr().err
+        assert 'download llvm.tar.xz from ' in diagnostic
+        assert url in diagnostic
+        assert 'HTTP Error 404' in diagnostic
+        assert requests == ['/llvm.tar.xz']
+        assert not (tmp_path / 'state/llvm.tar.xz').exists()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()

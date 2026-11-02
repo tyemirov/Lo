@@ -35,6 +35,7 @@ type darwinCreator struct {
 	commands            map[string]struct{}
 	roots               []string
 	helper              adapter.ProcessExecutableGrant
+	protected           []adapter.ProcessExecutableGrant
 	parallelism         uint32
 }
 
@@ -120,7 +121,17 @@ func NewDarwinCreator(ctx context.Context, configuration Config) (Creator, error
 	if err != nil || parallelism == 0 {
 		return nil, host("native processor bound unavailable")
 	}
-	c := &darwinCreator{launcher: launcher, directory: filepath.Dir(launcher), helper: helper, parallelism: parallelism, commands: make(map[string]struct{}), roots: policy.ReadRoots(), configurations: map[string][]byte{}, scopes: scopes}
+	c := &darwinCreator{launcher: launcher, directory: filepath.Dir(launcher), helper: helper, protected: configuration.ProtectedImages(), parallelism: parallelism, commands: make(map[string]struct{}), roots: policy.ReadRoots(), configurations: map[string][]byte{}, scopes: scopes}
+	for _, scope := range scopes {
+		for _, root := range append(scope.WriteRoots(), scope.PruneRoots()...) {
+			for _, image := range c.protected {
+				relative, err := filepath.Rel(root, image.Path())
+				if err == nil && (relative == "." || filepath.IsLocal(relative)) {
+					return nil, host("mutation root contains a protected host image")
+				}
+			}
+		}
+	}
 	for _, grant := range policy.Grants() {
 		if !canonicalNativePath(grant.Path()) {
 			return nil, host("invalid native command path")
@@ -236,6 +247,9 @@ func (c *darwinCreator) profile(grants []adapter.ProcessExecutableGrant, scope a
 	}
 	for _, grant := range grants {
 		lines = append(lines, "(deny file-write* (literal "+quote(grant.Path())+"))")
+	}
+	for _, image := range c.protected {
+		lines = append(lines, "(deny file-write* (literal "+quote(image.Path())+"))")
 	}
 	lines = append(lines, "(deny file-write* (literal "+quote(c.launcher)+"))")
 	profile := strings.Join(lines, "\n") + "\n"

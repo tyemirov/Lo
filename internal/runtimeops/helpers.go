@@ -117,6 +117,17 @@ func ActivationError(target value.Target, err error, span source.Span) (value.Er
 	var operation, kind string
 	var input value.Record
 	switch v := target.(type) {
+	case value.ConsoleLine:
+		var failure execution.ConsoleWriteError
+		if !errors.As(err, &failure) {
+			return nil, fmt.Errorf("no recoverable Console failure evidence")
+		}
+		operation, kind = catalog.ConsoleWrite, catalog.ConsoleWriteFailed
+		input = must(value.NewRecord([]value.Field{
+			{Name: "stream", Value: must(value.NewText(types.String(), failure.Stream()))},
+			{Name: "bytes_written", Value: must(value.NewInt(new(big.Int).SetUint64(failure.BytesWritten())))},
+			{Name: "stage", Value: must(value.NewText(types.String(), failure.Stage()))},
+		}))
 	case value.ProcessCommand:
 		progress := execution.ProcessProgress(err)
 		if progress == nil {

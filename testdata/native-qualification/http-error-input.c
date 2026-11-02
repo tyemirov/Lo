@@ -20,6 +20,7 @@ extern int open(const char *,int,...),dup2(int,int),kill(int,int),getpid(void);
 struct Address{unsigned char length,family;unsigned short port;unsigned int address;unsigned char zero[8];};
 #else
 struct Address{unsigned short family,port;unsigned int address;unsigned char zero[8];};
+extern int ioctl(int,unsigned long,...);
 #endif
 static const Value *captured;
 static U64 callback_count;
@@ -41,6 +42,9 @@ static Size length(const char *text){Size count=0;while(text[count])count++;retu
 static int equal(const char *left,const char *right,Size size){for(Size i=0;i<size;i++)if(left[i]!=right[i])return 0;return 1;}
 int main(void){
  if(!zero())return 10;
+#if !defined(__APPLE__)
+ int control=socket(2,2,0);if(control<0)return 70;unsigned char interface_request[40]={0};interface_request[0]='l';interface_request[1]='o';if(ioctl(control,0x8913UL,interface_request))return 71;interface_request[16]|=1;if(ioctl(control,0x8914UL,interface_request))return 72;close(control);
+#endif
  int output=73;if(dup2(1,output)<0)return 10;int null=open("/dev/null",1);if(output<0||null<0||dup2(null,1)<0)return 11;close(null);
  Thread worker;if(pthread_create(&worker,0,service,0))return 12;
  struct Address address={0};

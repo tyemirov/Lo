@@ -1,0 +1,217 @@
+{
+  "pull_request": "https://github.com/tyemirov/Lo/pull/24",
+  "failed_runs": [
+    "https://github.com/tyemirov/Lo/actions/runs/41335129935",
+    "https://github.com/tyemirov/Lo/actions/runs/41335125052"
+  ],
+  "step": "Prepare pinned compiler inputs",
+  "failure": "native preparation: download does not match pin: qemu.tbz2",
+  "old_qemu_response": {
+    "advertised_bytes": 50057453,
+    "received_bytes": 2097152,
+    "query_response": 404
+  },
+  "old_libunistring_response": 404,
+  "updated_pins": [
+    {
+      "archive": "qemu.tbz2",
+      "url": "https://packages.macports.org/qemu/qemu-11.1.3_0+cocoa+curses+spice+spice_protocol+target_arm+target_i386+target_x86_64+usb+vnc.darwin_25.arm64.tbz2",
+      "sha256": "93f05f904a30d1c29e41e390520f05506fff83100c0676b9ac1d4ef982cc340a",
+      "bytes": 50053580
+    },
+    {
+      "archive": "libunistring.tbz2",
+      "url": "https://packages.macports.org/libunistring/libunistring-1.5_0.darwin_25.arm64.tbz2",
+      "sha256": "6c077bb6541b4fe5ea894e12614944952411698e2ea25baecbf414a6c175c700",
+      "bytes": 1653573
+    }
+  ],
+  "archive_verification": [
+    {
+      "archive": "libc6.deb",
+      "result": "pass"
+    },
+    {
+      "archive": "libc6-dev.deb",
+      "result": "pass"
+    },
+    {
+      "archive": "vmlinuz-virt",
+      "result": "pass"
+    },
+    {
+      "archive": "qemu.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "glib2.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "gnutls.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libpixman.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "bzip2.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libslirp.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "lzfse.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "lzo2.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "snappy.tbz2",
+      "result": "pass",
+      "initial_error": "<urlopen error [Errno 54] Connection reset by peer>",
+      "verification": "complete transfer after connection reset"
+    },
+    {
+      "archive": "zlib.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "zstd.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "dtc.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "ncurses.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libiconv.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libusb.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "usbredir.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "cyrus-sasl2.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libjpeg-turbo.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libpng.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "spice-server.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "gettext-runtime.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libelf.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libffi.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "pcre2.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "dbus.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "brotli.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "gmp.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libidn2.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libtasn1.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libunistring.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "p11-kit.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "nettle.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "lz4.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "xz.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "openssl3.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "gstreamer1-gst-plugins-base-1.28.8_0+ogg+x11.darwin_25.arm64.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "gstreamer1-1.28.8_0.darwin_25.arm64.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "orc-0.4.44_0.darwin_25.arm64.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libopus-1.6.1_0.darwin_25.arm64.tbz2",
+      "result": "pass"
+    },
+    {
+      "archive": "libgcc-s1.deb",
+      "result": "pass"
+    }
+  ],
+  "review": "pass",
+  "validation": {
+    "preparation": "pass",
+    "guest": "pass",
+    "runtime_build": "pass",
+    "runtime_tools": {
+      "result": "pass",
+      "passed": 20,
+      "seconds": 13.77
+    }
+  },
+  "qemu_identity": "QEMU emulator version 11.1.3\nCopyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers"
+}

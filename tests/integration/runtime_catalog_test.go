@@ -14,6 +14,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	executablePath := repository + "/testdata/inert-process/executable"
 	executableJSON := fmt.Sprintf(`{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":%q}}}`, executablePath)
 	want := map[string]string{
+		catalog.ConsoleLineNew:                 `{"type":"Console.Line","value":{"stream":"stdout","bytes":8,"flush":true,"redacted":true}}`,
+		catalog.ProgramExitNew:                 `{"type":"Record{terminal: Program.Exit}","value":{"terminal":{"type":"Program.Exit","value":{"code":2,"stdout_bytes":3,"stderr_bytes":3,"redacted":true}}}}`,
+		catalog.CLIParse:                       `{"type":"CLI.Options","value":{"flags":{"type":"Map<String, Bool>","value":[{"key":{"type":"String","value":"--verbose"},"value":{"type":"Bool","value":true}}]},"help_requested":{"type":"Bool","value":false},"help_text":{"type":"String","value":"Usage: catalog [OPTIONS]\n\nOptions:\n  -h, --help  Show this help message and exit.\n  --verbose, -v  Show detail\n"}}}`,
 		catalog.HostInvocationCurrent:          `{"type":"Int","value":"0"}`,
 		catalog.FileDirectory:                  `{"type":"Bool","value":true}`,
 		catalog.FileScan:                       `{"type":"Int","value":"0"}`,

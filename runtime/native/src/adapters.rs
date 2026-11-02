@@ -8,6 +8,9 @@ use std::{
 #[derive(Clone)]
 pub enum AdapterValue {
     Host(crate::host_invocation::Value),
+    Console(crate::console::Value),
+    Program(crate::program_exit::Value),
+    Cli(crate::cli_options::Value),
     File(crate::files::Value),
     Process(crate::process::Value),
     Http(crate::http::Value),
@@ -16,6 +19,9 @@ macro_rules! delegate {
     ($self:ident, $method:ident) => {
         match $self {
             Self::Host(v) => v.$method(),
+            Self::Console(v) => v.$method(),
+            Self::Program(v) => v.$method(),
+            Self::Cli(v) => v.$method(),
             Self::File(v) => v.$method(),
             Self::Process(v) => v.$method(),
             Self::Http(v) => v.$method(),
@@ -35,9 +41,18 @@ impl AdapterValue {
     pub fn fields(&self) -> Option<&BTreeMap<String, Handle>> {
         delegate!(self, fields)
     }
+    pub fn retained_children(&self) -> &[Handle] {
+        match self {
+            Self::Program(value) => value.retained_children(),
+            _ => &[],
+        }
+    }
     pub fn snapshot(&self) -> Self {
         match self {
             Self::Host(v) => Self::Host(v.snapshot()),
+            Self::Console(v) => Self::Console(v.snapshot()),
+            Self::Program(v) => Self::Program(v.snapshot()),
+            Self::Cli(v) => Self::Cli(v.snapshot()),
             Self::File(v) => Self::File(v.snapshot()),
             Self::Process(v) => Self::Process(v.snapshot()),
             Self::Http(v) => Self::Http(v.snapshot()),
@@ -56,6 +71,7 @@ pub struct Session {
     pub files: Mutex<crate::files::Files>,
     pub devices: crate::device::Config,
     pub serving: bool,
+    pub console: Arc<crate::console::Console>,
 }
 impl Session {
     pub fn empty(program: Arc<Program>, steps: u64) -> Arc<Self> {
@@ -71,6 +87,7 @@ impl Session {
             files: Mutex::new(crate::files::empty()),
             devices: crate::device::Config::default(),
             serving: false,
+            console: Arc::new(crate::console::Console::empty()),
         })
     }
     pub fn close(&self) -> Result<(), Fault> {
@@ -115,6 +132,7 @@ impl Session {
 
 pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     match &target.data {
+        Data::Adapter(AdapterValue::Console(_)) => crate::console::commit(context, site, target),
         Data::Adapter(AdapterValue::File(_)) => crate::files::commit(context, site, target),
         Data::Adapter(AdapterValue::Process(_)) => crate::process::commit(context, site, target),
         Data::Adapter(AdapterValue::Http(_)) => {

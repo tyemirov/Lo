@@ -20,6 +20,7 @@ Its [implementation plan](docs/adapter-plan.md) records implementation status an
 Lo implements the **v0.4 language contract**, with native compilation, CPU and Metal training, explicit device transfers, and model checkpoints.
 
 The [implemented contract](specification.md#version-and-scope) includes File, HTTP, and Process adapters with explicit grants and activation results.
+It also includes Console commits, terminal results, and declared application options.
 This version records the implemented language.
 The [planned features](specification.md#planned-features) are outside v0.4.
 They include NVIDIA arithmetic, mixed precision, modules, user-defined types, generics, packages, and development tools.
@@ -42,6 +43,12 @@ The [native compilation contract](docs/native-compilation-contract.md) defines t
 F001 qualified the previous Go-generation implementation on macOS arm64 and Linux arm64.
 Its [historical acceptance report](docs/native-compilation-results.md) records those measurements.
 I011 completed qualification under the [focused acceptance update](docs/standalone-compiler-plan.md).
+
+The [required self-contained compiler](docs/self-contained-compiler.md) can use any implementation language.
+Once built, it must compile Lo source into native machine code without external tools, SDKs, runtimes, or companion compiler files.
+Only the target OS loader and system libraries are permitted host dependencies.
+P008 selects the [embedded payload design](docs/self-contained-compiler-design.md).
+F038 through F041 track implementation. F037 retains final qualification.
 
 The selected [training extension design](docs/training-extension-design.md) defines FP32 tensors, reverse-mode autodiff, immutable optimizer state, and explicit device execution.
 P001 completed the design task.
@@ -399,6 +406,19 @@ lo inspect program.lo
 The report includes flows, boundary reads, constructed targets, commit sites, error kinds, and capability requirements.
 Each resource description identifies its source and invocation context.
 The [inspection contract](docs/compiler-design.md#inspection-contract) defines the text and JSON formats.
+
+Applications can parse declared flags with `CLI.parse` and write lines through committed `Console.Line` targets.
+A final `Program.Exit` result selects the application status after output and resource cleanup.
+The [CLI contract](docs/cli-runtime-design.md) defines text, JSON, quotas, and embedding behavior.
+Run the [mode selection example](docs/examples/cli-cleanup-preview.lo) inside this repository:
+
+```sh
+bin/lo run docs/examples/cli-cleanup-preview.lo -- --help
+bin/lo run docs/examples/cli-cleanup-preview.lo -- --dry-run
+```
+
+The example performs no cleanup.
+The [mac-cleanup roadmap](docs/mac-cleanup-implementation-plan.md) records the remaining application dependencies.
 
 ## Repository Layout
 

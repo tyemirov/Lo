@@ -9,6 +9,11 @@ extern long read(int,void*,Size),write(int,const void*,Size),lseek(int,long,int)
 extern Thread pthread_self(void);
 extern int pthread_create(Thread*,const void*,void*(*)(void*),void*),pthread_join(Thread,void**);
 extern void *dlsym(void*,const char*);
+extern int mkdir(const char *,unsigned),chdir(const char *);
+extern char *getcwd(char *,Size);
+#ifndef __APPLE__
+extern long readlink(const char *,char *,Size);
+#endif
 #ifdef __APPLE__
 extern int *__error(void);
 #define ERROR_ADDRESS __error
@@ -23,18 +28,41 @@ extern int ioctl(int,unsigned long,...);
 #endif
 static Thread owner;
 static int armed,failed_closes;
+static char cleanup_root[4096];
+static int same_path(const char *left,const char *right){while(*left&&*left==*right){++left;++right;}return *left==*right;}
+static int selected_directory(int descriptor,const char *expected){
+ if(!*expected)return 0;
+ char path[4096];
+#ifdef __APPLE__
+ if(fcntl(descriptor,50,path))return 0;
+#else
+ char link[64]="/proc/self/fd/",digits[16];unsigned value=(unsigned)descriptor;Size length=14,count=0;
+ do{digits[count++]=(char)('0'+value%10);value/=10;}while(value);
+ while(count)link[length++]=digits[--count];link[length]=0;
+ long size=readlink(link,path,sizeof(path)-1);if(size<0)return 0;path[size]=0;
+#endif
+ return same_path(path,expected);
+}
+
 struct Poll{int descriptor;short events,revents;};
 static int (*real_close)(int),(*real_shutdown)(int,int);
 static void *client_failed(unsigned code){kill(getpid(),15);return (void*)(__UINTPTR_TYPE__)code;}
 int shutdown(int descriptor,int how){
- int result=real_shutdown(descriptor,how);
+ int (*shutdown_function)(int,int)=real_shutdown;
+ if(!shutdown_function)shutdown_function=(int (*)(int,int))dlsym((void *)-1,"shutdown");
+ if(!shutdown_function){*ERROR_ADDRESS()=5;return -1;}
+ int result=shutdown_function(descriptor,how);
  if(how==2&&pthread_self()!=owner)__atomic_store_n(&armed,1,__ATOMIC_RELEASE);
  return result;
 }
 int close(int descriptor){
- int result=real_close(descriptor);
- if(pthread_self()==owner&&__atomic_load_n(&armed,__ATOMIC_ACQUIRE)){
-  ++failed_closes;*ERROR_ADDRESS()=5;return -1;
+ int (*close_function)(int)=real_close;
+ if(!close_function)close_function=(int (*)(int))dlsym((void *)-1,"close");
+ if(!close_function){*ERROR_ADDRESS()=5;return -1;}
+ int inject=pthread_self()==owner&&__atomic_load_n(&armed,__ATOMIC_ACQUIRE)&&!failed_closes&&selected_directory(descriptor,cleanup_root);
+ int result=close_function(descriptor);
+ if(inject&&result==0){
+  __atomic_store_n(&armed,0,__ATOMIC_RELEASE);++failed_closes;*ERROR_ADDRESS()=5;return -1;
  }
  return result;
 }
@@ -60,6 +88,7 @@ static void *request(void *unused){
 int main(void){
  real_close=(int(*)(int))dlsym((void*)-1,"close");real_shutdown=(int(*)(int,int))dlsym((void*)-1,"shutdown");
  if(!real_close||!real_shutdown)return 10;owner=pthread_self();
+ if(mkdir("cleanup-root",0777)||chdir("cleanup-root")||!getcwd(cleanup_root,sizeof(cleanup_root)))return 18;
 #ifndef __APPLE__
  int control=socket(2,2,0);if(control<0)return 70;unsigned char interface_request[40]={0};interface_request[0]='l';interface_request[1]='o';if(ioctl(control,0x8913UL,interface_request))return 71;interface_request[16]|=1;if(ioctl(control,0x8914UL,interface_request))return 72;real_close(control);
 #endif
@@ -72,7 +101,7 @@ int main(void){
  if(dup2(saved_out,1)<0||dup2(saved_err,2)<0||lseek(output,0,0)<0)return 14;
  char diagnostic[32768];long count=read(output,diagnostic,sizeof(diagnostic)-1);
  if(client_result){if(count>0)write(2,diagnostic,(Size)count);return 30+(int)(__UINTPTR_TYPE__)client_result;}
- if(count<=0||count==(long)sizeof(diagnostic)-1||status!=2||!failed_closes)return 15;
+ if(count<=0||count==(long)sizeof(diagnostic)-1||status!=2||failed_closes!=1)return 15;
  if(lo_runtime_live_contexts()||lo_runtime_live_values()||lo_runtime_live_storages()||lo_runtime_live_storage_bytes())return 16;
  if(write(1,diagnostic,(Size)count)!=count)return 17;
  return 0;

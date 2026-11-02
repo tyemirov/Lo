@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"path/filepath"
 	"strings"
 	"sync/atomic"
@@ -102,12 +103,12 @@ func TestAdapterProcessPolicyParsesBeforeHostValidation(t *testing.T) {
 				t.Fatal(err)
 			}
 			var ran atomic.Bool
-			program, err := execution.NewProgram(func(execution.Session) (value.Value, error) { ran.Store(true); return value.Int64(7), nil }, nil)
+			program, err := execution.NewProgram(func(execution.Session) (value.Value, error) { ran.Store(true); return value.Int64(7), nil }, nil, types.Int())
 			if err != nil {
 				t.Fatal(err)
 			}
 			var stdout, stderr bytes.Buffer
-			status := runner.Execute(program, append([]string{command, "--format", runner.JsonFormat}, processPolicyFlags(t)...), &stdout, &stderr)
+			status := runner.Execute(program, append([]string{command, "--format", runner.JsonFormat}, processPolicyFlags(t)...), newRunnerConsole(t, &stdout, &stderr))
 			invalidHost := strings.Contains(stderr.String(), fmt.Sprint(execution.ProcessUnavailable().Code())) || strings.Contains(stderr.String(), fmt.Sprint(execution.HostFailure("", "", nil).Code()))
 			if status != runner.ExitHost || ran.Load() || stdout.Len() != 0 || !invalidHost {
 				t.Fatalf("invalid Process configuration reached evaluation: %s", stderr.String())
@@ -167,12 +168,12 @@ func TestAdapterProcessPolicyRejectsMalformedOrIncompleteInputs(t *testing.T) {
 				t.Fatal("invalid Process policy was accepted")
 			}
 			var ran atomic.Bool
-			program, err := execution.NewProgram(func(execution.Session) (value.Value, error) { ran.Store(true); return value.Int64(7), nil }, nil)
+			program, err := execution.NewProgram(func(execution.Session) (value.Value, error) { ran.Store(true); return value.Int64(7), nil }, nil, types.Int())
 			if err != nil {
 				t.Fatal(err)
 			}
 			var stdout, stderr bytes.Buffer
-			status := runner.Execute(program, append([]string{runner.RunCommand}, test.flags...), &stdout, &stderr)
+			status := runner.Execute(program, append([]string{runner.RunCommand}, test.flags...), newRunnerConsole(t, &stdout, &stderr))
 			if status != runner.ExitHost || ran.Load() || stdout.Len() != 0 {
 				t.Fatal("invalid embedded policy reached execution")
 			}
@@ -192,12 +193,12 @@ func TestAdapterProcessPolicyRejectsFlagsForOtherCommands(t *testing.T) {
 				t.Fatal("Process policy accepted outside run/serve")
 			}
 			var ran atomic.Bool
-			program, err := execution.NewProgram(func(execution.Session) (value.Value, error) { ran.Store(true); return value.Int64(7), nil }, nil)
+			program, err := execution.NewProgram(func(execution.Session) (value.Value, error) { ran.Store(true); return value.Int64(7), nil }, nil, types.Int())
 			if err != nil {
 				t.Fatal(err)
 			}
 			var stdout, stderr bytes.Buffer
-			if runner.Execute(program, append([]string{command}, processPolicyFlags(t)...), &stdout, &stderr) != runner.ExitHost || ran.Load() {
+			if runner.Execute(program, append([]string{command}, processPolicyFlags(t)...), newRunnerConsole(t, &stdout, &stderr)) != runner.ExitHost || ran.Load() {
 				t.Fatal("unsupported embedded command reached execution")
 			}
 		})
@@ -209,7 +210,7 @@ func TestAdapterProcessPolicyRequiresSessionBeforeEvaluation(t *testing.T) {
 	program, err := execution.NewProgram(func(execution.Session) (value.Value, error) {
 		evaluated.Store(true)
 		return value.Int64(7), nil
-	}, nil)
+	}, nil, types.Int())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +220,7 @@ func TestAdapterProcessPolicyRequiresSessionBeforeEvaluation(t *testing.T) {
 		t.Fatal(err)
 	}
 	var stdout, stderr bytes.Buffer
-	if runner.Run(options, program, &stdout, &stderr) != runner.ExitHost || evaluated.Load() || stdout.Len() != 0 {
+	if runner.Run(options, program, newRunnerConsole(t, &stdout, &stderr)) != runner.ExitHost || evaluated.Load() || stdout.Len() != 0 {
 		t.Fatalf("invalid Process session reached program evaluation: %s %s", stdout.String(), stderr.String())
 	}
 }

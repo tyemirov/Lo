@@ -172,7 +172,7 @@ func TestAdapterHTTPClientPostCommitBudget(t *testing.T) {
 			}
 		}
 		return runtimeops.Commit(session, target, text.Span(0, 22))
-	}, nil)
+	}, nil, types.Response())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,7 +271,7 @@ func TestAdapterHTTPClientCleanupEvidence(t *testing.T) {
 			}
 			program, err := execution.NewProgram(func(session execution.Session) (value.Value, error) {
 				return runtimeops.Commit(session, target, text.Span(0, 13))
-			}, nil)
+			}, nil, types.Response())
 			if err != nil {
 				t.Fatal(err)
 			}

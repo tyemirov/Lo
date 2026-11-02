@@ -278,6 +278,7 @@ fn for_each_child<'a>(value: &'a Handle, mut push: impl FnMut(&'a Handle)) {
             if let Some(fields) = value.fields() {
                 fields.values().for_each(&mut push);
             }
+            value.retained_children().iter().for_each(&mut push);
         }
         _ => (),
     }

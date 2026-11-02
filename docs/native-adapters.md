@@ -24,12 +24,26 @@ Only an explicit `commit` activates a target.
 | Process execution | `--process-allow`, `--process-launcher`, `--process-read-root` | Authorize explicit executable identities and directory roots. |
 | HTTP client | `--http-allow` | Authorize the selected method and HTTP origin. |
 | HTTP server | `serve --listen` | Authorize the port. |
+| Console output | `--max-console-bytes` | Enable inherited stdout/stderr with a logical-byte quota. |
 
 File operations keep opened directory roots.
 File observations belong to one request.
 Removal rejects foreign observations, changed identities, duplicate names, and invalid entry kinds.
 Process registrations and the open-file probe protect their executable paths from file changes.
 Cancellation stops blocked file work and prevents subsequent commits.
+
+## Console Output And Terminal Results
+
+The [CLI contract](cli-runtime-design.md) defines Console records, terminal values, and declared options.
+Construction remains pure.
+Console commit uses an owned writer process with a bounded private protocol.
+Participating File and Process mutations protect its executable identity.
+Embeddings register cooperative callbacks through the [Console header](../runtime/native/include/lo_console.h).
+
+The native CLI joins resource cleanup before terminal output and application status selection.
+The native embedding API completes through `lo_context_complete`.
+It returns a status without exiting the host process.
+The [runtime contract](native-runtime-contract.md#console-registration-and-completion) defines registration, callbacks, and completion ownership.
 
 ## Process Execution
 
@@ -50,7 +64,7 @@ A completed activation remains visible after a later execution limit.
 
 Each process operation keeps its resources until cleanup completes.
 A timeout does not release an unresolved owner.
-The CLI reports a bounded close failure before its final ownership wait.
+The CLI joins retained ownership before terminal output or cleanup diagnostics.
 Unresolved ownership prevents another process activation in the same session.
 
 ## HTTP Execution

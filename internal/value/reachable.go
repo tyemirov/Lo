@@ -30,6 +30,10 @@ func VisitWhile(values []Value, visit func(Value) bool) {
 			continue
 		}
 		switch item := current.(type) {
+		case cliOptions:
+			pending = append(pending, item.fields)
+		case programExit:
+			pending = append(pending, item.stdout, item.stderr)
 		case list:
 			pending = append(pending, item.items...)
 		case record:
