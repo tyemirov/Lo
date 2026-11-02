@@ -112,7 +112,7 @@ impl Image {
                             Ok(0) => return Err(host("Console request closed")),
                             Ok(n) => sent += n,
                             Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                                std::thread::sleep(Duration::from_millis(1))
+                                wait_ready(&request_write, libc::POLLOUT)?;
                             }
                             Err(e) if e.kind() == std::io::ErrorKind::Interrupted => (),
                             Err(_) => return Err(host("Console request failed")),
@@ -127,7 +127,7 @@ impl Image {
                             Ok(0) => return Err(host("Console acknowledgment ended early")),
                             Ok(n) => received += n,
                             Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                                std::thread::sleep(Duration::from_millis(1));
+                                wait_ready(&ack_read, libc::POLLIN)?;
                                 continue;
                             }
                             Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
@@ -220,6 +220,24 @@ fn nonblocking(file: &File) -> Result<(), Fault> {
     let flags = unsafe { libc::fcntl(fd, libc::F_GETFL) };
     if flags < 0 || unsafe { libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK) } < 0 {
         return Err(host("Console owned pipe configuration failed"));
+    }
+    Ok(())
+}
+fn wait_ready(file: &File, events: libc::c_short) -> Result<(), Fault> {
+    let mut descriptor = libc::pollfd {
+        fd: file.as_raw_fd(),
+        events,
+        revents: 0,
+    };
+    let result = unsafe { libc::poll(&mut descriptor, 1, 1) };
+    if result < 0 {
+        if std::io::Error::last_os_error().kind() == std::io::ErrorKind::Interrupted {
+            return Ok(());
+        }
+        return Err(host("Console owned pipe readiness wait failed"));
+    }
+    if descriptor.revents & libc::POLLNVAL != 0 {
+        return Err(host("Console owned pipe readiness descriptor invalid"));
     }
     Ok(())
 }

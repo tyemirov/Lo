@@ -1,0 +1,25 @@
+{
+  "failed_run": "https://github.com/tyemirov/Lo/actions/runs/41363916620",
+  "failure": {
+    "test": "TestFlowFoldErrorProgressValueBudget",
+    "status": 2,
+    "stderr_bytes": 6291456
+  },
+  "change": {
+    "request_wait": "poll(POLLOUT)",
+    "acknowledgment_wait": "poll(POLLIN)",
+    "poll_timeout_ms": 1,
+    "reporting_deadline_seconds": 1,
+    "frame_bytes": 2097152
+  },
+  "focused_native_tests": {
+    "result": "pass",
+    "seconds": 42.275
+  },
+  "diagnostic_stability": {
+    "result": "pass",
+    "count": 5,
+    "seconds": 17.864
+  },
+  "independent_review": "pass"
+}

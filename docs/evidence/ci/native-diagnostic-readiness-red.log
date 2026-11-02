@@ -1,0 +1,4 @@
+https://github.com/tyemirov/Lo/actions/runs/41363916620
+make ci	Run CI	2026-11-02T00:26:32.0390720Z --- FAIL: TestFlowFoldErrorProgressValueBudget (1.79s)
+make ci	Run CI	2026-11-02T00:26:32.0392860Z     native_test.go:120: LO_NATIVE_RUNTIME=67e9960c74358be0cc0dee23dbab4fab315c1e2f1f9d28ecb5074ebfa36c98b0
+make ci	Run CI	2026-11-02T00:26:32.0393880Z     flow_fold_budget_progress_test.go:32: decode diagnostic: unexpected end of JSON input (status=2 stdout bytes=0 stderr bytes=6291456)
