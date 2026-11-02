@@ -106,7 +106,12 @@ func runProgramOutput(ctx context.Context, inv invocation, p execution.Program, 
 	if err != nil {
 		return report(err)
 	}
-	hostSession, err := processhost.Open(ctx, configuration, adapter.FileRoots{Read: inv.readRoots, Write: inv.writeRoots, List: inv.listRoots, Remove: inv.removeRoots, OpenFiles: inv.openFilesRoots})
+	if err := ctx.Err(); err != nil {
+		return report(err)
+	}
+	// The runner owns host resources until HTTP requests and evaluator cleanup
+	// complete. Operation contexts still carry cancellation to the host boundary.
+	hostSession, err := processhost.Open(context.WithoutCancel(ctx), configuration, adapter.FileRoots{Read: inv.readRoots, Write: inv.writeRoots, List: inv.listRoots, Remove: inv.removeRoots, OpenFiles: inv.openFilesRoots})
 	if err != nil {
 		return report(err)
 	}
