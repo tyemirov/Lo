@@ -11,6 +11,10 @@ import (
 
 func (m *machine) builtin(call ir.BuiltinCall, args []value.Value, flows map[int]identity.FlowID, f frame) (value.Value, error) {
 	switch call.Operation().Name() {
+	case catalog.ProgramPath:
+		return runtimeops.ProgramPath(m.Session, call, args, flows)
+	case catalog.LockFileNew:
+		return runtimeops.LockFileNew(m.Session, call, args, flows)
 	case catalog.ConsoleLineNew:
 		return runtimeops.ConsoleLineNew(m.Session, call, args, flows)
 	case catalog.ProgramExitNew:

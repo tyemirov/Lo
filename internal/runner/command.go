@@ -50,6 +50,8 @@ const (
 	maxStepsOption            = "--max-steps"
 	maxValueBytesOption       = "--max-value-bytes"
 	maxConsoleBytesOption     = "--max-console-bytes"
+	lockFileOption            = "--lock-file"
+	lockEntryOption           = "--lock-entry"
 	maxLiveBytesOption        = "--max-live-bytes"
 	maxDataBytesOption        = "--max-data-bytes"
 	maxListItemsOption        = "--max-list-items"
@@ -80,6 +82,8 @@ type invocation struct {
 	httpPolicy            adapter.HTTPPolicy
 	processPolicy         adapter.ProcessPolicy
 	programArguments      []string
+	lockFiles             []string
+	lockEntry             bool
 	maxConsoleBytes       uint64
 }
 
@@ -113,6 +117,22 @@ func parseArgs(args []string, embedded bool) (invocation, error) {
 	processLauncherSet := false
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
+		if arg == lockEntryOption {
+			if inv.command != RunCommand && inv.command != ServeCommand || inv.lockEntry {
+				return inv, fmt.Errorf("--lock-entry requires run or serve once")
+			}
+			inv.lockEntry = true
+			continue
+		}
+		if arg == lockFileOption {
+			if inv.command != RunCommand && inv.command != ServeCommand || i+1 == len(args) {
+				return inv, fmt.Errorf("--lock-file requires a value with run or serve")
+			}
+			i++
+			inv.lockFiles = append(inv.lockFiles, args[i])
+			continue
+		}
+
 		if arg == "--" {
 			if inv.command != RunCommand && inv.command != ServeCommand {
 				return inv, fmt.Errorf("program arguments require run or serve")
@@ -471,10 +491,10 @@ func Execute(program execution.Program, args []string, console *adapter.Console)
 		defer cancel()
 		return finishConsole(console, Report(console.Writer(reporting, adapter.ConsoleStderr), inv.format, diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), ExitHost))
 	}
-	return executeProgram(inv, program, console)
+	return executeProgram(context.Background(), inv, program, console)
 }
-func Run(inv Options, program execution.Program, console *adapter.Console) int {
-	return executeProgram(inv.(invocation), program, console)
+func Run(ctx context.Context, inv Options, program execution.Program, console *adapter.Console) int {
+	return executeProgram(ctx, inv.(invocation), program, console)
 }
 func Main(program execution.Program) {
 	if adapter.HandleConsoleWriter(os.Args[1:]) || adapter.HandleFileProbe(os.Args[1:]) {
@@ -488,7 +508,7 @@ func Main(program execution.Program) {
 	if err != nil {
 		os.Exit(ReportRuntime(os.Stderr, inv.format, err))
 	}
-	os.Exit(executeProgram(inv, program, console))
+	os.Exit(executeProgram(context.Background(), inv, program, console))
 }
 func ReportRuntime(stderr io.Writer, format string, err error) int {
 	var failure execution.Failure

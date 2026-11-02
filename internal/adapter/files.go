@@ -195,6 +195,8 @@ func (f *files) resolve(roots []grant, operation, path string) (*os.Root, string
 }
 func (f *files) Commit(ctx context.Context, target value.Target) (value.Value, error) {
 	switch target := target.(type) {
+	case value.LockFile:
+		return nil, execution.Denied(catalog.LockAcquire, "file")
 	case value.Server:
 		return nil, execution.ServerRequiresServe()
 	case value.RemovalEffect:

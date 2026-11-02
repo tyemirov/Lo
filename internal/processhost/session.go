@@ -18,6 +18,7 @@ type Config interface {
 	Policy() adapter.ProcessPolicy
 	Limits() adapter.ProcessLimits
 	ProtectedImages() []adapter.ProcessExecutableGrant
+	LockPolicy() adapter.LockPolicy
 	config()
 }
 
@@ -25,19 +26,25 @@ type config struct {
 	policy    adapter.ProcessPolicy
 	limits    adapter.ProcessLimits
 	protected []adapter.ProcessExecutableGrant
+	locks     adapter.LockPolicy
 }
 
 func (config) config()                                             {}
 func (c config) Policy() adapter.ProcessPolicy                     { return c.policy }
 func (c config) Limits() adapter.ProcessLimits                     { return c.limits }
 func (c config) ProtectedImages() []adapter.ProcessExecutableGrant { return slices.Clone(c.protected) }
+func (c config) LockPolicy() adapter.LockPolicy                    { return c.locks }
 
 // NewConfig constructs a description without filesystem access or activation.
 func NewConfig(policy adapter.ProcessPolicy, limits adapter.ProcessLimits) (Config, error) {
 	if policy == nil || limits == nil {
 		return nil, host("missing session configuration")
 	}
-	return config{policy: policy, limits: limits}, nil
+	locks, err := adapter.NewLockPolicy(nil, false)
+	if err != nil {
+		return nil, err
+	}
+	return config{policy: policy, limits: limits, locks: locks}, nil
 }
 
 // WithProtectedImages selects host-owned images which participating mutations
@@ -51,7 +58,15 @@ func WithProtectedImages(configuration Config, images []adapter.ProcessExecutabl
 			return nil, host("missing protected image")
 		}
 	}
-	return config{policy: configuration.Policy(), limits: configuration.Limits(), protected: append(configuration.ProtectedImages(), images...)}, nil
+	return config{policy: configuration.Policy(), limits: configuration.Limits(), protected: append(configuration.ProtectedImages(), images...), locks: configuration.LockPolicy()}, nil
+}
+
+// WithLockPolicy supplies exact lock authority without File content authority.
+func WithLockPolicy(configuration Config, policy adapter.LockPolicy) (Config, error) {
+	if configuration == nil || policy == nil {
+		return nil, host("missing lock policy")
+	}
+	return config{policy: configuration.Policy(), limits: configuration.Limits(), protected: configuration.ProtectedImages(), locks: policy}, nil
 }
 
 // Session owns the host boundary and a single retained shutdown owner. Close's
@@ -71,6 +86,8 @@ type session struct {
 	boundary execution.Boundary
 	files    adapter.Files
 	registry adapter.ProcessRegistry
+	locks    adapter.Locks
+	entry    execution.ProgramEntry
 	driver   *sessionDriver
 	active   int
 	closing  bool
@@ -95,24 +112,39 @@ func Open(ctx context.Context, configuration Config, roots adapter.FileRoots) (S
 		if err != nil {
 			return nil, err
 		}
-		return openSession(ctx, configuration, roots, creator)
+		return openSession(ctx, configuration, roots, creator, adapter.NativeLockIO())
 	}
-	return openSession(ctx, configuration, roots, nil)
+	return openSession(ctx, configuration, roots, nil, adapter.NativeLockIO())
 }
 
 // OpenTrusted is a trusted Go-embedding boundary, not native qualification. The
 // Creator must honor Primary ownership, confinement, execution-witness, and
 // resource contracts. File mutations preserve configured command grants and
 // protection-only images. Production native assembly also protects its helper.
-func OpenTrusted(ctx context.Context, configuration Config, roots adapter.FileRoots, creator Creator) (Session, error) {
+func OpenTrusted(ctx context.Context, configuration Config, roots adapter.FileRoots, creator Creator, lockIO adapter.LockIO) (Session, error) {
 	if configuration == nil || creator == nil {
 		return nil, host("missing trusted session dependencies")
 	}
-	return openSession(ctx, configuration, roots, creator)
+	return openSession(ctx, configuration, roots, creator, lockIO)
 }
 
-func openSession(ctx context.Context, configuration Config, roots adapter.FileRoots, creator Creator) (Session, error) {
+func openSession(ctx context.Context, configuration Config, roots adapter.FileRoots, creator Creator, lockIO adapter.LockIO) (result Session, resultErr error) {
 	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	entry := execution.InitialProgramEntry(ctx)
+	if entry != nil {
+		if err := execution.ClaimProgramEntry(entry); err != nil {
+			return nil, execution.HostFailure("program entry", "adoption", err)
+		}
+		defer func() {
+			if resultErr != nil {
+				resultErr = execution.PreserveCleanup(resultErr, entry.Close())
+			}
+		}()
+	}
+	locks, err := adapter.OpenLocks(ctx, configuration.LockPolicy(), entry, lockIO)
+	if err != nil {
 		return nil, err
 	}
 	grants := configuration.Policy().Grants()
@@ -124,14 +156,14 @@ func openSession(ctx context.Context, configuration Config, roots adapter.FileRo
 	}
 	registry, err := adapter.OpenProtectedProcessRegistry(ctx, grants, protectedImages, adapter.DefaultProcessRegistryLimits())
 	if err != nil {
-		return nil, err
+		return nil, execution.PreserveCleanup(err, locks.Close())
 	}
 	files, err := registry.OpenFiles(roots, adapter.NativeFileIO())
 	if err != nil {
-		return nil, execution.PreserveCleanup(err, registry.Close())
+		return nil, execution.PreserveCleanup(err, errors.Join(registry.Close(), locks.Close()))
 	}
 	childContext, cancel := context.WithCancel(ctx)
-	s := &session{ctx: childContext, cancel: cancel, files: files, registry: registry, changed: make(chan struct{}), done: make(chan struct{})}
+	s := &session{ctx: childContext, cancel: cancel, files: files, registry: registry, locks: locks, entry: entry, changed: make(chan struct{}), done: make(chan struct{})}
 	var boundary execution.Boundary
 	if creator == nil {
 		boundary, err = adapter.WithProcess(files)
@@ -153,9 +185,9 @@ func openSession(ctx context.Context, configuration Config, roots adapter.FileRo
 	}
 	if err != nil {
 		cancel()
-		return nil, execution.PreserveCleanup(err, errors.Join(files.Close(), registry.Close()))
+		return nil, execution.PreserveCleanup(err, errors.Join(files.Close(), registry.Close(), locks.Close()))
 	}
-	s.boundary = boundary
+	s.boundary = locks.Wrap(boundary)
 	// Parent cancellation uses the same terminal transition and cleanup owner.
 	go func() {
 		select {
@@ -273,7 +305,12 @@ func (s *session) closeOwned() {
 	if s.driver != nil {
 		childErr = s.driver.releaseOwned()
 	}
-	cleanup := errors.Join(childErr, s.files.Close(), s.registry.Close())
+	fileErr, registryErr := s.files.Close(), s.registry.Close()
+	var entryErr error
+	if s.entry != nil {
+		entryErr = s.entry.Close()
+	}
+	cleanup := errors.Join(childErr, fileErr, registryErr, entryErr, s.locks.Close())
 	s.mu.Lock()
 	s.cleanup = cleanup
 	s.mu.Unlock()

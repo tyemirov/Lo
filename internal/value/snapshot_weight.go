@@ -10,6 +10,8 @@ import (
 // SnapshotWeight calculates diagnostic value weight before snapshot allocation.
 func SnapshotWeight(v Value) uint64 {
 	switch x := v.(type) {
+	case LockFile:
+		return 16
 	case ConsoleLine:
 		return uint64(26 + len(x.Stream()))
 	case ProgramExit:

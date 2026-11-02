@@ -105,6 +105,7 @@ func (s *servers) Start(ctx context.Context) (value.Value, error) {
 		s.mu.Unlock()
 		return nil, err
 	}
+	requestContext = execution.InheritProgramEntry(requestContext, ctx)
 	requestContext, err = execution.InheritHostInvocation(requestContext, ctx)
 	if err != nil {
 		s.mu.Unlock()

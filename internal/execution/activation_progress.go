@@ -40,6 +40,9 @@ func (p *activationProgress) Summary() string {
 	if p.process != nil {
 		return p.resultType + " " + value.TextResult(p.process)
 	}
+	if p.status == nil {
+		return p.resultType
+	}
 	return p.resultType + " status " + value.TextResult(p.status)
 }
 func (p *activationProgress) MarshalJSON() ([]byte, error) {
@@ -80,6 +83,8 @@ func ActivationDetails(err error) ActivationProgress {
 func (s *session) RecordActivation(operation string, span source.Span, result value.Value) error {
 	progress := &activationProgress{operation: operation, span: span}
 	switch result := result.(type) {
+	case value.LockLease:
+		progress.resultType = result.Type().String()
 	case value.Receipt:
 		progress.receipt = result
 	case value.HTTPValue:

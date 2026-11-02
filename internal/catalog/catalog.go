@@ -219,6 +219,8 @@ func (operation) operation()            {}
 func (o operation) TargetPosition() int { return o.targetPosition }
 func (o operation) Capability() string {
 	switch o.name {
+	case LockFileNew:
+		return LockAcquire
 	case ConsoleLineNew:
 		return ConsoleWrite
 	case ProcessCommandNew:
@@ -449,7 +451,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "CLI", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
+	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "Lock", "CLI", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
 		return true
 	}
 	return false
@@ -488,6 +490,7 @@ type activationTarget struct {
 }
 
 var activationTargets = map[types.Kind]activationTarget{
+	types.LockFileKind:       {LockFileNew, types.LockLease()},
 	types.ConsoleLineKind:    {ConsoleLineNew, types.ConsoleReceipt()},
 	types.ProcessCommandKind: {ProcessCommandNew, types.ProcessResult()},
 	types.FileWriteKind:      {FileWrite, types.FileWriteReceipt()},

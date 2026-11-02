@@ -117,6 +117,13 @@ func ActivationError(target value.Target, err error, span source.Span) (value.Er
 	var operation, kind string
 	var input value.Record
 	switch v := target.(type) {
+	case value.LockFile:
+		var failure execution.LockError
+		if !errors.As(err, &failure) {
+			return nil, fmt.Errorf("no recoverable lock failure evidence")
+		}
+		operation, kind = catalog.LockAcquire, failure.Kind()
+		input = must(value.NewRecord(nil))
 	case value.ConsoleLine:
 		var failure execution.ConsoleWriteError
 		if !errors.As(err, &failure) {
