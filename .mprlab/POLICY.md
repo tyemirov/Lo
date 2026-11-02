@@ -57,7 +57,8 @@ Preserve these rules when shared templates or skills propose different instructi
 - Keep `/_scratch/` in the repository `.gitignore`.
 - Record the directory and its task in the task plan before use.
 - Keep files from an interrupted task until that task resumes or its owner authorizes removal.
-- Before task completion, preserve useful results in maintained tests, tools, or documentation.
+- Before the task ends, keep specified behavior in tests and necessary fixtures.
+- Record permanent decisions in maintained documentation.
 - Remove only the temporary directory owned by the completed task.
 - Verify that this directory is absent before reporting task completion.
 - Preserve directories owned by other tasks.
@@ -223,7 +224,7 @@ Production operations outside the task do not remove code validation requirement
 
 - Use repository-native `make` targets.
 - Do not run a pre-edit or per-issue `make ci` baseline.
-- Preserve the expected failing integration-test result as implementation evidence.
+- Keep the expected failing integration-test result in the task's ignored directory until the task ends.
 - During the change, run the smallest public-entrypoint target that validates the changed contract.
 - After the last stack change, run `make ci` once at the documented stack completion checkpoint.
 - If this run reports an error, run the target that reports the error during the correction.
@@ -238,6 +239,17 @@ Production operations outside the task do not remove code validation requirement
 - For read-only work, use source facts and run only the necessary checks.
 - For frontend behavior, verify through a browser test when the behavior is user-visible.
 - For services and CLIs, verify through HTTP, CLI, or public API entry points.
+
+### Validation Output
+
+- Use tests and necessary fixtures as the permanent record of specified behavior.
+- Keep source code, tests, necessary fixtures, configuration, and maintained documentation in Git.
+- Keep generated validation reports, logs, and review summaries in the task's ignored `_scratch/<task-id>/` directory.
+- Do not commit generated validation output.
+- Record completed checks in the task response or pull request description.
+- For corrected product defects, keep tests that verify the specified behavior.
+- When the task ends, remove temporary validation output under [Temporary Task Files](#temporary-task-files).
+- Apply these rules to tools, child processes, and delegated agents.
 
 ## Documentation Language
 
