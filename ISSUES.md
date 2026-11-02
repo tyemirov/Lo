@@ -516,6 +516,32 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   Changed-prose, local-link, issue-structure, dependency, and whitespace checks passed.
   F038 through F041 remain open for implementation. F037 retains final qualification.
 
+- [x] [P009] (P1) {I011,F029} Plan one compiled application runtime and interpreter removal
+  Goal:
+  Select one native application runtime while retaining the Go compiler frontend.
+
+  Requirements:
+  - Keep compiler parse, check, inspect, and build commands.
+  - Select build, then execute, with run and serve commands on the produced executable.
+  - Remove source execution commands and Go embedding APIs without a compatibility bridge.
+  - Preserve language behavior through native public fixtures and independent expected results.
+  - Separate static compiler facts and shared native assets before runtime deletion.
+  - Keep compiler packaging work separate from interpreter removal.
+
+  Deliverables:
+  - Maintain the [single-runtime plan](docs/single-runtime-plan.md) with source boundaries and acceptance requirements.
+  - Allocate I014 through I018 and update the remaining application dependencies.
+
+  Validation:
+  - Review current compiler, native runtime, embedding, test, CI, and measurement consumers.
+  - Complete independent plan review and issue, link, prose, and whitespace checks.
+  - Keep implementation issues open until their required implementation evidence exists.
+
+  P009 completed the plan on November 2, 2026.
+  Independent review passed after corrections to extraction scope and coverage references.
+  Changed-prose, local-link, issue-structure, dependency, and whitespace checks passed.
+  I014 through I018 remain open. This planning task changed no runtime source and ran no builds or runtime tests.
+
 ## Features
 
 - [x] [F001] (P1) Build native Lo executables
@@ -1048,7 +1074,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [distribution guide](docs/compiler-distribution.md) gives installation, construction, and acceptance commands.
   I011 retains final semantic and performance qualification after removal of development Go generation.
 
-- [ ] [F018] (P2) {P006,I011} Add modules and explicit visibility
+- [ ] [F018] (P2) {P006,I011,I018} Add modules and explicit visibility
   Goal:
   Compose programs from multiple source modules.
 
@@ -1059,12 +1085,12 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Reject import cycles under the selected contract and prevent import-time execution.
 
   Deliverables:
-  - Add parser, resolver, verifier, inspector, interpreter, and native module support.
+  - Add parser, resolver, verifier, inspector, and native module support.
 
   Validation:
   - Execute a multi-module CLI and service through public commands.
   - Reject inaccessible names, invalid cycles, hidden effects, and malformed imports with source diagnostics.
-  - Verify equivalent interpreter and native results.
+  - Verify native results against independent expectations on supported targets.
 
 - [ ] [F019] (P2) {F018,P006} Add user-defined records and tagged variants
   Goal:
@@ -1081,7 +1107,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Validation:
   - Execute imported type declarations and nested variants through the public CLI.
   - Reject missing fields, invalid alternatives, incomplete matches, and identity mismatches.
-  - Verify stable error context and equivalent interpreter and native behavior.
+  - Verify stable error context and native behavior against independent expectations.
 
 - [ ] [F020] (P2) {F019,P006} Add generics with bounded specialization
   Goal:
@@ -1099,7 +1125,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Execute generic collection and variant examples across module boundaries.
   - Reject invalid type arguments and effect constraints.
   - Verify deterministic limit failures for excessive specialization.
-  - Compare interpreter and native results and errors.
+  - Compare native results and errors with independent expectations on supported targets.
 
 - [ ] [F021] (P2) {F018,F020,P006} Add reproducible offline packages
   Goal:
@@ -1134,7 +1160,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Validation:
   - Execute CLI, service, and training applications with the library offline.
   - Verify malformed input, denied capabilities, limits, and cancellation through public commands.
-  - Compare interpreter and native behavior.
+  - Compare native behavior with independent expectations on supported targets.
 
 - [ ] [F023] (P2) {F018,I011} Add formatter, test runner, editor, and debug support
   Goal:
@@ -1554,9 +1580,14 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   The [CLI example](docs/examples/cli-cleanup-preview.lo) executes mode selection and reports invalid arguments with application status 2.
   The [completion record](docs/evidence/cli-runtime/checkpoint.json) contains successful local CI and independent review.
 
-- [ ] [F029] (P1) {F025} Add program entry identity and scoped exclusive file locks
+- [x] [F029] (P1) {F025} Add program entry identity and scoped exclusive file locks
   Goal:
   Supply identity-checked exclusive nonblocking lock leases for application lifetimes.
+
+  Current state:
+  The [lock contract](docs/program-lock-design.md) defines entry capture, exact authority, lease ownership, and the bounded filesystem guarantee.
+  Both runtimes implement the selected interfaces.
+  Runtime parity checks, independent review, and final stack CI passed.
 
   Requirements:
   - Identify the interpreted source entry or actual native executable without trusting `argv[0]`.
@@ -1577,7 +1608,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Inject close failures and reject false successful release.
   - Complete parity checks, independent review, and final stack CI.
 
-- [ ] [F030] (P1) {F025,F028} Add selected generic text, byte, collection, path, and glob processors
+- [ ] [F030] (P1) {F025,F028,I018} Add selected generic text, byte, collection, path, and glob processors
   Goal:
   Supply the pure value operations needed by executable file policies and exact probe protocols.
 
@@ -1600,9 +1631,9 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify Unicode boundaries, malformed UTF-8, embedded NUL, empty cases, and invalid bounds.
   - Verify stable sorting, comparator purity, wildcard classes, escapes, separators, and leading dots.
   - Reject probe names outside the selected candidate batch.
-  - Complete resource checks, parity, independent review, and final stack CI.
+  - Complete resource and native target conformance checks, independent review, and final stack CI.
 
-- [ ] [F031] (P1) {F030} Add generic JSON extraction and numeric presentation
+- [ ] [F031] (P1) {F030,I018} Add generic JSON extraction and numeric presentation
   Goal:
   Supply typed JSON values, decimal integer parsing, and deterministic numeric formatting for application reports.
 
@@ -1615,17 +1646,17 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep decoder depth, work, and value limits under explicit host quotas.
 
   Deliverables:
-  - Add selected pure processors and interpreter/native implementations.
+  - Add selected pure processors in the single native runtime.
   - Add local JSON and report fixtures without a live Docker dependency.
 
   Validation:
   - Confirm public fixture failures before implementation.
   - Exercise malformed Unicode, duplicate fields, deep input, numeric bounds, missing fields, and wrong kinds.
   - Verify deterministic formatting, nonfinite failures, invalid precision, and quota exhaustion.
-  - Compare local Docker-like metadata extraction and report outputs across runtimes.
+  - Compare local Docker-like metadata extraction and report outputs with independent expectations on supported native targets.
   - Complete independent review and final stack CI.
 
-- [ ] [F032] (P1) {F025} Add coherent file identity, allocation, clock, and volume observations
+- [ ] [F032] (P1) {F025,I018} Add coherent file identity, allocation, clock, and volume observations
   Goal:
   Supply public metadata and fresh host measurements for generic filesystem decisions.
 
@@ -1644,10 +1675,10 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Confirm public fixture failures before implementation.
   - Verify coherent identities, empty and sparse files, allocated versus logical size, and arithmetic bounds.
   - Inject advancing clocks, volume failures, and changed metadata through public boundaries.
-  - Verify Darwin and Linux software parity and current removal receipt semantics.
+  - Verify Darwin and Linux software target conformance and current removal receipt semantics.
   - Complete independent review and final stack CI.
 
-- [ ] [F033] (P1) {F025} Add explicit descendant directory authority and retained child observations
+- [ ] [F033] (P1) {F025,I018} Add explicit descendant directory authority and retained child observations
   Goal:
   Support recursive filesystem traversal without expanding existing exact grants.
 
@@ -1661,7 +1692,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Release completed handles under existing worklist resource accounting.
 
   Deliverables:
-  - Add selected child, refresh, entry, and re-observation operations with Go and native parity.
+  - Add selected child, refresh, entry, and re-observation operations in the single native runtime.
   - Specify bounded retained handles and snapshot authority rules.
 
   Validation:
@@ -1669,9 +1700,9 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify an exact parent grant cannot authorize a child or recursive removal.
   - Exercise replacement, symlinks, foreign sessions, released leases, cancellation, and close failures.
   - Visit more than 128 cumulative directories under bounded live quotas in deep and wide fixtures.
-  - Complete public parity checks, independent review, and final stack CI.
+  - Complete public native target conformance checks, independent review, and final stack CI.
 
-- [ ] [F034] (P1) {F032,F033} Add bounded tree snapshots and checked recursive removal
+- [ ] [F034] (P1) {F032,F033,I018} Add bounded tree snapshots and checked recursive removal
   Goal:
   Bind descriptor-safe recursive removal to an approved tree observation with complete eligibility preflight.
 
@@ -1685,7 +1716,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Report confirmed partial progress without a claim of atomic deletion or rollback.
 
   Deliverables:
-  - Add the selected snapshot, removal target, guard, receipt, and resource-lifetime contracts in both runtimes.
+  - Add the selected snapshot, removal target, guard, receipt, and resource-lifetime contracts in the single native runtime.
   - Update the draft's parent/root-only target if it cannot enforce expected state.
 
   Validation:
@@ -1693,9 +1724,9 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Exercise more than 128 directories, quota exhaustion, row ordering, and rejected subtree visibility.
   - Verify symlink unlinking without traversal, snapshot inequality, additions, replacements, and vanished entries.
   - Verify complete preflight, postorder removal, late failure progress, cancellation, and close failures.
-  - Complete parity checks, independent review, and final stack CI.
+  - Complete native target conformance checks, independent review, and final stack CI.
 
-- [ ] [F035] (P1) {F024,F026} Add host-admitted command deadlines and forwarded output
+- [ ] [F035] (P1) {F024,F026,I018} Add host-admitted command deadlines and forwarded output
   Goal:
   Support bounded command duration and explicit forwarded output under trusted host policy.
 
@@ -1703,7 +1734,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Replace the current five-second admission ceiling through one selected host-limit contract.
   - Keep per-command requests within host-authorized duration, cleanup, output, and destination limits.
   - Reject excessive requests before launch without silent shortening.
-  - Coordinate Go, C, Rust, CLI, embedding, and trusted launcher framing changes.
+  - Coordinate compiler schemas, C, Rust, native CLI, retained ABI, and trusted launcher framing changes.
   - Make a command timeout recoverable only after complete owned-process cleanup succeeds.
   - Keep cancellation, budget failure, cleanup failure, and uncertain ownership terminal.
   - Bound forwarded output without exposing unrelated descriptors or bypassing output accounting.
@@ -1721,7 +1752,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Preserve explicit Linux activation unavailability unless a separate platform contract changes it.
   - Complete independent review and final stack CI.
 
-- [ ] [F036] (P1) {P007,F035} Implement the qualified descendant process profile
+- [ ] [F036] (P1) {P007,F035,I018} Implement the qualified descendant process profile
   Goal:
   Enable only the process-tree behavior selected and qualified by P007.
 
@@ -2520,7 +2551,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify package errors, denied capabilities, execution limits, and diagnostics across modules.
   - Verify the formatter, test runner, editor navigation, and source-level debugging on these applications.
 
-- [ ] [I013] (P1) {F028,F029,F030,F031,F032,F034,F035,F036} Complete the mac-cleanup Lo application with confined workflow acceptance
+- [ ] [I013] (P1) {F028,F029,F030,F031,F032,F034,F035,F036,I018} Complete the mac-cleanup Lo application with confined workflow acceptance
   Goal:
   Replace proposed calls with accepted generic contracts and validate one complete cleanup application inside Lo.
 
@@ -2544,9 +2575,135 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify help, arguments, UID rejection, locks, literal inputs, command order, and actual process statuses.
   - Verify file selection, allocation, open handles, changed entries, sibling preservation, and partial progress.
   - Verify temporary-root validation and Docker context, builder, endpoint, JSON, and response handling.
-  - Compare complete interpreter and native Darwin fixtures under the selected Process profile.
+  - Compare compiled Darwin fixtures with independently specified category outcomes under the selected Process profile.
   - Verify portable contracts under Linux QEMU while preserving explicit Process unavailability.
   - Complete independent review and final repository-native CI after the last implementation correction.
+
+- [ ] [I014] (P1) {I015,I016} Restrict the compiler CLI to source compilation commands
+  Goal:
+  Execute applications through their compiled artifacts with one native runtime.
+
+  Requirements:
+  - Retain parse, check, inspect, and build commands in the Go compiler frontend.
+  - Reject compiler run and serve commands and application-only execution options.
+  - Keep run, serve, grants, budgets, Console output, and status on the produced program.
+  - Remove Go evaluation dispatch and source-entry capture from the compiler command.
+  - Keep actual executable identity for Program.path and entry locks.
+  - Add no source wrapper, supervisor, persistent artifact cache, or interpreter fallback.
+
+  Deliverables:
+  - Separate compiler options and diagnostics from Go runtime policies and values.
+  - Update command help, examples, and removed Go embedding documentation.
+  - Implement the [command boundary](docs/single-runtime-plan.md#selected-command-boundary).
+
+  Validation:
+  - Add public failing cases before command changes.
+  - Verify removed compiler commands fail explicitly and all retained compiler commands succeed.
+  - Build and execute program arguments, output, status, service readiness, and foreground/process-group signal cases.
+  - Verify same-artifact lock contention and application invocation capture.
+  - Require the I018 final stack checkpoint before closure.
+
+- [ ] [I015] (P1) {I016} Migrate runtime coverage and embedding tests to compiled execution
+  Goal:
+  Preserve required language assertions before removing their Go execution boundaries.
+
+  Requirements:
+  - Classify each compiler, program, and retained native ABI contract in a coverage ledger.
+  - Retire tests only when their sole contract is a removed Go API.
+  - Port authority, failure, lifetime, resource, Console, File, Process, and lock behavior to native fixtures.
+  - Retain the compiled-entry C ABI with canonical declarations and bounded diagnostic access.
+  - Specify ownership, release, owner-thread rules, cancellation isolation, and signal ownership.
+  - Replace evaluator-generated expectations with independently specified results.
+  - Keep analytical checks alongside finite differences that use native forward execution.
+  - Replace source execution helpers with explicit build and artifact execution helpers.
+
+  Deliverables:
+  - Implement the [coverage and ABI migration](docs/single-runtime-plan.md#embedding-and-failure-injection).
+  - Add deterministic native failure hooks for required retained behavior.
+  - Remove evaluator-based expected results without copying the evaluator into test support.
+
+  Validation:
+  - Add focused public failing fixtures before native corrections.
+  - Verify no required language assertion disappears with a Go helper.
+  - Exercise native CLI and ABI fixtures on their declared software targets.
+  - Keep a full replacement embedding SDK outside this issue's scope.
+  - Require the I018 final stack checkpoint before closure.
+
+- [ ] [I016] (P1) {P009} Extract static compiler facts and relocate native host assets
+  Goal:
+  Make compiler and native build inputs independent of removable Go execution packages.
+
+  Requirements:
+  - Retain compiler derivative planning in internal/autodiff.
+  - Extract pure shape validation and static target selection from dynamic tensor and device code.
+  - Remove dynamic evaluation, value, execution, and adapter imports from retained compiler core packages and static build producers.
+  - Leave transitional cmd/lo and runner execution dispatch to I014 and I018.
+  - Move shared Process C assets and Metal Objective-C assets into the native source tree.
+  - Update source inventories, build recipes, includes, identity generators, and distribution inputs together.
+  - Keep one source owner for each native asset.
+
+  Deliverables:
+  - Implement the [source boundary extraction](docs/single-runtime-plan.md#current-source-boundaries).
+  - Preserve compiler types, catalog, inspection, native lowering, and LLVM emission.
+  - Remove obsolete Go asset consumers only after retained consumers use the new paths.
+
+  Validation:
+  - Establish current focused characterization coverage before extraction.
+  - Verify pure compiler core imports and relocated source identities.
+  - Produce fresh native archives and run focused compiler, Process, and Metal software checks.
+  - Verify installed compilation inputs consume the relocated assets.
+  - Require the I018 final stack checkpoint before closure.
+
+- [ ] [I017] (P1) {I014,I015} Use one native application validation and measurement contract
+  Goal:
+  Remove dual-runtime CI, semantic coverage mappings, and interpreter-relative measurements.
+
+  Requirements:
+  - Reference compiler, native program, and native ABI coverage directly by contract and target.
+  - Permit tests to cover several contracts and contracts to require several tests.
+  - Remove interpreter logs, native translation maps, and LO_TEST_BACKEND selection.
+  - Keep frontend tests separate and run each application integration suite once in aggregate CI.
+  - Preserve applicable Darwin, Linux QEMU, and Metal software coverage with explicit availability.
+  - Replace interpreter benchmark generators and Go runtime allocation measurements for Lo execution.
+  - Define native measurement schemas and reject obsolete paired schemas without compatibility reads.
+  - Preserve independent expected results and historical evidence identities.
+
+  Deliverables:
+  - Implement the [validation and measurement plan](docs/single-runtime-plan.md#semantic-coverage-ci-and-measurements).
+  - Update Make targets, workflows, semantic tools, benchmark tools, and qualification consumers together.
+
+  Validation:
+  - Add rejection cases for stale reports, missing coverage, duplicate contract IDs, duplicate completion events, and old schemas.
+  - Reject duplicate test references within a contract without rejecting shared tests across contracts.
+  - Verify native application execution occurs once per declared target in aggregate CI.
+  - Verify benchmarks execute compiled artifacts and no native pair is labeled independent runtime parity.
+  - Require the I018 final stack checkpoint before closure.
+
+- [ ] [I018] (P1) {I014,I015,I016,I017} Remove the Go interpreter and qualify the single runtime
+  Goal:
+  Complete one compiled application execution path without a retained interpreter or Go embedding bridge.
+
+  Requirements:
+  - Delete dynamic eval, runtimeops, execution, value, derivative, and clioptions packages after migration.
+  - Delete Go host adapters, Process sessions, numeric tensor execution, and device execution.
+  - Preserve extracted compiler facts and relocated native assets from I016.
+  - Remove obsolete runtime selectors, build variants, generators, imports, and dependencies.
+  - Keep the Go compiler frontend and the Rust native runtime with supported target and device variants.
+  - Update current architecture, specification, CLI, embedding, and distribution source references.
+  - Implement the [runtime removal procedure](docs/single-runtime-plan.md#i018-runtime-removal-and-qualification).
+
+  Deliverables:
+  - Remove every active Go path that evaluates a Lo checked graph.
+  - Publish the final coverage ledger and software-target acceptance results inside Lo.
+  - Keep executable-only compiler packaging under F037 through F041.
+
+  Validation:
+  - Audit production, test, benchmark, distribution, and tool imports for deleted packages.
+  - Verify complete retained language and ABI contracts with independent expectations.
+  - Verify compiled arguments, Console output, status, locking, services, and resource cleanup.
+  - Complete independent review and correct accepted findings.
+  - Run final make ci after the last stack correction, including runtime-tool and qualification-tool checks.
+  - Close I014 through I018 only after the shared final checkpoint passes.
 
 ## Maintenance
 
