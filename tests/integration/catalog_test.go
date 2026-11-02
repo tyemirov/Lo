@@ -14,6 +14,8 @@ func builtinExamples() []builtinExample {
 	executablePath := repository + "/testdata/inert-process/executable"
 	directoryPath := repository + "/testdata/inert-process/directory"
 	examples := []builtinExample{
+		{catalog.ProgramPath, `flow Main() -> Bool! { path = Program.path(); return File.Path.eq(path, path) }; return Main()`, "Bool!"},
+		{catalog.LockFileNew, `return Lock.File.new(File.Path.new("/ungranted-private-lock"))`, "Lock.File"},
 		{catalog.ConsoleLineNew, `return Console.Line.new("stdout", "catalog", true)`, "Console.Line!"},
 		{catalog.ProgramExitNew, `flow Main() -> Record{terminal: Program.Exit}! { terminal = Program.Exit.new(2, Bytes.new("out"), Bytes.new("err")); return Record.new(terminal: terminal) }; return Main()`, "Record{terminal: Program.Exit}!"},
 		{catalog.CLIParse, `return CLI.parse(List.new("--verbose"), List.new(Record.new(name: "--verbose", aliases: List.new("-v"), group: "", help: "Show detail")), "catalog", "", true)`, "CLI.Options!"},

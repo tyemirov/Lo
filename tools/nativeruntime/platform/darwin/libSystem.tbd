@@ -140,6 +140,7 @@ exports:
       - _openat
       - _opendir
       - _pipe
+      - _proc_pidinfo
       - _poll
       - _posix_memalign
       - _posix_spawn

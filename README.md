@@ -157,6 +157,10 @@ The [native Metal contract](docs/native-metal.md) specifies the toolchain, metad
 The training example returns initial loss `2.46875` and final loss `0.00013215476064942777` after 200 updates.
 The [training acceptance report](docs/metal-training.md) separates software acceptance from optional local Metal execution.
 `lo run` and `lo serve` select interpreter execution.
+P009 selects their removal in I014 through I018.
+The [single-runtime plan](docs/single-runtime-plan.md) retains the Go compiler frontend and one Rust application runtime.
+Its selected workflow is `lo build`, then the produced program's `run` or `serve` command.
+The current interpreter remains until that implementation completes.
 
 ## Core Idea
 
@@ -410,6 +414,11 @@ The [inspection contract](docs/compiler-design.md#inspection-contract) defines t
 Applications can parse declared flags with `CLI.parse` and write lines through committed `Console.Line` targets.
 A final `Program.Exit` result selects the application status after output and resource cleanup.
 The [CLI contract](docs/cli-runtime-design.md) defines text, JSON, quotas, and embedding behavior.
+
+`Program.path` observes the source entry or actual native executable.
+Committed `Lock.File` targets require exact host lock authority and retain their leases through application cleanup.
+The [lock contract](docs/program-lock-design.md) defines identity checks, contention, and embedding ownership.
+
 Run the [mode selection example](docs/examples/cli-cleanup-preview.lo) inside this repository:
 
 ```sh

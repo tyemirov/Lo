@@ -122,6 +122,9 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	switch op.Boundary() {
 	case catalog.Read:
 		target := a.unknown(node, types.ProcessContext())
+		if op.Name() == catalog.ProgramPath {
+			target = a.unknown(node, types.Path())
+		}
 		if op.Name() == catalog.HostInvocationCurrent {
 			target = a.unknown(node, types.HostInvocation())
 		}

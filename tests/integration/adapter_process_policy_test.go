@@ -220,7 +220,7 @@ func TestAdapterProcessPolicyRequiresSessionBeforeEvaluation(t *testing.T) {
 		t.Fatal(err)
 	}
 	var stdout, stderr bytes.Buffer
-	if runner.Run(options, program, newRunnerConsole(t, &stdout, &stderr)) != runner.ExitHost || evaluated.Load() || stdout.Len() != 0 {
+	if runner.Run(context.Background(), options, program, newRunnerConsole(t, &stdout, &stderr)) != runner.ExitHost || evaluated.Load() || stdout.Len() != 0 {
 		t.Fatalf("invalid Process session reached program evaluation: %s %s", stdout.String(), stderr.String())
 	}
 }
@@ -231,7 +231,7 @@ func TestAdapterProcessPolicyDoesNotGrantParentFileAuthority(t *testing.T) {
 	session, err := processhost.OpenTrusted(context.Background(), configuration, adapter.FileRoots{}, sessionCreator(func(context.Context, adapter.ProcessInvocation) (processhost.Primary, error) {
 		creations.Add(1)
 		return nil, errors.New("unexpected creation")
-	}))
+	}), adapter.NativeLockIO())
 	if err != nil {
 		t.Fatal(err)
 	}

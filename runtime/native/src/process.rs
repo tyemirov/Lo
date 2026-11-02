@@ -790,16 +790,30 @@ impl Processes {
     }
 
     pub fn close(&self) -> Result<(), String> {
-        self.close_wait(Some(Duration::from_millis(self.cleanup_ms)))
+        self.close_wait(Some(Duration::from_millis(self.cleanup_ms)), false)
     }
     pub fn wait_retained(&self) -> Result<(), String> {
-        self.close_wait(None)
+        self.close_wait(None, false)
     }
-    fn close_wait(&self, bound: Option<Duration>) -> Result<(), String> {
+    pub fn wait_owned(&self) -> Result<(), String> {
+        self.close_wait(None, true)
+    }
+    pub fn unresolved(&self) -> bool {
+        self.state.lock().unwrap().unresolved
+    }
+    fn close_wait(&self, bound: Option<Duration>, reject_unknown: bool) -> Result<(), String> {
         let deadline = bound.map(|duration| Instant::now() + duration);
         let mut state = self.state.lock().unwrap();
         state.closing = true;
         while state.active || state.unresolved || state.releasing {
+            if reject_unknown && state.unresolved && !state.active && !state.releasing {
+                let message = registry_error(
+                    "close",
+                    "ownership remains quarantined without a release handle",
+                );
+                state.close_error.get_or_insert(message.clone());
+                return Err(message);
+            }
             if let Some(deadline) = deadline {
                 let remaining = deadline.saturating_duration_since(Instant::now());
                 if remaining.is_zero() {
@@ -1254,6 +1268,8 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     let cancel = Arc::new(AtomicBool::new(false));
     let worker_cancel = cancel.clone();
     let worker_processes = processes.clone();
+    let worker_locks = context.session.locks.clone();
+    let worker_entry = context.session.entry.clone();
     let (tx, rx) = std::sync::mpsc::sync_channel(1);
     let spawned = std::thread::Builder::new()
         .name("lo-process-owner".into())
@@ -1360,7 +1376,12 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
                     state.unresolved = true;
                     // No proof of release exists. Retain the registry and its frozen
                     // descriptors; a caller cannot discharge unknown ownership.
-                    std::mem::forget(Box::new((result, worker_processes.clone())));
+                    std::mem::forget(Box::new((
+                        result,
+                        worker_processes.clone(),
+                        worker_locks.clone(),
+                        worker_entry.clone(),
+                    )));
                 }
                 p.changed.notify_all();
             }

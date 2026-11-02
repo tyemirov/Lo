@@ -11,6 +11,7 @@ pub enum AdapterValue {
     Console(crate::console::Value),
     Program(crate::program_exit::Value),
     Cli(crate::cli_options::Value),
+    Lock(crate::locks::Value),
     File(crate::files::Value),
     Process(crate::process::Value),
     Http(crate::http::Value),
@@ -22,6 +23,7 @@ macro_rules! delegate {
             Self::Console(v) => v.$method(),
             Self::Program(v) => v.$method(),
             Self::Cli(v) => v.$method(),
+            Self::Lock(v) => v.$method(),
             Self::File(v) => v.$method(),
             Self::Process(v) => v.$method(),
             Self::Http(v) => v.$method(),
@@ -44,6 +46,7 @@ impl AdapterValue {
     pub fn retained_children(&self) -> &[Handle] {
         match self {
             Self::Program(value) => value.retained_children(),
+            Self::Lock(value) => value.retained_children(),
             _ => &[],
         }
     }
@@ -53,6 +56,7 @@ impl AdapterValue {
             Self::Console(v) => Self::Console(v.snapshot()),
             Self::Program(v) => Self::Program(v.snapshot()),
             Self::Cli(v) => Self::Cli(v.snapshot()),
+            Self::Lock(v) => Self::Lock(v.snapshot()),
             Self::File(v) => Self::File(v.snapshot()),
             Self::Process(v) => Self::Process(v.snapshot()),
             Self::Http(v) => Self::Http(v.snapshot()),
@@ -61,6 +65,9 @@ impl AdapterValue {
 }
 
 pub struct Session {
+    pub initial_program_path: Result<Handle, String>,
+    pub entry: Arc<crate::program_entry::Entry>,
+    pub locks: Arc<crate::locks::Locks>,
     pub initial_process_context: Result<Handle, String>,
     pub initial_host_invocation: Result<Handle, String>,
     pub program: Arc<Program>,
@@ -77,6 +84,9 @@ impl Session {
     pub fn empty(program: Arc<Program>, steps: u64) -> Arc<Self> {
         let captured = crate::host_invocation::capture_inputs(&[]);
         Arc::new(Self {
+            initial_program_path: Err("program entry identity is unavailable".into()),
+            entry: Arc::new(crate::program_entry::Entry::unavailable()),
+            locks: Arc::new(crate::locks::Locks::empty()),
             initial_process_context: captured.process,
             initial_host_invocation: captured.host,
             program,
@@ -91,6 +101,7 @@ impl Session {
         })
     }
     pub fn close(&self) -> Result<(), Fault> {
+        self.locks.seal();
         let mut failures = vec![];
         if let Err(f) = self.http.shutdown() {
             failures.push(f);
@@ -124,14 +135,33 @@ impl Session {
     }
     pub fn wait_retained(&self) -> Result<(), Fault> {
         let http = self.http.wait_retained();
-        let process = self.processes.wait_retained().map_err(host);
+        let process = self.processes.wait_owned().map_err(host);
+        if self.processes.unresolved() {
+            return combine_cleanup(http.err(), process.err()).map_or(Ok(()), Err);
+        }
         let files = self.files.lock().unwrap().close().map_err(host);
-        combine_cleanup(combine_cleanup(http.err(), process.err()), files.err()).map_or(Ok(()), Err)
+        let locks = self.locks.close().map_err(host);
+        let entry = self.entry.close().map_err(host);
+        combine_cleanup(
+            combine_cleanup(
+                combine_cleanup(combine_cleanup(http.err(), process.err()), files.err()),
+                locks.err(),
+            ),
+            entry.err(),
+        )
+        .map_or(Ok(()), Err)
+    }
+}
+impl Drop for Session {
+    fn drop(&mut self) {
+        let _ = self.close();
+        let _ = self.wait_retained();
     }
 }
 
 pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     match &target.data {
+        Data::Adapter(AdapterValue::Lock(_)) => crate::locks::commit(context, site, target),
         Data::Adapter(AdapterValue::Console(_)) => crate::console::commit(context, site, target),
         Data::Adapter(AdapterValue::File(_)) => crate::files::commit(context, site, target),
         Data::Adapter(AdapterValue::Process(_)) => crate::process::commit(context, site, target),

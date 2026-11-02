@@ -83,6 +83,12 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
     }
 }
 pub fn admit(s: &Site) -> Result<(), String> {
+    if s.operation == crate::program_entry::OPERATION {
+        return crate::program_entry::admit(s);
+    }
+    if s.operation == crate::locks::OPERATION {
+        return crate::locks::admit(s);
+    }
     if s.operation == crate::console::OPERATION {
         return crate::console::admit(s);
     }

@@ -1,6 +1,6 @@
 # mac-cleanup Implementation Roadmap
 
-Status: technical plan and implementation backlog, reviewed against repository source on October 31, 2026.
+Status: technical plan and implementation backlog, updated on November 2, 2026.
 This plan does not implement a new language operation or establish full cleanup acceptance.
 The [application design](mac-cleanup-script-design.md) owns the observed workflow and its draft interfaces.
 The [application plan](mac-cleanup-plan.md) owns the cleanup policies and acceptance boundary.
@@ -15,7 +15,11 @@ Generic language changes stay reusable across applications.
 F026 through F028 implement M1: Console output, terminal results, and an executable declared CLI.
 Final local `make ci` and independent review passed.
 The [completion record](evidence/cli-runtime/checkpoint.json) contains the results.
-F029 is next for entry identity and exclusive file leases.
+F029 implements entry identity and exclusive file leases.
+P009 selects the [single-runtime cleanup](single-runtime-plan.md) before further application runtime features.
+The implementation order is I016, I015, I014, I017, then I018.
+The Go compiler frontend remains. The Rust runtime becomes the only application runtime.
+Compiler commands build the program; the produced executable supplies run and serve commands.
 M2 then combines those leases with F030 processors, F032 observations, and F035 command policy.
 This sequence does not depend on modules, user-defined types, generics, or packages.
 
@@ -49,6 +53,8 @@ The draft's `File.Directory.open` must not become an alias for the current root 
 F026 through F028 complete M1.
 The [CLI contract](cli-runtime-design.md) defines their selected interfaces and behavior.
 Other entries remain planned work outside the implemented language reference.
+F030 through F036 and I013 depend on I018.
+P007 research can continue during the runtime cleanup.
 
 | Issue | Work package | Direct dependencies | Observable completion |
 | --- | --- | --- | --- |
@@ -56,15 +62,15 @@ Other entries remain planned work outside the implemented language reference.
 | F027 | Terminal results and final process status. | F026 | Status selection after output and resource cleanup, including cleanup failures after requested status 1 or 2. |
 | F028 | Declared application flags and minimal value helpers. | F025, F027 | Executable help, invalid-argument handling, and dry-run selection. |
 | F029 | Program identity and exclusive nonblocking file leases. | F025 | Contention and release across interpreted and native programs. |
-| F030 | Selected text, byte, collection, path, and glob processors. | F025, F028 | Executable direct-file and probe predicates with bounded values. |
-| F031 | Generic JSON decoding and numeric presentation. | F030 | Typed Docker metadata extraction and deterministic report formatting. |
-| F032 | Public identity, allocation, fresh time, and volume observations. | F025 | Coherent metadata and distinct allocation/free-space reports. |
-| F033 | Explicit descendant directory authority and retained child observations. | F025 | Bounded recursive traversal without wider exact grants. |
-| F034 | Bounded tree snapshots and checked recursive removal. | F032, F033 | Complete eligibility preflight and identity-bound removal with partial progress. |
-| F035 | Host-admitted command deadlines and forwarded output. | F024, F026 | Requested durations, output accounting, and recoverable timeouts after confirmed cleanup. |
+| F030 | Selected text, byte, collection, path, and glob processors. | F025, F028, I018 | Executable direct-file and probe predicates with bounded values. |
+| F031 | Generic JSON decoding and numeric presentation. | F030, I018 | Typed Docker metadata extraction and deterministic report formatting. |
+| F032 | Public identity, allocation, fresh time, and volume observations. | F025, I018 | Coherent metadata and distinct allocation/free-space reports. |
+| F033 | Explicit descendant directory authority and retained child observations. | F025, I018 | Bounded recursive traversal without wider exact grants. |
+| F034 | Bounded tree snapshots and checked recursive removal. | F032, F033, I018 | Complete eligibility preflight and identity-bound removal with partial progress. |
+| F035 | Host-admitted command deadlines and forwarded output. | F024, F026, I018 | Requested durations, output accounting, and recoverable timeouts after confirmed cleanup. |
 | P007 | Select and qualify descendant process ownership. | F024 | A bounded ownership design with controlled fork, spawn, detach, and pipe evidence. |
-| F036 | Implement the selected descendant execution profile. | P007, F035 | Child creation remains confined and owned through complete cleanup. |
-| I013 | Complete the mac-cleanup application and fixture acceptance. | F028, F029, F030, F031, F032, F034, F035, F036 | One checked source passes the complete workflow matrix. |
+| F036 | Implement the selected descendant execution profile. | P007, F035, I018 | Child creation remains confined and owned through complete cleanup. |
+| I013 | Complete the mac-cleanup application and fixture acceptance. | F028, F029, F030, F031, F032, F034, F035, F036, I018 | One checked source passes the complete workflow matrix. |
 
 F022 remains the later module/package library initiative.
 The small generic contracts here can use builtins and maintained named flows before that initiative completes.
@@ -72,6 +78,15 @@ Existing exact grants and current Process restrictions keep their meanings until
 
 ```mermaid
 flowchart LR
+  P009 --> I016 --> I015 --> I014 --> I017 --> I018
+  I018 --> F030
+  I018 --> F031
+  I018 --> F032
+  I018 --> F033
+  I018 --> F034
+  I018 --> F035
+  I018 --> F036
+  I018 --> I013
   F024 --> F025
   F025 --> F026 --> F027 --> F028
   F025 --> F028
@@ -108,7 +123,7 @@ flowchart LR
 
 I013 can add incremental fixture entry sources after each milestone.
 Its complete acceptance remains open until M5.
-P007 research can proceed independently of console and file implementation.
+P007 research can proceed during the single-runtime cleanup and file implementation.
 It must not delay M1 through M4 or weaken current descendant denial.
 
 ## Console And Terminal Contracts
@@ -187,6 +202,7 @@ Help completes before lock acquisition, probes, cleaners, or removal.
 Unknown flags and conflicting modes select the application's declared argument-error status.
 
 F029 supplies entry identity and an exclusive nonblocking lock lease.
+The [lock contract](program-lock-design.md) selects entry capture, exact grants, session ownership, and the bounded replacement guarantee.
 Interpreted entry identity refers to the source entry.
 Native entry identity refers to the actual executable after relocation.
 Untrusted `argv[0]` and embedded source metadata cannot substitute for that observation.
@@ -216,7 +232,7 @@ New aliases for implemented behavior are outside this plan.
 | `CLI.parse` | F028 | Implemented pure declarations, structured errors, and help. |
 | `Console.Line.new` | F026 | Implemented committed output boundary. |
 | `Program.Exit.new` | F027 | Implemented inert terminal result and type-correct startup path. |
-| `Program.path`, `Lock.File.new` | F029 | Add entry identity and explicit lock authority. |
+| `Program.path`, `Lock.File.new` | F029 | Implemented entry identity and explicit lock authority. |
 | Boolean, list, byte, glob, and text processors | F030 | Reuse current flows where sufficient. Implement only the selected remainder. |
 | `File.Path.join`, `parent`, `name`, `to_string` | F030 | Select pure lexical path behavior without filesystem access. |
 | `Process.Arguments.format_shell` | F030 | Select display-only quoting. Never turn the display string into execution source. |
@@ -393,12 +409,14 @@ Their proof does not extend to arbitrary installed tool versions.
 The process profile must support every process behavior that the application claims to support.
 Unsupported behavior remains an explicit availability result, not another execution backend selected silently.
 
-### Runtime Matrix
+### Native Acceptance Matrix
+
+This matrix applies to the planned application after I018.
+Current interpreter evidence remains historical evidence for the migration ledger.
 
 | Environment | Required acceptance |
 | --- | --- |
-| Go interpreter on Darwin | Portable contracts and complete application fixtures under the selected Process profile. |
-| Native Darwin software | The same command, file, status, and lifecycle outcomes. |
+| Native Darwin software | Complete application fixtures under the selected Process profile, with independently specified command, file, status, and lifecycle outcomes. |
 | Native Linux under QEMU TCG | Portable value, Console, terminal, lock, file, and worklist contracts. Preserve explicit Process unavailability. |
 | Metal-linked Darwin artifact | Generic CLI compile/link/run checks without GPU operations or GPU qualification claims. |
 
@@ -409,21 +427,22 @@ It is not a prerequisite for the macOS application roadmap.
 
 ### Source And Test Map
 
-The paths below identify current implementation areas. New modules belong beside those areas under the selected issue's contract.
+The paths below identify retained and planned implementation areas after I018.
+The single-runtime plan owns extraction and relocation from the current Go runtime.
 
-| Issues | Go and shared source | Native source | Public regression anchors |
+| Issues | Compiler and shared source | Native source | Public regression anchors |
 | --- | --- | --- | --- |
-| F026, F027 | `internal/types/types.go`, `internal/value/application.go`, `internal/catalog/application.go`, `internal/execution/console.go`, `program.go`, `internal/adapter/console*.go`, and `internal/runner/execute.go` | `console.rs`, `console_process.rs`, `program_exit.rs`, `spawn_ownership.rs`, value traversal, exports, and CLI completion | `cli_runtime_test.go`, `console_boundary_test.go`, `llvm_console*.go`, and `llvm_program_exit_resources_test.go`. |
-| F028, F030, F031 | `internal/clioptions/`, catalog/type rules, `internal/runtimeops/`, pure processor dispatch, and `internal/runner/command.go` | `cli_options.rs`, corresponding value processors, CLI options, generated operation exports, and embedding validation | `cli_options_test.go`, `host_invocation_test.go`, builtin catalog fixtures, and new pure processor fixtures. |
-| F029 | Execution/session lifetime, adapter resource ownership, runner entry setup, and nominal values | Session cleanup, `exports.rs`, CLI entry setup, and a selected lock module | New two-process lock, relocation, replacement, cancellation, and cleanup-failure fixtures. |
-| F032 | `internal/adapter/file_metadata.go`, `file_observation.go`, `internal/value/file_observation.go`, and Host operations | `files.rs`, `file_entries.rs`, `file_observer.rs`, and measurement operations | `f025_file_observation_test.go`, platform metadata fixtures, and Host injection fixtures. |
-| F033, F034 | `internal/adapter/files.go`, `file_entries.go`, `file_remove.go`, `internal/value/file_leases.go`, and `internal/execution/file_guard.go` | `files.rs`, `file_entries.rs`, `file_observer.rs`, `file_leases.rs`, resource accounting, and CLI grant transport | `file_observation_lifetime_test.go`, worklist lifetime fixtures, probe fixtures, and new recursive-removal fixtures. |
-| P007, F035, F036 | Process policy/limits, `internal/processhost/`, and `tools/processbuild/` | `process.rs`, `process_transport.c`, trusted C launcher/configuration, and session cleanup | Process lifecycle, resource, transport, authority, output, and new descendant ownership fixtures. |
+| F026, F027 | `internal/types/types.go`, `internal/catalog/application.go`, and inspection metadata | `console.rs`, `console_process.rs`, `program_exit.rs`, `spawn_ownership.rs`, value traversal, exports, and CLI completion | Migrated compiled Console, terminal, and resource fixtures from I015. |
+| F028, F030, F031 | Catalog/type rules, static checking, inspection metadata, and native lowering | `cli_options.rs`, corresponding value processors, CLI options, generated operation exports, and ABI validation | Migrated compiled CLI and Host invocation fixtures, builtin catalog fixtures, and new pure processor fixtures. |
+| F029 | Program and lock catalog/type rules and native lowering | `program_entry.rs`, `locks.rs`, context lifetime, `exports.rs`, and CLI entry setup | Compiled two-process lock, relocation, replacement, cancellation, and cleanup-failure fixtures. |
+| F032 | File/Host schemas, catalog/type rules, inspection metadata, and native lowering | `files.rs`, `file_entries.rs`, `file_observer.rs`, and measurement operations | Migrated compiled observation fixtures, platform metadata fixtures, and native Host injection fixtures. |
+| F033, F034 | File schemas, catalog/type rules, resource effects, and native lowering | `files.rs`, `file_entries.rs`, `file_observer.rs`, `file_leases.rs`, resource accounting, and CLI grant transport | Compiled observation/worklist lifetime, probe, and new recursive-removal fixtures. |
+| P007, F035, F036 | Process schemas, static limits, and `tools/processbuild/` | `process.rs`, trusted C launcher/configuration under `runtime/native/host/process/`, transport, and context cleanup | Compiled Process lifecycle, resource, transport, authority, output, and new descendant ownership fixtures. |
 | I013 | Canonical application flows, fixture entry assembly, settings, and controlled command/protocol helpers | The same compiled application flows under selected target availability | `gateway_cleanup_test.go`, package/Docker fixture patterns, and complete workflow fixtures. |
 
 Paths without a directory prefix in the native column belong under `runtime/native/src/`.
-Paths without a prefix in the Go column continue the preceding directory in that cell.
 Test anchors belong under `tests/integration/`.
+Migrated fixture names and final package locations are owned by I015 and I017.
 Each selected signature also needs matching inspection metadata, semantic identity, runtime exports, and production/test inventories.
 
 ### Change Sequence
@@ -431,8 +450,8 @@ Each selected signature also needs matching inspection metadata, semantic identi
 1. Select the next issue's public types, signatures, authority, failures, and resource lifetime.
 2. Add its public CLI or embedding fixture before production changes.
 3. Confirm failure because the selected behavior is absent or incorrect.
-4. Implement the smallest canonical contract in Go and native runtime code.
-5. Run focused interpreter and native checks with current runtime bundles.
+4. Implement compiler contracts and the smallest canonical behavior in the single Rust runtime.
+5. Run focused compiler and native public checks with current runtime bundles.
 6. Verify source, launcher, runtime, and toolchain identities before native acceptance.
 7. Update semantic inventories and Darwin link inputs when the source or imports change.
 8. Add the milestone's executable application fixture and compare observable outcomes.
@@ -458,7 +477,6 @@ The remaining decisions follow below.
 
 | Owner | Decision to close before its implementation |
 | --- | --- |
-| F029 | Canonical entry identity, exact lock authority, lease ownership, and replacement guarantees. |
 | F030, F031 | Exact processor list, text/byte boundaries, JSON value/extraction schema, and formatting failures. |
 | F032 | Public metadata shapes, allocation arithmetic, fresh-clock errors, and containing-volume result schema. |
 | F033 | Recursive grant inputs, retained child representation, and provenance/release checks. |

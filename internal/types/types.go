@@ -31,6 +31,8 @@ const (
 	ConsoleReceiptKind     Kind = "Console.Receipt"
 	ProgramExitKind        Kind = "Program.Exit"
 	CLIOptionsKind         Kind = "CLI.Options"
+	LockFileKind           Kind = "Lock.File"
+	LockLeaseKind          Kind = "Lock.Lease"
 	HeadersKind            Kind = "HTTP.Headers"
 	RequestKind            Kind = "HTTP.Request"
 	URLKind                Kind = "HTTP.URL"
@@ -144,6 +146,8 @@ func HostInvocation() Type    { return atom(HostInvocationKind) }
 func ConsoleLine() Type       { return atom(ConsoleLineKind) }
 func ConsoleReceipt() Type    { return atom(ConsoleReceiptKind) }
 func ProgramExit() Type       { return atom(ProgramExitKind) }
+func LockFile() Type          { return atom(LockFileKind) }
+func LockLease() Type         { return atom(LockLeaseKind) }
 func CLIOptions() Type        { return atom(CLIOptionsKind) }
 func Headers() Type           { return atom(HeadersKind) }
 func HeaderEntries() List {
@@ -170,7 +174,7 @@ func ProcessTermination() Type { return atom(ProcessTerminationKind) }
 func AnyRecord() Type          { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind:
+	case URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind, LockFileKind, LockLeaseKind:
 		return atom(name), true
 	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true

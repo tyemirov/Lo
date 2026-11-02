@@ -363,6 +363,8 @@ unsafe fn cli_main(
     let mut limits = crate::value_resources::Limits::default();
     let mut limit_flags = std::collections::BTreeSet::new();
     let mut roots = crate::files::Options::default();
+    let mut lock_paths = vec![];
+    let mut lock_entry = false;
     let mut process_grants = vec![];
     let mut process_roots = vec![];
     let mut process_writes = vec![];
@@ -395,6 +397,11 @@ unsafe fn cli_main(
                 error = Some(message);
             }
             break;
+        } else if arg == "--lock-entry" && !lock_entry {
+            lock_entry = true;
+        } else if arg == "--lock-file" && i + 1 < args.len() {
+            i += 1;
+            lock_paths.push(args[i].to_owned());
         } else if arg == "--format" && !format_set && i + 1 < args.len() {
             i += 1;
             format = args[i];
@@ -628,8 +635,68 @@ unsafe fn cli_main(
             );
         }
     };
+    let entry = console
+        .program_entry()
+        .unwrap_or_else(|| Arc::new(crate::program_entry::Entry::unavailable()));
+    if lock_entry {
+        match &entry.path {
+            Ok(path) => {
+                if !lock_paths.contains(path) {
+                    lock_paths.push(path.clone());
+                }
+            }
+            Err(_) => {
+                let mut files = files;
+                let cleanup = combine_cleanup(
+                    files.close().err().map(host),
+                    combine_cleanup(
+                        processes.close().err().map(host),
+                        processes.wait_retained().err().map(host),
+                    ),
+                );
+                return report(
+                    combine_cleanup(Some(host("entry lock identity is unavailable")), cleanup)
+                        .unwrap(),
+                    &Context::new(program.clone(), steps),
+                    format == "json",
+                    None,
+                );
+            }
+        }
+    }
+    let locks = match crate::locks::Locks::configure_with_entry(&lock_paths, Some(entry.as_ref())) {
+        Ok(locks) => locks,
+        Err(message) => {
+            let mut files = files;
+            let cleanup = combine_cleanup(
+                files.close().err().map(host),
+                combine_cleanup(
+                    processes.close().err().map(host),
+                    processes.wait_retained().err().map(host),
+                ),
+            );
+            return report(
+                combine_cleanup(
+                    Some(if lock_paths.len() > crate::locks::MAX_LOCKS {
+                        limit("lock grants")
+                    } else {
+                        host(message)
+                    }),
+                    cleanup,
+                )
+                .unwrap(),
+                &Context::new(program.clone(), steps),
+                format == "json",
+                None,
+            );
+        }
+    };
     let captured = crate::host_invocation::capture_inputs(&program_arguments);
+    let initial_program_path = entry.value();
     let session = Arc::new(Session {
+        initial_program_path,
+        entry,
+        locks: Arc::new(locks),
         initial_process_context: captured.process,
         initial_host_invocation: captured.host,
         program: program.clone(),

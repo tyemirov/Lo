@@ -58,6 +58,10 @@ Both hosts also passed 500-step XOR training through installed compilation.
 
 I011 removed Go generation and the embedded runtime source bundle.
 The interpreter remains available through explicit execution commands.
+P009 supersedes the earlier decision to retain that interpreter.
+The [single-runtime plan](single-runtime-plan.md) assigns its removal to I014 through I018.
+The selected compiler retains parse, check, inspect, and build commands.
+The produced executable supplies run and serve commands through the Rust runtime.
 
 I011 passed the final focused HTTP qualification on both targets with unchanged numeric thresholds.
 The user selected review of earlier correctness, offline, and non-HTTP evidence instead of another full suite run.
@@ -308,7 +312,8 @@ The current 180-second, 2-GiB, and 64-MiB build limits remain applicable until a
 The migration does not retain an automatic Go or interpreter fallback.
 I011 removed the Go generator and runtime source bundle after the initial corpus and corrected fixture checks.
 The final qualification must bind all results to the current source and installed packages.
-The interpreter remains an explicit implementation of the current language for execution and differential tests.
+The current interpreter supplies execution and differential tests until I018 completes.
+P009 selects independent expected results and direct native coverage for its replacement.
 
 ## Offline Acceptance Procedure
 

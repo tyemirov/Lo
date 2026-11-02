@@ -1223,6 +1223,30 @@
       "oracle": "literal_assertions:TestRunBuiltinCatalog/List.unfold"
     },
     {
+      "activation_errors": [
+        "Lock.Busy",
+        "Lock.Failed"
+      ],
+      "capability": "Lock.acquire",
+      "errors": null,
+      "operation": "Lock.File.new",
+      "positive": [
+        "TestRunBuiltinCatalog/Lock.File.new",
+        "TestProgramLockPureTarget",
+        "TestProgramLockEntryGrant"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Lock.File.new"
+      ],
+      "runtime_negative": [
+        "TestProgramLockRepeatedAcquisition",
+        "TestProgramLockReplacementGuarantee"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Lock.File.new"
+    },
+    {
       "activation_errors": null,
       "capability": "",
       "errors": [
@@ -2032,6 +2056,27 @@
       ],
       "negative_applicability": "catalog_failure_or_activation",
       "oracle": "literal_assertions:TestRunBuiltinCatalog/Program.Exit.new"
+    },
+    {
+      "activation_errors": null,
+      "capability": "Program.path",
+      "errors": [
+        "Program.EntryUnavailable"
+      ],
+      "operation": "Program.path",
+      "positive": [
+        "TestRunBuiltinCatalog/Program.path",
+        "TestProgramLockEntry"
+      ],
+      "boundary": "positive:cli_interpreter_and_native;negative:compiler_cli;runtime_negative:fixture_specific",
+      "negative": [
+        "TestSemanticBuiltinRejections/Program.path"
+      ],
+      "runtime_negative": [
+        "TestProgramLockGoMissingEntry"
+      ],
+      "negative_applicability": "catalog_failure_or_activation",
+      "oracle": "literal_assertions:TestRunBuiltinCatalog/Program.path"
     },
     {
       "activation_errors": null,
@@ -3173,6 +3218,22 @@
         "TestCLIStackQuotaPreservesPrefixAndReservesTerminal"
       ],
       "oracle": "logical_quota:prefix_preserved;terminal_payloads_reserved_together;failure=exit2",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--lock-file",
+      "tests": [
+        "TestProgramLockAuthority"
+      ],
+      "oracle": "explicit_authority_and_no_content_mutation",
+      "boundary": "cli_interpreter_and_native"
+    },
+    {
+      "id": "--lock-entry",
+      "tests": [
+        "TestProgramLockEntryGrant"
+      ],
+      "oracle": "explicit_authority_and_no_content_mutation",
       "boundary": "cli_interpreter_and_native"
     }
   ],
@@ -5044,6 +5105,38 @@
     ],
     "TestCLIStackQuotaPreservesPrefixAndReservesTerminal": [
       "TestCLIStackQuotaPreservesPrefixAndReservesTerminal"
+    ],
+    "TestRunBuiltinCatalog/Program.path": [
+      "TestRunBuiltinCatalog/Program.path"
+    ],
+    "TestProgramLockEntry": [
+      "TestProgramLockNativeRelocation",
+      "TestProgramLockNativeEntryDiffersFromSource"
+    ],
+    "TestSemanticBuiltinRejections/Program.path": [
+      "TestSemanticBuiltinRejections/Program.path"
+    ],
+    "TestProgramLockGoMissingEntry": [],
+    "TestRunBuiltinCatalog/Lock.File.new": [
+      "TestRunBuiltinCatalog/Lock.File.new"
+    ],
+    "TestProgramLockPureTarget": [
+      "TestProgramLockPureTarget"
+    ],
+    "TestProgramLockEntryGrant": [
+      "TestProgramLockEntryGrant"
+    ],
+    "TestSemanticBuiltinRejections/Lock.File.new": [
+      "TestSemanticBuiltinRejections/Lock.File.new"
+    ],
+    "TestProgramLockRepeatedAcquisition": [
+      "TestProgramLockRepeatedAcquisition"
+    ],
+    "TestProgramLockReplacementGuarantee": [
+      "TestProgramLockReplacementGuarantee"
+    ],
+    "TestProgramLockAuthority": [
+      "TestProgramLockAuthority"
     ]
   }
 }

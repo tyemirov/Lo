@@ -29,8 +29,8 @@ type executionResult struct {
 
 const consoleProtocolTimeout = time.Second
 
-func executeProgram(inv invocation, p execution.Program, console *adapter.Console) int {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+func executeProgram(parent context.Context, inv invocation, p execution.Program, console *adapter.Console) int {
+	ctx, stop := signal.NotifyContext(parent, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	return runProgram(ctx, inv, p, console)
 }
@@ -63,7 +63,14 @@ func finishConsole(console *adapter.Console, status int) int {
 	return status
 }
 
-func runProgram(ctx context.Context, inv invocation, p execution.Program, console *adapter.Console) int {
+func runProgram(ctx context.Context, inv invocation, p execution.Program, console *adapter.Console) (status int) {
+	if entry := execution.InitialProgramEntry(ctx); entry != nil {
+		defer func() {
+			if err := execution.CloseUnclaimedProgramEntry(entry); err != nil {
+				status = ExitHost
+			}
+		}()
+	}
 	if err := console.SetRendering(inv.command, inv.format); err != nil {
 		return finishConsole(console, reportConsole(console, inv.format, err))
 	}
@@ -91,7 +98,20 @@ func runProgramOutput(ctx context.Context, inv invocation, p execution.Program, 
 	if err != nil {
 		return report(err)
 	}
-	hostSession, err := processhost.Open(ctx, configuration, adapter.FileRoots{Read: inv.readRoots, Write: inv.writeRoots, List: inv.listRoots, Remove: inv.removeRoots, OpenFiles: inv.openFilesRoots})
+	policy, err := adapter.NewLockPolicy(inv.lockFiles, inv.lockEntry)
+	if err != nil {
+		return report(err)
+	}
+	configuration, err = processhost.WithLockPolicy(configuration, policy)
+	if err != nil {
+		return report(err)
+	}
+	if err := ctx.Err(); err != nil {
+		return report(err)
+	}
+	// The runner owns host resources until HTTP requests and evaluator cleanup
+	// complete. Operation contexts still carry cancellation to the host boundary.
+	hostSession, err := processhost.Open(context.WithoutCancel(ctx), configuration, adapter.FileRoots{Read: inv.readRoots, Write: inv.writeRoots, List: inv.listRoots, Remove: inv.removeRoots, OpenFiles: inv.openFilesRoots})
 	if err != nil {
 		return report(err)
 	}

@@ -271,24 +271,20 @@ impl Http {
                 let _ = connection.stream.shutdown(Shutdown::Both);
             }
         }
+        let mut worker_fault = None;
         for worker in workers {
             if worker.join().is_err() {
-                return Err(host("HTTP request worker failed"));
+                worker_fault =
+                    combine_cleanup(worker_fault, Some(host("HTTP request worker failed")));
             }
         }
         let resolver_closed = self.resolver.close();
         let mut state = self.state.lock().unwrap();
-        if let Some(fault) = state.failure.take() {
-            match resolver_closed {
-                Ok(()) => Err(fault),
-                Err(cleanup) => Err(fault.with_details(BoundaryDetails {
-                    cleanup_errors: vec![cleanup.message()],
-                    ..Default::default()
-                })),
-            }
-        } else {
-            resolver_closed
-        }
+        combine_cleanup(
+            combine_cleanup(state.failure.take(), worker_fault),
+            resolver_closed.err(),
+        )
+        .map_or(Ok(()), Err)
     }
 }
 fn handle_request(

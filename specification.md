@@ -443,6 +443,7 @@ Examples:
 * `File.Scan`
 * `Host.Invocation`
 * `Console.Line`
+* `Lock.File`
 * `HTTP.Server`
 
 Some adapter operations produce committable targets.
@@ -513,7 +514,8 @@ A committable target may be:
 1. a nominal File target: `File.Write`, `File.Append`, or `File.Remove`, or
 2. an HTTP target: `HTTP.Server` or `HTTP.Client.Request`, or
 3. a `Process.Command` target, under the selected host execution profile, or
-4. a `Console.Line` target, with an enabled host output sink.
+4. a `Console.Line` target, with an enabled host output sink, or
+5. a `Lock.File` target, under exact host lock authority.
 
 Examples:
 
@@ -748,6 +750,8 @@ The initial boundary-oriented built-in types are:
 * `Host.Invocation`
 * `Console.Line`
 * `Console.Receipt`
+* `Lock.File`
+* `Lock.Lease`
 * `Program.Exit`
 * `CLI.Options`
 * `HTTP.Request`
@@ -1627,6 +1631,55 @@ JSON mode uses base64 console events on each selected destination, then the norm
 Terminal envelopes contain `exit_code` and retain `status: "ok"` for successful execution.
 The [executable example](docs/examples/cli-cleanup-preview.lo) demonstrates help, argument errors, and application mode selection.
 
+### 9.8 Program Entry And File Locks
+
+`Program.path() -> File.Path!` observes the captured program entry path.
+The interpreter captures identity from the descriptor used to read its source.
+The native runtime captures the actual executable through operating-system identity checks.
+It does not use `argv[0]` or embedded source metadata.
+The path remains immutable after capture.
+An embedding must inject identity explicitly or receive `Program.EntryUnavailable` when it observes the path.
+
+`Lock.File.new(path: File.Path) -> Lock.File` constructs a pure inert target.
+It grants no host authority and does not access the filesystem.
+Commit requires a separate exact lock grant for an existing regular file.
+`--lock-file PATH` grants that authority for a selected file.
+`--lock-entry` grants that authority for the captured program entry.
+Grant admission rejects symlink traversal.
+
+Grant paths must be clean absolute paths with at most 4096 UTF-8 bytes, excluding the terminal NUL.
+They have at most 256 normal components, including the basename and excluding the root.
+Target path text must match an admitted grant exactly.
+Entry capture can resolve an alias before identity checks and publication of the canonical path.
+
+Commit acquires an exclusive lock without a wait and returns `Lock.Lease`.
+Each acquisition uses a fresh independent open file description.
+The host checks the granted identity and pathname before and after acquisition.
+Contention, including repeated acquisition within one session, produces `Lock.Busy`.
+Other acquisition failures produce `Lock.Failed` after successful descriptor cleanup.
+Both recoverable failures contain an empty record as input.
+
+The host admits at most 128 lock grants and 128 live lock leases per session.
+Missing authority, cancellation, exceeded limits, and cleanup failures remain terminal host failures.
+Lock grants do not change separately granted File or Process authority.
+
+The session owns acquired descriptors through HTTP, Process, and File cleanup, including all retained child joins.
+Ordinary value disposal cannot release a lease.
+Executed children cannot inherit the acquired descriptors.
+A trusted fork stub remains under retained host ownership until exec or cleanup completes.
+The host checks descriptor cleanup before final output and application status selection.
+A close failure prevents successful completion.
+
+The lock applies to a file object and all its hardlinks.
+It does not prevent an external pathname replacement.
+A replacement object can acquire a separate lock.
+Mixed interpreted/native callers contend when they select the same file object.
+
+Both nominal values have no public fields or release operation.
+Automatic output contains only redaction metadata.
+Diagnostic snapshots cannot activate a lock.
+The [lock contract](docs/program-lock-design.md) defines entry capture, embedding ownership, and the bounded filesystem guarantee.
+
 ## 10. Flow Definitions
 
 A flow is a named reusable graph template.
@@ -1916,7 +1969,7 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 
 ### 15.5 Commit Rules
 
-* Commit accepts bound nominal File targets, `HTTP.Server`, `HTTP.Client.Request`, `Process.Command`, and `Console.Line`.
+* Commit accepts bound nominal File targets, `HTTP.Server`, `HTTP.Client.Request`, `Process.Command`, `Console.Line`, and `Lock.File`.
 * A committed target activates exactly once per commit statement evaluation.
 
 ### 15.6 Null, Absence, and Record Rules
@@ -2211,8 +2264,10 @@ Section 9.1 defines File observations, removal constructors, and their failure k
 Section 8.8 defines callback failure propagation for `Flow.fold`.
 Sections 9.2 and 9.4 define HTTP constructor failure kinds.
 Section 9.5 defines context observation, discovery, Process construction, termination accessors, activation errors, and host unavailability.
+
 Section 9.6 defines the invocation snapshot and `Host.InvocationFailed`.
 Section 9.7 defines Console construction and activation, terminal construction, and declared option parsing failures.
+Section 9.8 defines entry observation and exclusive lock failures.
 
 The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may

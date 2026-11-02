@@ -307,6 +307,11 @@ pub struct Context {
     pub scopes: u64,
     pub cancelled: bool,
     pub completed: bool,
+    pub evaluated: bool,
+    pub owns_session: bool,
+    pub entry_registered: bool,
+    pub locks_registered: bool,
+    pub close_succeeded: Option<bool>,
     pub final_result: Option<std::sync::Weak<crate::value::Value>>,
     pub cancel_polls: Cell<u64>,
     pub cancel_after_polls: Option<u64>,
@@ -899,6 +904,11 @@ impl Context {
             scopes: 0,
             cancelled: false,
             completed: false,
+            evaluated: false,
+            owns_session: true,
+            entry_registered: false,
+            locks_registered: false,
+            close_succeeded: None,
             final_result: None,
             cancel_polls: Cell::new(0),
             cancel_after_polls: None,
@@ -908,7 +918,9 @@ impl Context {
     }
     pub fn request(session: Arc<Session>) -> Result<Self, Fault> {
         let files = session.files.lock().unwrap().fork().map_err(host)?;
-        Ok(Self::with_session(session, files, false))
+        let mut context = Self::with_session(session, files, false);
+        context.owns_session = false;
+        Ok(context)
     }
     pub fn invoke(&mut self, flow: usize, args: &[Handle]) -> Outcome {
         unsafe { crate::exports::invoke(self, flow, args, 0) }
@@ -1167,6 +1179,12 @@ pub fn frame(e: &Handle, flow: &str, operation: &str, input: Handle) -> Handle {
 
 impl Drop for Context {
     fn drop(&mut self) {
+        if self.owns_session && !self.completed {
+            let _ = self.close();
+            let _ = self.session.close();
+            let _ = self.session.wait_retained();
+            let _ = self.session.console.close();
+        }
         LIVE_CONTEXTS.fetch_sub(1, Ordering::Relaxed);
     }
 }

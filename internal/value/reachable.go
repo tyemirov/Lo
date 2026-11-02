@@ -30,6 +30,8 @@ func VisitWhile(values []Value, visit func(Value) bool) {
 			continue
 		}
 		switch item := current.(type) {
+		case lockFile:
+			pending = append(pending, item.path)
 		case cliOptions:
 			pending = append(pending, item.fields)
 		case programExit:

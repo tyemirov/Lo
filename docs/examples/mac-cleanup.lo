@@ -545,7 +545,7 @@ flow Started(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit!
 }
 
 flow Locked(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit! {
-    lock = Lock.File.new(Program.path(), "exclusive", "nonblocking")
+    lock = Lock.File.new(Program.path())
     lease = commit lock
     selector_1 = invocation.effective_uid
     choice_1 = Match.new(selector_1,

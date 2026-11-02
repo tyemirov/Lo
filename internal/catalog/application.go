@@ -3,18 +3,36 @@ package catalog
 import "github.com/MarcoPoloResearchLab/Lo/internal/types"
 
 const (
-	ConsoleLineNew       = "Console.Line.new"
-	ConsoleWrite         = "Console.write"
-	ConsoleInvalidLine   = "Console.InvalidLine"
-	ConsoleWriteFailed   = "Console.WriteFailed"
-	ProgramExitNew       = "Program.Exit.new"
-	ProgramInvalidExit   = "Program.InvalidExit"
-	CLIParse             = "CLI.parse"
-	CLIInvalidDefinition = "CLI.InvalidDefinition"
-	CLIInvalidArguments  = "CLI.InvalidArguments"
+	ProgramPath             = "Program.path"
+	ProgramEntryUnavailable = "Program.EntryUnavailable"
+	LockFileNew             = "Lock.File.new"
+	LockAcquire             = "Lock.acquire"
+	LockBusy                = "Lock.Busy"
+	LockFailed              = "Lock.Failed"
+	ConsoleLineNew          = "Console.Line.new"
+	ConsoleWrite            = "Console.write"
+	ConsoleInvalidLine      = "Console.InvalidLine"
+	ConsoleWriteFailed      = "Console.WriteFailed"
+	ProgramExitNew          = "Program.Exit.new"
+	ProgramInvalidExit      = "Program.InvalidExit"
+	CLIParse                = "CLI.parse"
+	CLIInvalidDefinition    = "CLI.InvalidDefinition"
+	CLIInvalidArguments     = "CLI.InvalidArguments"
 )
 
 func addApplications(operations map[string]Operation, fixed func(string, []types.Parameter, types.Type)) {
+	fixed(ProgramPath, nil, must(types.NewFallible(types.Path())))
+	observed := operations[ProgramPath].(operation)
+	observed.boundary = Read
+	observed.errors = []string{ProgramEntryUnavailable}
+	operations[ProgramPath] = observed
+	fixed(LockFileNew, []types.Parameter{{Name: "path", Type: types.Path()}}, types.LockFile())
+	target := operations[LockFileNew].(operation)
+	target.boundary = Effect
+	target.targetPosition = 0
+	target.activation = []string{LockBusy, LockFailed}
+	operations[LockFileNew] = target
+
 	flag := must(types.NewRecord([]types.Field{
 		{Name: "name", Type: types.String()},
 		{Name: "aliases", Type: must(types.NewList(types.String()))},

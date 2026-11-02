@@ -146,6 +146,7 @@
     "_posix_spawnattr_setsigdefault",
     "_posix_spawnp",
     "_pread",
+    "_proc_pidinfo",
     "_pthread_attr_destroy",
     "_pthread_attr_init",
     "_pthread_attr_setstacksize",

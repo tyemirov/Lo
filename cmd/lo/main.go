@@ -8,6 +8,7 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
+	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/inspect"
 	"github.com/MarcoPoloResearchLab/Lo/internal/nativebuild"
 	"github.com/MarcoPoloResearchLab/Lo/internal/runner"
@@ -23,7 +24,7 @@ import (
 var installedToolchainSHA256 string
 
 func main() { os.Exit(execute(os.Args[1:], os.Stdout, os.Stderr)) }
-func execute(args []string, stdout, stderr io.Writer) int {
+func execute(args []string, stdout, stderr io.Writer) (status int) {
 	if adapter.HandleConsoleWriter(args) {
 		return 0
 	}
@@ -34,7 +35,23 @@ func execute(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), runner.ExitHost)
 	}
-	file, err := readSource(inv.Path())
+	var entry execution.ProgramEntry
+	var file string
+	if inv.Command() == runner.RunCommand || inv.Command() == runner.ServeCommand {
+		entry, err = execution.OpenProgramEntry(inv.Path())
+		if err == nil {
+			file, err = entry.ReadSource()
+		}
+		if entry != nil {
+			defer func() {
+				if err := execution.CloseUnclaimedProgramEntry(entry); err != nil {
+					status = runner.ReportRuntime(stderr, inv.Format(), err)
+				}
+			}()
+		}
+	} else {
+		file, err = readSource(inv.Path())
+	}
 	if err != nil {
 		return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.ReadFailed, diagnostic.Source, err.Error(), nil), runner.ExitHost)
 	}
@@ -132,7 +149,11 @@ func execute(args []string, stdout, stderr io.Writer) int {
 			if err != nil {
 				return runner.ReportRuntime(stderr, inv.Format(), err)
 			}
-			return runner.Run(inv, program, console)
+			ctx, err := execution.WithProgramEntry(context.Background(), entry)
+			if err != nil {
+				return runner.ReportRuntime(stderr, inv.Format(), err)
+			}
+			return runner.Run(ctx, inv, program, console)
 		}
 		output := ""
 		if t := result.ResultType(); t != nil {

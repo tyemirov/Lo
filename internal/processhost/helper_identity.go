@@ -2,4 +2,4 @@
 
 package processhost
 
-const nativeHelperSHA256 = "a2ab0271d762d91ccc327c648a2b5ff46ecc85553a70d8e05ca2ec57151bebff"
+const nativeHelperSHA256 = "09801deccd3d64b0dad2ca70ac32cdcf8239582b7181db7e2b7c5dc4957af126"

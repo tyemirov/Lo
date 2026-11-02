@@ -156,7 +156,7 @@ func TestProcessHostSessionLateCreationRetainsSingleCleanupOwner(t *testing.T) {
 		close(canceled)
 		<-publish
 		return primary, nil
-	}))
+	}), adapter.NativeLockIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func TestProcessHostSessionSettledCreationFailureDoesNotRetainResources(t *testi
 	config, root, path := sessionFixture(t)
 	session, err := processhost.OpenTrusted(context.Background(), config, adapter.FileRoots{}, sessionCreator(func(context.Context, adapter.ProcessInvocation) (processhost.Primary, error) {
 		return nil, errors.New("private creator payload")
-	}))
+	}), adapter.NativeLockIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,7 +279,7 @@ func TestProcessHostSessionParentCancellationStartsOwnedShutdown(t *testing.T) {
 		close(entered)
 		<-ctx.Done()
 		return nil, ctx.Err()
-	}))
+	}), adapter.NativeLockIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -308,7 +308,7 @@ func TestProcessHostSessionConcurrentCloseSharesCleanup(t *testing.T) {
 	session, err := processhost.OpenTrusted(context.Background(), configuration, adapter.FileRoots{}, sessionCreator(func(context.Context, adapter.ProcessInvocation) (processhost.Primary, error) {
 		close(entered)
 		return primary, nil
-	}))
+	}), adapter.NativeLockIO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -351,7 +351,7 @@ func TestProcessHostSessionProtectsRegisteredFileAliases(t *testing.T) {
 	session, err := processhost.OpenTrusted(context.Background(), configuration, adapter.FileRoots{Write: []string{root}}, sessionCreator(func(context.Context, adapter.ProcessInvocation) (processhost.Primary, error) {
 		creates.Add(1)
 		return nil, errors.New("unexpected creation")
-	}))
+	}), adapter.NativeLockIO())
 	if err != nil {
 		t.Fatal(err)
 	}

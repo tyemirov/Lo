@@ -47,6 +47,10 @@ These sources establish design mechanisms, not acceptance of the proposed artifa
 No language extension is necessary for this architecture.
 The Go frontend and Rust runtime remain implementation components.
 Producer tools can remain separate because they do not participate after the final compiler build.
+P009 selects the [single-runtime cleanup](single-runtime-plan.md) in I014 through I018.
+I016 relocates shared native host assets and updates their source inventories.
+Payload producers must consume those canonical inputs and current runtime identities.
+Compiler packaging and interpreter removal retain separate acceptance gates.
 
 ## Host, Target, And Variant Matrix
 

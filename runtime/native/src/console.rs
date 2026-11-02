@@ -5,7 +5,7 @@ use std::{
     collections::BTreeMap,
     ffi::c_void,
     fs::File,
-    sync::{Mutex, TryLockError},
+    sync::{Arc, Mutex, TryLockError},
     time::{Duration, Instant},
 };
 #[path = "console_process.rs"]
@@ -126,6 +126,12 @@ impl Console {
         match &self.sink {
             Sink::Cli(image) => image.paths.clone(),
             _ => vec![],
+        }
+    }
+    pub fn program_entry(&self) -> Option<Arc<crate::program_entry::Entry>> {
+        match &self.sink {
+            Sink::Cli(image) => Some(image.entry.clone()),
+            _ => None,
         }
     }
     pub fn protect_name(&self, parent: &File, name: &str) -> Result<(), Fault> {
