@@ -193,6 +193,40 @@ Output and cleanup failures override the requested application status.
 The caller owns the final value and must release it through the existing value API.
 The [CLI contract](cli-runtime-design.md) defines output bounds, byte framing, redaction, and failure progress.
 
+### Program Entry And Lock Registration
+
+The [lock header](../runtime/native/include/lo_program_lock.h) defines explicit entry identity, lock authority, and checked cleanup.
+An embedding starts without entry identity or lock authority.
+`lo_context_set_program_entry(context, bytes, length)` injects an existing regular file as the program entry.
+The bytes contain an absolute UTF-8 path without a terminal NUL.
+This registration grants no File, Process, or Lock authority.
+
+`lo_context_set_lock_files(context, paths, count, lock_entry)` registers exact lock grants before evaluation.
+Each path is a clean absolute UTF-8 C string.
+`lock_entry` is zero or one.
+One selects the previously captured entry as an additional grant.
+An explicit grant for the same path does not add another entry grant.
+The registration rejects invalid paths, duplicate explicit paths, and unavailable entry selection.
+
+Both setters require the owner thread, a unique session, and no evaluation work.
+Successful registration returns 1.
+Rejected registration returns 0 without partial authority.
+Entry registration precedes lock registration.
+The [lock contract](program-lock-design.md) defines limits, identity checks, and recoverable activation failures.
+
+`lo_context_close(context)` supplies checked cleanup after successful, failed, or cancelled evaluation.
+It seals admission and joins retained HTTP and Process ownership before lock release.
+It checks File, lock, entry, and Console cleanup.
+It does not emit a terminal payload or select an application status.
+Its success result confirms cleanup without removal of an earlier evaluation failure.
+The host must keep callback data alive until checked cleanup and context release complete.
+
+Successful terminal completion uses `lo_context_complete`.
+It releases lock leases before terminal bytes.
+Ordinary Lo value release cannot close a lock lease.
+The context destructor preserves retained child joins and lock ownership.
+The void context release API does not establish checked completion success.
+
 ### Program Metadata
 
 B008 introduced the shared source spans used by the current metadata format.

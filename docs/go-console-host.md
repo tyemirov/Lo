@@ -41,7 +41,7 @@ The runner accepts an output owner through these entry points:
 
 ```go
 runner.Execute(program, arguments, console)
-runner.Run(options, program, console)
+runner.Run(ctx, options, program, console)
 runner.RunContext(ctx, options, program, factory, observer, console)
 ```
 
@@ -50,6 +50,13 @@ It takes ownership of the supplied Console host for that invocation.
 It returns a status after output and resource cleanup finish.
 These APIs do not exit the caller's process.
 `runner.Main` is the process entry point that exits with the returned status.
+
+`Run` and `RunContext` preserve explicitly injected program entry identity from their context.
+An embedding can capture that identity with `execution.OpenProgramEntry` and inject it with `execution.WithProgramEntry`.
+Unavailable identity produces `Program.EntryUnavailable` when observed.
+The host session adopts a captured entry once and rejects a second adoption.
+HTTP requests share that existing owner.
+The [lock contract](program-lock-design.md) defines exact lock authority and cleanup ownership.
 
 The following example supplies two separate memory buffers:
 
@@ -95,7 +102,7 @@ Context cancellation also stops a caller that waits for another record.
 `console.WriteTerminal` reserves both terminal payloads before either output action.
 It validates authority for both nonempty payloads first.
 It writes stdout before stderr and requests a flush for each payload.
-The runner calls this API only after Program, File, and Process cleanup finish.
+The runner calls this API only after Program, File, Process, and Lock cleanup finish.
 The runner also joins retained Process ownership before terminal output.
 
 `Console.WriteFailed` contains the destination, known encoded-byte count, and failure stage.

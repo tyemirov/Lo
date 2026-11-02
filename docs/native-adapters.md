@@ -25,6 +25,7 @@ Only an explicit `commit` activates a target.
 | HTTP client | `--http-allow` | Authorize the selected method and HTTP origin. |
 | HTTP server | `serve --listen` | Authorize the port. |
 | Console output | `--max-console-bytes` | Enable inherited stdout/stderr with a logical-byte quota. |
+| Exclusive file locks | `--lock-file`, `--lock-entry` | Grant acquisition on exact retained file identities. |
 
 File operations keep opened directory roots.
 File observations belong to one request.
@@ -44,6 +45,14 @@ The native CLI joins resource cleanup before terminal output and application sta
 The native embedding API completes through `lo_context_complete`.
 It returns a status without exiting the host process.
 The [runtime contract](native-runtime-contract.md#console-registration-and-completion) defines registration, callbacks, and completion ownership.
+
+## Program Entry And File Locks
+
+The native runtime observes its actual executable identity through `Program.path`.
+The [lock contract](program-lock-design.md) defines exact authority and exclusive acquisition without a wait.
+The session retains acquired descriptors through application cleanup and all retained child joins.
+Executed children cannot inherit these descriptors.
+The [lock header](../runtime/native/include/lo_program_lock.h) supplies embedding registration and checked cleanup after failed evaluation.
 
 ## Process Execution
 

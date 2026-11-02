@@ -254,6 +254,18 @@ Retained descendant handles do not acquire authority from path text alone.
 Observation and removal grants remain separate.
 Resource admission and handle release require explicit tests before this example can become executable.
 
+## Program Entry And Locks
+
+F029 implements the entry observation and lock target used by `Locked`.
+The [lock contract](program-lock-design.md) defines exact host authority, identity checks, and session ownership.
+
+| Operation | Implemented contract |
+| --- | --- |
+| `Program.path()` | Observe the captured source entry or actual native executable. |
+| `Lock.File.new(path)` | Construct a pure target for exclusive acquisition without a wait. Commit returns `Lock.Lease`. |
+
+The application lock remains held through resource cleanup, including failure and cancellation.
+
 ## Proposed Generic Host Operations
 
 | Operations | Proposed contract |
@@ -262,15 +274,12 @@ Resource admission and handle release require explicit tests before this example
 | `Process.Arguments.format_shell(arguments)` | Pure shell quoting for display only. Execution continues to use argument lists. |
 | `Process.Command.with_output(command, output)` | Pure command copy with `capture` or inherited stdout/stderr. Stdin remains closed. |
 | `Process.Command.with_timeout(command, seconds)` | Pure command copy with a timeout subject to host admission limits. |
-| `Program.path()` | Observe the interpreted entry source or the native entry executable for program-scoped identity. |
-| `Lock.File.new(path, access, wait)` | Construct a lock target. Activation returns a session-owned lease or `Lock.Busy` for contention. |
 
 `CLI.Options` exposes `flags: Map<String,Bool>`, `help_requested: Bool`, and `help_text: String`.
 All declared flags are present and false until selected.
 The parser supplies `-h` and `--help` and does not accept positional operands.
 The script's flags are `--dry-run` and `--report` in one exclusive group.
 Help completes before lock acquisition.
-The cleanup lock remains held until program cleanup completes, including failure and cancellation.
 Child timeouts are 1800 seconds for cleaners, 60 for pip discovery, 30 for probes, and 180 for inventory.
 
 A command deadline produces recoverable `Process.Timeout` only after owned-process cleanup finishes.
