@@ -155,6 +155,12 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `cooperative lock`: A host lock protocol followed by every process within its stated concurrency guarantee.
 - `shared lock`: A lock that permits concurrent participating readers or lifecycle owners and excludes an exclusive lock.
 - `exclusive lock`: A lock that excludes all other participating shared and exclusive holders.
+- `lock lease`: Session ownership of an acquired exclusive lock until application resource cleanup completes.
+- `lock grant`: Explicit host authority to acquire a lock on one retained file identity.
+- `quarantine`: A retained owner that prevents resource release when child ownership is unknown.
+- `program entry`: The source file used by an interpreter or the executable image used by a native program.
+- `open file description`: State that the operating system shares between duplicated file descriptors for one open operation.
+- `vnode`: The Darwin filesystem object that identifies one file or directory.
 - `basename`: The final name component of a filesystem path.
 - `Unix epoch`: The time origin at 00:00:00 UTC on January 1, 1970.
 - `logical size`: The observed file length in bytes, independent of reclaimed disk storage.
@@ -309,6 +315,9 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `baseline`: A recorded benchmark result used to assess a later implementation.
 - `differential test`: A test that compares observable results from two implementations of the same contract.
 - `runtime bundle`: The exact runtime sources and dependencies included with a compiler for executable construction.
+- `native runtime`: The Rust implementation of Lo primitive operations, value ownership, and host and device boundaries.
+- `compiler command`: A command that parses, checks, inspects, or compiles Lo source without application execution.
+- `program command`: An execution command supplied by a compiled Lo application.
 - `logical cost`: The execution steps and value weight charged under the Lo host execution contract.
 - `lowering plan`: A compiler representation with explicit statements, branches, calls, source locations, and logical costs.
 - `basic block`: An ordered instruction sequence with one entry point and one final control transfer.
@@ -429,6 +438,9 @@ Use the simple present, simple past, simple future, imperative, or infinitive fo
 
 ## Repository Technical Verbs
 
+- `acquire`: Establish session ownership of an exclusive lock through committed activation. Forms: acquire, acquires, acquired.
+- `inject`: Supply an explicit dependency through a test or embedding boundary. Forms: inject, injects, injected.
+- `seal`: Prevent new resource admission during shutdown. Forms: seal, seals, sealed.
 - `flush`: Complete the output sink action that publishes bytes already accepted by that sink. Forms: flush, flushes, flushed.
 - `join`: Wait for an owned operation or process to finish and receive its final result. Forms: join, joins, joined.
 - `capture`: Get host inputs once and keep their immutable result. Forms: capture, captures, captured.
