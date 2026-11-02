@@ -13,28 +13,19 @@ use std::{
 pub const FRAME_BYTES: usize = 2097152;
 
 pub struct Image {
+    pub entry: std::sync::Arc<crate::program_entry::Entry>,
     pub paths: Vec<String>,
     pub registry: crate::process::Processes,
     path: String,
 }
 impl Image {
     pub fn bind() -> Result<Self, String> {
-        let path = std::env::current_exe().map_err(|e| e.to_string())?;
-        let resolved = path.canonicalize().map_err(|e| e.to_string())?;
-        let path = path
-            .to_str()
-            .ok_or("Console image path requires UTF-8")?
-            .to_owned();
-        let resolved = resolved
-            .to_str()
-            .ok_or("Console image path requires UTF-8")?
-            .to_owned();
-        let mut paths = vec![path.clone()];
-        if resolved != path {
-            paths.push(resolved);
-        }
+        let entry = std::sync::Arc::new(crate::program_entry::Entry::native()?);
+        let path = entry.path.as_ref().map_err(Clone::clone)?.clone();
+        let paths = vec![path.clone()];
         let registry = crate::process::protection(&paths)?;
         Ok(Self {
+            entry,
             paths,
             registry,
             path,

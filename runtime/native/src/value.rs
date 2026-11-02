@@ -226,6 +226,8 @@ const ATOM_NAMES: &[&str] = &[
     "Console.Line",
     "Console.Receipt",
     "Program.Exit",
+    "Lock.File",
+    "Lock.Lease",
     "CLI.Options",
     "File.Append",
     "File.Remove",

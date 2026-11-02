@@ -1545,3 +1545,24 @@ pub unsafe extern "C" fn lo_op_Flow_2Eworklist(
 ) {
     call(c, a, n, s, o, Some("Flow.worklist"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Program_2Epath(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Program.path"))
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Lock_2EFile_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Lock.File.new"))
+}

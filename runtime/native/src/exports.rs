@@ -215,6 +215,12 @@ pub unsafe fn call(
             if op == crate::console::OPERATION {
                 return crate::console::execute(&mut *c, &s, &a);
             }
+            if op == crate::program_entry::OPERATION {
+                return crate::program_entry::execute(&mut *c, &s);
+            }
+            if op == crate::locks::OPERATION {
+                return crate::locks::execute(&mut *c, &s, &a);
+            }
             if op == crate::program_exit::OPERATION {
                 return crate::program_exit::execute(&mut *c, &s, &a);
             }
@@ -795,6 +801,7 @@ pub unsafe extern "C" fn lo_context_run(c: *mut Context, out: *mut ResultSlot) {
     }
     (*c).resources.reclaim_orphans();
     (*c).values.reclaim_orphans();
+    (*c).evaluated = true;
     lo_entry(c, ptr::null(), 0, 0, out);
     let result = read(&*c, ptr::read(out)).and_then(|value| match cause(&value) {
         Some(error) => Err(Fault::Recoverable(error)),
@@ -912,6 +919,7 @@ pub unsafe extern "C" fn lo_context_complete(
     let context = &mut *c;
     if context.owner != std::thread::current().id()
         || context.completed
+        || !context.owns_session
         || context.scopes != 0
         || context.depth != 0
         || !context.tapes.is_empty()
@@ -955,6 +963,7 @@ pub unsafe extern "C" fn lo_context_complete(
         (result, cleanup) => Err(combine_cleanup(result.err(), cleanup.err()).unwrap()),
     };
     context.completed = true;
+    context.close_succeeded = Some(result.is_ok());
     match result {
         Ok(code) => {
             *status = code;
@@ -965,4 +974,121 @@ pub unsafe extern "C" fn lo_context_complete(
             0
         }
     }
+}
+
+fn registration_ready(context: &Context) -> bool {
+    context.owner == std::thread::current().id()
+        && !context.evaluated
+        && !context.completed
+        && context.final_result.is_none()
+        && context.owns_session
+        && context.fault.is_none()
+        && context.scopes == 0
+        && context.depth == 0
+        && context.weight == 0
+        && context.remaining == context.session.steps
+        && Arc::strong_count(&context.session) == 1
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_set_program_entry(
+    c: *mut Context,
+    bytes: *const u8,
+    length: usize,
+) -> i32 {
+    let Some(context) = c.as_mut() else { return 0 };
+    if !registration_ready(context)
+        || context.entry_registered
+        || context.locks_registered
+        || bytes.is_null()
+        || length == 0
+        || length > 4096
+    {
+        return 0;
+    }
+    let Ok(path) = std::str::from_utf8(std::slice::from_raw_parts(bytes, length)) else {
+        return 0;
+    };
+    let Ok(entry) = crate::program_entry::Entry::inject(path) else {
+        return 0;
+    };
+    let session = Arc::get_mut(&mut context.session).unwrap();
+    session.initial_program_path = entry.value();
+    session.entry = Arc::new(entry);
+    context.entry_registered = true;
+    1
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_set_lock_files(
+    c: *mut Context,
+    paths: *const *const std::os::raw::c_char,
+    count: usize,
+    lock_entry: i32,
+) -> i32 {
+    let Some(context) = c.as_mut() else { return 0 };
+    if !registration_ready(context)
+        || context.locks_registered
+        || count > crate::locks::MAX_LOCKS
+        || (count != 0 && paths.is_null())
+        || !(0..=1).contains(&lock_entry)
+    {
+        return 0;
+    }
+    let mut selected = vec![];
+    for index in 0..count {
+        let path = *paths.add(index);
+        if path.is_null() {
+            return 0;
+        }
+        let bytes = std::ffi::CStr::from_ptr(path).to_bytes();
+        if bytes.is_empty() || bytes.len() > 4096 {
+            return 0;
+        }
+        let Ok(path) = std::str::from_utf8(bytes) else {
+            return 0;
+        };
+        selected.push(path.to_owned());
+    }
+    if lock_entry == 1 {
+        let Ok(path) = &context.session.entry.path else {
+            return 0;
+        };
+        if !selected.contains(path) {
+            selected.push(path.clone());
+        }
+    }
+    let Ok(locks) =
+        crate::locks::Locks::configure_with_entry(&selected, Some(context.session.entry.as_ref()))
+    else {
+        return 0;
+    };
+    Arc::get_mut(&mut context.session).unwrap().locks = Arc::new(locks);
+    context.locks_registered = true;
+    1
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_close(c: *mut Context) -> i32 {
+    let Some(context) = c.as_mut() else { return 0 };
+    if context.owner != std::thread::current().id()
+        || context.scopes != 0
+        || context.depth != 0
+        || !context.tapes.is_empty()
+        || !context.owns_session
+    {
+        return 0;
+    }
+    if let Some(succeeded) = context.close_succeeded {
+        return succeeded as i32;
+    }
+    let session = context.session.clone();
+    let cleanup = combine_cleanup(context.close().err(), session.close().err());
+    let cleanup = combine_cleanup(cleanup, session.wait_retained().err());
+    let cleanup = combine_cleanup(cleanup, session.console.close().err());
+    let succeeded = cleanup.is_none();
+    if let Some(cleanup) = cleanup {
+        let fault = combine_cleanup(context.fault.take(), Some(cleanup)).unwrap();
+        context.store_fault(fault);
+    }
+    context.completed = true;
+    context.close_succeeded = Some(succeeded);
+    succeeded as i32
 }
