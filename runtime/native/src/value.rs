@@ -172,6 +172,7 @@ pub enum Data {
     Bool(bool),
     Null,
     Bytes(Vec<u8>),
+    Glob(crate::glob::Glob),
     List(Vec<Handle>),
     Record(BTreeMap<String, Handle>),
     Map(Vec<(Handle, Handle)>),
@@ -209,6 +210,7 @@ const ATOM_NAMES: &[&str] = &[
     "Null",
     "Scalar",
     "Bytes",
+    "Glob",
     "Float",
     "Error",
     "Record",
@@ -276,6 +278,7 @@ pub fn new(typ: Type, data: Data) -> Handle {
             Data::Bool(_) => 1,
             Data::Null | Data::Flow(_) => 0,
             Data::Bytes(b) => b.len() as u64,
+            Data::Glob(pattern) => pattern.weight(),
             Data::List(v) => sum_weight(v.iter().map(|x| x.weight)),
             Data::Record(v) => {
                 sum_weight(v.iter().map(|(n, x)| add_weight(n.len() as u64, x.weight)))
@@ -327,6 +330,7 @@ pub fn new(typ: Type, data: Data) -> Handle {
         | Data::Bool(_)
         | Data::Null
         | Data::Bytes(_)
+        | Data::Glob(_)
         | Data::Flow(_)
         | Data::Device(_) => false,
     };
@@ -434,6 +438,7 @@ impl Value {
             Data::Bool(v) => json!(v),
             Data::Null => Json::Null,
             Data::Bytes(v) => json!(STANDARD.encode(v)),
+            Data::Glob(pattern) => json!(pattern.pattern),
             Data::List(v) => json!(v.iter().map(|x| x.json()).collect::<Vec<_>>()),
             Data::Record(v) => Json::Object(v.iter().map(|(n, x)| (n.clone(), x.json())).collect()),
             Data::Map(v) => json!(v
@@ -514,6 +519,7 @@ impl Value {
             Data::Bool(v) => v.to_string(),
             Data::Null => "null".into(),
             Data::Bytes(b) => quote(&STANDARD.encode(b)),
+            Data::Glob(pattern) => quote(&pattern.pattern),
             Data::List(v) => list(v),
             Data::Record(v) => format!(
                 "{{{}}}",

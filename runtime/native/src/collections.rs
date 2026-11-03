@@ -9,6 +9,35 @@ use std::{
 pub fn admit(site: &Site, flows: &[Flow]) -> Result<(), String> {
     let invalid = || format!("invalid native collection contract {}", site.operation);
     let operation = site.operation.as_str();
+    if operation == "List.sort" {
+        let Some(Argument::Value(Type::List(element))) = site.arguments.first() else {
+            return Err(invalid());
+        };
+        let Some(Argument::Flow(callback)) = site.arguments.last() else {
+            return Err(invalid());
+        };
+        let flow = flows.get(*callback).ok_or_else(invalid)?;
+        let mut parameters = Vec::new();
+        for argument in &site.arguments[1..site.arguments.len() - 1] {
+            let Argument::Value(typ) = argument else {
+                return Err(invalid());
+            };
+            parameters.push(typ.clone());
+        }
+        parameters.push(*element.clone());
+        parameters.push(*element.clone());
+        if flow.output != atom("Int")
+            || site.typ != Type::List(element.clone())
+            || parameters.len() != flow.parameters.len()
+            || parameters
+                .iter()
+                .zip(&flow.parameters)
+                .any(|(a, (_, b))| a != b)
+        {
+            return Err(invalid());
+        }
+        return Ok(());
+    }
     let unfold = operation == "List.unfold";
     let fold = matches!(operation, "List.fold" | "Flow.fold" | "Flow.worklist");
     let context_start = if unfold || fold { 2 } else { 1 };
@@ -186,6 +215,9 @@ impl Drop for CallbackArguments<'_> {
 
 /// The context pointer permits callback reentry without retaining a Rust borrow.
 pub unsafe fn execute(context: *mut Context, site: &Site, args: &[Handle]) -> Outcome {
+    if site.operation == "List.sort" {
+        return sort(context, site, args);
+    }
     if site.operation == "Flow.worklist" {
         return worklist(context, site, args);
     }
@@ -450,4 +482,84 @@ unsafe fn worklist(context: *mut Context, site: &Site, args: &[Handle]) -> Outco
         scope.output = Some(output.clone());
     }
     result
+}
+
+unsafe fn sort(context: *mut Context, site: &Site, args: &[Handle]) -> Outcome {
+    let mut scope = Scope::enter(context);
+    let values = args[0].items();
+    let count = values.len();
+    if count < 2 {
+        return Ok(args[0].clone());
+    }
+    (*context).values.preflight(args[0].weight)?;
+    let slots = count
+        .checked_mul(2)
+        .and_then(|n| {
+            args.len()
+                .checked_mul(2)
+                .and_then(|extra| n.checked_add(extra))
+        })
+        .ok_or_else(|| limit("live value bytes"))?;
+    let bytes = (slots as u64)
+        .checked_mul(std::mem::size_of::<Handle>() as u64)
+        .ok_or_else(|| limit("live value bytes"))?;
+    let _scratch = crate::processors::Scratch::new(context, bytes)?;
+    (*context).values.preflight(args[0].weight)?;
+    let mut current = Vec::with_capacity(count);
+    for value in values {
+        (*context).step()?;
+        current.push(value.clone());
+    }
+    let mut following = Vec::with_capacity(count);
+    let mut callback_args = Vec::with_capacity(args.len());
+    let Data::Flow(flow) = args.last().unwrap().data else {
+        return Err(host("missing sort callback identity"));
+    };
+    let mut width = 1usize;
+    while width < count {
+        let mut start = 0;
+        while start < count {
+            let middle = start.saturating_add(width).min(count);
+            let end = middle.saturating_add(width).min(count);
+            let mut left = start;
+            let mut right = middle;
+            while left < middle && right < end {
+                (*context).step()?;
+                callback_args.clear();
+                for value in &args[1..args.len() - 1] {
+                    (*context).step()?;
+                    callback_args.push(value.clone());
+                }
+                callback_args.push(current[left].clone());
+                callback_args.push(current[right].clone());
+                let comparison = crate::exports::invoke(context, flow, &callback_args, site.id)?;
+                let take_left = !comparison.integer().is_positive();
+                drop(comparison);
+                callback_args.clear();
+                (*context).scope_keep(scope.id, &[]);
+                if take_left {
+                    following.push(current[left].clone());
+                    left += 1;
+                } else {
+                    following.push(current[right].clone());
+                    right += 1;
+                }
+            }
+            for value in &current[left..middle] {
+                (*context).step()?;
+                following.push(value.clone());
+            }
+            for value in &current[right..end] {
+                (*context).step()?;
+                following.push(value.clone());
+            }
+            start = end;
+        }
+        std::mem::swap(&mut current, &mut following);
+        following.clear();
+        width = width.saturating_mul(2);
+    }
+    let output = new(site.typ.clone(), Data::List(current));
+    scope.output = Some(output.clone());
+    Ok(output)
 }

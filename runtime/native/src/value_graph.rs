@@ -236,6 +236,7 @@ pub(crate) fn is_leaf(value: &Handle) -> bool {
             | Data::Text(_)
             | Data::Bool(_)
             | Data::Null
+            | Data::Glob(_)
             | Data::Tensor(_)
     )
 }

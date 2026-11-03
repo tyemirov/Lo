@@ -148,6 +148,16 @@ impl Ledger {
         self.admit(id, value);
         Ok(())
     }
+    pub fn reserve_temporary(&mut self, bytes: u64) -> Result<(), Fault> {
+        if exceeds(self.live, bytes, self.limits.live_bytes) {
+            return Err(limit("live value bytes"));
+        }
+        self.live = self.live.saturating_add(bytes);
+        Ok(())
+    }
+    pub fn release_temporary(&mut self, bytes: u64) {
+        self.live -= bytes;
+    }
     pub fn reserve_worklist(&mut self, count: usize) -> Result<(), Fault> {
         let bytes = (count as u64)
             .checked_mul(16)

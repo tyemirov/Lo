@@ -224,6 +224,9 @@ pub unsafe fn call(
             if op == crate::program_exit::OPERATION {
                 return crate::program_exit::execute(&mut *c, &s, &a);
             }
+            if crate::processors::SUPPORTED.contains(&op) && op != "List.sort" {
+                return crate::processors::execute(&mut *c, &s, &a);
+            }
             if op == crate::cli_options::OPERATION {
                 return crate::cli_options::execute(&mut *c, &s, &a);
             }
@@ -247,7 +250,8 @@ pub unsafe fn call(
             }
             if matches!(
                 op,
-                "List.map"
+                "List.sort"
+                    | "List.map"
                     | "List.filter"
                     | "List.fold"
                     | "List.flat_map"

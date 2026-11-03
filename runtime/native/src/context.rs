@@ -730,7 +730,8 @@ impl Program {
                 }
                 if matches!(
                     site.operation.as_str(),
-                    "List.map"
+                    "List.sort"
+                        | "List.map"
                         | "List.filter"
                         | "List.fold"
                         | "List.flat_map"
