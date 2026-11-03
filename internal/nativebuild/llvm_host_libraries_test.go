@@ -3,14 +3,13 @@ package nativebuild
 import (
 	"context"
 	"encoding/json"
+	"github.com/MarcoPoloResearchLab/Lo/internal/nativeplan"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/nativeplan"
 )
 
 func TestLLVMLinuxHostLibrarySnapshots(t *testing.T) {
@@ -23,7 +22,7 @@ func TestLLVMLinuxHostLibrarySnapshots(t *testing.T) {
 		t.Fatal(err)
 	}
 	pin := llvmFile{Path: "input", SHA256: snapshotTestDigest(t, input)}
-	arguments, names := llvmLinkRecipe("linux/arm64", device.SoftwareBuild)
+	arguments, names := llvmLinkRecipe("linux/arm64", targetconfig.SoftwareBuild)
 	inputs := map[string]llvmFile{}
 	for _, name := range names {
 		inputs[name] = pin
@@ -50,7 +49,7 @@ func TestLLVMLinuxHostLibrarySnapshots(t *testing.T) {
 		t.Fatal(err)
 	}
 	snapshot := filepath.Join(root, "snapshots")
-	admitted, err := admitLLVM(context.Background(), manifest, "linux/arm64", snapshot, device.SoftwareBuild)
+	admitted, err := admitLLVM(context.Background(), manifest, "linux/arm64", snapshot, targetconfig.SoftwareBuild)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +77,7 @@ func TestLLVMLinuxHostLibrarySnapshots(t *testing.T) {
 	if err := writeFile(manifest, data); err != nil {
 		t.Fatal(err)
 	}
-	_, err = admitLLVM(context.Background(), manifest, "linux/arm64", filepath.Join(root, "rejected"), device.SoftwareBuild)
+	_, err = admitLLVM(context.Background(), manifest, "linux/arm64", filepath.Join(root, "rejected"), targetconfig.SoftwareBuild)
 	if err == nil || !strings.Contains(err.Error(), "requires path host/lib/") {
 		t.Fatalf("host library alias admission: %v", err)
 	}

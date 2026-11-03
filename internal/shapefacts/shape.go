@@ -1,8 +1,8 @@
-package tensor
+package shapefacts
 
 import (
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"math"
 	"math/big"
 	"slices"
@@ -57,7 +57,7 @@ func (s shape) Dims() []int64 { return slices.Clone(s.dims) }
 func (s shape) Rank() int     { return len(s.dims) }
 func (s shape) Count() uint64 { return s.count }
 func (s shape) Weight() uint64 {
-	return 16 + 4*s.count + 8*uint64(s.Rank()) + uint64(len(Dtype)+len(device.CPU))
+	return 16 + 4*s.count + 8*uint64(s.Rank()) + uint64(len(Dtype)+len(targetconfig.CPU))
 }
 func (s shape) Limits() error {
 	if len(s.dims) > MaxRank {
@@ -120,7 +120,6 @@ type Plan interface {
 	plan()
 }
 type plan struct {
-	op            string
 	shape         Shape
 	axes          []int
 	steps, region uint64
@@ -131,7 +130,7 @@ func (p *plan) Shape() Shape  { return p.shape }
 func (p *plan) Steps() uint64 { return p.steps }
 
 func Prepare(op string, a, b Shape, indices []*big.Int) (Plan, error) {
-	p := &plan{op: op, shape: a, region: 1}
+	p := &plan{shape: a, region: 1}
 	var err error
 	switch op {
 	case catalog.TensorAdd, catalog.TensorSub, catalog.TensorMul, catalog.TensorDiv:

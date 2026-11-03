@@ -2,8 +2,8 @@ package inspect
 
 import (
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"math/big"
 	"strings"
 
@@ -172,7 +172,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 			target = values[1]
 			from = values[0].location
 		} else if op.Name() == catalog.TensorNew || op.Name() == catalog.CheckpointDecode {
-			cpu := device.CPU
+			cpu := targetconfig.CPU
 			target.known = &cpu
 		} else if len(values) > 0 {
 			target.known = values[0].location
@@ -187,13 +187,13 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		if catalog.IsTransfer(op.Name()) {
 			a.data.Transfers = append(a.data.Transfers, entry)
 		}
-		if target.known == nil || *target.known != device.CPU {
-			a.capability(resource, device.Capability)
+		if target.known == nil || *target.known != targetconfig.CPU {
+			a.capability(resource, targetconfig.Capability)
 		}
-		if catalog.IsTransfer(op.Name()) && (from == nil || *from != device.CPU) {
+		if catalog.IsTransfer(op.Name()) && (from == nil || *from != targetconfig.CPU) {
 			source := values[0]
 			source.known = from
-			a.capability(a.resource(c, op.Name(), node, source), device.Capability)
+			a.capability(a.resource(c, op.Name(), node, source), targetconfig.Capability)
 		}
 		out.location = target.known
 	}
@@ -308,7 +308,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	case catalog.ParametersTo, catalog.SGDStateTo, catalog.AdamWStateTo:
 		out.fields = trainingFields(values[0].fields, values[1].known)
 	case catalog.CheckpointDecode:
-		cpu := device.CPU
+		cpu := targetconfig.CPU
 		out.fields = trainingFields(values[1].fields, &cpu)
 	case catalog.TensorDevice:
 		out.known = values[0].location

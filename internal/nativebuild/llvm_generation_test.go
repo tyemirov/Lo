@@ -3,6 +3,7 @@ package nativebuild
 import (
 	"context"
 	"encoding/json"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -10,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
 	"github.com/MarcoPoloResearchLab/Lo/internal/nativeplan"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
@@ -82,7 +82,7 @@ func TestLLVMExecutableGenerationDiagnostics(t *testing.T) {
 			if err := writeFile(output, []byte("previous artifact")); err != nil {
 				t.Fatal(err)
 			}
-			_, failure = BuildLLVM(ctx, program, output, "darwin/arm64", device.SoftwareBuild, manifest)
+			_, failure = BuildLLVM(ctx, program, output, "darwin/arm64", targetconfig.SoftwareBuild, manifest)
 			if failure == nil || string(failure.Data().Code) != want {
 				t.Fatalf("generation diagnostic: got %v, want %s", failure, want)
 			}
@@ -104,7 +104,7 @@ func generationTestManifest(t *testing.T, root string) string {
 		t.Fatal(err)
 	}
 	pin := llvmFile{Path: "input", SHA256: snapshotTestDigest(t, input)}
-	arguments, _ := llvmLinkRecipe("darwin/arm64", device.SoftwareBuild)
+	arguments, _ := llvmLinkRecipe("darwin/arm64", targetconfig.SoftwareBuild)
 	record := llvmDistribution{ABI: nativeplan.ABIIdentity, LLVM: llvmVersion, Host: runtime.GOOS + "/" + runtime.GOARCH,
 		Compiler: pin, Targets: map[string]llvmTarget{"darwin/arm64": {
 			Triple: "aarch64-apple-darwin", Linker: pin, Runtime: pin,

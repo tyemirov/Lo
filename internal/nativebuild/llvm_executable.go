@@ -8,6 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
+	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
+	"github.com/MarcoPoloResearchLab/Lo/internal/llvmemit"
+	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
+	"github.com/MarcoPoloResearchLab/Lo/internal/nativeplan"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"io"
 	"os"
 	"os/exec"
@@ -16,13 +22,6 @@ import (
 	"runtime"
 	"slices"
 	"strings"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
-	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
-	"github.com/MarcoPoloResearchLab/Lo/internal/llvmemit"
-	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
-	"github.com/MarcoPoloResearchLab/Lo/internal/nativeplan"
 )
 
 const llvmVersion = "21.1.8"
@@ -66,12 +65,12 @@ type admittedLLVM struct {
 }
 
 // Link recipes belong to the compiler. A manifest identifies their exact inputs.
-func llvmLinkRecipe(target string, backend device.BuildBackend) (arguments, inputs []string) {
-	if backend == device.MetalBuild {
+func llvmLinkRecipe(target string, backend targetconfig.BuildBackend) (arguments, inputs []string) {
+	if backend == targetconfig.MetalBuild {
 		if target != metalconfig.Target {
 			return nil, nil
 		}
-		arguments, inputs = llvmLinkRecipe(target, device.SoftwareBuild)
+		arguments, inputs = llvmLinkRecipe(target, targetconfig.SoftwareBuild)
 		return append(arguments, "{input:foundation}", "{input:metal}", "{input:objc}"), append(inputs, "foundation", "metal", "objc")
 	}
 	switch target {
@@ -88,11 +87,11 @@ func llvmLinkRecipe(target string, backend device.BuildBackend) (arguments, inpu
 	}
 }
 
-func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend device.BuildBackend) (admittedLLVM, error) {
+func admitLLVM(ctx context.Context, manifest, target, snapshots string, backend targetconfig.BuildBackend) (admittedLLVM, error) {
 	return admitPinnedLLVM(ctx, manifest, target, snapshots, backend, "")
 }
 
-func admitPinnedLLVM(ctx context.Context, manifest, target, snapshots string, backend device.BuildBackend, manifestSHA256 string) (admittedLLVM, error) {
+func admitPinnedLLVM(ctx context.Context, manifest, target, snapshots string, backend targetconfig.BuildBackend, manifestSHA256 string) (admittedLLVM, error) {
 	var admitted admittedLLVM
 	if manifest == "" {
 		return admitted, fmt.Errorf("development compiler requires --toolchain with an offline distribution manifest")
@@ -149,7 +148,7 @@ func admitPinnedLLVM(ctx context.Context, manifest, target, snapshots string, ba
 		"linux/arm64":  "aarch64-unknown-linux-gnu",
 	}[target]
 	selected, ok := distribution.Targets[target]
-	if backend == device.MetalBuild {
+	if backend == targetconfig.MetalBuild {
 		if distribution.Metal == nil {
 			return admitted, fmt.Errorf("toolchain has no Metal runtime")
 		}
@@ -221,7 +220,7 @@ func admitPinnedLLVM(ctx context.Context, manifest, target, snapshots string, ba
 	if admitted.archive, err = file("Lo runtime archive", selected.Runtime); err != nil {
 		return admitted, err
 	}
-	if backend == device.MetalBuild {
+	if backend == targetconfig.MetalBuild {
 		if _, err = file("embedded Metal kernel", distribution.Metal.Kernel); err != nil {
 			return admitted, err
 		}
@@ -255,19 +254,19 @@ func admitPinnedLLVM(ctx context.Context, manifest, target, snapshots string, ba
 }
 
 // BuildLLVM compiles and links using only admitted, explicitly supplied inputs.
-func BuildLLVM(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend, manifest string) (receipt Receipt, failure diagnostic.Diagnostic) {
+func BuildLLVM(ctx context.Context, program ir.Program, output, target string, backend targetconfig.BuildBackend, manifest string) (receipt Receipt, failure diagnostic.Diagnostic) {
 	return buildLLVM(ctx, program, output, target, backend, manifest, "")
 }
 
 // BuildInstalledLLVM binds manifest admission to the installed frontend identity.
-func BuildInstalledLLVM(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend, manifest, manifestSHA256 string) (Receipt, diagnostic.Diagnostic) {
+func BuildInstalledLLVM(ctx context.Context, program ir.Program, output, target string, backend targetconfig.BuildBackend, manifest, manifestSHA256 string) (Receipt, diagnostic.Diagnostic) {
 	if manifestSHA256 == "" {
 		return Receipt{}, diagnostic.New(diagnostic.BuildToolchain, diagnostic.Build, "installed compiler requires a toolchain SHA-256 identity", nil)
 	}
 	return buildLLVM(ctx, program, output, target, backend, manifest, manifestSHA256)
 }
 
-func buildLLVM(ctx context.Context, program ir.Program, output, target string, backend device.BuildBackend, manifest, manifestSHA256 string) (receipt Receipt, failure diagnostic.Diagnostic) {
+func buildLLVM(ctx context.Context, program ir.Program, output, target string, backend targetconfig.BuildBackend, manifest, manifestSHA256 string) (receipt Receipt, failure diagnostic.Diagnostic) {
 	fail := func(code diagnostic.Code, err error) (Receipt, diagnostic.Diagnostic) {
 		return Receipt{}, diagnostic.New(code, diagnostic.Build, fmt.Sprintf("build LLVM executable: %v", err), nil)
 	}
@@ -280,10 +279,10 @@ func buildLLVM(ctx context.Context, program ir.Program, output, target string, b
 	if target != "darwin/arm64" && target != "linux/arm64" {
 		return fail(diagnostic.BuildTarget, fmt.Errorf("unsupported target %q", target))
 	}
-	if backend == device.MetalBuild && (target != metalconfig.Target || runtime.GOOS+"/"+runtime.GOARCH != metalconfig.Target) {
+	if backend == targetconfig.MetalBuild && (target != metalconfig.Target || runtime.GOOS+"/"+runtime.GOARCH != metalconfig.Target) {
 		return fail(diagnostic.BuildTarget, fmt.Errorf("Metal requires a %s host and target", metalconfig.Target))
 	}
-	if backend != device.SoftwareBuild && backend != device.MetalBuild {
+	if backend != targetconfig.SoftwareBuild && backend != targetconfig.MetalBuild {
 		return fail(diagnostic.BuildBackend, fmt.Errorf("unsupported device backend %q", backend))
 	}
 	ctx, cancel := context.WithTimeout(ctx, BuildTimeout)
