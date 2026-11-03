@@ -1,18 +1,12 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct {U32 status,code;const Value *value;} ResultSlot;
 typedef struct {int stage,class_id,started,cleanup_complete,termination_kind,termination_value;Size stdin_written,stdout_size,stderr_size;unsigned int cleanup_failures;Size ownership;} NativeResult;
 typedef int (*Cancel)(const void *);
 typedef void (*Driver)(Size,const unsigned char*,Size,const unsigned char*,Size,unsigned char*,unsigned char*,Size,Cancel,const void*,U64,NativeResult*);
-extern Context *lo_context_new(const ContextOptions *);
-extern void lo_context_run(Context*,ResultSlot*);
-extern void lo_context_free(Context*);
-extern void lo_value_release(const Value*);
+
 extern int lo_context_process_driver(Context*,Driver,Size);
 extern int lo_context_process_driver_limits(Context*,U64,U64,Size);
 extern int lo_context_process_close(Context*);

@@ -1,22 +1,15 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-typedef struct Program Program;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct { U32 status, code; const Value *value; } Result;
-extern const Program *lo_program_new(void);
-extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *, const ContextOptions *);
-extern void lo_context_free(Context *), lo_context_run(Context *, Result *);
+
 extern void lo_context_cancel_after_polls(Context *, U64);
 extern U64 lo_context_remaining_steps(const Context *), lo_context_scope_count(const Context *), lo_context_depth(const Context *);
 extern U64 lo_runtime_live_values(void), lo_runtime_live_programs(void), lo_runtime_live_contexts(void);
-extern void lo_value_release(const Value *);
+
 extern void lo_scope_leave(Context *, const Value *, U64);
 extern long write(int, const void *, unsigned long);
-#define ABI(name) void name(Context *context, const Value *const *arguments, U64 count, U64 site, Result *out)
+#define ABI(name) void name(Context *context, const Value *const *arguments, U64 count, U64 site, ResultSlot *out)
 extern ABI(lo_scope_enter);
 extern ABI(lo_step);
 extern ABI(lo_literal);
@@ -33,7 +26,7 @@ static void before(unsigned kind, U64 site) {
     if (failed || closed || calls >= 15 || kinds[calls] != kind || lo_literal_sequence_sites[calls] != site) error = 1;
     ++calls;
 }
-static void after(Result *result) {
+static void after(ResultSlot *result) {
     if (result->status == 0) {
         if (!result->value || owned >= 15) error = 2;
         else owners[owned++] = result->value;
@@ -91,7 +84,7 @@ static int session(U64 budget, U64 cancel_poll) {
     const Program *program=lo_program_new(); if (!program) return 11;
     Context *context=lo_context_from_program(program,LO_OPTIONS(budget)); if (!context) return 12;
     if (cancel_poll) lo_context_cancel_after_polls(context,cancel_poll);
-    Result result={99,99,0}; lo_context_run(context,&result);
+    ResultSlot result={99,99,0}; lo_context_run(context,&result);
     U64 expected_steps=LO_CASE ? 2+LO_CASE : cancel_poll && cancel_poll<=5 ? cancel_poll-1 : budget<5 ? budget : 5;
     int terminal=LO_CASE || budget<5 || (cancel_poll && cancel_poll<=5);
     if (error) return 20+error;

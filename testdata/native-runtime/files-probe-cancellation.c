@@ -1,12 +1,10 @@
+#include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __INT64_TYPE__ Offset;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct {U32 status,code;const Value *value;} Result;
 extern int lo_cli_main(int,const char *const*,const char *const*);
-extern void lo_op_File_2Eopen_5Fpaths(Context*,const Value**,U64,U64,Result*);
+extern void lo_op_File_2Eopen_5Fpaths(Context*,const Value**,U64,U64,ResultSlot*);
 extern void lo_context_cancel_after_polls(Context*,U64);
 extern U64 lo_runtime_live_contexts(void);
 extern U64 lo_runtime_live_values(void);
@@ -41,7 +39,7 @@ int execvp(const char *program,char *const arguments[]){
  int marker=open("spawned",CREATE,0666);if(marker>=0)close(marker);*ERROR_ADDRESS()=5;return -1;
 }
 static int contains(const char *text,const char *needle){for(;*text;++text){Size i=0;while(needle[i]&&text[i]==needle[i])++i;if(!needle[i])return 1;}return 0;}
-void lo_files_probe_bridge(Context *context,const Value **args,U64 count,U64 site,Result *out){
+void lo_files_probe_bridge(Context *context,const Value **args,U64 count,U64 site,ResultSlot *out){
  /* Two operation admission polls precede the before/after first hash read. */
  lo_context_cancel_after_polls(context,4);
  lo_op_File_2Eopen_5Fpaths(context,args,count,site,out);

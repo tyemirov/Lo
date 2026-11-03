@@ -1,13 +1,7 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 #include "lo_console.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-typedef struct {U32 status,code;const Value *value;} ResultSlot;
-extern Context *lo_context_new(const ContextOptions *);
-extern void lo_context_run(Context *,ResultSlot *);
-extern void lo_context_cancel(Context *);
-extern void lo_context_free(Context *);
-extern void lo_value_release(const Value *);
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 static Context *active;
 static unsigned calls,flushes,total,sequence;

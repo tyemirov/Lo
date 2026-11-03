@@ -1,11 +1,9 @@
+#include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct { U32 status, code; const Value *value; } Result;
 extern int lo_cli_main(int, const char **, const char **);
-extern void lo_op_List_2Efold(Context *, const Value **, U64, U64, Result *);
+extern void lo_op_List_2Efold(Context *, const Value **, U64, U64, ResultSlot *);
 extern U64 lo_runtime_live_values(void), lo_runtime_live_contexts(void);
 extern long write(int, const void *, Size);
 static int collecting;
@@ -50,7 +48,7 @@ int posix_memalign(void **pointer, Size alignment, Size size) {
 }
 
 void lo_profile_fold(Context *context, const Value **arguments, U64 count,
-                     U64 site, Result *result) {
+                     U64 site, ResultSlot *result) {
     collecting = 1;
     ++measured;
     lo_op_List_2Efold(context, arguments, count, site, result);

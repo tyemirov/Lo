@@ -1,14 +1,13 @@
+#include "lo_runtime.h"
 #include "lo_file_observer.h"
 
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-typedef LoContext Context;
-typedef struct Value Value;
-typedef struct { U32 status, code; const Value *value; } Result;
+
 extern int lo_cli_main(int, const char **, const char **);
-extern void lo_profiled_entry(Context *, const Value **, U64, U64, Result *);
-extern void lo_commit(Context *, const Value **, U64, U64, Result *);
+extern void lo_profiled_entry(Context *, const Value **, U64, U64, ResultSlot *);
+extern void lo_commit(Context *, const Value **, U64, U64, ResultSlot *);
 extern U64 lo_runtime_live_values(void), lo_runtime_live_contexts(void);
 extern long write(int, const void *, Size);
 extern int open(const char *, int, ...), close(int);
@@ -74,14 +73,14 @@ static int observe(uintptr_t userdata, uint32_t phase, const unsigned char *root
 }
 
 void lo_entry(Context *context, const Value **arguments, U64 count,
-              U64 site, Result *result) {
-    if (lo_context_file_metadata_observer(context, observe, LO_CASE) != 1)
+              U64 site, ResultSlot *result) {
+    if (lo_context_file_metadata_observer((LoContext *)context, observe, LO_CASE) != 1)
         observer_error = 1;
     lo_profiled_entry(context, arguments, count, site, result);
 }
 
 void lo_profile_commit(Context *context, const Value **arguments, U64 count,
-                       U64 site, Result *result) {
+                       U64 site, ResultSlot *result) {
     ++commits;
     collecting = commits == LO_CASE + 1;
     if (collecting) ++measured;
