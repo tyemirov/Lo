@@ -10,6 +10,15 @@ func TestF030CompilerGenericContracts(t *testing.T) {
 	for _, test := range []struct{ name, source, output string }{
 		{"element", `flow Main()->Record{x:Int}!{return List.at(List.new(Record.new(x:1)),0)};return Main()`, "Record{x: Int}!"},
 		{"empty-slice", `flow Main()->List<Int>!{return List.slice(List.new(),0,0)};return Main()`, "List<Int>!"},
+		{"empty-at-slice", `flow Main()->Int!{return List.at(List.slice(List.new(),0,0),0)};return Main()`, "Int!"},
+		{"empty-at-named-slice", `flow Main()->Int!{return List.at(List.slice(start:0,end:0,values:List.new()),0)};return Main()`, "Int!"},
+		{"empty-named-at-named-slice", `flow Main()->Int!{return List.at(index:0,values:List.slice(end:0,values:List.new(),start:0))};return Main()`, "Int!"},
+		{"empty-at-piped-slice", `flow Main()->Int!{return List.at(List.new() |> List.slice(0,0),0)};return Main()`, "Int!"},
+		{"empty-at-piped-named-slice", `flow Main()->Int!{return List.at(List.new() |> List.slice(end:0,start:0),0)};return Main()`, "Int!"},
+		{"empty-piped-at-slice", `flow Main()->Int!{return List.new() |> List.slice(0,0) |> List.at(0)};return Main()`, "Int!"},
+		{"empty-slice-named-at", `flow Main()->List<Int>!{return List.slice(List.at(index:0,values:List.new(List.new())),0,0)};return Main()`, "List<Int>!"},
+		{"empty-slice-piped-at", `flow Main()->List<Int>!{return List.slice(List.new(List.new()) |> List.at(0),0,0)};return Main()`, "List<Int>!"},
+		{"empty-slice-piped-new", `flow Main()->List<List<Int>>!{return List.slice(List.new() |> List.new(),0,0)};return Main()`, "List<List<Int>>!"},
 		{"sort-context", `flow Compare(direction:Int,left:String,right:String)->Int{return Math.mul(direction,String.compare(left,right))};return List.sort(List.new("b","a"),-1,Compare)`, "List<String>"},
 		{"empty-sort", `flow Compare(left:Int,right:Int)->Int{return Math.sub(left,right)};return List.sort(List.new(),Compare)`, "List<Int>"},
 		{"fallible-element", `return List.at(List.new(Math.div(1,0)),0)`, "Int!"},
@@ -96,6 +105,8 @@ func TestF030CompilerPreservesFallibleElements(t *testing.T) {
 	for _, source := range []string{
 		`flow Main()->Int!{return List.at(List.new(Math.div(1,0),Math.div(2,1)),1)};return Main()`,
 		`flow Main()->List<Int!>!{return List.slice(List.new(Math.div(1,0),Math.div(2,1)),0,2)};return Main()`,
+		`flow Main()->Int!{return List.at(List.slice(start:0,end:2,values:List.new(Math.div(1,0),Math.div(2,1))),1)};return Main()`,
+		`flow Main()->Int!{return List.new(Math.div(1,0),Math.div(2,1)) |> List.slice(end:2,start:0) |> List.at(1)};return Main()`,
 	} {
 		report, _, _ := inspectSource(t, source)
 		found := false
