@@ -1,0 +1,42 @@
+flow PolicyAnd(previous: Bool, value: Bool) -> Bool {
+    return Match.new(previous, true: value, _: false)
+}
+
+flow PolicyAll(values: List<Bool>) -> Bool {
+    return List.fold(values, true, PolicyAnd)
+}
+
+flow PolicyCharacter(character: Scalar) -> Bool {
+    control = Range.contains(Range.new(Scalar.new("\u0000"), Scalar.new("\u001f"), true, true), character)
+    return PolicyAll(List.new(Match.new(control, true: false, _: true), Match.new(Scalar.eq(character, Scalar.new("\u007f")), true: false, _: true), Match.new(Scalar.eq(character, Scalar.new("\\")), true: false, _: true)))
+}
+
+flow PolicyCandidate(uid: Int, cutoff: Int, mask: Glob, entry: File.Entry) -> Bool {
+    visible = Match.new(String.starts_with(entry.name, "."), true: false, _: true)
+    unambiguous = PolicyAll(List.map(File.Path.to_string(entry.path), PolicyCharacter))
+    return PolicyAll(List.new(visible, unambiguous, Glob.matches(mask, entry.name), String.eq(entry.kind, "regular"), Math.eq(entry.owner_uid, uid), Math.eq(entry.link_count, 1), Math.lt(entry.accessed_unix_ns, cutoff), Math.lt(entry.modified_unix_ns, cutoff), Math.lt(entry.changed_unix_ns, cutoff)))
+}
+
+flow PolicyName(entry: File.Entry) -> String {
+    return entry.name
+}
+
+flow PolicyCompare(left: String, right: String) -> Int {
+    return String.compare(left, right)
+}
+
+flow DirectFilePolicy(root: File.Path, uid: Int, cutoff: Int, pattern: String) -> Record{names: List<String>, vanished: List<String>}! {
+    mask = Glob.new(pattern)
+    scan = File.scan(root)
+    candidates = List.filter(scan.entries, uid, cutoff, mask, PolicyCandidate)
+    return Record.new(names: List.sort(List.map(candidates, PolicyName), PolicyCompare), vanished: scan.vanished_names)
+}
+
+flow PolicyMain() -> Record{names: List<String>, vanished: List<String>}! {
+    invocation = Host.Invocation.current()
+    root = File.Path.new(List.at(invocation.arguments, 0))
+    cutoff = Math.sub(invocation.now_unix_ns, 604800000000000)
+    return DirectFilePolicy(root, invocation.real_uid, cutoff, "*.tmp")
+}
+
+return PolicyMain()
