@@ -101,14 +101,14 @@ Further work follows this sequence:
 4. Specify retained descendant observations, metadata additions, and descriptor-safe tree removal with explicit grants and resource limits.
 5. Specify program identity, locks, process output, and timeouts.
 6. Add public fixture failures before implementation of each selected contract.
-7. Implement each selected contract in the interpreter and native runtime.
+7. Implement each selected contract in the compiler and Rust runtime.
 8. Validate the full application with repository-contained command and filesystem fixtures.
 
 Do not add a language operation for a named application or workflow step.
 Keep the implemented Match effect rules and flow-cycle rules unchanged unless a separate language contract explicitly changes them.
 The source now uses current `Match.new`, `onError`, and `Flow.fold` contracts for its conditional effects and recovery.
 All 47 selections and nine captures now use named application flows.
-The [control example](examples/cleanup-control-flow.lo) passes interpreter and native software checks.
+The [control example](examples/cleanup-control-flow.lo) has compiled-program software coverage.
 `Flow.worklist` now supplies dynamic traversal with host resource quotas and resource release when scopes close.
 The [resource contract](../specification.md#89-dynamic-worklists-and-host-resource-quotas) separates cumulative work from retained values and observations.
 Proposed descendant operations still need explicit authority contracts.
@@ -122,7 +122,7 @@ Fixtures verify argument lists, process environment, closed input, output modes,
 File fixtures verify preview, observations, open-file skips, changed entries, partial progress, and untouched siblings.
 Whole-tree fixtures verify retained identities and full eligibility before eviction.
 Lock fixtures verify contention and release on success, failure, and cancellation.
-Complete application fixtures must cover the interpreter and native Darwin under the selected Process profile.
+Complete application fixtures must execute compiled Darwin artifacts under the selected Process profile.
 Portable contracts must also run under native Linux software emulation.
 Linux Process activation keeps its explicit unavailable result until a separate platform contract changes it.
 

@@ -45,13 +45,13 @@ No compatibility aliases, alternative legacy schemas, or unrestricted Process mo
 
 | Component | Responsibility | Existing source |
 | --- | --- | --- |
-| Syntax and types | Bound commit statement, nominal targets, result types, and header values. | `internal/syntax`, `internal/types`, `internal/value` |
+| Syntax and types | Bound commit statement, nominal targets, result types, and header values. | `internal/syntax`, `internal/types`, `runtime/native/src/value.rs` |
 | Catalog and verifier | Shared operation metadata, activation result relation, and transitive callback rules. | `internal/catalog`, `internal/check`, `internal/ir` |
-| Execution | Ordered activation, successful binding publication, failures, and progress. | `internal/eval`, `internal/execution`, `internal/runtimeops` |
+| Execution | Ordered activation, successful binding publication, failures, and progress. | `runtime/native/src/context.rs`, `operations.rs`, `adapters.rs` |
 | Inspection | Immediate effects, stored callbacks, calculated authority, and result types. | `internal/inspect` |
 | Native compilation | Equivalent statement lowering, LLVM emission, and static runtime interfaces. | `internal/nativeplan`, `internal/llvmemit`, `internal/nativebuild`, `runtime/native` |
-| Adapters and host | File receipts, HTTP client/server behavior, Process profiles, and lifecycle. | `internal/adapter`, `internal/runner` |
-| Acceptance | Public CLI contracts, local protocol fixtures, and interpreter/native comparisons. | `tests/integration`, `testdata`, `examples`, `docs/examples` |
+| Adapters and host | File receipts, HTTP client/server behavior, Process profiles, and lifecycle. | `runtime/native/src/files.rs`, `process.rs`, `http.rs`, `cli.rs` |
+| Acceptance | Public CLI contracts, local protocol fixtures, and native ABI assertions. | `tests/integration`, `testdata`, `examples`, `docs/examples` |
 
 The primary agent owns shared contracts and integration.
 Assign one edit owner per source group during implementation.
@@ -400,7 +400,7 @@ The [implementation review](evidence/adapter-implementation-review.json) records
 The current focused commands are:
 
 ```bash
-CI=1 make test-integration TEST_ARGS='-run "TestAdapter.*Receipt|TestTypedCommit|TestAdapterPurity|TestInspectionListContext|TestInspectionCaseHeadReads|TestEvaluatorMatchRegions" -count=1' </dev/null
+CI=1 make test-native TEST_ARGS='-run "TestAdapter.*Receipt|TestTypedCommit|TestAdapterPurity|TestInspectionListContext|TestInspectionCaseHeadReads|TestEvaluatorMatchRegions" -count=1' </dev/null
 CI=1 make test-native TEST_ARGS='-run "TestAdapter.*Receipt|TestTypedCommit|TestAdapterPurity|TestInspectionListContext|TestInspectionCaseHeadReads|TestEvaluatorMatchRegions|TestFile" -count=1' </dev/null
 ```
 
@@ -425,7 +425,7 @@ The interpreter run took 22.727 seconds, and the native run took 138.832 seconds
 The combined commands are:
 
 ```bash
-CI=1 make test-integration TEST_ARGS='-run "TestAdapterHTTP|TestDiagnosticTrace|TestVerifierBuiltinContracts|TestRunBuiltinCatalog|TestTypedCommit|TestAdapter.*Receipt|TestAdapterPurity|TestFile|TestFlowFold" -count=1' </dev/null
+CI=1 make test-native TEST_ARGS='-run "TestAdapterHTTP|TestDiagnosticTrace|TestVerifierBuiltinContracts|TestRunBuiltinCatalog|TestTypedCommit|TestAdapter.*Receipt|TestAdapterPurity|TestFile|TestFlowFold" -count=1' </dev/null
 CI=1 make test-native TEST_ARGS='-run "TestAdapterHTTP|TestDiagnosticTrace|TestVerifierBuiltinContracts|TestRunBuiltinCatalog|TestTypedCommit|TestAdapter.*Receipt|TestAdapterPurity|TestFile|TestFlowFold" -count=1' </dev/null
 ```
 

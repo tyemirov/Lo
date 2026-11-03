@@ -1,6 +1,9 @@
 # Lo Native Compilation Milestone
 
 This document records historical implementation evidence before I011.
+The source paths and test names below describe those earlier revisions.
+I014 through I018 remove the Go runtime paths recorded here.
+The [single-runtime plan](single-runtime-plan.md) defines the current architecture and validation owners.
 The [native compilation contract](native-compilation-contract.md) defines the current LLVM build requirements.
 The [compiler plan](standalone-compiler-plan.md) records the current migration status.
 
@@ -37,9 +40,9 @@ The following work is outside this milestone:
 - Speculative reads, changed commit order, and reduced error context.
 - Automatic interpreter execution after a native build failure.
 
-`lo run` and `lo serve` remain explicit interpreter commands.
-The interpreter provides a second implementation of the same current language contract for differential tests.
-It is not a compatibility path for obsolete programs or artifacts.
+F001 retained explicit interpreter commands for differential tests.
+I014 through I018 remove those commands and the Go runtime.
+Current program commands execute compiled artifacts through the Rust runtime.
 
 ## Execution Backends and Runtime Costs
 
@@ -53,12 +56,12 @@ The following table compares the two backends.
 
 | Operation | Interpreter execution | Native execution |
 | --- | --- | --- |
-| [Expression evaluation](../internal/eval/eval.go) | Select an IR node type for each expression. | Execute the generated operation directly. |
+| `internal/eval/eval.go` (historical) | Select an IR node type for each expression. | Execute the generated operation directly. |
 | Flow invocation in `internal/eval/eval.go` | Find a flow and construct its binding map. | Call a generated function with typed parameters and local variables. |
-| [Built-in execution](../internal/eval/builtin.go) | Select an operation by name and construct argument collections. | Call the operation helper selected during compilation. |
-| [List execution](../internal/eval/list.go) | Invoke the interpreter for each callback. | Execute a generated loop with a direct callback call. |
-| [Runtime values](../internal/value/value.go) | Copy integers and collection views to preserve immutable values. | Use the same immutable value contract. |
-| [HTTP adapter](../internal/adapter/http.go) | Create an execution session for each request and invoke the interpreter handler. | Create an execution session for each request and invoke the compiled handler. |
+| `internal/eval/builtin.go` (historical) | Select an operation by name and construct argument collections. | Call the operation helper selected during compilation. |
+| `internal/eval/list.go` (historical) | Invoke the interpreter for each callback. | Execute a generated loop with a direct callback call. |
+| `internal/value/value.go` (historical) | Copy integers and collection views to preserve immutable values. | Use the same immutable value contract. |
+| `internal/adapter/http.go` (historical) | Create an execution session for each request and invoke the interpreter handler. | Create an execution session for each request and invoke the compiled handler. |
 
 Native compilation does not remove arbitrary-precision arithmetic, capability checks, execution limits, or operating-system I/O costs.
 The initial implementation retains the current immutable value representations.

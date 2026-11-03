@@ -105,15 +105,15 @@ All repository commands keep their state under Lo's `_scratch/` directory.
 
 1. Prepare the pinned runtime inputs with `make prepare-native-runtime`.
 2. Prepare the pinned package inputs with `make prepare-compiler-distribution`.
-3. Produce the Metal assets with `make build-metal`.
+3. Verify the canonical Metal assets with `make build-metal`.
 4. Construct the packages with `make package-compiler-distributions`.
 5. Run the tool checks with `make test-compiler-distribution-tools`.
 6. Run installed acceptance with `make test-compiler-distributions`.
 
-The Metal producer creates `runtime/metal/metal.metallib` and `runtime/metal/manifest.json`.
-The runtime producer checks their source digests against `bin/lo-metal-build.json`.
-Run `make build-metal` before `make build-native-runtime-metal` or package construction.
-The producer reads kernel library files, without a Go source archive.
+The repository supplies the canonical kernel library and source manifest in `runtime/metal`.
+The runtime producer verifies their provenance before it builds the Metal archive.
+The [Metal guide](native-metal.md#developer-preparation) defines kernel checks and reproduction after source changes.
+Package construction requires no Go interpreter build receipt.
 
 The preparation commands permit explicit downloads.
 Package construction and installed compilation do not download inputs.

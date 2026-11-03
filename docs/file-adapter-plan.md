@@ -90,7 +90,7 @@ Prepare the selected LLVM toolchain with the [runtime guide](native-runtime.md#p
 Run these targets sequentially:
 
 ```bash
-CI=1 make test-integration TEST_ARGS='-run TestFlowFold\|TestFile\|TestGatewayLogCleanup\|TestNativeBuildPaths\|TestNativeBuildRootValidation -count=1' </dev/null
+CI=1 make test-native TEST_ARGS='-run TestFlowFold\|TestFile\|TestGatewayLogCleanup\|TestNativeBuildPaths\|TestNativeBuildRootValidation -count=1' </dev/null
 CI=1 make test-native TEST_ARGS='-run TestFlowFold\|TestFile\|TestGatewayLogCleanup -count=1' </dev/null
 CI=1 make ci </dev/null
 ```

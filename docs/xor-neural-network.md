@@ -51,7 +51,8 @@ make build
 ./bin/lo parse examples/xor_cpu.lo --format json
 ./bin/lo check examples/xor_cpu.lo --format json
 ./bin/lo inspect examples/xor_cpu.lo --format json
-./bin/lo run examples/xor_cpu.lo --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_cpu.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/xor-cpu
+./bin/xor-cpu run --format json
 ```
 
 For a standalone CPU executable, use these commands:
@@ -106,15 +107,14 @@ The [documentation review](evidence/xor-review.json) records the prose review an
 The [integration tests](../tests/integration/xor_test.go) require correct classification of every row and final loss below `0.001`.
 They compare the reported loss with an independent calculation from the returned predictions.
 They also require identical results across three executions and complete cleanup in the Metal executor.
-The [local Metal tests](../tests/integration/xor_metal_live_test.go) compare interpreter and native results with the CPU result.
+The [local Metal tests](../tests/integration/xor_metal_live_test.go) compare compiled Metal results with independently calculated expectations.
 
 Run the focused tests with these commands:
 
 ```bash
-make test-integration TEST_ARGS='-run TestXOR -count=1 -v'
 make test-native TEST_ARGS='-run TestXOR -count=1 -v'
-make test-metal TEST_ARGS='-run TestMetalLiveXOR -count=1 -race -v'
-make test-native-metal TEST_ARGS='-run TestNativeMetalLiveXOR -count=1 -race -v'
+make test-native-metal TEST_ARGS='-run TestLLVMMetalXOR -count=1 -v'
+make test-native TEST_ARGS='-tags=metal -run TestNativeMetalLiveXOR -count=1 -v'
 ```
 
 The software tests provide acceptance without a physical-device requirement.

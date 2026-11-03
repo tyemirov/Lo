@@ -4,7 +4,8 @@ P009 selects one compiled execution architecture for Lo.
 The Go frontend compiles Lo programs through LLVM.
 The Rust native runtime supplies application operations and resource ownership.
 I014 through I018 implement this plan.
-The current source still contains the interpreter until that work completes.
+The source now contains one Rust application runtime.
+The final stack validation controls issue closure.
 
 ## Selected Command Boundary
 
@@ -48,7 +49,12 @@ Compiler subprocess controls must not become application invocation inputs.
 The native CLI owns output, exit status, service readiness, cancellation, and retained child cleanup.
 The compiler does not add another application supervisor or output broker.
 
-## Current Source Boundaries
+## Migration Source Boundaries
+
+This table records the original sources and the migration actions.
+The retained pure contracts are now in `internal/shapefacts` and `internal/targetconfig`.
+The compiler command parser is in `internal/compilercli`.
+The Go execution packages in this table are removed.
 
 | Source area | Required action |
 | --- | --- |
@@ -66,13 +72,12 @@ The compiler does not add another application supervisor or output broker.
 
 Package names alone do not establish deletion authority.
 I016 must inspect imports and separate static compiler facts from dynamic Lo execution.
-The proposed destinations are `internal/shapefacts` and `internal/targetconfig` for the required pure compiler contracts.
-These package names are implementation targets, not existing interfaces.
+`internal/shapefacts` and `internal/targetconfig` own the required pure compiler contracts.
 
 ### Native Assets That Must Survive
 
-The native build consumes files currently stored under Go runtime directories.
-Deleting those directories first would break the retained runtime.
+The native build consumed assets originally stored under Go runtime directories.
+The table records their single current owner.
 
 | Current assets | Selected destination | Required consumers |
 | --- | --- | --- |
@@ -99,7 +104,7 @@ No Go compatibility bridge remains.
 
 The native ABI already supplies Console callbacks, device hooks, Process driver hooks, and entry and lock registration.
 Its current headers and result access do not describe a complete general embedding SDK.
-I015 must provide canonical declarations and bounded diagnostic access for the retained interfaces.
+The [native embedding guide](native-embedding.md) defines canonical declarations and bounded diagnostic access for the retained interfaces.
 It must specify pointer ownership, result release, owner-thread rules, cancellation, and signal ownership.
 Concurrent retained contexts must have explicit cancellation isolation.
 
@@ -142,6 +147,28 @@ Remove `LO_TEST_BACKEND` and interpreter selection branches from active test exe
 Remove Go evaluator calls used to generate expected native values or diagnostics.
 Do not copy the evaluator into test support under another name.
 
+### Retained Coverage Ledger
+
+The [semantic matrix](../testdata/semantic-migration/matrix.json) owns the direct contract references and target requirements.
+These maintained tests preserve the migration's required failure and lifetime scenarios.
+The temporary review ledger classifies removed Go API tests separately from retained language assertions.
+Tests and necessary fixtures remain the permanent behavior record.
+
+| Preserved contract | Permanent witness |
+| --- | --- |
+| Compiler command rejection before source access | [Compiler CLI tests](../tests/integration/cli_test.go) |
+| Native worker frames, exact acknowledgments, closed pipes, and parent liveness | [Console writer tests](../tests/integration/llvm_console_writer_test.go) |
+| Independent scalar, collection, and diagnostic expectations | [Native expectations](../tests/integration/native_expectations_test.go) |
+| Analytical gradients, FP32 training, and optimizer expectations | [Numerical expectations](../tests/integration/native_numerical_expectations_test.go) |
+| Retained contexts, invocation isolation, ownership, cancellation, and bounded diagnostics | [Native ABI tests](../tests/integration/llvm_retained_abi_test.go) |
+| Signal cleanup, service output, child joins, and lock lifetime | [Signal and lock tests](../tests/integration/llvm_signal_lock_lifetime_test.go) |
+| File observation descriptor lifetime and callback release | [Observation lifetime tests](../tests/integration/llvm_file_observation_lifetime_test.go) |
+| File write failure, SIGPIPE policy, and cleanup with a controlled dependency | [File write fixture](../testdata/native-runtime/file-sigpipe.c) |
+| Descriptor-bound probe admission and namespace changes | [Probe binding tests](../tests/integration/llvm_probe_binding_test.go) |
+| Binary Process output, File composition, and result completion | [Process composition tests](../tests/integration/llvm_process_file_composition_test.go) |
+| Independent HTTP protocol expectations | [HTTP wire tests](../tests/integration/llvm_http_buffer_test.go) |
+| Native measurements and independent workload results | [Measurement contract](native-benchmarks.md) |
+
 ## Semantic Coverage, CI, And Measurements
 
 The semantic inventory must classify compiler commands, program commands, and native ABI contracts explicitly.
@@ -159,13 +186,13 @@ Keep source, compiler, ABI, runtime, target, and profile identities in acceptanc
 | `make test` | Aggregate the retained compiler, tooling, and native suites without duplicate application execution. |
 | `make ci` | Format, lint, test, build, semantic-report, runtime-tool, and qualification-tool checks. |
 
-`test-frontend` is a planned target.
-I017 must select package boundaries that prevent `go test ./...` from running application integration twice.
+`test-frontend` and `test-tooling` select separate package sets.
+`test-native` runs the application integration package once.
 The native suite covers Darwin arm64, Linux arm64 under QEMU, and applicable Metal-linked contracts.
 Controlled backend tests and software environments are sufficient acceptance environments.
 
 The measurement cleanup includes `tools/nativebench`, `tools/filebench`, `tests/benchmark`, and qualification consumers.
-Current tooling generates or calls interpreter fixtures and uses paired measurement schemas.
+The former tooling generated interpreter fixtures and used paired measurement schemas.
 Remove those generators, Go runtime allocation measurements, interpreter-relative ratios, and obsolete thresholds.
 Select native measurements for execution, allocations, resource use, compilation, and linking where each remains necessary.
 Do not label two native measurements as independent runtime parity.
@@ -266,8 +293,8 @@ It must not require an interpreter comparison or a physical-device gate.
 
 ## Plan Acceptance And Implementation Boundary
 
-This task changes plans and issue dependencies only.
-It does not remove code, change commands, run cleanup, or claim runtime migration completion.
-P009 closes after source review, issue validation, link checks, and changed-prose checks.
-I018 remains open until implementation and its final checks complete.
+P009 established the architecture and issue dependencies.
+I014 through I018 implement the command changes, coverage migration, and Go runtime removal.
+Their acceptance includes independent review and final stack validation.
+I018 owns final stack acceptance and issue closure.
 All fixtures, tool state, temporary work, and acceptance output stay inside Lo.

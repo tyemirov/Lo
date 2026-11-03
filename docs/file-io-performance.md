@@ -1,11 +1,11 @@
 # File I/O Performance
 
-This study records File operation measurements before the dynamic traversal revision.
-The [dynamic traversal study](dynamic-traversal-performance.md) compares the current resource contract with the preceding implementation.
-Each removal uses a generated fixture directory inside Lo.
-The measurement archive keeps the earlier resource contract.
-The current benchmark uses the [host resource quotas](../specification.md#89-dynamic-worklists-and-host-resource-quotas).
-File authority rules remain unchanged.
+This guide describes the current native File measurements.
+The [native measurements guide](native-benchmarks.md) defines the shared measurement contract.
+The historical sections below retain earlier resource contracts, interpreter results, and their evidence identities.
+The current tool builds each workload before it executes the native artifact.
+Each workload uses a generated fixture directory inside Lo.
+The current tool uses the [host resource quotas](../specification.md#89-dynamic-worklists-and-host-resource-quotas).
 
 ## Run The Benchmarks
 
@@ -37,9 +37,7 @@ make benchmark-file-io NATIVE_RUNTIME_STATE=_scratch/file-io-runtime \
 ## Measurement Methods
 
 - Process times include startup, program admission, execution, cleanup, and the scalar JSON result.
-- Interpreter process times also include source compilation.
 - The native build completes before the measured process starts.
-- Separate interpreter allocation samples start after source compilation.
 - Native allocation tests count successful allocator requests during removal activation.
 - RSS results report peak process memory.
 - Fixture setup writes the input files before each sample.
@@ -48,7 +46,9 @@ make benchmark-file-io NATIVE_RUNTIME_STATE=_scratch/file-io-runtime \
 - Write and append samples include a payload read.
 
 Compare before and after results within one measurement method.
-The interpreter and native allocation measurements have different scopes.
+The generic CLI tool does not collect native allocator counters.
+Dedicated native tests measure removal allocation requests.
+Go compiler counters do not describe native application allocation.
 Darwin samples supply execution times for this host and these fixtures.
 The Linux emulator checks correctness and allocation growth.
 
@@ -80,9 +80,10 @@ A file read also needs space for its result wrapper.
 The benchmark verifies typed `runtime.limit` results when a resource quota is exceeded.
 Sequential directory samples release completed observations and can exceed 128 total visits.
 
-The following result used the earlier cumulative-data contract.
+The following historical result used the earlier cumulative-data contract.
 A selected batch of 10,000 entries can exceed the cumulative budget during guarded removal.
 One fixture stopped after 9,276 removals and retained 724 files.
+
 The interpreter and native artifact produced identical progress with the same source, arguments, and 149-byte fixture path.
 A separate native fixture with a shorter path completed all 10,000 removals.
 That result does not measure the current live-value contract.
@@ -90,34 +91,24 @@ The default removal samples stop at 5,000 entries.
 
 ## Regression Checks
 
+Run the native File checks with the prepared runtime:
+
 ```bash
-make test-integration TEST_ARGS='-run TestFileReadValidationAllocation -count=1 -v'
-make test-integration TEST_ARGS='-run TestFileObservationDirectoryCapacity -count=1 -v'
 make test-native NATIVE_RUNTIME_STATE=_scratch/file-io-runtime \
-  TEST_ARGS='-run TestLLVMFileRemovalAllocationScaling -count=1 -v'
-make test-native NATIVE_RUNTIME_STATE=_scratch/file-io-runtime \
-  TEST_ARGS='-run TestLLVMLinuxFileRemovalAllocationScaling -count=1 -v'
-make test-filebench
+  TEST_ARGS='-run "TestLLVM(Linux)?FileRemovalAllocationScaling" -count=1 -v'
+make test-filebench NATIVE_RUNTIME_STATE=_scratch/file-io-runtime
 ```
 
-The native removal test uses 64, 128, and 256 entries.
-It verifies unconditional removal and removal with a total guard.
-It checks discovery metadata, preflight metadata, immediate revalidation, removal results, and resource cleanup.
+The removal checks use 64, 128, and 256 entries on Darwin and Linux.
+They verify removal with and without a total guard.
+They check discovery, preflight, immediate metadata observations, removal results, and cleanup.
 Each doubled batch permits at most three times the previous allocation count and byte volume.
 
-The read test supplies a preconstructed immutable 4 MiB value at the external boundary.
-It measures execution allocations and verifies the complete returned payload.
-A separate case verifies the typed rejection of an oversized boundary result.
-Real filesystem workloads supply the end-to-end measurements.
+The public tool checks cover small workloads, capacity boundaries, incorrect results, and bounded child output.
+They retain scalar result checks and complete filesystem checks.
+The current tool has no runtime selector or interpreter allocation worker.
 
-The directory test retains 128 distinct observations and verifies reuse of an existing observation.
-It verifies that the 129th simultaneously retained observation returns `runtime.limit`.
-Separate tests verify 160 sequential observations and dynamic discovery through `Flow.worklist`.
-
-Exact negative timestamp checks use injected metadata in the interpreter and both native targets.
-Real filesystem checks verify the owner and stable timestamp fields.
-
-## Measured Changes
+## Historical Measurements
 
 The native removal implementation repeatedly rebuilt the complete diagnostic entry list during progress updates.
 This produced quadratic allocation work for an immutable removal batch.

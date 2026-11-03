@@ -200,19 +200,19 @@ Keep the current build limits and atomic artifact publication contract.
 | --- | --- | --- |
 | 1 | F012 | Explicit selection, Metal build, adapter, transfers, budgets, and failure tests after F008. |
 | 2 | F013 | Numeric decision, typed computation interface, FP32 kernels, derivatives, and optimizers after F012 and F007. |
-| 3 | F014 | Native artifact support and interpreter parity after F013 and F001. |
+| 3 | F014 | Native artifact support and independent numeric checks after F013 and F001. |
 | 4 | I002 | Complete training acceptance and evidence after F014. |
 
 Start each behavior change with a failing integration test through the public CLI.
 Use controlled backend dependencies for unavailable devices, allocation failures, command failures, and cancellation.
-Keep the checker, evaluator, resource ledger, error handling, and CLI serialization real.
+Keep the compiler, native operations, resource ledger, error handling, and CLI serialization real.
 Use an independent software executor for Metal operation descriptors and the selected arithmetic profile.
 Do not use the CPU tensor evaluator as its numerical oracle.
 Do not add a public `metal-sim:0` selector for this test dependency.
 
-Use `make test-metal` for explicit local Metal execution.
-F014 adds `make test-native-metal` for native artifacts.
-These targets must fail clearly when their requested Metal environment is unavailable.
+Use `make test-native-metal` for controlled native Metal contracts.
+Optional tests tagged `metal` exercise actual Metal execution.
+Those optional tests must report an unavailable Metal environment explicitly.
 Routine CI must run the software contract tests without a GPU prerequisite.
 Simulation and controlled failures are sufficient acceptance environments under repository policy.
 Record optional Metal execution separately and state which behavior each environment establishes.

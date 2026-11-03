@@ -20,7 +20,8 @@ The validation records below retain their original dates and implementation scop
 Local link, heading, version-reference, and whitespace checks passed for this update.
 All 114 numbered section identities, fenced code blocks, and executable fixture content are unchanged.
 The official STE reference passed SHA-256 verification against the repository-recorded digest.
-The shared `prepare-ste-reference` and `check-ste` helpers are outside Lo and could not run within the repository boundary.
+The earlier task did not run the external language helpers.
+The current repository policy permits tools from any location and keeps their output inside Lo.
 Changed prose received a limited manual language review.
 Full STE compliance is unverified.
 The [update record](evidence/v04-reference-update.json) records local checks and independent documentation review.
@@ -117,22 +118,25 @@ Runtime tests supply additional behavioral evidence.
 | **SGD**: `Optimizer.SGD.Config.new`, `Optimizer.SGD.State.new`, `Optimizer.SGD.step` | [Contract](../specification.md#247-sgd-and-adamw) | [optimizer.go](../internal/catalog/optimizer.go) | [optimizer](../tests/integration/optimizer_test.go) |
 | **AdamW**: `Optimizer.AdamW.Config.new`, `Optimizer.AdamW.State.new`, `Optimizer.AdamW.step` | [Contract](../specification.md#247-sgd-and-adamw) | [optimizer.go](../internal/catalog/optimizer.go) | [optimizer](../tests/integration/optimizer_test.go) |
 
-## Semantic Coverage
+## Current Semantic Coverage
+
+I014 through I018 replace Go execution witnesses with compiled-program tests and native ABI fixtures.
+The [semantic matrix](../testdata/semantic-migration/matrix.json) assigns direct references to each required contract.
+The earlier validation records below describe their original revisions.
 
 | Contract | Implementation | Integration evidence |
 | --- | --- | --- |
-| Lexical rules and grammar | [Lexer](../internal/syntax/lexer.go), [parser](../internal/syntax/parser.go) | [Conformance entry point](../tests/integration/cli_test.go), [fixtures](../testdata/conformance/manifest.json) |
-| Types, named flows, fallibility, and Match | [Checker](../internal/check/check.go), [types](../internal/check/type.go), [Match](../internal/check/match.go) | [Verifier tests](../tests/integration/verifier_test.go) |
-| Eager bindings, branch selection, and first failure | [Evaluator](../internal/eval/eval.go) | [Evaluation tests](../tests/integration/eval_test.go), [stored fallibility](../tests/integration/run_test.go) |
-| File and HTTP activation | [Runtime operations](../internal/runtimeops/runtime.go) | [Activation](../tests/integration/activation_test.go), [HTTP](../tests/integration/serve_test.go) |
-| Tensor shapes and numeric limits | [Tensor operations](../internal/runtimeops/tensor.go), [shape analysis](../internal/tensorfacts/analyze.go) | [Tensor contracts](../tests/integration/tensor_contract_test.go), [budgets](../tests/integration/tensor_budget_test.go) |
+| Lexical rules and grammar | [Lexer](../internal/syntax/lexer.go), [parser](../internal/syntax/parser.go) | [Compiler entry point](../tests/integration/cli_test.go), [fixtures](../testdata/conformance/manifest.json) |
+| Types, named flows, fallibility, and Match | [Checker](../internal/check/check.go), [Match](../internal/check/match.go) | [Verifier tests](../tests/integration/verifier_test.go) |
+| Eager bindings, branch selection, and first failure | [LLVM emission](../internal/llvmemit), [native operations](../runtime/native/src/operations.rs) | [Core runtime tests](../tests/integration/llvm_runtime_test.go), [native fixtures](../tests/integration/llvm_fixed_corpus_test.go) |
+| File and HTTP activation | [Files](../runtime/native/src/files.rs), [HTTP](../runtime/native/src/http.rs) | [File tests](../tests/integration/llvm_file_adapters_test.go), [HTTP tests](../tests/integration/llvm_http_test.go) |
+| Tensor shapes and numeric limits | [Tensor operations](../runtime/native/src/tensor.rs), [shape analysis](../internal/tensorfacts/analyze.go) | [Numerical tests](../tests/integration/llvm_numerical_lifetime_test.go), [work limits](../tests/integration/llvm_work_budget_test.go) |
 | Supported loss graph and derivative limits | [Autodiff plan](../internal/autodiff/plan.go), [checker](../internal/check/autodiff.go) | [Autodiff contracts](../tests/integration/autodiff_contract_test.go) |
-| Backpropagation and shared derivative edges | [Interpreter](../internal/eval/autodiff.go), [VJP rules](../internal/derivative/vjp.go) | [Analytical and finite-difference tests](../tests/integration/autodiff_numeric_test.go), [context tests](../tests/integration/autodiff_test.go) |
-| Gradient schema and stop-gradient | [Parameter operations](../internal/runtimeops/parameters.go) | [Gradient lifecycle](../tests/integration/parameters_test.go) |
-| SGD, AdamW, immutable state, and config boundaries | [Optimizer operations](../internal/runtimeops/optimizer.go), [config](../internal/value/optimizer.go) | [Optimizer tests](../tests/integration/optimizer_test.go) |
-| Native derivatives | Historical `internal/codegen/gradient.go`, removed by I011 | Autodiff, Parameter, and optimizer tests through `make test-native` |
-| Device authorization, storage, and transfer simulation | [Device backend](../internal/device/device.go), [compute boundary](../internal/device/compute.go) | [Device tests](../tests/integration/device_test.go), [resource tests](../tests/integration/device_resources_test.go) |
-| Metal arithmetic, backpropagation, and optimizers | [Metal backend](../internal/device/metal_darwin.go) | [Software compute tests](../tests/integration/metal_compute_test.go), [training tests](../tests/integration/metal_training_test.go) |
+| Backpropagation and shared derivative edges | [Native derivatives](../runtime/native/src/derivative.rs) | [Analytical and finite-difference tests](../tests/integration/autodiff_numeric_test.go) |
+| Gradient schemas, SGD, AdamW, and immutable state | [Native training](../runtime/native/src/training.rs) | [Numerical expectations](../tests/integration/native_numerical_expectations_test.go), [optimizer tests](../tests/integration/optimizer_test.go) |
+| Device authority, storage, and transfer simulation | [Device runtime](../runtime/native/src/device.rs) | [Device CLI](../tests/integration/llvm_device_cli_test.go), [resource tests](../tests/integration/llvm_device_resources_test.go) |
+| Metal arithmetic, backpropagation, and optimizers | [Metal host](../runtime/native/host/metal/metal_bridge_darwin.m) | [Controlled compute](../tests/integration/llvm_metal_compute_test.go), [training tests](../tests/integration/metal_training_test.go) |
+| Invocation, diagnostics, cancellation, and retained contexts | [Native ABI](../runtime/native/include/lo_runtime.h) | [Embedding tests](../tests/integration/llvm_retained_abi_test.go), [signal and lock tests](../tests/integration/llvm_signal_lock_lifetime_test.go) |
 
 ## Example Results
 
@@ -158,7 +162,7 @@ The checks asserted the initial loss, loss decrease, update count, and unchanged
 The exact source of each example also occurs in the reference.
 Different configs make these demonstrations unsuitable for optimizer performance comparisons.
 
-## Validation
+## Historical Validation
 
 Validation used Go 1.27.1, the CPU interpreter, native macOS arm64 artifacts, and software device tests.
 No live device execution was necessary for this documentation task.

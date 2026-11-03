@@ -36,8 +36,8 @@ This sequence does not depend on modules, user-defined types, generics, or packa
 | Program completion | Nominal terminal results select status after resource cleanup and required output. | An ordinary returned Int remains data. |
 | Process duration | The default lifetime is five seconds. Native admission also enforces that ceiling. | The draft requests 30, 60, 180, and 1800 seconds for different command classes. |
 
-Source anchors include `internal/runner/command.go`, `internal/runner/execute.go`, and `internal/catalog/observations.go`.
-Other anchors include `internal/adapter/file_observation.go`, `internal/value/file_leases.go`, and `runtime/native/src/process.rs`.
+Compiler anchors include `internal/compilercli/command.go` and `internal/catalog/observations.go`.
+Runtime anchors include `runtime/native/src/cli.rs`, `file_observer.rs`, `file_leases.rs`, and `process.rs`.
 The [control evidence](evidence/cleanup-control-composition.json) records the executable control example.
 F024 and F025 record their own implementation evidence.
 Those records describe the earlier validation of their contracts.
@@ -150,7 +150,7 @@ Requirements:
 The Go implementation wraps `execution.Boundary` with Console activation.
 The runner supplies an explicit output owner to that boundary.
 Native Session, adapter dispatch, values, ABI exports, and CLI setup implement the same contract.
-The catalog, type checker, interpreter, inspector, and semantic inventory include the Console target.
+The catalog, type checker, Rust runtime, inspector, and semantic inventory include the Console target.
 
 The selected output protocol resolves `--format json` through NDJSON console events and the final result envelope.
 Raw application text cannot silently mix with the existing JSON result envelope.

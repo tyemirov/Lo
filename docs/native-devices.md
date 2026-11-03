@@ -52,7 +52,8 @@ Admission checks the kernel bytes, length, and digest in the archive's canonical
 The separate kernel file and artifact metadata must identify those same bytes.
 
 Prepare the pinned inputs as described in the [runtime guide](native-runtime.md).
-The kernel files and `bin/lo-metal-build.json` receipt from `make build-metal` are necessary for the Metal producer.
+The Metal producer requires the canonical kernel files and source manifest in `runtime/metal`.
+The [Metal preparation guide](native-metal.md#developer-preparation) defines their provenance and reproduction rules.
 `runtime/metal/manifest.json` identifies the kernel, source files, and fixed numeric profile.
 Build the distribution with the explicit Metal target:
 

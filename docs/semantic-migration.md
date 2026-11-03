@@ -29,21 +29,23 @@ Other operations must still include applicable runtime failures.
 
 ## Evidence Contract
 
-Three full integration logs are necessary for the [report command](../tools/semanticcoverage/report.py).
-One log records the interpreter lane.
-Two logs record LLVM execution on `darwin/arm64` and `linux/arm64`.
-Each matrix reference has a required native equivalent.
-Controlled runtime tests state their actual execution boundary independently.
+The [report command](../tools/semanticcoverage/report.py) consumes native logs for Darwin arm64 and Linux arm64.
+Each contract has a unique ID, explicit targets, direct test references, and a declared execution boundary.
+The boundaries are `compiler-command`, `program-command`, and `native-abi`.
+The report has no interpreter lane or translation map.
 
-Each run records its backend, implementation, target, compiler digest, source identity, and matrix identity.
-Each LLVM run also records its toolchain manifest digest and selected runtime archive digest.
-The report checks these digests against the current source files and installed package.
+Each run records its target, compiler digest, source identity, and matrix identity.
+Each native run also records its toolchain manifest digest and selected runtime archive digests.
+Metal-linked contracts require the Metal runtime identity.
+The report checks these digests against the current source files and selected package.
 
 The source identity includes implementation files, tests, corpus inputs, independent expectations, and build inputs.
 The report rejects stale identities, failed packages, absent references, skipped references, and conflicting results.
-A successful test name alone does not verify execution through a different implementation.
-The matrix identifies interpreter tests, native LLVM tests, and native ABI tests independently.
-The `native_tests` map assigns native tests to each required reference.
+It rejects duplicate contracts, duplicate completion events, and obsolete paired schemas.
+It rejects duplicate test references within one contract.
+Different contracts can share a test reference.
+The runner and report preserve consumed inputs, including file aliases.
+A successful test name alone cannot prove execution through another boundary.
 
 Each recorded gap has an owner and an acceptance class:
 
@@ -72,22 +74,23 @@ Keep the source files and packages unchanged between both target runs.
    make test-native-linux </dev/null
    ```
 
-2. Run the interpreter and Darwin LLVM corpus with the Linux log:
+2. Run the Darwin compiled corpus with the Linux log:
 
    ```sh
    make test-semantic-migration \
-     SEMANTIC_ARGS='--llvm-log linux/arm64=_scratch/native-qualification/linux/semantic-linux-arm64.jsonl' </dev/null
+     SEMANTIC_ARGS='--native linux/arm64=_scratch/native-qualification/linux/semantic-linux-arm64.jsonl' </dev/null
    ```
 
 3. If a command fails, read its diagnostic and input logs.
 4. Correct the failed requirement before another acceptance run.
-5. Keep the report and all input logs with the implementation evidence.
+5. Keep reports and input logs in the task scratch directory until task completion.
+6. Remove temporary reports after all acceptance checks pass.
 
-The default installed compiler is `_scratch/compiler-distribution/packages/lo-darwin-arm64-software/bin/lo`.
+The default installed compiler is `_scratch/compiler-distribution/packages/lo-darwin-arm64-metal/bin/lo`.
 Set `SEMANTIC_COMPILER` and `SEMANTIC_TOOLCHAIN` to select another prepared Darwin installation.
 Set `COMPILER_DISTRIBUTION_OUTPUT` to select the package directory for the Linux run.
 Set `NATIVE_QUALIFICATION_OUTPUT` to select a new guest output directory.
-Use its `linux/semantic-linux-arm64.jsonl` path in `--llvm-log linux/arm64=PATH`.
+Use its `linux/semantic-linux-arm64.jsonl` path in `--native linux/arm64=PATH`.
 
 The report is `_scratch/build-state/semantic/semantic-coverage.json` by default.
 Set `SEMANTIC_OUTPUT` to select another report directory.

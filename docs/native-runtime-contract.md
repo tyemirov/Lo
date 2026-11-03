@@ -295,9 +295,9 @@ It does not select the production representation of Lo integers.
 ## Ownership And Cycle Audit
 
 Current immutable containers own values that already exist when construction starts.
-The [value constructors](../internal/value/value.go) do not publish partially constructed containers.
+The [value constructors](../runtime/native/src/value.rs) do not publish partially constructed containers.
 Parameters and optimizer states follow the same construction rule.
-The [server value](../internal/value/target.go) stores flow identifiers without captured environments.
+The [server value](../runtime/native/src/http.rs) stores flow identifiers without captured environments.
 The [autodiff plan](../internal/autodiff/plan.go) stores node and release identifiers.
 These properties make reference counting possible without a cycle collector for the current language.
 
@@ -343,7 +343,7 @@ An internal invariant failure aborts the process under the selected Rust profile
 
 ## Device And Adapter Lifetimes
 
-Keep the [device scope](../internal/device/device.go) release points in the lowering plan.
+Keep the [device scope](../runtime/native/src/resources.rs) release points in the lowering plan.
 Move escaping resource roots into their enclosing scope before scope destruction.
 Release temporary allocations after each completed callback iteration.
 Release the remaining scope after success, error, cancellation, or denied admission.

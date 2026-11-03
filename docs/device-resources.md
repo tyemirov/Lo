@@ -1,10 +1,10 @@
 # Device Resources and Transfers
 
 F008 implements device authorization, explicit tensor transfers, and invocation storage budgets.
-The interpreter and native artifacts use the same resource contract.
+Compiled artifacts use the Rust runtime resource contract.
 The software backend implements transfers for the explicit `cuda-sim:0` selector.
 The current build reports `Device.Unavailable` for authorized `cuda:0` access.
-F012 adds explicit `metal:0` transfers in the Metal interpreter build.
+F012 adds explicit `metal:0` transfers in Metal-linked artifacts.
 The [Metal transfer contract](metal-transfers.md) defines that build and its validation.
 F013 adds [synchronous Metal computation](metal-arithmetic.md) through typed operation descriptors.
 F009 will implement NVIDIA arithmetic and its backend.
@@ -25,9 +25,8 @@ The [example](../examples/device_transfer.lo) transfers four elements to simulat
 make build
 ./bin/lo check examples/device_transfer.lo
 ./bin/lo inspect examples/device_transfer.lo --format json
-./bin/lo run examples/device_transfer.lo --allow-device cuda-sim:0 --format json
-LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/device_transfer.lo --output ./bin/device-transfer
-./bin/device-transfer run --allow-device cuda-sim:0 --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/device_transfer.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/device_transfer
+./bin/device_transfer run --allow-device cuda-sim:0 --format json
 ```
 
 The result has shape `[2,2]` and values `[1.25,-0,1e-45,-2.5]`.
@@ -67,7 +66,7 @@ Parameters and gradients require consistent locations in their exact schemas.
 
 ## Ownership and Budgets
 
-`internal/device` contains validated sessions, backend interfaces, and the resource ledger.
+`runtime/native/src/device.rs` contains device sessions, backend interfaces, and the resource ledger.
 A session initializes its backend at first authorized access.
 Each allocation receipt records an identity, location, and actual reserved byte count.
 Immutable views share one backing allocation.
@@ -88,7 +87,7 @@ A reservation that exceeds the available budget is released before transfer.
 
 F009 can use the workspace class through the same ledger boundary.
 Metal computation charges status buffers to the workspace class.
-Driver context overhead and Go process memory are outside these logical storage limits.
+Driver context overhead and host process memory are outside these logical storage limits.
 
 Execution scopes release temporary allocations at flow exits.
 Fold callbacks release superseded states and keep values that remain reachable.
@@ -107,13 +106,13 @@ Unknown storage sizes and source locations use JSON `null`.
 Known sizes describe logical element payloads before any backend padding.
 Inspection includes unused flows without resource access.
 
-The `Factory`, `Backend`, and `Buffer` interfaces isolate backend initialization, allocation, transfers, computation, and cleanup.
+Native device hooks isolate backend initialization, allocation, transfers, computation, and cleanup.
 A compute tensor has metadata and opaque storage.
 CPU numeric kernels require CPU data.
-`runner.RunContext` accepts a factory and receipt observer for tests through the public CLI execution contract.
-It also requires an explicit Console host under the [Go host API](go-console-host.md).
-The production CLI selects a backend through the factory for its build.
-The standard build provides simulation. The Metal build also provides authorized Metal transfers and computation.
+The [native embedding contract](native-embedding.md) defines device hooks, ownership, and failure injection.
+
+The production CLI selects the backend linked into its runtime archive.
+The software archive provides simulation. The Metal archive also provides authorized Metal transfers and computation.
 Open receipts record the selected backend identity without tensor contents.
 A failed CUDA request never changes its selected backend.
 
@@ -121,9 +120,9 @@ A failed CUDA request never changes its selected backend.
 
 The initial public CLI tests failed because `Tensor.to` and `--allow-device` were absent.
 The [initial failure record](evidence/device-red.txt) contains that result.
-The [integration tests](../tests/integration/device_test.go) cover interpreter and native command execution.
-The [resource tests](../tests/integration/device_resources_test.go) inject backend failures through interpreter execution and CLI serialization.
-They also verify receipts through the public resource interface.
+The [native device tests](../tests/integration/llvm_device_cli_test.go) cover program commands and explicit grants.
+The [native resource tests](../tests/integration/llvm_device_resources_test.go) inject backend failures through the compiled-entry ABI.
+They also verify allocation receipts and complete resource release.
 Native command cases verify transfers, retained callback outputs, HTTP requests, authorization, publication failures, and metadata.
 
 The failure tests cover unavailable backends, allocation, upload, download, cancellation, budgets, and cleanup.

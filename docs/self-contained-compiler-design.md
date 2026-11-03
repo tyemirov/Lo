@@ -50,7 +50,7 @@ Producer tools can remain separate because they do not participate after the fin
 P009 selects the [single-runtime cleanup](single-runtime-plan.md) in I014 through I018.
 I016 relocates shared native host assets and updates their source inventories.
 Payload producers must consume those canonical inputs and current runtime identities.
-Compiler packaging and interpreter removal retain separate acceptance gates.
+Compiler packaging and the single-runtime transition have separate acceptance gates.
 
 ## Host, Target, And Variant Matrix
 

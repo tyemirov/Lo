@@ -1,19 +1,20 @@
 # Lo Compiler Design and Implementation Plan
 
 Lo compiles source programs into a verified execution graph.
-Static inspection, the interpreter, and native code generation use the same checked graph.
-The frontend and interpreter use Go.
+Static inspection and native code generation use the same checked graph.
+The frontend uses Go. Application execution uses the single Rust runtime.
 Native executables use LLVM and the static Rust runtime.
 This plan defines six implementation stages, their contracts, and their acceptance evidence.
 
 ## Status and Authority
 
 The compiler architecture and implementation sequence are accepted.
-The frontend, verifier, checked graph, static inspection, interpreter, native compiler, File activation, and HTTP execution are implemented.
+The frontend, verifier, checked graph, static inspection, native compiler, File activation, and HTTP execution are implemented.
 The [implementation audit](implementation-audit.md) maps the completed requirements to source and acceptance evidence.
 The stages below specify the full implementation scope.
 
-Validated commands are `lo parse`, `lo check`, `lo inspect`, `lo run`, `lo serve`, and `lo build`.
+Compiler commands are `lo parse`, `lo check`, `lo inspect`, and `lo build`.
+The compiled program supplies `run` and `serve`.
 The parser and verifier accept all six specification examples.
 The verifier checks all built-in signatures and every declared flow, including unused flows.
 Accepted programs produce an immutable checked graph with explicit propagation and commit sites.
@@ -126,18 +127,18 @@ Design sections:
 
 | Decision | Selected design | Reason |
 | --- | --- | --- |
-| Implementation languages | Go and Rust | Go implements the frontend and interpreter. Rust implements the static native runtime. |
+| Implementation languages | Go and Rust | Go implements the frontend. Rust implements the static native runtime. |
 | First product | Verifier with source diagnostics | Type and boundary checks establish the executable contract. |
-| Compiler output | Checked graph and optional native executable | Inspection, interpreter execution, and code generation use the same resolved program. |
+| Compiler output | Checked graph and optional native executable | Inspection and code generation use the same resolved program. |
 | Parser | Handwritten recursive descent | The small grammar permits direct control of source spans and diagnostics. |
 | Built-ins | One typed catalog | Type checks, inspection, and execution use the same operation definitions. |
 | Integers | Arbitrary-precision values | Lo specifies mathematical integer semantics. |
-| Initial execution | Interpreter over the checked graph | This gives a direct implementation of branches, handlers, and activation order. |
+| Application execution | Compiled code with the Rust runtime | One implementation owns branches, handlers, and activation order. |
 | Primary tests | Integration tests through the CLI | Acceptance depends on observable language behavior. |
 
 Go has arbitrary-precision integers through [`math/big`](https://pkg.go.dev/math/big).
 Its arithmetic methods write results into a receiver.
-The Lo value layer keeps these mutable objects private.
+The compiler keeps mutable integer objects private.
 Lo operations must not change values shared with another binding.
 
 The implementation accepts the current canonical Lo contract only.
@@ -149,13 +150,11 @@ It leaves the completed six-stage acceptance scope unchanged.
 The [standalone compiler plan](standalone-compiler-plan.md) owns I011 qualification and distribution acceptance.
 The [native contract](native-compilation-contract.md) defines the build limits and execution charges.
 
-The interpreter and native runtime implement the same language and adapter contracts.
-The interpreter uses the Go packages below.
-`runtime/native` implements the native execution sessions, operations, and adapters.
+`runtime/native` owns application sessions, values, operations, and adapters.
 `internal/identity` owns flow identities.
-`internal/execution` owns budgets, failures, program entries, and request invocations.
-`internal/derivative` owns the runtime VJP arithmetic without compiler graph dependencies.
-`internal/runner` owns runtime options, results, signals, and service lifecycle.
+`internal/autodiff` supplies checked derivative plans for native lowering.
+`internal/compilercli` owns compiler arguments and diagnostics.
+The [embedding guide](native-embedding.md) defines the compiled entry ABI and host ownership.
 
 The selected [training extension design](training-extension-design.md) defines the additional contracts for F002 through F011 and I001.
 P001 completed that design task.
@@ -194,19 +193,17 @@ flowchart TD
     Effects --> Lower[Graph construction]
     Lower --> Graph[Checked execution graph]
     Graph --> Inspect[Inspection report]
-    Graph --> Runtime[Interpreter]
     Graph --> Plan[Native lowering plan]
     Plan --> Generate[LLVM module emission]
     Generate --> Build[Packaged LLVM and LLD]
     RuntimeLibrary[Static Rust runtime] --> Build
     Build --> Native[Native executable]
-    Native --> Adapters
-    Runtime --> Adapters[File, Process, and HTTP adapters]
+    Native --> Host[File, Process, HTTP, Console, and Lock adapters]
 ```
 
 Each stage gives a representation with more guarantees.
 A failed stage returns diagnostics and prevents graph publication.
-The interpreter and code generator accept only a checked graph.
+The code generator accepts only a checked graph.
 
 ### Stage Contracts
 
@@ -444,9 +441,8 @@ Child processes receive explicit cache paths and closed standard input.
 The [native contract](native-compilation-contract.md#artifact-construction) specifies invalid-input behavior.
 
 
-The interpreter evaluates graph regions, and the native backend executes generated code.
-Each backend preserves execution sessions, budgets, failures, and typed adapter requests.
-The native runtime uses its own ABI implementation of these contracts.
+The native backend executes generated code through the Rust runtime.
+The runtime preserves sessions, budgets, failures, and typed adapter requests.
 The adapter interface owns external operations and converts recoverable failures into Lo errors.
 Each Lo error contains the required kind, input record, and trace data.
 
@@ -477,7 +473,7 @@ The [File contract](file-adapter-design.md) specifies nominal observations and o
 A File session retains directory handles and opaque entry provenance.
 Published JSON and error snapshots contain public metadata only.
 Grant authorization and directory identity checks precede removal.
-The same boundary implementation serves interpreted and generated programs.
+The native boundary implementation serves compiled programs.
 
 `Flow.fold` accepts named callbacks that can read external state and activate commits.
 It preserves ordered state transitions without changing List purity rules.
@@ -492,13 +488,14 @@ Shared HTTP adapters do not transfer fold progress between requests.
 
 ## CLI and Diagnostics
 
-| Planned command | Result on success | Execution boundary |
+| Command | Result on success | Execution boundary |
 | --- | --- | --- |
 | `lo parse program.lo` | Syntax representation with source locations. | Read the source file only. |
 | `lo check program.lo` | Confirmation that the implemented language contract accepts the program. | Compile without program execution. |
 | `lo inspect program.lo` | Static report from the checked graph. | Compile without program execution. |
-| `lo run program.lo` | Evaluation of a checked finite program. | Use host authorization for external operations. |
-| `lo serve program.lo` | Operation of committed HTTP servers. | Use host authorization for external operations. |
+| `lo build program.lo --output PROGRAM` | A native executable. | Read source and verified compiler inputs. |
+| `PROGRAM run` | Execution of a compiled finite program. | Use explicit host authorization for external operations. |
+| `PROGRAM serve` | Operation of committed HTTP servers. | Use explicit host authorization for external operations. |
 
 Each implemented command has text output and `--format json` for structured output.
 Standard output contains the selected result representation.
@@ -521,7 +518,7 @@ Every declaration and operation receives static validation before graph publicat
 A check that passes confirms source acceptance under the current language contract.
 It does not execute the program or authorize external operations.
 
-Server startup and orderly shutdown must have a specified CLI lifecycle before `lo serve` acceptance.
+The compiled `PROGRAM serve` command owns server startup and orderly shutdown.
 The compiler reports the first diagnostic in source traversal order.
 Line and column numbers start at one.
 Columns count Unicode scalars, and byte offsets start at zero.
@@ -550,21 +547,27 @@ The inspection schema appears below.
 
 ### Execution Command Contract
 
-`lo run` verifies the complete source before it opens adapter roots or evaluates the graph.
+The compiler checks the complete source before it publishes an executable.
+`PROGRAM run` opens authorized roots and executes the compiled entry point.
+
 Its default adapter policy denies all external operations.
 The `--read-root DIRECTORY` option authorizes reads within one directory tree.
 `--list-root DIRECTORY` and `--remove-root DIRECTORY` authorize direct children of one exact directory.
 `--open-files-root DIRECTORY` authorizes a recursive open-file probe rooted at that exact directory.
 These grants are independent of read and write grants.
+
 An exact grant for a missing directory stays inert if that directory appears later.
 This option can occur more than once for different roots.
 Duplicate normalized roots are invalid.
 Parse, check, and inspect reject runtime options.
 
 ```bash
-./bin/lo run examples/list_sum.lo
-./bin/lo run examples/count_letter.lo --read-root examples
-./bin/lo run examples/count_letter.lo --read-root examples --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/list_sum
+./bin/list_sum run
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/count_letter.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/count_letter
+./bin/count_letter run --read-root examples
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/count_letter.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/count_letter
+./bin/count_letter run --read-root examples --format json
 ```
 
 These examples return `10`, `3`, and a JSON result with integer value `3`.
@@ -751,9 +754,10 @@ Empty reduction axes preserve these logical charges even when the result shares 
 Tensor kernels test cancellation during execution.
 A host failure bypasses Lo handlers and prevents result publication.
 
-The two backends check weight before they publish an expression result.
+The runtime verifies weight before it publishes an expression result.
 These budgets bound specified evaluation work and data expansion.
 They do not specify exact process memory use.
+
 `runtime.limit` reports a budget failure with exit status `2`.
 `runtime.cancelled` reports host cancellation with exit status `2`.
 Neither failure enters a Lo handler.
@@ -762,7 +766,8 @@ The runtime does not narrow integers or silently truncate collections to meet a 
 ### Numeric and Tensor Analysis
 
 The catalog defines built-in operations for checkpoints, nominal File targets, explicit UTF-8 encoding, observations, and `Flow.fold`.
-`internal/tensor` owns validated shapes, operation plans, immutable data, and CPU kernels.
+`internal/shapefacts` owns validated shapes and static operation plans.
+`runtime/native/src/tensor.rs` owns immutable numeric data and execution.
 `internal/tensorfacts` propagates static metadata through bindings, records, Match branches, and named flow calls.
 It examines every declared flow, including unused flows.
 It checks calls again with available argument facts and caches results by flow and facts.
@@ -779,7 +784,7 @@ The analyzer does not replace exhausted analysis with unknown metadata.
 CPU arithmetic uses the `cpu-fp32-strict` profile from P001.
 Each multiplication completes its FP32 rounding before the addition.
 Reduction order and intermediate failures follow specification section 24.3.
-The [forward example](../examples/tensor_forward.lo) returns loss from mean squared error `3` through `lo run`.
+The [forward example](../examples/tensor_forward.lo) returns loss from mean squared error `3` through its compiled artifact.
 This operation set supplies the reference implementation for F005 and F009.
 
 ### Derivative Plans
@@ -790,15 +795,15 @@ The plan expands named helpers with distinct invocation identities.
 Its nodes contain source spans, operand bindings, active derivative edges, and value-lifetime information.
 Unsupported operations fail before execution, including operations in unused eager bindings.
 
-The interpreter executes the derivative plan, and the native backend generates code from that plan.
-The two backends execute the forward operations and propagate contributions in reverse stable order.
+The native backend generates code from the derivative plan.
+The runtime executes forward operations and propagates contributions in reverse stable order.
 The VJP module uses an arithmetic interface for checked tensor operations and resource admission.
-This interface keeps derivative rules independent of interpreter traversal.
-The two backends use the VJP rules in `internal/derivative`.
+This interface keeps derivative rules independent of compiler traversal.
+The runtime uses the VJP rules in `runtime/native/src/autodiff.rs`.
 
 Forward values leave the local environment after their last use unless a derivative rule requires them.
 Automatic diagnostic frames keep field names and type summaries without tensor contents.
-The two backends include each constructed frame in the error value weight.
+The runtime includes each constructed frame in the error value weight.
 The tape counts distinct storage allocations and enforces the limit in specification section 24.5.
 Every generated numeric result contributes to cumulative value weight.
 Failures retain the forward operation span and the expanded helper trace.
@@ -1002,30 +1007,24 @@ The following paths identify the compiler and runtime responsibilities.
 | Path | Responsibility |
 | --- | --- |
 | `cmd/lo/` | Source compiler entry point and native build commands. |
-| `internal/runner/` | Runtime arguments, output streams, signals, service lifecycle, and exit status. |
-| `internal/execution/` | Interpreter execution sessions, budgets, boundaries, failures, and program entries. |
-| `internal/runtimeops/` | Interpreter runtime operations and value construction. |
+| `internal/compilercli/` | Compiler arguments, command selection, and diagnostics. |
 | `internal/nativeplan/` | Checked native statements, branches, callbacks, source locations, and work charges. |
 | `internal/llvmemit/`, `internal/nativebuild/` | LLVM emission, verified tool inputs, and isolated artifact construction. |
 | `runtime/native/` | Static Rust runtime, ABI, native values, numerical operations, and adapters. |
 | `runtime/metal/` | Direct Metal kernel source, compiled library, and producer manifest. |
-| `internal/identity/` | Flow identities for the two execution backends. |
+| `internal/identity/` | Flow identities for compilation and native execution. |
 | `internal/autodiff/` | Checked derivative plans. |
-| `internal/derivative/` | Runtime VJP arithmetic without compiler graph dependencies. |
 | `internal/source/` | Source bytes, file identity, and source spans. |
 | `internal/syntax/` | Tokens, lexer, AST, and parser. |
 | `internal/resolve/` | Symbols, lexical scopes, and reference resolution. |
 | `internal/types/` | Type identities, constraints, and type unification. |
 | `internal/catalog/` | Canonical built-in definitions and operation identifiers. |
-| `internal/device/` | Grants, backend sessions, allocation receipts, storage budgets, and software transfers. |
-| `internal/tensor/` | Shape boundaries, immutable CPU and device data, transfers, operation plans, and FP32 kernels. |
+| `internal/targetconfig/` | Static build selection, profile names, and device error names. |
+| `internal/shapefacts/` | Pure shape validation and static work plans. |
 | `internal/tensorfacts/` | Static shape facts, shape diagnostics, and inspection metadata. |
 | `internal/check/` | Type checks, fallibility rules, and flow analysis. |
 | `internal/ir/` | Checked graph types and graph construction. |
 | `internal/inspect/` | Static inspection and capability summaries. |
-| `internal/value/` | Immutable runtime values and Lo errors. |
-| `internal/eval/` | Graph evaluation and handler propagation. |
-| `internal/adapter/` | File and HTTP implementations at external boundaries. |
 | `internal/diagnostic/` | Diagnostic values and output formats. |
 | `internal/compiler/` | Public orchestration of compiler stages in the application. |
 | `tests/integration/` | Tests through the built CLI and local resources. |
@@ -1034,13 +1033,17 @@ The following paths identify the compiler and runtime responsibilities.
 
 The compiler core imports typed catalog definitions.
 Concrete adapter implementations stay outside the compiler core.
-The source CLI selects interpreter execution or native artifact construction through explicit commands.
-Each runtime connects its execution sessions to its adapters.
+The compiler CLI constructs native artifacts through explicit build commands.
+The Rust runtime connects execution sessions to native adapters.
 The inspector uses the graph without a runtime dependency.
 Private representations prevent unrestricted construction of checked graphs and valid domain values.
 Smart constructors return `(Type, error)` where construction has invariants.
 
 ## Implementation Stages
+
+These stages record the original bootstrap sequence.
+I018 removes its Go execution implementation and preserves the required language assertions in native fixtures.
+The current command boundary and source owners are defined above.
 
 The stages below divide the four README milestones into smaller implementation tasks.
 Stages 1 through 3 implement the verifier.
@@ -1413,8 +1416,8 @@ Startup executes each commit in source order.
 If a later startup operation fails, cleanup closes every listener already active.
 Cleanup does not reverse completed file effects.
 
-`lo run` rejects server activation with `runtime.server-requires-serve`.
-`lo serve` without an active server publishes `runtime.no-server`.
+`PROGRAM run` rejects server activation with `runtime.server-requires-serve`.
+`PROGRAM serve` without an active server publishes `runtime.no-server`.
 Both failures use exit status `2`.
 An unhandled recoverable startup failure uses exit status `1` after successful cleanup.
 A cleanup failure uses exit status `2` and keeps the original failure context.
@@ -1521,14 +1524,16 @@ The [File example test](../tests/integration/activation_test.go) executes both c
 The HTTP division example uses fixed port `8080`.
 
 ```bash
-./bin/lo serve examples/http_division.lo --listen 8080
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/http_division.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/http_division
+./bin/http_division serve --listen 8080
 ```
 
 From another terminal, a request to `http://127.0.0.1:8080/` returns status `400` and body `division by zero`.
 The [HTTP echo example](../examples/http_echo.lo) uses a port selected by the operating system.
 
 ```bash
-./bin/lo serve examples/http_echo.lo --listen 0 --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/http_echo.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/http_echo
+./bin/http_echo serve --listen 0 --format json
 ```
 
 The readiness event gives the selected address.
@@ -1545,7 +1550,8 @@ Focused unit tests verify complex type algorithms, cycle detection, and numeric 
 | Planned target | Scope |
 | --- | --- |
 | `make build` | Build the CLI. |
-| `make test-integration` | Run tests through public entry points. |
+| `make test-frontend` | Run compiler and static-analysis tests. |
+| `make test-native` | Run compiled-program and native ABI tests. |
 | `make test-conformance` | Run the fixtures implemented in the current stage. |
 | `make test` | Run integration, conformance, and focused unit tests. |
 | `make fmt` | Apply the canonical Go format. |
@@ -1554,7 +1560,7 @@ Focused unit tests verify complex type algorithms, cycle detection, and numeric 
 
 A partial milestone records the pending fixture groups.
 For full verifier acceptance, all static fixture groups must pass.
-For full interpreter acceptance, all applicable runtime fixture groups must pass.
+For full runtime acceptance, all applicable runtime fixture groups must pass.
 An unimplemented group cannot count as passed coverage.
 
 Validation requirements:

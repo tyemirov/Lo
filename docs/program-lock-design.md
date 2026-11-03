@@ -1,6 +1,6 @@
 # Program Entry And File Locks
 
-F029 implements program entry identity and exclusive file locks in both runtimes.
+F029 implements program entry identity and exclusive file locks in the Rust runtime.
 This document defines the implemented contract.
 
 ## Public Interfaces
@@ -33,17 +33,11 @@ A target snapshot has a weight of 16 bytes.
 
 ## Entry Capture
 
-The interpreter captures entry identity from the descriptor used to read the source.
-It retains that object through application cleanup.
-Checked graph metadata and `argv[0]` do not establish entry identity.
-Source entry capture can resolve a supplied symlink alias to its canonical physical path.
-It compares the resolved object with the retained source descriptor before acceptance.
-`Program.path` reports that canonical path.
-
 The native CLI captures the actual executable through operating-system interfaces.
 It does not use an embedded source path.
 A relocated executable reports its actual launch location.
 The runtime retains the captured file identity.
+Checked graph metadata and `argv[0]` do not establish entry identity.
 
 On Linux, `/proc/self/exe` identifies the running executable object.
 On Darwin, the main image address selects a memory region with a backing vnode.
