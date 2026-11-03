@@ -23,6 +23,7 @@ const (
 	DeviceKind             Kind = "Device"
 	ErrorKind              Kind = "Error"
 	PathKind               Kind = "File.Path"
+	GlobKind               Kind = "Glob"
 	FileEntryKind          Kind = "File.Entry"
 	FileDirectoryKind      Kind = "File.Directory"
 	FileScanKind           Kind = "File.Scan"
@@ -139,6 +140,7 @@ func Tensor() Type            { return atom(TensorKind) }
 func Device() Type            { return atom(DeviceKind) }
 func Error() Type             { return atom(ErrorKind) }
 func Path() Type              { return atom(PathKind) }
+func Glob() Type              { return atom(GlobKind) }
 func FileEntry() Type         { return atom(FileEntryKind) }
 func FileDirectory() Type     { return atom(FileDirectoryKind) }
 func FileScan() Type          { return atom(FileScanKind) }
@@ -174,7 +176,7 @@ func ProcessTermination() Type { return atom(ProcessTerminationKind) }
 func AnyRecord() Type          { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind, LockFileKind, LockLeaseKind:
+	case GlobKind, URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind, LockFileKind, LockLeaseKind:
 		return atom(name), true
 	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true

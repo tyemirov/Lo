@@ -664,7 +664,7 @@ func (b *functionBuilder) literalSequence(call ir.BuiltinCall, literals []ir.Lit
 func validateArguments(op catalog.Operation, args []ir.Argument, flows map[identity.FlowID]ir.Flow) error {
 	count := len(args)
 	variadic := op.Rule() == catalog.StringConcat || op.Rule() == catalog.ListConstructor || op.Rule() == catalog.MapConstructor || op.Rule() == catalog.RecordConstructor
-	processor := op.Rule() == catalog.ListProcessor || op.Rule() == catalog.FlowProcessor
+	processor := op.Rule() == catalog.ListProcessor || op.Rule() == catalog.FlowProcessor || op.Rule() == catalog.ListSortProcessor
 	guarded := op.Rule() == catalog.CheckedRemovalConstructor
 	if !variadic && !processor && !guarded && count != len(op.Parameters()) {
 		return fmt.Errorf("native lowering: %s requires %d arguments, got %d", op.Name(), len(op.Parameters()), count)
@@ -690,12 +690,40 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 			if op.Rule() == catalog.Fixed && op.Parameters()[arg.Position()].Type != nil && !types.Equal(op.Parameters()[arg.Position()].Type, arg.Value().Type()) {
 				return fmt.Errorf("native lowering: inconsistent argument type for %s", op.Name())
 			}
+			if op.Rule() == catalog.ListAccess {
+				if arg.Position() == 0 && arg.Value().Type().Kind() != types.ListKind || arg.Position() > 0 && !types.Equal(arg.Value().Type(), types.Int()) {
+					return fmt.Errorf("native lowering: inconsistent list access argument for %s", op.Name())
+				}
+			}
 		case ir.FlowArgument:
 			flow, ok := flows[arg.Flow()]
 			if !ok {
 				return fmt.Errorf("native lowering: missing callback %s", arg.Flow())
 			}
-			if guarded {
+			if op.Rule() == catalog.ListSortProcessor {
+				if arg.Position() != count-1 || len(flow.Parameters()) != count || !types.Equal(flow.Signature().Output(), types.Int()) || flow.Effects().Reads || flow.Effects().Commits {
+					return fmt.Errorf("native lowering: invalid sort comparison for %s", op.Name())
+				}
+				values := make([]types.Type, count-1)
+				for _, candidate := range args {
+					if value, ok := candidate.(ir.ValueArgument); ok && value.Position() >= 0 && value.Position() < len(values) {
+						values[value.Position()] = value.Value().Type()
+					}
+				}
+				list, ok := values[0].(types.List)
+				if !ok {
+					return fmt.Errorf("native lowering: invalid sort input for %s", op.Name())
+				}
+				for index, parameter := range flow.Parameters() {
+					expected := list.Element()
+					if index < count-2 {
+						expected = values[index+1]
+					}
+					if expected == nil || !types.Equal(parameter.Type, expected) {
+						return fmt.Errorf("native lowering: inconsistent sort comparison parameter for %s", op.Name())
+					}
+				}
+			} else if guarded {
 				if arg.Position() != count-1 || len(flow.Parameters()) != count || !types.Equal(flow.Signature().Output(), types.Bool()) || flow.Effects().Reads || flow.Effects().Commits {
 					return fmt.Errorf("native lowering: invalid removal predicate for %s", op.Name())
 				}
