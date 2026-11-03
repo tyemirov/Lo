@@ -1,6 +1,6 @@
 # mac-cleanup Implementation Roadmap
 
-Status: technical plan and implementation backlog, updated on November 2, 2026.
+Status: technical plan and implementation backlog, updated on November 3, 2026.
 This plan does not implement a new language operation or establish full cleanup acceptance.
 The [application design](mac-cleanup-script-design.md) owns the observed workflow and its draft interfaces.
 The [application plan](mac-cleanup-plan.md) owns the cleanup policies and acceptance boundary.
@@ -16,10 +16,11 @@ F026 through F028 implement M1: Console output, terminal results, and an executa
 Final local `make ci` and independent review passed.
 The [completion record](evidence/cli-runtime/checkpoint.json) contains the results.
 F029 implements entry identity and exclusive file leases.
-P009 selects the [single-runtime cleanup](single-runtime-plan.md) before further application runtime features.
-The implementation order is I016, I015, I014, I017, then I018.
-The Go compiler frontend remains. The Rust runtime becomes the only application runtime.
-Compiler commands build the program; the produced executable supplies run and serve commands.
+
+P009 and I014 through I018 complete the [single-runtime cleanup](single-runtime-plan.md).
+The Go compiler frontend remains. The Rust native runtime is the only application runtime.
+Compiler commands build the program. The produced executable supplies run and serve commands.
+
 M2 then combines those leases with F030 processors, F032 observations, and F035 command policy.
 This sequence does not depend on modules, user-defined types, generics, or packages.
 
@@ -42,8 +43,9 @@ The [control evidence](evidence/cleanup-control-composition.json) records the ex
 F024 and F025 record their own implementation evidence.
 Those records describe the earlier validation of their contracts.
 
-The application draft retains 62 proposed operation names after exclusion of implemented Match behavior and current catalog operations.
-That count identifies dependencies. Some draft operations can use the current language contract.
+F030 supplies the [selected pure value operations](value-processors.md).
+The executable file-policy and probe examples use those operations with ordinary typed flows.
+The full application draft still contains proposed interfaces and helper abbreviations.
 Some draft calls can use current operations or ordinary named flows.
 For example, exact root observations can use `File.directory`, `File.list`, and `File.scan`.
 The draft's `File.Directory.open` must not become an alias for the current root operation.
@@ -52,7 +54,8 @@ The draft's `File.Directory.open` must not become an alias for the current root 
 
 F026 through F028 complete M1.
 The [CLI contract](cli-runtime-design.md) defines their selected interfaces and behavior.
-Other entries remain planned work outside the implemented language reference.
+F030 adds the selected value processors and executable policy examples.
+F031 through F036 remain planned work outside the implemented language reference.
 F030 through F036 and I013 depend on I018.
 P007 research can continue during the runtime cleanup.
 
@@ -61,7 +64,7 @@ P007 research can continue during the runtime cleanup.
 | F026 | Console targets and injected output sinks. | F025 | Ordered stdout/stderr output through `commit` in all software runtimes. |
 | F027 | Terminal results and final process status. | F026 | Status selection after output and resource cleanup, including cleanup failures after requested status 1 or 2. |
 | F028 | Declared application flags and minimal value helpers. | F025, F027 | Executable help, invalid-argument handling, and dry-run selection. |
-| F029 | Program identity and exclusive nonblocking file leases. | F025 | Contention and release across interpreted and native programs. |
+| F029 | Program identity and exclusive nonblocking file leases. | F025 | Contention and release across compiled native programs. |
 | F030 | Selected text, byte, collection, path, and glob processors. | F025, F028, I018 | Executable direct-file and probe predicates with bounded values. |
 | F031 | Generic JSON decoding and numeric presentation. | F030, I018 | Typed Docker metadata extraction and deterministic report formatting. |
 | F032 | Public identity, allocation, fresh time, and volume observations. | F025, I018 | Coherent metadata and distinct allocation/free-space reports. |
@@ -203,8 +206,7 @@ Unknown flags and conflicting modes select the application's declared argument-e
 
 F029 supplies entry identity and an exclusive nonblocking lock lease.
 The [lock contract](program-lock-design.md) selects entry capture, exact grants, session ownership, and the bounded replacement guarantee.
-Interpreted entry identity refers to the source entry.
-Native entry identity refers to the actual executable after relocation.
+Entry identity refers to the actual executable after relocation.
 Untrusted `argv[0]` and embedded source metadata cannot substitute for that observation.
 Embeddings without entry identity need an explicit injected identity or a typed unavailable result.
 
@@ -215,14 +217,14 @@ Discarding an ordinary value must not release the program lock early.
 Child processes must not retain the lock descriptor.
 The initial contract does not need shared or blocking locks.
 
-Public cases include two-process contention, mixed interpreted/native callers, relocation, replacement, missing identity, and cancellation.
+Public cases include two-process contention, relocation, replacement, missing identity, and cancellation.
 Close failures and delayed child cleanup must not appear as successful lease release.
 
 ## Value And Observation Contracts
 
-F028 uses existing public value helpers for its executable option parser.
-F030 then selects the remaining text, byte, collection, and glob operations from actual application call sites.
-F030 depends on F028 so that parser helpers have one canonical owner before remaining processors are selected.
+F028 owns its parser implementation and adds no public value helper aliases.
+F030 implements 26 selected processors from current application call sites.
+The [value contract](value-processors.md) defines their exact boundaries and typed failures.
 Boolean composition can use Match and ordinary pure flows.
 UTF-8 conversions and scalar predicates already exist.
 New aliases for implemented behavior are outside this plan.
@@ -233,9 +235,9 @@ New aliases for implemented behavior are outside this plan.
 | `Console.Line.new` | F026 | Implemented committed output boundary. |
 | `Program.Exit.new` | F027 | Implemented inert terminal result and type-correct startup path. |
 | `Program.path`, `Lock.File.new` | F029 | Implemented entry identity and explicit lock authority. |
-| Boolean, list, byte, glob, and text processors | F030 | Reuse current flows where sufficient. Implement only the selected remainder. |
-| `File.Path.join`, `parent`, `name`, `to_string` | F030 | Select pure lexical path behavior without filesystem access. |
-| `Process.Arguments.format_shell` | F030 | Select display-only quoting. Never turn the display string into execution source. |
+| Boolean, list, byte, glob, and text processors | F030 | Implemented selected processors. Ordinary flows own Boolean composition, chunks, duplicate removal, and typed equality. |
+| `File.Path.join`, `parent`, `name`, `to_string` | F030 | Implemented lexical paths without host observations. |
+| `Process.Arguments.format_shell` | F030 | Implemented POSIX shell display text. Process activation receives the original arguments. |
 | `Int.parse`, `Float.format_fixed`, `String.format`, `JSON.*` | F031 | Select numeric parsing, presentation, JSON values, and typed extraction. |
 | `Clock.now_unix_ns`, `File.System.usage` | F032 | Add authorized host observations and immutable results. |
 | `File.Path.resolve`, `exists`, `is_directory`, `is_symlink` | F033 | Reuse equivalent exact observations or select an explicitly authorized observation contract. |
@@ -428,7 +430,7 @@ It is not a prerequisite for the macOS application roadmap.
 ### Source And Test Map
 
 The paths below identify retained and planned implementation areas after I018.
-The single-runtime plan owns extraction and relocation from the current Go runtime.
+The single-runtime plan records the completed removal of Go application execution.
 
 | Issues | Compiler and shared source | Native source | Public regression anchors |
 | --- | --- | --- | --- |
@@ -477,7 +479,7 @@ The remaining decisions follow below.
 
 | Owner | Decision to close before its implementation |
 | --- | --- |
-| F030, F031 | Exact processor list, text/byte boundaries, JSON value/extraction schema, and formatting failures. |
+| F031 | JSON value/extraction schema and formatting failures. |
 | F032 | Public metadata shapes, allocation arithmetic, fresh-clock errors, and containing-volume result schema. |
 | F033 | Recursive grant inputs, retained child representation, and provenance/release checks. |
 | F034 | Bounded snapshot representation, expected-state binding, quota admission, and recursive-removal receipt. |

@@ -198,21 +198,29 @@ flow DockerCommand(context: Record{apply: Bool, home: File.Path, uid: Int, proce
     return Run(context.process, executable, List.concat(List.new("--context", "desktop-linux"), arguments), output, 1800) |> RequireSuccess()
 }
 
-flow BuilderValue(key: String, line: String) -> Record{pending: Bool, values: List<String>} {
+flow BuilderFirst(tokens: List<String>) -> List<String>! {
+    return Match.new(List.length(tokens), 0: List.new(), _: List.slice(tokens, 0, 1))
+}
+
+flow BuilderSuffix(key: String, line: String) -> Record{pending: Bool, values: List<String>}! {
     suffix = String.slice(line, Math.add(String.length(key), 1), String.length(line))
-    spaced = Bool.any(List.new(String.eq(suffix, ""), String.is_whitespace(String.slice(suffix, 0, 1))))
-    matched = Bool.all(List.new(String.starts_with(line, String.concat(key, ":")), spaced))
+    spaced = Match.new(String.length(suffix), 0: true, _: String.is_whitespace(String.slice(suffix, 0, 1)))
     tokens = String.split_whitespace(suffix)
-    return Match.new(matched,
-        true: Record.new(pending: Math.eq(List.length(tokens), 0), values: List.slice(tokens, 0, 1)),
+    return Match.new(spaced,
+        true: Record.new(pending: Math.eq(List.length(tokens), 0), values: BuilderFirst(tokens)),
         _: Record.new(pending: false, values: List.new()))
 }
 
-flow BuilderField(key: String, state: Record{pending: Bool, values: List<String>}, line: String) -> Record{pending: Bool, values: List<String>} {
+flow BuilderValue(key: String, line: String) -> Record{pending: Bool, values: List<String>}! {
+    return Match.new(String.starts_with(line, String.concat(key, ":")),
+        true: BuilderSuffix(key, line), _: Record.new(pending: false, values: List.new()))
+}
+
+flow BuilderField(key: String, state: Record{pending: Bool, values: List<String>}, line: String) -> Record{pending: Bool, values: List<String>}! {
     prefix = BuilderValue(key, line)
     continued = String.split_whitespace(line)
     return Match.new(state.pending,
-        true: Record.new(pending: Math.eq(List.length(continued), 0), values: List.concat(state.values, List.slice(continued, 0, 1))),
+        true: Record.new(pending: Math.eq(List.length(continued), 0), values: List.concat(state.values, BuilderFirst(continued))),
         _: Record.new(pending: prefix.pending, values: List.concat(state.values, prefix.values)))
 }
 
@@ -625,13 +633,16 @@ flow StaleGuard(uid: Int, cutoff: Int, masks: List<Glob>, before: File.Entry, no
     return Bool.all(List.new(SameFile(before, now), StaleCandidate(uid, cutoff, masks, now)))
 }
 flow GatewayDigit(valid: Bool, character: Scalar) -> Bool {
-    return Bool.all(List.new(valid, Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), character)))
+    return Match.new(valid, true: Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), character), _: false)
 }
-flow GatewayName(name: String) -> Bool {
+flow GatewayDigits(name: String) -> Bool! {
     digits = String.slice(name, 11, Math.sub(String.length(name), 4))
-    return Bool.all(List.new(Math.gte(String.length(name), 16), List.fold(digits, true, GatewayDigit)))
+    return List.fold(digits, true, GatewayDigit)
 }
-flow GatewayCandidate(cutoff: Int, mask: Glob, entry: File.Entry) -> Bool {
+flow GatewayName(name: String) -> Bool! {
+    return Match.new(Math.gte(String.length(name), 16), true: GatewayDigits(name), _: false)
+}
+flow GatewayCandidate(cutoff: Int, mask: Glob, entry: File.Entry) -> Bool! {
     return Bool.all(List.new(Glob.matches(mask, entry.name), GatewayName(entry.name), String.eq(entry.kind, "regular"), Math.lt(entry.modified_unix_ns, cutoff)))
 }
 flow GatewayGuard(before: File.Entry, now: File.Entry) -> Bool {

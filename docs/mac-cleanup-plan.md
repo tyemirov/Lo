@@ -3,7 +3,7 @@
 Status: the full current workflow is written as a Lo application design.
 The [source](examples/mac-cleanup.lo) uses implemented operations and explicit proposals for missing generic capabilities.
 The [application design](mac-cleanup-script-design.md) records source identity, behavior, proposed interfaces, and validation limits.
-The source is not executable with the current compiler and runtimes.
+The source is not executable with the current compiler and native runtime.
 
 ## Language Boundary
 
@@ -72,6 +72,9 @@ Other file policies use globs and pure metadata predicates.
 The [application design](mac-cleanup-script-design.md#behavior-in-the-application) records their framing and stderr differences.
 
 ## Implemented Foundation
+
+F030 adds [pure value processors](value-processors.md) and executable direct-file and exact-probe examples.
+The complete application remains I013 work.
 
 F024 supplies inherited Process contexts, executable discovery, bounded transport, and scoped cleanup execution fixtures.
 The [F024 evidence](evidence/process-context-cleanup/checkpoint.json) records its validation boundary.

@@ -2,7 +2,7 @@
 
 Status: application design source with proposed generic operations.
 The [Lo source](examples/mac-cleanup.lo) describes the cleanup workflow observed on October 28, 2026.
-It is not executable with the current compiler and runtimes.
+It is not executable with the current compiler and native runtime.
 This document keeps proposed interfaces outside the implemented language reference.
 
 ## Source and Scope
@@ -78,39 +78,43 @@ Proposed additions below do not change that reference or the catalog.
 The existing exact File grants remain exact.
 Recursive observation and removal require separate explicit authority.
 
-## Proposed Generic Value Operations
+## Value Operations And Draft Helpers
 
-| Operations | Proposed contract |
+F030 supplies the [implemented value processor contract](value-processors.md).
+It includes exact text and byte boundaries, indexed collections, stable sorting, lexical paths, globs, and command display.
+The [file-policy example](../examples/file_policy.lo) executes direct-file selection with current metadata.
+The [probe-fields example](../examples/probe_fields.lo) executes NUL-framed parsing with exact batch membership.
+These examples have no removal effects.
+
+The full draft still uses helper names that require ordinary application flows.
+Those names do not propose additional builtins.
+
+| Draft helper | Current composition |
 | --- | --- |
-| `Glob.new(pattern) -> Glob!` | Compile a case-sensitive wildcard pattern. Support `*`, `?`, character classes, and escapes. |
-| `Glob.matches(mask, text) -> Bool` | Pure full-string match. `*` includes separators and leading dots. The application selects basenames and excludes hidden names explicitly. |
-| `Bool.all(values)`, `Bool.any(values)`, `Bool.not(value)` | Pure Boolean operations over `List<Bool>` or one `Bool`. Empty all is true. Empty any is false. |
-| `List.at(values, index)` | Fallible indexed lookup. |
-| `List.slice(values, start, end)` | Pure ordered slice with an exclusive end. Restrict endpoints to valid bounds. Negative indices count from the end. |
-| `List.concat(left, right)` | Pure concatenation of lists with one element type. |
-| `List.contains(values, value)`, `List.unique(values)`, `List.equal(left, right)` | Pure typed equality, stable duplicate removal, and ordered equality. Path equality uses `File.Path.eq`. |
-| `List.chunks(values, size)` | Ordered batches with a positive size and explicit invalid-size failure. |
-| `List.sort(values, Compare)` | Pure stable sort through a total pair comparator with an `Int` result. |
-| `List.equal_by(left, right, Equal)` | Pure ordered equality through a total pair predicate. |
-| `String.starts_with`, `String.ends_with`, `String.compare` | Pure prefix, suffix, and lexical comparison. |
-| `String.slice(text, start, end)` | Pure Unicode-scalar slice with an exclusive end. Restrict endpoints to valid bounds. Negative indices count from the end. |
-| `String.trim`, `String.is_whitespace`, `String.split_whitespace` | Pure whitespace operations. The whitespace predicate returns false for an empty string. |
-| `String.lines(text)` | Pure line split without terminators, with universal line boundaries. |
-| `String.split(text, separator)`, `String.replace_all(text, old, new)` | Pure exact string operations. |
-| `String.split_first(text, separator)` | Fallible split with `before` and `after` fields. Missing separators fail. |
-| `String.join(values, separator)` | Pure string concatenation with a separator. |
-| `String.format(template, fields) -> String!` | Typed record substitutions with decimal grouping and width fields. Invalid templates or fields fail. |
-| `Float.format_fixed(value, places) -> String!` | Fixed decimal places with explicit invalid-precision and nonfinite failures. |
-| `Int.parse(text) -> Int!` | Decimal integer conversion with explicit malformed-input failure. |
-| `Bytes.length`, `Bytes.starts_with` | Pure byte length and prefix test. |
-| `Bytes.slice(bytes, start, end)` | Fallible byte slice with an exclusive end. |
-| `Bytes.split(bytes, separator)`, `Bytes.trim_start(bytes, prefix)` | Pure exact byte split and repeated leading-prefix removal. |
-| `JSON.decode(bytes) -> JSON.Value!` | Parse JSON bytes without an application-specific schema. |
-| `JSON.at`, `JSON.get`, `JSON.string` | Fallible array lookup, object lookup, and string extraction. |
+| `Bool.all`, `Bool.any`, `Bool.not` | `Match.new` and `List.fold`. |
+| `List.concat` | `List.flat_map` over the two lists. |
+| `List.contains`, `List.unique`, `List.equal`, `List.equal_by` | Typed predicates and ordered folds. Path comparison uses `File.Path.eq`. |
+| `List.chunks` | A positive-size guard, `List.unfold`, and `List.slice`. |
+| `String.join` | An ordered fold with an explicit separator. |
 
-Negation applies to the Boolean match result.
-The program does not require special negative-mask syntax or a regex engine.
-The exact digit rule in `GatewayName` uses ordinary scalar predicates after filename selection.
+The probe example contains executable Path composition flows for these collection policies.
+The full application draft still requires their integration under I013.
+F028 owns `CLI.parse` and does not add public value helper aliases.
+The existing String view as `List<Scalar>` supplies scalar iteration.
+
+F031 owns the remaining JSON and presentation proposals:
+
+| Proposed operation | Required behavior |
+| --- | --- |
+| `String.format(template, fields) -> String!` | Typed substitutions, decimal groups, and field width. |
+| `Float.format_fixed(value, places) -> String!` | Fixed decimal places with precision and nonfinite failures. |
+| `Int.parse(text) -> Int!` | Decimal conversion with malformed-input failure. |
+| `JSON.decode(bytes) -> JSON.Value!` | Generic JSON parsing. |
+| `JSON.at`, `JSON.get`, `JSON.string` | Typed extraction with explicit failures. |
+
+Glob negation applies to the Boolean match result.
+The application does not require negative-mask syntax or a regex engine.
+Filename digits remain an application predicate over Scalars.
 
 ## Control Composition
 
@@ -219,7 +223,7 @@ Their projections remain pure.
 
 | Operations | Proposed contract |
 | --- | --- |
-| `File.Path.join`, `File.Path.parent`, `File.Path.name`, `File.Path.to_string` | Pure lexical path operations. |
+| `File.Path.join`, `File.Path.parent`, `File.Path.name`, `File.Path.to_string` | Implemented lexical path operations under F030. |
 | `File.Path.resolve(path) -> File.Path!` | Resolve links and produce an absolute canonical path. |
 | `File.Path.exists`, `File.Path.is_directory`, `File.Path.is_symlink` | Fallible observations. Only absence gives false. The symlink test examines the final entry without following it. |
 | `File.Directory.open(path) -> File.Directory!` | Require a canonical directory path and retain its descriptor after an identity check. |
