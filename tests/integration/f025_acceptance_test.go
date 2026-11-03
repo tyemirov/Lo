@@ -54,7 +54,7 @@ func TestF025GuardStaticContracts(t *testing.T) {
 
 func TestF025CheckedConstructionIsPure(t *testing.T) {
 	source := `flow Accept(expected: Int, original: File.Entry, current: File.Entry) -> Bool { return Math.eq(expected, current.owner_uid) }; flow Build(number: Int) -> File.Remove! { return File.Remove.checked(List.new(), number, Accept) }; return List.map(List.new(7), Build)`
-	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 	if got.Type != "List<File.Remove>" {
 		t.Fatalf("pure constructor result: %+v", got)
 	}
@@ -78,11 +78,11 @@ func TestF025ScanAndDirectoryAuthority(t *testing.T) {
 		t.Run(operation, func(t *testing.T) {
 			root := fileFixtureRoot(t)
 			source := sourceFile(t, fmt.Sprintf(`return %s(File.Path.new(%q))`, operation, root))
-			denied := run(t, "run", source, "--format", "json")
+			denied := runProgram(t, source, "run", "--format", "json")
 			if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 				t.Fatalf("missing exact listing grant: %+v", denied)
 			}
-			readOnly := run(t, "run", source, "--read-root", root, "--format", "json")
+			readOnly := runProgram(t, source, "run", "--read-root", root, "--format", "json")
 			if readOnly.status != 2 || diagnostics(t, readOnly.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 				t.Fatalf("read grant supplied listing authority: %+v", readOnly)
 			}
@@ -91,7 +91,7 @@ func TestF025ScanAndDirectoryAuthority(t *testing.T) {
 				t.Fatal(err)
 			}
 			childSource := sourceFile(t, fmt.Sprintf(`return %s(File.Path.new(%q))`, operation, child))
-			parentOnly := run(t, "run", childSource, "--list-root", root, "--format", "json")
+			parentOnly := runProgram(t, childSource, "run", "--list-root", root, "--format", "json")
 			if parentOnly.status != 2 || diagnostics(t, parentOnly.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 				t.Fatalf("parent grant supplied child-root authority: %+v", parentOnly)
 			}
@@ -105,7 +105,7 @@ func TestF025ObservationFailures(t *testing.T) {
 			root := fileFixtureRoot(t)
 			missing := filepath.Join(root, "missing")
 			source := sourceFile(t, fmt.Sprintf(`return %s(File.Path.new(%q))`, operation, missing))
-			got := run(t, "run", source, "--list-root", missing, "--format", "json")
+			got := runProgram(t, source, "run", "--list-root", missing, "--format", "json")
 			diagnostic := receiptHostDiagnostic(t, got)
 			if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != "File.DirectoryAbsent" {
 				t.Fatalf("missing-directory error: %+v", got)
@@ -114,7 +114,7 @@ func TestF025ObservationFailures(t *testing.T) {
 			if err := os.Symlink(fileFixtureRoot(t), link); err != nil {
 				t.Fatal(err)
 			}
-			linked := run(t, "run", sourceFile(t, fmt.Sprintf(`return %s(File.Path.new(%q))`, operation, link)), "--list-root", link, "--format", "json")
+			linked := runProgram(t, sourceFile(t, fmt.Sprintf(`return %s(File.Path.new(%q))`, operation, link)), "run", "--list-root", link, "--format", "json")
 			if linked.status == 0 {
 				t.Fatalf("symlinked root accepted: %+v", linked)
 			}
@@ -128,7 +128,7 @@ func TestF025ScanOrdering(t *testing.T) {
 		fileFixture(t, root, name, "payload")
 	}
 	source := fmt.Sprintf(`flow Name(entry: File.Entry) -> String { return entry.name }; flow Main() -> Record{names: List<String>, vanished: List<String>, owner: Int}! { scan = File.scan(File.Path.new(%q)); return Record.new(names: List.map(scan.entries, Name), vanished: scan.vanished_names, owner: scan.directory.owner_uid) }; return Main()`, root)
-	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--list-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--list-root", root, "--format", "json"))
 	fields := processFields(t, got)
 	valueJSON(t, fields["names"], `[{"type":"String","value":".hidden"},{"type":"String","value":"a"},{"type":"String","value":"z"},{"type":"String","value":"é"}]`)
 	valueJSON(t, fields["vanished"], `[]`)
@@ -139,7 +139,7 @@ func TestF025GuardRejectionPreservesFiles(t *testing.T) {
 	root := fileFixtureRoot(t)
 	selected := fileFixture(t, root, "selected", "payload")
 	source := fmt.Sprintf(`flow Reject(original: File.Entry, current: File.Entry) -> Bool { return false }; flow Main() -> Int! { entries = File.list(File.Path.new(%q)); target = File.Remove.checked(entries, Reject); receipt = commit target; return receipt.completed_count }; return Main()`, root)
-	got := run(t, "run", sourceFile(t, source), "--list-root", root, "--remove-root", root, "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--list-root", root, "--remove-root", root, "--format", "json")
 	diagnostic := receiptHostDiagnostic(t, got)
 	if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != "File.EntryChanged" {
 		t.Fatalf("guard rejection: %+v", got)
@@ -157,7 +157,7 @@ func TestF025CheckedSelectionValidation(t *testing.T) {
 	root := fileFixtureRoot(t)
 	selected := fileFixture(t, root, "selected", "payload")
 	source := fmt.Sprintf(`flow Accepted(original: File.Entry, current: File.Entry) -> Bool { return true }; flow Duplicate(entry: File.Entry) -> List<File.Entry> { return List.new(entry, entry) }; flow Failed(error: Error) -> String { return error.kind }; flow Main() -> String onError Failed { entries = File.list(File.Path.new(%q)); duplicated = List.flat_map(entries, Duplicate); target = File.Remove.checked(duplicated, Accepted); return "accepted" }; return Main()`, root)
-	valueJSON(t, fileOutput(t, run(t, "run", sourceFile(t, source), "--list-root", root, "--format", "json")), `"File.InvalidSelection"`)
+	valueJSON(t, fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--list-root", root, "--format", "json")), `"File.InvalidSelection"`)
 	data, err := os.ReadFile(selected)
 	if err != nil || string(data) != "payload" {
 		t.Fatalf("invalid selection changed the observed file: %q %v", data, err)
@@ -170,7 +170,7 @@ func TestF025GuardWorkExhaustion(t *testing.T) {
 	numbers := strings.TrimSuffix(strings.Repeat("1,", 300), ",")
 	source := fmt.Sprintf(`flow Add(total: Int, number: Int) -> Int { return Math.add(total, number) }; flow Eligible(expected: Int, name: String, original: File.Entry, current: File.Entry) -> Bool { numbers = List.new(%s); total = List.fold(numbers, 0, Add); return Match.new(String.eq(name, current.name), true: Math.eq(total, expected), _: false) }; flow Failed(error: Error) -> Int { return -1 }; flow Main() -> Int onError Failed { entries = File.list(File.Path.new(%q)); target = File.Remove.checked(entries, 300, "selected", Eligible); receipt = commit target; return receipt.completed_count }; return Main()`, numbers, root)
 	path := sourceFile(t, source)
-	limited := run(t, "run", path, "--list-root", root, "--remove-root", root, "--max-steps", "100", "--format", "json")
+	limited := runProgram(t, path, "run", "--list-root", root, "--remove-root", root, "--max-steps", "100", "--format", "json")
 	if limited.status != 2 || diagnostics(t, limited.stderr).Diagnostics[0].Code != "runtime.limit" {
 		t.Fatalf("predicate work limit did not bypass the Lo handler: %+v", limited)
 	}
@@ -178,7 +178,7 @@ func TestF025GuardWorkExhaustion(t *testing.T) {
 	if err != nil || string(data) != "payload" {
 		t.Fatalf("predicate work exhaustion changed the file: %q %v", data, err)
 	}
-	valueJSON(t, fileOutput(t, run(t, "run", path, "--list-root", root, "--remove-root", root, "--max-steps", "10000", "--format", "json")), `"1"`)
+	valueJSON(t, fileOutput(t, runProgram(t, path, "run", "--list-root", root, "--remove-root", root, "--max-steps", "10000", "--format", "json")), `"1"`)
 	if _, err := os.Lstat(selected); !os.IsNotExist(err) {
 		t.Fatalf("guard did not complete with sufficient work: %v", err)
 	}

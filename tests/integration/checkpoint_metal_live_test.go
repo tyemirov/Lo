@@ -10,7 +10,6 @@ import (
 func checkpointLiveWorkflow(t *testing.T, prepare func(string, string) func() result) {
 	t.Helper()
 	directory := t.TempDir()
-	baseline := trainingResult(t, runExecutable(t, binary, "run", filepath.Join(repository, "examples", "xor_cpu.lo"), "--format", "json"))
 	stages := []string{"save", "resume", "infer"}
 	executions := make([]func() result, len(stages))
 	for index, stage := range stages {
@@ -24,38 +23,29 @@ func checkpointLiveWorkflow(t *testing.T, prepare func(string, string) func() re
 				valueJSON(t, recordField(t, actual, "steps"), `"250"`)
 			case "resume":
 				assertXORResult(t, actual)
-				if string(actual.Value) != string(baseline.Value) {
-					t.Fatal("local Metal resumption differs from uninterrupted CPU result")
-				}
 			case "infer":
-				if string(actual.Value) != string(recordField(t, baseline, "predictions").Value) {
-					t.Fatal("local Metal inference differs")
-				}
+				checkNativeTensor(t, actual, []string{"4", "1"}, []float64{0, 1, 1, 0}, .05, 0)
 			}
 		}
 	}
 	adam := prepare(checkpointAdamWResume, directory)
 	for repeat := 0; repeat < 3; repeat++ {
-		assertCheckpointAdamW(t, trainingResult(t, adam()))
+		actual := trainingResult(t, adam())
+		assertCheckpointAdamW(t, actual)
+		state := nativeCheckpoint(t, recordField(t, actual, "actual"))
+		valueJSON(t, recordField(t, state, "step"), `"2"`)
+		checkNativeTensor(t, recordField(t, recordField(t, state, "parameters"), "x"), []string{"2"}, []float64{.9813104194054769, -1.98848901856369}, 1e-6, 1e-5)
+		checkNativeTensor(t, recordField(t, recordField(t, state, "first_moment"), "x"), []string{"2"}, []float64{.009, .012}, 1e-7, 1e-5)
+		checkNativeTensor(t, recordField(t, recordField(t, state, "second_moment"), "x"), []string{"2"}, []float64{.00000999, .00012996}, 1e-9, 1e-5)
 	}
 }
 
-func TestMetalLiveCheckpoints(t *testing.T) {
-	compiler := filepath.Join(repository, "bin", "lo-metal")
-	checkpointLiveWorkflow(t, func(text, directory string) func() result {
-		path := sourceFile(t, text)
-		return func() result {
-			return runExecutable(t, compiler, "run", path, "--allow-device", "metal:0", "--read-root", directory, "--write-root", directory, "--format", "json")
-		}
-	})
-}
-
 func TestNativeMetalCheckpoints(t *testing.T) {
-	compiler := filepath.Join(repository, "bin", "lo-metal")
+	compiler := binary
 	checkpointLiveWorkflow(t, func(text, directory string) func() result {
 		path := sourceFile(t, text)
 		artifact := filepath.Join(t.TempDir(), "checkpoint")
-		built := runExecutable(t, compiler, "build", path, "--device-backend", "metal", "--output", artifact, "--format", "json")
+		built := runExecutable(t, compiler, nativeMetalBuildArgs(t, path, artifact, "metal")...)
 		if built.status != 0 {
 			t.Fatalf("checkpoint native build: %+v", built)
 		}

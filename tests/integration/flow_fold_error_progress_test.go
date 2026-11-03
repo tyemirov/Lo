@@ -30,7 +30,7 @@ func TestFlowFoldRecoverableErrorProgress(t *testing.T) {
 		{"equal-nested-records", recoverableFoldStep + `flow Outer(state: Int, item: Int) -> Int! { return Flow.fold(List.new(0), state, Step) }; return Flow.fold(List.new(0), 0, Outer)`, []expectedFoldProgress{{1, 0, 0, `"0"`}, {1, 0, 0, `"0"`}}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got := run(t, "run", sourceFile(t, test.source), "--format", "json")
+			got := runProgram(t, sourceFile(t, test.source), "run", "--format", "json")
 			if got.status != 1 || got.stdout != "" {
 				t.Fatalf("expected recoverable fold failure: %+v", got)
 			}
@@ -78,7 +78,7 @@ func TestFlowFoldErrorProgressHandlers(t *testing.T) {
 	})
 	t.Run("handled-fold-does-not-contaminate-later-error", func(t *testing.T) {
 		source := recoverableFoldStep + `flow Count(error: Error) -> Int { return List.length(error.flow_progress) }; flow Handled() -> Int onError Count { return Flow.fold(List.new(2, 0), 0, Step) }; flow Main() -> Int! { count = Handled(); return Math.div(count, 0) }; return Main()`
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 {
 			t.Fatalf("expected later recoverable failure: %+v", got)
 		}
@@ -114,7 +114,7 @@ func TestFlowFoldErrorProgressHandlers(t *testing.T) {
 
 func returnedFoldErrorProgress(t *testing.T, source string) foldErrorProgressValue {
 	t.Helper()
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("expected returned Error value: %+v", got)
 	}

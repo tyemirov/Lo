@@ -51,7 +51,7 @@ func TestProcessExecutableReplacementBeforeActivation(t *testing.T) {
 			defer server.Close()
 			body := fmt.Sprintf(`context = Process.Context.new(Map.new(Record.new(key: "PATH", value: %q)), File.Path.new(%q)); executable = Process.Executable.resolve(context, "command"); command = Process.Command.new(context, executable, List.new("write", %q), Bytes.new("")); method = HTTP.Method.new("GET"); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(List.new()); barrier = HTTP.Client.Request.new(method, url, headers, Bytes.new("")); observed = commit barrier; result = commit command; later = File.Write.new(File.Path.new(%q), Bytes.new("wrong")); commit later; return Process.Termination.exit_code(result.termination)`, fixture.root, fixture.root, preserved, server.URL, later)
 			flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes), "--write-root", fixture.writes, "--http-allow", httpGrant("GET", server.URL))
-			got := run(t, append([]string{"run", sourceFile(t, processContextProgram("Int", body)), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, processContextProgram("Int", body)), "run", append([]string{"--format", "json"}, flags...)...)
 			diagnostic := receiptHostDiagnostic(t, got)
 			if got.status != 2 || diagnostic.Code != "runtime.host-failure" || diagnostic.ProcessProgress == nil || calls.Load() != 1 {
 				t.Fatalf("replaced executable admission: %+v calls=%d", got, calls.Load())

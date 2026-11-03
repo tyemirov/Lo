@@ -87,7 +87,7 @@ func TestProcessDockerCleanupRequests(t *testing.T) {
 	}))
 	flags := append(fixture.flags(), "--process-unix-endpoint", cleanupScope(t, fixture.executable, "endpoint", endpoint))
 	source := cleanupDockerSource(t, fixture, endpoint, []string{"system", "df"}, []string{"buildx", "prune", "--builder", "desktop-linux", "--all", "--force"}, []string{"image", "prune", "--all", "--force"})
-	got := fileOutput(t, run(t, append([]string{"run", sourceFile(t, source), "--format", "json"}, flags...)...))
+	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", append([]string{"--format", "json"}, flags...)...))
 	var results []runtimeValue
 	if err := json.Unmarshal(got.Value, &results); err != nil {
 		t.Fatal(err)
@@ -154,7 +154,7 @@ func TestProcessDockerCancellationKeepsConfirmedDaemonEffect(t *testing.T) {
 	}))
 	flags := append(fixture.flags(), "--process-unix-endpoint", cleanupScope(t, fixture.executable, "endpoint", endpoint))
 	source := sourceFile(t, cleanupDockerSource(t, fixture, endpoint, []string{"image", "prune", "--all", "--force"}))
-	command := runtimeCommand(t, append([]string{"run", source, "--format", "json"}, flags...)...)
+	command := programCommand(t, source, "run", append([]string{"--format", "json"}, flags...)...)
 	command.Dir = repository
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
@@ -225,7 +225,7 @@ func TestProcessDockerFailureResponses(t *testing.T) {
 			}))
 			flags := append(fixture.flags(), "--process-unix-endpoint", cleanupScope(t, fixture.executable, "endpoint", endpoint))
 			source := cleanupDockerSource(t, fixture, endpoint, []string{"image", "prune", "--all", "--force"})
-			got := fileOutput(t, run(t, append([]string{"run", sourceFile(t, source), "--format", "json"}, flags...)...))
+			got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", append([]string{"--format", "json"}, flags...)...))
 			var results []runtimeValue
 			if err := json.Unmarshal(got.Value, &results); err != nil || len(results) != 1 {
 				t.Fatalf("daemon failure result: %+v %v", got, err)

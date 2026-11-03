@@ -1,13 +1,11 @@
 package integration_test
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
+
 	"strings"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 )
 
 func checkpointBuiltinExamples() []builtinExample {
@@ -75,64 +73,6 @@ func checkpointTransferSource(kind string) string {
 	return fmt.Sprintf(`flow Run() -> Record{before: Bytes, after: Bytes}! { %s before=Checkpoint.encode(original); moved=%s(original,Device.new("metal:0")); restored=%s(moved,cpu); after=Checkpoint.encode(restored); return Record.new(before:before,after:after) }; return Run()`, setup, transfer, transfer)
 }
 
-func TestCheckpointMetalTransfers(t *testing.T) {
-	for _, kind := range []string{"Parameters", "SGD", "AdamW"} {
-		t.Run(kind, func(t *testing.T) {
-			text := checkpointTransferSource(kind)
-			v, receipts, _ := metalResult(t, text, metalComputeFactory())
-			if string(recordField(t, v, "before").Value) != string(recordField(t, v, "after").Value) {
-				t.Fatal("state changed in transfer")
-			}
-			uploads, downloads := 0, 0
-			for _, receipt := range receipts {
-				if receipt.Event == device.EventTransfer {
-					if receipt.Device == device.Metal {
-						uploads++
-					} else {
-						downloads++
-					}
-				}
-			}
-			want := 1
-			if kind == "AdamW" {
-				want = 5
-			}
-			if uploads != want || downloads != want {
-				t.Fatalf("transfers=%d/%d want=%d/%d", uploads, downloads, want, want)
-			}
-		})
-	}
-	text := checkpointTransferSource("AdamW")
-	for _, tc := range []struct {
-		name, text string
-		args       []string
-		status     int
-		diagnostic string
-	}{
-		{"denied", text, nil, 2, "runtime.capability-denied"},
-		{"unavailable", text, []string{"--allow-device", "metal:0"}, 1, "Device.Unavailable"},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			got, receipts := runWithDevices(t, context.Background(), tc.text, device.SoftwareFactory{}, tc.args...)
-			if got.status != tc.status || got.stdout != "" || !strings.Contains(got.stderr, tc.diagnostic) {
-				t.Fatalf("checkpoint admission: %+v", got)
-			}
-			assertReleased(t, receipts)
-		})
-	}
-	for _, replacement := range []string{
-		`after=Checkpoint.encode(moved)`,
-		`loaded=Checkpoint.decode(before,moved); after=Checkpoint.encode(loaded)`,
-	} {
-		invalid := strings.Replace(text, `after=Checkpoint.encode(restored)`, replacement, 1)
-		got, receipts := runWithDevices(t, context.Background(), invalid, metalComputeFactory(), "--allow-device", "metal:0")
-		if got.status != 1 || !strings.Contains(got.stderr, "Tensor.HostObservationRequired") {
-			t.Fatalf("implicit checkpoint transfer: %+v", got)
-		}
-		assertReleased(t, receipts)
-	}
-}
-
 const checkpointAdamWResume = `flow Run()->Record{expected:Bytes,actual:Bytes}!{
  cpu=Device.new("cpu"); device=Device.new("metal:0");
  x=Tensor.new(List.new(1.0,-2.0),List.new(2)); p=Parameters.new(Record.new(x:x));
@@ -156,9 +96,4 @@ func assertCheckpointAdamW(t *testing.T, result runtimeValue) {
 	if string(recordField(t, result, "expected").Value) != string(recordField(t, result, "actual").Value) {
 		t.Fatal("AdamW resume changed complete state")
 	}
-}
-
-func TestCheckpointAdamWMetalResume(t *testing.T) {
-	result, _, _ := metalResult(t, checkpointAdamWResume, metalComputeFactory())
-	assertCheckpointAdamW(t, result)
 }

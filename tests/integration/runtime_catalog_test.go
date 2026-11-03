@@ -121,7 +121,7 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				t.Fatalf("missing runtime assertion for %s", tc.name)
 			}
 			if tc.name == catalog.MathDiv || tc.name == catalog.MathMod || tc.name == catalog.MathMin || tc.name == catalog.MathMax {
-				got := run(t, "run", sourceFile(t, tc.source), "--format", "json")
+				got := runProgram(t, sourceFile(t, tc.source), "run", "--format", "json")
 				var out struct {
 					Diagnostics []struct{ Error runtimeValue }
 				}

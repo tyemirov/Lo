@@ -1,15 +1,11 @@
 package integration_test
 
 import (
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestLLVMDeviceArtifactGrantArguments(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	input := sourceFile(t, "return 1")
 	artifact, built := buildForTest(t, input)
 	if built.status != 0 {

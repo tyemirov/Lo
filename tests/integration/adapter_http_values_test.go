@@ -16,11 +16,11 @@ const headerEntriesSource = `List.new(Record.new(name: "X-Z", value: UTF8.Bytes.
 
 func TestAdapterHTTPHeaderValues(t *testing.T) {
 	source := `flow Main() -> List<Record{name: String, value: Bytes}>! { headers = HTTP.Headers.new(` + headerEntriesSource + `); return headers.entries }; return Main()`
-	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 	valueJSON(t, got, `[{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-a"},"value":{"type":"Bytes","value":"Zmlyc3Q="}}},{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-a"},"value":{"type":"Bytes","value":"c2Vjb25k"}}},{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-z"},"value":{"type":"Bytes","value":"eg=="}}}]`)
 	for _, test := range []struct{ name, want string }{{"X-a", `[{"type":"Bytes","value":"Zmlyc3Q="},{"type":"Bytes","value":"c2Vjb25k"}]`}, {"absent", `[]`}} {
 		source := fmt.Sprintf(`flow Main() -> List<Bytes>! { headers = HTTP.Headers.new(%s); return HTTP.Headers.values(headers, %q) }; return Main()`, headerEntriesSource, test.name)
-		got := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+		got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 		valueJSON(t, got, test.want)
 	}
 }
@@ -28,7 +28,7 @@ func TestAdapterHTTPHeaderValues(t *testing.T) {
 func TestAdapterHTTPHeaderValidation(t *testing.T) {
 	for _, name := range []string{"", "bad name", "bad:name", "héader", "x\r\ny"} {
 		source := fmt.Sprintf(`return HTTP.Headers.new(List.new(Record.new(name: %q, value: UTF8.Bytes.new("ok"))))`, name)
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		v := receiptHostDiagnostic(t, got)
 		if got.status != 1 || v.Error == nil || v.Error.Kind != "HTTP.InvalidHeaders" {
 			t.Fatalf("invalid header name accepted: %+v", v)
@@ -40,14 +40,14 @@ func TestAdapterHTTPHeaderValidation(t *testing.T) {
 			t.Fatal(err)
 		}
 		source := fmt.Sprintf(`return HTTP.Headers.new(List.new(Record.new(name: "x", value: UTF8.Bytes.new(%s))))`, strings.ReplaceAll(string(literal), "\x7f", `\u007f`))
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		v := receiptHostDiagnostic(t, got)
 		if got.status != 1 || v.Error == nil || v.Error.Kind != "HTTP.InvalidHeaders" {
 			t.Fatalf("invalid header bytes accepted: %+v", v)
 		}
 	}
 	invalidLookup := `flow Main() -> List<Bytes>! { headers = HTTP.Headers.new(List.new()); return HTTP.Headers.values(headers, "bad name") }; return Main()`
-	got := run(t, "run", sourceFile(t, invalidLookup), "--format", "json")
+	got := runProgram(t, sourceFile(t, invalidLookup), "run", "--format", "json")
 	v := receiptHostDiagnostic(t, got)
 	if got.status != 1 || v.Error == nil || v.Error.Kind != "HTTP.InvalidHeaders" {
 		t.Fatalf("invalid lookup accepted: %+v", v)
@@ -62,7 +62,7 @@ func TestAdapterHTTPHeaderValidation(t *testing.T) {
 
 func TestAdapterHTTPGeneralResponse(t *testing.T) {
 	source := `flow Main() -> HTTP.Response! { headers = HTTP.Headers.new(List.new()); return HTTP.Response.new(200, headers, UTF8.Bytes.new("body")) }; return Main()`
-	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 	if got.Type != "HTTP.Response" {
 		t.Fatalf("response type %s", got.Type)
 	}
@@ -110,7 +110,7 @@ func TestAdapterHTTPHeaderDiagnosticRedaction(t *testing.T) {
 		`flow Fail(response: HTTP.Response) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { headers = HTTP.Headers.new(List.new(Record.new(name: "authorization", value: UTF8.Bytes.new("` + headerSecret + `")))); response = HTTP.Response.new(200, headers, Bytes.new("")); return Fail(response) }; return Main()`,
 	}
 	for _, source := range sources {
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 || !strings.Contains(got.stderr, `"error":`) {
 			t.Fatalf("expected returned flow error: %+v", got)
 		}

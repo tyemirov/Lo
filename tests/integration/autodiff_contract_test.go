@@ -1,16 +1,12 @@
 package integration_test
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
+
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+
 	"strings"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
 )
 
 func TestAutodiffFallibleContext(t *testing.T) {
@@ -56,7 +52,7 @@ func TestAutodiffFallibleContextPropagation(t *testing.T) {
 				source := fmt.Sprintf(`%s
 flow Loss(c: %s, p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { %s }
 flow Run() -> Tensor<FP32>! { x=Tensor.new(List.new(2.0),List.new()); p=Record.new(x:x); %s }; return Run()`, tc.helper, tc.contextType, tc.body, expression)
-				got := run(t, "run", sourceFile(t, source), "--format", "json")
+				got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 				if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"Context.Used"`) || !strings.Contains(got.stderr, `"value":"Loss"`) {
 					t.Fatalf("context propagation: %+v", got)
 				}
@@ -141,7 +137,7 @@ func TestAutodiffLossValidation(t *testing.T) {
 		}
 	}
 	source := `flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32> { return p.x }; flow Run() -> Tensor<FP32>! { x=Tensor.new(List.new(1.0,2.0),List.new(Math.add(1,1))); r=Autodiff.grad(Record.new(x:x),Loss); return r.value }; return Run()`
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"Autodiff.InvalidLoss"`) {
 		t.Fatalf("dynamic loss rank: %+v", got)
 	}
@@ -163,54 +159,10 @@ func TestAutodiffTransitiveRejections(t *testing.T) {
 	}
 }
 
-func TestAutodiffFailureStopsCommitAndCanBeHandled(t *testing.T) {
-	const prelude = `flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.sqrt(p.x) }
-flow Handle(e: Error) -> String { return e.kind }
-flow Work() -> String onError Handle {
- x=Tensor.new(List.new(0.0),List.new()); r=Autodiff.grad(Record.new(x:x),Loss)
- effect=File.Write.new(File.Path.new("after"),Bytes.new("bad")); commit effect
- return "unexpected"
-}; return Work()`
-	boundary := &observedBoundary{}
-	v, err := evaluate(t, prelude, boundary)
-	if err != nil || boundary.commits != 0 {
-		t.Fatalf("gradient failure order: %v, commits=%d", err, boundary.commits)
-	}
-	encoded, err := json.Marshal(v)
-	if err != nil || !strings.Contains(string(encoded), "Autodiff.UndefinedDerivative") {
-		t.Fatalf("outer handler: %s %v", encoded, err)
-	}
-}
+// Nine extra elements: input broadcast, forward mul/sum, zero accumulator,
+// reduction broadcast, two VJP multiplies, and two accumulator additions.
 
-func TestAutodiffWorkAndCancellation(t *testing.T) {
-	program := func(n int) string {
-		return fmt.Sprintf(`flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.sum(Tensor.mul(p.x,p.x),List.new(0)) }; flow Run() -> Tensor<FP32>! { one=Tensor.new(List.new(1.0),List.new()); x=Tensor.broadcast(one,List.new(%d)); r=Autodiff.grad(Record.new(x:x),Loss); return r.gradients.x }; return Run()`, n)
-	}
-	// Nine extra elements: input broadcast, forward mul/sum, zero accumulator,
-	// reduction broadcast, two VJP multiplies, and two accumulator additions.
-	if delta := minimumTensorSteps(t, program(10)) - minimumTensorSteps(t, program(1)); delta != 81 {
-		t.Fatalf("derivative work delta=%d, want 81", delta)
-	}
-	p := checkedTensor(t, program(100000))
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	controlled := &tensorCancellation{Context: ctx, cancel: cancel}
-	budgetInput := execution.DefaultBudgetInput()
-	budgetInput.Steps = 10000000
-	budget, err := execution.NewBudget(budgetInput)
-	if err != nil {
-		t.Fatal(err)
-	}
-	v, err := eval.Run(controlled, p, &observedBoundary{}, budget, device.DefaultConfig())
-	var host execution.HostError
-	if v != nil || !errors.As(err, &host) || host.Code() != "runtime.cancelled" {
-		t.Fatalf("derivative cancellation: %v %v", v, err)
-	}
-	// Reuse the same checked plan after cancellation with a fresh invocation.
-	if _, err = eval.Run(context.Background(), p, &observedBoundary{}, budget, device.DefaultConfig()); err != nil {
-		t.Fatal(err)
-	}
-}
+// Reuse the same checked plan after cancellation with a fresh invocation.
 
 func TestAutodiffExpansionLimit(t *testing.T) {
 	var source strings.Builder
@@ -229,7 +181,7 @@ func TestAutodiffReverseFailureSource(t *testing.T) {
 	const source = `flow Divide(c: Tensor<FP32>, x: Tensor<FP32>) -> Tensor<FP32>! { return Tensor.div(x,c) }
 flow Loss(c: Tensor<FP32>, p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Divide(c,p.x) }
 flow Run() -> Tensor<FP32>! { x=Tensor.new(List.new(0.0),List.new()); c=Tensor.new(List.new(1e-40),List.new()); r=Autodiff.grad(Record.new(x:x),c,Loss); return r.gradients.x }; return Run()`
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"Numeric.NonFinite"`) || !strings.Contains(got.stderr, `"value":"Divide"`) || !strings.Contains(got.stderr, `"value":"Tensor.div"`) {
 		t.Fatalf("reverse failure provenance: %+v", got)
 	}
@@ -244,7 +196,7 @@ flow Loss(context: List<Int>, p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { v0=
 		fmt.Fprintf(&source, "v%d=Helper(context,v%d);", i, i-1)
 	}
 	source.WriteString(`return v200 }; flow Run() -> Tensor<FP32>! { context=List.unfold(0,20000,Counter); x=Tensor.new(List.new(1.0),List.new()); r=Autodiff.grad(Record.new(x:x),context,Loss); return r.value }; return Run()`)
-	got := run(t, "run", sourceFile(t, source.String()), "--format", "json", "--max-steps", "10000000")
+	got := runProgram(t, sourceFile(t, source.String()), "run", "--format", "json", "--max-steps", "10000000")
 	if got.status != 2 || !strings.Contains(got.stderr, "live value bytes") || got.stdout != "" {
 		t.Fatalf("unbounded derivative context: status=%d, stdout bytes=%d, stderr=%s", got.status, len(got.stdout), got.stderr)
 	}

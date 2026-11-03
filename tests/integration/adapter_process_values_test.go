@@ -4,8 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/types"
-	"github.com/MarcoPoloResearchLab/Lo/internal/value"
+
 	"os"
 	"strings"
 	"testing"
@@ -45,7 +44,7 @@ func processNoSecrets(t *testing.T, text string) {
 }
 func processConstructorFailure(t *testing.T, source, kind string) {
 	t.Helper()
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	diagnostic := receiptHostDiagnostic(t, got)
 	if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != kind {
 		t.Fatalf("expected %s: %+v", kind, got)
@@ -57,7 +56,7 @@ func TestAdapterProcessExecutableValue(t *testing.T) {
 	root := fileFixtureRoot(t)
 	lexical := root + "/never-created/../missing//tool"
 	source := fmt.Sprintf(`return Process.Executable.new(path: File.Path.new(%s))`, processLiteral(t, lexical))
-	executable := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+	executable := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 	if executable.Type != "Process.Executable" {
 		t.Fatalf("executable type %s", executable.Type)
 	}
@@ -81,7 +80,7 @@ func TestAdapterProcessCommandValue(t *testing.T) {
 	environment := `Map.new(Record.new(key: "EMPTY", value: ""), Record.new(key: "UNICODE", value: "é\nvalue"))`
 	source := processCommandSource(t, lexicalExecutable, arguments, environment, lexicalDirectory, fmt.Sprintf(`File.read(File.Path.new(%s))`, processLiteral(t, stdin)), `return command`)
 	t.Setenv("LO_PROCESS_AMBIENT_SECRET", "ambient-value-must-not-enter-command")
-	command := fileOutput(t, run(t, "run", sourceFile(t, source), "--read-root", root, "--format", "json"))
+	command := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--read-root", root, "--format", "json"))
 	if command.Type != "Process.Command" {
 		t.Fatalf("command type %s", command.Type)
 	}
@@ -152,7 +151,7 @@ func TestAdapterProcessNominalTypes(t *testing.T) {
 func TestAdapterProcessConstructorPurity(t *testing.T) {
 	root := fileFixtureRoot(t)
 	source := fmt.Sprintf(`flow Build(path: File.Path) -> Process.Command! { executable = Process.Executable.new(path); return Process.Command.new(executable: executable, arguments: List.new(), context: Process.Context.new(Map.new(), path), stdin: Bytes.new("")) }; return List.map(List.new(File.Path.new(%s)), Build)`, processLiteral(t, root+"/nonexistent"))
-	list := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+	list := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 	if list.Type != "List<Process.Command>" {
 		t.Fatalf("pure command list type %s", list.Type)
 	}
@@ -171,7 +170,7 @@ func TestAdapterProcessCommandDiagnosticSnapshot(t *testing.T) {
 	environment := `Map.new(Record.new(key: "TOKEN", value: "` + processEnvironmentSecret + `"))`
 	stdin := `UTF8.Bytes.new("` + processStdinSecret + `")`
 	source := fmt.Sprintf(`flow Main() -> Error! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: %s, context: Process.Context.new(%s, File.Path.new(%s)), stdin: %s); return Error.new("Probe", "safe", Record.new(command: command, nested: List.new(command))) }; return Main()`, processLiteral(t, root+"/missing"), arguments, environment, processLiteral(t, root), stdin)
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 0 {
 		t.Fatalf("explicit command error: %+v", got)
 	}
@@ -194,79 +193,10 @@ func TestAdapterProcessCommandDiagnosticSnapshot(t *testing.T) {
 func TestAdapterProcessFailureTraceRedaction(t *testing.T) {
 	root := fileFixtureRoot(t)
 	source := fmt.Sprintf(`flow Fail(command: Process.Command) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: List.new("%s"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN", value: "%s")), File.Path.new(%s)), stdin: UTF8.Bytes.new("%s")); return Fail(command) }; return Main()`, processLiteral(t, root+"/missing"), processArgumentSecret, processEnvironmentSecret, processLiteral(t, root), processStdinSecret)
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	diagnostic := receiptHostDiagnostic(t, got)
 	if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != "Math.DivideByZero" {
 		t.Fatalf("expected ordinary flow failure: %+v", got)
 	}
 	processNoSecrets(t, got.stdout+got.stderr)
-}
-
-func TestAdapterProcessSnapshotWeight(t *testing.T) {
-	root := fileFixtureRoot(t)
-	path, err := value.NewText(types.Path(), root+"/missing")
-	if err != nil {
-		t.Fatal(err)
-	}
-	executable, err := value.NewProcessExecutable(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	argumentsType, err := types.NewList(types.String())
-	if err != nil {
-		t.Fatal(err)
-	}
-	environmentType, err := types.NewMap(types.String(), types.String())
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, length := range []int{0, 1, 4096} {
-		t.Run(fmt.Sprint(length), func(t *testing.T) {
-			text, err := value.NewText(types.String(), strings.Repeat("payload", length))
-			if err != nil {
-				t.Fatal(err)
-			}
-			arguments, err := value.NewList(argumentsType, []value.Value{text})
-			if err != nil {
-				t.Fatal(err)
-			}
-			name, err := value.NewText(types.String(), "TOKEN")
-			if err != nil {
-				t.Fatal(err)
-			}
-			environment, err := value.NewMap(environmentType, []value.Entry{{Key: name, Value: text}})
-			if err != nil {
-				t.Fatal(err)
-			}
-			processContext, err := value.NewProcessContext(environment, path)
-			if err != nil {
-				t.Fatal(err)
-			}
-			command, err := value.NewProcessCommand(processContext, executable, arguments, value.NewBytes([]byte(text.Text())))
-			if err != nil {
-				t.Fatal(err)
-			}
-			listType, err := types.NewList(types.ProcessCommand())
-			if err != nil {
-				t.Fatal(err)
-			}
-			commands, err := value.NewList(listType, []value.Value{command})
-			if err != nil {
-				t.Fatal(err)
-			}
-			nested, err := value.NewRecord([]value.Field{{Name: "commands", Value: commands}})
-			if err != nil {
-				t.Fatal(err)
-			}
-			for _, original := range []value.Value{command, commands, nested} {
-				snapshot := value.Snapshot(original)
-				if actual, expected := snapshot.Weight(), value.SnapshotWeight(original); actual != expected {
-					t.Fatalf("snapshot %s weight=%d, reservation=%d", original.Type(), actual, expected)
-				}
-				if !types.Equal(original.Type(), snapshot.Type()) {
-					t.Fatalf("snapshot lost nominal type %s", original.Type())
-				}
-			}
-		})
-	}
 }

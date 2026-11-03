@@ -331,7 +331,7 @@ func TestInspectionFoldCarriedActivation(t *testing.T) {
 			first, next := filepath.Join(root, "first"), filepath.Join(root, "next")
 			source := fmt.Sprintf(`flow Fallible(target: File.Write) -> File.Write! { return target }; flow Step(state: %s, item: Int) -> %s! { target = %s; commit target; next = File.Write.new(File.Path.new(%q), Bytes.new("next")); return %s }; first = File.Write.new(File.Path.new(%q), Bytes.new("first")); return Flow.fold(List.new(1, 2), %s, Step)`, shape.typ, shape.typ, shape.target, next, shape.next, first, shape.seed)
 			report, _, _ := inspectSource(t, source)
-			got := run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json")
+			got := runProgram(t, sourceFile(t, source), "run", "--write-root", root, "--format", "json")
 			if got.status != 0 {
 				t.Fatalf("execute fold: %+v", got)
 			}
@@ -360,7 +360,7 @@ func TestInspectionFoldCarriedResult(t *testing.T) {
 			first, next := filepath.Join(root, "first"), filepath.Join(root, "next")
 			source := fmt.Sprintf(`flow Step(state: Record{previous: File.Write, next: File.Write}, item: Int) -> Record{previous: File.Write, next: File.Write} { return Record.new(previous: state.next, next: File.Write.new(File.Path.new(%q), Bytes.new("next"))) }; first = File.Write.new(File.Path.new(%q), Bytes.new("first")); result = %s(List.new(1, 2), Record.new(previous: first, next: first), Step); target = result.previous; commit target`, next, first, operation)
 			report, _, _ := inspectSource(t, source)
-			got := run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json")
+			got := runProgram(t, sourceFile(t, source), "run", "--write-root", root, "--format", "json")
 			if got.status != 0 {
 				t.Fatalf("execute fold: %+v", got)
 			}

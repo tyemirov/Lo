@@ -39,6 +39,7 @@ func llvmHostInvocationScenarios(t *testing.T) []llvmRuntimeScenario {
 		{"count-overflow", failed, []byte{0, 0, 16, 1}},
 		{"invalid-utf8", failed, []byte{0, 0, 0, 1, 0, 0, 0, 2, 255, 0}},
 		{"interior-nul", failed, []byte{0, 0, 0, 1, 0, 0, 0, 3, 0, 'x', 0}},
+		{"zero-string-length", failed, []byte{0, 0, 0, 1, 0, 0, 0, 0}},
 		{"unused-capture-error", `return true`, []byte{0, 0, 0, 1}},
 	} {
 		encoded := make([]string, len(test.body))

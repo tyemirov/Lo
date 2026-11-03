@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
+
 	"reflect"
 	"regexp"
 	"strings"
@@ -25,13 +25,7 @@ func TestLLVMLinuxHTTPErrorInputs(t *testing.T) {
 
 func testLLVMHTTPErrorInputs(t *testing.T, target string) {
 	t.Helper()
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	const headers = `HTTP.Headers.new(List.new(Record.new(name:"X-Probe",value:UTF8.Bytes.new("one")),Record.new(name:"X-Probe",value:UTF8.Bytes.new("two"))))`
-	response := func(status int) string {
-		return fmt.Sprintf(`HTTP.Response.new(%d,%s,UTF8.Bytes.new("payloadé"))`, status, headers)
-	}
 	tests := []struct {
 		name, kind, message, method string
 		path                        []byte
@@ -59,23 +53,13 @@ func testLLVMHTTPErrorInputs(t *testing.T, target string) {
 		if test.method != "" {
 			expected = map[string]any{"method": map[string]any{"type": "Bytes", "value": base64.StdEncoding.EncodeToString([]byte(test.method))}, "path": map[string]any{"type": "Bytes", "value": base64.StdEncoding.EncodeToString(test.path)}}
 		} else {
-			// Establish the canonical header/value encoding through the independent
-			// public interpreter, without reading the native error being asserted.
-			input := sourceFile(t, `flow Expected()->HTTP.Response!{return `+response(status)+`};return Expected()`)
-			got := runExecutable(t, binary, "run", input, "--format", "json")
-			if got.status != 0 || got.stderr != "" {
-				t.Fatalf("response input reference fixture: %+v", got)
-			}
-			var envelope struct{ Result runtimeValue }
-			if err := json.Unmarshal([]byte(got.stdout), &envelope); err != nil {
-				t.Fatal(err)
-			}
-			value := successfulValue(t, envelope.Result)
-			if value.Type != "HTTP.Response" {
-				t.Fatalf("reference response type: %+v", value)
-			}
-			if err := json.Unmarshal(value.Value, &expected); err != nil {
-				t.Fatal(err)
+			expected = map[string]any{
+				"status": map[string]any{"type": "Int", "value": fmt.Sprint(status)},
+				"body":   map[string]any{"type": "Bytes", "value": base64.StdEncoding.EncodeToString([]byte("payloadé"))},
+				"headers": map[string]any{"type": "HTTP.Headers", "value": map[string]any{"entries": map[string]any{"type": "List<Record{name: String, value: Bytes}>", "value": []any{
+					map[string]any{"type": "Record{name: String, value: Bytes}", "value": map[string]any{"name": map[string]any{"type": "String", "value": "x-probe"}, "value": map[string]any{"type": "Bytes", "value": "b25l"}}},
+					map[string]any{"type": "Record{name: String, value: Bytes}", "value": map[string]any{"name": map[string]any{"type": "String", "value": "x-probe"}, "value": map[string]any{"type": "Bytes", "value": "dHdv"}}},
+				}}}},
 			}
 		}
 		scenarios = append(scenarios, llvmRuntimeScenario{name: test.name, source: source, number: index, harness: "testdata/native-qualification/http-error-input.c", timeout: 20 * time.Second, transform: httpErrorInputCapture, verify: func(t *testing.T, got result) {

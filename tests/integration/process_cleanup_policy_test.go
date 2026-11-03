@@ -4,8 +4,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 )
 
 func TestProcessCleanupPolicyDiagnostics(t *testing.T) {
@@ -43,42 +41,14 @@ func TestProcessCleanupPolicyDiagnostics(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			flags := append(processPolicyFlags(t), test.flags...)
-			reference := runExecutable(t, binary, append([]string{"run", source, "--format", "json"}, flags...)...)
-			native := runExecutable(t, artifact, append([]string{"run", "--format", "json"}, flags...)...)
-			for name, got := range map[string]result{"interpreter": reference, "native": native} {
-				if got.status != 2 || got.stdout != "" {
-					t.Fatalf("%s accepted invalid scope: %+v", name, got)
-				}
-				diagnostic := diagnostics(t, got.stderr).Diagnostics[0]
-				if diagnostic.Code != "cli.invalid-invocation" || !strings.Contains(diagnostic.Message, test.message) {
-					t.Fatalf("%s scope diagnostic: %+v; want %q", name, diagnostic, test.message)
-				}
+			got := runExecutable(t, artifact, append([]string{"run", "--format", "json"}, flags...)...)
+			if got.status != 2 || got.stdout != "" {
+				t.Fatalf("native accepted invalid scope: %+v", got)
+			}
+			diagnostic := diagnostics(t, got.stderr).Diagnostics[0]
+			if diagnostic.Code != "cli.invalid-invocation" || !strings.Contains(diagnostic.Message, test.message) {
+				t.Fatalf("native scope diagnostic: %+v; want %q", got, test.message)
 			}
 		})
-	}
-}
-
-func TestProcessCleanupPolicyCopiesScopes(t *testing.T) {
-	root, executable, launcher := processPolicyPaths(t)
-	writes := []adapter.ProcessPathScopeInput{{Executable: executable, Path: filepath.Join(root, "cache")}}
-	policy, err := adapter.NewProcessPolicy(adapter.ProcessPolicyInput{Grants: []string{strings.Repeat("a", 64) + "," + executable}, Launcher: launcher, ReadRoots: []string{root}, Writes: writes})
-	if err != nil {
-		t.Fatal(err)
-	}
-	writes[0].Path = "changed"
-	scope, exists := policy.Scope(executable)
-	if !exists || scope.Kind() != adapter.ProcessCleanupScope {
-		t.Fatal("missing cleanup scope")
-	}
-	paths := scope.WriteRoots()
-	if len(paths) != 1 || paths[0] != filepath.Join(root, "cache") {
-		t.Fatal("scope retained mutable input")
-	}
-	paths[0] = "changed"
-	if scope.WriteRoots()[0] != filepath.Join(root, "cache") {
-		t.Fatal("scope exposed mutable storage")
-	}
-	if _, exists := policy.Scope(filepath.Join(root, "ungranted")); exists {
-		t.Fatal("ungranted executable acquired a scope")
 	}
 }

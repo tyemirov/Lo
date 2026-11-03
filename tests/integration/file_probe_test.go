@@ -46,7 +46,7 @@ func TestFileOpenPaths(t *testing.T) {
 	t.Setenv("LO_TEST_PROBE_STDOUT", "p123\nf3\nn./open.log\nfcwd\nn.\n")
 	t.Setenv("LO_TEST_PROBE_EXIT", "0")
 	path := sourceFile(t, fmt.Sprintf(`flow Main() -> List<File.Path>! {return File.open_paths(File.Path.new(%q))}; return Main()`, root))
-	got := fileOutput(t, run(t, "run", path, "--open-files-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, path, "run", "--open-files-root", root, "--format", "json"))
 	valueJSON(t, got, fmt.Sprintf(`[{"type":"File.Path","value":%q}]`, open))
 	data, err := os.ReadFile(record)
 	if err != nil {
@@ -59,7 +59,7 @@ func TestFileOpenPaths(t *testing.T) {
 	if !reflect.DeepEqual(args, []string{"-Fn", "+D", "."}) {
 		t.Fatalf("probe args: %v", args)
 	}
-	denied := run(t, "run", path, "--list-root", root, "--format", "json")
+	denied := runProgram(t, path, "run", "--list-root", root, "--format", "json")
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("probe grant: %+v", denied)
 	}
@@ -93,7 +93,7 @@ func TestFileOpenPathsResults(t *testing.T) {
 			t.Setenv("LO_TEST_PROBE_STDOUT", tc.output)
 			t.Setenv("LO_TEST_PROBE_STDERR", tc.stderr)
 			t.Setenv("LO_TEST_PROBE_EXIT", tc.status)
-			got := run(t, "run", path, "--open-files-root", root, "--format", "json")
+			got := runProgram(t, path, "run", "--open-files-root", root, "--format", "json")
 			if tc.kind == "" {
 				valueJSON(t, fileOutput(t, got), `[]`)
 				return
@@ -118,7 +118,7 @@ func TestFileOpenPathsRecordedProtocol(t *testing.T) {
 	t.Setenv("LO_TEST_PROBE_STDOUT", "p33265\nf3\nn./held.log\nf4\nn.\nf*000\nn./held.log\nf*001\nn./held.log\np33271\nfcwd\nn.\np33276\nfcwd\nn.\n")
 	t.Setenv("LO_TEST_PROBE_EXIT", "0")
 	path := sourceFile(t, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root))
-	got := fileOutput(t, run(t, "run", path, "--open-files-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, path, "run", "--open-files-root", root, "--format", "json"))
 	valueJSON(t, got, fmt.Sprintf(`[{"type":"File.Path","value":%q}]`, filepath.Join(root, "held.log")))
 }
 
@@ -130,7 +130,7 @@ func TestFileOpenPathsInvalidStderrHandled(t *testing.T) {
 	for _, status := range []string{"0", "1"} {
 		t.Run(status, func(t *testing.T) {
 			t.Setenv("LO_TEST_PROBE_EXIT", status)
-			valueJSON(t, fileOutput(t, run(t, "run", program, "--open-files-root", root, "--format", "json")), `"File.OpenFilesFailed"`)
+			valueJSON(t, fileOutput(t, runProgram(t, program, "run", "--open-files-root", root, "--format", "json")), `"File.OpenFilesFailed"`)
 		})
 	}
 }
@@ -147,7 +147,7 @@ func TestFileOpenPathsHostProbe(t *testing.T) {
 	}
 	defer held.Close()
 	program := sourceFile(t, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root))
-	got := fileOutput(t, run(t, "run", program, "--open-files-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, program, "run", "--open-files-root", root, "--format", "json"))
 	valueJSON(t, got, fmt.Sprintf(`[{"type":"File.Path","value":%q}]`, path))
 }
 
@@ -175,16 +175,16 @@ func TestFileOpenPathsHighDescriptorHostProbe(t *testing.T) {
 		t.Fatal(closeErr)
 	}
 	program := sourceFile(t, fmt.Sprintf(`return File.open_paths(File.Path.new(%q))`, root))
-	got := fileOutput(t, run(t, "run", program, "--open-files-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, program, "run", "--open-files-root", root, "--format", "json"))
 	valueJSON(t, got, fmt.Sprintf(`[{"type":"File.Path","value":%q}]`, path))
 }
 
 func TestFileDirectoryAbsent(t *testing.T) {
 	root := filepath.Join(fileFixtureRoot(t), "absent")
 	path := sourceFile(t, fmt.Sprintf(`flow Handle(e: Error) -> String {return e.kind}; flow Main() -> String onError Handle {entries = File.list(File.Path.new(%q)); return "present"}; return Main()`, root))
-	got := fileOutput(t, run(t, "run", path, "--list-root", root, "--remove-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, path, "run", "--list-root", root, "--remove-root", root, "--format", "json"))
 	valueJSON(t, got, `"File.DirectoryAbsent"`)
-	denied := run(t, "run", path, "--format", "json")
+	denied := runProgram(t, path, "run", "--format", "json")
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("missing is not denied: %+v", denied)
 	}
@@ -201,7 +201,7 @@ func TestFileRemovalHardlinks(t *testing.T) {
 		t.Fatal(err)
 	}
 	path := sourceFile(t, fmt.Sprintf(`flow Main() -> Int! {entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return List.length(entries)}; return Main()`, root))
-	valueJSON(t, fileOutput(t, run(t, "run", path, "--list-root", root, "--remove-root", root, "--format", "json")), `"2"`)
+	valueJSON(t, fileOutput(t, runProgram(t, path, "run", "--list-root", root, "--remove-root", root, "--format", "json")), `"2"`)
 	remaining, err := os.ReadDir(root)
 	if err != nil || len(remaining) != 0 {
 		t.Fatalf("selected hardlinks remain: %v, %v", remaining, err)

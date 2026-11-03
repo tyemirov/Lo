@@ -13,9 +13,6 @@ import (
 )
 
 func TestLLVMMetalBuildSelection(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	source := sourceFile(t, "return 1")
 	compiler := developmentToolchainCompiler(t)
 	for _, scenario := range []struct {
@@ -51,9 +48,6 @@ func TestLLVMMetalBuildSelection(t *testing.T) {
 
 func llvmMetalManifest(t *testing.T) (string, map[string]any) {
 	t.Helper()
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 	data, err := os.ReadFile(manifest)
 	if err != nil {

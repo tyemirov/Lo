@@ -10,9 +10,6 @@ import (
 )
 
 func TestLLVMExecutableReproducibility(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	compiler, _ := controlledLLVMTools(t)
 	source := sourceFile(t, `return String.concat("stable ", "é")`)
 	for _, target := range []string{"darwin/arm64", "linux/arm64"} {

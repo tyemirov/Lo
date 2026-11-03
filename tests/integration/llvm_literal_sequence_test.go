@@ -3,7 +3,7 @@ package integration_test
 import (
 	"context"
 	"fmt"
-	"os"
+
 	"strings"
 	"testing"
 
@@ -113,9 +113,6 @@ func TestLLVMLiteralSequenceGradientRelease(t *testing.T) {
 }
 
 func TestLLVMLiteralSequenceGroupedLifetime(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	checkNumbers(t, tensorNumbers(t, successfulValue(t, runValue(t, literalSequenceGradientSource))), []float64{4}, 0, 0)
 	const nested = `flow Run()->Tensor<FP32>!{dims=Match.new(true,true:List.new(1,1),_:List.new(2,2));nested=List.new(List.new(11,22),List.new(33));return Tensor.reshape(Tensor.new(List.new(2.0),List.new()),dims)};return Run()`
 	checkNumbers(t, tensorNumbers(t, successfulValue(t, runValue(t, nested))), []float64{2}, 0, 0)
@@ -252,9 +249,6 @@ func literalSequenceScenario(items []string, number int) llvmRuntimeScenario {
 }
 
 func TestLLVMLiteralSequenceFailureLocations(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	source := "return List.new(\n  11,\n  22,\n  33\n)\n"
 	path := sourceFile(t, source)
 	artifact, built := buildForTest(t, path)
@@ -263,17 +257,8 @@ func TestLLVMLiteralSequenceFailureLocations(t *testing.T) {
 	}
 	for index, item := range []string{"11", "22", "33"} {
 		t.Run("step-"+item, func(t *testing.T) {
-			for lane, args := range map[string][]string{
-				"interpreter": {"run", path, "--max-steps", fmt.Sprint(index + 2), "--format", "json"},
-				"native":      {"run", "--max-steps", fmt.Sprint(index + 2), "--format", "json"},
-			} {
-				executable := binary
-				if lane == "native" {
-					executable = artifact
-				}
-				got := runExecutable(t, executable, args...)
-				assertLiteralSequenceFailure(t, got, strings.Index(source, item), index+2, 3)
-			}
+			got := runExecutable(t, artifact, "run", "--max-steps", fmt.Sprint(index+2), "--format", "json")
+			assertLiteralSequenceFailure(t, got, strings.Index(source, item), index+2, 3)
 		})
 	}
 	large := "1" + strings.Repeat("0", 315654)
@@ -287,13 +272,7 @@ func TestLLVMLiteralSequenceFailureLocations(t *testing.T) {
 			if built.status != 0 {
 				t.Fatalf("build admitted literal limit: %+v", built)
 			}
-			for lane, args := range map[string][]string{"interpreter": {"run", path, "--format", "json"}, "native": {"run", "--format", "json"}} {
-				executable := binary
-				if lane == "native" {
-					executable = artifact
-				}
-				assertLiteralSequenceFailure(t, runExecutable(t, executable, args...), strings.Index(source, large), index+2, 3)
-			}
+			assertLiteralSequenceFailure(t, runExecutable(t, artifact, "run", "--format", "json"), strings.Index(source, large), index+2, 3)
 		})
 	}
 }

@@ -78,7 +78,7 @@ func TestParametersSchemaFailures(t *testing.T) {
 		`p=Parameters.new(Record.new(x:a)); q=Parameters.new(Record.new(x:b)); g=Gradients.zero(p); h=Gradients.zero(q); return Gradients.add(g,h)`,
 	} {
 		source := `flow Run() -> Gradients<Record{x: Tensor<FP32>}>! { a=Tensor.new(List.new(1.0),List.new()); b=Tensor.new(List.new(1.0),List.new(1)); ` + body + ` }; return Run()`
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 || !strings.Contains(got.stderr, `"kind":"Gradient.SchemaMismatch"`) || got.stdout != "" {
 			t.Fatalf("gradient metadata mismatch: %+v", got)
 		}
@@ -124,7 +124,7 @@ flow Run() -> Tensor<FP32>! {
 func TestParametersScaleFailuresAndMetadataSnapshots(t *testing.T) {
 	for _, factor := range []string{"1e40", "2.0"} {
 		source := fmt.Sprintf(`flow Run() -> Gradients<Record{x: Tensor<FP32>}>! { x=Tensor.new(List.new(3e38),List.new()); p=Parameters.new(Record.new(x:x)); g=Gradients.new(p,Record.new(x:x)); return Gradients.scale(g,%s) }; return Run()`, factor)
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"Numeric.NonFinite"`) || !strings.Contains(got.stderr, `"tensor_type"`) || strings.Contains(got.stderr, `"values"`) {
 			t.Fatalf("gradient failure snapshot: %+v", got)
 		}

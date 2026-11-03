@@ -6,16 +6,13 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"os"
+
 	"strings"
 	"testing"
 	"time"
 )
 
 func TestLLVMHTTPBodyPipeline(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	server := startServer(t, `flow Handle(r:HTTP.Request)->HTTP.Response!{body=UTF8.String.new(r.body);return HTTP.Response.Text.new(200,String.concat(r.method,"|",r.path,"|",body))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	defer stopServer(t, server)
 	boundaryBody := strings.Repeat("0123456789abcdef", 512) + "boundary-tail"

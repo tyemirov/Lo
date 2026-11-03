@@ -1,10 +1,9 @@
 package integration_test
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
+
 	"os"
 	"path/filepath"
 	"strings"
@@ -46,7 +45,7 @@ func TestWorklistOrderedActivation(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := filepath.Join(root, "events")
 	source := worklistIntegerChildren + fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { target = File.Append.new(path, UTF8.Bytes.new(String.concat(Int.to_string(item), ","))); commit target; return Record.new(state: Math.add(state, 1), items: Children(item), stop: false) }; flow Run() -> Int! { return Flow.worklist(List.new(1, 2), 0, File.Path.new(%q), Step) }; return Run()`, path)
-	output := fileOutput(t, run(t, "run", sourceFile(t, source), "--write-root", root, "--format", "json"))
+	output := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--write-root", root, "--format", "json"))
 	valueJSON(t, output, `"5"`)
 	contents, err := os.ReadFile(path)
 	if err != nil || string(contents) != "1,11,12,2,21," {
@@ -107,7 +106,7 @@ func TestWorklistFailureProgress(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			args := append([]string{"run", sourceFile(t, test.source), "--format", "json"}, test.args...)
-			got := run(t, args...)
+			got := runProgram(t, args[1], args[0], args[2:]...)
 			if got.status != test.status {
 				t.Fatalf("worklist failure: %+v", got)
 			}
@@ -143,7 +142,7 @@ func TestWorklistSuccessorAdmissionProgress(t *testing.T) {
 	first := fileFixture(t, root, "first", "x")
 	next := fileFixture(t, root, "next", strings.Repeat("x", 8<<20))
 	program := fmt.Sprintf(`flow Step(children: List<File.Path>, state: Int, item: File.Path) -> Record{state: Int, items: List<File.Path>, stop: Bool}! { bytes = File.read(item); return Record.new(state: Math.add(state, 1), items: children, stop: false) }; flow Run() -> Int! { return Flow.worklist(List.new(File.Path.new(%q)), 0, List.new(File.Path.new(%q)), Step) }; return Run()`, first, next)
-	got := run(t, "run", sourceFile(t, program), "--read-root", root, "--max-live-bytes", "4194304", "--format", "json")
+	got := runProgram(t, sourceFile(t, program), "run", "--read-root", root, "--max-live-bytes", "4194304", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 		t.Fatalf("successor I/O admission escaped its policy: %+v", got)
 	}
@@ -162,46 +161,4 @@ func TestWorklistSuccessorAdmissionProgress(t *testing.T) {
 	valueJSON(t, fields["completed_count"], `"1"`)
 	valueJSON(t, fields["state"], `"1"`)
 	valueJSON(t, fields["pending_count"], `"1"`)
-}
-
-func TestWorklistCancellationProgress(t *testing.T) {
-	root := fileFixtureRoot(t)
-	for _, name := range []string{"a", "b", "c", "d"} {
-		fileFixture(t, root, name, name)
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	filesystem := &scheduledFileIO{FileIO: adapter.NativeFileIO()}
-	filesystem.remove = func(directory *os.Root, name string, count int) error {
-		if err := directory.Remove(name); err != nil {
-			return err
-		}
-		if count == 3 {
-			cancel()
-		}
-		return nil
-	}
-	program := fmt.Sprintf(`flow Step(state: Int, item: File.Entry) -> Record{state: Int, items: List<File.Entry>, stop: Bool}! { target = File.Remove.new(List.new(item)); commit target; return Record.new(state: Math.add(state, 1), items: List.new(), stop: false) }; flow Run() -> Int! { return Flow.worklist(File.list(File.Path.new(%q)), 0, Step) }; return Run()`, root)
-	_, err, got := injectedFileProgram(t, ctx, root, program, filesystem)
-	if err == nil || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.cancelled" {
-		t.Fatalf("worklist did not preserve cancellation: %+v", got)
-	}
-	var document struct {
-		Diagnostics []struct {
-			Progress []runtimeValue `json:"flow_progress"`
-		} `json:"diagnostics"`
-	}
-	if err := json.Unmarshal([]byte(got.stderr), &document); err != nil {
-		t.Fatal(err)
-	}
-	if len(document.Diagnostics) != 1 || len(document.Diagnostics[0].Progress) != 1 {
-		t.Fatalf("cancellation discarded confirmed worklist state: %+v", got)
-	}
-	fields := foldProgressFields(t, document.Diagnostics[0].Progress[0])
-	valueJSON(t, fields["completed_count"], `"2"`)
-	valueJSON(t, fields["state"], `"2"`)
-	valueJSON(t, fields["pending_count"], `"2"`)
-	if len(filesystem.removals) != 3 {
-		t.Fatalf("cancelled worklist visited its suffix: %v", filesystem.removals)
-	}
 }

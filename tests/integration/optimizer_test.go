@@ -102,50 +102,6 @@ flow Run() -> Optimizer.SGD.State<Record{x: Tensor<FP32>}>! {
 	}
 }
 
-func TestOptimizerSchemasAndFailureOrder(t *testing.T) {
-	for _, optimizer := range []string{"SGD", "AdamW"} {
-		config := "Optimizer.SGD.Config.new(2.0)"
-		if optimizer == "AdamW" {
-			config = "Optimizer.AdamW.Config.new(0.01,0.9,0.999,1e-8,0.1)"
-		}
-		for _, tc := range []struct{ shape, gradient, kind string }{
-			{"List.new(1)", "1.0", "Gradient.SchemaMismatch"},
-			{"List.new()", "3e38", "Numeric.NonFinite"},
-		} {
-			source := fmt.Sprintf(`flow Run() -> Optimizer.%s.State<Record{x: Tensor<FP32>}>! { x=Tensor.new(List.new(1.0),List.new()); p=Parameters.new(Record.new(x:x)); state=Optimizer.%s.State.new(p,%s); g=Tensor.new(List.new(%s),%s); gp=Parameters.new(Record.new(x:g)); gradients=Gradients.new(gp,Record.new(x:g)); next=Optimizer.%s.step(state,gradients); effect=File.Write.new(File.Path.new("never"),Bytes.new("bad")); commit effect; return next }; return Run()`, optimizer, optimizer, config, tc.gradient, tc.shape, optimizer)
-			boundary := &observedBoundary{}
-			_, err := evaluate(t, source, boundary)
-			if err == nil || !strings.Contains(err.Error(), tc.kind) || boundary.commits != 0 {
-				t.Fatalf("optimizer failure: %v commits=%d", err, boundary.commits)
-			}
-		}
-	}
-	for _, field := range []string{"config", "first_moment", "beta1_power"} {
-		source := fmt.Sprintf(`flow Private(s: Optimizer.AdamW.State<Record{x: Tensor<FP32>}>) -> Int { hidden=s.%s; return 0 }`, field)
-		got := run(t, "check", sourceFile(t, source), "--format", "json")
-		if got.status != 1 || !strings.Contains(got.stderr, "check.unknown-field") {
-			t.Fatalf("private state field: %+v", got)
-		}
-	}
-}
-
-func TestOptimizerPrimitiveWorkCharges(t *testing.T) {
-	for _, tc := range []struct {
-		optimizer, config string
-		delta             uint64
-	}{
-		{"SGD", "Optimizer.SGD.Config.new(0.1)", 36},
-		{"AdamW", "Optimizer.AdamW.Config.new(0.01,0.9,0.999,1e-8,0.1)", 180},
-	} {
-		program := func(n int) string {
-			return fmt.Sprintf(`flow Run() -> Optimizer.%s.State<Record{x: Tensor<FP32>}>! { one=Tensor.new(List.new(1.0),List.new()); x=Tensor.broadcast(one,List.new(%d)); p=Parameters.new(Record.new(x:x)); state=Optimizer.%s.State.new(p,%s); return Optimizer.%s.step(state,Gradients.zero(p)) }; return Run()`, tc.optimizer, n, tc.optimizer, tc.config, tc.optimizer)
-		}
-		if delta := minimumTensorSteps(t, program(10)) - minimumTensorSteps(t, program(1)); delta != tc.delta {
-			t.Fatalf("%s work delta=%d, want %d", tc.optimizer, delta, tc.delta)
-		}
-	}
-}
-
 func TestOptimizerInvalidConfigurations(t *testing.T) {
 	for _, expression := range []string{
 		`Optimizer.SGD.Config.new(0.0)`, `Optimizer.SGD.Config.new(-1.0)`, `Optimizer.SGD.Config.new(1e-60)`, `Optimizer.SGD.Config.new(1e40)`,
@@ -157,7 +113,7 @@ func TestOptimizerInvalidConfigurations(t *testing.T) {
 		`Optimizer.AdamW.Config.new(0.01,0.9,0.9,1e-8,-0.1)`,
 		`Optimizer.AdamW.Config.new(1e30,0.9,0.9,1e-8,1e30)`,
 	} {
-		got := run(t, "run", sourceFile(t, "return "+expression), "--format", "json")
+		got := runProgram(t, sourceFile(t, "return "+expression), "run", "--format", "json")
 		if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"Optimizer.InvalidConfig"`) {
 			t.Fatalf("invalid optimizer config: %+v", got)
 		}

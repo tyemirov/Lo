@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -29,32 +30,18 @@ import (
 )
 
 func TestLLVMHTTPValues(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
-	for _, source := range []string{
-		`return HTTP.URL.new("HTTP://EXAMPLE.COM/path?q=1")`,
-		`return HTTP.Method.new("POST")`,
-		`flow Main()->HTTP.Headers! { return HTTP.Headers.new(List.new(Record.new(name:"X-Z",value:UTF8.Bytes.new("z")),Record.new(name:"X-a",value:UTF8.Bytes.new("a")))) }; return Main()`,
-		`return HTTP.Response.Text.new(200,"ok")`,
+	for _, fixture := range []struct{ source, typ, payload string }{
+		{`return HTTP.URL.new("HTTP://EXAMPLE.COM/path?q=1")`, "HTTP.URL", `"http://example.com:80/path?q=1"`},
+		{`return HTTP.Method.new("POST")`, "HTTP.Method", `"POST"`},
+		{`flow Main()->HTTP.Headers! { return HTTP.Headers.new(List.new(Record.new(name:"X-Z",value:UTF8.Bytes.new("z")),Record.new(name:"X-a",value:UTF8.Bytes.new("a")))) }; return Main()`, "HTTP.Headers", `{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-a"},"value":{"type":"Bytes","value":"YQ=="}}},{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-z"},"value":{"type":"Bytes","value":"eg=="}}}]}}`},
+		{`return HTTP.Response.Text.new(200,"ok")`, "HTTP.Response", `{"status":{"type":"Int","value":"200"},"headers":{"type":"HTTP.Headers","value":{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[]}}},"body":{"type":"Bytes","value":"b2s="}}`},
 	} {
-		input := sourceFile(t, source)
-		artifact, built := buildForTest(t, input)
-		if built.status != 0 {
-			t.Fatalf("build HTTP value: %+v", built)
-		}
-		expected := runExecutable(t, binary, "run", input, "--format", "json")
-		actual := runExecutable(t, artifact, "run", "--format", "json")
-		if actual != expected {
-			t.Fatalf("HTTP value differs: native %+v evaluator %+v", actual, expected)
-		}
+		actual := runProgram(t, sourceFile(t, fixture.source), "run", "--format", "json")
+		nativeValueCheck(fixture.typ, fixture.payload)(t, actual)
 	}
 }
 
 func TestLLVMHTTPKeepAlivePipelining(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	p := startServer(t, `flow Handle(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,r.path)}; flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	defer stopServer(t, p)
 	connection, err := net.DialTimeout("tcp", p.address, time.Second)
@@ -83,9 +70,6 @@ func TestLLVMHTTPKeepAlivePipelining(t *testing.T) {
 }
 
 func TestLLVMHTTPVerifiedTLS(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	directory := t.TempDir()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
@@ -155,9 +139,6 @@ func TestLLVMHTTPVerifiedTLS(t *testing.T) {
 }
 
 func TestLLVMHTTPRequestContentLength(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	p := startServer(t, `flow Decode(s:String,b:Bytes)->String!{return UTF8.String.new(b)}; flow Handle(r:HTTP.Request)->HTTP.Response!{values=HTTP.Headers.values(r.headers,"content-length"); value=List.fold(values,"",Decode); return HTTP.Response.Text.new(200,value)}; flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	defer stopServer(t, p)
 	status, body := response(t, p, "POST", "/", "ab")
@@ -167,29 +148,28 @@ func TestLLVMHTTPRequestContentLength(t *testing.T) {
 }
 
 func TestLLVMHTTPURLCanonicalization(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
-	for index, url := range []string{"http://example.com/a?b=é", "http://example.com/é?b=é", "http://example.com/%2f?a=%xx", "http://example.com/a\\b", "http://[::ffff:127.0.0.1]/", "http://example.com:00080/", "http://[example.com]/", "ftp://host/", "http://host:", "http://user:pass@host/", "http://host/%xx"} {
+	for index, fixture := range []struct{ url, canonical string }{
+		{"http://example.com/a?b=é", "http://example.com:80/a?b=é"},
+		{"http://example.com/é?b=é", "http://example.com:80/%C3%A9?b=é"},
+		{"http://example.com/%2f?a=%xx", "http://example.com:80/%2f?a=%xx"},
+		{"http://example.com/a\\b", "http://example.com:80/a%5Cb"},
+		{"http://[::ffff:127.0.0.1]/", "http://127.0.0.1:80/"},
+		{"http://example.com:00080/", "http://example.com:80/"},
+		{"http://[example.com]/", ""}, {"ftp://host/", ""}, {"http://host:", ""},
+		{"http://user:pass@host/", ""}, {"http://host/%xx", ""},
+	} {
 		t.Run(fmt.Sprint(index), func(t *testing.T) {
-			input := sourceFile(t, fmt.Sprintf("return HTTP.URL.new(%q)", url))
-			artifact, built := buildForTest(t, input)
-			if built.status != 0 {
-				t.Fatalf("build URL fixture: %+v", built)
-			}
-			expected := runExecutable(t, binary, "run", input, "--format", "json")
-			actual := runExecutable(t, artifact, "run", "--format", "json")
-			if actual != expected {
-				t.Fatalf("URL %q differs: native %+v evaluator %+v", url, actual, expected)
+			actual := runProgram(t, sourceFile(t, fmt.Sprintf("return HTTP.URL.new(%q)", fixture.url)), "run", "--format", "json")
+			if fixture.canonical == "" {
+				nativeFailure(t, actual, 1, "runtime.unhandled-error", "HTTP.InvalidURL")
+			} else {
+				nativeValueCheck("HTTP.URL", strconv.Quote(fixture.canonical))(t, actual)
 			}
 		})
 	}
 }
 
 func TestLLVMHTTPStartupSelfRequest(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -205,9 +185,6 @@ func TestLLVMHTTPStartupSelfRequest(t *testing.T) {
 }
 
 func TestLLVMHTTPErrorHandlerOnce(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	arguments := strings.TrimSuffix(strings.Repeat(`"x",`, 100), ",")
 	source := `flow Handle(r:HTTP.Request)->HTTP.Response!{n=Math.div(1,0);return HTTP.Response.Text.new(200,Int.to_string(n))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(99,String.concat(` + arguments + `))}` + serveSuffix
 	p := startServer(t, source, "--max-steps", "180")
@@ -275,9 +252,6 @@ func TestLLVMLinuxHTTPVerifiedTLS(t *testing.T) {
 }
 
 func TestLLVMHTTPServerRequestFraming(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	p := startServer(t, `flow Handle(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,r.path)};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	defer stopServer(t, p)
 	for _, request := range []string{"GET /bare-lf HTTP/1.1\nHost: localhost\nConnection: close\n\n", "GET /old-version HTTP/1.0\r\n\r\n"} {
@@ -306,9 +280,6 @@ func TestLLVMHTTPServerRequestFraming(t *testing.T) {
 }
 
 func TestLLVMHTTPClientCancellation(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	started := make(chan struct{})
 	release := make(chan struct{})
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { close(started); <-release }))
@@ -391,11 +362,28 @@ func llvmHTTPCheckedCleanupScenarios() []llvmRuntimeScenario {
 }
 
 func TestLLVMHTTPChunkLengthGrammar(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
-	for index, chunk := range []string{"+1", "1 ", "1\t", "1;extension=ok", "1 ;extension=ok"} {
-		t.Run(fmt.Sprint(index), func(t *testing.T) {
+	for _, test := range []struct {
+		name, chunk string
+		accepted    bool
+	}{
+		{"leading-plus", "+1", false},
+		{"trailing-space", "1 ", true},
+		{"trailing-tab", "1\t", true},
+		{"extension", "1;extension=ok", true},
+		{"space-before-extension", "1 ;extension=ok", false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			wire := "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n" + test.chunk + "\r\na\r\n0\r\n\r\n"
+			// The standard HTTP reader independently checks the declared outcomes.
+			reference, err := http.ReadResponse(bufio.NewReader(strings.NewReader(wire)), &http.Request{Method: "GET"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, readErr := io.ReadAll(reference.Body)
+			_ = reference.Body.Close()
+			if (readErr == nil) != test.accepted || (test.accepted && string(body) != "a") {
+				t.Fatalf("independent chunk expectation: body %q, error %v", body, readErr)
+			}
 			listener, err := net.Listen("tcp", "127.0.0.1:0")
 			if err != nil {
 				t.Fatal(err)
@@ -404,7 +392,7 @@ func TestLLVMHTTPChunkLengthGrammar(t *testing.T) {
 			done := make(chan struct{})
 			go func() {
 				defer close(done)
-				for call := 0; call < 2; call++ {
+				for call := 0; call < 1; call++ {
 					connection, err := listener.Accept()
 					if err != nil {
 						return
@@ -414,7 +402,7 @@ func TestLLVMHTTPChunkLengthGrammar(t *testing.T) {
 					if err == nil {
 						_, _ = io.Copy(io.Discard, request.Body)
 						_ = request.Body.Close()
-						_, _ = io.WriteString(connection, "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n"+chunk+"\r\na\r\n0\r\n\r\n")
+						_, _ = io.WriteString(connection, wire)
 					}
 					connection.Close()
 				}
@@ -426,12 +414,14 @@ func TestLLVMHTTPChunkLengthGrammar(t *testing.T) {
 				t.Fatalf("build chunk fixture: %+v", built)
 			}
 			arguments := []string{"--http-allow", httpGrant("GET", origin), "--format", "json"}
-			expected := runExecutable(t, binary, append([]string{"run", input}, arguments...)...)
 			actual := runExecutable(t, artifact, append([]string{"run"}, arguments...)...)
 			listener.Close()
 			<-done
-			if actual.status != expected.status || actual.stdout != expected.stdout || (actual.status == 1 && !strings.Contains(actual.stderr, "HTTP.ExchangeFailed")) {
-				t.Fatalf("chunk %q differs: native %+v evaluator %+v", chunk, actual, expected)
+			if test.accepted {
+				value := nativeValue(t, actual)
+				valueJSON(t, recordField(t, value, "body"), `"YQ=="`)
+			} else {
+				nativeFailure(t, actual, 1, "runtime.unhandled-error", "HTTP.ExchangeFailed")
 			}
 		})
 	}
@@ -479,7 +469,16 @@ func llvmHTTPWireExchangeConnection(t *testing.T, artifact, method, connectionVa
 	if err := json.NewDecoder(stdout).Decode(&ready); err != nil || ready.Status != "ready" || len(ready.Servers) != 1 {
 		t.Fatalf("wire server startup: %v %+v %s", err, ready, stderr.String())
 	}
-	connection, err := net.DialTimeout("tcp", ready.Servers[0].Address, time.Second)
+	result := llvmHTTPReadWire(t, ready.Servers[0].Address, method, connectionValue)
+	_ = command.Process.Signal(os.Interrupt)
+	_ = command.Wait()
+	finished = true
+	result.Exit = command.ProcessState.ExitCode()
+	return result
+}
+func llvmHTTPReadWire(t *testing.T, address, method, connectionValue string) llvmHTTPWireResult {
+	t.Helper()
+	connection, err := net.DialTimeout("tcp", address, time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -515,71 +514,91 @@ func llvmHTTPWireExchangeConnection(t *testing.T, artifact, method, connectionVa
 			second.Body.Close()
 		}
 	}
-	_ = command.Process.Signal(os.Interrupt)
-	_ = command.Wait()
-	finished = true
-	result.Exit = command.ProcessState.ExitCode()
 	return result
 }
-func TestLLVMHTTPResponseFraming(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
+
+type llvmHTTPHeader struct{ name, value string }
+
+func llvmHTTPHeaderSource(headers []llvmHTTPHeader) string {
+	entries := make([]string, len(headers))
+	for index, header := range headers {
+		entries[index] = fmt.Sprintf(`Record.new(name:%q,value:UTF8.Bytes.new(%q))`, header.name, header.value)
 	}
+	return "List.new(" + strings.Join(entries, ",") + ")"
+}
+
+func llvmHTTPReferenceWireExchange(t *testing.T, headers []llvmHTTPHeader, status int, body, method, connectionValue string) llvmHTTPWireResult {
+	t.Helper()
+	var writeFailed atomic.Bool
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		for _, header := range headers {
+			writer.Header().Add(header.name, header.value)
+		}
+		writer.WriteHeader(status)
+		if request.Method != http.MethodHead && body != "" {
+			if _, err := io.WriteString(writer, body); err != nil {
+				writeFailed.Store(true)
+				panic(http.ErrAbortHandler)
+			}
+		}
+	}))
+	defer server.Close()
+	observed := llvmHTTPReadWire(t, server.Listener.Addr().String(), method, connectionValue)
+	// A response write failure is terminal for the native service contract.
+	// The reference supplies HTTP bytes only. This status is an explicit expectation.
+	if writeFailed.Load() {
+		observed.Exit = 2
+	}
+	return observed
+}
+
+func TestLLVMHTTPResponseFraming(t *testing.T) {
 	cases := []struct {
-		name, headers, body, method string
-		status                      int
-	}{{"chunked", `List.new(Record.new(name:"transfer-encoding",value:UTF8.Bytes.new("chunked")))`, "abc", "GET", 200}, {"short-length", `List.new(Record.new(name:"content-length",value:UTF8.Bytes.new("1")))`, "abc", "GET", 200}, {"long-length", `List.new(Record.new(name:"content-length",value:UTF8.Bytes.new("5")))`, "abc", "GET", 200}, {"close", `List.new(Record.new(name:"connection",value:UTF8.Bytes.new("close")))`, "abc", "GET", 200}, {"204-framing", `List.new(Record.new(name:"transfer-encoding",value:UTF8.Bytes.new("chunked")),Record.new(name:"content-length",value:UTF8.Bytes.new("5")))`, "", "GET", 204}, {"304-framing", `List.new(Record.new(name:"transfer-encoding",value:UTF8.Bytes.new("chunked")),Record.new(name:"content-length",value:UTF8.Bytes.new("5")))`, "", "GET", 304}, {"head-default", `List.new()`, "abc", "HEAD", 200}}
-	cases = append(cases, struct {
-		name, headers, body, method string
-		status                      int
-	}{"close-token", `List.new(Record.new(name:"connection",value:UTF8.Bytes.new("keep-alive, close")))`, "abc", "GET", 200}, struct {
-		name, headers, body, method string
-		status                      int
-	}{"trailer", `List.new(Record.new(name:"trailer",value:UTF8.Bytes.new("X-Foo")),Record.new(name:"x-foo",value:UTF8.Bytes.new("bar")))`, "abc", "GET", 200})
+		name         string
+		headers      []llvmHTTPHeader
+		body, method string
+		status       int
+	}{
+		{"chunked", []llvmHTTPHeader{{"transfer-encoding", "chunked"}}, "abc", "GET", 200},
+		{"short-length", []llvmHTTPHeader{{"content-length", "1"}}, "abc", "GET", 200},
+		{"long-length", []llvmHTTPHeader{{"content-length", "5"}}, "abc", "GET", 200},
+		{"close", []llvmHTTPHeader{{"connection", "close"}}, "abc", "GET", 200},
+		{"204-framing", []llvmHTTPHeader{{"transfer-encoding", "chunked"}, {"content-length", "5"}}, "", "GET", 204},
+		{"304-framing", []llvmHTTPHeader{{"transfer-encoding", "chunked"}, {"content-length", "5"}}, "", "GET", 304},
+		{"head-default", nil, "abc", "HEAD", 200},
+		{"close-token", []llvmHTTPHeader{{"connection", "keep-alive, close"}}, "abc", "GET", 200},
+		{"trailer", []llvmHTTPHeader{{"trailer", "X-Foo"}, {"x-foo", "bar"}}, "abc", "GET", 200},
+	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			source := sourceFile(t, fmt.Sprintf(`flow Handle(r:HTTP.Request)->HTTP.Response!{headers=HTTP.Headers.new(%s);return HTTP.Response.new(%d,headers,UTF8.Bytes.new(%q))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix, test.headers, test.status, test.body))
+			source := sourceFile(t, fmt.Sprintf(`flow Handle(r:HTTP.Request)->HTTP.Response!{headers=HTTP.Headers.new(%s);return HTTP.Response.new(%d,headers,UTF8.Bytes.new(%q))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix, llvmHTTPHeaderSource(test.headers), test.status, test.body))
 			native, built := buildForTest(t, source)
 			if built.status != 0 {
 				t.Fatalf("build response framing: %+v", built)
 			}
-			oracle := filepath.Join(t.TempDir(), "go-oracle")
-			if built := runExecutable(t, binary, "build", source, "--output", oracle, "--format", "json"); built.status != 0 {
-				t.Fatalf("build Go oracle: %+v", built)
-			}
-			expected := llvmHTTPWireExchange(t, oracle, test.method)
+			expected := llvmHTTPReferenceWireExchange(t, test.headers, test.status, test.body, test.method, "")
 			actual := llvmHTTPWireExchange(t, native, test.method)
 			if actual != expected {
-				t.Fatalf("response framing differs: native %+v evaluator %+v", actual, expected)
+				t.Fatalf("response framing differs: native %+v standard-library HTTP reference %+v", actual, expected)
 			}
 		})
 	}
 }
 
 func TestLLVMHTTPRequestConnectionTokens(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	source := sourceFile(t, `flow Handle(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,"ok")};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	native, built := buildForTest(t, source)
 	if built.status != 0 {
 		t.Fatalf("build connection tokens: %+v", built)
 	}
-	oracle := filepath.Join(t.TempDir(), "go-oracle")
-	if built := runExecutable(t, binary, "build", source, "--output", oracle, "--format", "json"); built.status != 0 {
-		t.Fatalf("build Go oracle: %+v", built)
-	}
-	expected := llvmHTTPWireExchangeConnection(t, oracle, "GET", "keep-alive, close")
+	expected := llvmHTTPReferenceWireExchange(t, nil, 200, "ok", "GET", "keep-alive, close")
 	actual := llvmHTTPWireExchangeConnection(t, native, "GET", "keep-alive, close")
 	if actual != expected {
-		t.Fatalf("request connection tokens differ: native %+v evaluator %+v", actual, expected)
+		t.Fatalf("request connection tokens differ: native %+v standard-library HTTP reference %+v", actual, expected)
 	}
 }
 
 func TestLLVMHTTPResponseContentType(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	p := startServer(t, `flow Handle(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Bytes.new(200,r.body)};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	defer stopServer(t, p)
 	payloads := [][]byte{nil, []byte("text"), []byte("  <hTmL>"), []byte("<!-- comment"), []byte("\n<?xml version"), []byte("%PDF-1.7"), []byte("%!PS-Adobe-"), {0xfe, 0xff, 0, 1}, {0xff, 0xfe, 0, 1}, {0xef, 0xbb, 0xbf, 0}, {0, 0, 1, 0}, []byte("BM"), []byte("GIF89a"), []byte("RIFFxxxxWEBPVP"), []byte("\x89PNG\r\n\x1a\n"), {0xff, 0xd8, 0xff}, []byte("FORMxxxxAIFF"), []byte("ID3"), []byte("OggS\x00"), []byte("MThd\x00\x00\x00\x06"), []byte("RIFFxxxxAVI "), []byte("RIFFxxxxWAVE"), {0x1a, 0x45, 0xdf, 0xa3}, []byte("OTTO"), []byte("ttcf"), []byte("wOFF"), []byte("wOF2"), {0x1f, 0x8b, 0x08}, []byte("PK\x03\x04"), []byte("Rar!\x1a\x07\x00"), []byte("\x00asm"), {0, 1, 2}, bytes.Repeat([]byte("a"), 4096)}
@@ -602,9 +621,6 @@ func TestLLVMHTTPResponseContentType(t *testing.T) {
 }
 
 func TestLLVMHTTPSharedRequestDeadline(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	release := make(chan struct{})
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { <-release }))
 	defer upstream.Close()

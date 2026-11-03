@@ -32,7 +32,7 @@ return File.read(p)
 		t.Fatalf("commit order: %q", contents)
 	}
 	program = fmt.Sprintf(`target = File.Append.new(File.Path.new(%q), UTF8.Bytes.new("new")); commit target`, filepath.Join(dir, "created.txt"))
-	got := run(t, "run", sourceFile(t, program), "--write-root", dir, "--format", "json")
+	got := runProgram(t, sourceFile(t, program), "run", "--write-root", dir, "--format", "json")
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("append creates target: %+v", got)
 	}
@@ -54,7 +54,7 @@ func TestFileCommitFailure(t *testing.T) {
 				kind = "File.AppendFailed"
 			}
 			program := fmt.Sprintf(`bad = %s(File.Path.new(%q), %s); later = File.Write.new(File.Path.new(%q), Bytes.new("later")); commit bad; commit later`, op, dir, body, later)
-			got := run(t, "run", sourceFile(t, program), "--write-root", dir, "--format", "json")
+			got := runProgram(t, sourceFile(t, program), "run", "--write-root", dir, "--format", "json")
 			if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"`+kind+`"`) {
 				t.Fatalf("commit failure: %+v", got)
 			}
@@ -74,7 +74,7 @@ func TestFileCommitAuthorization(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "output")
 	program := fmt.Sprintf(`target = File.Write.new(File.Path.new(%q), Bytes.new("data")); commit target`, path)
-	got := run(t, "run", sourceFile(t, program), "--read-root", dir, "--format", "json")
+	got := runProgram(t, sourceFile(t, program), "run", "--read-root", dir, "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("write authorization: %+v", got)
 	}
@@ -103,7 +103,7 @@ func TestFileCommitAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 	program = fmt.Sprintf(`target = File.Write.new(File.Path.new(%q), Bytes.new("changed")); commit target`, link)
-	got = run(t, "run", sourceFile(t, program), "--write-root", dir, "--format", "json")
+	got = runProgram(t, sourceFile(t, program), "run", "--write-root", dir, "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"File.WriteFailed"`) {
 		t.Fatalf("write root escape: %+v", got)
 	}
@@ -130,7 +130,7 @@ func TestFileWorkflowExample(t *testing.T) {
 			if err := input.Close(); err != nil {
 				t.Fatal(err)
 			}
-			cmd := runtimeCommand(t, "run", filepath.Join(repository, "examples/agent_file_workflow.lo"), "--read-root", ".", "--write-root", ".", "--format", "json")
+			cmd := programCommand(t, filepath.Join(repository, "examples/agent_file_workflow.lo"), "run", "--read-root", ".", "--write-root", ".", "--format", "json")
 			cmd.Dir = dir
 			var stdout, stderr bytes.Buffer
 			cmd.Stdout = &stdout

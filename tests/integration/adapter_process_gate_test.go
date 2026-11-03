@@ -40,7 +40,7 @@ func TestAdapterProcessUnavailable(t *testing.T) {
 				commit = "outcome = commit target"
 			}
 			program := `flow Main() -> Int! { ` + processGateSource(root) + commit + fmt.Sprintf(`; next = File.Write.new(File.Path.new(%q), UTF8.Bytes.new("unexpected")); commit next; return 0 }; return Main()`, later)
-			got := run(t, "run", sourceFile(t, program), "--write-root", root, "--format", "json")
+			got := runProgram(t, sourceFile(t, program), "run", "--write-root", root, "--format", "json")
 			assertProcessUnavailable(t, got)
 			if _, err := os.ReadFile(later); !os.IsNotExist(err) {
 				t.Fatalf("effect after unavailable commit ran: %v", err)
@@ -52,9 +52,9 @@ func TestAdapterProcessUnavailable(t *testing.T) {
 func TestAdapterProcessUnavailableBypassesHandlers(t *testing.T) {
 	root := fileFixtureRoot(t)
 	program := `flow Recover(error: Error) -> Int { return 73 }; flow Attempt() -> Int onError Recover { ` + processGateSource(root) + ` outcome = commit target; return 1 }; return Attempt()`
-	assertProcessUnavailable(t, run(t, "run", sourceFile(t, program), "--format", "json"))
+	assertProcessUnavailable(t, runProgram(t, sourceFile(t, program), "run", "--format", "json"))
 	program = `flow Recover(error: Error) -> Int { return 73 }; flow Step(total: Int, item: Int) -> Int! { ` + processGateSource(root) + ` commit target; return Math.add(total,item) }; flow Attempt() -> Int onError Recover { return Flow.fold(List.new(1),0,Step) }; return Attempt()`
-	assertProcessUnavailable(t, run(t, "run", sourceFile(t, program), "--format", "json"))
+	assertProcessUnavailable(t, runProgram(t, sourceFile(t, program), "run", "--format", "json"))
 }
 
 func TestAdapterProcessUnavailableInServerCallbacks(t *testing.T) {

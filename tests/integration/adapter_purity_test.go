@@ -60,7 +60,7 @@ func TestAdapterPurity(t *testing.T) {
 			t.Fatal(err)
 		}
 		program := fmt.Sprintf(`flow Read(path: String) -> String! { return UTF8.String.new(File.read(File.Path.new(path))) }; flow Main() -> String! { return Match.new(Read(%q), "chosen": Read(%q), _: Read("not-authorized")) }; return Main()`, selected, selected)
-		valueJSON(t, fileOutput(t, run(t, "run", sourceFile(t, program), "--read-root", root, "--format", "json")), `"chosen"`)
+		valueJSON(t, fileOutput(t, runProgram(t, sourceFile(t, program), "run", "--read-root", root, "--format", "json")), `"chosen"`)
 	})
 	t.Run("conditional-observation-contaminates-callback", func(t *testing.T) {
 		adapterPurityRejected(t, read+`flow Callback(x: Int) -> Int { return Match.new(x, 1: 1, _: Observe()) }; return List.map(List.new(1), Callback)`, "check.effectful-callback")
@@ -86,7 +86,7 @@ func TestAdapterPurity(t *testing.T) {
 		if err := os.WriteFile(output, []byte("stable"), 0600); err != nil {
 			t.Fatal(err)
 		}
-		valueJSON(t, fileOutput(t, run(t, "run", sourceFile(t, source), "--read-root", root, "--write-root", root, "--format", "json")), `"3"`)
+		valueJSON(t, fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--read-root", root, "--write-root", root, "--format", "json")), `"3"`)
 	})
 }
 

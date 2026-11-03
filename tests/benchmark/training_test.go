@@ -1,95 +1,32 @@
 package benchmark_test
 
 import (
-	"context"
-	"encoding/json"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
+	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
+	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
-	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
-	"github.com/MarcoPoloResearchLab/Lo/internal/source"
-	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
-type noBoundaries struct{}
-
-func (noBoundaries) Read(context.Context, value.Text) (value.Bytes, error) {
-	return nil, execution.Denied("File.read", "training benchmark")
-}
-func (noBoundaries) List(context.Context, value.Text) (value.List, error) {
-	return nil, execution.Denied("File.list", "training benchmark")
-}
-func (noBoundaries) OpenPaths(context.Context, value.Text) (value.List, error) {
-	return nil, execution.Denied("File.open_paths", "training benchmark")
-}
-func (noBoundaries) Commit(context.Context, value.Target) (value.Value, error) {
-	return nil, execution.Denied("commit", "training benchmark")
-}
-
-var programSink ir.Program
-var valueSink value.Value
-var bytesSink []byte
-
-func BenchmarkTraining(b *testing.B) {
-	for _, fixture := range []struct{ name, path string }{
-		{"MVP200", filepath.Join("..", "..", "examples", "training_cpu.lo")},
-		{"Dense20", filepath.Join("testdata", "training_dense.lo")},
-	} {
-		text, err := os.ReadFile(fixture.path)
-		if err != nil {
-			b.Fatal(err)
-		}
-		file, err := source.New(fixture.path, string(text))
-		if err != nil {
-			b.Fatal(err)
-		}
-		program, d := compiler.Check(file)
-		if d != nil {
-			b.Fatal(d)
-		}
-		budgetInput := execution.DefaultBudgetInput()
-		budgetInput.Steps = 10_000_000
-		budget, err := execution.NewBudget(budgetInput)
-		if err != nil {
-			b.Fatal(err)
-		}
-		result, err := eval.Run(context.Background(), program, noBoundaries{}, budget, device.DefaultConfig())
-		if err != nil {
-			b.Fatal(err)
-		}
-		b.Run(fixture.name+"/Check", func(b *testing.B) {
-			b.ReportAllocs()
-			for b.Loop() {
-				p, d := compiler.Check(file)
-				if d != nil {
-					b.Fatal(d)
-				}
-				programSink = p
+// BenchmarkTrainingCheck measures only frontend compiler checking.
+func BenchmarkTrainingCheck(b *testing.B) {
+	for _, fixture := range []struct{ name, path string }{{"MVP200", filepath.Join("..", "..", "examples", "training_cpu.lo")}, {"Dense20", filepath.Join("testdata", "training_dense.lo")}} {
+		b.Run(fixture.name, func(b *testing.B) {
+			text, err := os.ReadFile(fixture.path)
+			if err != nil {
+				b.Fatal(err)
 			}
-		})
-		b.Run(fixture.name+"/Execute", func(b *testing.B) {
-			b.ReportAllocs()
-			for b.Loop() {
-				v, err := eval.Run(context.Background(), program, noBoundaries{}, budget, device.DefaultConfig())
-				if err != nil {
-					b.Fatal(err)
-				}
-				valueSink = v
+			file, err := source.New(fixture.path, string(text))
+			if err != nil {
+				b.Fatal(err)
 			}
-		})
-		b.Run(fixture.name+"/Serialize", func(b *testing.B) {
 			b.ReportAllocs()
 			for b.Loop() {
-				bytes, err := json.Marshal(result)
-				if err != nil {
-					b.Fatal(err)
+				program, problem := compiler.Check(file)
+				if problem != nil {
+					b.Fatal(problem)
 				}
-				bytesSink = bytes
+				programSink = program
 			}
 		})
 	}

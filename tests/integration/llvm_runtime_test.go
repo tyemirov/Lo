@@ -12,9 +12,6 @@ import (
 )
 
 func TestLLVMRuntimeToolchainAdmission(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 	compiler := developmentToolchainCompiler(t)
 	data, err := os.ReadFile(manifest)
@@ -102,9 +99,6 @@ func writeLLVMFixture(t *testing.T, path string, data []byte) {
 }
 
 func TestLLVMRuntimeStandalone(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	input := sourceFile(t, `flow Add(a:Int,b:Int)->Int{return Math.add(a,b)}
 return List.fold(List.new(1,2,3),123456789012345678901234567890,Add)`)
 	work := t.TempDir()
@@ -201,9 +195,6 @@ func TestLLVMRuntimeRequiresToolchain(t *testing.T) {
 }
 
 func TestLLVMRuntimeCore(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	for _, fixture := range []struct {
 		name, source, expected string
 	}{

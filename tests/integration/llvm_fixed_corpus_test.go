@@ -35,9 +35,6 @@ func TestLLVMFixedCorpusModuleLimit(t *testing.T) {
 }
 
 func TestLLVMFixedCorpusExecutable(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires LLVM runtime inputs")
-	}
 	target := os.Getenv("LO_TEST_TARGET")
 	if target == "" {
 		target = runtime.GOOS + "/" + runtime.GOARCH

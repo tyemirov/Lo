@@ -40,8 +40,17 @@ func startServer(t *testing.T, source string, extra ...string) *serverProcess {
 }
 func startServerFile(t *testing.T, path string, extra ...string) *serverProcess {
 	t.Helper()
-	args := append([]string{"serve", path, "--listen", "0", "--format", "json"}, extra...)
-	p := &serverProcess{cmd: runtimeCommand(t, args...), events: make(chan serveEvent, 4), done: make(chan struct{})}
+	artifact, built := buildForTest(t, path)
+	if built.status != 0 {
+		t.Fatalf("build server fixture: %+v", built)
+	}
+	return startServerArtifact(t, artifact, extra...)
+}
+
+func startServerArtifact(t *testing.T, artifact string, extra ...string) *serverProcess {
+	t.Helper()
+	args := append([]string{"--listen", "0", "--format", "json"}, extra...)
+	p := &serverProcess{cmd: exec.Command(artifact, append([]string{"serve"}, args...)...), events: make(chan serveEvent, 4), done: make(chan struct{})}
 	p.cmd.Dir = repository
 	stdout, err := p.cmd.StdoutPipe()
 	if err != nil {
@@ -236,20 +245,20 @@ flow OnError(error: Error) -> HTTP.Response { return HTTP.Response.Text.new(502,
 func TestServeStartupFailures(t *testing.T) {
 	flows := `flow Handle(r: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow OnError(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; `
 	for _, port := range []string{"-1", "65536", "18446744073709551616"} {
-		got := run(t, "serve", sourceFile(t, flows+"s = HTTP.Server.new("+port+", Handle, OnError); commit s"), "--format", "json")
+		got := runProgram(t, sourceFile(t, flows+"s = HTTP.Server.new("+port+", Handle, OnError); commit s"), "serve", "--format", "json")
 		if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"HTTP.ServerStartFailed"`) {
 			t.Fatalf("invalid port: %+v", got)
 		}
 	}
-	got := run(t, "serve", sourceFile(t, flows+serveSuffix), "--format", "json")
+	got := runProgram(t, sourceFile(t, flows+serveSuffix), "serve", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("listen authorization: %+v", got)
 	}
-	got = run(t, "run", sourceFile(t, flows+serveSuffix), "--format", "json")
+	got = runProgram(t, sourceFile(t, flows+serveSuffix), "run", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.server-requires-serve" {
 		t.Fatalf("run lifecycle: %+v", got)
 	}
-	got = run(t, "serve", sourceFile(t, "return 1"), "--format", "json")
+	got = runProgram(t, sourceFile(t, "return 1"), "serve", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.no-server" {
 		t.Fatalf("empty service: %+v", got)
 	}
@@ -260,7 +269,7 @@ func TestServeStartupFailures(t *testing.T) {
 	defer occupied.Close()
 	port := occupied.Addr().(*net.TCPAddr).Port
 	source := flows + fmt.Sprintf("s = HTTP.Server.new(%d, Handle, OnError); commit s", port)
-	got = run(t, "serve", sourceFile(t, source), "--listen", strconv.Itoa(port), "--format", "json")
+	got = runProgram(t, sourceFile(t, source), "serve", "--listen", strconv.Itoa(port), "--format", "json")
 	if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"HTTP.ServerStartFailed"`) {
 		t.Fatalf("startup failure: %+v", got)
 	}
@@ -268,7 +277,7 @@ func TestServeStartupFailures(t *testing.T) {
 
 func TestServeServerLimit(t *testing.T) {
 	program := `flow H(r: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow E(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, e.kind) }; s = HTTP.Server.new(0,H,E);` + strings.Repeat("commit s;", 65)
-	got := run(t, "serve", sourceFile(t, program), "--listen", "0", "--format", "json")
+	got := runProgram(t, sourceFile(t, program), "serve", "--listen", "0", "--format", "json")
 	if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 		t.Fatalf("active server limit: %+v", got)
 	}

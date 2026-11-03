@@ -54,9 +54,6 @@ func runLLVMRuntimeScenarios(t *testing.T, scenarios []llvmRuntimeScenario) {
 
 func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenarios []llvmRuntimeScenario) {
 	t.Helper()
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 	if manifest == "" {
 		t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")

@@ -13,6 +13,20 @@ const metadataV2GradientSource = `flow Square(x:Tensor<FP32>)->Tensor<FP32>!{ret
 const metadataV2CallbackSource = `flow Twice(n:Int)->Int{return Math.mul(n,2)};return List.map(List.new(0,1,256),Twice)`
 const metadataV2RecoverableSource = `return Math.div(1,0)`
 
+func metadataV2ValueCheck(source string) func(*testing.T, result) {
+	switch source {
+	case metadataV2LiteralSource:
+		return nativeValueCheck("List<Int>", `[{"type":"Int","value":"0"},{"type":"Int","value":"1"},{"type":"Int","value":"256"}]`)
+	case metadataV2CallbackSource:
+		return nativeValueCheck("List<Int>", `[{"type":"Int","value":"0"},{"type":"Int","value":"2"},{"type":"Int","value":"512"}]`)
+	case metadataV2GradientSource:
+		// Two independent gradients of x*x at x=2 each contribute4.
+		return nativeValueCheck("Tensor<FP32>", `{"dtype":"fp32","device":"cpu","shape":[],"values":["8"]}`)
+	default:
+		panic("metadata fixture has no independently specified result")
+	}
+}
+
 // The admission fixtures mutate only the current canonical wire document.
 func metadataV2FixtureDocument(t *testing.T, module []byte) map[string]any {
 	t.Helper()
@@ -251,11 +265,7 @@ func TestLLVMMetadataV2Admission(t *testing.T) {
 			scenario.number = 2
 		}
 		if fixture.valid && !fixture.coordinateError {
-			reference := runExecutable(t, binary, "run", sourceFile(t, source), "--format", "json")
-			if reference.status != 0 || reference.stderr != "" {
-				t.Fatalf("fixture independent language result: %+v", reference)
-			}
-			scenario.expectedStdout = reference.stdout
+			scenario.verify = metadataV2ValueCheck(source)
 		}
 		var expectedFile string
 		scenario.transform = func(t *testing.T, module []byte) []byte {
@@ -333,11 +343,7 @@ func TestLLVMMetadataV2HarnessControl(t *testing.T) {
 	} {
 		scenario := llvmRuntimeScenario{name: control.name, source: control.source, number: control.number, harness: "testdata/native-qualification/metadata-v2.c"}
 		if control.number == 1 {
-			reference := runExecutable(t, binary, "run", sourceFile(t, control.source), "--format", "json")
-			if reference.status != 0 || reference.stderr != "" {
-				t.Fatalf("control language result: %+v", reference)
-			}
-			scenario.expectedStdout = reference.stdout
+			scenario.verify = metadataV2ValueCheck(control.source)
 		} else {
 			scenario.verify = func(t *testing.T, got result) {
 				var report struct{ Diagnostics []struct{ Code string } }

@@ -14,9 +14,6 @@ import (
 )
 
 func TestLLVMCheckpointFileCancellation(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	for _, operation := range []string{"read", "write"} {
 		t.Run(operation, func(t *testing.T) {
 			directory := t.TempDir()
@@ -110,9 +107,6 @@ return Run()`, expression, later))
 }
 
 func TestLLVMCheckpointFileDiagnostics(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	directory := t.TempDir()
 	child := filepath.Join(directory, "child")
 	if err := os.MkdirAll(child, os.ModePerm); err != nil {
@@ -135,11 +129,12 @@ func TestLLVMCheckpointFileDiagnostics(t *testing.T) {
 				t.Fatalf("build file diagnostic fixture: %+v", built)
 			}
 			arguments := []string{"--read-root", directory, "--write-root", directory, "--format", "json"}
-			expected := runExecutable(t, binary, append([]string{"run", input}, arguments...)...)
 			actual := runExecutable(t, artifact, append([]string{"run"}, arguments...)...)
-			if actual != expected {
-				t.Fatalf("file diagnostics differ: native %+v evaluator %+v", actual, expected)
+			kind := "File.ReadFailed"
+			if index >= 2 {
+				kind = "File.WriteFailed"
 			}
+			nativeFailure(t, actual, 1, "runtime.unhandled-error", kind)
 		})
 	}
 }

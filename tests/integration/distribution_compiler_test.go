@@ -76,7 +76,7 @@ func TestInstalledCompilerIdentity(t *testing.T) {
 			}
 		})
 	}
-	for _, args := range [][]string{{"check", input}, {"run", input}, {"build", input, "--emit", "llvm", "--output", filepath.Join(root, "program.ll")}} {
+	for _, args := range [][]string{{"parse", input}, {"check", input}, {"inspect", input}, {"build", input, "--emit", "llvm", "--output", filepath.Join(root, "program.ll")}} {
 		got := runExecutable(t, alias, args...)
 		if got.status != 0 {
 			t.Fatalf("installed non-executable command: %+v", got)

@@ -64,9 +64,9 @@ func TestFileDiscovery(t *testing.T) {
 	if checked.status != 0 {
 		t.Fatalf("File discovery must type check: %+v", checked)
 	}
-	v := fileOutput(t, run(t, "run", path, "--list-root", root, "--format", "json"))
+	v := fileOutput(t, runProgram(t, path, "run", "--list-root", root, "--format", "json"))
 	valueJSON(t, v, `[{"type":"String","value":".first"},{"type":"String","value":"z.log"}]`)
-	denied := run(t, "run", path, "--format", "json")
+	denied := runProgram(t, path, "run", "--format", "json")
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("list grant: %+v", denied)
 	}
@@ -80,19 +80,19 @@ func TestFileRemoval(t *testing.T) {
 	if checked.status != 0 {
 		t.Fatalf("File removal must type check: %+v", checked)
 	}
-	fileOutput(t, run(t, "run", construct, "--list-root", root, "--format", "json"))
+	fileOutput(t, runProgram(t, construct, "run", "--list-root", root, "--format", "json"))
 	if _, err := os.Stat(name); err != nil {
 		t.Fatalf("construction changed file: %v", err)
 	}
 	commit := sourceFile(t, fmt.Sprintf(`flow Remove() -> Int! { entries = File.list(File.Path.new(%q)); removal = File.Remove.new(entries); commit removal; return List.length(entries) }; return Remove()`, root))
-	denied := run(t, "run", commit, "--list-root", root, "--format", "json")
+	denied := runProgram(t, commit, "run", "--list-root", root, "--format", "json")
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("remove grant: %+v", denied)
 	}
 	if _, err := os.Stat(name); err != nil {
 		t.Fatalf("denied commit changed file: %v", err)
 	}
-	v := fileOutput(t, run(t, "run", commit, "--list-root", root, "--remove-root", root, "--format", "json"))
+	v := fileOutput(t, runProgram(t, commit, "run", "--list-root", root, "--remove-root", root, "--format", "json"))
 	valueJSON(t, v, `"1"`)
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
 		t.Fatalf("committed file remains: %v", err)
@@ -155,13 +155,13 @@ func TestGatewayLogCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	previewValue := fileOutput(t, run(t, "run", preview, "--list-root", root, "--open-files-root", root, "--format", "json"))
+	previewValue := fileOutput(t, runProgram(t, preview, "run", "--list-root", root, "--open-files-root", root, "--format", "json"))
 	var previewFields map[string]runtimeValue
 	if err := json.Unmarshal(previewValue.Value, &previewFields); err != nil {
 		t.Fatal(err)
 	}
 	valueJSON(t, previewFields["names"], `[{"type":"String","value":"deployment-1.log"},{"type":"String","value":"deployment-5.log"},{"type":"String","value":"deployment-9.log"}]`)
-	v := fileOutput(t, run(t, "run", path, "--list-root", root, "--remove-root", root, "--open-files-root", root, "--format", "json"))
+	v := fileOutput(t, runProgram(t, path, "run", "--list-root", root, "--remove-root", root, "--open-files-root", root, "--format", "json"))
 	var fields map[string]runtimeValue
 	if err := json.Unmarshal(v.Value, &fields); err != nil {
 		t.Fatal(err)

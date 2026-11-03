@@ -12,9 +12,6 @@ import (
 )
 
 func TestLLVMFailureStopsCommit(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	fixtures := []struct {
 		name, source, kind string
 		status             int
@@ -43,10 +40,9 @@ func TestLLVMFailureStopsCommit(t *testing.T) {
 			if built.status != 0 {
 				t.Fatalf("build: %+v", built)
 			}
-			expected := runExecutable(t, binary, "run", path, "--write-root", directory, "--format", "json")
 			actual := runExecutable(t, artifact, "run", "--write-root", directory, "--format", "json")
-			if actual != expected || actual.status != fixture.status || !strings.Contains(actual.stdout+actual.stderr, fixture.kind) {
-				t.Fatalf("failure order: native=%+v interpreter=%+v", actual, expected)
+			if actual.status != fixture.status || !strings.Contains(actual.stdout+actual.stderr, fixture.kind) {
+				t.Fatalf("failure order: native=%+v", actual)
 			}
 			if _, err := os.Stat(output); !os.IsNotExist(err) {
 				t.Fatalf("later commit reached: %v", err)
@@ -56,9 +52,6 @@ func TestLLVMFailureStopsCommit(t *testing.T) {
 }
 
 func TestLLVMPartialServerStartupCleanup(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	directory := t.TempDir()
 	receipt := filepath.Join(directory, "started-port")
 	text := fmt.Sprintf(`flow H(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,"ok")};flow E(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,"bad")};first=HTTP.Server.new(0,H,E);started=commit first;record=File.Write.new(File.Path.new(%q),UTF8.Bytes.new(Int.to_string(started.port)));commit record;second=HTTP.Server.new(-1,H,E);commit second`, receipt)
@@ -67,7 +60,7 @@ func TestLLVMPartialServerStartupCleanup(t *testing.T) {
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}
-	for _, command := range [][]string{{binary, "serve", path}, {artifact, "serve"}} {
+	for _, command := range [][]string{{artifact, "serve"}} {
 		got := runExecutable(t, command[0], append(command[1:], "--listen", "0", "--write-root", directory, "--format", "json")...)
 		if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, "HTTP.ServerStartFailed") {
 			t.Fatalf("partial startup: %+v", got)

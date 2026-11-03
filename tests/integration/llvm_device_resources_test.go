@@ -5,7 +5,7 @@ import "testing"
 func llvmDeviceResourceScenarios() []llvmRuntimeScenario {
 	source := `flow Main()->Tensor<FP32>! {a=Tensor.new(List.new(1.0,2.0,3.0),List.new(3));b=Tensor.to(a,Device.new("cuda-sim:0"));c=Tensor.to(b,Device.new("cpu"));next=File.Write.new(File.Path.new("later"),Bytes.new("ran"));commit next;return c};return Main()`
 	retry := `flow Stop(error:Error)->String{return error.kind};flow Retry(error:Error)->String onError Stop {a=Tensor.new(List.new(1.0),List.new());b=Tensor.to(a,Device.new("cuda-sim:0"));return "unexpected"};flow Main()->String onError Retry {a=Tensor.new(List.new(1.0),List.new());b=Tensor.to(a,Device.new("cuda-sim:0"));return "unexpected"};return Main()`
-	names := []string{"reserved-transfer-receipts", "open-failure", "allocation-failure", "upload-failure", "download-failure", "release-cleanup", "backend-cleanup", "cancel-during-upload", "reserved-budget", "undersized-reservation", "sticky-lost", "lost-and-cancellation"}
+	names := []string{"reserved-transfer-receipts", "open-failure", "allocation-failure", "upload-failure", "download-failure", "release-cleanup", "backend-cleanup", "cancel-during-upload", "reserved-budget", "undersized-reservation", "sticky-lost", "lost-and-cancellation", "profile-open-failure", "library-open-failure", "lost-open-failure"}
 	var scenarios []llvmRuntimeScenario
 	for number, name := range names {
 		text := source

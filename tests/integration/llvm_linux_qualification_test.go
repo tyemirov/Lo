@@ -101,9 +101,6 @@ func runLinuxLLVMExecutableWithInputs(t *testing.T, executable, capture, compani
 
 func linuxLLVMArtifact(t *testing.T, source string) string {
 	t.Helper()
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 	if manifest == "" {
 		t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")

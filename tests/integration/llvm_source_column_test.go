@@ -11,9 +11,6 @@ import (
 )
 
 func TestLLVMSourceColumnOverflow(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM executable lane")
-	}
 	prefix := `padding="` + strings.Repeat("界", 1<<16) + `"; return `
 	column := utf8.RuneCountInString(prefix) + 1
 	path := sourceFile(t, prefix+"7")

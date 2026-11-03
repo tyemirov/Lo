@@ -1,7 +1,6 @@
 package integration_test
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -58,9 +57,6 @@ func runProgramLockEmbeddingBoundary(t *testing.T, target string) {
 }
 
 func TestLLVMProgramLockMetalEntry(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	manifest, _ := llvmMetalManifest(t)
 	artifact := filepath.Join(t.TempDir(), "program-entry-metal")
 	source := sourceFile(t, `flow Main()->Lock.Lease!{target=Lock.File.new(Program.path());lease=commit target;return lease};return Main()`)

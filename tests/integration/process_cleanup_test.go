@@ -102,7 +102,7 @@ func TestProcessCleanupDataWrites(t *testing.T) {
 			if test.destination != "" {
 				arguments = append(arguments, test.destination)
 			}
-			got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, arguments...)), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, fixture.source(t, arguments...)), "run", append([]string{"--format", "json"}, flags...)...)
 			valueJSON(t, fileOutput(t, got), processLiteral(t, test.code))
 		})
 	}
@@ -125,7 +125,7 @@ func TestProcessCleanupPruneHardlink(t *testing.T) {
 	}
 	flags := append(fixture.flags(), "--process-prune-root", cleanupScope(t, fixture.executable, "root", fixture.prunes))
 	for _, test := range []struct{ operation, path, code string }{{"write", alias, "1"}, {"unlink", alias, "0"}} {
-		got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, test.operation, test.path)), "--format", "json"}, flags...)...)
+		got := runProgram(t, sourceFile(t, fixture.source(t, test.operation, test.path)), "run", append([]string{"--format", "json"}, flags...)...)
 		valueJSON(t, fileOutput(t, got), processLiteral(t, test.code))
 	}
 	data, err := os.ReadFile(protected)
@@ -153,7 +153,7 @@ func TestProcessCleanupPruneAliasWithSeparateWriteRoot(t *testing.T) {
 		if test.destination != "" {
 			arguments = append(arguments, test.destination)
 		}
-		got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, arguments...)), "--format", "json"}, flags...)...)
+		got := runProgram(t, sourceFile(t, fixture.source(t, arguments...)), "run", append([]string{"--format", "json"}, flags...)...)
 		valueJSON(t, fileOutput(t, got), processLiteral(t, test.code))
 	}
 	data, err := os.ReadFile(protected)
@@ -182,7 +182,7 @@ func TestProcessCleanupRejectsOutsideAlias(t *testing.T) {
 		t.Fatal(err)
 	}
 	flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes))
-	got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "write", alias)), "--format", "json"}, flags...)...)
+	got := runProgram(t, sourceFile(t, fixture.source(t, "write", alias)), "run", append([]string{"--format", "json"}, flags...)...)
 	diagnostic := receiptHostDiagnostic(t, got)
 	if got.status != 2 || diagnostic.Code != "runtime.capability-denied" {
 		t.Fatalf("outside hardlink admitted: %+v", got)
@@ -201,7 +201,7 @@ func TestProcessCleanupRejectsDataAliasInPruneRoot(t *testing.T) {
 		t.Fatal(err)
 	}
 	flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes), "--process-prune-root", cleanupScope(t, fixture.executable, "root", fixture.prunes))
-	got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "write", path)), "--format", "json"}, flags...)...)
+	got := runProgram(t, sourceFile(t, fixture.source(t, "write", path)), "run", append([]string{"--format", "json"}, flags...)...)
 	if got.status != 2 {
 		t.Fatalf("data authority crossed a prune root: %+v", got)
 	}
@@ -222,7 +222,7 @@ func TestProcessCleanupOwnedHardlinks(t *testing.T) {
 		t.Fatal(err)
 	}
 	flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes))
-	got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "write", path)), "--format", "json"}, flags...)...)
+	got := runProgram(t, sourceFile(t, fixture.source(t, "write", path)), "run", append([]string{"--format", "json"}, flags...)...)
 	valueJSON(t, fileOutput(t, got), `"0"`)
 	data, err := os.ReadFile(alias)
 	if err != nil || string(data) != "changed" {
@@ -235,7 +235,7 @@ func TestProcessCleanupUnicodeNamespaceNames(t *testing.T) {
 	opaque := fileFixture(t, fixture.writes, "naïve-日本語", "opaque")
 	path := fileFixture(t, fixture.writes, "data", "before")
 	flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes))
-	got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "write", path)), "--format", "json"}, flags...)...)
+	got := runProgram(t, sourceFile(t, fixture.source(t, "write", path)), "run", append([]string{"--format", "json"}, flags...)...)
 	valueJSON(t, fileOutput(t, got), `"0"`)
 	data, err := os.ReadFile(opaque)
 	if err != nil || string(data) != "opaque" {
@@ -256,13 +256,13 @@ func TestProcessCleanupScopedPathCharacters(t *testing.T) {
 			outside := fileFixture(t, fixture.root, "outside", "preserved")
 			scope := strings.ReplaceAll(cleanupScope(t, fixture.executable, "root", selected), "🐩", `\ud83d\udc29`)
 			flags := append(fixture.flags(), "--process-write-root", scope)
-			got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "write", path)), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, fixture.source(t, "write", path)), "run", append([]string{"--format", "json"}, flags...)...)
 			valueJSON(t, fileOutput(t, got), `"0"`)
 			data, err := os.ReadFile(path)
 			if err != nil || string(data) != "changed" {
 				t.Fatalf("scoped path characters changed authority: %q %v", data, err)
 			}
-			denied := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "write", outside)), "--format", "json"}, flags...)...)
+			denied := runProgram(t, sourceFile(t, fixture.source(t, "write", outside)), "run", append([]string{"--format", "json"}, flags...)...)
 			valueJSON(t, fileOutput(t, denied), `"1"`)
 			data, err = os.ReadFile(outside)
 			if err != nil || string(data) != "preserved" {
@@ -290,7 +290,7 @@ func TestProcessCleanupExactEndpoint(t *testing.T) {
 	}
 	flags := append(fixture.flags(), "--process-unix-endpoint", cleanupScope(t, fixture.executable, "endpoint", allowed))
 	for _, test := range []struct{ path, code string }{{allowed, "0"}, {denied, "1"}} {
-		got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "connect", test.path)), "--format", "json"}, flags...)...)
+		got := runProgram(t, sourceFile(t, fixture.source(t, "connect", test.path)), "run", append([]string{"--format", "json"}, flags...)...)
 		valueJSON(t, fileOutput(t, got), processLiteral(t, test.code))
 	}
 	for index, listener := range listeners {
@@ -329,7 +329,7 @@ func TestProcessCleanupInitialExecutableScope(t *testing.T) {
 	path := fileFixture(t, fixture.writes, "data", "before")
 	flags := append(fixture.flags(), "--process-allow", fmt.Sprintf("%x,%s", digest, second), "--process-write-root", cleanupScope(t, second, "root", fixture.writes), "--process-prune-root", cleanupScope(t, fixture.executable, "root", fixture.prunes))
 	source := processContextProgram("Record{first: Int, second: Int}", fmt.Sprintf(`context = Process.Context.new(Map.new(), File.Path.new(%q)); first = Process.Executable.new(File.Path.new(%q)); second = Process.Executable.new(File.Path.new(%q)); firstCommand = Process.Command.new(context, first, List.new("exec-write", %q, %q), Bytes.new("")); firstResult = commit firstCommand; secondCommand = Process.Command.new(context, second, List.new("write", %q), Bytes.new("")); secondResult = commit secondCommand; return Record.new(first: Process.Termination.exit_code(firstResult.termination), second: Process.Termination.exit_code(secondResult.termination))`, fixture.root, fixture.executable, second, second, path, path))
-	got := run(t, append([]string{"run", sourceFile(t, source), "--format", "json"}, flags...)...)
+	got := runProgram(t, sourceFile(t, source), "run", append([]string{"--format", "json"}, flags...)...)
 	fields := processFields(t, fileOutput(t, got))
 	valueJSON(t, fields["first"], `"1"`)
 	valueJSON(t, fields["second"], `"0"`)
@@ -357,7 +357,7 @@ func TestProcessCleanupRechecksNamespaceAtActivation(t *testing.T) {
 	observation := fmt.Sprintf(`method = HTTP.Method.new("GET"); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(List.new()); observe = HTTP.Client.Request.new(method, url, headers, Bytes.new("")); observed = commit observe; `, server.URL)
 	source := strings.Replace(fixture.source(t, "write", alias), "context =", observation+"context =", 1)
 	flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes), "--http-allow", httpGrant("GET", server.URL))
-	got := run(t, append([]string{"run", sourceFile(t, source), "--format", "json"}, flags...)...)
+	got := runProgram(t, sourceFile(t, source), "run", append([]string{"--format", "json"}, flags...)...)
 	if got.status != 2 || calls.Load() != 1 {
 		t.Fatalf("late alias was not checked after the observation: %+v calls=%d", got, calls.Load())
 	}
@@ -386,7 +386,7 @@ func TestProcessCleanupAdmissionDepthLimit(t *testing.T) {
 	}
 	path := fileFixture(t, fixture.writes, "data", "preserved")
 	flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes))
-	got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, "write", path)), "--format", "json"}, flags...)...)
+	got := runProgram(t, sourceFile(t, fixture.source(t, "write", path)), "run", append([]string{"--format", "json"}, flags...)...)
 	if got.status != 2 {
 		t.Fatalf("unbounded cleanup admission: %+v", got)
 	}
@@ -407,7 +407,7 @@ func TestProcessCleanupResourceLimitsKeepConfirmedMutation(t *testing.T) {
 			later := filepath.Join(fixture.root, "later")
 			source := strings.Replace(fixture.source(t, operation, path), "return Process.Termination", fmt.Sprintf(`later = File.Write.new(File.Path.new(%q), Bytes.new("wrong")); commit later; return Process.Termination`, later), 1)
 			flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes), "--write-root", fixture.root)
-			got := run(t, append([]string{"run", sourceFile(t, source), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, source), "run", append([]string{"--format", "json"}, flags...)...)
 			diagnostic := receiptHostDiagnostic(t, got)
 			code := "runtime.limit"
 			if operation == "wait" {
@@ -444,30 +444,23 @@ func TestProcessContextInheritedWorkingDirectoryIgnoresPWD(t *testing.T) {
 		t.Fatalf("build inherited directory fixture: %+v", built)
 	}
 	flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes))
-	for _, native := range []bool{false, true} {
-		t.Run(fmt.Sprint(native), func(t *testing.T) {
-			executable, arguments := binary, []string{"run", source, "--format", "json"}
-			if native {
-				executable, arguments = artifact, []string{"run", "--format", "json"}
-			}
-			command := exec.Command(executable, append(arguments, flags...)...)
-			command.Dir = fixture.root
-			for _, entry := range os.Environ() {
-				if !strings.HasPrefix(entry, "PWD=") {
-					command.Env = append(command.Env, entry)
-				}
-			}
-			command.Env = append(command.Env, "PWD="+alias)
-			var stdout, stderr bytes.Buffer
-			command.Stdout, command.Stderr = &stdout, &stderr
-			if err := command.Run(); err != nil {
-				t.Fatalf("inherited directory follows ambient PWD: %v: %s", err, &stderr)
-			}
-			fields := processFields(t, fileOutput(t, result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}))
-			valueJSON(t, fields["code"], `"0"`)
-			valueJSON(t, fields["pwd"], processLiteral(t, alias))
-		})
+	command := exec.Command(artifact, append([]string{"run", "--format", "json"}, flags...)...)
+	command.Dir = fixture.root
+	for _, entry := range os.Environ() {
+		if !strings.HasPrefix(entry, "PWD=") {
+			command.Env = append(command.Env, entry)
+		}
 	}
+	command.Env = append(command.Env, "PWD="+alias)
+	var stdout, stderr bytes.Buffer
+	command.Stdout, command.Stderr = &stdout, &stderr
+	if err := command.Run(); err != nil {
+		t.Fatalf("inherited directory follows ambient PWD: %v: %s", err, &stderr)
+	}
+	fields := processFields(t, fileOutput(t, result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}))
+	valueJSON(t, fields["code"], `"0"`)
+	valueJSON(t, fields["pwd"], processLiteral(t, alias))
+
 	data, err := os.ReadFile(path)
 	if err != nil || string(data) != "changed" {
 		t.Fatalf("inherited directory did not activate cleanup: %q %v", data, err)
@@ -507,7 +500,7 @@ func TestProcessCleanupScopeLimits(t *testing.T) {
 			if resource == "prune" {
 				operation, path = "unlink", fileFixture(t, roots[0], "entry", "disposable")
 			}
-			got := run(t, append([]string{"run", sourceFile(t, fixture.source(t, operation, path)), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, fixture.source(t, operation, path)), "run", append([]string{"--format", "json"}, flags...)...)
 			valueJSON(t, fileOutput(t, got), `"0"`)
 		})
 	}

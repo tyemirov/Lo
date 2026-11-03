@@ -37,7 +37,7 @@ flow Matmul(a:Tensor<FP32>,b:Tensor<FP32>)->Tensor<FP32>!{return Tensor.matmul(a
 			if fixture.grant != "" {
 				arguments = append(arguments, "--allow-device", fixture.grant)
 			}
-			got := run(t, arguments...)
+			got := runProgram(t, arguments[1], arguments[0], arguments[2:]...)
 			if got.status != 1 || got.stdout != "" {
 				t.Fatalf("runtime rejection: %+v", got)
 			}

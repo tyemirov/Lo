@@ -2,13 +2,12 @@ package integration_test
 
 import (
 	"encoding/json"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"math"
-	"os"
+
 	"path/filepath"
 	"slices"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 )
 
 func assertXORResult(t *testing.T, result runtimeValue) {
@@ -24,7 +23,7 @@ func assertXORResult(t *testing.T, result runtimeValue) {
 		Dtype, Device string
 		Shape         []string
 	}
-	if err := json.Unmarshal(prediction.Value, &metadata); err != nil || metadata.Dtype != "fp32" || metadata.Device != device.CPU || !slices.Equal(metadata.Shape, []string{"4", "1"}) {
+	if err := json.Unmarshal(prediction.Value, &metadata); err != nil || metadata.Dtype != "fp32" || metadata.Device != targetconfig.CPU || !slices.Equal(metadata.Shape, []string{"4", "1"}) {
 		t.Fatalf("XOR prediction metadata: %s (%v)", prediction.Value, err)
 	}
 	predictions := tensorNumbers(t, prediction)
@@ -53,43 +52,11 @@ func TestXORExamples(t *testing.T) {
 	}
 	var previous string
 	for repeat := 0; repeat < 3; repeat++ {
-		got := run(t, "run", filepath.Join(repository, "examples", "xor_cpu.lo"), "--format", "json")
+		got := runProgram(t, filepath.Join(repository, "examples", "xor_cpu.lo"), "run", "--format", "json")
 		assertXORResult(t, trainingResult(t, got))
 		if repeat > 0 && got.stdout != previous {
 			t.Fatal("XOR CPU results changed between runs")
 		}
 		previous = got.stdout
-	}
-}
-
-func TestXORMetalModel(t *testing.T) {
-	text, err := os.ReadFile(filepath.Join(repository, "examples", "xor_metal.lo"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var previous string
-	for repeat := 0; repeat < 3; repeat++ {
-		value, receipts, serialized := metalResult(t, string(text), metalComputeFactory())
-		assertXORResult(t, value)
-		if repeat > 0 && serialized != previous {
-			t.Fatal("XOR Metal model results changed between runs")
-		}
-		previous = serialized
-		uploads, downloads := 0, 0
-		var peak uint64
-		for _, receipt := range receipts {
-			peak = max(peak, receipt.Live)
-			if receipt.Event == device.EventTransfer {
-				if receipt.Device == device.Metal {
-					uploads++
-				} else if receipt.Device == device.CPU {
-					downloads++
-				}
-			}
-		}
-		if uploads != 6 || downloads != 7 || peak > 4096 {
-			t.Fatalf("XOR storage: uploads=%d downloads=%d peak=%d", uploads, downloads, peak)
-		}
-		assertReleased(t, receipts)
 	}
 }

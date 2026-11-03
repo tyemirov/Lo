@@ -94,7 +94,7 @@ func TestSemanticMigrationFailurePreventsEffects(t *testing.T) {
 			directory := t.TempDir()
 			later := filepath.Join(directory, "later")
 			source := fmt.Sprintf(`flow Main() -> Int! { %s failure=%s; target=File.Write.new(File.Path.new(%q),Bytes.new("later")); commit target; return 7 }; return Main()`, fixture.setup, fixture.expression, later)
-			got := run(t, "run", sourceFile(t, source), "--write-root", directory, "--format", "json")
+			got := runProgram(t, sourceFile(t, source), "run", "--write-root", directory, "--format", "json")
 			if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, fixture.kind) {
 				t.Fatalf("expected %s: %+v", fixture.kind, got)
 			}
@@ -116,7 +116,7 @@ func TestSemanticMigrationStepBoundary(t *testing.T) {
 		{"5", 0},
 	} {
 		t.Run(fixture.steps, func(t *testing.T) {
-			got := run(t, "run", source, "--max-steps", fixture.steps)
+			got := runProgram(t, source, "run", "--max-steps", fixture.steps)
 			if got.status != fixture.status {
 				t.Fatalf("step boundary: %+v", got)
 			}

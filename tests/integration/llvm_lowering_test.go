@@ -3,6 +3,7 @@ package integration_test
 import (
 	"context"
 	"encoding/json"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/nativebuild"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 )
@@ -177,7 +177,7 @@ func TestLLVMLoweringCancellation(t *testing.T) {
 	output := filepath.Join(t.TempDir(), "cancelled.ll")
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	_, diagnostic = nativebuild.EmitLLVM(ctx, program, output, "darwin/arm64", device.SoftwareBuild)
+	_, diagnostic = nativebuild.EmitLLVM(ctx, program, output, "darwin/arm64", targetconfig.SoftwareBuild)
 	if diagnostic == nil || diagnostic.Data().Code != "build.cancelled" {
 		t.Fatalf("cancelled build result: %v", diagnostic)
 	}

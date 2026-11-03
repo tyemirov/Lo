@@ -29,7 +29,7 @@ func TestFileObservationDirectoryCapacity(t *testing.T) {
 			text := fmt.Sprintf(`flow Keep(directories: List<File.Directory>) -> List<File.Directory> { return directories }; flow Observe(directories: List<File.Directory>, path: File.Path) -> List<File.Directory>! { directory = File.directory(path); return List.flat_map(List.new(directories, List.new(directory)), Keep) }; flow Main() -> Int! { directories = Flow.fold(List.new(%s), List.new(), Observe); repeated = File.directory(File.Path.new(%q)); return List.length(directories) }; return Main()`, strings.Join(paths, ","), first)
 			arguments = append([]string{"run", sourceFile(t, text)}, arguments...)
 			arguments = append(arguments, "--format", "json")
-			got := run(t, arguments...)
+			got := runProgram(t, arguments[1], arguments[0], arguments[2:]...)
 			if count == 128 {
 				valueJSON(t, fileOutput(t, got), `"128"`)
 				return
