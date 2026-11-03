@@ -1608,9 +1608,10 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Inject close failures and reject false successful release.
   - Complete parity checks, independent review, and final stack CI.
 
-- [ ] [F030] (P1) {F025,F028,I018} Add selected generic text, byte, collection, path, and glob processors
+- [x] [F030] (P1) {F025,F028,I018} Add selected generic text, byte, collection, path, and glob processors
   Goal:
   Supply the pure value operations needed by executable file policies and exact probe protocols.
+  The [value processor contract](docs/value-processors.md) defines the 26 implemented processors.
 
   Requirements:
   - Select the minimal operation inventory from current application call sites.
