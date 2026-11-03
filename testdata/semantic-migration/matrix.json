@@ -39,11 +39,52 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "Bytes.length",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
       "operation": "Bytes.new",
       "capability": "",
       "errors": [],
       "activation_errors": [],
       "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "Bytes.slice",
+      "capability": "",
+      "errors": [
+        "Bytes.InvalidBounds"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "Bytes.split",
+      "capability": "",
+      "errors": [
+        "Bytes.InvalidSeparator"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "Bytes.starts_with",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "Bytes.trim_start",
+      "capability": "",
+      "errors": [
+        "Bytes.InvalidSeparator"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
     },
     {
       "operation": "CLI.parse",
@@ -120,7 +161,37 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "File.Path.join",
+      "capability": "",
+      "errors": [
+        "File.InvalidPath"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "File.Path.name",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
       "operation": "File.Path.new",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "File.Path.parent",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "File.Path.to_string",
       "capability": "",
       "errors": [],
       "activation_errors": [],
@@ -327,6 +398,22 @@
       "negative_applicability": "verifier_and_callback"
     },
     {
+      "operation": "Glob.matches",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "Glob.new",
+      "capability": "",
+      "errors": [
+        "Glob.InvalidPattern"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "Gradients.add",
       "capability": "",
       "errors": [
@@ -505,6 +592,15 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "List.at",
+      "capability": "",
+      "errors": [
+        "List.InvalidIndex"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "List.filter",
       "capability": "",
       "errors": [],
@@ -545,6 +641,22 @@
       "errors": [],
       "activation_errors": [],
       "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "List.slice",
+      "capability": "",
+      "errors": [
+        "List.InvalidBounds"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "List.sort",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_and_callback"
     },
     {
       "operation": "List.unfold",
@@ -845,6 +957,15 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "Process.Arguments.format_shell",
+      "capability": "",
+      "errors": [
+        "Process.InvalidArguments"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "Process.Command.new",
       "capability": "Process.run",
       "errors": [
@@ -1021,7 +1142,21 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "String.compare",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
       "operation": "String.concat",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "String.ends_with",
       "capability": "",
       "errors": [],
       "activation_errors": [],
@@ -1035,7 +1170,21 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "String.is_whitespace",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
       "operation": "String.length",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "String.lines",
       "capability": "",
       "errors": [],
       "activation_errors": [],
@@ -1050,6 +1199,64 @@
     },
     {
       "operation": "String.new",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "String.replace_all",
+      "capability": "",
+      "errors": [
+        "String.InvalidSeparator"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "String.slice",
+      "capability": "",
+      "errors": [
+        "String.InvalidBounds"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "String.split",
+      "capability": "",
+      "errors": [
+        "String.InvalidSeparator"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "String.split_first",
+      "capability": "",
+      "errors": [
+        "String.InvalidSeparator",
+        "String.SeparatorAbsent"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "String.split_whitespace",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "String.starts_with",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "String.trim",
       "capability": "",
       "errors": [],
       "activation_errors": [],
@@ -10614,6 +10821,1031 @@
       "profile": "metal-artifact",
       "tests": [
         "TestLLVMProgramLockMetalEntry"
+      ]
+    },
+    {
+      "id": "operation:String.starts_with:positive",
+      "operation": "String.starts_with",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.starts_with",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.starts_with:negative",
+      "operation": "String.starts_with",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.starts_with"
+      ]
+    },
+    {
+      "id": "operation:String.ends_with:positive",
+      "operation": "String.ends_with",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.ends_with",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.ends_with:negative",
+      "operation": "String.ends_with",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.ends_with"
+      ]
+    },
+    {
+      "id": "operation:String.slice:positive",
+      "operation": "String.slice",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.slice",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.slice:negative",
+      "operation": "String.slice",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.slice"
+      ]
+    },
+    {
+      "id": "operation:String.slice:runtime-negative",
+      "operation": "String.slice",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/string-start",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.compare:positive",
+      "operation": "String.compare",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.compare",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.compare:negative",
+      "operation": "String.compare",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.compare"
+      ]
+    },
+    {
+      "id": "operation:String.split:positive",
+      "operation": "String.split",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.split",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.split:negative",
+      "operation": "String.split",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.split"
+      ]
+    },
+    {
+      "id": "operation:String.split:runtime-negative",
+      "operation": "String.split",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/split-empty-separator",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.split_first:positive",
+      "operation": "String.split_first",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.split_first",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.split_first:negative",
+      "operation": "String.split_first",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.split_first"
+      ]
+    },
+    {
+      "id": "operation:String.split_first:runtime-negative",
+      "operation": "String.split_first",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/split-first-absent",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.replace_all:positive",
+      "operation": "String.replace_all",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.replace_all",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.replace_all:negative",
+      "operation": "String.replace_all",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.replace_all"
+      ]
+    },
+    {
+      "id": "operation:String.replace_all:runtime-negative",
+      "operation": "String.replace_all",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/replace-empty",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.trim:positive",
+      "operation": "String.trim",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.trim",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.trim:negative",
+      "operation": "String.trim",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.trim"
+      ]
+    },
+    {
+      "id": "operation:String.is_whitespace:positive",
+      "operation": "String.is_whitespace",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.is_whitespace",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.is_whitespace:negative",
+      "operation": "String.is_whitespace",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.is_whitespace"
+      ]
+    },
+    {
+      "id": "operation:String.split_whitespace:positive",
+      "operation": "String.split_whitespace",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.split_whitespace",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.split_whitespace:negative",
+      "operation": "String.split_whitespace",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.split_whitespace"
+      ]
+    },
+    {
+      "id": "operation:String.lines:positive",
+      "operation": "String.lines",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/String.lines",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:String.lines:negative",
+      "operation": "String.lines",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.lines"
+      ]
+    },
+    {
+      "id": "operation:Bytes.length:positive",
+      "operation": "Bytes.length",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Bytes.length",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Bytes.length:negative",
+      "operation": "Bytes.length",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Bytes.length"
+      ]
+    },
+    {
+      "id": "operation:Bytes.starts_with:positive",
+      "operation": "Bytes.starts_with",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Bytes.starts_with",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Bytes.starts_with:negative",
+      "operation": "Bytes.starts_with",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Bytes.starts_with"
+      ]
+    },
+    {
+      "id": "operation:Bytes.slice:positive",
+      "operation": "Bytes.slice",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Bytes.slice",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Bytes.slice:negative",
+      "operation": "Bytes.slice",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Bytes.slice"
+      ]
+    },
+    {
+      "id": "operation:Bytes.slice:runtime-negative",
+      "operation": "Bytes.slice",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/bytes-start",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Bytes.split:positive",
+      "operation": "Bytes.split",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Bytes.split",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Bytes.split:negative",
+      "operation": "Bytes.split",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Bytes.split"
+      ]
+    },
+    {
+      "id": "operation:Bytes.split:runtime-negative",
+      "operation": "Bytes.split",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/bytes-empty-separator",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Bytes.trim_start:positive",
+      "operation": "Bytes.trim_start",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Bytes.trim_start",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Bytes.trim_start:negative",
+      "operation": "Bytes.trim_start",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Bytes.trim_start"
+      ]
+    },
+    {
+      "id": "operation:Bytes.trim_start:runtime-negative",
+      "operation": "Bytes.trim_start",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/bytes-empty-prefix",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:List.at:positive",
+      "operation": "List.at",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/List.at",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:List.at:negative",
+      "operation": "List.at",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/List.at"
+      ]
+    },
+    {
+      "id": "operation:List.at:runtime-negative",
+      "operation": "List.at",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/list-index",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:List.slice:positive",
+      "operation": "List.slice",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/List.slice",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:List.slice:negative",
+      "operation": "List.slice",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/List.slice"
+      ]
+    },
+    {
+      "id": "operation:List.slice:runtime-negative",
+      "operation": "List.slice",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/list-bounds",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:List.sort:positive",
+      "operation": "List.sort",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/List.sort",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:List.sort:negative",
+      "operation": "List.sort",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/List.sort"
+      ]
+    },
+    {
+      "id": "operation:File.Path.to_string:positive",
+      "operation": "File.Path.to_string",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/File.Path.to_string",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:File.Path.to_string:negative",
+      "operation": "File.Path.to_string",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Path.to_string"
+      ]
+    },
+    {
+      "id": "operation:File.Path.join:positive",
+      "operation": "File.Path.join",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/File.Path.join",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:File.Path.join:negative",
+      "operation": "File.Path.join",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Path.join"
+      ]
+    },
+    {
+      "id": "operation:File.Path.join:runtime-negative",
+      "operation": "File.Path.join",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/absolute-child",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:File.Path.parent:positive",
+      "operation": "File.Path.parent",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/File.Path.parent",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:File.Path.parent:negative",
+      "operation": "File.Path.parent",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Path.parent"
+      ]
+    },
+    {
+      "id": "operation:File.Path.name:positive",
+      "operation": "File.Path.name",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/File.Path.name",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:File.Path.name:negative",
+      "operation": "File.Path.name",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Path.name"
+      ]
+    },
+    {
+      "id": "operation:Glob.new:positive",
+      "operation": "Glob.new",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Glob.new",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Glob.new:negative",
+      "operation": "Glob.new",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Glob.new"
+      ]
+    },
+    {
+      "id": "operation:Glob.new:runtime-negative",
+      "operation": "Glob.new",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/glob-empty-class",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Glob.matches:positive",
+      "operation": "Glob.matches",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Glob.matches",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Glob.matches:negative",
+      "operation": "Glob.matches",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Glob.matches"
+      ]
+    },
+    {
+      "id": "operation:Process.Arguments.format_shell:positive",
+      "operation": "Process.Arguments.format_shell",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Values/Process.Arguments.format_shell",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "operation:Process.Arguments.format_shell:negative",
+      "operation": "Process.Arguments.format_shell",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Process.Arguments.format_shell"
+      ]
+    },
+    {
+      "id": "operation:Process.Arguments.format_shell:runtime-negative",
+      "operation": "Process.Arguments.format_shell",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/quote-nul",
+        "TestLLVMF030Linux"
+      ]
+    },
+    {
+      "id": "f030:compiler",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestF030CompilerGenericContracts",
+        "TestF030CompilerRejections",
+        "TestF030CompilerInspectionErrors",
+        "TestF030CompilerPreservesFallibleElements",
+        "TestF030CompilerInspectionProvenance"
+      ]
+    },
+    {
+      "id": "f030:resources",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030ResourceAccounting",
+        "TestF030TemporaryResourceAdmission",
+        "TestF030ComparatorTemporaryRelease",
+        "TestF030SplitItemQuota"
+      ]
+    },
+    {
+      "id": "f030:file-policy",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030DirectFilePolicy"
+      ]
+    },
+    {
+      "id": "f030:exact-probe",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030ExactProbeFields",
+        "TestF030ProbeComposition"
+      ]
+    },
+    {
+      "id": "f030:unicode-globs",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030GlobBoundaries",
+        "TestF030EmptyAndLexicalBoundaries",
+        "TestF030StableSort",
+        "TestF030FallibleElements",
+        "TestF030DraftPredicateBounds"
+      ]
+    },
+    {
+      "id": "f030:metal-linked",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "metal-artifact",
+      "tests": [
+        "TestLLVMF030MetalArtifact"
       ]
     }
   ],
