@@ -1,7 +1,5 @@
 .DS_Store
 /bin/
-/runtime/metal/metal.metallib
-/runtime/metal/manifest.json
 __pycache__/
 
 # BEGIN MPRLAB-GOVERNANCE
