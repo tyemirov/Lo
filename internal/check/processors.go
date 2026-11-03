@@ -51,16 +51,24 @@ func (c *checker) listAccess(op catalog.Operation, args []syntax.Argument, expec
 }
 
 func unresolvedListLiteral(value syntax.Expression) bool {
-	call, ok := value.(syntax.Call)
-	if !ok {
+	var name string
+	var args []syntax.Argument
+	switch call := value.(type) {
+	case syntax.Call:
+		name, args = call.Name(), call.Arguments()
+	case syntax.Pipe:
+		name = call.Name()
+		args = append([]syntax.Argument{{Value: call.Left(), Span: call.Left().Span()}}, call.Arguments()...)
+	default:
 		return false
 	}
-	arguments := call.Arguments()
-	switch call.Name() {
+	switch name {
 	case catalog.ListNew:
-		return len(arguments) == 0 || unresolvedListLiteral(arguments[0].Value)
+		return len(args) == 0 || unresolvedListLiteral(args[0].Value)
 	case catalog.ListAt, catalog.ListSlice:
-		return len(arguments) > 0 && unresolvedListLiteral(arguments[0].Value)
+		op, _ := catalog.Lookup(name)
+		bound, failure := bindArguments(name, op.Parameters(), args, value.Span())
+		return failure == nil && unresolvedListLiteral(bound.byPosition[0].Value)
 	}
 	return false
 }
