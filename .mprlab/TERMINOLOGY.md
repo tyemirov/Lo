@@ -158,7 +158,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `lock lease`: Session ownership of an acquired exclusive lock until application resource cleanup completes.
 - `lock grant`: Explicit host authority to acquire a lock on one retained file identity.
 - `quarantine`: A retained owner that prevents resource release when child ownership is unknown.
-- `program entry`: The source file used by an interpreter or the executable image used by a native program.
+- `program entry`: The executable image of a compiled program or an explicitly injected native embedding identity.
 - `open file description`: State that the operating system shares between duplicated file descriptors for one open operation.
 - `vnode`: The Darwin filesystem object that identifies one file or directory.
 - `basename`: The final name component of a filesystem path.
@@ -287,6 +287,8 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `reduction`: Combination of tensor elements along specified axes into fewer output elements.
 - `numeric profile`: Fixed arithmetic rules and implementation identities for reproducible numeric execution.
 - `kernel`: A compiled program that executes tensor operations on a device.
+- `kernel provenance`: Source snapshots, tool identities, and byte digests that establish the inputs of a compiled kernel.
+- `compiled source snapshot`: Immutable source bytes recorded with the kernel producer inputs.
 - `CUDA`: NVIDIA's platform for device computation.
 - `Metal`: Apple's API for graphics and device computation.
 - `MSL`: Metal Shading Language, the source language for Metal kernels.
