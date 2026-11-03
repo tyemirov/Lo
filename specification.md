@@ -885,6 +885,8 @@ Processors are pure.
 * `String.length(value) -> Int`
 * `String.eq(left_value, right_value) -> Bool`
 
+Section 8.10 defines exact text boundaries, splitting, whitespace, and comparison.
+
 ### 8.2 Scalar Processors
 
 * `Scalar.eq(left_value, right_value) -> Bool`
@@ -978,6 +980,8 @@ Type rules:
 List operators receive explicit context arguments before the callback reference.
 
 Because String is semantically compatible with `List<Scalar>`, these processors may also operate on strings.
+
+Section 8.10 defines indexed lookup, slicing, and stable sorting with two callback operands.
 
 ### 8.8 Sequential Flow Processor
 
@@ -1095,9 +1099,14 @@ A completed callback releases temporary values before the next callback.
 A long scan can process cumulative data beyond its live-value quota.
 Tensor storage and adapter transport retain their separate documented limits.
 
-The Go embedding API accepts `execution.NewBudget(execution.BudgetInput{Steps: ..., Limits: ...})`.
-`execution.DefaultBudgetInput()` supplies the CLI defaults.
 The native ABI uses the options structure in the [runtime contract](docs/native-runtime-contract.md).
+
+### 8.10 Pure Value Boundaries
+
+The [value processor contract](docs/value-processors.md) defines 26 additional pure processors.
+It specifies text, bytes, indexed collections, stable sorting, lexical paths, globs, and command display.
+Those processors use current resource quotas and have no host authority.
+Application flows own chunking, duplicate removal, typed equality, and other composition.
 
 ---
 
@@ -2221,6 +2230,7 @@ Device access has a separate resource summary.
 | Parameters, gradients, and `Autodiff.stop` | [24.6](#246-parameters-and-gradient-lifecycle) |
 | SGD and AdamW transitions | [24.7](#247-sgd-and-adamw) |
 | Checkpoints and training-state transfers | [24.9](#249-model-checkpoints-and-training-state-transfers) |
+| Text, bytes, collection boundaries, lexical paths, globs, and command display | [8.10](#810-pure-value-boundaries) |
 
 * `Process.Context.override_environment`
 * `Process.Context.without_environment`
