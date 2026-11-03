@@ -7,7 +7,7 @@ kernel void lo_copy_words(device const uint *source [[buffer(0)]],
     target[index] = source[index];
 }
 
-#include "../../internal/device/metal_types.h"
+#include "../native/host/metal/metal_types.h"
 
 // Bitwise classification avoids implementation-dependent subnormal comparisons.
 float lo_normal(float value) {

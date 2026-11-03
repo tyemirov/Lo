@@ -122,7 +122,7 @@ fn host_progress_text(diagnostic: &Json) -> String {
     }
     message
 }
-fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>) -> i32 {
+pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str>) -> (Json, i32) {
     let program = &context.program;
     let (f, details) = match f {
         Fault::Boundary { primary, details } => (*primary, *details),
@@ -223,6 +223,10 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
             .unwrap()
             .push(json!(cleanup));
     }
+    (d, status)
+}
+fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>) -> i32 {
+    let (mut d, status) = fault_diagnostic(f, context, cleanup);
     if json_format {
         checked_stderr!("{}", canonical_json_value(&json!({"diagnostics":[d]})));
     } else {
