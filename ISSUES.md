@@ -268,7 +268,7 @@ No open issue met all its acceptance criteria for closure.
 | I001 | Public CLI tests for the existing language. | Add the complete training example and its CPU and software GPU-backend acceptance evidence. |
 | F011 | Existing binary64 values. | Add explicit mixed precision after I001 passes. |
 
-Source evidence includes the [type definitions](internal/types/types.go), [operation catalog](internal/catalog/catalog.go), and [list evaluator](internal/eval/list.go).
+Source evidence includes the [type definitions](internal/types/types.go), [operation catalog](internal/catalog/catalog.go), and historical `internal/eval/list.go` source.
 The catalog contains no tensor, gradient, or optimizer operations.
 The source tree contains no derivative or device backend.
 The current `Parameter` type in `internal/types/types.go` describes a flow argument, not a trainable value.
@@ -2579,7 +2579,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify portable contracts under Linux QEMU while preserving explicit Process unavailability.
   - Complete independent review and final repository-native CI after the last implementation correction.
 
-- [ ] [I014] (P1) {I015,I016} Restrict the compiler CLI to source compilation commands
+- [x] [I014] (P1) {I015,I016} Restrict the compiler CLI to source compilation commands
   Goal:
   Execute applications through their compiled artifacts with one native runtime.
 
@@ -2603,7 +2603,11 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify same-artifact lock contention and application invocation capture.
   - Require the I018 final stack checkpoint before closure.
 
-- [ ] [I015] (P1) {I016} Migrate runtime coverage and embedding tests to compiled execution
+  Status:
+  Completed November 2, 2026. The compiler accepts parse, check, inspect, and build. Compiled artifacts own application execution.
+  The shared I018 final checkpoint passed.
+
+- [x] [I015] (P1) {I016} Migrate runtime coverage and embedding tests to compiled execution
   Goal:
   Preserve required language assertions before removing their Go execution boundaries.
 
@@ -2629,7 +2633,11 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep a full replacement embedding SDK outside this issue's scope.
   - Require the I018 final stack checkpoint before closure.
 
-- [ ] [I016] (P1) {P009} Extract static compiler facts and relocate native host assets
+  Status:
+  Completed November 2, 2026. Native CLI and ABI fixtures preserve required behavior. Independent results replace Go execution expectations.
+  The shared I018 final checkpoint passed.
+
+- [x] [I016] (P1) {P009} Extract static compiler facts and relocate native host assets
   Goal:
   Make compiler and native build inputs independent of removable Go execution packages.
 
@@ -2643,7 +2651,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep one source owner for each native asset.
 
   Deliverables:
-  - Implement the [source boundary extraction](docs/single-runtime-plan.md#current-source-boundaries).
+  - Implement the [source boundary extraction](docs/single-runtime-plan.md#migration-source-boundaries).
   - Preserve compiler types, catalog, inspection, native lowering, and LLVM emission.
   - Remove obsolete Go asset consumers only after retained consumers use the new paths.
 
@@ -2654,7 +2662,11 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify installed compilation inputs consume the relocated assets.
   - Require the I018 final stack checkpoint before closure.
 
-- [ ] [I017] (P1) {I014,I015} Use one native application validation and measurement contract
+  Status:
+  Completed November 2, 2026. Static compiler facts and native assets have single owners. Fresh software and Metal archives passed the required checks.
+  The shared I018 final checkpoint passed.
+
+- [x] [I017] (P1) {I014,I015} Use one native application validation and measurement contract
   Goal:
   Remove dual-runtime CI, semantic coverage mappings, and interpreter-relative measurements.
 
@@ -2679,7 +2691,11 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify benchmarks execute compiled artifacts and no native pair is labeled independent runtime parity.
   - Require the I018 final stack checkpoint before closure.
 
-- [ ] [I018] (P1) {I014,I015,I016,I017} Remove the Go interpreter and qualify the single runtime
+  Status:
+  Completed November 2, 2026. One native coverage and measurement contract now applies. Tool tests preserve the supplied runtime distribution.
+  The shared I018 final checkpoint passed.
+
+- [x] [I018] (P1) {I014,I015,I016,I017} Remove the Go interpreter and qualify the single runtime
   Goal:
   Complete one compiled application execution path without a retained interpreter or Go embedding bridge.
 
@@ -2704,6 +2720,10 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Complete independent review and correct accepted findings.
   - Run final make ci after the last stack correction, including runtime-tool and qualification-tool checks.
   - Close I014 through I018 only after the shared final checkpoint passes.
+
+  Status:
+  Completed November 2, 2026. The Go runtime packages and obsolete C bootstrap are removed. Independent review and final local `make ci` passed.
+  The shared I018 final checkpoint passed.
 
 ## Maintenance
 
