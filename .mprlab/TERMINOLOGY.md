@@ -101,6 +101,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `application`: A program or service that uses language operations for a specific task.
 - `general-purpose language`: A programming language with contracts that apply across application domains.
 - `glob`: A wildcard pattern that matches a complete string.
+- `lexical path`: Path text with slash separators and no host resolution.
+- `Unicode White_Space`: The fixed set of 25 scalars in the value processor contract.
+- `POSIX shell syntax`: Text conventions for command arguments in a POSIX shell.
+- `dynamic programming`: An algorithm that keeps results for successive subproblems.
+- `merge sort`: A stable sort that combines sorted subsequences.
 - `worklist`: An ordered collection of items that a sequential flow processor has yet to visit.
 - `resource quota`: A host-configured maximum for a specified execution resource.
 - `live value weight`: Logical value weight retained by active execution scopes and pending work.
