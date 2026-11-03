@@ -40,17 +40,15 @@ NATIVE_CAMPAIGN_WORK ?= $(NATIVE_QUALIFICATION_OUTPUT)/campaign
 NATIVE_CAMPAIGN_ARGS ?=
 NATIVE_BENCH_COMPILER ?= $(COMPILER_DISTRIBUTION_OUTPUT)/lo-darwin-arm64-software/bin/lo
 NATIVE_BACKEND_INPUTS ?= _scratch/native-backends/inputs.json
-NATIVE_LOWERING_ROOT ?= _scratch/native-lowering
-NATIVE_LOWERING_TOOLS ?= $(NATIVE_LOWERING_ROOT)/tools.json
-NATIVE_LOWERING_STATE ?= $(NATIVE_LOWERING_ROOT)/execution
 NATIVE_RUNTIME_STATE ?= _scratch/native-runtime
 NATIVE_RUNTIME_OUTPUT ?= $(NATIVE_RUNTIME_STATE)/distribution
 LLVM_TOOLCHAIN ?= $(NATIVE_RUNTIME_OUTPUT)/toolchain.json
 COMPILER_DISTRIBUTION_STATE ?= _scratch/compiler-distribution
 COMPILER_DISTRIBUTION_OUTPUT ?= $(COMPILER_DISTRIBUTION_STATE)/packages
 COMPILER_DISTRIBUTION_ACCEPTANCE ?= $(COMPILER_DISTRIBUTION_STATE)/acceptance
-SEMANTIC_COMPILER ?= $(COMPILER_DISTRIBUTION_OUTPUT)/lo-darwin-arm64-software/bin/lo
-SEMANTIC_TOOLCHAIN ?= $(COMPILER_DISTRIBUTION_OUTPUT)/lo-darwin-arm64-software/toolchain.json
+SEMANTIC_PACKAGE ?= $(COMPILER_DISTRIBUTION_OUTPUT)/lo-$(if $(filter Darwin,$(shell uname -s)),darwin-arm64-metal,linux-arm64-software)
+SEMANTIC_COMPILER ?= $(SEMANTIC_PACKAGE)/bin/lo
+SEMANTIC_TOOLCHAIN ?= $(SEMANTIC_PACKAGE)/toolchain.json
 SEMANTIC_OUTPUT ?= $(LO_BUILD_ROOT)/semantic
 SEMANTIC_ARGS ?=
 NATIVE_QUALIFICATION_OUTPUT ?= _scratch/native-qualification
@@ -58,33 +56,31 @@ LINUX_ACCELERATOR ?= tcg
 
 .DEFAULT_GOAL := build
 
-.PHONY: build fmt lint test test-integration test-conformance test-native benchmark-training benchmark-training-cli benchmark-training-profile benchmark-native-baseline benchmark-native ci
+.PHONY: build fmt lint test test-conformance test-native benchmark-training benchmark-training-cli benchmark-compiler benchmark-native ci
 
 ifeq ($(shell uname -s),Darwin)
 PROCESS_LAUNCHER := bin/lo-process-launcher
 .PHONY: process-launcher verify-process-launcher
 process-launcher: | tool-state
-	python3 -B tools/processbuild/identity.py build $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
+	python3 -B tools/processbuild/identity.py build $(PROCESS_LAUNCHER) runtime/native/src/process_helper_identity.rs </dev/null
 
 verify-process-launcher: | tool-state
-	python3 -B tools/processbuild/identity.py verify $(PROCESS_LAUNCHER) internal/processhost/helper_identity.go runtime/native/src/process_helper_identity.rs </dev/null
+	python3 -B tools/processbuild/identity.py verify $(PROCESS_LAUNCHER) runtime/native/src/process_helper_identity.rs </dev/null
 endif
 
-build: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
+build: | tool-state
 	$(GO) build -o bin/lo ./cmd/lo </dev/null
 
-.PHONY: build-metal test-metal test-native-metal
+.PHONY: build-metal reproduce-metal-kernels test-native-metal
 build-metal: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
 	mkdir -p bin </dev/null
 	$(GO) run ./tools/metalbuild </dev/null
 
-test-metal: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
-	mkdir -p bin </dev/null
-	$(GO) run ./tools/metalbuild -test '^TestMetalLive' -- $(TEST_ARGS) </dev/null
+reproduce-metal-kernels: | tool-state
+	python3 -B tools/nativeruntime/metal_assets.py reproduce </dev/null
 
-test-native-metal: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
-	mkdir -p bin </dev/null
-	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" $(GO) run ./tools/metalbuild -test '^TestNativeMetal' -- $(TEST_ARGS) </dev/null
+test-native-metal: | tool-state
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test -timeout=120m ./tests/integration -run '^TestLLVM.*Metal' $(TEST_ARGS) </dev/null
 
 fmt: | tool-state
 	$(GO) fmt ./... </dev/null
@@ -92,14 +88,17 @@ fmt: | tool-state
 lint: | tool-state
 	$(GO) vet ./... </dev/null
 
-test: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
-	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" $(GO) test -timeout=120m ./... $(TEST_ARGS) </dev/null
+.PHONY: test-frontend test-tooling
+test: test-frontend test-native test-tooling
 
-test-integration: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
-	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" $(GO) test -timeout=120m ./tests/integration $(TEST_ARGS) </dev/null
+test-frontend: | tool-state
+	$(GO) test -timeout=120m ./cmd/... ./internal/... ./tests/corpus ./tests/benchmark $(TEST_ARGS) </dev/null
+
+test-tooling: | tool-state
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test -timeout=120m ./tools/... $(TEST_ARGS) </dev/null
 
 test-native: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
-	LO_TEST_BACKEND=llvm LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test -timeout=120m ./tests/integration $(TEST_ARGS) </dev/null
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test -timeout=120m ./tests/integration $(TEST_ARGS) </dev/null
 
 .PHONY: prepare-native-runtime build-native-runtime build-native-runtime-metal test-native-runtime-tools
 prepare-native-runtime: | tool-state
@@ -112,7 +111,7 @@ build-native-runtime-metal: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-st
 	python3 -B tools/nativeruntime/build.py --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(NATIVE_RUNTIME_OUTPUT)" --metal </dev/null
 
 test-native-runtime-tools: | tool-state
-	LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q tools/nativeruntime </dev/null
+	LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q tools/nativeruntime tools/processbuild </dev/null
 
 .PHONY: prepare-compiler-distribution package-compiler-distributions test-compiler-distribution-tools test-compiler-distributions
 prepare-compiler-distribution: | tool-state
@@ -133,10 +132,10 @@ test-conformance: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
 	$(GO) test ./tests/integration -run TestConformance $(TEST_ARGS) </dev/null
 
 benchmark-training: | tool-state
-	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkTraining -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) </dev/null
+	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkTrainingCheck -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) </dev/null
 
-benchmark-native-baseline: | tool-state
-	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkNativeBaseline -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) </dev/null
+benchmark-compiler: | tool-state
+	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkCompilerCheck -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) </dev/null
 
 benchmark-native: build | tool-state
 	GOMAXPROCS=1 python3 -B scripts/qualify_native.py --binary bin/lo --toolchain "$(LLVM_TOOLCHAIN)" --workdir "$(NATIVE_BENCH_WORK)" --lane "$(NATIVE_BENCH_LANE)" </dev/null
@@ -146,20 +145,16 @@ benchmark-file-io: build | tool-state
 	$(GO) run ./tools/filebench -work "$(FILE_BENCH_WORK)" -compiler "$(abspath bin/lo)" -toolchain "$(abspath $(LLVM_TOOLCHAIN))" $(FILE_BENCH_ARGS) </dev/null
 
 test-filebench: | tool-state
-	$(GO) test ./tools/filebench $(TEST_ARGS) </dev/null
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" $(GO) test ./tools/filebench $(TEST_ARGS) </dev/null
 
 .PHONY: benchmark-standalone
 benchmark-standalone: | tool-state
 	GOMAXPROCS=1 python3 -B scripts/qualify_native.py --binary "$(NATIVE_BENCH_COMPILER)" --workdir "$(NATIVE_BENCH_WORK)" --lane "$(NATIVE_BENCH_LANE)" $(NATIVE_BENCH_ARGS) </dev/null
 
 benchmark-training-cli: build | tool-state
-	GOMAXPROCS=1 python3 scripts/benchmark_training.py --binary bin/lo --samples $(BENCH_COUNT) </dev/null
+	GOMAXPROCS=1 python3 scripts/benchmark_training.py --binary bin/lo --toolchain "$(LLVM_TOOLCHAIN)" --samples $(BENCH_COUNT) </dev/null
 
-benchmark-training-profile: build | tool-state
-	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench 'BenchmarkTraining/(MVP200|Dense20)/Execute$$' -benchtime=3s -cpuprofile bin/training-cpu.pprof -memprofile bin/training-alloc.pprof -o bin/training-benchmark.test </dev/null
-	$(GO) tool pprof -top -nodecount=30 bin/training-benchmark.test bin/training-cpu.pprof </dev/null
-	$(GO) tool pprof -top -cum -nodecount=30 bin/training-benchmark.test bin/training-cpu.pprof </dev/null
-	$(GO) tool pprof -sample_index=alloc_space -top -nodecount=30 bin/training-benchmark.test bin/training-alloc.pprof </dev/null
+
 
 .PHONY: prepare-native-backend-probe experiment-native-backends check-native-backend-probe test-native-backend-probe
 prepare-native-backend-probe: | tool-state
@@ -194,17 +189,7 @@ test-native-linux: | tool-state
 benchmark-native-linux: | tool-state
 	python3 -B tools/loqualification/performance.py --preparation "$(NATIVE_RUNTIME_STATE)" --package "$(NATIVE_LINUX_PACKAGE)" --frontend "$(SEMANTIC_COMPILER)" --work "$(NATIVE_BENCH_WORK)" --go "$(shell command -v $(GO))" --accelerator "$(LINUX_ACCELERATOR)" --lane "$(NATIVE_BENCH_LANE)" $(NATIVE_BENCH_ARGS) </dev/null
 
-.PHONY: prepare-native-lowering test-native-lowering test-native-lowering-tools
-prepare-native-lowering: | tool-state
-	python3 -B tools/nativelowering/prepare.py --state "$(NATIVE_LOWERING_ROOT)" --download </dev/null
-
-test-native-lowering: build | tool-state
-	python3 -B tools/nativelowering/run.py --lo bin/lo --tools "$(NATIVE_LOWERING_TOOLS)" --state "$(NATIVE_LOWERING_STATE)" </dev/null
-
-test-native-lowering-tools: | tool-state
-	UV_NO_CONFIG=1 uv run --offline --with pytest==8.3.5 python -B -m pytest -p no:cacheprovider -q tools/nativelowering/test_cli.py </dev/null
-
-ci: fmt lint test test-native build test-semantic-report test-native-qualification-tools
+ci: fmt lint test build test-semantic-report test-native-runtime-tools test-compiler-distribution-tools test-native-qualification-tools
 
 tool-state:
 	mkdir -p "$(LO_BUILD_ROOT)" "$(HOME)" "$(TMPDIR)" "$(GOCACHE)" "$(GOMODCACHE)" "$(GOPATH)" "$(XDG_CACHE_HOME)" "$(XDG_CONFIG_HOME)" "$(XDG_DATA_HOME)" "$(XDG_STATE_HOME)" "$(CLANG_MODULE_CACHE_PATH)" "$(CCACHE_DIR)" </dev/null
