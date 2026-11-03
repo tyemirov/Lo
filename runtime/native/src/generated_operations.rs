@@ -1566,3 +1566,289 @@ pub unsafe extern "C" fn lo_op_Lock_2EFile_2Enew(
 ) {
     call(c, a, n, s, o, Some("Lock.File.new"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Estarts_5Fwith(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.starts_with"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Eends_5Fwith(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.ends_with"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Eslice(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.slice"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Ecompare(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.compare"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Esplit(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.split"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Esplit_5Ffirst(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.split_first"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Ereplace_5Fall(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.replace_all"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Etrim(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.trim"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Eis_5Fwhitespace(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.is_whitespace"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Esplit_5Fwhitespace(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.split_whitespace"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Elines(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("String.lines"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Bytes_2Elength(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Bytes.length"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Bytes_2Estarts_5Fwith(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Bytes.starts_with"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Bytes_2Eslice(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Bytes.slice"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Bytes_2Esplit(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Bytes.split"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Bytes_2Etrim_5Fstart(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Bytes.trim_start"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_List_2Eat(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("List.at"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_List_2Eslice(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("List.slice"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_List_2Esort(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("List.sort"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EPath_2Eto_5Fstring(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.Path.to_string"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EPath_2Ejoin(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.Path.join"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EPath_2Eparent(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.Path.parent"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EPath_2Ename(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.Path.name"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Glob_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Glob.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Glob_2Ematches(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Glob.matches"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2EArguments_2Eformat_5Fshell(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Process.Arguments.format_shell"))
+}

@@ -2,15 +2,12 @@ package integration_test
 
 import (
 	"fmt"
-	"os"
+
 	"strings"
 	"testing"
 )
 
 func TestLLVMProgramExitRetainedBytes(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires LLVM runtime inputs")
-	}
 	stdout, stderr, extra := strings.Repeat("a", 400), strings.Repeat("b", 400), strings.Repeat("c", 800)
 	fixtures := []struct {
 		name, makeBody, output, useBody, mainBody string
@@ -45,7 +42,7 @@ func TestLLVMProgramExitRetainedBytes(t *testing.T) {
 						name, executable string
 						arguments        []string
 					}{
-						{"interpreter", binary, []string{"run", path}}, {"native", artifact, []string{"run"}},
+						{"native", artifact, []string{"run"}},
 					} {
 						t.Run(backend.name, func(t *testing.T) {
 							arguments := append(append([]string{}, backend.arguments...), limit.flag, fmt.Sprint(limit.quota))

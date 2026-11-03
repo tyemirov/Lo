@@ -38,7 +38,7 @@ int main(int argc,char **argv,char **env){char cwd[4096],byte;int count=0;while(
 		arguments = append(arguments, `"literal argument"`)
 	}
 	source := processContextProgram("String", fmt.Sprintf(`initial = Process.Context.current(); context = Process.Context.with_directory(initial, File.Path.new(%q)); executable = Process.Executable.new(File.Path.new(%q)); command = Process.Command.new(context, executable, List.new(%s), Bytes.new("")); result = commit command; code = Process.Termination.exit_code(result.termination); return Match.new(code, 0: UTF8.String.new(result.stdout), _: "helper-failed")`, root, path, strings.Join(arguments, ",")))
-	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--process-allow", fmt.Sprintf("%x,%s", digest, path), "--process-read-root", root, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--format", "json"))
+	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--process-allow", fmt.Sprintf("%x,%s", digest, path), "--process-read-root", root, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--format", "json"))
 	valueJSON(t, got, `"context-ok"`)
 }
 
@@ -103,7 +103,7 @@ int main(int argc,char **argv,char **env){if(argc!=2)return 0;int count=0;while(
 				contextSource = fmt.Sprintf(`context = Process.Context.new(Map.new(%s), File.Path.new(%q)); `, strings.Join(environment, ","), root)
 			}
 			source := flows + processContextProgram("Int", contextSource+fmt.Sprintf(`executable = Process.Executable.new(File.Path.new(%q)); command = Process.Command.new(context, executable, List.new(%s), Bytes.new("")); result = commit command; return Process.Termination.exit_code(result.termination)`, path, strings.Join(arguments, ",")))
-			got := run(t, "run", sourceFile(t, source), "--process-allow", fmt.Sprintf("%x,%s", digest, path), "--process-read-root", root, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--format", "json")
+			got := runProgram(t, sourceFile(t, source), "run", "--process-allow", fmt.Sprintf("%x,%s", digest, path), "--process-read-root", root, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--format", "json")
 			if test.accepted {
 				valueJSON(t, fileOutput(t, got), `"0"`)
 				return

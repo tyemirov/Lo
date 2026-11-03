@@ -1,4 +1,5 @@
 """Exercise the actual timing driver with an opaque ABI and deterministic clock."""
+
 from pathlib import Path
 import hashlib
 import json
@@ -9,7 +10,7 @@ import subprocess
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-FAKE_ABI = r'''
+FAKE_ABI = r"""
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
@@ -48,6 +49,7 @@ void lo_context_run(Context *value,ResultSlot *out) {
  out->status=mode==5?1:0; out->code=out->status;
  out->value=mode==6?0:&result_value;
 }
+int lo_context_close(Context *value) { return value==&context && mode!=8; }
 void lo_context_free(Context *value) {
  if(value!=&context || !context.live || phase!=2) violation=5;
  context.live=0; phase=3; ++freed;
@@ -71,7 +73,7 @@ int lo_test_clock(int clock,struct timespec *out) {
 }
 int lo_cli_main(int argc,const char **argv,const char **environment) {
  (void)environment; ++verified;
- if(argc!=4 || !equal(argv[1],"run") || !equal(argv[2],"--max-steps") || !equal(argv[3],"10000000")) return 18;
+ if(argc!=6 || !equal(argv[1],"run") || !equal(argv[2],"--max-steps") || !equal(argv[3],"10000000") || !equal(argv[4],"--format") || !equal(argv[5],"json")) return 18;
  return 17;
 }
 static void number(U64 value) {
@@ -92,6 +94,7 @@ int main(int argc,const char **argv,const char **environment) {
  else if(argc==2 && equal(argv[1],"bad-status")) mode=5;
  else if(argc==2 && equal(argv[1],"null-result")) mode=6;
  else if(argc==2 && equal(argv[1],"equal-boundary")) mode=7;
+ else if(argc==2 && equal(argv[1],"close-failure")) mode=8;
  const char *arguments[]={argv[0],0};
  int status=(argc==2 && equal(argv[1],"--verify"))?lo_harness_main(argc,argv,environment):lo_harness_main(1,arguments,environment);
  field("{\"created\":",created);field(",\"ran\":",ran);field(",\"freed\":",freed);field(",\"released\":",released);
@@ -99,56 +102,97 @@ int main(int argc,const char **argv,const char **environment) {
  field(",\"admitted\":",admitted);field(",\"verified\":",verified);field(",\"violation\":",violation);write(2,"}\n",2);
  return violation?90:status;
 }
-'''
+"""
 
 
 def pinned(base: Path, identity: dict[str, str]) -> Path:
-    path = (base / identity['path']).resolve()
+    path = (base / identity["path"]).resolve()
     path.relative_to(ROOT)
-    assert hashlib.sha256(path.read_bytes()).hexdigest() == identity['sha256'], path
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == identity["sha256"], path
     return path
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def driver(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    work = tmp_path_factory.mktemp('native-harness').resolve()
+    work = tmp_path_factory.mktemp("native-harness").resolve()
     work.relative_to(ROOT)
-    preparation = Path(os.environ.get('LO_NATIVE_PREPARATION', ROOT / '_scratch/native-runtime')).resolve()
+    preparation = Path(
+        os.environ.get("LO_NATIVE_PREPARATION", ROOT / "_scratch/native-runtime")
+    ).resolve()
     preparation.relative_to(ROOT)
-    tools = json.loads((preparation / 'tools.json').read_text())['tools']
-    compiler = pinned(ROOT, tools['clang'])
-    manifest = Path(os.environ.get('LO_LLVM_TOOLCHAIN', preparation / 'distribution/toolchain.json')).resolve()
+    tools = json.loads((preparation / "tools.json").read_text())["tools"]
+    compiler = pinned(ROOT, tools["clang"])
+    manifest = Path(
+        os.environ.get("LO_LLVM_TOOLCHAIN", preparation / "distribution/toolchain.json")
+    ).resolve()
     manifest.relative_to(ROOT)
     distribution = json.loads(manifest.read_text())
-    target_name = platform.system().lower() + '/arm64'
-    target = distribution['targets'][target_name]
-    linker = pinned(ROOT, tools['ld64.lld' if target_name.startswith('darwin/') else 'ld.lld'])
-    environment = {'CI': '1', 'PATH': '', 'TMPDIR': str(work), 'LC_ALL': 'C', 'ZERO_AR_DATE': '1'}
+    target_name = platform.system().lower() + "/arm64"
+    target = distribution["targets"][target_name]
+    linker = pinned(
+        ROOT, tools["ld64.lld" if target_name.startswith("darwin/") else "ld.lld"]
+    )
+    environment = {
+        "CI": "1",
+        "PATH": "",
+        "TMPDIR": str(work),
+        "LC_ALL": "C",
+        "ZERO_AR_DATE": "1",
+    }
 
     def run(arguments: list[str]) -> None:
-        result = subprocess.run(arguments, cwd=work, env=environment, stdin=subprocess.DEVNULL,
-                                capture_output=True, text=True)
+        result = subprocess.run(
+            arguments,
+            cwd=work,
+            env=environment,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+        )
         assert result.returncode == 0, result.stderr
 
-    abi = work / 'fake.c'
+    abi = work / "fake.c"
     abi.write_text(FAKE_ABI)
-    harness_object, abi_object, executable = work / 'harness.o', work / 'fake.o', work / 'driver'
-    flags = ['-target', target['triple'], '-O2', '-ffp-contract=off', '-nostdinc']
-    if target_name.startswith('darwin/'):
-        flags += ['-mmacosx-version-min=27.0']
-    run([str(compiler), *flags, '-Dmain=lo_harness_main', '-Dclock_gettime=lo_test_clock',
-         '-x', 'c', '-c', str(ROOT / 'tools/nativebench/harness.c.txt'), '-o', str(harness_object)])
-    run([str(compiler), *flags, '-c', str(abi), '-o', str(abi_object)])
+    harness_object, abi_object, executable = (
+        work / "harness.o",
+        work / "fake.o",
+        work / "driver",
+    )
+    flags = [
+        "-target",
+        target["triple"],
+        "-O2",
+        "-ffp-contract=off",
+        "-nostdinc",
+        "-I" + str(ROOT / "runtime/native/include"),
+    ]
+    if target_name.startswith("darwin/"):
+        flags += ["-mmacosx-version-min=27.0"]
+    run(
+        [
+            str(compiler),
+            *flags,
+            "-Dmain=lo_harness_main",
+            "-Dclock_gettime=lo_test_clock",
+            "-x",
+            "c",
+            "-c",
+            str(ROOT / "tools/nativebench/harness.c.txt"),
+            "-o",
+            str(harness_object),
+        ]
+    )
+    run([str(compiler), *flags, "-c", str(abi), "-o", str(abi_object)])
     arguments = []
-    for item in target['link_args']:
-        if item == '{object}':
+    for item in target["link_args"]:
+        if item == "{object}":
             arguments += [str(harness_object), str(abi_object)]
-        elif item == '{runtime}':
+        elif item == "{runtime}":
             continue
-        elif item == '{output}':
+        elif item == "{output}":
             arguments.append(str(executable))
-        elif item.startswith('{input:'):
-            arguments.append(str(pinned(manifest.parent, target['inputs'][item[7:-1]])))
+        elif item.startswith("{input:"):
+            arguments.append(str(pinned(manifest.parent, target["inputs"][item[7:-1]])))
         else:
             arguments.append(item)
     run([str(linker), *arguments])
@@ -156,48 +200,68 @@ def driver(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def invoke(driver: Path, mode: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([str(driver), mode], cwd=driver.parent,
-                          env={'CI': '1', 'PATH': '', 'TMPDIR': str(driver.parent)},
-                          stdin=subprocess.DEVNULL, text=True, capture_output=True, timeout=10)
+    return subprocess.run(
+        [str(driver), mode],
+        cwd=driver.parent,
+        env={"CI": "1", "PATH": "", "TMPDIR": str(driver.parent)},
+        stdin=subprocess.DEVNULL,
+        text=True,
+        capture_output=True,
+        timeout=10,
+    )
 
 
-@pytest.mark.parametrize(('mode', 'batch', 'cost'), [('fast', 64, 10000), ('slow', 2, 600000), ('very-slow', 1, 2000000), ('equal-boundary', 64, 10000)])
-def test_calibration_amortizes_clock_and_preserves_fresh_sessions(driver: Path, mode: str, batch: int, cost: int) -> None:
+@pytest.mark.parametrize(
+    ("mode", "batch", "cost"),
+    [
+        ("fast", 64, 10000),
+        ("slow", 2, 600000),
+        ("very-slow", 1, 2000000),
+        ("equal-boundary", 64, 10000),
+    ],
+)
+def test_calibration_amortizes_clock_and_preserves_fresh_sessions(
+    driver: Path, mode: str, batch: int, cost: int
+) -> None:
     observed = invoke(driver, mode)
     assert observed.returncode == 0, observed.stderr
     report, abi = json.loads(observed.stdout), json.loads(observed.stderr)
-    assert 'batch_size' in report, 'timing driver must report its calibrated batch size'
-    assert report['batch_size'] == batch
-    assert report['iterations'] > 0 and report['iterations'] % batch == 0
-    assert report['ns'] == cost + 100 // batch
-    assert report['total_ns'] == report['iterations'] // batch * (batch * cost + 100)
+    assert "batch_size" in report, "timing driver must report its calibrated batch size"
+    assert report["batch_size"] == batch
+    assert report["iterations"] > 0 and report["iterations"] % batch == 0
+    assert report["ns"] == cost + 100 // batch
+    assert report["total_ns"] == report["iterations"] // batch * (batch * cost + 100)
     calibration_rounds = batch.bit_length()
     calibration_iterations = 2 * batch - 1
-    batches = report['iterations'] // batch
-    assert abi['created'] == report['iterations'] + calibration_iterations
-    assert abi['created'] == abi['ran'] == abi['freed'] == abi['released']
-    assert abi['clock_reads'] == 2 * (calibration_rounds + batches)
-    assert abi['context_checks'] == calibration_rounds + batches
-    assert abi['value_checks'] == abi['context_checks'] + 2
-    assert abi['violation'] == 0 and abi['admitted'] == 1 and abi['verified'] == 0
+    batches = report["iterations"] // batch
+    assert abi["created"] == report["iterations"] + calibration_iterations
+    assert abi["created"] == abi["ran"] == abi["freed"] == abi["released"]
+    assert abi["clock_reads"] == 2 * (calibration_rounds + batches)
+    assert abi["context_checks"] == calibration_rounds + batches
+    assert abi["value_checks"] == abi["context_checks"] + 2
+    assert abi["violation"] == 0 and abi["admitted"] == 1 and abi["verified"] == 0
 
 
-@pytest.mark.parametrize('mode', ['clock-error', 'clock-zero', 'clock-backwards', 'clock-equal'])
+@pytest.mark.parametrize(
+    "mode", ["clock-error", "clock-zero", "clock-backwards", "clock-equal"]
+)
 def test_driver_rejects_invalid_clock(driver: Path, mode: str) -> None:
     observed = invoke(driver, mode)
     assert observed.returncode != 0, observed.stdout
-    assert observed.stdout == ''
+    assert observed.stdout == ""
 
 
-@pytest.mark.parametrize('mode', ['bad-status', 'null-result'])
+@pytest.mark.parametrize("mode", ["bad-status", "null-result", "close-failure"])
 def test_every_iteration_checks_runtime_result(driver: Path, mode: str) -> None:
     observed = invoke(driver, mode)
-    assert observed.returncode != 0 and observed.stdout == ''
+    assert observed.returncode != 0 and observed.stdout == ""
 
 
 def test_verify_uses_real_cli_outside_timing(driver: Path) -> None:
-    observed = invoke(driver, '--verify')
-    assert observed.returncode == 17 and observed.stdout == ''
+    observed = invoke(driver, "--verify")
+    assert observed.returncode == 17 and observed.stdout == ""
     abi = json.loads(observed.stderr)
-    assert abi['verified'] == 1
-    assert abi['created'] == abi['clock_reads'] == abi['admitted'] == abi['violation'] == 0
+    assert abi["verified"] == 1
+    assert (
+        abi["created"] == abi["clock_reads"] == abi["admitted"] == abi["violation"] == 0
+    )

@@ -38,7 +38,7 @@ next = File.Write.new(File.Path.new(%q), UTF8.Bytes.new("later"))
 commit next
 return receipt
 `, root, later))
-	got := run(t, "run", program, "--write-root", root, "--format", "json")
+	got := runProgram(t, program, "run", "--write-root", root, "--format", "json")
 	if got.status == 0 || !strings.Contains(got.stderr, "File.WriteFailed") {
 		t.Fatalf("expected write failure: %+v", got)
 	}
@@ -61,7 +61,7 @@ flow Attempt() -> Int onError Failure {
 }
 return Attempt()
 `, root))
-	got := fileOutput(t, run(t, "run", program, "--write-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, program, "run", "--write-root", root, "--format", "json"))
 	valueJSON(t, got, `"17"`)
 }
 
@@ -135,7 +135,7 @@ second = commit target
 copies = List.new(first, second, first)
 return List.map(copies, Count)
 `, path))
-	got := fileOutput(t, run(t, "run", program, "--write-root", root, "--format", "json"))
+	got := fileOutput(t, runProgram(t, program, "run", "--write-root", root, "--format", "json"))
 	valueJSON(t, got, `[{"type":"Int","value":"1"},{"type":"Int","value":"1"},{"type":"Int","value":"1"}]`)
 	data, err := os.ReadFile(path)
 	if err != nil || string(data) != "xx" {

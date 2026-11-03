@@ -57,7 +57,7 @@ def test_runtime_build_requires_prepared_compiler(missing_state: Path) -> None:
     assert 'missing prepared Rust receipt' in result.stderr
 
 
-def test_runtime_build_uses_prepared_host_linker() -> None:
+def test_runtime_build_uses_prepared_host_linker(tmp_path: Path) -> None:
     import json
     import pytest
 
@@ -66,14 +66,19 @@ def test_runtime_build_uses_prepared_host_linker() -> None:
         pytest.skip('LO_NATIVE_PREPARATION selects the prepared compiler inputs')
     state = (ROOT / supplied).resolve()
     assert state.is_relative_to(ROOT / '_scratch')
+    assert tmp_path.resolve().is_relative_to(ROOT / '_scratch')
+    canonical = [state / 'distribution' / name for name in ('toolchain.json', 'build-receipt.json')]
+    original = {path: path.read_bytes() if path.is_file() else None for path in canonical}
+    output = tmp_path / 'runtime-distribution'
     result = subprocess.run([sys.executable, '-B', str(CLI.with_name('build.py')),
-                             '--preparation', str(state), '--output', str(state / 'distribution')],
+                             '--preparation', str(state), '--output', str(output)],
                             cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
                             capture_output=True, text=True, check=False)
     assert result.returncode == 0, result.stderr
-    manifest = json.loads((state / 'distribution/toolchain.json').read_text())
+    assert {path: path.read_bytes() if path.is_file() else None for path in canonical} == original
+    manifest = json.loads((output / 'toolchain.json').read_text())
     assert set(manifest['targets']) == {'darwin/arm64', 'linux/arm64'}
-    receipt = json.loads((state / 'distribution/build-receipt.json').read_text())
+    receipt = json.loads((output / 'build-receipt.json').read_text())
     environment = receipt['cargo_environment']
     assert environment['CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER'] == str(state / 'host-linker/linker')
     assert environment['SDKROOT'] == str(state / 'host-linker/sdk')
@@ -235,7 +240,7 @@ def test_metal_bridge_declarations_match_runtime_abi(tmp_path: Path) -> None:
                              '-mmacosx-version-min=27.0', '-nostdinc', '-fblocks', '-Werror',
                              '-I' + str(ROOT / 'runtime/native/include'),
                              '-I' + str(ROOT / 'runtime/native/include/darwin'),
-                             '-I' + str(ROOT / 'internal/device'), '-S', '-emit-llvm',
+                             '-I' + str(ROOT / 'runtime/native/host/metal'), '-S', '-emit-llvm',
                              str(source), '-o', str(module)], cwd=ROOT,
                             env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
                             capture_output=True, text=True, check=False)

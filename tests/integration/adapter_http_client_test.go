@@ -2,19 +2,12 @@ package integration_test
 
 import (
 	"bufio"
-	"bytes"
-	"context"
+
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
-	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
-	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
-	"github.com/MarcoPoloResearchLab/Lo/internal/runner"
-	"github.com/MarcoPoloResearchLab/Lo/internal/source"
+
 	"io"
 	"log"
 	"net"
@@ -62,7 +55,7 @@ func TestAdapterHTTPClientExchange(t *testing.T) {
 	defer server.Close()
 	headers := `List.new(Record.new(name: "X-Probe", value: UTF8.Bytes.new("one")), Record.new(name: "x-probe", value: UTF8.Bytes.new("two")))`
 	source := sourceFile(t, httpClientSource(server.URL+"/resource?private=query", "POST", headers, "payload", `response = commit target; return response`))
-	fields := httpResultFields(t, run(t, "run", source, "--http-allow", httpGrant("POST", server.URL), "--format", "json"))
+	fields := httpResultFields(t, runProgram(t, source, "run", "--http-allow", httpGrant("POST", server.URL), "--format", "json"))
 	valueJSON(t, fields["status"], `"418"`)
 	valueJSON(t, fields["body"], `"cmVzdWx0"`)
 	if calls.Load() != 1 {
@@ -75,7 +68,7 @@ func TestAdapterHTTPClientConstruction(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { calls.Add(1) }))
 	defer server.Close()
 	source := fmt.Sprintf(`flow Make() -> HTTP.Client.Request! { method = HTTP.Method.new("GET"); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(List.new()); return HTTP.Client.Request.new(method, url, headers, Bytes.new("")) }; return Make()`, server.URL)
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 0 || calls.Load() != 0 {
 		t.Fatalf("construction activated request: %+v calls=%d", got, calls.Load())
 	}
@@ -85,7 +78,7 @@ func TestAdapterHTTPClientConstruction(t *testing.T) {
 		httpClientSource(server.URL, "CONNECT", `List.new()`, "", `response = commit target; return response`),
 		httpClientSource(server.URL, "GET", `List.new(Record.new(name: "host", value: UTF8.Bytes.new("other")))`, "", `response = commit target; return response`),
 	} {
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 || calls.Load() != 0 {
 			t.Fatalf("invalid construction: %+v calls=%d", got, calls.Load())
 		}
@@ -99,13 +92,13 @@ func TestAdapterHTTPClientAuthority(t *testing.T) {
 	source := sourceFile(t, httpClientSource(server.URL, "GET", `List.new()`, "", `response = commit target; return response`))
 	for _, args := range [][]string{nil, {"--http-allow", httpGrant("get", server.URL)}, {"--http-allow", "GET," + server.URL + ",127.0.0.2"}} {
 		command := append([]string{"run", source, "--format", "json"}, args...)
-		got := run(t, command...)
+		got := runProgram(t, command[1], command[0], command[2:]...)
 		if got.status != 2 || !strings.Contains(got.stderr, `runtime.capability-denied`) || calls.Load() != 0 {
 			t.Fatalf("grant authority: %+v calls=%d", got, calls.Load())
 		}
 	}
 	for _, grant := range []string{"GET," + server.URL, "GET," + server.URL + ",127.0.0.1,extra", "GET," + server.URL + "/path,127.0.0.1", "GET," + server.URL + ",localhost", "GET," + server.URL + ",fe80::1%zone", "GET, " + server.URL + ",127.0.0.1"} {
-		got := run(t, "run", source, "--http-allow", grant, "--format", "json")
+		got := runProgram(t, source, "run", "--http-allow", grant, "--format", "json")
 		if got.status != 2 || calls.Load() != 0 {
 			t.Fatalf("invalid grant %s: %+v", grant, got)
 		}
@@ -125,7 +118,7 @@ func TestAdapterHTTPClientRedirectAndProxy(t *testing.T) {
 	t.Setenv("HTTPS_PROXY", "http://127.0.0.1:1")
 	t.Setenv("NO_PROXY", "")
 	source := sourceFile(t, httpClientSource(server.URL, "GET", `List.new()`, "", `response = commit target; return response`))
-	fields := httpResultFields(t, run(t, "run", source, "--http-allow", httpGrant("GET", server.URL), "--format", "json"))
+	fields := httpResultFields(t, runProgram(t, source, "run", "--http-allow", httpGrant("GET", server.URL), "--format", "json"))
 	valueJSON(t, fields["status"], `"302"`)
 	if calls.Load() != 1 {
 		t.Fatalf("redirect replayed %d requests", calls.Load())
@@ -160,7 +153,7 @@ func TestAdapterHTTPClientNoReplay(t *testing.T) {
 	const secret = "http-client-secret-sentinel"
 	origin := "http://" + listener.Addr().String()
 	source := sourceFile(t, httpClientSource(origin+"/drop?"+secret, "POST", `List.new(Record.new(name: "authorization", value: UTF8.Bytes.new("`+secret+`")))`, secret, `response = commit target; return response`))
-	got := run(t, "run", source, "--http-allow", httpGrant("POST", origin), "--format", "json")
+	got := runProgram(t, source, "run", "--http-allow", httpGrant("POST", origin), "--format", "json")
 	_ = listener.Close()
 	<-done
 	if got.status != 1 || !strings.Contains(got.stderr, `HTTP.ExchangeFailed`) || calls.Load() != 1 {
@@ -178,7 +171,7 @@ func TestAdapterHTTPClientBodyLimit(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = io.WriteString(w, strings.Repeat("x", (1<<20)+1)) }))
 	defer server.Close()
 	source := sourceFile(t, httpClientSource(server.URL, "GET", `List.new()`, "", `response = commit target; return response`))
-	got := run(t, "run", source, "--http-allow", httpGrant("GET", server.URL), "--format", "json")
+	got := runProgram(t, source, "run", "--http-allow", httpGrant("GET", server.URL), "--format", "json")
 	if got.status != 2 || !strings.Contains(got.stderr, `runtime.limit`) {
 		t.Fatalf("body limit: %+v", got)
 	}
@@ -224,7 +217,7 @@ func TestAdapterHTTPClientProtocolLimits(t *testing.T) {
 			}()
 			origin := "http://" + listener.Addr().String()
 			source := sourceFile(t, httpClientSource(origin, "GET", `List.new()`, "", `response = commit target; return response`))
-			got := run(t, "run", source, "--http-allow", httpGrant("GET", origin), "--format", "json")
+			got := runProgram(t, source, "run", "--http-allow", httpGrant("GET", origin), "--format", "json")
 			_ = listener.Close()
 			<-done
 			if !strings.Contains(got.stderr, test.code) || got.stdout != "" {
@@ -245,7 +238,7 @@ func TestAdapterHTTPClientHeadAndEmptyStatus(t *testing.T) {
 	defer server.Close()
 	for _, test := range []struct{ method, path string }{{"HEAD", "/head"}, {"GET", "/empty"}} {
 		source := sourceFile(t, httpClientSource(server.URL+test.path, test.method, `List.new()`, "", `response = commit target; return response`))
-		fields := httpResultFields(t, run(t, "run", source, "--http-allow", httpGrant(test.method, server.URL), "--format", "json"))
+		fields := httpResultFields(t, runProgram(t, source, "run", "--http-allow", httpGrant(test.method, server.URL), "--format", "json"))
 		valueJSON(t, fields["body"], `""`)
 	}
 }
@@ -257,7 +250,7 @@ func TestAdapterHTTPClientRequestBodyLimit(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := fileFixture(t, root, "request-body", strings.Repeat("x", (1<<20)+1))
 	source := fmt.Sprintf(`flow Main() -> HTTP.Response! { method = HTTP.Method.new("POST"); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(List.new()); body = File.read(File.Path.new(%q)); target = HTTP.Client.Request.new(method, url, headers, body); result = commit target; return result }; return Main()`, server.URL, path)
-	got := run(t, "run", sourceFile(t, source), "--read-root", root, "--http-allow", httpGrant("POST", server.URL), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--read-root", root, "--http-allow", httpGrant("POST", server.URL), "--format", "json")
 	if got.status != 2 || !strings.Contains(got.stderr, "runtime.limit") || calls.Load() != 0 {
 		t.Fatalf("request-body limit: %+v calls=%d", got, calls.Load())
 	}
@@ -277,7 +270,7 @@ func TestAdapterHTTPClientTLSAuthority(t *testing.T) {
 	defer server.Close()
 	origin := strings.Replace(server.URL, "127.0.0.1", "localhost", 1)
 	source := sourceFile(t, httpClientSource(origin+"/private", "GET", `List.new()`, "", `response = commit target; return response`))
-	got := run(t, "run", source, "--http-allow", httpGrant("GET", origin), "--format", "json")
+	got := runProgram(t, source, "run", "--http-allow", httpGrant("GET", origin), "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, "HTTP.ExchangeFailed") || calls.Load() != 0 {
 		t.Fatalf("untrusted TLS authority: %+v calls=%d", got, calls.Load())
 	}
@@ -327,52 +320,4 @@ func httpClientFailureProgress(t *testing.T, got result) map[string]runtimeValue
 		t.Fatalf("invalid HTTP progress: %+v", fields)
 	}
 	return fields
-}
-
-func TestAdapterHTTPClientCancellationProgress(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.Copy(io.Discard, r.Body)
-		cancel()
-		<-r.Context().Done()
-	}))
-	defer server.Close()
-	policy, err := adapter.NewHTTPPolicy([]string{httpGrant("GET", server.URL)})
-	if err != nil {
-		t.Fatal(err)
-	}
-	files, err := adapter.OpenFiles(adapter.FileRoots{}, adapter.NativeFileIO())
-	if err != nil {
-		t.Fatal(err)
-	}
-	boundary, err := adapter.WithHTTP(files, policy)
-	if err != nil {
-		t.Fatal(err)
-	}
-	text, err := source.New("http-cancel.lo", httpClientSource(server.URL, "GET", `List.new()`, "", `response = commit target; return response`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	checked, diagnostic := compiler.Check(text)
-	if diagnostic != nil {
-		t.Fatal(diagnostic)
-	}
-	program, err := eval.Program(checked)
-	if err != nil {
-		t.Fatal(err)
-	}
-	output, runErr := program.Run(ctx, boundary, execution.DefaultBudget(), device.DefaultConfig())
-	runErr = execution.PreserveCleanup(runErr, files.Close())
-	if output != nil {
-		t.Fatalf("canceled exchange published %v", output)
-	}
-	var stderr bytes.Buffer
-	status := runner.ReportRuntime(&stderr, runner.JsonFormat, runErr)
-	got := result{stderr: stderr.String(), status: status}
-	if status != 2 || !strings.Contains(got.stderr, "runtime.cancelled") {
-		t.Fatalf("HTTP cancellation: %+v", got)
-	}
-	progress := httpClientFailureProgress(t, got)
-	valueJSON(t, progress["remote_outcome"], `"unknown"`)
 }

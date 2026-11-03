@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,14 +12,10 @@ import (
 )
 
 var binary string
-var nativeCompiler string
 var repository string
 var fixtureDirectory string
 
 func TestMain(m *testing.M) {
-	if adapter.HandleFileProbe(os.Args[1:]) {
-		return
-	}
 	var err error
 	repository, err = filepath.Abs("../..")
 	if err != nil {
@@ -71,7 +66,6 @@ func TestMain(m *testing.M) {
 			os.Exit(1)
 		}
 	}
-	nativeCompiler = binary
 	status := m.Run()
 	if err := os.RemoveAll(dir); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -88,13 +82,6 @@ type result struct {
 
 func run(t *testing.T, args ...string) result {
 	t.Helper()
-	if path, runtimeArgs, ok := nativeInvocation(args); ok {
-		artifact, r := buildForTest(t, path)
-		if r.status != 0 {
-			return r
-		}
-		return runExecutable(t, artifact, runtimeArgs...)
-	}
 	return runExecutable(t, binary, args...)
 }
 func runExecutable(t *testing.T, executable string, args ...string) result {
@@ -228,7 +215,13 @@ func TestConformance(t *testing.T) {
 	for _, fixture := range fixtures {
 		t.Run(fixture.ID, func(t *testing.T) {
 			path := filepath.Join(repository, "testdata/conformance", fixture.File)
-			got := run(t, fixture.Command, path, "--format", "json")
+			var got result
+			switch fixture.Command {
+			case "run", "serve":
+				got = runProgram(t, path, fixture.Command, "--format", "json")
+			default:
+				got = run(t, fixture.Command, path, "--format", "json")
+			}
 			if got.status != fixture.Exit {
 				t.Fatalf("exit %d, want %d: %+v", got.status, fixture.Exit, got)
 			}
@@ -299,6 +292,45 @@ func TestCLIErrorBoundary(t *testing.T) {
 	}
 }
 
+func TestCompilerRejectsSourceExecution(t *testing.T) {
+	path := sourceFile(t, "return 7")
+	for _, command := range []string{"run", "serve"} {
+		for _, source := range []string{path, filepath.Join(t.TempDir(), "missing.lo")} {
+			t.Run(command+"/"+filepath.Base(source), func(t *testing.T) {
+				got := run(t, command, source, "--format", "json")
+				if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "cli.invalid-invocation" {
+					t.Fatalf("compiler accepted application command: %+v", got)
+				}
+			})
+		}
+	}
+}
+
+func TestCompilerRejectsApplicationOptions(t *testing.T) {
+	path := sourceFile(t, "return 7")
+	for _, command := range []string{"parse", "check", "inspect", "build"} {
+		for _, options := range [][]string{
+			{"--read-root", repository},
+			{"--write-root", repository},
+			{"--listen", "0"},
+			{"--lock-entry"},
+			{"--max-steps", "100"},
+			{"--max-console-bytes", "100"},
+		} {
+			t.Run(command+"/"+options[0], func(t *testing.T) {
+				arguments := []string{command, path, "--format", "json"}
+				if command == "build" {
+					arguments = append(arguments, "--output", filepath.Join(t.TempDir(), "program"))
+				}
+				got := run(t, append(arguments, options...)...)
+				if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "cli.invalid-invocation" {
+					t.Fatalf("compiler accepted application options: %+v", got)
+				}
+			})
+		}
+	}
+}
+
 func TestParserExternalInputs(t *testing.T) {
 	for _, source := range []string{"return \"\xff\"", "return \"\x00\"", "return " + strings.Repeat("(", 600) + "1" + strings.Repeat(")", 600)} {
 		got := run(t, "parse", sourceFile(t, source), "--format", "json")
@@ -319,5 +351,21 @@ func TestParserExternalInputs(t *testing.T) {
 	got = run(t, "parse", sourceFile(t, strings.Repeat(" ", (16<<20)+1)), "--format", "json")
 	if got.status != 1 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "source.limit" {
 		t.Fatalf("source size limit: %+v", got)
+	}
+}
+
+func TestCompilerSourceLimit(t *testing.T) {
+	path := sourceFile(t, strings.Repeat(" ", (16<<20)+1))
+	for _, command := range []string{"parse", "check", "inspect", "build"} {
+		t.Run(command, func(t *testing.T) {
+			arguments := []string{command, path, "--format", "json"}
+			if command == "build" {
+				arguments = append(arguments, "--output", filepath.Join(t.TempDir(), "program"))
+			}
+			got := run(t, arguments...)
+			if got.status != 1 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "source.limit" {
+				t.Fatalf("source limit changed: %+v", got)
+			}
+		})
 	}
 }

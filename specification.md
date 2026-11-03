@@ -3,7 +3,7 @@
 Lo is a typed, general-purpose dataflow language for executable plans, file workflows, HTTP services, and tensor training.
 This reference defines the implemented Lo v0.4 language contract.
 CPU execution and the selected Metal backend support training.
-Native executables use the same language contracts as the interpreter.
+Compiled executables use one Rust runtime for these language contracts.
 The [reference audit](docs/language-reference-audit.md) records implementation evidence and its scope.
 
 ## Version and Scope
@@ -11,14 +11,14 @@ The [reference audit](docs/language-reference-audit.md) records implementation e
 Lo v0.4 includes the core language and its implemented adapter, numeric, training, and device extensions.
 This version update records existing behavior.
 It adds no syntax or runtime operations.
-The interpreter and native compiler use this same language contract.
+The compiler and native runtime use this language contract.
 Runtime ABI, checkpoint encoding, and compiler distribution identities follow their separate documented contracts.
 
 Each language operation has types and behavior that apply across applications.
 Application programs contain file selection, retention rules, command arguments, output formats, and exit policy.
 Language operations and runtime semantics contain no rules for one named application.
 Examples for named applications and their acceptance criteria stay outside this reference.
-Proposed operations and syntax stay outside the implemented contract until the compiler and runtimes implement them.
+Proposed operations and syntax stay outside the implemented contract until the compiler and native runtime implement them.
 
 | Implemented contract | Reference |
 | --- | --- |
@@ -81,7 +81,8 @@ The repository examples provide complete input files:
 make build
 ./bin/lo check examples/list_sum.lo
 ./bin/lo inspect examples/training_adamw.lo --format json
-./bin/lo run examples/training_adamw.lo --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/training_adamw.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/training_adamw
+./bin/training_adamw run --format json
 ```
 
 ## Train With Autodiff, SGD, and AdamW
@@ -109,7 +110,8 @@ Its original Parameter remains `0`, and its trained Parameter is approximately `
 
 ```bash
 ./bin/lo check examples/training_sgd.lo
-./bin/lo run examples/training_sgd.lo --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/training_sgd.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/training_sgd
+./bin/training_sgd run --format json
 ./bin/lo build examples/training_sgd.lo --output ./bin/training-sgd
 ./bin/training-sgd run --format json
 ```
@@ -275,8 +277,8 @@ For a larger model, see the [XOR tutorial](docs/xor-neural-network.md), [CPU net
 
 | Location | Transfers | Tensor arithmetic, autodiff, SGD, AdamW |
 | --- | --- | --- |
-| `cpu` | CPU construction and explicit transfers | Supported by the standard interpreter and native artifacts |
-| `metal:0` | Supported by the Metal build | Supported by the Metal interpreter and explicitly selected Metal artifacts |
+| `cpu` | CPU construction and explicit transfers | Supported by software native artifacts |
+| `metal:0` | Supported by the Metal build | Supported by explicitly selected Metal artifacts |
 | `cuda-sim:0` | Software simulation | Unsupported. Operations produce `Device.UnsupportedOperation` |
 | `cuda:0` | Unavailable | Unavailable. Authorized access produces `Device.Unavailable` |
 
@@ -883,6 +885,8 @@ Processors are pure.
 * `String.length(value) -> Int`
 * `String.eq(left_value, right_value) -> Bool`
 
+Section 8.10 defines exact text boundaries, splitting, whitespace, and comparison.
+
 ### 8.2 Scalar Processors
 
 * `Scalar.eq(left_value, right_value) -> Bool`
@@ -976,6 +980,8 @@ Type rules:
 List operators receive explicit context arguments before the callback reference.
 
 Because String is semantically compatible with `List<Scalar>`, these processors may also operate on strings.
+
+Section 8.10 defines indexed lookup, slicing, and stable sorting with two callback operands.
 
 ### 8.8 Sequential Flow Processor
 
@@ -1093,9 +1099,14 @@ A completed callback releases temporary values before the next callback.
 A long scan can process cumulative data beyond its live-value quota.
 Tensor storage and adapter transport retain their separate documented limits.
 
-The Go embedding API accepts `execution.NewBudget(execution.BudgetInput{Steps: ..., Limits: ...})`.
-`execution.DefaultBudgetInput()` supplies the CLI defaults.
 The native ABI uses the options structure in the [runtime contract](docs/native-runtime-contract.md).
+
+### 8.10 Pure Value Boundaries
+
+The [value processor contract](docs/value-processors.md) defines 26 additional pure processors.
+It specifies text, bytes, indexed collections, stable sorting, lexical paths, globs, and command display.
+Those processors use current resource quotas and have no host authority.
+Application flows own chunking, duplicate removal, typed equality, and other composition.
 
 ---
 
@@ -1107,7 +1118,7 @@ The shared purity rules and bound commits apply to the nominal File targets belo
 Server activation also returns `HTTP.ServerReceipt`.
 The [adapter design](docs/adapter-design.md) records shared domain contracts and the qualified Process profile.
 
-HTTP headers, client actions, and automatic trace summaries pass focused interpreter and native qualification.
+HTTP headers, client actions, and automatic trace summaries have compiled-program qualification.
 Independent source review closed the current findings.
 
 ### 9.1 File Adapter
@@ -1324,7 +1335,7 @@ fields.
 ### 9.4 HTTP Client
 
 Client source is implemented.
-Focused interpreter and native qualification passed.
+Focused compiled-program qualification passed.
 Independent source review closed the current findings.
 The following contract defines its public surface.
 
@@ -1500,11 +1511,12 @@ Dynamic command descriptions retain whole-command dependencies.
 Text inspection shows `execution_profile=required/unavailable` and the named inputs.
 Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
 
-The standard runner opens one canonical `processhost.Session` for `run`, `serve`, and server callbacks.
-The session owns native policy, the executable registry, participating File adapters, and retained shutdown.
-`Close(ctx)` closes admission and starts one shutdown owner. Its context bounds only the caller wait.
-`WaitRetained()` joins that same owner without a cleanup retry. A caller timeout does not release ownership.
-Custom Go boundaries are trusted host implementations and must enforce qualification.
+Native program commands configure one Process host for startup and HTTP callbacks.
+The host owns native policy, the executable registry, participating File adapters, and retained shutdown.
+Shutdown closes admission before it joins retained work.
+Caller cancellation does not release ownership before cleanup completes.
+Native Process drivers are trusted host boundaries and must enforce their selected host contract.
+
 Generic commit execution validates the result type without a universal host qualification gate.
 HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
 HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
@@ -1530,9 +1542,12 @@ Projection from the returned value is pure.
 The value has no public constructor, equality, ordering, or checkpoint representation.
 The snapshot grants no filesystem or process authority.
 
-Source execution accepts `lo run source.lo [runner options] -- [program arguments]`.
-The same separator applies to `lo serve` and native artifact runtime options.
-The snapshot excludes runner options, executable and source names, command names, and the separator.
+The compiler builds source with `lo build source.lo --output PROGRAM`.
+The executable accepts `PROGRAM run [runtime options] -- [program arguments]`.
+The same separator applies to `PROGRAM serve`.
+The compiler rejects `run` and `serve` before source access.
+
+The snapshot excludes runtime options, executable names, command names, and the separator.
 Without the separator, `arguments` is empty.
 After the separator, values that start with `-` and explicit empty arguments stay literal values.
 Invalid argument encoding or argument limits produce CLI exit status 2 before evaluation.
@@ -1634,7 +1649,6 @@ The [executable example](docs/examples/cli-cleanup-preview.lo) demonstrates help
 ### 9.8 Program Entry And File Locks
 
 `Program.path() -> File.Path!` observes the captured program entry path.
-The interpreter captures identity from the descriptor used to read its source.
 The native runtime captures the actual executable through operating-system identity checks.
 It does not use `argv[0]` or embedded source metadata.
 The path remains immutable after capture.
@@ -2216,6 +2230,7 @@ Device access has a separate resource summary.
 | Parameters, gradients, and `Autodiff.stop` | [24.6](#246-parameters-and-gradient-lifecycle) |
 | SGD and AdamW transitions | [24.7](#247-sgd-and-adamw) |
 | Checkpoints and training-state transfers | [24.9](#249-model-checkpoints-and-training-state-transfers) |
+| Text, bytes, collection boundaries, lexical paths, globs, and command display | [8.10](#810-pure-value-boundaries) |
 
 * `Process.Context.override_environment`
 * `Process.Context.without_environment`
@@ -2530,7 +2545,7 @@ Lo v0.4 is a typed declarative dataflow language with:
 13. self-handling flows through signature-level onError, and
 14. mandatory adapter-level onError flows to guarantee a boundary catch.
 
-The implementation includes the lexer, parser, type checker, checked graph, interpreter, and native compiler.
+The implementation includes the lexer, parser, type checker, checked graph, native compiler, and Rust runtime.
 File, HTTP, and Process adapters use explicit host grants.
 Tensor training includes reverse-mode autodiff, gradient operations, SGD, and AdamW.
 Sections 24.1 through 24.9 define numeric, device, and checkpoint contracts.
@@ -2659,8 +2674,7 @@ It evaluates only the selected branch.
 
 ## 23. Runtime Contracts
 
-The interpreter and native backend use these runtime contracts.
-The two backends use the same evaluation order, errors, authorization rules, and logical execution limits.
+The native runtime implements evaluation order, errors, authorization rules, and logical execution limits.
 
 ### 23.1 Numeric and Collection Results
 
@@ -2890,7 +2904,7 @@ The compiler design specifies request limits, cancellation, startup, and shutdow
 
 F002 through F007 implement Float arithmetic, CPU tensors, reverse-mode autodiff, Parameters, gradients, and optimizers.
 F001 implements these operations in native executables.
-The reference interpreter and native artifacts use the same numeric and runtime contracts.
+Native artifacts implement these numeric and runtime contracts.
 All operations in this section have neither host observations nor commit activation.
 Device resource boundaries have a separate transitive effect summary.
 F008 adds device resources and explicit transfers.
@@ -2953,7 +2967,7 @@ This abbreviation is not a source type alias.
 Device construction validates the selector without device initialization.
 An invalid selector produces `Device.InvalidSelector`.
 The current software backend executes explicit transfers for `cuda-sim:0`.
-The Metal interpreter and explicitly selected Metal artifacts execute transfers and synchronous FP32 computation for `metal:0`.
+Explicitly selected Metal artifacts execute transfers and synchronous FP32 computation for `metal:0`.
 The standard compiler and software artifacts report `Device.Unavailable` for authorized Metal access.
 Use `lo-metal build --device-backend metal` for a native Metal artifact on `darwin/arm64`.
 The [native Metal contract](docs/native-metal.md) defines build inputs, metadata, and execution requirements.

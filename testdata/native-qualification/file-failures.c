@@ -1,13 +1,11 @@
+#include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __INT64_TYPE__ Offset;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct {U32 status,code;const Value *value;} Result;
-extern void lo_qualified_entry(Context*,const Value**,U64,U64,Result*);
-extern void lo_commit(Context*,const Value**,U64,U64,Result*);
-extern void lo_context_cancel(Context*);
+extern void lo_qualified_entry(Context*,const Value**,U64,U64,ResultSlot*);
+extern void lo_commit(Context*,const Value**,U64,U64,ResultSlot*);
+
 extern int lo_cli_main(int,const char**,const char**);
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int open(const char*,int,...),fcntl(int,int,...),dup2(int,int),mkdir(const char*,unsigned),unlink(const char*);
@@ -90,8 +88,8 @@ int unlinkat(int fd,const char *name,int flags){
  if(!result){++removed;if((LO_CASE==6&&removed==1)||(LO_CASE==9&&removed==3))lo_context_cancel(active);if(LO_CASE==7&&removed==4){cleanup_descriptor=fd;armed=1;}}
  return result;
 }
-void lo_qualified_commit(Context*c,const Value**a,U64 n,U64 s,Result*out){lo_commit(c,a,n,s,out);if(LO_CASE==10&&!out->status)armed=1;}
-void lo_entry(Context*c,const Value**a,U64 n,U64 s,Result*out){active=c;lo_qualified_entry(c,a,n,s,out);active=0;}
+void lo_qualified_commit(Context*c,const Value**a,U64 n,U64 s,ResultSlot*out){lo_commit(c,a,n,s,out);if(LO_CASE==10&&!out->status)armed=1;}
+void lo_entry(Context*c,const Value**a,U64 n,U64 s,ResultSlot*out){active=c;lo_qualified_entry(c,a,n,s,out);active=0;}
 int main(void){
  real_readdir=(void*(*)(void*))dlsym((void*)-1,"readdir");real_close=(int(*)(int))dlsym((void*)-1,"close");real_stat=(int(*)(int,const char*,void*,int))dlsym((void*)-1,"fstatat");real_unlink=(int(*)(int,const char*,int))dlsym((void*)-1,"unlinkat");
  if(!real_readdir||!real_close||!real_stat||!real_unlink)return 10;

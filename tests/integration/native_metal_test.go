@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -68,9 +69,8 @@ func TestNativeMetalSoftwareArtifact(t *testing.T) {
 	if got.status != 0 || json.Unmarshal([]byte(got.stdout), &metadata) != nil || metadata["device_backend"] != "software" {
 		t.Fatalf("metadata: %+v", got)
 	}
-	expected := runExecutable(t, binary, "run", source, "--allow-device", "metal:0", "--format", "json")
 	actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--format", "json")
-	if actual != expected || actual.status != 1 {
-		t.Fatalf("unavailable device: actual=%+v expected=%+v", actual, expected)
+	if actual.status != 1 || actual.stdout != "" || !strings.Contains(actual.stderr, `"kind":"Device.Unavailable"`) {
+		t.Fatalf("unavailable device: %+v", actual)
 	}
 }

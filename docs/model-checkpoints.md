@@ -105,14 +105,13 @@ Temporary decoded or transferred storage is released after failure or cancellati
 | --- | --- |
 | `internal/catalog` | Add checkpoint signatures, transfer signatures, error kinds, and device classification. |
 | `internal/check` | Infer exact checkpoint output types from the template and reject unsupported values. |
-| `internal/runtimeops` | Add the bounded codec and container transfers through the current tensor runtime. |
-| `internal/eval` | Dispatch the new checked operations. |
+| `runtime/native/src/checkpoint.rs` | Supply the bounded codec through the native tensor runtime. |
 | `internal/nativeplan` and `internal/llvmemit` | Lower checkpoint operations and emit native runtime calls. |
 | `internal/inspect` and `internal/tensorfacts` | Keep shapes and report transfers, CPU decode results, and possible errors. |
 | `runtime/native` | Execute checkpoint operations and container transfers in the static native runtime. |
 | `tests/integration` | Exercise independent processes, malformed data, failures, and CPU/Metal parity. |
 
-Each runtime preserves the same value and optimizer invariants.
+The runtime preserves the specified value and optimizer invariants.
 The native runtime implements the checked operations through its ABI.
 It does not import arbitrary runtime values.
 
@@ -146,9 +145,12 @@ From the repository root, build the compiler and execute the CPU workflow:
 
 ```bash
 make build
-./bin/lo run examples/xor_save_cpu.lo --write-root ./bin --format json
-./bin/lo run examples/xor_resume_cpu.lo --read-root ./bin --write-root ./bin --format json
-./bin/lo run examples/xor_infer_cpu.lo --read-root ./bin --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_save_cpu.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/xor_save_cpu
+./bin/xor_save_cpu run --write-root ./bin --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_resume_cpu.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/xor_resume_cpu
+./bin/xor_resume_cpu run --read-root ./bin --write-root ./bin --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_infer_cpu.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/xor_infer_cpu
+./bin/xor_infer_cpu run --read-root ./bin --format json
 ```
 
 The [save example](../examples/xor_save_cpu.lo) writes `bin/xor-state.json` after 250 updates.
@@ -162,9 +164,12 @@ For the explicit Metal workflow, use these commands:
 
 ```bash
 make build-metal
-./bin/lo-metal run examples/xor_save_metal.lo --allow-device metal:0 --write-root ./bin --format json
-./bin/lo-metal run examples/xor_resume_metal.lo --allow-device metal:0 --read-root ./bin --write-root ./bin --format json
-./bin/lo-metal run examples/xor_infer_metal.lo --allow-device metal:0 --read-root ./bin --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/xor_save_metal.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --device-backend metal --output ./bin/xor_save_metal
+./bin/xor_save_metal run --allow-device metal:0 --write-root ./bin --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/xor_resume_metal.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --device-backend metal --output ./bin/xor_resume_metal
+./bin/xor_resume_metal run --allow-device metal:0 --read-root ./bin --write-root ./bin --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/xor_infer_metal.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --device-backend metal --output ./bin/xor_infer_metal
+./bin/xor_infer_metal run --allow-device metal:0 --read-root ./bin --format json
 ```
 
 The Metal examples use the same checkpoint bytes as the CPU examples.

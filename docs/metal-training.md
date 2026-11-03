@@ -85,7 +85,7 @@ Run software acceptance without a Metal build:
 
 ```bash
 python3 docs/evidence/training-reference.py
-make test-integration TEST_ARGS='-run "TestMetalTraining|TestMetalCompute" -count=1 -race -v'
+make test-native-metal TEST_ARGS='-count=1 -v'
 make test-native TEST_ARGS='-run TestMetalTrainingCLI -count=1 -v'
 make ci
 ```
@@ -93,14 +93,12 @@ make ci
 For optional local Metal execution, use the [pinned toolchain](metal-transfers.md):
 
 ```bash
-make test-metal TEST_ARGS='-count=1 -race -v'
-make test-native-metal TEST_ARGS='-count=1 -race -v'
+make test-native TEST_ARGS='-tags=metal -run TestNativeMetalLiveTraining -count=1 -v'
 ./bin/lo-metal parse examples/training_metal.lo --format json
 ./bin/lo-metal check examples/training_metal.lo --format json
 ./bin/lo-metal inspect examples/training_metal.lo --format json
-./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
-LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo --device-backend metal --output ./bin/metal-training
-./bin/metal-training run --allow-device metal:0 --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --device-backend metal --output ./bin/training_metal
+./bin/training_metal run --allow-device metal:0 --format json
 ./bin/metal-training metadata
 ```
 

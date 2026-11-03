@@ -8,7 +8,8 @@ Reverse-mode autodiff produces gradients from the checked graph.
 Status: design completed on October 13, 2026.
 F002 through F011 and I001 own implementation and acceptance.
 
-F002, F003, and F004 implement Float arithmetic and CPU tensors through `lo run`.
+F002, F003, and F004 implement Float arithmetic and CPU tensors.
+Compiled artifacts execute these operations through the Rust runtime.
 The compiler also implements Device descriptors without device initialization.
 F005 implements first-order CPU autodiff and derivative plans in inspection reports.
 F006 and F007 implement Parameters, gradients, stop-gradient, SGD, and AdamW.
@@ -877,7 +878,7 @@ The selected software operation backend is the required numerical environment.
 An emulator can supply additional evidence when it supports the selected cubin and ABI.
 Unavailable emulator support does not authorize implicit CPU substitution for a CUDA request.
 
-I001 runs `make test-integration`, `make test-conformance`, and the final `make ci` at its implementation completion checkpoint.
+I001 runs `make test-native`, `make test-conformance`, and the final `make ci` at its implementation completion checkpoint.
 F009 also supplies the documented `make build-cuda` compilation lane.
 The P001 document review does not claim that those future acceptance commands passed.
 

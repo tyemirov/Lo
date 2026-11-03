@@ -61,13 +61,9 @@ func TestLLVMProcessCleanupAdmissionParity(t *testing.T) {
 			if built.status != 0 {
 				t.Fatalf("build admission fixture: %+v", built)
 			}
-			reference := runExecutable(t, binary, append([]string{"run", source, "--format", "json"}, flags...)...)
 			native := runExecutable(t, artifact, append([]string{"run", "--format", "json"}, flags...)...)
-			if reference.status != 2 || diagnostics(t, reference.stderr).Diagnostics[0].Code != code {
-				t.Fatalf("interpreter admission class: %+v", reference)
-			}
-			if native != reference {
-				t.Fatalf("admission differs: native=%+v interpreter=%+v", native, reference)
+			if native.status != 2 || native.stdout != "" || diagnostics(t, native.stderr).Diagnostics[0].Code != code {
+				t.Fatalf("native admission class: %+v", native)
 			}
 			data, err := os.ReadFile(path)
 			if err != nil || string(data) != "preserved" {

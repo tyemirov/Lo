@@ -57,9 +57,8 @@ The resulting executables passed independent execution without the compiler pack
 Both hosts also passed 500-step XOR training through installed compilation.
 
 I011 removed Go generation and the embedded runtime source bundle.
-The interpreter remains available through explicit execution commands.
-P009 supersedes the earlier decision to retain that interpreter.
-The [single-runtime plan](single-runtime-plan.md) assigns its removal to I014 through I018.
+The [single-runtime plan](single-runtime-plan.md) removes Go application execution through I014 to I018.
+The Rust runtime supplies the only application execution path.
 The selected compiler retains parse, check, inspect, and build commands.
 The produced executable supplies run and serve commands through the Rust runtime.
 
@@ -192,7 +191,6 @@ Lo source and local dependencies
   -> frontend and verifier
   -> checked Lo graph
      -> inspector
-     -> reference interpreter
      -> native lowering plan
         -> selected backend
         -> object files
@@ -312,8 +310,8 @@ The current 180-second, 2-GiB, and 64-MiB build limits remain applicable until a
 The migration does not retain an automatic Go or interpreter fallback.
 I011 removed the Go generator and runtime source bundle after the initial corpus and corrected fixture checks.
 The final qualification must bind all results to the current source and installed packages.
-The current interpreter supplies execution and differential tests until I018 completes.
-P009 selects independent expected results and direct native coverage for its replacement.
+P009 selects independent expected results and direct native coverage.
+The current tests compile Lo programs and execute their artifacts or use the compiled-entry ABI.
 
 ## Offline Acceptance Procedure
 

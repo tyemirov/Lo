@@ -730,7 +730,8 @@ impl Program {
                 }
                 if matches!(
                     site.operation.as_str(),
-                    "List.map"
+                    "List.sort"
+                        | "List.map"
                         | "List.filter"
                         | "List.fold"
                         | "List.flat_map"
@@ -873,7 +874,7 @@ impl Context {
         Self::with_session(session, crate::files::empty(), true)
     }
     pub fn with_options(session: Arc<Session>) -> Self {
-        Self::with_session(session, crate::files::empty(), true)
+        Self::with_session(session, crate::files::empty(), false)
     }
     fn with_session(
         session: Arc<Session>,

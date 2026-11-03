@@ -2,7 +2,7 @@
 #define LO_TEST_METAL_EXECUTOR_H
 typedef unsigned uint;
 #define __METAL_VERSION__ 1
-#include "../../internal/device/metal_types.h"
+#include "../../runtime/native/host/metal/metal_types.h"
 #undef __METAL_VERSION__
 _Static_assert(sizeof(LoMetalOperation)==160,"descriptor size");
 static float model_float(unsigned bits) {

@@ -1,21 +1,17 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 #include "capture.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct {U32 status,code;const Value *value;} Result;
 typedef struct {int stage,class_id,started,cleanup_complete,termination_kind,termination_value;Size stdin_written,stdout_size,stderr_size;unsigned int cleanup_failures;Size ownership;} NativeResult;
 typedef int (*Cancel)(const void*);
 typedef void (*Driver)(Size,const unsigned char*,Size,const unsigned char*,Size,unsigned char*,unsigned char*,Size,Cancel,const void*,U64,NativeResult*);
-extern Context *lo_context_new(const ContextOptions *);
-extern void lo_context_run(Context*,Result*),lo_context_free(Context*),lo_value_release(const Value*);
+
 extern void lo_context_cancel_after_polls(Context*,U64);
 extern int lo_context_process_driver(Context*,Driver,Size),lo_context_process_driver_limits(Context*,U64,U64,Size),lo_context_process_close(Context*),lo_context_process_wait_retained(Context*);
 extern U32 lo_context_process_ownership(Context*);
-extern void lo_process_lifecycle_entry(Context*,const Value**,U64,U64,Result*);
+extern void lo_process_lifecycle_entry(Context*,const Value**,U64,U64,ResultSlot*);
 extern int lo_cli_main(int,const char**,const char**);
 extern U64 lo_runtime_live_values(void),lo_runtime_live_contexts(void);
 extern int dup2(int,int),fcntl(int,int,...),close(int);
@@ -67,7 +63,7 @@ static Context *context(void){
  if(LO_CASE==9)lo_context_cancel_after_polls(c,128);
  return c;
 }
-void lo_entry(Context*c,const Value**a,U64 n,U64 s,Result*out){
+void lo_entry(Context*c,const Value**a,U64 n,U64 s,ResultSlot*out){
  if(embedding){lo_process_lifecycle_entry(c,a,n,s,out);return;}
  Context*owned=context();if(!owned){invalid=6;return;}
  embedding=1;lo_context_run(owned,out);embedding=0;slot_status=out->status;
@@ -78,7 +74,7 @@ void lo_entry(Context*c,const Value**a,U64 n,U64 s,Result*out){
 int main(void){
  int host=LO_CASE>=6;
  if(host){
-  Context*c=context();if(!c)return 10;Result result={99,99,0};embedding=1;lo_context_run(c,&result);embedding=0;
+  Context*c=context();if(!c)return 10;ResultSlot result={99,99,0};embedding=1;lo_context_run(c,&result);embedding=0;
   if(result.status!=2||result.value||!__atomic_load_n(&finished,__ATOMIC_SEQ_CST))return 11;
   if(!lo_context_process_close(c)||!lo_context_process_wait_retained(c)||lo_context_process_ownership(c))return 12;
   lo_context_free(c);

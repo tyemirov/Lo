@@ -20,7 +20,7 @@ func TestDiagnosticTraceArguments(t *testing.T) {
 		{"callback", `flow Fail(entries: List<Record{name: String, value: Bytes}>, item: Int) -> Int! { headers = HTTP.Headers.new(entries); return Math.div(item, 0) }; return List.map(List.new(1), ` + entries + `, Fail)`, []map[string]string{{"entries": entriesType, "item": "Int"}, {"index": "Int", "element": "Int"}}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got := run(t, "run", sourceFile(t, test.source), "--format", "json")
+			got := runProgram(t, sourceFile(t, test.source), "run", "--format", "json")
 			diagnostic := receiptHostDiagnostic(t, got)
 			if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != "Math.DivideByZero" {
 				t.Fatalf("expected unrelated math failure: %+v", got)

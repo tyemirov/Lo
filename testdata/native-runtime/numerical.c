@@ -1,13 +1,8 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct { U32 status; U32 code; const Value *value; } ResultSlot;
-extern Context *lo_context_new(const ContextOptions *);
-extern void lo_context_free(Context *);
-extern void lo_context_run(Context *, ResultSlot *);
+
 extern void lo_context_cancel_after_polls(Context *, U64);
 extern U64 lo_context_resource_bytes(const Context *, U32);
 extern U64 lo_context_peak_resource_bytes(const Context *, U32);
@@ -18,8 +13,7 @@ extern U64 lo_runtime_live_contexts(void);
 extern U64 lo_runtime_live_values(void);
 extern U64 lo_runtime_live_storages(void);
 extern U64 lo_runtime_live_storage_bytes(void);
-extern void lo_value_release(const Value *);
-extern void lo_value_retain(const Value *);
+
 static int clean(Context *c) {
     return !lo_context_scope_count(c) && !lo_context_depth(c) && !lo_context_tape_count(c) &&
         !lo_context_resource_bytes(c, 1) && !lo_context_resource_bytes(c, 3);

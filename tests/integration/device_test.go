@@ -18,7 +18,7 @@ func deviceSource(selector, outputType, expression string) string {
 
 func TestDeviceTransferRoundTrip(t *testing.T) {
 	source := deviceSource("cuda-sim:0", "Record{source: Tensor<FP32>, result: Tensor<FP32>, location: Device}", `Record.new(source: source, result: Tensor.to(transferred, Device.new("cpu")), location: Tensor.device(transferred))`)
-	got := run(t, "run", sourceFile(t, source), "--allow-device", "cuda-sim:0", "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--allow-device", "cuda-sim:0", "--format", "json")
 	if got.status != 0 || got.stderr != "" || !json.Valid([]byte(got.stdout)) {
 		t.Fatalf("transfer round trip: %+v", got)
 	}
@@ -47,7 +47,7 @@ func TestDeviceAuthorizationAndFailures(t *testing.T) {
 			if tc.grant != "" {
 				args = append(args, "--allow-device", tc.grant)
 			}
-			got := run(t, args...)
+			got := runProgram(t, args[1], args[0], args[2:]...)
 			if got.status != tc.status || got.stdout != "" || !strings.Contains(got.stderr, tc.diagnostic) {
 				t.Fatalf("want %s status %d: %+v", tc.diagnostic, tc.status, got)
 			}
@@ -57,7 +57,7 @@ func TestDeviceAuthorizationAndFailures(t *testing.T) {
 
 func TestDeviceGrantArguments(t *testing.T) {
 	for _, options := range [][]string{{"--allow-device"}, {"--allow-device", "cpu"}, {"--allow-device", "cuda:1"}, {"--allow-device", "cuda:0", "--allow-device", "cuda-sim:0"}, {"--allow-device", "cuda:0", "--allow-device", "cuda:0"}} {
-		got := run(t, append([]string{"run", sourceFile(t, "return 1"), "--format", "json"}, options...)...)
+		got := runProgram(t, sourceFile(t, "return 1"), "run", append([]string{"--format", "json"}, options...)...)
 		if got.status != 2 || !strings.Contains(got.stderr, "cli.invalid-invocation") {
 			t.Fatalf("grant arguments: %+v", got)
 		}
@@ -83,7 +83,7 @@ func TestDeviceStaticInspection(t *testing.T) {
 
 func TestDeviceCPUIdentity(t *testing.T) {
 	source := deviceSource("cpu", "Tensor<FP32>", "transferred")
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 0 || got.stderr != "" || !strings.Contains(got.stdout, `"device":"cpu"`) {
 		t.Fatalf("CPU identity: %+v", got)
 	}
@@ -116,7 +116,7 @@ func TestDeviceEmptyAndIdentity(t *testing.T) {
   same=Tensor.to(remote,Device.new("cuda-sim:0"))
   return Tensor.to(same,Device.new("cpu"))
  };return Main()`
-	got := run(t, "run", sourceFile(t, text), "--allow-device", "cuda-sim:0", "--format", "json")
+	got := runProgram(t, sourceFile(t, text), "run", "--allow-device", "cuda-sim:0", "--format", "json")
 	if got.status != 0 || !strings.Contains(got.stdout, `"shape":["2","0","3"]`) || !strings.Contains(got.stdout, `"values":[]`) {
 		t.Fatalf("empty tensor transfer: %+v", got)
 	}

@@ -4,14 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
 	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
+	"github.com/MarcoPoloResearchLab/Lo/internal/compilercli"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
-	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
 	"github.com/MarcoPoloResearchLab/Lo/internal/inspect"
 	"github.com/MarcoPoloResearchLab/Lo/internal/nativebuild"
-	"github.com/MarcoPoloResearchLab/Lo/internal/runner"
 	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 	"github.com/MarcoPoloResearchLab/Lo/internal/syntax"
 	"io"
@@ -24,79 +21,57 @@ import (
 var installedToolchainSHA256 string
 
 func main() { os.Exit(execute(os.Args[1:], os.Stdout, os.Stderr)) }
-func execute(args []string, stdout, stderr io.Writer) (status int) {
-	if adapter.HandleConsoleWriter(args) {
-		return 0
-	}
-	if adapter.HandleFileProbe(args) {
-		return 0
-	}
-	inv, err := runner.ParseCompiler(args)
+func execute(args []string, stdout, stderr io.Writer) int {
+	inv, err := compilercli.Parse(args)
 	if err != nil {
-		return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), runner.ExitHost)
+		return compilercli.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), compilercli.ExitHost)
 	}
-	var entry execution.ProgramEntry
-	var file string
-	if inv.Command() == runner.RunCommand || inv.Command() == runner.ServeCommand {
-		entry, err = execution.OpenProgramEntry(inv.Path())
-		if err == nil {
-			file, err = entry.ReadSource()
-		}
-		if entry != nil {
-			defer func() {
-				if err := execution.CloseUnclaimedProgramEntry(entry); err != nil {
-					status = runner.ReportRuntime(stderr, inv.Format(), err)
-				}
-			}()
-		}
-	} else {
-		file, err = readSource(inv.Path())
-	}
+	file, err := readSource(inv.Path())
 	if err != nil {
-		return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.ReadFailed, diagnostic.Source, err.Error(), nil), runner.ExitHost)
+		return compilercli.Report(stderr, inv.Format(), diagnostic.New(diagnostic.ReadFailed, diagnostic.Source, err.Error(), nil), compilercli.ExitHost)
 	}
 	src, err := source.New(inv.Path(), file)
 	if err != nil {
-		return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.SourceLimit, diagnostic.Source, err.Error(), nil), runner.ExitRejected)
+		return compilercli.Report(stderr, inv.Format(), diagnostic.New(diagnostic.SourceLimit, diagnostic.Source, err.Error(), nil), compilercli.ExitRejected)
 	}
 	encoder := json.NewEncoder(stdout)
 	encoder.SetEscapeHTML(false)
-	if inv.Format() == runner.TextFormat {
+	if inv.Format() == compilercli.TextFormat {
 		encoder.SetIndent("", "  ")
 	}
-	if inv.Command() == runner.InspectCommand {
+	if inv.Command() == compilercli.InspectCommand {
 		result, d := compiler.Inspect(src)
 		if d != nil {
-			return runner.Report(stderr, inv.Format(), d, runner.ExitRejected)
+			return compilercli.Report(stderr, inv.Format(), d, compilercli.ExitRejected)
 		}
-		if inv.Format() == runner.JsonFormat {
+		if inv.Format() == compilercli.JsonFormat {
 			err = encoder.Encode(struct {
 				Command string         `json:"command"`
 				Report  inspect.Report `json:"report"`
-			}{runner.InspectCommand, result})
+			}{compilercli.InspectCommand, result})
 		} else {
 			_, err = io.WriteString(stdout, result.Text())
 		}
-	} else if inv.Command() == runner.ParseCommand {
+	} else if inv.Command() == compilercli.ParseCommand {
 		program, d := compiler.Parse(src)
 		if d != nil {
-			return runner.Report(stderr, inv.Format(), d, runner.ExitRejected)
+			return compilercli.Report(stderr, inv.Format(), d, compilercli.ExitRejected)
 		}
 		err = encoder.Encode(struct {
 			Command string         `json:"command"`
 			Program syntax.Program `json:"program"`
-		}{runner.ParseCommand, program})
+		}{compilercli.ParseCommand, program})
 	} else {
 		result, d := compiler.Check(src)
 		if d != nil {
-			return runner.Report(stderr, inv.Format(), d, runner.ExitRejected)
+			return compilercli.Report(stderr, inv.Format(), d, compilercli.ExitRejected)
 		}
-		if inv.Command() == runner.BuildCommand {
+		if inv.Command() == compilercli.BuildCommand {
 			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 			defer stop()
 			var receipt nativebuild.Receipt
 			var d diagnostic.Diagnostic
-			if inv.Emit() == runner.LLVMEmission {
+			if inv.Emit() == compilercli.LLVMEmission {
 				receipt, d = nativebuild.EmitLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend())
 			} else if installedToolchainSHA256 != "" {
 				executable, err := os.Executable()
@@ -110,7 +85,7 @@ func execute(args []string, stdout, stderr io.Writer) (status int) {
 					if inv.Toolchain() != "" {
 						supplied, resolveErr := filepath.Abs(inv.Toolchain())
 						if resolveErr != nil || supplied != manifest {
-							return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, "installed compiler uses its own toolchain", nil), runner.ExitHost)
+							return compilercli.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, "installed compiler uses its own toolchain", nil), compilercli.ExitHost)
 						}
 					}
 					receipt, d = nativebuild.BuildInstalledLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend(), manifest, installedToolchainSHA256)
@@ -119,61 +94,41 @@ func execute(args []string, stdout, stderr io.Writer) (status int) {
 				receipt, d = nativebuild.BuildLLVM(ctx, result, inv.Output(), inv.Target(), inv.DeviceBackend(), inv.Toolchain())
 			}
 			if d != nil {
-				return runner.Report(stderr, inv.Format(), d, runner.ExitHost)
+				return compilercli.Report(stderr, inv.Format(), d, compilercli.ExitHost)
 			}
-			if inv.Format() == runner.JsonFormat {
+			if inv.Format() == compilercli.JsonFormat {
 				err = encoder.Encode(receipt)
 			} else {
-				if receipt.Emit == runner.LLVMEmission {
+				if receipt.Emit == compilercli.LLVMEmission {
 					_, err = fmt.Fprintf(stdout, "%s: emitted LLVM module for %s (%s)\n", receipt.Artifact, receipt.Target, receipt.ABI)
 				} else {
 					_, err = fmt.Fprintf(stdout, "%s: built %s\n", receipt.Artifact, receipt.Target)
 				}
 			}
 			if err != nil {
-				return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), runner.ExitHost)
+				return compilercli.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, err.Error(), nil), compilercli.ExitHost)
 			}
-			return runner.ExitSuccess
-		}
-		if inv.Command() == runner.RunCommand || inv.Command() == runner.ServeCommand {
-			program, err := eval.Program(result)
-			if err != nil {
-				return runner.ReportRuntime(stderr, inv.Format(), err)
-			}
-			out, okOut := stdout.(*os.File)
-			errout, okErr := stderr.(*os.File)
-			if !okOut || !okErr {
-				return runner.ReportRuntime(stderr, inv.Format(), fmt.Errorf("CLI output requires owned console descriptors"))
-			}
-			console, err := adapter.OpenCLIConsole(context.Background(), adapter.ConsoleOptions{Command: inv.Command(), Format: inv.Format(), MaxBytes: inv.MaxConsoleBytes()}, out, errout)
-			if err != nil {
-				return runner.ReportRuntime(stderr, inv.Format(), err)
-			}
-			ctx, err := execution.WithProgramEntry(context.Background(), entry)
-			if err != nil {
-				return runner.ReportRuntime(stderr, inv.Format(), err)
-			}
-			return runner.Run(ctx, inv, program, console)
+			return compilercli.ExitSuccess
 		}
 		output := ""
 		if t := result.ResultType(); t != nil {
 			output = t.String()
 		}
-		if inv.Format() == runner.JsonFormat {
+		if inv.Format() == compilercli.JsonFormat {
 			err = encoder.Encode(struct {
 				Command    string `json:"command"`
 				Status     string `json:"status"`
 				File       string `json:"file"`
 				ResultType string `json:"result_type,omitempty"`
-			}{runner.CheckCommand, "ok", inv.Path(), output})
+			}{compilercli.CheckCommand, "ok", inv.Path(), output})
 		} else {
 			_, err = fmt.Fprintf(stdout, "%s: ok\n", inv.Path())
 		}
 	}
 	if err != nil {
-		return runner.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, "write command result: "+err.Error(), nil), runner.ExitHost)
+		return compilercli.Report(stderr, inv.Format(), diagnostic.New(diagnostic.Invocation, diagnostic.CLI, "write command result: "+err.Error(), nil), compilercli.ExitHost)
 	}
-	return runner.ExitSuccess
+	return compilercli.ExitSuccess
 }
 func readSource(path string) (string, error) {
 	f, err := os.Open(path)

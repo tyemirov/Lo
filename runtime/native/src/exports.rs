@@ -224,6 +224,9 @@ pub unsafe fn call(
             if op == crate::program_exit::OPERATION {
                 return crate::program_exit::execute(&mut *c, &s, &a);
             }
+            if crate::processors::SUPPORTED.contains(&op) && op != "List.sort" {
+                return crate::processors::execute(&mut *c, &s, &a);
+            }
             if op == crate::cli_options::OPERATION {
                 return crate::cli_options::execute(&mut *c, &s, &a);
             }
@@ -247,7 +250,8 @@ pub unsafe fn call(
             }
             if matches!(
                 op,
-                "List.map"
+                "List.sort"
+                    | "List.map"
                     | "List.filter"
                     | "List.fold"
                     | "List.flat_map"
@@ -816,6 +820,85 @@ pub unsafe extern "C" fn lo_context_cancel(c: *mut Context) {
         std::process::abort()
     }
     (*c).cancelled = true;
+}
+const DIAGNOSTIC_MAX_BYTES: usize = 1 << 20;
+struct DiagnosticBuffer {
+    bytes: Vec<u8>,
+    exceeded: bool,
+}
+impl std::io::Write for DiagnosticBuffer {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        if bytes.len() > DIAGNOSTIC_MAX_BYTES - self.bytes.len() {
+            self.exceeded = true;
+            return Err(std::io::Error::other(
+                "native diagnostic exceeds byte limit",
+            ));
+        }
+        self.bytes.extend_from_slice(bytes);
+        Ok(bytes.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_context_diagnostic(
+    c: *const Context,
+    result: *const ResultSlot,
+    destination: *mut u8,
+    capacity: usize,
+    required: *mut usize,
+) -> i32 {
+    const OK: i32 = 0;
+    const SHORT_BUFFER: i32 = 1;
+    const NONE: i32 = 2;
+    const INVALID: i32 = 3;
+    const WRONG_THREAD: i32 = 4;
+    const TOO_LARGE: i32 = 5;
+    if required.is_null() {
+        return INVALID;
+    }
+    *required = 0;
+    if c.is_null() || (destination.is_null() && capacity != 0) {
+        return INVALID;
+    }
+    if ptr::addr_of!((*c).owner).read() != std::thread::current().id() {
+        return WRONG_THREAD;
+    }
+    let context = &*c;
+    let fault = if let Some(fault) = &context.fault {
+        Some(fault.clone())
+    } else if let Some(result) = result.as_ref() {
+        match (result.status, result.code, result.value.is_null()) {
+            (0, 0, false) => None,
+            (1, 1, false) => {
+                if !matches!((*result.value).data, Data::Error(_)) {
+                    return INVALID;
+                }
+                Some(Fault::Recoverable(borrow(result.value)))
+            }
+            (2, 3, true) => Some(host("context belongs to another thread")),
+            _ => return INVALID,
+        }
+    } else {
+        None
+    };
+    let Some(fault) = fault else { return NONE };
+    let (diagnostic, _) = crate::cli::fault_diagnostic(fault, context, None);
+    let document = serde_json::json!({"diagnostics": [diagnostic]});
+    let mut buffer = DiagnosticBuffer {
+        bytes: Vec::new(),
+        exceeded: false,
+    };
+    if serde_json::to_writer(&mut buffer, &document).is_err() {
+        return if buffer.exceeded { TOO_LARGE } else { INVALID };
+    }
+    *required = buffer.bytes.len();
+    if capacity < buffer.bytes.len() {
+        return SHORT_BUFFER;
+    }
+    ptr::copy_nonoverlapping(buffer.bytes.as_ptr(), destination, buffer.bytes.len());
+    OK
 }
 #[no_mangle]
 pub extern "C" fn lo_runtime_live_contexts() -> u64 {

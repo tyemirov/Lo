@@ -86,14 +86,14 @@ func TestTensorShapeBoundaries(t *testing.T) {
 		{"sum", "List.new(n)", "Tensor.InvalidShape"},
 	} {
 		source := fmt.Sprintf(`flow Bad(n: Int) -> Tensor<FP32>! { a=Tensor.new(List.new(1.0,2.0),List.new(2)); return Tensor.%s(a,%s) }; return Bad(Math.add(2,1))`, tc.op, tc.args)
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 || !strings.Contains(got.stderr, `"kind":"`+tc.kind+`"`) {
 			t.Fatalf("dynamic axes/shape: %+v", got)
 		}
 	}
 	tensorResult(t, `return Tensor.new(List.new(),List.new(1000000,1000000,1000000,1000000,0))`, []string{"1000000", "1000000", "1000000", "1000000", "0"}, []string{})
 	tensorResult(t, `flow Identity() -> Tensor<FP32>! { a=Tensor.new(List.new(-0.0),List.new()); return Tensor.sum(a,List.new()) }; return Identity()`, []string{}, []string{"-0"})
-	got := run(t, "run", sourceFile(t, `flow Empty() -> Tensor<FP32>! { a=Tensor.new(List.new(),List.new(0,0)); return Tensor.mean(a,List.new(0)) }; return Empty()`), "--format", "json")
+	got := runProgram(t, sourceFile(t, `flow Empty() -> Tensor<FP32>! { a=Tensor.new(List.new(),List.new(0,0)); return Tensor.mean(a,List.new(0)) }; return Empty()`), "run", "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"Tensor.EmptyReduction"`) {
 		t.Fatalf("empty mean: %+v", got)
 	}
@@ -106,12 +106,12 @@ func TestTensorLimits(t *testing.T) {
 		`flow Large() -> Tensor<FP32>! { a=Tensor.new(List.new(1.0),List.new()); return Tensor.broadcast(a,List.new(1001,1000)) }; return Large()`,
 		`flow Large() -> List<Float>! { a=Tensor.new(List.new(1.0),List.new()); b=Tensor.broadcast(a,List.new(1000000)); return Tensor.values(b) }; return Large()`,
 	} {
-		got := run(t, "run", sourceFile(t, source), "--format", "json", "--max-steps", "10000000")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json", "--max-steps", "10000000")
 		if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 			t.Fatalf("tensor limit: %+v", got)
 		}
 	}
-	got := run(t, "run", sourceFile(t, `flow Work() -> Tensor<FP32>! { a=Tensor.new(List.new(1.0),List.new()); b=Tensor.broadcast(a,List.new(1000,1000)); return Tensor.matmul(b,b) }; return Work()`), "--format", "json", "--max-steps", "1100000")
+	got := runProgram(t, sourceFile(t, `flow Work() -> Tensor<FP32>! { a=Tensor.new(List.new(1.0),List.new()); b=Tensor.broadcast(a,List.new(1000,1000)); return Tensor.matmul(b,b) }; return Work()`), "run", "--format", "json", "--max-steps", "1100000")
 	if got.status != 2 || !strings.Contains(got.stderr, "tensor work steps") {
 		t.Fatalf("matmul preflight: %+v", got)
 	}
@@ -120,7 +120,7 @@ func TestTensorLimits(t *testing.T) {
 func TestTensorDiagnosticSnapshots(t *testing.T) {
 	source := `flow Fail(a: Tensor<FP32>) -> Tensor<FP32>! { bad=Tensor.sqrt(a); later=Tensor.div(a,Tensor.new(List.new(0.0),List.new())); return later }
 flow Outer() -> Tensor<FP32>! { a=Tensor.new(List.new(1.0,-1.0,-2.0),List.new(3)); return Fail(a) }; return Outer()`
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, "row-major element 1") || strings.Contains(got.stderr, `"values":`) || strings.Contains(got.stderr, `Numeric.DivideByZero`) || !strings.Contains(got.stderr, `"tensor_type"`) || !strings.Contains(got.stderr, `"trace"`) {
 		t.Fatalf("snapshot/source order: %+v", got)
 	}
@@ -221,7 +221,7 @@ func TestTensorEmptyReductionOutputs(t *testing.T) {
   a=Tensor.new(List.new(),List.new(n,n,n,n,0,0))
   return Tensor.mean(a,List.new(0,1,2,3,4))
 }; return Reduce(%s)`, dimension)
-			got := run(t, "run", sourceFile(t, source), "--format", "json")
+			got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 			if got.status != 1 || !strings.Contains(got.stderr, `"kind":"Tensor.EmptyReduction"`) {
 				t.Fatalf("empty mean region: %+v", got)
 			}

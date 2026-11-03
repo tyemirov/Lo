@@ -14,7 +14,7 @@ func cliOptionFlag(name, aliases, group, help string) string {
 func cliOptionFailure(t *testing.T, arguments, flags, name string, abbreviations bool, kind, reason string) {
 	t.Helper()
 	body := fmt.Sprintf(`return CLI.parse(%s, %s, %q, "", %t)`, arguments, flags, name, abbreviations)
-	got := run(t, "run", sourceFile(t, cliStackProgram("CLI.Options", body)), "--format", "json")
+	got := runProgram(t, sourceFile(t, cliStackProgram("CLI.Options", body)), "run", "--format", "json")
 	if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"`+kind+`"`) || !strings.Contains(got.stderr, `"value":"`+reason+`"`) || strings.Contains(got.stderr, "private-parser") {
 		t.Fatalf("sanitized option failure kind=%s reason=%s: %+v", kind, reason, got)
 	}
@@ -85,7 +85,7 @@ func TestCLIOptionsCanonicalResolution(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			body := fmt.Sprintf(`options = CLI.parse(%s, %s, "example", "", true); return options.flags`, test.arguments, test.flags)
-			got := run(t, "run", sourceFile(t, cliStackProgram("Map<String, Bool>", body)), "--format", "json")
+			got := runProgram(t, sourceFile(t, cliStackProgram("Map<String, Bool>", body)), "run", "--format", "json")
 			valueJSON(t, fileOutput(t, got), test.expected)
 		})
 	}
@@ -99,7 +99,7 @@ func TestCLIOptionsFailureEvidence(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			body := fmt.Sprintf(`return CLI.parse(%s, %s, "example", "", true)`, test.arguments, flags)
-			got := run(t, "run", sourceFile(t, cliStackProgram("CLI.Options", body)), "--format", "json")
+			got := runProgram(t, sourceFile(t, cliStackProgram("CLI.Options", body)), "run", "--format", "json")
 			diagnostic := receiptHostDiagnostic(t, got)
 			if got.status != 1 || got.stdout != "" || diagnostic.Error == nil || diagnostic.Error.Kind != "CLI.InvalidArguments" || diagnostic.Error.Message != "declared option parsing failed" || diagnostic.Error.Input == nil {
 				t.Fatalf("typed parser evidence: %+v", got)
@@ -118,7 +118,7 @@ func TestCLIOptionsFailureEvidence(t *testing.T) {
 func TestCLIOptionsHelpDoesNotRetainSkippedArguments(t *testing.T) {
 	flags := `List.new(` + cliOptionFlag("--review", `List.new()`, "", "Review") + `)`
 	body := fmt.Sprintf(`return CLI.parse(List.new("--review", "--he", "--private-parser-skipped"), %s, "example", "", true)`, flags)
-	got := run(t, "run", sourceFile(t, cliStackProgram("CLI.Options", body)), "--format", "json")
+	got := runProgram(t, sourceFile(t, cliStackProgram("CLI.Options", body)), "run", "--format", "json")
 	value := fileOutput(t, got)
 	if strings.Contains(got.stdout, "private-parser") {
 		t.Fatalf("options retained skipped arguments: %s", got.stdout)
@@ -134,7 +134,7 @@ func TestCLIOptionsHelpDoesNotRetainSkippedArguments(t *testing.T) {
 
 func TestCLIOptionsPureCallback(t *testing.T) {
 	source := `flow Parse(arguments: List<String>) -> CLI.Options! { return CLI.parse(arguments, List.new(), "example", "", true) }; flow Main() -> List<CLI.Options>! { return List.map(List.new(List.new("--help")), Parse) }; return Main()`
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 0 || got.stderr != "" || !strings.Contains(got.stdout, `"help_requested":{"type":"Bool","value":true}`) {
 		t.Fatalf("pure parser callback: %+v", got)
 	}
@@ -143,11 +143,11 @@ func TestCLIOptionsPureCallback(t *testing.T) {
 func TestCLIOptionsWorkLimit(t *testing.T) {
 	body := fmt.Sprintf(`options = CLI.parse(List.new("--help"), List.new(), "example", %q, true); return options.help_requested`, strings.Repeat("x", 4096))
 	path := sourceFile(t, cliStackProgram("Bool", body))
-	limited := run(t, "run", path, "--max-steps", "200", "--format", "json")
+	limited := runProgram(t, path, "run", "--max-steps", "200", "--format", "json")
 	if limited.status != 2 || !strings.Contains(limited.stderr, "runtime.limit") || limited.stdout != "" {
 		t.Fatalf("parser scan escaped work limit: %+v", limited)
 	}
-	complete := run(t, "run", path, "--max-steps", "20000")
+	complete := runProgram(t, path, "run", "--max-steps", "20000")
 	if complete.status != 0 || complete.stdout != "true\n" || complete.stderr != "" {
 		t.Fatalf("admitted parser scan: %+v", complete)
 	}

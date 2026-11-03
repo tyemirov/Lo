@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -19,9 +18,6 @@ const llvmCheckpointParameters = `{"type":"Parameters\u003cRecord{x: Tensor\u003
 
 func llvmCheckpointLane(t *testing.T) {
 	t.Helper()
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 }
 
 func checkpointResultBytes(t *testing.T, output result) []byte {
@@ -51,9 +47,8 @@ func checkpointResultBytes(t *testing.T, output result) []byte {
 func TestLLVMCheckpointCanonicalBytes(t *testing.T) {
 	llvmCheckpointLane(t)
 	input := sourceFile(t, `flow Main()->Bytes!{x=Tensor.new(List.new(1.0,-2.0),List.new(2));p=Parameters.new(Record.new(x:x));return Checkpoint.encode(p)};return Main()`)
-	expected := runExecutable(t, binary, "run", input, "--format", "json")
-	actual := run(t, "run", input, "--format", "json")
-	for _, output := range []result{expected, actual} {
+	actual := runProgram(t, input, "run", "--format", "json")
+	for _, output := range []result{actual} {
 		if got := string(checkpointResultBytes(t, output)); got != llvmCheckpointParameters {
 			t.Fatalf("canonical checkpoint bytes: %s, want %s", got, llvmCheckpointParameters)
 		}
@@ -98,17 +93,13 @@ return restored
 };return Main()`, typ, setup, data, path)
 	input := sourceFile(t, text)
 	arguments := []string{"run", input, "--format", "json", "--write-root", directory, "--max-steps", "100000000"}
-	expected := runCheckpointBounded(t, binary, arguments...)
 	artifact, built := buildForTest(t, input)
 	if built.status != 0 {
 		t.Fatalf("build checkpoint rejection fixture: %+v", built)
 	}
-	_, runtimeArguments, ok := nativeInvocation(arguments)
-	if !ok {
-		t.Fatal("checkpoint runtime invocation not admitted")
-	}
+	runtimeArguments := append([]string{"run"}, arguments[2:]...)
 	actual := runCheckpointBounded(t, artifact, runtimeArguments...)
-	for _, output := range []result{expected, actual} {
+	for _, output := range []result{actual} {
 		if output.status != 1 || output.stdout != "" {
 			t.Fatalf("malformed checkpoint did not stop evaluation: %+v", output)
 		}
@@ -129,16 +120,6 @@ return restored
 		if diagnostic.Code != "runtime.unhandled-error" || diagnostic.Stage != "runtime" || diagnostic.Error.Kind != kind || diagnostic.Error.Type != "Error" || diagnostic.Span.File != input || diagnostic.Error.Input == nil || len(diagnostic.Error.Trace) == 0 {
 			t.Fatalf("checkpoint typed diagnostic lost source or error context: %s", output.stderr)
 		}
-	}
-	var expectedDiagnostic, actualDiagnostic any
-	if err := json.Unmarshal([]byte(expected.stderr), &expectedDiagnostic); err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal([]byte(actual.stderr), &actualDiagnostic); err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(actualDiagnostic, expectedDiagnostic) {
-		t.Fatalf("checkpoint diagnostic differs: native %s; interpreter %s", actual.stderr, expected.stderr)
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
 		t.Fatalf("malformed checkpoint activated file output: %v", err)
@@ -170,11 +151,26 @@ func TestLLVMCheckpointOptimizerStatePublicAdmission(t *testing.T) {
 		t.Run(optimizer, func(t *testing.T) {
 			setup, typ := checkpointSetup(optimizer)
 			input := sourceFile(t, fmt.Sprintf(`flow Main()->Bytes!{%s return Checkpoint.encode(original)};return Main()`, setup))
-			expected := runExecutable(t, binary, "run", input, "--format", "json")
-			actual := run(t, "run", input, "--format", "json")
-			valid := string(checkpointResultBytes(t, expected))
-			if string(checkpointResultBytes(t, actual)) != valid {
-				t.Fatalf("%s canonical optimizer checkpoint differs", optimizer)
+			actual := runProgram(t, input, "run", "--format", "json")
+			valid := string(checkpointResultBytes(t, actual))
+			var state runtimeValue
+			if err := json.Unmarshal([]byte(valid), &state); err != nil {
+				t.Fatal(err)
+			}
+			if state.Type != typ {
+				t.Fatalf("checkpoint state type: %s", state.Type)
+			}
+			valueJSON(t, recordField(t, state, "step"), `"1"`)
+			want := []float64{.99, -1.98}
+			if optimizer == "AdamW" {
+				want = []float64{.9890000224113464, -1.9880000352859497}
+			}
+			checkNumbers(t, tensorNumbers(t, recordField(t, recordField(t, state, "parameters"), "x")), want, 1e-7, 1e-6)
+			if optimizer == "AdamW" {
+				checkNumbers(t, tensorNumbers(t, recordField(t, recordField(t, state, "first_moment"), "x")), []float64{.010000002570450306, -.020000005140900612}, 1e-9, 1e-6)
+				checkNumbers(t, tensorNumbers(t, recordField(t, recordField(t, state, "second_moment"), "x")), []float64{9.999871508625802e-6, 3.9999486034503207e-5}, 1e-11, 1e-6)
+				checkNumbers(t, tensorNumbers(t, recordField(t, state, "beta1_power")), []float64{.9}, 1e-7, 0)
+				checkNumbers(t, tensorNumbers(t, recordField(t, state, "beta2_power")), []float64{.999}, 1e-7, 0)
 			}
 			t.Run("arbitrary-precision-step-resume", func(t *testing.T) {
 				const previousStep = "184467440737095516160000000000000000000"
@@ -184,9 +180,8 @@ func TestLLVMCheckpointOptimizerStatePublicAdmission(t *testing.T) {
 					t.Fatal("missing optimizer step fixture")
 				}
 				input := sourceFile(t, fmt.Sprintf(`flow Main()->%s!{%s restored=Checkpoint.decode(Bytes.new(%q),original);return Optimizer.%s.step(restored,gradients)};return Main()`, typ, setup, encoded, optimizer))
-				expected := runExecutable(t, binary, "run", input, "--format", "json")
-				actual := run(t, "run", input, "--format", "json")
-				for _, output := range []result{expected, actual} {
+				actual := runProgram(t, input, "run", "--format", "json")
+				for _, output := range []result{actual} {
 					if output.status != 0 || output.stderr != "" {
 						t.Fatalf("large optimizer step: %+v", output)
 					}
@@ -196,16 +191,12 @@ func TestLLVMCheckpointOptimizerStatePublicAdmission(t *testing.T) {
 					}
 					valueJSON(t, recordField(t, successfulValue(t, envelope.Result), "step"), fmt.Sprintf("%q", nextStep))
 				}
-				var expectedValue, actualValue any
-				if err := json.Unmarshal([]byte(expected.stdout), &expectedValue); err != nil {
-					t.Fatal(err)
+				state := nativeValue(t, actual)
+				want := []float64{.98, -1.96}
+				if optimizer == "AdamW" {
+					want = []float64{.978011, -1.976012}
 				}
-				if err := json.Unmarshal([]byte(actual.stdout), &actualValue); err != nil {
-					t.Fatal(err)
-				}
-				if !reflect.DeepEqual(actualValue, expectedValue) {
-					t.Fatalf("large-step resumed optimizer differs: native %s; interpreter %s", actual.stdout, expected.stdout)
-				}
+				checkNumbers(t, tensorNumbers(t, recordField(t, recordField(t, state, "parameters"), "x")), want, 1e-6, 1e-5)
 			})
 			mutations := []struct{ name, old, new string }{
 				{"negative-step", `"step":{"type":"Int","value":"1"}`, `"step":{"type":"Int","value":"-1"}`},
@@ -298,7 +289,11 @@ func TestLLVMCheckpointNumericStringParity(t *testing.T) {
 			if component == "config" {
 				setup, typ = checkpointSetup("SGD")
 				input := sourceFile(t, fmt.Sprintf(`flow Main()->Bytes!{%s return Checkpoint.encode(original)};return Main()`, setup))
-				valid = string(checkpointResultBytes(t, runCheckpointBounded(t, binary, "run", input, "--format", "json")))
+				artifact, built := buildForTest(t, input)
+				if built.status != 0 {
+					t.Fatalf("build numeric checkpoint fixture: %+v", built)
+				}
+				valid = string(checkpointResultBytes(t, runCheckpointBounded(t, artifact, "run", "--format", "json")))
 				prefix = `"learning_rate":{"type":"Float","value":"`
 			}
 			start := strings.Index(valid, prefix)
@@ -351,7 +346,11 @@ func TestLLVMCheckpointIntegerStringParity(t *testing.T) {
 	llvmCheckpointLane(t)
 	setup, typ := checkpointSetup("SGD")
 	input := sourceFile(t, fmt.Sprintf(`flow Main()->Bytes!{%s return Checkpoint.encode(original)};return Main()`, setup))
-	valid := string(checkpointResultBytes(t, runCheckpointBounded(t, binary, "run", input, "--format", "json")))
+	artifact, built := buildForTest(t, input)
+	if built.status != 0 {
+		t.Fatalf("build integer checkpoint fixture: %+v", built)
+	}
+	valid := string(checkpointResultBytes(t, runCheckpointBounded(t, artifact, "run", "--format", "json")))
 	for _, text := range []string{"1_0", "1_", "_1", "+1", "-0", "+", "", "١"} {
 		t.Run(fmt.Sprintf("%q", text), func(t *testing.T) {
 			data := strings.Replace(valid, `"step":{"type":"Int","value":"1"}`, `"step":{"type":"Int","value":"`+text+`"}`, 1)

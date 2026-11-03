@@ -17,7 +17,7 @@ func TestFlowFoldErrorProgressValueBudget(t *testing.T) {
 	}; flow Run() -> Bytes! {
 		state = File.read(File.Path.new(%q)); return Flow.fold(List.new(1, 2), state, Outer)
 	}; return Run()`, path)
-	got := run(t, "run", sourceFile(t, program), "--read-root", root, "--format", "json")
+	got := runProgram(t, sourceFile(t, program), "run", "--read-root", root, "--format", "json")
 	if got.status != 2 {
 		t.Fatalf("expected host value limit, status %d", got.status)
 	}

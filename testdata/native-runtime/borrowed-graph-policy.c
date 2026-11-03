@@ -1,18 +1,10 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-typedef struct Context Context;
-typedef struct Program Program;
-typedef struct Value Value;
-typedef struct { U32 status, code; const Value *value; } Result;
-extern const Program *lo_program_new(void);
-extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *, const ContextOptions *);
+
 extern int lo_context_set_host_invocation(Context *, const unsigned char *, Size);
-extern void lo_context_run(Context *, Result *);
-extern void lo_context_free(Context *);
-extern void lo_value_release(const Value *);
+
 extern int lo_boolean_value(const Value *);
 extern U64 lo_context_scope_count(const Context *), lo_context_depth(const Context *);
 extern U64 lo_runtime_live_contexts(void), lo_runtime_live_values(void);
@@ -75,7 +67,7 @@ int main(void) {
         const unsigned char *body = index == 3 ? oversized : ordinary;
         Size size = index == 3 ? sizeof(oversized) : sizeof(ordinary);
         if (!lo_context_set_host_invocation(context, body, size)) return 12;
-        Result result = {99, 99, 0};
+        ResultSlot result = {99, 99, 0};
         lo_context_run(context, &result);
         U32 expected = index >= 2 ? 2 : 0;
         if (result.status != expected || result.code != expected) return 20 + index;
@@ -88,7 +80,7 @@ int main(void) {
     if (!repeated || !lo_context_set_host_invocation(repeated, ordinary, sizeof(ordinary))) return 50;
     U64 baseline = 0, allocation_baseline = 0;
     for (unsigned request = 0; request < 100; ++request) {
-        Result result = {99, 99, 0};
+        ResultSlot result = {99, 99, 0};
         lo_context_run(repeated, &result);
         if (result.status || result.code || !result.value || !lo_boolean_value(result.value)) return 51;
         lo_value_release(result.value);

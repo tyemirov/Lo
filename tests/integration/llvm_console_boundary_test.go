@@ -74,9 +74,6 @@ func TestLLVMConsoleCompletionFlushCancellation(t *testing.T) {
 }
 
 func TestLLVMConsoleWriterParentLiveness(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires LLVM runtime inputs")
-	}
 	artifact, built := buildForTest(t, sourceFile(t, "return 0"))
 	if built.status != 0 {
 		t.Fatalf("build writer fixture: %+v", built)
@@ -139,9 +136,6 @@ func TestLLVMConsoleWriterParentLiveness(t *testing.T) {
 }
 
 func TestLLVMConsoleWriterImageProtection(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires LLVM runtime inputs")
-	}
 	for _, operation := range []string{"Write", "Append"} {
 		t.Run(operation, func(t *testing.T) {
 			source := `flow Last(state:String,item:String)->String{return item};` + cliStackProgram("Int", fmt.Sprintf(`invocation=Host.Invocation.current();name=List.fold(invocation.arguments,"",Last);target=File.%s.new(File.Path.new(name),Bytes.new("replace"));receipt=commit target;return receipt.bytes_written`, operation))

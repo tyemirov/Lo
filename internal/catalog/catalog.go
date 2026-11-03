@@ -29,6 +29,8 @@ const (
 	OptimizerOperation
 	CheckpointOperation
 	CheckedRemovalConstructor
+	ListAccess
+	ListSortProcessor
 )
 
 type Boundary uint8
@@ -277,6 +279,7 @@ func build() map[string]Operation {
 	fixed(ProcessCommandNew, []types.Parameter{{Name: "context", Type: types.ProcessContext()}, {Name: "executable", Type: types.ProcessExecutable()}, {Name: "arguments", Type: must(types.NewList(types.String()))}, {Name: "stdin", Type: types.Bytes()}}, must(types.NewFallible(types.ProcessCommand())))
 	addProcessContexts(m, fixed)
 	addApplications(m, fixed)
+	addProcessors(m, fixed)
 	executable := m[ProcessExecutableNew].(operation)
 	executable.errors = []string{ProcessInvalidExecutable}
 	m[ProcessExecutableNew] = executable

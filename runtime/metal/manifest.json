@@ -1,0 +1,38 @@
+{
+  "identity": {
+    "profile": "metal-fp32",
+    "xcode": "Xcode 27.1\nBuild version 27A9275",
+    "sdk": "27.0",
+    "clang": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "metal_compiler": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+    "kernel_linker": "AIR-LLD 32023.921 (metalfe-32023.921.6) (compatible with legacy metallib linker)",
+    "deployment_target": "27.0",
+    "kernel_flags": [
+      "-std=metal3.1",
+      "-mmacosx-version-min=27.0",
+      "-fmetal-math-mode=safe",
+      "-fmetal-math-fp32-functions=precise",
+      "-ffp-contract=off"
+    ],
+    "kernel_sha256": "d2a55ee54a4b38e2bb43cb363f5f985c42fec15be7a11ead67cd44036f3b7dd6"
+  },
+  "sources": {
+    "runtime/metal/kernels.metal": "0616b8689efc361fb39f3865cf6b0a8c6e173213a0d0f4384f49b624a162a282",
+    "runtime/native/host/metal/metal_types.h": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683"
+  },
+  "translation_unit_sha256": "a81b812bed43412fe1f918eaf6b32f01e0d44a490ebadecb60d7f36b69ed1962",
+  "compiled": {
+    "entry": "runtime/metal/kernels.metal",
+    "sources": {
+      "internal/device/metal_types.h": {
+        "sha256": "c3c301727a5f18e7ad55ce293230a89ac0b372c0b05a93c4393bb34966280683",
+        "text": "#ifndef LO_METAL_TYPES_H\n#define LO_METAL_TYPES_H\n#ifdef __METAL_VERSION__\ntypedef uint LoMetalWord;\n#else\n#include <stdint.h>\ntypedef uint32_t LoMetalWord;\n#endif\n\nenum { LO_ADD=1, LO_SUB, LO_MUL, LO_DIV, LO_SQRT, LO_RELU, LO_BROADCAST,\n       LO_TRANSPOSE, LO_SUM, LO_MEAN, LO_MATMUL, LO_FILL, LO_RELU_GRAD, LO_SQRT_GRAD };\nenum { LO_NUMERIC_NONFINITE=1, LO_NUMERIC_ZERO, LO_NUMERIC_DOMAIN, LO_NUMERIC_DERIVATIVE };\ntypedef struct {\n    LoMetalWord kind, count, inputCount, region, aRank, bRank, rank, scalar;\n    LoMetalWord a[8], b[8], output[8], axes[8];\n} LoMetalOperation;\n#endif\n"
+      },
+      "runtime/metal/kernels.metal": {
+        "sha256": "d70f010dd2f9faf06e993bc3961e355ef0703e12d30d9726e666dd624ba5dfef",
+        "text": "#include <metal_stdlib>\nusing namespace metal;\n\nkernel void lo_copy_words(device const uint *source [[buffer(0)]],\n                          device uint *target [[buffer(1)]],\n                          uint index [[thread_position_in_grid]]) {\n    target[index] = source[index];\n}\n\n#include \"../../internal/device/metal_types.h\"\n\n// Bitwise classification avoids implementation-dependent subnormal comparisons.\nfloat lo_normal(float value) {\n    return (as_type<uint>(value) & 0x7f800000u) == 0 ? 0.0f : value;\n}\nbool lo_finite(float value) { return (as_type<uint>(value) & 0x7f800000u) != 0x7f800000u; }\nvoid lo_failure(device atomic_uint *status, uint index, uint kind) {\n    atomic_fetch_min_explicit(status, (index << 3) | kind, memory_order_relaxed);\n}\nuint lo_broadcast_index(uint index, constant LoMetalOperation &op, constant uint *dims, uint rank) {\n    uint result=0, stride=1;\n    for (int i=int(op.rank)-1, j=int(rank)-1; j>=0; --i,--j) {\n        uint coordinate=index%op.output[i]; index/=op.output[i];\n        if(dims[j]!=1) result+=coordinate*stride;\n        stride*=dims[j];\n    }\n    return result;\n}\n\nkernel void lo_compute(device const float *a [[buffer(0)]], device const float *b [[buffer(1)]],\n                       device float *out [[buffer(2)]], device atomic_uint *status [[buffer(3)]],\n                       constant LoMetalOperation &op [[buffer(4)]], uint index [[thread_position_in_grid]]) {\n    float result=0.0f;\n    switch(op.kind) {\n    case LO_FILL: reinterpret_cast<device uint *>(out)[index]=op.scalar; return;\n    case LO_BROADCAST: reinterpret_cast<device uint *>(out)[index]=reinterpret_cast<device const uint *>(a)[lo_broadcast_index(index,op,op.a,op.aRank)]; return;\n    case LO_TRANSPOSE: {\n        uint strides[8],stride=1,source=0,rest=index;\n        for(int axis=int(op.aRank)-1;axis>=0;--axis){strides[axis]=stride;stride*=op.a[axis];}\n        for(int axis=int(op.rank)-1;axis>=0;--axis){source+=(rest%op.output[axis])*strides[op.axes[axis]];rest/=op.output[axis];}\n        reinterpret_cast<device uint *>(out)[index]=reinterpret_cast<device const uint *>(a)[source];return;\n    }\n    case LO_SQRT_GRAD:\n        if(lo_normal(a[index])==0.0f)lo_failure(status,index,LO_NUMERIC_DERIVATIVE);\n        return;\n    case LO_RELU_GRAD:\n        if(lo_normal(a[index])>0.0f)result=lo_normal(b[index]);\n        break;\n    case LO_SUM: case LO_MEAN: {\n        // Each output traverses its source coordinates in row-major order.\n        for(uint r=0;r<op.region;++r){\n            uint selected=r,kept=index,source=0,stride=1;\n            for(int axis=int(op.aRank)-1;axis>=0;--axis){\n                uint coordinate;\n                if(op.axes[axis]){coordinate=selected%op.a[axis];selected/=op.a[axis];}\n                else{coordinate=kept%op.a[axis];kept/=op.a[axis];}\n                source+=coordinate*stride;stride*=op.a[axis];\n            }\n            result=lo_normal(result+lo_normal(a[source]));\n            if(!lo_finite(result)){lo_failure(status,index,LO_NUMERIC_NONFINITE);return;}\n        }\n        if(op.kind==LO_MEAN)result=lo_normal(result/float(op.region));\n        break;\n    }\n    case LO_MATMUL:\n        for(uint k=0;k<op.a[1];++k){\n            float product=lo_normal(lo_normal(a[(index/op.b[1])*op.a[1]+k])*lo_normal(b[k*op.b[1]+index%op.b[1]]));\n            if(!lo_finite(product)){lo_failure(status,index,LO_NUMERIC_NONFINITE);return;}\n            result=lo_normal(result+product);\n            if(!lo_finite(result)){lo_failure(status,index,LO_NUMERIC_NONFINITE);return;}\n        }\n        break;\n    default: {\n        float x=lo_normal(a[lo_broadcast_index(index,op,op.a,op.aRank)]),y=0.0f;\n        if(op.kind<=LO_DIV)y=lo_normal(b[lo_broadcast_index(index,op,op.b,op.bRank)]);\n        switch(op.kind){\n        case LO_ADD:result=lo_normal(x+y);break;\n        case LO_SUB:result=lo_normal(x-y);break;\n        case LO_MUL:result=lo_normal(x*y);break;\n        case LO_DIV:\n            if(y==0.0f){lo_failure(status,index,LO_NUMERIC_ZERO);return;}\n            result=lo_normal(x/y);break;\n        case LO_SQRT:\n            if(x<0.0f){lo_failure(status,index,LO_NUMERIC_DOMAIN);return;}\n            result=lo_normal(sqrt(x));break;\n        case LO_RELU:if(x>0.0f)result=x;break;\n        }\n    }\n    }\n    if(!lo_finite(result)){lo_failure(status,index,LO_NUMERIC_NONFINITE);return;}\n    out[index]=result;\n}\n"
+      }
+    },
+    "translation_unit_sha256": "a81b812bed43412fe1f918eaf6b32f01e0d44a490ebadecb60d7f36b69ed1962"
+  }
+}

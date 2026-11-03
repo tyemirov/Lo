@@ -1,352 +1,438 @@
-import json
 import hashlib
+import json
 import os
+import platform
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Any
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "tools/semanticcoverage/report.py"
+TARGETS = ("darwin/arm64", "linux/arm64")
 
 
 class ReportCLI(unittest.TestCase):
     def setUp(self):
         base = ROOT / "_scratch/build-state/tmp"
         base.mkdir(parents=True, exist_ok=True)
-        self.workspace = tempfile.TemporaryDirectory(prefix="semantic-report-", dir=base)
+        self.workspace = tempfile.TemporaryDirectory(prefix="native-report-", dir=base)
         self.addCleanup(self.workspace.cleanup)
         self.directory = Path(self.workspace.name)
         self.script = self.directory / "tools/semanticcoverage/report.py"
         self.script.parent.mkdir(parents=True)
         shutil.copyfile(SCRIPT, self.script)
-        for name in ("cmd/lo/main.go", "runtime/native/src/lib.rs", "runtime/native/Cargo.toml", "runtime/native/Cargo.lock",
-                     "go.mod", "go.sum", "Makefile", "docs/evidence/training-reference-results.json"):
+        for name in ("cmd/lo/main.go", "runtime/native/src/lib.rs", "runtime/native/Cargo.toml",
+                     "runtime/native/Cargo.lock", "go.mod", "go.sum", "Makefile",
+                     "docs/evidence/training-reference-results.json"):
             item = self.directory / name
             item.parent.mkdir(parents=True, exist_ok=True)
             item.write_text("fixture\n")
         self.matrix = self.directory / "matrix.json"
-        self.matrix.write_text(json.dumps({
-            "operations": [{"operation": "Math.add", "positive": ["TestExample/add"],
-                            "negative": ["TestExample/reject"], "runtime_negative": [],
-                            "boundary": "cli_interpreter_and_native"}],
-            "cli": [], "semantics": [], "profiles": [], "gaps": [],
-            "native_tests": {"TestExample/add": ["TestExample/add"],"TestExample/reject": ["TestExample/reject"]}
-        }))
+        self.data = {
+            "operations": [{"operation": "Math.add", "capability": "", "errors": [],
+                            "activation_errors": [], "negative_applicability": "verifier_only_typed_total"}],
+            "contracts": [self.contract("add", "program-command", "TestExample/add", "positive"),
+                          self.contract("reject", "compiler-command", "TestExample/reject", "negative")],
+            "gaps": [],
+        }
         self.compiler = self.directory / "lo"
-        self.compiler.write_bytes(b"installed compiler fixture")
+        self.compiler.write_bytes(b"compiler fixture")
         self.runtime = self.directory / "runtime.a"
         self.runtime.write_bytes(b"native runtime fixture")
         self.manifest = self.directory / "toolchain.json"
-        self.manifest.write_text(json.dumps({"host": "darwin/arm64", "targets": {
-            target: {"runtime": {"path": "runtime.a", "sha256": hashlib.sha256(self.runtime.read_bytes()).hexdigest()}}
-            for target in ("darwin/arm64", "linux/arm64")}}))
-        self.logs = [self.directory / "interpreter.jsonl", self.directory / "llvm-darwin.jsonl", self.directory / "llvm-linux.jsonl"]
-        for path in self.logs:
-            self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"})
+        self.manifest.write_text(json.dumps({"abi": "lo-native-3", "host": TARGETS[0], "targets": {
+            target: {"runtime": {"path": "runtime.a", "sha256": self.digest(self.runtime)}} for target in TARGETS}}))
+        self.logs = {target: self.directory / (target.replace("/", "-") + ".jsonl") for target in TARGETS}
+        self.write_matrix()
 
-    def events(self, path: Path, tests: dict[str, str], gates: dict[str, str] | None = None,
-               root: Path | None = None) -> None:
-        root = root or self.directory
-        package = "github.com/MarcoPoloResearchLab/Lo/tests/integration"
+    @staticmethod
+    def contract(identity, boundary, test, axis="contract", operation="Math.add"):
+        return {"id": identity, "operation": operation, "axis": axis, "boundary": boundary,
+                "targets": list(TARGETS), "profile": "frontend" if boundary == "compiler-command" else "software",
+                "tests": [test]}
+
+    @staticmethod
+    def digest(path):
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    def write_matrix(self):
+        self.matrix.write_text(json.dumps(self.data))
+        for target, path in self.logs.items():
+            self.events(path, target)
+
+    def events(self, path, target, statuses=None, gates=None):
         sys.path.insert(0, str(ROOT / "tools/semanticcoverage"))
-        import report as reporter
-        original_root = reporter.ROOT
-        reporter.ROOT = root
+        import report
+        previous = report.ROOT
+        report.ROOT = self.directory
         try:
-            _, source_hash = reporter.source_identity()
+            _, source = report.source_identity()
         finally:
-            reporter.ROOT = original_root
-        backend = "interpreter" if path.name.startswith("interpreter") else "llvm"
-        target = "linux/arm64" if path.name.endswith("linux.jsonl") else "darwin/arm64"
-        identity = {"backend": backend, "implementation": "go-interpreter" if backend == "interpreter" else "llvm-native",
-                    "target": target, "compiler": str(self.compiler.relative_to(root)),
-                    "compiler_sha256": hashlib.sha256(self.compiler.read_bytes()).hexdigest(),
-                    "source_sha256": source_hash,
-                    "matrix_sha256": hashlib.sha256(self.matrix.read_bytes()).hexdigest()}
-        if backend == "llvm":
-            identity.update(toolchain=str(self.manifest.relative_to(root)),
-                            toolchain_sha256=hashlib.sha256(self.manifest.read_bytes()).hexdigest(),
-                            runtime_sha256=hashlib.sha256(self.runtime.read_bytes()).hexdigest())
+            report.ROOT = previous
+        identity = {"implementation": "llvm-native", "target": target, "abi": "lo-native-3", "profile": "software",
+                    "compiler": "lo", "compiler_sha256": self.digest(self.compiler), "source_sha256": source,
+                    "matrix_sha256": self.digest(self.matrix), "toolchain": "toolchain.json",
+                    "toolchain_sha256": self.digest(self.manifest), "runtime_sha256": self.digest(self.runtime)}
+        package = report.PACKAGE
+        tests = {"TestExample/add": "pass", "TestExample/reject": "pass", **(statuses or {})}
+        tests.update({gate: "pass" for gate in report.COVERAGE_GATES})
+        tests.update(gates or {})
         events = [{"Action": "start", "Package": package},
                   {"Action": "output", "Package": package, "Test": "TestSemanticCoverageRunIdentity",
-                   "Output": "LO_SEMANTIC_IDENTITY=" + json.dumps(identity) + "\n"}]
-        gate_statuses = {"TestSemanticCoverageRunIdentity": "pass", "TestSemanticCoverageInventory": "pass"}
-        if gates is not None:
-            gate_statuses.update(gates)
-        events += [{"Action": action, "Package": package, "Test": test}
-                   for test, action in {**tests, **gate_statuses}.items() if action != "missing"]
+                   "Output": report.IDENTITY_MARKER + json.dumps(identity) + "\n"}]
+        events.extend({"Action": action, "Package": package, "Test": name} for name, action in tests.items() if action != "missing")
         events.append({"Action": "pass", "Package": package})
         path.write_text("".join(json.dumps(event) + "\n" for event in events))
 
-    def run_report(self, output: Path | None = None, script: Path | None = None) -> subprocess.CompletedProcess[str]:
-        target = output or self.directory / "report.json"
-        command = [sys.executable, "-B", str(script or self.script), "--matrix", str(self.matrix),
-                   "--interpreter", str(self.logs[0]), "--llvm", "darwin/arm64=" + str(self.logs[1]),
-                   "--llvm", "linux/arm64=" + str(self.logs[2]),
-                   "--output", str(target)]
-        return subprocess.run(command, cwd=ROOT, stdin=subprocess.DEVNULL,
-                              text=True, capture_output=True,
-                              env={**os.environ, "CI": "1", "PYTHONDONTWRITEBYTECODE": "1"})
+    def run_report(self, output=None, targets=TARGETS, extra=()):
+        command = [sys.executable, "-B", str(self.script), "--matrix", str(self.matrix)]
+        for target in targets:
+            command += ["--native", target + "=" + str(self.logs[target])]
+        command += ["--output", str(output or self.directory / "_scratch" / "report.json"), *extra]
+        return subprocess.run(command, cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True)
 
-    def test_both_lanes_require_every_reference(self):
+    def test_native_direct_contracts(self):
         result = self.run_report()
         self.assertEqual(result.returncode, 0, result.stderr)
-        report = json.loads((self.directory / "report.json").read_text())
-        self.assertEqual(report["execution_status"], "passed")
-        self.assertEqual(len(report["references"]), 2)
-        self.assertEqual(report["references"][0]["llvm:darwin/arm64"], "pass")
+        record = json.loads((self.directory / "_scratch" / "report.json").read_text())
+        self.assertEqual(record["execution_status"], "passed")
+        self.assertEqual(len(record["contracts"]), 2)
+        self.assertEqual(set(record["execution_identity"]), set(TARGETS))
+        self.assertNotIn("native_tests", record)
 
-    def test_missing_or_skipped_subtest_is_not_coverage(self):
-        for status in ["missing", "skip"]:
-            self.events(self.logs[1], {"TestExample/add": "pass", "TestExample/reject": status})
+    def test_missing_and_skipped_references_fail(self):
+        for status in ("missing", "skip", "fail"):
+            self.events(self.logs[TARGETS[0]], TARGETS[0], {"TestExample/add": status})
             result = self.run_report()
             self.assertEqual(result.returncode, 1, result.stderr)
-            report = json.loads((self.directory / "report.json").read_text())
-            self.assertEqual(report["execution_status"], "incomplete")
-            self.assertIn("TestExample/reject", result.stderr)
+            self.assertIn("TestExample/add", result.stderr)
 
-    def test_missing_target_is_not_standalone_qualification(self):
-        self.logs[2].unlink()
-        result = subprocess.run(
-            [sys.executable, "-B", str(self.script), "--matrix", str(self.matrix),
-             "--interpreter", str(self.logs[0]), "--llvm", "darwin/arm64=" + str(self.logs[1]),
-             "--output", str(self.directory / "report.json")], cwd=ROOT,
-            stdin=subprocess.DEVNULL, text=True, capture_output=True)
-        self.assertEqual(result.returncode, 2, result.stderr)
-        record = json.loads((self.directory / "report.json").read_text())
-        self.assertEqual(record["qualification_status"], "incomplete")
-        self.assertEqual(record["missing_targets"], ["linux/arm64"])
+    def test_many_contracts_can_share_a_reference(self):
+        self.data["contracts"].append(self.contract("shared", "program-command", "TestExample/add", operation=""))
+        self.write_matrix()
+        self.assertEqual(self.run_report().returncode, 0)
 
-    def test_installed_runtime_mutation_invalidates_evidence(self):
-        self.runtime.write_bytes(b"changed runtime")
-        result = self.run_report()
-        self.assertEqual(result.returncode, 1, result.stderr)
-        self.assertIn("runtime identity mismatch", result.stderr)
+    def test_one_contract_can_require_several_references(self):
+        self.data["contracts"][0]["tests"].append("TestExample/reject")
+        self.write_matrix()
+        self.events(self.logs[TARGETS[0]], TARGETS[0], {"TestExample/reject": "skip"})
+        self.assertEqual(self.run_report().returncode, 1)
 
-    def test_installed_compiler_mutation_invalidates_evidence(self):
-        self.compiler.write_bytes(b"changed compiler")
-        result = self.run_report()
-        self.assertEqual(result.returncode, 1, result.stderr)
-        self.assertIn("compiler identity mismatch", result.stderr)
-
-    def test_output_outside_repository_is_rejected(self):
-        result = self.run_report(ROOT.parent / "forbidden-semantic-report.json")
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("outside repository", result.stderr)
-
-    def test_truncated_package_run_is_rejected(self):
-        self.logs[1].write_text(self.logs[1].read_text().splitlines()[0] + "\n")
+    def test_duplicate_contract_ids_are_rejected(self):
+        self.data["contracts"].append(dict(self.data["contracts"][0]))
+        self.write_matrix()
         result = self.run_report()
         self.assertEqual(result.returncode, 1)
-        self.assertIn("package", result.stderr)
+        self.assertIn("duplicate contract", result.stderr)
 
-    def test_interpreter_log_cannot_count_as_native(self):
-        output = self.directory / "report.json"
-        output.write_text('{"execution_status":"passed"}')
-        self.logs[1].write_text(self.logs[0].read_text())
+    def test_duplicate_references_within_contract_are_rejected(self):
+        self.data["contracts"][0]["tests"] *= 2
+        self.write_matrix()
         result = self.run_report()
         self.assertEqual(result.returncode, 1)
-        self.assertIn("identity mismatch", result.stderr)
-        self.assertFalse(output.exists())
+        self.assertIn("duplicate test reference", result.stderr)
 
-    def test_changed_matrix_is_rejected(self):
-        self.matrix.write_text(self.matrix.read_text() + "\n")
+    def test_unknown_operation_reference_is_rejected(self):
+        self.data["contracts"][0]["operation"] = "Unknown.operation"
+        self.write_matrix()
         result = self.run_report()
         self.assertEqual(result.returncode, 1)
-        self.assertIn("identity mismatch", result.stderr)
+        self.assertIn("unknown operation", result.stderr)
 
-    def test_cli_source_changes_invalidate_evidence(self) -> None:
-        script = self.directory / "tools/semanticcoverage/report.py"
-        script.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(SCRIPT, script)
-        for name in ("cmd/lo/main.go", "go.mod", "go.sum", "Makefile",
-                     "docs/evidence/training-reference-results.json"):
-            path = self.directory / name
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text("fixture\n")
-        for name in ("compiler", "runtime", "manifest"):
-            original = getattr(self, name)
-            destination = self.directory / original.name
-            if destination != original:
-                shutil.copyfile(original, destination)
-            setattr(self, name, destination)
-        for path in self.logs:
-            self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"},
-                        root=self.directory)
-        result = self.run_report(script=script)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        cli = self.directory / "cmd/lo/main.go"
-        report = json.loads((self.directory / "report.json").read_text())
-        self.assertEqual(report["source_sha256"]["cmd/lo/main.go"],
-                         hashlib.sha256(cli.read_bytes()).hexdigest())
-        cli.write_text("changed CLI\n")
-        result = self.run_report(script=script)
-        self.assertEqual(result.returncode, 1, result.stderr)
-        self.assertIn("identity mismatch", result.stderr)
-        self.assertFalse((self.directory / "report.json").exists())
-
-    def test_rust_runtime_source_changes_invalidate_evidence(self):
-        runtime = self.directory / "runtime/native/src/lib.rs"
-        runtime.write_text("changed runtime source\n")
+    def test_operation_axes_are_required(self):
+        self.data["contracts"].pop()
+        self.write_matrix()
         result = self.run_report()
-        self.assertEqual(result.returncode, 1, result.stderr)
-        self.assertIn("identity mismatch", result.stderr)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("negative", result.stderr)
 
-    def test_i011_gap_prevents_qualification(self):
-        matrix = json.loads(self.matrix.read_text())
-        matrix["gaps"] = [{"ID": "native-injected-device-runtime", "Scope": "device", "Reason": "pending",
-                           "Owner": "I011", "Acceptance": "downstream"}]
-        self.matrix.write_text(json.dumps(matrix))
-        for path in self.logs:
-            self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"})
-        result = self.run_report()
-        self.assertEqual(result.returncode, 2, result.stderr)
-        record = json.loads((self.directory / "report.json").read_text())
-        self.assertEqual(record["qualification_status"], "incomplete")
-        self.assertEqual(record["qualification_gaps"], matrix["gaps"])
+    def test_old_matrix_shapes_are_rejected(self):
+        for field in ("native_tests", "cli", "semantics", "profiles"):
+            self.data[field] = {}
+            self.write_matrix()
+            result = self.run_report()
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("matrix fields", result.stderr)
+            del self.data[field]
 
-    def test_recorded_gap_blocks_qualification(self):
-        matrix = json.loads(self.matrix.read_text())
-        matrix["gaps"] = [{"ID": "missing-profile", "Scope": "test", "Reason": "absent",
-                           "Owner": "I005", "Acceptance": "required"}]
-        self.matrix.write_text(json.dumps(matrix))
-        for path in self.logs:
-            self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"})
-        result = self.run_report()
-        self.assertEqual(result.returncode, 2, result.stderr)
-        self.assertIn("missing-profile", result.stderr)
-        report = json.loads((self.directory / "report.json").read_text())
-        self.assertEqual(report["execution_status"], "passed")
-        self.assertEqual(report["coverage_status"], "incomplete")
-
-
-    def test_disclosed_limits_do_not_require_downstream_implementation(self):
-        matrix = json.loads(self.matrix.read_text())
-        matrix["gaps"] = [
-            {"ID": "offline-distribution", "Scope": "compiler", "Reason": "not_yet_implemented",
-             "Owner": "F017", "Acceptance": "downstream"},
-            {"ID": "error-kind-exhaustiveness", "Scope": "errors", "Reason": "coverage_limit_recorded",
-             "Owner": "I005", "Acceptance": "disclosed_limit"},
-        ]
-        self.matrix.write_text(json.dumps(matrix))
-        for path in self.logs:
-            self.events(path, {"TestExample/add": "pass", "TestExample/reject": "pass"})
-        result = self.run_report()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        report = json.loads((self.directory / "report.json").read_text())
-        self.assertEqual(report["coverage_status"], "complete_with_limits")
-        self.assertEqual(report["gaps"], matrix["gaps"])
-
-    def test_unclassified_gap_is_rejected(self):
-        matrix = json.loads(self.matrix.read_text())
-        matrix["gaps"] = [{"ID": "unknown", "Scope": "test", "Reason": "absent"}]
-        self.matrix.write_text(json.dumps(matrix))
-        result = self.run_report()
-        self.assertEqual(result.returncode, 1, result.stderr)
-        self.assertIn("gap classification", result.stderr)
-
-
-    def test_selector_keeps_every_matrix_axis_and_identity_checks(self):
-        matrix = json.loads(self.matrix.read_text())
-        matrix["operations"][0]["runtime_negative"] = ["TestRuntime/failure"]
-        for section in ("cli", "semantics", "profiles"):
-            matrix[section] = [{"tests": ["Test" + section.title() + "/case"]}]
-        matrix["native_tests"] = {"TestExample/add":["TestExample/add"],"TestExample/reject":["TestExample/reject"]}
-        self.matrix.write_text(json.dumps(matrix))
-        result = subprocess.run(
-            [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
-             "select", "--matrix", str(self.matrix)], cwd=ROOT,
-            stdin=subprocess.DEVNULL, text=True, capture_output=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.strip(),
-                         "^(TestCli|TestExample|TestProfiles|TestRuntime|TestSemanticCoverageInventory|TestSemanticCoverageRunIdentity|TestSemantics)$")
-
-    def test_selector_rejects_invalid_test_identity(self):
-        matrix = json.loads(self.matrix.read_text())
-        matrix["operations"][0]["positive"] = [".*"]
-        matrix["native_tests"] = {"TestExample/add":["TestExample/add"],"TestExample/reject":["TestExample/reject"]}
-        self.matrix.write_text(json.dumps(matrix))
-        result = subprocess.run(
-            [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
-             "select", "--matrix", str(self.matrix)], cwd=ROOT,
-            stdin=subprocess.DEVNULL, text=True, capture_output=True)
+    def test_old_interpreter_cli_and_logs_are_rejected(self):
+        result = self.run_report(extra=("--interpreter", str(self.logs[TARGETS[0]])))
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("test identity", result.stderr)
+        events = [json.loads(line) for line in self.logs[TARGETS[0]].read_text().splitlines()]
+        identity = json.loads(events[1]["Output"].split("=", 1)[1])
+        identity["backend"] = "interpreter"
+        identity["implementation"] = "go-interpreter"
+        events[1]["Output"] = "LO_SEMANTIC_IDENTITY=" + json.dumps(identity)
+        self.logs[TARGETS[0]].write_text("".join(json.dumps(event) + "\n" for event in events))
+        result = self.run_report()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("identity", result.stderr)
 
+    def test_invalid_boundary_target_profile_and_test_are_rejected(self):
+        for field, value in (("boundary", "evaluator-api"), ("targets", ["unknown/target"]),
+                             ("targets", [TARGETS[0], TARGETS[0]]), ("profile", "physical-device"), ("tests", [".*"])):
+            original = self.data["contracts"][0][field]
+            self.data["contracts"][0][field] = value
+            self.write_matrix()
+            self.assertEqual(self.run_report().returncode, 1)
+            self.data["contracts"][0][field] = original
+
+    def test_target_specific_contract_does_not_require_other_target(self):
+        self.data["contracts"][0]["targets"] = [TARGETS[0]]
+        self.write_matrix()
+        self.events(self.logs[TARGETS[1]], TARGETS[1], {"TestExample/add": "skip"})
+        self.assertEqual(self.run_report().returncode, 0)
+
+    def test_missing_target_requires_explicit_partial_report(self):
+        result = self.run_report(targets=(TARGETS[0],))
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(self.run_report(targets=(TARGETS[0],), extra=("--allow-partial",)).returncode, 0)
+
+    def test_duplicate_package_and_test_completion_are_rejected(self):
+        path = self.logs[TARGETS[0]]
+        original = path.read_text()
+        for event in ({"Action": "pass", "Package": "github.com/MarcoPoloResearchLab/Lo/tests/integration"},
+                      {"Action": "pass", "Package": "github.com/MarcoPoloResearchLab/Lo/tests/integration", "Test": "TestExample/add"}):
+            path.write_text(original + json.dumps(event) + "\n")
+            result = self.run_report()
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("duplicate", result.stderr)
+
+    def test_truncated_and_failed_package_runs_are_rejected(self):
+        path = self.logs[TARGETS[0]]
+        original = path.read_text()
+        path.write_text(original.splitlines()[0] + "\n")
+        self.assertEqual(self.run_report().returncode, 1)
+        path.write_text(original.replace('"Action": "pass", "Package": "github.com/MarcoPoloResearchLab/Lo/tests/integration"}', '"Action": "fail", "Package": "github.com/MarcoPoloResearchLab/Lo/tests/integration"}'))
+        self.assertEqual(self.run_report().returncode, 1)
 
     def test_inventory_and_identity_gates_must_complete(self):
         for gate in ("TestSemanticCoverageInventory", "TestSemanticCoverageRunIdentity"):
             for status in ("missing", "skip"):
-                with self.subTest(gate=gate, status=status):
-                    self.events(self.logs[1], {"TestExample/add": "pass", "TestExample/reject": "pass"},
-                                gates={gate: status})
-                    result = self.run_report()
-                    self.assertEqual(result.returncode, 1, result.stderr)
-                    self.assertIn("coverage gate did not pass", result.stderr)
-                    self.assertIn(gate, result.stderr)
+                self.events(self.logs[TARGETS[0]], TARGETS[0], gates={gate: status})
+                result = self.run_report()
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("coverage gate", result.stderr)
 
-    def test_runner_cannot_overwrite_its_matrix(self):
-        contents = self.matrix.read_text()
-        for name in ("semantic-coverage.json", "semantic-interpreter.jsonl", "semantic-llvm-darwin-arm64.jsonl"):
-            with self.subTest(name=name):
-                matrix = self.directory / name
-                matrix.write_text(contents)
-                result = subprocess.run(
-                    [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
-                     "run", "--matrix", str(matrix), "--output-root", str(self.directory)],
-                    cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True)
-                self.assertTrue(matrix.exists(), "runner deleted its input matrix")
-                self.assertEqual(matrix.read_text(), contents, "runner replaced its input matrix")
-                self.assertEqual(result.returncode, 1, result.stderr)
-                self.assertIn("overlaps matrix", result.stderr)
+    def test_changed_compiler_runtime_matrix_and_source_invalidate_evidence(self):
+        for path in (self.compiler, self.runtime, self.matrix, self.directory / "cmd/lo/main.go", self.directory / "runtime/native/src/lib.rs"):
+            original = path.read_bytes()
+            path.write_bytes(original + b" ")
+            result = self.run_report()
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse((self.directory / "_scratch" / "report.json").exists())
+            path.write_bytes(original)
 
-    def alternate_matrix(self) -> dict[str, Any]:
-        matrix = json.loads((ROOT / "testdata/semantic-migration/matrix.json").read_text())
-        for row in matrix["operations"]:
-            for axis in ("positive", "negative", "runtime_negative"):
-                row[axis] = ["TestSemanticCoverageInventory"]
-        for section in ("cli", "semantics", "profiles"):
-            for row in matrix[section]:
-                row["tests"] = ["TestSemanticCoverageInventory"]
-        matrix["native_tests"] = {"TestSemanticCoverageInventory":["TestSemanticCoverageInventory"]}
-        return matrix
+    def test_output_cannot_overlap_inputs_or_leave_repository(self):
+        for path in (self.matrix, self.logs[TARGETS[0]], ROOT.parent / "forbidden-report.json"):
+            result = self.run_report(output=path)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("overlap" if path != ROOT.parent / "forbidden-report.json" else "outside repository", result.stderr)
 
-    def run_alternate_matrix(self, matrix: dict[str, Any]) -> subprocess.CompletedProcess[str]:
-        for name in ("LO_TEST_COMPILER", "LO_LLVM_TOOLCHAIN"):
-            if not os.environ.get(name):
-                raise ValueError(f"alternate matrix test requires explicit {name}")
-        self.matrix.write_text(json.dumps(matrix))
-        return subprocess.run(
-            [sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
-             "run", "--matrix", str(self.matrix.relative_to(ROOT)),
-             "--output-root", str(self.directory), "--allow-partial",
-             "--compiler", os.environ["LO_TEST_COMPILER"],
-             "--toolchain", os.environ["LO_LLVM_TOOLCHAIN"]],
-            cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True,
-            env={**os.environ, "LO_SEMANTIC_MATRIX": "missing-inherited-matrix.json"})
+    def test_output_cannot_replace_compiler_toolchain_or_runtime(self):
+        for path in (self.compiler, self.manifest, self.runtime, self.directory / "cmd/lo/main.go", self.directory / "runtime/native/src/lib.rs"):
+            before = path.read_bytes()
+            result = self.run_report(output=path)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual(path.read_bytes(), before)
+            self.assertIn("overlap", result.stderr)
 
-    def test_runner_uses_selected_matrix_in_both_lanes(self) -> None:
-        result = self.run_alternate_matrix(self.alternate_matrix())
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        report = json.loads((self.directory / "semantic-coverage.json").read_text())
-        self.assertEqual(report["matrix_sha256"], hashlib.sha256(self.matrix.read_bytes()).hexdigest())
-        self.assertEqual(report["source_sha256"]["cmd/lo/main.go"],
-                         hashlib.sha256((ROOT / "cmd/lo/main.go").read_bytes()).hexdigest())
-        for lane in ("interpreter", "llvm:darwin/arm64"):
-            self.assertEqual(set(report["coverage_gates"][lane].values()), {"pass"})
+    def test_required_and_downstream_gaps_are_classified(self):
+        for owner, acceptance, expected in (("I005", "required", 2), ("I011", "downstream", 2),
+                                             ("I005", "disclosed_limit", 0), ("F017", "downstream", 0)):
+            self.data["gaps"] = [{"ID": "gap", "Scope": "test", "Reason": "recorded", "Owner": owner, "Acceptance": acceptance}]
+            self.write_matrix()
+            self.assertEqual(self.run_report().returncode, expected)
+        self.data["gaps"] = [{"ID": "gap", "Scope": "test"}]
+        self.write_matrix()
+        self.assertEqual(self.run_report().returncode, 1)
 
-    def test_runner_validates_selected_matrix_inventory(self) -> None:
-        matrix = self.alternate_matrix()
-        removed = matrix["operations"].pop()["operation"]
-        result = self.run_alternate_matrix(matrix)
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        log = (self.directory / "semantic-interpreter.jsonl").read_text()
+    def test_selector_uses_direct_contract_union_and_gates(self):
+        result = subprocess.run([sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"), "select", "--matrix", str(self.matrix)],
+                                cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "^(TestExample|TestSemanticCoverageInventory|TestSemanticCoverageRunIdentity)$")
+
+    def test_required_metal_artifact_needs_metal_runtime_identity(self):
+        data = json.loads(self.manifest.read_text())
+        data["metal"] = {"runtime": {"path": "runtime.a", "sha256": self.digest(self.runtime)}}
+        self.manifest.write_text(json.dumps(data))
+        contract = self.contract("metal-artifact", "program-command", "TestExample/add", operation="")
+        contract.update(targets=[TARGETS[0]], profile="metal-artifact")
+        self.data["contracts"].append(contract)
+        self.write_matrix()
+        result = self.run_report()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("metal-artifact", result.stderr)
+        path = self.logs[TARGETS[0]]
+        events = [json.loads(line) for line in path.read_text().splitlines()]
+        identity = json.loads(events[1]["Output"].split("=", 1)[1])
+        identity["metal_runtime_sha256"] = self.digest(self.runtime)
+        events[1]["Output"] = "LO_SEMANTIC_IDENTITY=" + json.dumps(identity)
+        path.write_text("".join(json.dumps(event) + "\n" for event in events))
+        result = self.run_report()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_direct_report_api_preserves_source_and_consumed_inputs(self):
+        sys.path.insert(0, str(ROOT / "tools/semanticcoverage"))
+        import report
+        previous = report.ROOT
+        report.ROOT = self.directory
+        try:
+            for path in (self.compiler, self.manifest, self.runtime, self.directory / "cmd/lo/main.go"):
+                before = path.read_bytes()
+                with self.assertRaisesRegex(ValueError, "overlap"):
+                    report.report(report.Inputs(self.matrix, self.logs, path))
+                self.assertEqual(path.read_bytes(), before)
+        finally:
+            report.ROOT = previous
+
+    def test_generated_report_must_stay_in_repository_scratch(self):
+        path = self.directory / "unexpected-report.json"
+        result = self.run_report(output=path)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("_scratch", result.stderr)
+        self.assertFalse(path.exists())
+
+    def runner_matrix(self):
+        manifest = json.loads(self.manifest.read_text())
+        manifest["metal"] = {"runtime": {"path": "runtime.a", "sha256": self.digest(self.runtime)}}
+        self.manifest.write_text(json.dumps(manifest))
+        data = json.loads((ROOT / "testdata/semantic-migration/matrix.json").read_text())
+        for row in data["contracts"]:
+            row["tests"] = ["TestSemanticCoverageInventory"]
+        data["gaps"] = []
+        path = self.directory / "selected-matrix.json"
+        path.write_text(json.dumps(data))
+        compiler = self.directory / "frontend"
+        built = subprocess.run(["go", "build", "-o", str(compiler), "./cmd/lo"], cwd=ROOT,
+                               stdin=subprocess.DEVNULL, text=True, capture_output=True)
+        self.assertEqual(built.returncode, 0, built.stderr)
+        return path, compiler
+
+    def invoke_runner(self, matrix, compiler):
+        output = self.directory / "selected-run"
+        result = subprocess.run([sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"), "run",
+                                 "--matrix", str(matrix), "--compiler", str(compiler), "--toolchain", str(self.manifest),
+                                 "--output-root", str(output), "--allow-partial"], cwd=ROOT,
+                                stdin=subprocess.DEVNULL, text=True, capture_output=True)
+        return result, output
+
+    def test_runner_executes_selected_matrix_once_with_native_identity(self):
+        matrix, compiler = self.runner_matrix()
+        result, output = self.invoke_runner(matrix, compiler)
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        logs = list(output.glob("*.jsonl"))
+        self.assertEqual(len(logs), 1)
+        self.assertTrue(logs[0].name.startswith("semantic-native-"))
+        record = json.loads((output / "semantic-coverage.json").read_text())
+        self.assertEqual(len(record["contracts"]), len(json.loads(matrix.read_text())["contracts"]))
+        self.assertEqual(len(record["execution_identity"]), 1)
+        self.assertEqual(next(iter(record["execution_identity"].values()))["implementation"], "llvm-native")
+
+    def test_runner_rejects_missing_catalog_operation(self):
+        matrix, compiler = self.runner_matrix()
+        data = json.loads(matrix.read_text())
+        removed = data["operations"].pop()["operation"]
+        data["contracts"] = [row for row in data["contracts"] if row["operation"] != removed]
+        matrix.write_text(json.dumps(data))
+        result, output = self.invoke_runner(matrix, compiler)
+        self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
+        log = next(output.glob("*.jsonl")).read_text()
         self.assertIn("missing operation " + removed, log)
-        self.assertFalse((self.directory / "semantic-coverage.json").exists())
+        self.assertFalse((output / "semantic-coverage.json").exists())
+
+    def test_selector_limits_execution_to_applicable_target(self):
+        sys.path.insert(0, str(ROOT / "tools/semanticcoverage"))
+        import run
+        self.data["contracts"][0]["targets"] = [TARGETS[0]]
+        self.data["contracts"][0]["tests"] = ["TestDarwinOnly"]
+        self.write_matrix()
+        self.assertNotIn("TestDarwinOnly", run.select_tests(self.matrix, TARGETS[1]))
+        self.assertIn("TestDarwinOnly", run.select_tests(self.matrix, TARGETS[0]))
+        with self.assertRaises(ValueError):
+            run.select_tests(self.matrix, "other/target")
+
+    def test_runner_preserves_every_consumed_input_before_execution(self):
+        host = {"Darwin": "darwin", "Linux": "linux"}[platform.system()] + "/arm64"
+        other = next(target for target in TARGETS if target != host)
+        names = ("semantic-coverage.json", "semantic-native-" + host.replace("/", "-") + ".jsonl")
+        for kind in ("compiler", "compiler-hardlink", "toolchain", "additional-log", "runtime", "identity-compiler", "identity-runtime"):
+            for name in names:
+                with self.subTest(kind=kind, generated=name):
+                    case = self.directory / (kind + "-" + name)
+                    case.mkdir()
+                    generated = case / name
+                    compiler, toolchain = self.compiler, self.manifest
+                    log = case / "other.jsonl"
+                    self.events(log, other)
+                    initial = [json.loads(line) for line in log.read_text().splitlines()]
+                    identity = json.loads(initial[1]["Output"].split("=", 1)[1])
+                    identity.update(compiler=str(self.compiler), toolchain=str(self.manifest))
+                    initial[1]["Output"] = "LO_SEMANTIC_IDENTITY=" + json.dumps(identity)
+                    log.write_text("".join(json.dumps(event) + "\n" for event in initial))
+                    if kind == "compiler":
+                        generated.write_bytes(self.compiler.read_bytes())
+                        compiler = generated
+                    elif kind == "compiler-hardlink":
+                        os.link(self.compiler, generated)
+                    elif kind == "toolchain":
+                        data = json.loads(self.manifest.read_text())
+                        for target in data["targets"].values():
+                            target["runtime"]["path"] = str(self.runtime)
+                        generated.write_text(json.dumps(data))
+                        toolchain = generated
+                    elif kind == "additional-log":
+                        generated.write_bytes(log.read_bytes())
+                        log = generated
+                    elif kind == "runtime":
+                        generated.write_bytes(self.runtime.read_bytes())
+                        data = json.loads(self.manifest.read_text())
+                        for target in data["targets"].values():
+                            target["runtime"]["path"] = str(generated)
+                        toolchain = case / "toolchain.json"
+                        toolchain.write_text(json.dumps(data))
+                    else:
+                        generated.write_bytes(self.compiler.read_bytes() if kind == "identity-compiler" else self.runtime.read_bytes())
+                        events = [json.loads(line) for line in log.read_text().splitlines()]
+                        identity = json.loads(events[1]["Output"].split("=", 1)[1])
+                        if kind == "identity-compiler":
+                            identity["compiler"] = str(generated)
+                        else:
+                            data = json.loads(self.manifest.read_text())
+                            for target in data["targets"].values():
+                                target["runtime"]["path"] = str(generated)
+                            manifest = case / "identity-toolchain.json"
+                            manifest.write_text(json.dumps(data))
+                            identity["toolchain"] = str(manifest)
+                        events[1]["Output"] = "LO_SEMANTIC_IDENTITY=" + json.dumps(identity)
+                        log.write_text("".join(json.dumps(event) + "\n" for event in events))
+                    consumed = {self.matrix, compiler, toolchain, log, generated}
+                    before = {path: path.read_bytes() for path in consumed}
+                    result = subprocess.run([sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"), "run",
+                                             "--matrix", str(self.matrix), "--compiler", str(compiler), "--toolchain", str(toolchain),
+                                             "--native", other + "=" + str(log), "--output-root", str(case)],
+                                            cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True)
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    self.assertIn("overlap", result.stderr)
+                    for path, contents in before.items():
+                        self.assertTrue(path.exists(), str(path))
+                        self.assertEqual(path.read_bytes(), contents, str(path))
+                    self.assertNotIn("semantic execution:", result.stdout)
+
+    def test_runner_cannot_overwrite_matrix(self):
+        for name in ("semantic-coverage.json", "semantic-native-darwin-arm64.jsonl"):
+            path = self.directory / name
+            path.write_text(self.matrix.read_text())
+            before = path.read_bytes()
+            result = subprocess.run([sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"), "run", "--matrix", str(path),
+                                     "--output-root", str(self.directory), "--compiler", str(self.compiler), "--toolchain", str(self.manifest)], cwd=ROOT, stdin=subprocess.DEVNULL, text=True, capture_output=True)
+            self.assertEqual(path.read_bytes(), before)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("overlaps an input", result.stderr)
 
 
 if __name__ == "__main__":

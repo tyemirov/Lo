@@ -1,7 +1,7 @@
 package catalog
 
 import (
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 	"slices"
 )
@@ -12,7 +12,7 @@ func addComputeFailures(operations map[string]Operation) {
 			continue
 		}
 		entry := definition.(operation)
-		for _, kind := range []string{device.Unavailable, device.UnsupportedProfile, device.UnsupportedOperation, device.AllocationFailed, device.LibraryFailed, device.ExecutionFailed, device.Lost, device.Mismatch} {
+		for _, kind := range []string{targetconfig.Unavailable, targetconfig.UnsupportedProfile, targetconfig.UnsupportedOperation, targetconfig.AllocationFailed, targetconfig.LibraryFailed, targetconfig.ExecutionFailed, targetconfig.Lost, targetconfig.Mismatch} {
 			if !slices.Contains(entry.errors, kind) {
 				entry.errors = append(entry.errors, kind)
 			}
@@ -66,7 +66,7 @@ func addTensors(m map[string]Operation) {
 	one := []types.Parameter{{Name: ParamValue, Type: t}}
 	add(DeviceNew, []types.Parameter{{Name: ParamSelector, Type: types.String()}}, must(types.NewFallible(types.Device())), InvalidSelector)
 	add(TensorNew, []types.Parameter{{Name: ParamValues, Type: floats}, {Name: ParamShape, Type: ints}}, ft, InvalidShape, NumericNonFinite)
-	add(TensorTo, []types.Parameter{{Name: ParamValue, Type: t}, {Name: ParamDevice, Type: types.Device()}}, ft, device.Mismatch, device.Unavailable, device.AllocationFailed, device.TransferFailed, device.UnsupportedProfile, device.LibraryFailed, device.Lost)
+	add(TensorTo, []types.Parameter{{Name: ParamValue, Type: t}, {Name: ParamDevice, Type: types.Device()}}, ft, targetconfig.Mismatch, targetconfig.Unavailable, targetconfig.AllocationFailed, targetconfig.TransferFailed, targetconfig.UnsupportedProfile, targetconfig.LibraryFailed, targetconfig.Lost)
 	add(TensorShape, one, ints)
 	add(TensorRank, one, types.Int())
 	add(TensorDtype, one, types.String())
@@ -74,20 +74,20 @@ func addTensors(m map[string]Operation) {
 	add(TensorToFloat, one, must(types.NewFallible(types.Float())), ShapeMismatch, HostObservationRequired)
 	add(TensorValues, one, must(types.NewFallible(floats)), HostObservationRequired)
 	for _, name := range []string{TensorAdd, TensorSub, TensorMul, TensorDiv, TensorMatmul} {
-		errors := []string{ShapeMismatch, NumericNonFinite, device.Mismatch, device.UnsupportedOperation}
+		errors := []string{ShapeMismatch, NumericNonFinite, targetconfig.Mismatch, targetconfig.UnsupportedOperation}
 		if name == TensorDiv {
 			errors = append(errors, NumericZero)
 		}
 		add(name, []types.Parameter{{Name: ParamLeftOperand, Type: t}, {Name: ParamRightOperand, Type: t}}, ft, errors...)
 	}
-	add(TensorSqrt, one, ft, NumericDomain, NumericNonFinite, device.UnsupportedOperation)
-	add(TensorRelu, one, ft, device.UnsupportedOperation)
+	add(TensorSqrt, one, ft, NumericDomain, NumericNonFinite, targetconfig.UnsupportedOperation)
+	add(TensorRelu, one, ft, targetconfig.UnsupportedOperation)
 	for _, name := range []string{TensorBroadcast, TensorReshape, TensorTranspose, TensorSum, TensorMean} {
 		param := ParamShape
 		if name == TensorTranspose || name == TensorSum || name == TensorMean {
 			param = ParamAxes
 		}
-		errors := []string{InvalidShape, ShapeMismatch, device.UnsupportedOperation}
+		errors := []string{InvalidShape, ShapeMismatch, targetconfig.UnsupportedOperation}
 		if name == TensorSum || name == TensorMean {
 			errors = append(errors, NumericNonFinite)
 		}

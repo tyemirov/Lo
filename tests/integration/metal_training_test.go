@@ -1,10 +1,10 @@
 package integration_test
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
+
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"math"
 	"os"
 	"path/filepath"
@@ -12,8 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 )
 
 func TestMetalTrainingCLI(t *testing.T) {
@@ -41,7 +39,7 @@ func TestMetalTrainingCLI(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			args := append([]string{"run", path, "--format", "json"}, tc.args...)
-			got := run(t, args...)
+			got := runProgram(t, args[1], args[0], args[2:]...)
 			if got.status != tc.status || got.stdout != "" || !strings.Contains(got.stderr, tc.diagnostic) {
 				t.Fatalf("training admission: %+v", got)
 			}
@@ -113,7 +111,7 @@ func trainingParameters(t *testing.T, value runtimeValue) []float64 {
 			Dtype, Device string
 			Shape         []string
 		}
-		if err := json.Unmarshal(tensor.Value, &metadata); err != nil || metadata.Dtype != "fp32" || metadata.Device != device.CPU || !slices.Equal(metadata.Shape, field.shape) {
+		if err := json.Unmarshal(tensor.Value, &metadata); err != nil || metadata.Dtype != "fp32" || metadata.Device != targetconfig.CPU || !slices.Equal(metadata.Shape, field.shape) {
 			t.Fatalf("training tensor metadata: %s (%v)", tensor.Value, err)
 		}
 		for _, number := range tensorNumbers(t, tensor) {
@@ -157,63 +155,6 @@ func trainingResult(t *testing.T, got result) runtimeValue {
 	return successfulValue(t, envelope.Result)
 }
 
-func TestMetalComputeTraining(t *testing.T) { metalTraining(t, metalComputeFactory) }
-func metalTraining(t *testing.T, factory func() device.Factory) {
-	text := metalTrainingSource(t)
-	var previous string
-	for repeat := 0; repeat < 3; repeat++ {
-		value, receipts, serialized := metalResult(t, text, factory())
-		loss := assertMetalTrainingResult(t, value)
-		if repeat > 0 && serialized != previous {
-			t.Fatal("training bits changed between runs")
-		}
-		previous = serialized
-		uploads, downloads, computes, initialComputes := 0, 0, 0, 0
-		var peak uint64
-		for _, receipt := range receipts {
-			peak = max(peak, receipt.Live)
-			switch receipt.Event {
-			case device.EventOpen:
-				if receipt.Backend == nil || receipt.Backend.Profile != device.MetalProfile {
-					t.Fatalf("training profile: %+v", receipt)
-				}
-				identity, err := json.Marshal(receipt.Backend)
-				if err != nil {
-					t.Fatal(err)
-				}
-				t.Logf("training identity: %s", identity)
-			case device.EventCompute:
-				computes++
-				if uploads != 6 || downloads > 1 {
-					t.Fatal("training computation crossed an observation boundary")
-				}
-			case device.EventTransfer:
-				switch receipt.Device {
-				case device.Metal:
-					uploads++
-					if computes != 0 {
-						t.Fatal("upload after training started")
-					}
-				case device.CPU:
-					downloads++
-					if downloads == 1 {
-						initialComputes = computes
-					} else if computes-initialComputes < 200 {
-						t.Fatal("download inside training steps")
-					}
-				default:
-					t.Fatalf("unexpected transfer target %s", receipt.Device)
-				}
-			}
-		}
-		if uploads != 6 || downloads != 6 || peak > 2048 {
-			t.Fatalf("training lifetime: uploads=%d downloads=%d peak=%d", uploads, downloads, peak)
-		}
-		assertReleased(t, receipts)
-		t.Logf("run=%d steps=200 loss=%.17g uploads=%d downloads=%d computes=%d peak_reserved_bytes=%d cleanup=complete", repeat+1, loss, uploads, downloads, computes, peak)
-	}
-}
-
 // This diagnostic variant observes gradients explicitly. It is separate from
 // the maintained example whose transfer and storage contract is tested above.
 func metalTrainingGradientSource(t *testing.T) string {
@@ -248,105 +189,4 @@ func metalTrainingGradientSource(t *testing.T) string {
 }
 `, stateType, observationType, stateType)
 	return text[:stepStart] + step + "flow Main() -> List<" + observationType + ">! {\n" + text[mainBody:observationStart] + "  return List.unfold(initial_state, 200, inputs, targets, ObserveStep)\n}\nreturn Main()\n"
-}
-
-func TestMetalTrainingGradients(t *testing.T) { metalTrainingGradients(t, metalComputeFactory) }
-func metalTrainingGradients(t *testing.T, factory func() device.Factory) {
-	text := metalTrainingGradientSource(t)
-	actual, _, _ := metalResult(t, text, factory())
-	cpu, _ := runWithDevices(t, context.Background(), strings.ReplaceAll(text, "metal:0", "cpu"), device.SoftwareFactory{})
-	var steps, cpuSteps []runtimeValue
-	if err := json.Unmarshal(actual.Value, &steps); err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(trainingResult(t, cpu).Value, &cpuSteps); err != nil || len(steps) != 200 || len(cpuSteps) != 200 {
-		t.Fatalf("gradient steps=%d cpu=%d (%v)", len(steps), len(cpuSteps), err)
-	}
-	for index, step := range steps {
-		loss := trainingFloat(t, recordField(t, step, "loss"))
-		gradients := trainingParameters(t, recordField(t, step, "gradients"))
-		cpuLoss := trainingFloat(t, recordField(t, cpuSteps[index], "loss"))
-		cpuGradients := trainingParameters(t, recordField(t, cpuSteps[index], "gradients"))
-		checkNumbers(t, []float64{loss}, []float64{cpuLoss}, 1e-5, 1e-4)
-		checkNumbers(t, gradients, cpuGradients, 1e-5, 1e-4)
-		if index == 0 {
-			for _, reference := range trainingReferences(t) {
-				checkNumbers(t, gradients, reference.InitialGradients, 1e-6, 1e-5)
-				checkNumbers(t, []float64{loss}, []float64{reference.InitialLoss}, 0, 0)
-			}
-		}
-	}
-	firstSource := strings.Replace(metalTrainingSource(t), "List.unfold(0, 200, Counter)", "List.unfold(0, 1, Counter)", 1)
-	first, _, _ := metalResult(t, firstSource, factory())
-	for _, reference := range trainingReferences(t) {
-		checkNumbers(t, trainingParameters(t, recordField(t, first, "parameters")), reference.FirstParameters, 1e-6, 1e-5)
-	}
-	t.Log("200 finite losses and 1800 finite gradient coordinates match the CPU profile; initial gradients and all nine first-step Parameters match independent references")
-}
-
-func TestMetalTrainingFailurePreventsEffects(t *testing.T) {
-	for _, tc := range []struct {
-		name, kind string
-		status     int
-	}{
-		{"numeric", "Numeric.NonFinite", 1},
-		{"command", device.ExecutionFailed, 1},
-		{"lost", device.Lost, 1},
-		{"cancel", "runtime.cancelled", 2},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-			steps := 0
-			model := &metalModel{before: func(op device.Operation) error {
-				if op.Kind() != device.ReluGradient {
-					return nil
-				}
-				steps++
-				if steps != 101 {
-					return nil
-				}
-				if tc.name == "numeric" {
-					return &device.NumericFailure{Code: device.NonFinite, Index: 0}
-				}
-				if tc.name == "cancel" {
-					cancel()
-					return ctx.Err()
-				}
-				fault, err := device.NewFault(tc.kind, errors.New("controlled training command failure"))
-				if err != nil {
-					t.Fatal(err)
-				}
-				return fault
-			}}
-			dir := t.TempDir()
-			path := filepath.Join(dir, "must-not-exist")
-			text := strings.Replace(metalTrainingSource(t), "  final_values =", fmt.Sprintf("  effect = File.Write.new(File.Path.new(%q), Bytes.new(\"unexpected\"))\n  commit effect\n  final_values =", path), 1)
-			got, receipts := runWithDevices(t, ctx, text, model, "--allow-device", "metal:0", "--write-root", dir)
-			if got.status != tc.status || got.stdout != "" || !strings.Contains(got.stderr, tc.kind) || steps != 101 {
-				t.Fatalf("training failure: %+v steps=%d", got, steps)
-			}
-			if tc.status == 1 {
-				for _, fragment := range []string{`"value":"Tensor.relu"`, `"value":"TrainStep"`, `"value":"Loss"`, `"span"`} {
-					if !strings.Contains(got.stderr, fragment) {
-						t.Fatalf("missing training trace %s: %s", fragment, got.stderr)
-					}
-				}
-			}
-			if _, err := os.ReadFile(path); !errors.Is(err, os.ErrNotExist) {
-				t.Fatalf("training committed after failure: %v", err)
-			}
-			transfers := 0
-			for _, receipt := range receipts {
-				if receipt.Event == device.EventTransfer {
-					transfers++
-				}
-			}
-			if transfers != 7 {
-				t.Fatalf("training downloaded after failure: %d", transfers)
-			}
-			assertReleased(t, receipts)
-			t.Logf("step=101 kind=%s transfers=7 result=absent commit=absent cleanup=complete", tc.kind)
-		})
-	}
 }

@@ -1,1 +1,0 @@
-return List.new(Math.div(8, 0))

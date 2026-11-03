@@ -2,7 +2,7 @@ package integration_test
 
 import (
 	"encoding/json"
-	"os"
+
 	"strings"
 	"testing"
 )
@@ -23,9 +23,6 @@ func TestLLVMAdmittedProgramSessions(t *testing.T) {
 }
 
 func TestLLVMAdmittedLiteralFailureOrder(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires LLVM runtime inputs")
-	}
 	large := "1" + strings.Repeat("0", 315654)
 	for _, fixture := range []struct {
 		name, source, code string
@@ -37,13 +34,12 @@ func TestLLVMAdmittedLiteralFailureOrder(t *testing.T) {
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			path := sourceFile(t, fixture.source)
-			reference := runExecutable(t, binary, "run", path, "--format", "json")
 			artifact, built := buildForTest(t, path)
 			if built.status != 0 {
 				t.Fatalf("literal fixture build: %+v", built)
 			}
 			got := runExecutable(t, artifact, "run", "--format", "json")
-			for name, observed := range map[string]result{"interpreter": reference, "native": got} {
+			for name, observed := range map[string]result{"native": got} {
 				if observed.status != fixture.status {
 					t.Fatalf("%s literal failure order: %+v", name, observed)
 				}

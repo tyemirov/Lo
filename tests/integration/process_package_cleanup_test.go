@@ -52,7 +52,7 @@ func TestProcessPackageCleanupCommands(t *testing.T) {
 					extra = append(extra, [2]string{"LO_CLEANUP_FAIL", "1"})
 				}
 				selected := packageCleanupContext(t, fixture, extra...) + fmt.Sprintf(` executable = Process.Executable.resolve(context, %q); command = Process.Command.new(context, executable, List.new(%s), Bytes.new("")); result = commit command; return result`, test.tool, strings.Join(arguments, ","))
-				got := run(t, append([]string{"run", sourceFile(t, processContextProgram("Process.Result", selected)), "--format", "json"}, flags...)...)
+				got := runProgram(t, sourceFile(t, processContextProgram("Process.Result", selected)), "run", append([]string{"--format", "json"}, flags...)...)
 				fields := processFields(t, fileOutput(t, got))
 				termination := processFields(t, fields["termination"])
 				code, stdout, stderr := "0", "cleaned\n", ""
@@ -93,7 +93,7 @@ func TestProcessPackageCleanupPipProbe(t *testing.T) {
 			body := packageCleanupContext(t, fixture, extra...) + ` executable = Process.Executable.resolve(context, "python3"); probe = Process.Command.new(context, executable, List.new("-m", "pip", "--version"), Bytes.new("")); checked = commit probe; code = Process.Termination.exit_code(checked.termination); clean = Process.Command.new(context, executable, List.new("-m", "pip", "cache", "purge"), Bytes.new("")); selected = Match.new(code, 0: List.new(clean), _: EmptyCommands()); return Flow.fold(selected, code, Purge)`
 			purge := `flow EmptyCommands() -> List<Process.Command> { return List.new() }; flow Purge(previous: Int, command: Process.Command) -> Int! { cleaned = commit command; return Process.Termination.exit_code(cleaned.termination) }; `
 			flags := append(fixture.flags(), "--process-prune-root", cleanupScope(t, path, "root", fixture.writes))
-			got := run(t, append([]string{"run", sourceFile(t, purge+processContextProgram("Int", body)), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, purge+processContextProgram("Int", body)), "run", append([]string{"--format", "json"}, flags...)...)
 			code := "0"
 			if absent {
 				code = "1"
@@ -130,7 +130,7 @@ func TestProcessPackageCleanupExample(t *testing.T) {
 			}
 			source := strings.Replace(string(data), "context = CleanupContext()", packageCleanupContext(t, fixture, extra...), 1)
 			flags := append(fixture.flags(), "--process-prune-root", cleanupScope(t, fixture.executable, "root", fixture.writes))
-			got := run(t, append([]string{"run", sourceFile(t, source), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, source), "run", append([]string{"--format", "json"}, flags...)...)
 			fields := processFields(t, fileOutput(t, got))
 			available, code := "true", "0"
 			if scenario == "absent" {
@@ -178,7 +178,7 @@ func TestProcessPackageCleanupRegisteredInterpreter(t *testing.T) {
 			if scenario != "no-cleanup-scope" {
 				flags = append(flags, "--process-prune-root", cleanupScope(t, wrapper, "root", fixture.writes))
 			}
-			got := run(t, append([]string{"run", sourceFile(t, processContextProgram("Int", body)), "--format", "json"}, flags...)...)
+			got := runProgram(t, sourceFile(t, processContextProgram("Int", body)), "run", append([]string{"--format", "json"}, flags...)...)
 			code := "1"
 			if scenario == "authorized" {
 				code = "0"

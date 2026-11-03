@@ -14,8 +14,8 @@ func TestExecutionPolicyLiveReads(t *testing.T) {
 	path := fileFixture(t, root, "data", strings.Repeat("x", 128<<10))
 	program := executionPolicySteps + fmt.Sprintf(`flow Read(path: File.Path, state: Int, item: Int) -> Int! { bytes = File.read(path); return Math.add(state, 1) }; flow Run() -> Int! { return Flow.fold(List.unfold(0, 512, Count), 0, File.Path.new(%q), Read) }; return Run()`, path)
 	source := sourceFile(t, program)
-	valueJSON(t, fileOutput(t, run(t, "run", source, "--read-root", root, "--max-live-bytes", "4194304", "--format", "json")), `"512"`)
-	got := run(t, "run", source, "--read-root", root, "--max-live-bytes", "4194304", "--max-data-bytes", "1048576", "--format", "json")
+	valueJSON(t, fileOutput(t, runProgram(t, source, "run", "--read-root", root, "--max-live-bytes", "4194304", "--format", "json")), `"512"`)
+	got := runProgram(t, source, "run", "--read-root", root, "--max-live-bytes", "4194304", "--max-data-bytes", "1048576", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" || !strings.Contains(got.stderr, "data bytes") {
 		t.Fatalf("explicit cumulative data policy: %+v", got)
 	}
@@ -25,7 +25,7 @@ func TestExecutionPolicyRetainedData(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := fileFixture(t, root, "data", strings.Repeat("x", 128<<10))
 	program := executionPolicySteps + fmt.Sprintf(`flow Read(path: File.Path, state: String, item: Int) -> String! { bytes = File.read(path); return String.concat(state, UTF8.String.new(bytes)) }; flow Run() -> String! { return Flow.fold(List.unfold(0, 64, Count), "", File.Path.new(%q), Read) }; return Run()`, path)
-	got := run(t, "run", sourceFile(t, program), "--read-root", root, "--max-live-bytes", "4194304", "--format", "json")
+	got := runProgram(t, sourceFile(t, program), "run", "--read-root", root, "--max-live-bytes", "4194304", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" || !strings.Contains(got.stderr, "live") {
 		t.Fatalf("retained data escaped live policy: %+v", got)
 	}
@@ -37,7 +37,7 @@ func TestExecutionPolicyOptions(t *testing.T) {
 		t.Run(option, func(t *testing.T) {
 			valueJSON(t, runValue(t, "return 1", option, "0"), `"1"`)
 			for _, arguments := range [][]string{{option, "-1"}, {option, "no"}, {option, "18446744073709551616"}, {option, "1", option, "2"}, {option}} {
-				got := run(t, append([]string{"run", path, "--format", "json"}, arguments...)...)
+				got := runProgram(t, path, "run", append([]string{"--format", "json"}, arguments...)...)
 				if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "cli.invalid-invocation" {
 					t.Fatalf("invalid execution policy accepted %q: %+v", arguments, got)
 				}
@@ -57,7 +57,7 @@ func TestExecutionPolicyConfiguredLimits(t *testing.T) {
 		{"list", "return List.new(1, 2)", "--max-list-items"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got := run(t, "run", sourceFile(t, test.source), test.option, "1", "--format", "json")
+			got := runProgram(t, sourceFile(t, test.source), "run", test.option, "1", "--format", "json")
 			if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 				t.Fatalf("configured policy was not applied: %+v", got)
 			}
@@ -84,7 +84,7 @@ func TestExecutionPolicyNestedListItems(t *testing.T) {
 					args := []string{"run", path, "--format", "json", "--max-list-items", limit}
 					args = append(args, fixture.options...)
 					args = append(args, fixture.arguments...)
-					got := run(t, args...)
+					got := runProgram(t, args[1], args[0], args[2:]...)
 					if limit == "0" {
 						if out := fileOutput(t, got); out.Type != fixture.resultType {
 							t.Fatalf("unlimited nested list changed type: %s, want %s", out.Type, fixture.resultType)
@@ -107,7 +107,7 @@ func TestExecutionPolicyLogicalWeightOverflow(t *testing.T) {
 		fmt.Fprintf(&program, "items%d = List.new(items%d, items%d); ", depth, depth-1, depth-1)
 	}
 	program.WriteString("return List.length(items64)")
-	got := run(t, "run", sourceFile(t, program.String()), "--max-value-bytes", "0", "--max-live-bytes", "0", "--max-data-bytes", "0", "--format", "json")
+	got := runProgram(t, sourceFile(t, program.String()), "run", "--max-value-bytes", "0", "--max-live-bytes", "0", "--max-data-bytes", "0", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 		t.Fatalf("logical weight overflow must fail with a typed limit: %+v", got)
 	}
@@ -137,7 +137,7 @@ func TestExecutionPolicyFileQuotas(t *testing.T) {
 			for _, limit := range []string{"1", "2", "0"} {
 				t.Run(limit, func(t *testing.T) {
 					arguments := []string{"run", path, "--format", "json", fixture.option, limit}
-					got := run(t, append(arguments, fixture.grants...)...)
+					got := runProgram(t, path, "run", append(arguments[2:], fixture.grants...)...)
 					if limit != "1" {
 						valueJSON(t, fileOutput(t, got), `"2"`)
 						return
@@ -165,7 +165,7 @@ func TestExecutionPolicyScalarIdentity(t *testing.T) {
 					fmt.Fprintf(&program, "item%d = %s; ", index, literal)
 				}
 				program.WriteString("return 1")
-				got := run(t, "run", sourceFile(t, program.String()), "--max-data-bytes", "1000", "--format", "json")
+				got := runProgram(t, sourceFile(t, program.String()), "run", "--max-data-bytes", "1000", "--format", "json")
 				if aliases {
 					valueJSON(t, fileOutput(t, got), `"1"`)
 				} else if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {

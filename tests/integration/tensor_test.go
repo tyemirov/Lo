@@ -123,7 +123,7 @@ func TestTensorDynamicFailures(t *testing.T) {
 		{`flow ReadScalar(n: Int) -> Float! { a = Tensor.new(List.new(1.0, 2.0), List.new(n)); return Tensor.to_float(a) }; return ReadScalar(Math.add(1,1))`, "Tensor.ShapeMismatch"},
 		{`flow Shape(n: Int) -> Tensor<FP32>! { return Tensor.new(List.new(), List.new(n,n,n,n)) }; return Shape(Math.mul(1000,1000))`, "Tensor.InvalidShape"},
 	} {
-		got := run(t, "run", sourceFile(t, tc.source), "--format", "json")
+		got := runProgram(t, sourceFile(t, tc.source), "run", "--format", "json")
 		if got.status != 1 || !strings.Contains(got.stderr, `"kind":"`+tc.kind+`"`) || got.stdout != "" {
 			t.Fatalf("dynamic tensor failure %s: %+v", tc.kind, got)
 		}
@@ -172,7 +172,7 @@ func TestTensorCPUFailures(t *testing.T) {
 		{`a = Tensor.new(List.new(),List.new(0,2)); return Tensor.mean(a,List.new(0))`, "Tensor.EmptyReduction"},
 		{`a = Tensor.new(List.new(3e38,3e38,-3e38),List.new(3)); return Tensor.sum(a,List.new(0))`, "Numeric.NonFinite"},
 	} {
-		got := run(t, "run", sourceFile(t, `flow Bad() -> Tensor<FP32>! { `+tc.body+` }; return Bad()`), "--format", "json")
+		got := runProgram(t, sourceFile(t, `flow Bad() -> Tensor<FP32>! { `+tc.body+` }; return Bad()`), "run", "--format", "json")
 		if got.status != 1 || !strings.Contains(got.stderr, `"kind":"`+tc.kind+`"`) || got.stdout != "" {
 			t.Fatalf("CPU error %s: %+v", tc.kind, got)
 		}

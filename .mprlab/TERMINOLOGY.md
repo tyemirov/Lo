@@ -101,6 +101,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `application`: A program or service that uses language operations for a specific task.
 - `general-purpose language`: A programming language with contracts that apply across application domains.
 - `glob`: A wildcard pattern that matches a complete string.
+- `lexical path`: Path text with slash separators and no host resolution.
+- `Unicode White_Space`: The fixed set of 25 scalars in the value processor contract.
+- `POSIX shell syntax`: Text conventions for command arguments in a POSIX shell.
+- `dynamic programming`: An algorithm that keeps results for successive subproblems.
+- `merge sort`: A stable sort that combines sorted subsequences.
 - `worklist`: An ordered collection of items that a sequential flow processor has yet to visit.
 - `resource quota`: A host-configured maximum for a specified execution resource.
 - `live value weight`: Logical value weight retained by active execution scopes and pending work.
@@ -158,7 +163,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `lock lease`: Session ownership of an acquired exclusive lock until application resource cleanup completes.
 - `lock grant`: Explicit host authority to acquire a lock on one retained file identity.
 - `quarantine`: A retained owner that prevents resource release when child ownership is unknown.
-- `program entry`: The source file used by an interpreter or the executable image used by a native program.
+- `program entry`: The executable image of a compiled program or an explicitly injected native embedding identity.
 - `open file description`: State that the operating system shares between duplicated file descriptors for one open operation.
 - `vnode`: The Darwin filesystem object that identifies one file or directory.
 - `basename`: The final name component of a filesystem path.
@@ -287,6 +292,8 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `reduction`: Combination of tensor elements along specified axes into fewer output elements.
 - `numeric profile`: Fixed arithmetic rules and implementation identities for reproducible numeric execution.
 - `kernel`: A compiled program that executes tensor operations on a device.
+- `kernel provenance`: Source snapshots, tool identities, and byte digests that establish the inputs of a compiled kernel.
+- `compiled source snapshot`: Immutable source bytes recorded with the kernel producer inputs.
 - `CUDA`: NVIDIA's platform for device computation.
 - `Metal`: Apple's API for graphics and device computation.
 - `MSL`: Metal Shading Language, the source language for Metal kernels.

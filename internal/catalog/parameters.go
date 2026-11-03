@@ -1,7 +1,7 @@
 package catalog
 
 import (
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
@@ -33,7 +33,7 @@ func addParameters(m map[string]Operation) {
 			errors = append(errors, NumericNonFinite)
 		}
 		if UsesDevice(name) {
-			errors = append(errors, device.UnsupportedOperation)
+			errors = append(errors, targetconfig.UnsupportedOperation)
 		}
 		m[name] = operation{name: name, rule: TensorBundleOperation, parameters: parameters, errors: errors}
 	}

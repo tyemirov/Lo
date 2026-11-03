@@ -82,9 +82,10 @@ The injection API is outside the Lo operation catalog.
 
 ### Argument Boundary and Limits
 
-Source execution accepts `lo run source.lo [runner options] -- [program arguments]`.
-The same separator applies to `lo serve` and native artifact runtime options.
-The snapshot excludes the executable, command name, source path, runner options, and separator.
+Compiled execution accepts `PROGRAM run [runtime options] -- [program arguments]`.
+The same separator applies to `PROGRAM serve`.
+The snapshot excludes the executable, command name, runtime options, and separator.
+
 Without the separator, the argument list is empty.
 After the separator, values that start with `-` are literal program arguments.
 An explicit empty argument stays present.
@@ -327,21 +328,20 @@ Each predicate reads immutable values and has no hidden metadata lookup.
 | Checker and IR | Resolve concrete contexts and predicate parameters. Record the pure constructor and activation callback separately. |
 | Runner context | Capture validated invocation data or its error once. Share the initial result with HTTP callbacks. |
 | Go filesystem boundary | Extend platform metadata conversion for Darwin and Linux. Get each observation through the open root. |
-| Go values | Extend `File.Entry`. Add sealed directory and scan values and guarded removal descriptions. |
+| Native values | Extend `File.Entry`. Add sealed directory and scan values and guarded removal descriptions. |
 | Native runtime | Extend Rust metadata conversion, nominal payloads, invocation capture, and removal callback dispatch. |
 | Lowering and ABI | Encode the resolved predicate identity, contexts, and exact nominal schemas in current native metadata. |
 | Inspection | Report host observations, exact or dynamic roots, and conditional removal with its activation-phase predicate. |
 | Serialization | Add all public fields and recursive invocation redaction without serialized authority. |
 
-The Go field definitions belong in `internal/types/types.go` beside the current `File.Entry` projections.
-The Go observation path belongs in `internal/adapter/file_entries.go` and its platform metadata adapters.
-The nominal values belong in `internal/value/file.go` and the invocation value implementation.
-The existing `internal/execution/process_context.go` supplies the lifetime pattern for capture results.
-The Rust observation path belongs in `runtime/native/src/file_entries.rs`.
-Its native context stores the immutable invocation capture result and dispatches guard flows through the ordinary flow evaluator.
+The static field definitions belong in `internal/types/types.go` beside the current `File.Entry` projections.
+Native observations belong in `runtime/native/src/file_entries.rs` and `file_observer.rs`.
+Native values and retained directory ownership belong in `runtime/native/src/value.rs` and `file_leases.rs`.
+The native context stores the immutable invocation capture result.
+Compiled callback dispatch evaluates removal guards.
 
-Implementation must update both runtime inventories and their schema assertions together.
-The interpreter and compiled artifacts must publish the same fields, errors, progress, and callback order.
+Implementation must update the compiler schemas, runtime schemas, and semantic inventory together.
+Compiled artifacts must preserve the specified fields, errors, progress, and callback order.
 Each observation operation has a host-read effect, including access to an invocation snapshot that is already captured.
 Only projection from the returned values is pure.
 Inspection must not capture host inputs, enumerate directories, invoke predicates, or execute commands.

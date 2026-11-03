@@ -1,5 +1,10 @@
 # Native Collection Performance Analysis
 
+This document preserves measurements from the recorded historical implementation.
+Its Go execution paths, command examples, and comparison limits are historical.
+The [native measurements guide](native-benchmarks.md) defines the current native tools and report schema.
+These recorded numbers do not qualify the current implementation.
+
 This analysis examines the remaining native performance regression after the [resource tracking corrections](resource-performance-remediation.md).
 The baseline is revision `0be6847ccf3d2a66b57f0505ded7ae5b4be9888a`.
 The current source is revision `d42c89b9a7e6d9736b289f6972fdabf3894971e0`.
@@ -115,7 +120,7 @@ Hash-table capacity changes also appear in the call stacks.
 These stacks support the measured value-ledger result.
 Optimized code and concurrent host load prevent a precise division of CPU time among these functions.
 
-## Next Implementation Targets
+## Historical Implementation Targets
 
 The first target is value receipt admission and transfer for scalar collection results.
 A correction must preserve live quotas, alias identities, retained children, and cleanup errors.

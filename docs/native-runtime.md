@@ -11,6 +11,9 @@ The [adapter receipt](evidence/native-adapters/validation.json) records I009 val
 
 All executable builds use LLVM and a static Rust runtime.
 The compiler no longer generates Go source.
+The compiler accepts parse, check, inspect, and build commands.
+Compiled artifacts supply run, serve, and metadata commands.
+The [embedding guide](native-embedding.md) defines the retained compiled-entry ABI.
 The [installed compiler](compiler-distribution.md) uses LLVM from its own package.
 An LLVM build does not select another backend when compilation fails.
 
@@ -143,26 +146,25 @@ make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run TestAutodiff -count=1" </dev/null
 
 make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
-  TEST_ARGS="-run 'TestTensor|TestNativeTensorBudgetDifferential' -count=1" </dev/null
+  TEST_ARGS="-run 'TestTensor|TestNativeTensorBudgetContracts' -count=1" </dev/null
 
 make test-native NATIVE_RUNTIME_STATE=_scratch/native-runtime \
   TEST_ARGS="-run 'TestLLVM|TestParameters|TestOptimizer|TestCheckpointFreshProcess|TestSemanticMigrationCheckpointResume' -count=1" </dev/null
 ```
 
 The Linux checks use QEMU without a physical-device requirement.
-Tests that directly inject Go evaluator dependencies do not establish LLVM runtime behavior.
+Tests use compiled entries and native host hooks for controlled failure scenarios.
 The native ABI tests supply separate evidence for numerical cancellation, storage ownership, and failure cleanup.
 
 ## Metal Assets
 
-Run `make build-metal </dev/null` before `make build-native-runtime-metal` or package construction.
-The producer creates `runtime/metal/metal.metallib` and `runtime/metal/manifest.json`.
-The manifest identifies the kernel, adapter, producer, and embed source files.
-The native runtime producer checks these files against `bin/lo-metal-build.json`.
+The repository supplies `runtime/metal/metal.metallib` and its canonical source manifest.
+The [Metal guide](native-metal.md#developer-preparation) defines provenance checks and kernel reproduction.
+`make build-native-runtime-metal` verifies those inputs and builds the native adapter with pinned LLVM.
+It does not require a Go interpreter build receipt.
 
-It reads the kernel library directly, without a Go source archive.
+The producer reads the kernel library directly, without a Go source archive.
 Software device models and injected failures supply device acceptance evidence.
-No physical device is necessary for any check.
 
 ## Runtime Structure
 

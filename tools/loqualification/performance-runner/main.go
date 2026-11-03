@@ -5,17 +5,18 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"math"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -30,18 +31,16 @@ const streamLimit = 1 << 20
 const buildTimeout = 180 * time.Second
 const steps = "10000000"
 
-var benchmarkPattern = regexp.MustCompile(`BenchmarkExecution\s+\d+\s+([\d.]+) ns/op\s+(\d+) B/op\s+(\d+) allocs/op`)
-
 type fixture struct {
-	Name       string `json:"name"`
-	Source     string `json:"source"`
-	Expected   string `json:"expected"`
-	SourceSHA  string `json:"source_sha256"`
-	Reference  string `json:"reference"`
-	Native     string `json:"native"`
-	Allocation string `json:"allocation"`
-	Artifact   string `json:"artifact"`
-	Work       string `json:"work"`
+	Name       string          `json:"name"`
+	Source     string          `json:"source"`
+	Expected   string          `json:"expected"`
+	SourceSHA  string          `json:"source_sha256"`
+	Oracle     *trainingOracle `json:"oracle,omitempty"`
+	Native     string          `json:"native"`
+	Allocation string          `json:"allocation"`
+	Artifact   string          `json:"artifact"`
+	Work       string          `json:"work"`
 }
 type config struct {
 	SamplePlan map[string]int `json:"sample_plan"`
@@ -89,7 +88,7 @@ func readConfig(path string) (config, error) {
 		return c, fmt.Errorf("configuration must contain one JSON object")
 	}
 	if c.Warmup != warmup || !absolute(c.Compiler) || !absolute(c.Output) {
-		return c, fmt.Errorf("configuration requires at least ten pairs, three warmups, and absolute compiler/output paths")
+		return c, fmt.Errorf("configuration requires native samples, three warmups, and absolute compiler/output paths")
 	}
 	plan := map[string]int{"execution": 10, "process": 10, "http": 100, "build": 10}
 	if len(c.SamplePlan) != len(plan) {
@@ -97,7 +96,7 @@ func readConfig(path string) (config, error) {
 	}
 	for lane, count := range plan {
 		if c.SamplePlan[lane] != count {
-			return c, fmt.Errorf("configuration sample_plan %s requires %d pairs", lane, count)
+			return c, fmt.Errorf("configuration sample_plan %s requires %d samples", lane, count)
 		}
 	}
 	names := map[string]bool{}
@@ -107,8 +106,8 @@ func readConfig(path string) (config, error) {
 				return c, fmt.Errorf("invalid %s fixture %q", lane, f.Name)
 			}
 			names[lane+"/"+f.Name] = true
-			if lane == "execution" && (!absolute(f.Reference) || !absolute(f.Native) || !absolute(f.Allocation)) {
-				return c, fmt.Errorf("execution fixture %s requires paired binaries", f.Name)
+			if lane == "execution" && (!absolute(f.Native) || !absolute(f.Allocation)) {
+				return c, fmt.Errorf("execution fixture %s requires native binaries", f.Name)
 			}
 			if !absolute(f.Artifact) {
 				return c, fmt.Errorf("fixture %s requires an absolute artifact", f.Name)
@@ -119,12 +118,6 @@ func readConfig(path string) (config, error) {
 		return c, fmt.Errorf("configuration requires a measurement lane")
 	}
 	return c, nil
-}
-func order(sample int) []string {
-	if sample%2 == 0 {
-		return []string{"interpreter", "native"}
-	}
-	return []string{"native", "interpreter"}
 }
 func rssTree(parent int) (uint64, error) {
 	directories, err := os.ReadDir("/proc")
@@ -252,152 +245,208 @@ func checked(argv []string, work string) (observation, error) {
 	return execute(argv, work, 60*time.Second, false)
 }
 func build(c config, f fixture) (observation, error) {
+	data, err := os.ReadFile(f.Source)
+	if err != nil {
+		return observation{}, err
+	}
+	if fmt.Sprintf("%x", sha256.Sum256(data)) != f.SourceSHA {
+		return observation{}, fmt.Errorf("fixture source identity differs")
+	}
 	return execute([]string{c.Compiler, "build", f.Source, "--output", f.Artifact, "--format", "json"}, f.Work, buildTimeout, true)
 }
-func command(c config, f fixture, backend, verb string) []string {
-	args := []string{f.Artifact, verb}
-	if backend == "interpreter" {
-		args = []string{c.Compiler, verb, f.Source}
-	}
-	return args
+
+type trainingOracle struct {
+	InitialLoss float64                    `json:"initial_loss"`
+	Loss        float64                    `json:"loss"`
+	Parameters  map[string]json.RawMessage `json:"parameters"`
 }
+type typedValue struct {
+	Type, Status string
+	Value        json.RawMessage
+}
+
+func verifyFixture(output []byte, f fixture) error {
+	text := strings.TrimSpace(string(output))
+	if f.Oracle == nil && text == f.Expected && f.Expected != "" {
+		return nil
+	}
+	var envelope struct{ Result typedValue }
+	if err := json.Unmarshal(output, &envelope); err != nil {
+		return fmt.Errorf("independent output %s: %w", f.Name, err)
+	}
+	node := envelope.Result
+	for node.Status == "ok" {
+		var next typedValue
+		if err := json.Unmarshal(node.Value, &next); err != nil {
+			return err
+		}
+		node = next
+	}
+	if f.Oracle == nil {
+		var value string
+		if err := json.Unmarshal(node.Value, &value); err != nil {
+			return err
+		}
+		if node.Type != "Int" || value != f.Expected {
+			return fmt.Errorf("independent result differs %s", f.Name)
+		}
+		return nil
+	}
+	var fields map[string]typedValue
+	if err := json.Unmarshal(node.Value, &fields); err != nil {
+		return err
+	}
+	check := func(raw json.RawMessage, expected float64, tolerance float64) error {
+		var text string
+		if err := json.Unmarshal(raw, &text); err != nil {
+			return err
+		}
+		value, err := strconv.ParseFloat(text, 64)
+		if err != nil || math.IsNaN(value) || math.IsInf(value, 0) || math.Abs(value-expected) > tolerance+1e-5*math.Abs(expected) {
+			return fmt.Errorf("training independent number differs")
+		}
+		return nil
+	}
+	if len(fields) != 3 {
+		return fmt.Errorf("training result inventory differs")
+	}
+	for name, expected := range map[string]float64{"initial_loss": f.Oracle.InitialLoss, "loss": f.Oracle.Loss} {
+		if fields[name].Type != "Float" {
+			return fmt.Errorf("training loss type differs")
+		}
+		if err := check(fields[name].Value, expected, 1e-8); err != nil {
+			return err
+		}
+	}
+	var parameters map[string]typedValue
+	if err := json.Unmarshal(fields["parameters"].Value, &parameters); err != nil {
+		return err
+	}
+	if len(parameters) != len(f.Oracle.Parameters) {
+		return fmt.Errorf("training parameter inventory differs")
+	}
+	for name, raw := range f.Oracle.Parameters {
+		var reference []json.RawMessage
+		if err := json.Unmarshal(raw, &reference); err != nil {
+			return err
+		}
+		if len(reference) != 2 {
+			return fmt.Errorf("training oracle shape differs")
+		}
+		var shape []int
+		var expected []float64
+		if err := json.Unmarshal(reference[0], &shape); err != nil {
+			return err
+		}
+		if err := json.Unmarshal(reference[1], &expected); err != nil {
+			return err
+		}
+		var tensor struct {
+			Dtype, Device string
+			Shape         []string
+			Values        []json.RawMessage
+		}
+		if err := json.Unmarshal(parameters[name].Value, &tensor); err != nil {
+			return err
+		}
+		if parameters[name].Type != "Tensor<FP32>" || tensor.Dtype != "fp32" || tensor.Device != "cpu" || len(tensor.Shape) != len(shape) || len(tensor.Values) != len(expected) {
+			return fmt.Errorf("training tensor metadata differs")
+		}
+		for index, dimension := range shape {
+			if tensor.Shape[index] != strconv.Itoa(dimension) {
+				return fmt.Errorf("training tensor shape differs")
+			}
+		}
+		for index, number := range expected {
+			if err := check(tensor.Values[index], number, 1e-6); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+func command(f fixture, verb string) []string { return []string{f.Artifact, verb} }
 func verifyNativeBenchmark(f fixture, expected string) error {
 	result, err := checked([]string{f.Native, "--verify"}, f.Work)
 	if err != nil {
 		return fmt.Errorf("verify native benchmark %s: %w", f.Name, err)
 	}
-	if strings.TrimSpace(string(result.Output)) != expected {
-		return fmt.Errorf("native benchmark result differs %s: %s", f.Name, result.Output)
+	f.Expected = expected
+	if err := verifyFixture(result.Output, f); err != nil {
+		return fmt.Errorf("native benchmark result differs %s: %w", f.Name, err)
 	}
 	return nil
 }
-
 func execution(c config, f fixture) (map[string]any, error) {
 	if _, err := build(c, f); err != nil {
 		return nil, err
 	}
-	var expected string
-	for _, backend := range []string{"interpreter", "native"} {
-		observed, err := checked(append(command(c, f, backend, "run"), "--max-steps", steps), f.Work)
-		if err != nil {
-			return nil, err
-		}
-		result := strings.TrimSpace(string(observed.Output))
-		if backend == "interpreter" {
-			expected = result
-			if f.Expected != "" && result != f.Expected {
-				return nil, fmt.Errorf("independent result differs %s", f.Name)
-			}
-		} else if result != expected {
-			return nil, fmt.Errorf("native result differs %s", f.Name)
-		}
-	}
-
-	if err := verifyNativeBenchmark(f, expected); err != nil {
+	observed, err := checked(append(command(f, "run"), "--max-steps", steps, "--format", "json"), f.Work)
+	if err != nil {
 		return nil, err
 	}
-
+	if err = verifyFixture(observed.Output, f); err != nil {
+		return nil, err
+	}
+	if err = verifyNativeBenchmark(f, f.Expected); err != nil {
+		return nil, err
+	}
 	var samples []map[string]any
 	for index := 0; index < c.SamplePlan["execution"]+warmup; index++ {
-		results := map[string]any{}
-		for _, backend := range order(index) {
-			argv := []string{f.Native}
-			if backend == "interpreter" {
-				argv = []string{f.Reference, "-test.run=^$", "-test.bench=BenchmarkExecution", "-test.benchmem", "-test.benchtime=200ms"}
-			}
-			measured, err := checked(argv, f.Work)
-			if err != nil {
-				return nil, err
-			}
-			if backend == "interpreter" {
-				match := benchmarkPattern.FindSubmatch(measured.Output)
-				if match == nil {
-					return nil, fmt.Errorf("incomplete reference benchmark %s: %s", f.Name, measured.Output)
-				}
-				ns, err := strconv.ParseFloat(string(match[1]), 64)
-				if err != nil || ns <= 0 || math.IsNaN(ns) || math.IsInf(ns, 0) {
-					return nil, fmt.Errorf("invalid reference timing %s", f.Name)
-				}
-				size, err := strconv.ParseUint(string(match[2]), 10, 64)
-				if err != nil {
-					return nil, fmt.Errorf("reference allocation bytes %s: %w", f.Name, err)
-				}
-				allocations, err := strconv.ParseUint(string(match[3]), 10, 64)
-				if err != nil {
-					return nil, fmt.Errorf("reference allocation count %s: %w", f.Name, err)
-				}
-				results[backend] = map[string]any{"ns": ns, "bytes": size, "allocations": allocations}
-			} else {
-				var result map[string]any
-				if err = json.Unmarshal(measured.Output, &result); err != nil {
-					return nil, fmt.Errorf("parse native benchmark %s: %w", f.Name, err)
-				}
-				ns, ok := result["ns"].(float64)
-				if !ok || ns <= 0 || math.IsNaN(ns) || math.IsInf(ns, 0) {
-					return nil, fmt.Errorf("invalid native timing %s", f.Name)
-				}
-				results[backend] = result
-			}
-		}
-		if index >= warmup {
-			samples = append(samples, map[string]any{"sample": index - warmup, "order": order(index), "results": results})
-		}
-	}
-	record := map[string]any{"name": f.Name, "source_sha256": f.SourceSHA, "native_benchmark_verified": true, "samples": samples}
-	if f.Allocation != "" {
-		result, err := checked([]string{f.Allocation}, f.Work)
+		measured, err := checked([]string{f.Native}, f.Work)
 		if err != nil {
 			return nil, err
 		}
-		var metrics map[string]any
-		if err = json.Unmarshal(result.Output, &metrics); err != nil {
-			return nil, fmt.Errorf("parse native allocation metrics: %w", err)
+		var timing map[string]any
+		if err = json.Unmarshal(measured.Output, &timing); err != nil {
+			return nil, err
 		}
-		record["native_allocation_volume"] = metrics
+		if index >= warmup {
+			timing["sample"] = index - warmup
+			samples = append(samples, timing)
+		}
 	}
-	return record, nil
+	result, err := checked([]string{f.Allocation}, f.Work)
+	if err != nil {
+		return nil, err
+	}
+	var metrics map[string]any
+	if err = json.Unmarshal(result.Output, &metrics); err != nil {
+		return nil, err
+	}
+	return map[string]any{"name": f.Name, "source_sha256": f.SourceSHA, "verified": true, "samples": samples, "native_allocation_volume": metrics}, nil
 }
 func process(c config, f fixture) (map[string]any, error) {
 	if _, err := build(c, f); err != nil {
 		return nil, err
 	}
-	var pairs []map[string]any
+	var samples []map[string]any
 	for index := 0; index < c.SamplePlan["process"]+warmup; index++ {
-		pair := map[string]any{}
-		for _, backend := range order(index) {
-			work := filepath.Join(f.Work, backend)
-			if err := os.MkdirAll(work, os.ModePerm); err != nil {
+		args := append(command(f, "run"), "--max-steps", steps)
+		if f.Name == "file" {
+			if err := os.WriteFile(filepath.Join(f.Work, "input.txt"), []byte(strings.Repeat("abc", 10000)), 0o600); err != nil {
 				return nil, err
 			}
-			args := append(command(c, f, backend, "run"), "--max-steps", steps)
-			if f.Name == "file" {
-				if err := os.WriteFile(filepath.Join(work, "input.txt"), []byte(strings.Repeat("abc", 10000)), 0o600); err != nil {
-					return nil, err
-				}
-				args = append(args, "--read-root", work, "--write-root", work)
+			args = append(args, "--read-root", f.Work, "--write-root", f.Work)
+		}
+		result, err := checked(args, f.Work)
+		if err != nil {
+			return nil, err
+		}
+		if err = verifyFixture(result.Output, f); err != nil {
+			return nil, err
+		}
+		if f.Name == "file" {
+			data, err := os.ReadFile(filepath.Join(f.Work, "output.txt"))
+			if err != nil || string(data) != strings.Repeat("abc", 10000) {
+				return nil, fmt.Errorf("file output differs: %v", err)
 			}
-			result, err := checked(args, work)
-			if err != nil {
-				return nil, err
-			}
-			if strings.TrimSpace(string(result.Output)) != f.Expected {
-				return nil, fmt.Errorf("process result differs: %s %s: %s", f.Name, backend, result.Output)
-			}
-			if f.Name == "file" {
-				data, err := os.ReadFile(filepath.Join(work, "output.txt"))
-				if err != nil || string(data) != strings.Repeat("abc", 10000) {
-					return nil, fmt.Errorf("file output differs: %v", err)
-				}
-			}
-			pair[backend] = result.Elapsed
 		}
 		if index >= warmup {
-			pair["sample"] = index - warmup
-			pair["order"] = order(index)
-			pairs = append(pairs, pair)
+			samples = append(samples, map[string]any{"sample": index - warmup, "wall_ns": result.Elapsed})
 		}
 	}
-	return map[string]any{"name": f.Name, "source_sha256": f.SourceSHA, "samples_ns": pairs}, nil
+	return map[string]any{"name": f.Name, "source_sha256": f.SourceSHA, "verified": true, "samples": samples}, nil
 }
 
 type server struct {
@@ -408,8 +457,58 @@ type server struct {
 	url     string
 }
 
-func startServer(c config, f fixture, backend string) (*server, error) {
-	argv := append(command(c, f, backend, "serve"), "--listen", "0", "--format", "json")
+func validServerAddress(address string) bool {
+	host, rawPort, err := net.SplitHostPort(address)
+	if err != nil {
+		return false
+	}
+	ip := net.ParseIP(host)
+	if ip == nil || !ip.IsLoopback() {
+		return false
+	}
+	port, err := strconv.Atoi(rawPort)
+	return err == nil && port > 0 && port <= 65535
+}
+
+func readyAddress(data []byte) (string, error) {
+	var envelope map[string]json.RawMessage
+	if err := json.Unmarshal(data, &envelope); err != nil {
+		return "", err
+	}
+	for key := range envelope {
+		if key != "command" && key != "status" && key != "servers" && key != "result" {
+			return "", fmt.Errorf("unexpected ready field")
+		}
+	}
+	var command, status string
+	if err := json.Unmarshal(envelope["command"], &command); err != nil {
+		return "", err
+	}
+	if err := json.Unmarshal(envelope["status"], &status); err != nil {
+		return "", err
+	}
+	if command != "serve" || status != "ready" {
+		return "", fmt.Errorf("serve ready envelope required")
+	}
+	var servers []map[string]json.RawMessage
+	if err := json.Unmarshal(envelope["servers"], &servers); err != nil {
+		return "", err
+	}
+	if len(servers) != 1 {
+		return "", fmt.Errorf("one server required")
+	}
+	var address string
+	if err := json.Unmarshal(servers[0]["address"], &address); err != nil {
+		return "", err
+	}
+	if !validServerAddress(address) {
+		return "", fmt.Errorf("loopback server address required")
+	}
+	return address, nil
+}
+
+func startServer(c config, f fixture) (*server, error) {
+	argv := append(command(f, "serve"), "--listen", "0", "--format", "json")
 	child := exec.Command(argv[0], argv[1:]...)
 	child.Dir = f.Work
 	child.Stdin = nil
@@ -432,20 +531,17 @@ func startServer(c config, f fixture, backend string) (*server, error) {
 	case <-time.After(10 * time.Second):
 		_ = syscall.Kill(-child.Process.Pid, syscall.SIGKILL)
 		_ = child.Wait()
-		return nil, fmt.Errorf("HTTP readiness deadline %s", backend)
+		return nil, fmt.Errorf("HTTP readiness deadline")
 	}
-	var envelope struct {
-		Command, Status string
-		Servers         []struct{ Address string }
-	}
-	if err = json.Unmarshal(line, &envelope); err != nil || envelope.Status != "ready" || len(envelope.Servers) != 1 {
+	address, err := readyAddress(line)
+	if err != nil {
 		_ = syscall.Kill(-child.Process.Pid, syscall.SIGKILL)
 		_ = child.Wait()
-		return nil, fmt.Errorf("HTTP readiness %s: %s %s", backend, line, stderr.Bytes())
+		return nil, fmt.Errorf("HTTP readiness: %w", err)
 	}
 	transport := &http.Transport{Proxy: nil, MaxIdleConnsPerHost: 1, ForceAttemptHTTP2: false}
 	client := &http.Client{Transport: transport, Timeout: 5 * time.Second}
-	return &server{command: child, reader: reader, stderr: stderr, client: client, url: "http://" + envelope.Servers[0].Address + "/benchmark"}, nil
+	return &server{command: child, reader: reader, stderr: stderr, client: client, url: "http://" + address + "/benchmark"}, nil
 }
 func (s *server) alive() error {
 	if err := s.command.Process.Signal(syscall.Signal(0)); err != nil {
@@ -461,21 +557,6 @@ func (s *server) alive() error {
 	}
 	return nil
 }
-func serversAlive(servers map[string]*server) error {
-	if len(servers) != 2 {
-		return fmt.Errorf("HTTP comparison requires both servers")
-	}
-	for _, backend := range []string{"interpreter", "native"} {
-		if servers[backend] == nil {
-			return fmt.Errorf("HTTP comparison lacks %s server", backend)
-		}
-		if err := servers[backend].alive(); err != nil {
-			return fmt.Errorf("%s: %w", backend, err)
-		}
-	}
-	return nil
-}
-
 func (s *server) close() error {
 	s.client.CloseIdleConnections()
 	if err := s.command.Process.Signal(syscall.SIGTERM); err != nil {
@@ -490,7 +571,10 @@ func (s *server) close() error {
 		if err != nil || s.stderr.Len() != 0 {
 			return fmt.Errorf("HTTP shutdown: %v: %s", err, s.stderr.Bytes())
 		}
-		<-output
+		var stopped map[string]string
+		if err := json.Unmarshal(<-output, &stopped); err != nil || len(stopped) != 2 || stopped["command"] != "serve" || stopped["status"] != "stopped" {
+			return fmt.Errorf("HTTP stopped event missing")
+		}
 		return nil
 	case <-time.After(10 * time.Second):
 		_ = syscall.Kill(-s.command.Process.Pid, syscall.SIGKILL)
@@ -502,61 +586,46 @@ func httpBenchmark(c config, f fixture) (record map[string]any, returned error) 
 	if _, err := build(c, f); err != nil {
 		return nil, err
 	}
-	servers := map[string]*server{}
+	child, err := startServer(c, f)
+	if err != nil {
+		return nil, err
+	}
 	defer func() {
-		for _, name := range []string{"interpreter", "native"} {
-			if child := servers[name]; child != nil {
-				if err := child.close(); err != nil && returned == nil {
-					returned = err
-				}
-			}
+		if err := child.close(); err != nil {
+			returned = errors.Join(returned, err)
 		}
 	}()
-	for _, backend := range []string{"interpreter", "native"} {
-		child, err := startServer(c, f, backend)
-		if err != nil {
-			return nil, err
-		}
-		servers[backend] = child
-	}
 	var samples []map[string]any
 	for index := 0; index < c.SamplePlan["http"]+warmup; index++ {
-		if err := serversAlive(servers); err != nil {
+		if err := child.alive(); err != nil {
 			return nil, err
 		}
-		pair := map[string]any{}
-		for _, backend := range order(index) {
-			child := servers[backend]
-			times := make([]int64, 0, 200)
-			started := time.Now()
-			for request := 0; request < 200; request++ {
-				before := time.Now()
-				response, err := child.client.Post(child.url, "application/octet-stream", strings.NewReader("fixed varied payload 123"))
-				if err != nil {
-					return nil, err
-				}
-				body, err := io.ReadAll(response.Body)
-				closeErr := response.Body.Close()
-				if err != nil || closeErr != nil || response.StatusCode != 200 || string(body) != f.Expected {
-					return nil, fmt.Errorf("HTTP response differs %s: %d %q %v %v", backend, response.StatusCode, body, err, closeErr)
-				}
-				times = append(times, time.Since(before).Nanoseconds())
+		times := make([]int64, 0, 200)
+		start := time.Now()
+		for request := 0; request < 200; request++ {
+			before := time.Now()
+			response, err := child.client.Post(child.url, "application/octet-stream", strings.NewReader("fixed varied payload 123"))
+			if err != nil {
+				return nil, err
 			}
-			elapsed := time.Since(started).Nanoseconds()
-			ordered := append([]int64{}, times...)
-			sort.Slice(ordered, func(i, j int) bool { return ordered[i] < ordered[j] })
-			pair[backend] = map[string]any{"samples_ns": times, "elapsed_ns": elapsed, "p95_ns": ordered[189], "requests_per_second": 200e9 / float64(elapsed)}
+			body, err := io.ReadAll(response.Body)
+			closeErr := response.Body.Close()
+			if err != nil || closeErr != nil || response.StatusCode != 200 || string(body) != f.Expected {
+				return nil, fmt.Errorf("HTTP response differs")
+			}
+			times = append(times, time.Since(before).Nanoseconds())
 		}
-		if err := serversAlive(servers); err != nil {
+		elapsed := time.Since(start).Nanoseconds()
+		ordered := append([]int64{}, times...)
+		sort.Slice(ordered, func(i, j int) bool { return ordered[i] < ordered[j] })
+		if err := child.alive(); err != nil {
 			return nil, err
 		}
 		if index >= warmup {
-			pair["sample"] = index - warmup
-			pair["order"] = order(index)
-			samples = append(samples, pair)
+			samples = append(samples, map[string]any{"sample": index - warmup, "samples_ns": times, "elapsed_ns": elapsed, "p95_ns": ordered[189], "requests_per_second": 200e9 / float64(elapsed)})
 		}
 	}
-	return map[string]any{"name": f.Name, "source_sha256": f.SourceSHA, "samples": samples, "requests_per_sample": 200, "concurrency": 1, "both_servers_alive": true}, nil
+	return map[string]any{"name": f.Name, "source_sha256": f.SourceSHA, "verified": true, "samples": samples, "requests_per_sample": 200, "concurrency": 1, "ready_verified": true, "stopped_verified": true}, nil
 }
 func builds(c config, f fixture) ([]map[string]any, error) {
 	var records []map[string]any
@@ -601,7 +670,7 @@ func otherBenchmarkJobs(c config) ([]string, error) {
 	executablePaths := map[string]bool{c.Compiler: true}
 	for _, fixtures := range [][]fixture{c.Execution, c.Process, c.HTTP, c.Build} {
 		for _, fixture := range fixtures {
-			for _, path := range []string{fixture.Reference, fixture.Native, fixture.Allocation, fixture.Artifact} {
+			for _, path := range []string{fixture.Native, fixture.Allocation, fixture.Artifact} {
 				if path != "" {
 					executablePaths[path] = true
 				}
@@ -698,7 +767,7 @@ func run(c config) (map[string]any, error) {
 // runWithObservations keeps the real runner with injected environment I/O boundaries.
 func runWithObservations(c config, environmentSnapshot func() (map[string]string, error), inventory func(config) ([]string, error), loadSnapshot func() ([]float64, error)) (map[string]any, error) {
 	environment, environmentErr := environmentSnapshot()
-	report := map[string]any{"other_benchmark_jobs": []string{}, "benchmark_job_observation": "Informational /proc process and load snapshots before and after sequential measurement; no load admission.", "measurement_complete": false, "target": "linux/arm64", "sample_plan": c.SamplePlan, "warmup": warmup, "max_steps": 10000000, "concurrency": 1, "order": "alternating paired samples", "clock": "Go monotonic time; native C CLOCK_MONOTONIC", "checked_execution": "program admission before timing; session run, context close, and returned value release inside timing"}
+	report := map[string]any{"other_benchmark_jobs": []string{}, "benchmark_job_observation": "Informational /proc process and load snapshots before and after sequential measurement; no load admission.", "measurement_complete": false, "target": "linux/arm64", "sample_plan": c.SamplePlan, "warmup": warmup, "max_steps": 10000000, "concurrency": 1, "order": "sequential native samples", "clock": "Go monotonic time; native C CLOCK_MONOTONIC", "checked_execution": "program admission before timing; session run, context close, and returned value release inside timing"}
 	if environmentErr != nil {
 		return report, environmentErr
 	}

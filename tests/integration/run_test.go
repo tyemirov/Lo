@@ -23,8 +23,8 @@ type runtimeValue struct {
 
 func runValue(t *testing.T, source string, options ...string) runtimeValue {
 	t.Helper()
-	args := append([]string{"run", sourceFile(t, source), "--format", "json"}, options...)
-	got := run(t, args...)
+	args := append([]string{"--format", "json"}, options...)
+	got := runProgram(t, sourceFile(t, source), "run", args...)
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("run: %+v", got)
 	}
@@ -85,11 +85,11 @@ func TestRunValues(t *testing.T) {
 			valueJSON(t, v, tc.value)
 		})
 	}
-	got := run(t, "run", "examples/list_sum.lo")
+	got := runProgram(t, "examples/list_sum.lo", "run")
 	if got.status != 0 || got.stdout != "10\n" || got.stderr != "" {
 		t.Fatalf("text result: %+v", got)
 	}
-	got = run(t, "run", sourceFile(t, "flow Unused() -> Int { return 1 }"), "--format", "json")
+	got = runProgram(t, sourceFile(t, "flow Unused() -> Int { return 1 }"), "run", "--format", "json")
 	if got.status != 0 || strings.Contains(got.stdout, "result") {
 		t.Fatalf("absent return: %+v", got)
 	}
@@ -122,7 +122,7 @@ func TestRunRecoverableErrors(t *testing.T) {
 		{`flow Empty() -> List<Int> { return List.new() }; return Math.max(Empty())`, "Math.EmptyList"},
 		{`return Map.get(Map.new(Record.new(key: "a", value: 1)), "b")`, "Map.MissingKey"},
 	} {
-		got := run(t, "run", sourceFile(t, tc.source), "--format", "json")
+		got := runProgram(t, sourceFile(t, tc.source), "run", "--format", "json")
 		if got.status != 1 || got.stdout != "" {
 			t.Fatalf("recoverable failure: %+v", got)
 		}
@@ -171,7 +171,7 @@ func TestRunRecoverableErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 	valueJSON(t, input["index"], `{"type":{"type":"String","value":"Int"}}`)
-	got := run(t, "run", sourceFile(t, `flow Divide(x: Int) -> Int! { return Math.div(8, x) }; return Divide(0)`))
+	got := runProgram(t, sourceFile(t, `flow Divide(x: Int) -> Int! { return Math.div(8, x) }; return Divide(0)`), "run")
 	if got.status != 1 || !strings.Contains(got.stderr, "Divide") || !strings.Contains(got.stderr, "Math.div") {
 		t.Fatalf("text trace: %+v", got)
 	}
@@ -192,7 +192,7 @@ func TestRunFileReads(t *testing.T) {
 	source := fmt.Sprintf(`flow Read() -> String! { bytes = File.read(File.Path.new(%q)); return UTF8.String.new(bytes) }; return Read()`, file.Name())
 	v := runValue(t, source, "--read-root", dir)
 	valueJSON(t, v, `{"type":"String","value":"aé😀"}`)
-	denied := run(t, "run", sourceFile(t, source), "--format", "json")
+	denied := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("authorization: %+v", denied)
 	}
@@ -200,7 +200,7 @@ func TestRunFileReads(t *testing.T) {
 	v = runValue(t, lazy)
 	valueJSON(t, v, `{"type":"Bytes","value":"c2FmZQ=="}`)
 	missing := fmt.Sprintf(`return File.read(File.Path.new(%q))`, filepath.Join(dir, "missing"))
-	got := run(t, "run", sourceFile(t, missing), "--read-root", dir, "--format", "json")
+	got := runProgram(t, sourceFile(t, missing), "run", "--read-root", dir, "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"File.ReadFailed"`) {
 		t.Fatalf("missing file: %+v", got)
 	}
@@ -215,7 +215,7 @@ func TestRunFileReads(t *testing.T) {
 		t.Fatal(err)
 	}
 	bad := fmt.Sprintf(`flow Decode() -> String! { bytes = File.read(File.Path.new(%q)); return UTF8.String.new(bytes) }; return Decode()`, invalid.Name())
-	got = run(t, "run", sourceFile(t, bad), "--read-root", dir, "--format", "json")
+	got = runProgram(t, sourceFile(t, bad), "run", "--read-root", dir, "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"UTF8.InvalidBytes"`) {
 		t.Fatalf("UTF8 boundary: %+v", got)
 	}
@@ -238,7 +238,7 @@ func TestRunStoredFallibility(t *testing.T) {
 	if len(entries) != 1 || entries[0].Value.Status != "error" {
 		t.Fatalf("stored map: %s", v.Value)
 	}
-	got := run(t, "run", sourceFile(t, `flow Make() -> Map<String, Int!> { return Map.new(Record.new(key: "bad", value: Math.div(1, 0))) }; return Map.get(Make(), "bad")`), "--format", "json")
+	got := runProgram(t, sourceFile(t, `flow Make() -> Map<String, Int!> { return Map.new(Record.new(key: "bad", value: Math.div(1, 0))) }; return Map.get(Make(), "bad")`), "run", "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"Math.DivideByZero"`) {
 		t.Fatalf("stored map lookup: %+v", got)
 	}
@@ -255,13 +255,13 @@ func TestRunHostLimitsAndAuthorization(t *testing.T) {
 		`return 1`,
 		`flow H(e: Error) -> Int { return 9 }; flow F() -> Int onError H { return Math.add(1, 2) }; return F()`,
 	} {
-		got := run(t, "run", sourceFile(t, source), "--format", "json", "--max-steps", "1")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json", "--max-steps", "1")
 		if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 			t.Fatalf("execution limit: %+v", got)
 		}
 	}
 	source := `flow H(e: Error) -> Bytes { return Bytes.new("caught") }; flow F() -> Bytes onError H { return File.read(File.Path.new("not-authorized")) }; return F()`
-	got := run(t, "run", sourceFile(t, source), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("host denial caught by Lo: %+v", got)
 	}
@@ -280,7 +280,7 @@ func TestRunHostLimitsAndAuthorization(t *testing.T) {
 	if err := os.Symlink(file.Name(), link); err != nil {
 		t.Fatal(err)
 	}
-	got = run(t, "run", sourceFile(t, fmt.Sprintf(`return File.read(File.Path.new(%q))`, link)), "--read-root", dir, "--format", "json")
+	got = runProgram(t, sourceFile(t, fmt.Sprintf(`return File.read(File.Path.new(%q))`, link)), "run", "--read-root", dir, "--format", "json")
 	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"File.ReadFailed"`) || strings.Contains(got.stdout, "outside") {
 		t.Fatalf("root escape: %+v", got)
 	}
@@ -292,7 +292,14 @@ func TestRunHostLimitsAndAuthorization(t *testing.T) {
 		{"run", "--read-root", dir, "--read-root", dir + "/."},
 		{"run", "--write-root", dir, "--write-root", dir + "/."},
 	} {
-		got := run(t, append(args, sourceFile(t, "return 1"))...)
+		path := sourceFile(t, "return 1")
+		var got result
+		switch args[0] {
+		case "run", "serve":
+			got = runProgram(t, path, args[0], args[1:]...)
+		default:
+			got = run(t, append(args, path)...)
+		}
 		if got.status != 2 || got.stdout != "" {
 			t.Fatalf("runtime options: %+v", got)
 		}
@@ -306,7 +313,7 @@ func TestRunExpandedValueLimit(t *testing.T) {
 		fmt.Fprintf(&program, "v%d = List.new(v%d, v%d)\n", i, i-1, i-1)
 	}
 	program.WriteString("return v13\n")
-	got := run(t, "run", sourceFile(t, program.String()), "--format", "json")
+	got := runProgram(t, sourceFile(t, program.String()), "run", "--format", "json")
 	if got.status != 2 {
 		t.Fatalf("expanded value limit: status %d, stdout bytes %d", got.status, len(got.stdout))
 	}
@@ -341,7 +348,7 @@ func TestRunResourceLimits(t *testing.T) {
 		{"unfold-count", `flow Step(n: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: n, next_state: n) }; return List.unfold(0, 1000001, Step)`, []string{"--max-list-items", "1000000"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got := run(t, append([]string{"run", sourceFile(t, tc.source), "--format", "json"}, tc.options...)...)
+			got := runProgram(t, sourceFile(t, tc.source), "run", append([]string{"--format", "json"}, tc.options...)...)
 			if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 				t.Fatalf("resource limit: %+v", got)
 			}
@@ -360,7 +367,7 @@ func TestRunResourceLimits(t *testing.T) {
 			t.Fatal(err)
 		}
 		program := fmt.Sprintf(`return File.read(File.Path.new(%q))`, file.Name())
-		got := run(t, "run", sourceFile(t, program), "--read-root", dir, "--format", "json")
+		got := runProgram(t, sourceFile(t, program), "run", "--read-root", dir, "--format", "json")
 		if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 			t.Fatalf("file limit: %+v", got)
 		}
@@ -368,7 +375,7 @@ func TestRunResourceLimits(t *testing.T) {
 }
 
 func TestRunCountLetterExample(t *testing.T) {
-	got := run(t, "run", "examples/count_letter.lo", "--read-root", "examples")
+	got := runProgram(t, "examples/count_letter.lo", "run", "--read-root", "examples")
 	if got.status != 0 || got.stdout != "3\n" || got.stderr != "" {
 		t.Fatalf("count letter: %+v", got)
 	}

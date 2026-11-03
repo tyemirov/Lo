@@ -117,7 +117,39 @@ func builtinExamples() []builtinExample {
 	examples = append(examples, parameterBuiltinExamples()...)
 	examples = append(examples, optimizerBuiltinExamples()...)
 	examples = append(examples, checkpointBuiltinExamples()...)
+	examples = append(examples, processorBuiltinExamples()...)
 	return append(examples, tensorBuiltinExamples()...)
+}
+
+func processorBuiltinExamples() []builtinExample {
+	return []builtinExample{
+		{catalog.StringStartsWith, `return String.starts_with("abc","a")`, "Bool"},
+		{catalog.StringEndsWith, `return String.ends_with("abc","c")`, "Bool"},
+		{catalog.StringSlice, `return String.slice("a界b",1,2)`, "String!"},
+		{catalog.StringCompare, `return String.compare("a","b")`, "Int"},
+		{catalog.StringSplit, `return String.split("a:b",":")`, "List<String>!"},
+		{catalog.StringSplitFirst, `return String.split_first("a:b",":")`, "Record{after: String, before: String}!"},
+		{catalog.StringReplaceAll, `return String.replace_all("aba","a","x")`, "String!"},
+		{catalog.StringTrim, `return String.trim(" a ")`, "String"},
+		{catalog.StringIsWhitespace, `return String.is_whitespace(" \t")`, "Bool"},
+		{catalog.StringSplitWhitespace, `return String.split_whitespace("a b")`, "List<String>"},
+		{catalog.StringLines, `return String.lines("a\nb")`, "List<String>"},
+		{catalog.BytesLength, `return Bytes.length(Bytes.new("abc"))`, "Int"},
+		{catalog.BytesStartsWith, `return Bytes.starts_with(Bytes.new("abc"),Bytes.new("a"))`, "Bool"},
+		{catalog.BytesSlice, `return Bytes.slice(Bytes.new("abc"),1,2)`, "Bytes!"},
+		{catalog.BytesSplit, `return Bytes.split(Bytes.new("a:b"),Bytes.new(":"))`, "List<Bytes>!"},
+		{catalog.BytesTrimStart, `return Bytes.trim_start(Bytes.new("ababx"),Bytes.new("ab"))`, "Bytes!"},
+		{catalog.ListAt, `return List.at(List.new(1,2),1)`, "Int!"},
+		{catalog.ListSlice, `return List.slice(List.new(1,2),1,2)`, "List<Int>!"},
+		{catalog.ListSort, `flow Compare(left:Int,right:Int)->Int{return Math.sub(left,right)};return List.sort(List.new(2,1),Compare)`, "List<Int>"},
+		{catalog.FilePathToString, `return File.Path.to_string(File.Path.new("a/b"))`, "String"},
+		{catalog.FilePathJoin, `return File.Path.join(File.Path.new("a"),"b")`, "File.Path!"},
+		{catalog.FilePathParent, `return File.Path.parent(File.Path.new("a/b"))`, "File.Path"},
+		{catalog.FilePathName, `return File.Path.name(File.Path.new("a/b"))`, "String"},
+		{catalog.GlobNew, `return Glob.new("*.lo")`, "Glob!"},
+		{catalog.GlobMatches, `flow Main()->Bool!{pattern=Glob.new("*.lo");return Glob.matches(pattern,"a.lo")};return Main()`, "Bool!"},
+		{catalog.ProcessArgumentsFormatShell, `return Process.Arguments.format_shell(List.new("a b"))`, "String!"},
+	}
 }
 
 func TestVerifierBuiltinContracts(t *testing.T) {

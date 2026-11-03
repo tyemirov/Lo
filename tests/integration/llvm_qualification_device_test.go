@@ -1,22 +1,15 @@
 package integration_test
 
 import (
-	"context"
 	"encoding/json"
-	"os"
 	"strings"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 )
 
 const nativeDeviceQualificationHarness = "testdata/native-qualification/device-qualification.c"
 
 func nativeDeviceQualification(t *testing.T, scenarios []llvmRuntimeScenario) {
 	t.Helper()
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	for index := range scenarios {
 		scenarios[index].harness = nativeDeviceQualificationHarness
 		number := scenarios[index].number
@@ -48,18 +41,11 @@ flow Step(state:Tensor<FP32>,index:Int)->Tensor<FP32>! {
 flow Main()->Tensor<FP32>! {
  initial=Tensor.new(List.new(1.0,2.0,3.0,4.0),List.new(4));steps=List.unfold(0,100,Counter);return List.fold(steps,initial,Step)
 };return Main()`
-	got, receipts := runWithDevices(t, context.Background(), text, &observedDeviceFactory{}, "--allow-device", "cuda-sim:0")
-	if got.status != 0 || got.stderr != "" {
-		t.Fatalf("reference callback: %+v", got)
-	}
-	var envelope struct{ Result runtimeValue }
-	if err := json.Unmarshal([]byte(got.stdout), &envelope); err != nil {
-		t.Fatal(err)
-	}
-	result, expected := successfulValue(t, envelope.Result), got.stdout
-	checkNumbers(t, tensorNumbers(t, result), []float64{1, 2, 3, 4}, 0, 0)
-	semanticTransferCount(t, receipts, 200)
-	nativeDeviceQualification(t, []llvmRuntimeScenario{{name: "100-fold-iterations", source: text, expectedStdout: expected, number: 110}})
+	scenario := llvmRuntimeScenario{name: "100-fold-iterations", source: text, number: 110}
+	scenario.verify = nativeValuesCheck(1, func(t *testing.T, value runtimeValue) {
+		checkNativeTensor(t, value, []string{"4"}, []float64{1, 2, 3, 4}, 0, 0)
+	})
+	nativeDeviceQualification(t, []llvmRuntimeScenario{scenario})
 }
 
 func TestLLVMDeviceRetainedCallbackValues(t *testing.T) {
@@ -70,16 +56,17 @@ flow Read(value:Tensor<FP32>)->Tensor<FP32>!{return Tensor.to(value,Device.new("
 flow Main()->List<Tensor<FP32>>!{
  host=Tensor.new(List.new(-0.0),List.new());initial=Tensor.to(host,Device.new("cuda-sim:0"));retained=List.unfold(initial,20,Step);return List.map(retained,Read)
 };return Main()`
-	got, receipts := runWithDevices(t, context.Background(), text, &observedDeviceFactory{}, "--allow-device", "cuda-sim:0")
-	if got.status != 0 || got.stderr != "" {
-		t.Fatalf("reference retained callback: %+v", got)
-	}
-	expected := got.stdout
-	if strings.Count(expected, `"values":["-0"]`) != 20 {
-		t.Fatal("retained values lost signed-zero bits")
-	}
-	semanticTransferCount(t, receipts, 61)
-	nativeDeviceQualification(t, []llvmRuntimeScenario{{name: "20-retained-unfold-values", source: text, expectedStdout: expected, number: 111}})
+	scenario := llvmRuntimeScenario{name: "20-retained-unfold-values", source: text, number: 111}
+	scenario.verify = nativeValuesCheck(1, func(t *testing.T, value runtimeValue) {
+		var retained []runtimeValue
+		if err := json.Unmarshal(value.Value, &retained); err != nil || len(retained) != 20 {
+			t.Fatalf("retained tensors: %d (%v)", len(retained), err)
+		}
+		for _, tensor := range retained {
+			checkNativeTensorBits(t, tensor, nil, []uint32{0x80000000})
+		}
+	})
+	nativeDeviceQualification(t, []llvmRuntimeScenario{scenario})
 }
 
 func TestLLVMMetalEmptyProfiles(t *testing.T) {
@@ -93,9 +80,16 @@ func TestLLVMMetalEmptyProfiles(t *testing.T) {
 		{"empty-broadcast", `a=Tensor.to(Tensor.new(List.new(1.0),List.new()),Device.new("metal:0"));return Tensor.to(Tensor.broadcast(a,List.new(0,3)),Device.new("cpu"))`, []float64{}},
 	} {
 		text := `flow Main()->Tensor<FP32>!{` + fixture.body + `};return Main()`
-		result, _, expected := metalResult(t, text, metalComputeFactory())
-		checkNumbers(t, tensorNumbers(t, result), fixture.want, 0, 0)
-		scenarios = append(scenarios, llvmRuntimeScenario{name: fixture.name, source: text, expectedStdout: expected, number: 130 + index})
+		shape := []string{"2"}
+		if fixture.name == "empty-matmul" {
+			shape = []string{"2", "3"}
+		}
+		if fixture.name == "empty-broadcast" {
+			shape = []string{"0", "3"}
+		}
+		scenario := llvmRuntimeScenario{name: fixture.name, source: text, number: 130 + index}
+		scenario.verify = nativeValuesCheck(1, func(t *testing.T, value runtimeValue) { checkNativeTensor(t, value, shape, fixture.want, 0, 0) })
+		scenarios = append(scenarios, scenario)
 	}
 	nativeDeviceQualification(t, scenarios)
 }
@@ -119,44 +113,19 @@ func TestLLVMMetalTensorBoundaries(t *testing.T) {
 }
 
 func TestLLVMMetalTrainingGradients(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	text := metalTrainingGradientSource(t)
-	actual, _, expected := metalResult(t, text, metalComputeFactory())
-	cpu, _ := runWithDevices(t, context.Background(), strings.ReplaceAll(text, "metal:0", "cpu"), device.SoftwareFactory{})
-	var steps, cpuSteps []runtimeValue
-	if err := json.Unmarshal(actual.Value, &steps); err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(trainingResult(t, cpu).Value, &cpuSteps); err != nil || len(steps) != 200 || len(cpuSteps) != 200 {
-		t.Fatalf("gradient observations native=%d cpu=%d error=%v", len(steps), len(cpuSteps), err)
-	}
-	for index, step := range steps {
-		loss := trainingFloat(t, recordField(t, step, "loss"))
-		gradients := trainingParameters(t, recordField(t, step, "gradients"))
-		checkNumbers(t, []float64{loss}, []float64{trainingFloat(t, recordField(t, cpuSteps[index], "loss"))}, 1e-5, 1e-4)
-		checkNumbers(t, gradients, trainingParameters(t, recordField(t, cpuSteps[index], "gradients")), 1e-5, 1e-4)
-		if index == 0 {
-			for _, reference := range trainingReferences(t) {
-				checkNumbers(t, gradients, reference.InitialGradients, 1e-6, 1e-5)
-				checkNumbers(t, []float64{loss}, []float64{reference.InitialLoss}, 0, 0)
-			}
-		}
-	}
 	firstSource := strings.Replace(metalTrainingSource(t), "List.unfold(0, 200, Counter)", "List.unfold(0, 1, Counter)", 1)
-	first, _, firstExpected := metalResult(t, firstSource, metalComputeFactory())
-	for _, reference := range trainingReferences(t) {
-		checkNumbers(t, trainingParameters(t, recordField(t, first, "parameters")), reference.FirstParameters, 1e-6, 1e-5)
-	}
-	nativeDeviceQualification(t, []llvmRuntimeScenario{{name: "200-observed-gradient-steps", source: text, expectedStdout: expected, number: 140}, {name: "first-parameters", source: firstSource, expectedStdout: firstExpected, number: 141}})
-	t.Log("200 losses and 1800 gradient coordinates match the CPU reference; initial gradients and first parameters match independent references")
+	nativeDeviceQualification(t, []llvmRuntimeScenario{
+		{name: "200-observed-gradient-steps", source: text, number: 140, verify: nativeValuesCheck(1, checkNativeTrainingGradients)},
+		{name: "first-parameters", source: firstSource, number: 141, verify: nativeValuesCheck(1, func(t *testing.T, value runtimeValue) {
+			for _, reference := range trainingReferences(t) {
+				checkNumbers(t, trainingParameters(t, recordField(t, value, "parameters")), reference.FirstParameters, 1e-6, 1e-5)
+			}
+		})},
+	})
 }
 
 func TestLLVMRetainedImmutableValues(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	const text = `flow Failure(error:Error)->Bool{return false}
 flow Add(item:Int)->Int{return Math.add(item,1)}
 flow Verify(original:Record{n:Int,bytes:Bytes,items:List<Int>,table:Map<String,Int>})->Bool onError Failure {

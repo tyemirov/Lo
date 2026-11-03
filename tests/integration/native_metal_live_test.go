@@ -4,27 +4,25 @@ package integration_test
 
 import (
 	"bytes"
-	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
+	"github.com/MarcoPoloResearchLab/Lo/internal/nativebuild"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
-	"github.com/MarcoPoloResearchLab/Lo/internal/nativebuild"
 )
 
 type nativeMetalArtifactIdentity struct {
 	SourceDigest                        string `json:"source_sha256"`
 	Source, Compiler, Toolchain, Target string
-	DeviceBackend                       device.BuildBackend `json:"device_backend"`
-	Runtime                             string              `json:"runtime_sha256"`
+	DeviceBackend                       targetconfig.BuildBackend `json:"device_backend"`
+	Runtime                             string                    `json:"runtime_sha256"`
 	Metal                               *metalconfig.Identity
 }
 
@@ -72,7 +70,7 @@ func nativeMetalBuildArgs(t *testing.T, source, output, backend string) []string
 	manifest, _ := nativeMetalManifest(t)
 	return nativeMetalBuildArgsForManifest(source, output, backend, manifest)
 }
-func nativeMetalMetadata(t *testing.T, artifact, source string, backend device.BuildBackend) nativeMetalArtifactIdentity {
+func nativeMetalMetadata(t *testing.T, artifact, source string, backend targetconfig.BuildBackend) nativeMetalArtifactIdentity {
 	t.Helper()
 	got := runExecutable(t, artifact, "metadata")
 	var identity nativeMetalArtifactIdentity
@@ -81,7 +79,7 @@ func nativeMetalMetadata(t *testing.T, artifact, source string, backend device.B
 	}
 	_, selected := nativeMetalManifest(t)
 	runtime := selected.Targets[metalconfig.Target].Runtime.SHA256
-	if backend == device.MetalBuild {
+	if backend == targetconfig.MetalBuild {
 		runtime = selected.Metal.Runtime.SHA256
 	}
 	data, err := os.ReadFile(source)
@@ -91,10 +89,10 @@ func nativeMetalMetadata(t *testing.T, artifact, source string, backend device.B
 	if identity.DeviceBackend != backend || identity.Target != metalconfig.Target || identity.Compiler != nativebuild.LLVMCompilerIdentity || identity.Toolchain != "LLVM 21.1.8" || identity.Runtime != runtime || identity.Source != source || identity.SourceDigest != hashText(data) {
 		t.Fatalf("LLVM artifact identity: %s", got.stdout)
 	}
-	if backend == device.MetalBuild && (identity.Metal == nil || !reflect.DeepEqual(*identity.Metal, selected.Metal.Identity)) {
+	if backend == targetconfig.MetalBuild && (identity.Metal == nil || !reflect.DeepEqual(*identity.Metal, selected.Metal.Identity)) {
 		t.Fatalf("Metal manifest identity differs: %s", got.stdout)
 	}
-	if backend == device.SoftwareBuild && identity.Metal != nil {
+	if backend == targetconfig.SoftwareBuild && identity.Metal != nil {
 		t.Fatalf("software artifact contains Metal identity: %s", got.stdout)
 	}
 	return identity
@@ -106,37 +104,19 @@ func TestNativeMetalLiveStandalone(t *testing.T) {
 		t.Fatal(err)
 	}
 	source := sourceFile(t, string(data))
-	compiler := filepath.Join(repository, "bin", "lo-metal")
+	compiler := binary
 	artifact := filepath.Join(t.TempDir(), "program")
 	built := runExecutable(t, compiler, nativeMetalBuildArgs(t, source, artifact, "metal")...)
 	if built.status != 0 {
 		t.Fatalf("Metal artifact build: %+v", built)
 	}
-	identity := nativeMetalMetadata(t, artifact, source, device.MetalBuild)
+	nativeMetalMetadata(t, artifact, source, targetconfig.MetalBuild)
 	metadata := runExecutable(t, artifact, "metadata")
 	if strings.Contains(metadata.stdout, "grant") || strings.Contains(metadata.stdout, "allow-device") {
 		t.Fatalf("metadata contains authorization: %s", metadata.stdout)
 	}
-	_, receipts := runWithDevices(t, context.Background(), string(data), device.DefaultFactory(), "--allow-device", "metal:0")
-	opened := false
-	for _, receipt := range receipts {
-		if receipt.Event == device.EventOpen {
-			opened = true
-			if receipt.Backend.KernelSHA256 != identity.Metal.KernelSHA256 || receipt.Backend.Profile != identity.Metal.Profile {
-				t.Fatalf("artifact and interpreter identities differ: %+v %+v", receipt.Backend, identity.Metal)
-			}
-			t.Logf("runtime identity: %+v", receipt.Backend)
-		}
-	}
-	if !opened {
-		t.Fatal("Metal session did not open")
-	}
 	t.Logf("artifact metadata: %s", metadata.stdout)
 	assertNativeObjectTarget(t, artifact, "darwin")
-	expected := runExecutable(t, compiler, "run", source, "--allow-device", "metal:0", "--format", "json")
-	if expected.status != 0 {
-		t.Fatalf("interpreter: %+v", expected)
-	}
 	denied := runExecutable(t, artifact, "run", "--format", "json")
 	if denied.status != 2 || !strings.Contains(denied.stderr, "runtime.capability-denied") {
 		t.Fatalf("missing runtime grant: %+v", denied)
@@ -159,15 +139,19 @@ func TestNativeMetalLiveStandalone(t *testing.T) {
 	command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
-	if err := command.Run(); err != nil || stdout.String() != expected.stdout || stderr.Len() != 0 {
-		t.Fatalf("standalone: %v stdout=%s stderr=%s expected=%+v", err, &stdout, &stderr, expected)
+	if err := command.Run(); err != nil || stderr.Len() != 0 {
+		t.Fatalf("standalone: %v stdout=%s stderr=%s", err, &stdout, &stderr)
 	}
+	value := nativeValue(t, result{stdout: stdout.String()})
+	checkNativeTensor(t, recordField(t, value, "before"), []string{"2"}, []float64{1, -2}, 0, 0)
+	checkNativeTensor(t, recordField(t, value, "after"), []string{"2"}, []float64{.8, -1.6}, 1e-6, 1e-5)
+	checkNumbers(t, []float64{trainingFloat(t, recordField(t, value, "loss"))}, []float64{5}, 0, 0)
 }
 
 func hashText(data []byte) string { return fmt.Sprintf("%x", sha256.Sum256(data)) }
 
-func TestNativeMetalLiveDifferential(t *testing.T) {
-	compiler := filepath.Join(repository, "bin", "lo-metal")
+func TestNativeMetalLiveNumericalContracts(t *testing.T) {
+	compiler := binary
 	for _, tc := range []struct {
 		name, source string
 		status       int
@@ -187,13 +171,13 @@ func TestNativeMetalLiveDifferential(t *testing.T) {
 				t.Fatalf("build: %+v", built)
 			}
 			for _, budget := range []string{"10000000", "1", "30"} {
-				expected := runExecutable(t, compiler, "run", source, "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
 				for repeat := 0; repeat < 3; repeat++ {
 					actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
-					if actual != expected {
-						t.Fatalf("budget=%s repeat=%d native=%+v interpreter=%+v", budget, repeat, actual, expected)
+					if budget != "10000000" && actual.status == 2 {
+						nativeBudgetOrSuccess(t, actual)
+						continue
 					}
-					if budget == "10000000" && (actual.status != tc.status || !strings.Contains(actual.stdout+actual.stderr, tc.fragment)) {
+					if budget == "1" || actual.status != tc.status || !strings.Contains(actual.stdout+actual.stderr, tc.fragment) {
 						t.Fatalf("independent result: %+v", actual)
 					}
 				}
@@ -209,20 +193,19 @@ func TestNativeMetalLiveFailurePreventsCommit(t *testing.T) {
 			path := filepath.Join(dir, "must-not-exist")
 			text := fmt.Sprintf(`flow Main()->Tensor<FP32>!{a=Tensor.to(Tensor.new(List.new(1.0),List.new()),Device.new(%q));b=Tensor.to(Tensor.new(List.new(1e-45),List.new()),Device.new(%q));r=Tensor.div(a,b);effect=File.Write.new(File.Path.new(%q),Bytes.new("bad"));commit effect;return Tensor.to(r,Device.new("cpu"))};return Main()`, selector, selector, path)
 			source := sourceFile(t, text)
-			compiler := filepath.Join(repository, "bin", "lo-metal")
+			compiler := binary
 			artifact := filepath.Join(t.TempDir(), "program")
 			built := runExecutable(t, compiler, nativeMetalBuildArgs(t, source, artifact, "metal")...)
 			if built.status != 0 {
 				t.Fatalf("build: %+v", built)
 			}
-			expected := runExecutable(t, compiler, "run", source, "--allow-device", selector, "--write-root", dir, "--format", "json")
 			actual := runExecutable(t, artifact, "run", "--allow-device", selector, "--write-root", dir, "--format", "json")
 			kind := "Numeric.DivideByZero"
 			if selector == "cuda:0" {
 				kind = "Device.Unavailable"
 			}
-			if actual != expected || actual.status != 1 || actual.stdout != "" || !strings.Contains(actual.stderr, kind) {
-				t.Fatalf("failure: native=%+v interpreter=%+v", actual, expected)
+			if actual.status != 1 || actual.stdout != "" || !strings.Contains(actual.stderr, kind) {
+				t.Fatalf("failure: %+v", actual)
 			}
 			if _, err := os.ReadFile(path); !os.IsNotExist(err) {
 				t.Fatalf("later commit: %v", err)
@@ -242,37 +225,24 @@ func TestNativeMetalLiveUnavailable(t *testing.T) {
 		t.Fatalf("compile controlled framework boundary: %v %s", err, output)
 	}
 	source := filepath.Join(repository, "examples", "metal_arithmetic.lo")
-	compiler := filepath.Join(repository, "bin", "lo-metal")
+	compiler := binary
 	artifact := filepath.Join(t.TempDir(), "program")
 	built := runExecutable(t, compiler, nativeMetalBuildArgs(t, source, artifact, "metal")...)
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}
-	var expected string
-	for _, executable := range []string{compiler, artifact} {
-		args := []string{"run"}
-		if executable == compiler {
-			args = append(args, source)
-		}
-		args = append(args, "--allow-device", "metal:0", "--format", "json")
-		command := exec.Command(executable, args...)
-		command.Env = append(os.Environ(), "DYLD_INSERT_LIBRARIES="+library)
-		var stdout, stderr bytes.Buffer
-		command.Stdout, command.Stderr = &stdout, &stderr
-		if err := command.Run(); err == nil || command.ProcessState.ExitCode() != 1 || stdout.Len() != 0 || !strings.Contains(stderr.String(), "Device.Unavailable") {
-			t.Fatalf("unavailable framework device: %v %s %s", err, &stdout, &stderr)
-		}
-		if executable == compiler {
-			expected = stderr.String()
-		} else if stderr.String() != expected {
-			t.Fatalf("unavailable trace differs: native=%s interpreter=%s", &stderr, expected)
-		}
+	command = exec.Command(artifact, "run", "--allow-device", "metal:0", "--format", "json")
+	command.Env = append(os.Environ(), "DYLD_INSERT_LIBRARIES="+library)
+	var stdout, stderr bytes.Buffer
+	command.Stdout, command.Stderr = &stdout, &stderr
+	if err := command.Run(); err == nil || command.ProcessState.ExitCode() != 1 || stdout.Len() != 0 || !strings.Contains(stderr.String(), "Device.Unavailable") {
+		t.Fatalf("unavailable framework device: %v %s %s", err, &stdout, &stderr)
 	}
 }
 
 func TestNativeMetalLiveBuildIsolation(t *testing.T) {
 	source := sourceFile(t, `return 7`)
-	compiler := filepath.Join(repository, "bin", "lo-metal")
+	compiler := binary
 	isolatedCompiler := filepath.Join(t.TempDir(), "lo-metal")
 	if err := os.Link(compiler, isolatedCompiler); err != nil {
 		t.Fatal(err)
@@ -298,7 +268,7 @@ func TestNativeMetalLiveBuildIsolation(t *testing.T) {
 		t.Fatalf("identical inputs produced different artifacts: %s %s", hashText(a), hashText(b))
 	}
 	assertNativeObjectTarget(t, first, "darwin")
-	nativeMetalMetadata(t, first, source, device.MetalBuild)
+	nativeMetalMetadata(t, first, source, targetconfig.MetalBuild)
 	got := runExecutable(t, first, "run")
 	if got.status != 0 || got.stdout != "7\n" {
 		t.Fatalf("unused Metal requires no grant: %+v", got)
@@ -312,7 +282,7 @@ func TestNativeMetalLiveBuildIsolation(t *testing.T) {
 		}
 		assertNativeObjectTarget(t, artifact, strings.Split(target, "/")[0])
 		if target == metalconfig.Target {
-			nativeMetalMetadata(t, artifact, source, device.SoftwareBuild)
+			nativeMetalMetadata(t, artifact, source, targetconfig.SoftwareBuild)
 		}
 	}
 	args := append(nativeMetalBuildArgs(t, source, first, "metal"), "--target", "linux/arm64")
@@ -347,7 +317,7 @@ func TestNativeMetalLiveBuildIsolation(t *testing.T) {
 }
 
 func TestNativeMetalLiveTraining(t *testing.T) {
-	compiler := filepath.Join(repository, "bin", "lo-metal")
+	compiler := binary
 	for _, tc := range []struct {
 		name, source string
 		repeats      int
@@ -361,38 +331,24 @@ func TestNativeMetalLiveTraining(t *testing.T) {
 			if built.status != 0 {
 				t.Fatalf("training build: %+v", built)
 			}
-			identity := nativeMetalMetadata(t, artifact, tc.source, device.MetalBuild)
-			if identity.Metal.Profile != device.MetalProfile {
+			identity := nativeMetalMetadata(t, artifact, tc.source, targetconfig.MetalBuild)
+			if identity.Metal.Profile != targetconfig.MetalProfile {
 				t.Fatal("training artifact profile differs")
 			}
 			t.Logf("training artifact: %+v", identity)
 			for _, budget := range []string{"1", "30"} {
-				expected := runExecutable(t, compiler, "run", tc.source, "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
 				actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
-				if actual != expected || actual.status != 2 || actual.stdout != "" || !strings.Contains(actual.stderr, "runtime.limit") {
-					t.Fatalf("training budget=%s: native=%+v interpreter=%+v", budget, actual, expected)
+				if actual.status != 2 || actual.stdout != "" || !strings.Contains(actual.stderr, "runtime.limit") {
+					t.Fatalf("training budget=%s: %+v", budget, actual)
 				}
 			}
-			expected := runExecutable(t, compiler, "run", tc.source, "--allow-device", "metal:0", "--format", "json")
-			trainingResult(t, expected)
 			for repeat := 0; repeat < tc.repeats; repeat++ {
 				got := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--format", "json")
-				if got != expected {
-					t.Fatalf("training parity: native=%+v interpreter=%+v", got, expected)
-				}
 				if tc.name == "200-steps" {
 					loss := assertMetalTrainingResult(t, trainingResult(t, got))
 					t.Logf("native run=%d loss=%.17g", repeat+1, loss)
 				} else {
-					var steps []runtimeValue
-					if err := json.Unmarshal(trainingResult(t, got).Value, &steps); err != nil || len(steps) != 200 {
-						t.Fatalf("native gradient steps=%d (%v)", len(steps), err)
-					}
-					for _, step := range steps {
-						trainingFloat(t, recordField(t, step, "loss"))
-						trainingParameters(t, recordField(t, step, "gradients"))
-					}
-					t.Log("native: 200 finite losses and 1800 finite gradient coordinates match the interpreter exactly")
+					checkNativeTrainingGradients(t, nativeValue(t, got))
 				}
 			}
 		})

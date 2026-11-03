@@ -2,8 +2,8 @@ package inspect
 
 import (
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"math/big"
 	"strings"
 
@@ -172,7 +172,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 			target = values[1]
 			from = values[0].location
 		} else if op.Name() == catalog.TensorNew || op.Name() == catalog.CheckpointDecode {
-			cpu := device.CPU
+			cpu := targetconfig.CPU
 			target.known = &cpu
 		} else if len(values) > 0 {
 			target.known = values[0].location
@@ -187,13 +187,13 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		if catalog.IsTransfer(op.Name()) {
 			a.data.Transfers = append(a.data.Transfers, entry)
 		}
-		if target.known == nil || *target.known != device.CPU {
-			a.capability(resource, device.Capability)
+		if target.known == nil || *target.known != targetconfig.CPU {
+			a.capability(resource, targetconfig.Capability)
 		}
-		if catalog.IsTransfer(op.Name()) && (from == nil || *from != device.CPU) {
+		if catalog.IsTransfer(op.Name()) && (from == nil || *from != targetconfig.CPU) {
 			source := values[0]
 			source.known = from
-			a.capability(a.resource(c, op.Name(), node, source), device.Capability)
+			a.capability(a.resource(c, op.Name(), node, source), targetconfig.Capability)
 		}
 		out.location = target.known
 	}
@@ -210,6 +210,10 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		}
 	case catalog.ListConstructor:
 		out.items = values
+		if len(values) > 0 {
+			joined := a.join(values, node, e.Type())
+			out.fileRoot = joined.fileRoot
+		}
 	case catalog.MapConstructor:
 		out.items = values
 	case catalog.RecordMerge:
@@ -233,6 +237,18 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		}
 	case catalog.ListProcessor, catalog.FlowProcessor:
 		return a.list(c, e, values, flows[len(e.Arguments())-1])
+	case catalog.ListSortProcessor:
+		return a.sort(c, e, values, flows[len(e.Arguments())-1])
+	case catalog.ListAccess:
+		if op.Name() == catalog.ListAt {
+			if len(values[0].items) > 0 {
+				out = a.join(values[0].items, node, e.Type())
+			}
+		} else {
+			out.items = values[0].items
+		}
+		out.fileRoot = values[0].fileRoot
+		out.targets = values[0].targets
 	}
 	switch op.Name() {
 	case catalog.ProcessContextCurrent:
@@ -308,7 +324,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	case catalog.ParametersTo, catalog.SGDStateTo, catalog.AdamWStateTo:
 		out.fields = trainingFields(values[0].fields, values[1].known)
 	case catalog.CheckpointDecode:
-		cpu := device.CPU
+		cpu := targetconfig.CPU
 		out.fields = trainingFields(values[1].fields, &cpu)
 	case catalog.TensorDevice:
 		out.known = values[0].location
@@ -323,6 +339,32 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 			a.addError(c, "value", op.Name(), node, nil, &d)
 		}
 	}
+	return out
+}
+
+func (a *analyzer) sort(c *context, e ir.BuiltinCall, values []abstract, callback identity.FlowID) abstract {
+	node := a.graph.nodes[e]
+	flow := a.graph.flows[callback]
+	arguments := make([]abstract, len(flow.Parameters()))
+	copy(arguments, values[1:len(values)-1])
+	for index := len(arguments) - 2; index < len(arguments); index++ {
+		element := a.unknown(values[0].node, flow.Parameters()[index].Type)
+		if len(values[0].items) > 0 {
+			element = a.join(values[0].items, values[0].node, flow.Parameters()[index].Type)
+		}
+		element.fileRoot = values[0].fileRoot
+		element.targets = appendTargets(element.targets, values[0].targets...)
+		arguments[index] = element
+	}
+	child := branchContext(c, condition{Kind: iterationCondition, Node: node, Context: c.id})
+	comparison := a.invoke(child, callback, "list-callback", c.entry, node, arguments, child.conditions)
+	out := values[0]
+	out.node = node
+	out.typ = e.Type()
+	for _, value := range values {
+		out.dependencies = append(out.dependencies, value.dependencies...)
+	}
+	out.dependencies = append(out.dependencies, comparison.dependencies...)
 	return out
 }
 

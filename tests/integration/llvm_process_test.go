@@ -13,9 +13,6 @@ import (
 )
 
 func TestLLVMProcessConstructors(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires explicit LLVM runtime lane")
-	}
 	for index, source := range []string{
 		`return Process.Executable.new(File.Path.new("/absolute/command"))`,
 		`return Process.Executable.new(File.Path.new("relative"))`,
@@ -32,19 +29,29 @@ func TestLLVMProcessConstructors(t *testing.T) {
 			if built.status != 0 {
 				t.Fatalf("build process fixture: %+v", built)
 			}
-			expected := runExecutable(t, binary, "run", input, "--format", "json")
 			actual := runExecutable(t, artifact, "run", "--format", "json")
-			if actual != expected {
-				t.Fatalf("process contract differs: native %+v evaluator %+v", actual, expected)
+			switch index {
+			case 0:
+				nativeValueCheck("Process.Executable", `{"path":{"type":"File.Path","value":"/absolute/command"}}`)(t, actual)
+			case 2:
+				nativeValueCheck("Process.Command", `{"context":{"type":"Process.Context","value":{"origin":"explicit","redacted":true}},"executable":{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":"/command"}}},"arguments":{"type":"List<String>","value":[{"type":"String","value":"arg"}]},"stdin":{"type":"Bytes","value":"aW5wdXQ="}}`)(t, actual)
+			case 3:
+				nativeFailure(t, actual, 2, "runtime.process-unavailable", "")
+			default:
+				kind := "Process.InvalidContext"
+				if index == 1 {
+					kind = "Process.InvalidExecutable"
+				}
+				if index == 5 {
+					kind = "Process.InvalidCommand"
+				}
+				nativeFailure(t, actual, 1, "runtime.unhandled-error", kind)
 			}
 		})
 	}
 }
 
 func TestLLVMProcessExecution(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires explicit LLVM runtime lane")
-	}
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires qualified Darwin arm64 process host")
 	}
@@ -70,9 +77,17 @@ func TestLLVMProcessExecution(t *testing.T) {
 	grant := fmt.Sprintf("%x,%s", digest, executable)
 	external := filepath.Join(repository, "bin", "lo-process-launcher")
 	arguments := []string{"--process-allow", grant, "--process-read-root", directory, "--process-launcher", external, "--format", "json"}
-	expected := runExecutable(t, binary, append([]string{"run", input}, arguments...)...)
-	if expected.status != 0 {
-		t.Fatalf("evaluate qualified process: %+v", expected)
+	verify := func(t *testing.T, actual result) {
+		value := nativeValue(t, actual)
+		if value.Type != "Process.Result" {
+			t.Fatalf("process result type: %+v", value)
+		}
+		fields := processFields(t, value)
+		valueJSON(t, fields["stdout"], `"aW5wdXQ="`)
+		valueJSON(t, fields["stderr"], `"ZGlhZ25vc3RpYw=="`)
+		termination := processFields(t, fields["termination"])
+		valueJSON(t, termination["kind"], `"exited"`)
+		valueJSON(t, termination["exit_code"], `"7"`)
 	}
 	copied := filepath.Join(directory, "standalone")
 	copyCommand := exec.Command("cp", artifact, copied)
@@ -92,9 +107,7 @@ func TestLLVMProcessExecution(t *testing.T) {
 			args := append([]string{}, arguments...)
 			args[5] = launcher
 			actual := runExecutable(t, artifact, append([]string{"run"}, args...)...)
-			if actual != expected {
-				t.Fatalf("process execution differs: native %+v evaluator %+v", actual, expected)
-			}
+			verify(t, actual)
 		})
 	}
 	t.Run("foreign-descriptors", func(t *testing.T) {
@@ -116,9 +129,7 @@ func TestLLVMProcessExecution(t *testing.T) {
 			t.Fatalf("execute with foreign descriptors: %v: %s", err, stderr.String())
 		}
 		actual := result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}
-		if actual != expected {
-			t.Fatalf("child inherited undeclared descriptors: native %+v evaluator %+v", actual, expected)
-		}
+		verify(t, actual)
 	})
 
 	t.Run("post-commit-budget-safe-progress", func(t *testing.T) {
@@ -133,17 +144,13 @@ func TestLLVMProcessExecution(t *testing.T) {
 			t.Run(format, func(t *testing.T) {
 				args := append(append([]string{}, arguments...), "--max-steps", "100", "--write-root", directory)
 				args[7] = format
-				expected := runExecutable(t, binary, append([]string{"run", source}, args...)...)
-				if expected.status != 2 {
-					t.Fatalf("evaluator must reach postcommit budget: %+v", expected)
-				}
-				if format == "json" && (!strings.Contains(expected.stderr, `"operation":"Process.run"`) || !strings.Contains(expected.stderr, `"code":"runtime.limit"`)) {
-					t.Fatalf("evaluator must retain completed activation: %+v", expected)
-				}
 				args[5] = builtArtifact
 				actual := runExecutable(t, builtArtifact, append([]string{"run"}, args...)...)
-				if actual != expected {
-					t.Fatalf("postcommit failure differs: native %+v evaluator %+v", actual, expected)
+				if actual.status != 2 || actual.stdout != "" {
+					t.Fatalf("postcommit status: %+v", actual)
+				}
+				if format == "json" && (!strings.Contains(actual.stderr, `"operation":"Process.run"`) || !strings.Contains(actual.stderr, `"code":"runtime.limit"`)) {
+					t.Fatalf("compiled budget lost completed activation: %+v", actual)
 				}
 				if strings.Contains(actual.stderr, "aW5wdXQ=") || strings.Contains(actual.stderr, "ZGlhZ25vc3RpYw==") {
 					t.Fatal("captured process bytes entered safe progress")
@@ -191,9 +198,6 @@ func TestLLVMProcessTransportOwnership(t *testing.T) {
 }
 
 func TestLLVMProcessConfigurationDiagnostics(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires explicit LLVM runtime lane")
-	}
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires qualified Darwin process host")
 	}
@@ -220,10 +224,13 @@ func TestLLVMProcessConfigurationDiagnostics(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			args := []string{"--process-allow", test.grant, "--process-launcher", test.helper, "--process-read-root", test.root, "--format", "json"}
-			expected := runExecutable(t, binary, append([]string{"run", input}, args...)...)
 			actual := runExecutable(t, artifact, append([]string{"run"}, args...)...)
-			if expected.status != 2 || actual != expected {
-				t.Fatalf("configuration diagnostic differs: native %+v evaluator %+v", actual, expected)
+			if actual.status != 2 || actual.stdout != "" {
+				t.Fatalf("configuration diagnostic: %+v", actual)
+			}
+			code := diagnostics(t, actual.stderr).Diagnostics[0].Code
+			if code != "runtime.capability-denied" && code != "runtime.host-failure" {
+				t.Fatalf("configuration rejection class: %+v", actual)
 			}
 		})
 	}
@@ -234,9 +241,6 @@ func TestLLVMProcessAdmissionHashCancellation(t *testing.T) {
 }
 
 func TestLLVMProcessProtectedFileComposition(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires explicit LLVM runtime lane")
-	}
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires qualified Darwin process host")
 	}
@@ -250,21 +254,41 @@ func TestLLVMProcessProtectedFileComposition(t *testing.T) {
 	}
 	digest := sha256.Sum256(content)
 	args := []string{"--process-allow", fmt.Sprintf("%x,%s", digest, command), "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--process-read-root", directory, "--write-root", directory, "--format", "json"}
-	for _, path := range []string{command, alias} {
-		t.Run(filepath.Base(path), func(t *testing.T) {
+	for _, test := range []struct{ path, protection string }{
+		{command, "registered namespace entry is protected"},
+		{alias, "registered executable or namespace is protected"},
+	} {
+		t.Run(filepath.Base(test.path), func(t *testing.T) {
+			path := test.path
 			source := sourceFile(t, fmt.Sprintf(`target=File.Write.new(File.Path.new(%q),Bytes.new("changed"));commit target`, path))
 			artifact, built := buildForTest(t, source)
 			if built.status != 0 {
 				t.Fatalf("build protected file fixture: %+v", built)
 			}
-			expected := runExecutable(t, binary, append([]string{"run", source}, args...)...)
 			actual := runExecutable(t, artifact, append([]string{"run"}, args...)...)
-			if expected.status != 2 || actual != expected {
-				t.Fatalf("registered file protection differs: native %+v evaluator %+v", actual, expected)
+			if actual.status != 2 || actual.stdout != "" {
+				t.Fatalf("registered file protection: %+v", actual)
 			}
-			observed, err := os.ReadFile(command)
-			if err != nil || !bytes.Equal(observed, content) {
-				t.Fatalf("registered bytes changed: %q: %v", observed, err)
+			report := diagnostics(t, actual.stderr)
+			if len(report.Diagnostics) != 1 {
+				t.Fatalf("registered protection diagnostic count: %+v", report)
+			}
+			diagnostic := report.Diagnostics[0]
+			message := fmt.Sprintf("boundary operation failed: File.write %q: Process registry %q: %s", path, "File mutation", test.protection)
+			if diagnostic.Code != "runtime.host-failure" || diagnostic.Stage != "runtime" || diagnostic.Message != message {
+				t.Fatalf("registered protection host failure: %+v", diagnostic)
+			}
+			evidence := receiptHostDiagnostic(t, actual)
+			if evidence.WriteProgress == nil || evidence.WriteProgress.Type != "Record{bytes_written: Int, stage: String}" || evidence.Error != nil || evidence.LastCompleted != nil {
+				t.Fatalf("registered protection published invalid activation evidence: %+v", evidence)
+			}
+			valueJSON(t, recordField(t, *evidence.WriteProgress, "bytes_written"), `"0"`)
+			valueJSON(t, recordField(t, *evidence.WriteProgress, "stage"), `"open"`)
+			for _, protected := range []string{command, alias} {
+				observed, err := os.ReadFile(protected)
+				if err != nil || !bytes.Equal(observed, content) {
+					t.Fatalf("registered bytes changed through %s: %q: %v", protected, observed, err)
+				}
 			}
 		})
 	}

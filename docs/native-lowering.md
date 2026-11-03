@@ -112,48 +112,25 @@ Optimization must not remove, combine, or reorder observable runtime boundaries.
 ## Validation Scope
 
 Public build tests include both target triples, source maps, unsupported inputs, cancellation, and output protection.
-The LLVM execution harness links generated modules against a small test runtime.
-It compares unoptimized and optimized execution with fixed expected results from the language contract.
-Exact budget boundaries, branch order, callbacks, handlers, cancellation, and cleanup are part of I006 acceptance.
-
-The test runtime is a fixture.
-It does not implement the full Lo value model or catalog.
-Full semantic migration acceptance is part of I007 through I011.
-The installed offline compiler acceptance criterion is part of F017 and I011.
+The current execution suite links generated modules against the canonical Rust runtime.
+Native ABI fixtures supply controlled failures without a second evaluator.
+Darwin and Linux under QEMU cover public results, budgets, callback order, cancellation, and resource cleanup.
+The earlier bounded C bootstrap runtime and its execution commands are removed.
 
 ## Repeat The Execution Checks
 
-The execution harness uses a Darwin arm64 host.
-It generates and verifies LLVM modules and object files for both supported targets.
-It links and executes the Darwin fixtures at O0 and O2.
-Linux object generation does not prove Linux execution.
-
-Prepare the pinned LLVM 21.1.8 tools inside the repository:
+Prepare current compiler inputs and runtime archives:
 
 ```bash
-make prepare-native-lowering NATIVE_LOWERING_ROOT=_scratch/native-lowering
+make prepare-native-runtime
+make build-native-runtime-metal
+make test-native
 ```
 
-Preparation retrieves the archive identified by `experiments/native-backends/preparation.lock.json`.
-It verifies the archive digest before extraction.
-The resulting `tools.json` records the prepared tools and their digests.
-
-Run the execution checks with a new output directory:
-
-```bash
-make test-native-lowering \
-  NATIVE_LOWERING_ROOT=_scratch/native-lowering \
-  NATIVE_LOWERING_STATE=_scratch/native-lowering/run-1
-```
-
-The harness rejects a nonempty output directory.
-Its `results.json` records commands, source identities, generated artifacts, and fixture results.
-Fixture expectations come from the language contract.
-They do not come from the generated module or its execution output.
-
-The C fixture runtime uses bounded integers for tests of the ABI and control flow.
-It rejects arithmetic outside that range.
-The production runtime must implement arbitrary-precision integers under I007.
+Set `NATIVE_RUNTIME_STATE`, `NATIVE_RUNTIME_OUTPUT`, and `LLVM_TOOLCHAIN` for a different repository-local preparation directory.
+An existing receipt with changed inputs requires fresh preparation.
+The [runtime guide](native-runtime.md) defines preparation and current acceptance.
+The [embedding guide](native-embedding.md) defines canonical C declarations and ownership.
 
 ## Recorded Results
 

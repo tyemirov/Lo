@@ -1,7 +1,7 @@
 package catalog
 
 import (
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
@@ -35,6 +35,6 @@ func addOptimizers(m map[string]Operation) {
 		if name == SGDStep || name == AdamWStep {
 			params = []types.Parameter{{Name: ParamState}, {Name: ParamGradients}}
 		}
-		m[name] = operation{name: name, rule: OptimizerOperation, parameters: params, errors: []string{GradientSchemaMismatch, NumericNonFinite, NumericZero, NumericDomain, device.UnsupportedOperation}}
+		m[name] = operation{name: name, rule: OptimizerOperation, parameters: params, errors: []string{GradientSchemaMismatch, NumericNonFinite, NumericZero, NumericDomain, targetconfig.UnsupportedOperation}}
 	}
 }

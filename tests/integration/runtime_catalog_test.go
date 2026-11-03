@@ -110,6 +110,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	for name, expected := range checkpointCatalogResults() {
 		want[name] = expected
 	}
+	for name, expected := range processorCatalogResults() {
+		want[name] = expected
+	}
 	covered := map[string]bool{}
 	for _, tc := range builtinExamples() {
 		if _, ok := want[tc.name]; ok {
@@ -121,7 +124,7 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				t.Fatalf("missing runtime assertion for %s", tc.name)
 			}
 			if tc.name == catalog.MathDiv || tc.name == catalog.MathMod || tc.name == catalog.MathMin || tc.name == catalog.MathMax {
-				got := run(t, "run", sourceFile(t, tc.source), "--format", "json")
+				got := runProgram(t, sourceFile(t, tc.source), "run", "--format", "json")
 				var out struct {
 					Diagnostics []struct{ Error runtimeValue }
 				}
@@ -203,6 +206,24 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		if !covered[op.Name()] {
 			t.Errorf("missing runtime case for %s", op.Name())
 		}
+	}
+}
+
+func processorCatalogResults() map[string]string {
+	return map[string]string{
+		catalog.StringStartsWith: `true`, catalog.StringEndsWith: `true`, catalog.StringSlice: `{"type":"String","value":"界"}`,
+		catalog.StringCompare: `"-1"`, catalog.StringSplit: `{"type":"List<String>","value":[{"type":"String","value":"a"},{"type":"String","value":"b"}]}`,
+		catalog.StringSplitFirst: `{"type":"Record{after: String, before: String}","value":{"after":{"type":"String","value":"b"},"before":{"type":"String","value":"a"}}}`,
+		catalog.StringReplaceAll: `{"type":"String","value":"xbx"}`, catalog.StringTrim: `"a"`, catalog.StringIsWhitespace: `true`,
+		catalog.StringSplitWhitespace: `[{"type":"String","value":"a"},{"type":"String","value":"b"}]`, catalog.StringLines: `[{"type":"String","value":"a"},{"type":"String","value":"b"}]`,
+		catalog.BytesLength: `"3"`, catalog.BytesStartsWith: `true`, catalog.BytesSlice: `{"type":"Bytes","value":"Yg=="}`,
+		catalog.BytesSplit:     `{"type":"List<Bytes>","value":[{"type":"Bytes","value":"YQ=="},{"type":"Bytes","value":"Yg=="}]}`,
+		catalog.BytesTrimStart: `{"type":"Bytes","value":"eA=="}`,
+		catalog.ListAt:         `{"type":"Int","value":"2"}`, catalog.ListSlice: `{"type":"List<Int>","value":[{"type":"Int","value":"2"}]}`,
+		catalog.ListSort:         `[{"type":"Int","value":"1"},{"type":"Int","value":"2"}]`,
+		catalog.FilePathToString: `"a/b"`, catalog.FilePathJoin: `{"type":"File.Path","value":"a/b"}`, catalog.FilePathParent: `"a"`, catalog.FilePathName: `"b"`,
+		catalog.GlobNew: `{"type":"Glob","value":"*.lo"}`, catalog.GlobMatches: `{"type":"Bool","value":true}`,
+		catalog.ProcessArgumentsFormatShell: `{"type":"String","value":"'a b'"}`,
 	}
 }
 

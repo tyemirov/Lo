@@ -6,16 +6,13 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"os"
+
 	"strings"
 	"testing"
 	"time"
 )
 
 func TestLLVMHTTPRejectedBodyDrain(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	server := startServer(t, `flow Handle(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,"handler entered")};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(413,String.concat(e.kind,":",Int.to_string(List.length(e.trace))))}`+serveSuffix)
 	var stalled *net.TCPConn
 	defer func() {

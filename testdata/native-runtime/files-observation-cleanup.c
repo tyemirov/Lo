@@ -1,10 +1,8 @@
+#include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct { U32 status, code; const Value *value; } Result;
-extern void lo_op_File_2Edirectory(Context *, const Value **, U64, U64, Result *);
+extern void lo_op_File_2Edirectory(Context *, const Value **, U64, U64, ResultSlot *);
 extern int lo_cli_main(int, const char **, const char **);
 extern U64 lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int mkdir(const char *, unsigned), open(const char *, int, ...);
@@ -27,7 +25,7 @@ int close(int descriptor) {
  if (armed) { armed = 0; ++close_failures; *ERROR_ADDRESS() = 5; return -1; }
  return result;
 }
-void lo_observation_directory_bridge(Context *context, const Value **arguments, U64 count, U64 site, Result *output) {
+void lo_observation_directory_bridge(Context *context, const Value **arguments, U64 count, U64 site, ResultSlot *output) {
  ++directory_calls;
  lo_op_File_2Edirectory(context, arguments, count, site, output);
  if (directory_calls == 2 && !output->status) armed = 1;

@@ -4,15 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math/bits"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
-	"github.com/MarcoPoloResearchLab/Lo/internal/execution"
-	"github.com/MarcoPoloResearchLab/Lo/internal/types"
-	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
 type workload struct {
@@ -268,72 +264,32 @@ func (w *workload) verifyFiles(success bool) error {
 
 // expectPayload models value charges for these fixed straight-line Lo programs.
 func (w *workload) expectPayload() error {
-	input, err := value.NewText(types.Path(), filepath.Join(w.directory, "input"))
-	if err != nil {
-		return err
-	}
-	empty := value.NewBytes(nil)
-	fallibleBytes, err := types.NewFallible(types.Bytes())
-	if err != nil {
-		return err
-	}
-	wrapped, err := value.Success(fallibleBytes, empty)
-	if err != nil {
-		return err
-	}
-	bytesWeight := uint64(w.size) + empty.Weight()
-	fallibleWeight := uint64(w.size) + wrapped.Weight()
-	integer := value.Int64(int64(w.size))
-	fallibleInt, err := types.NewFallible(types.Int())
-	if err != nil {
-		return err
-	}
-	wrappedInteger, err := value.Success(fallibleInt, integer)
-	if err != nil {
-		return err
-	}
-	weights := []uint64{input.Weight(), input.Weight(), fallibleWeight, bytesWeight}
+	const header = uint64(16)
+	const maxValue = uint64(16 << 20)
+	const maxLive = uint64(64 << 20)
+	pathWeight := func(name string) uint64 { return header + uint64(len(filepath.Join(w.directory, name))) }
+	payload := uint64(w.size)
+	bytesWeight, fallibleWeight := header+payload, 2*header+payload
+	integerWeight := header + uint64((bits.Len(uint(w.size))+7)/8)
+	weights := []uint64{pathWeight("input"), pathWeight("input"), fallibleWeight, bytesWeight}
 	commitIndex := -1
 	if w.name == "read" {
-		// UTF-8 result, propagated string, scalar, and wrapped flow return.
-		// References and the top-level result preserve an already charged identity.
-		weights = append(weights, fallibleWeight, bytesWeight, integer.Weight(), wrappedInteger.Weight())
+		weights = append(weights, fallibleWeight, bytesWeight, integerWeight, header+integerWeight)
 	} else {
-		output, err := value.NewText(types.Path(), filepath.Join(w.directory, "output"))
-		if err != nil {
-			return err
-		}
-		operationName, receiptType := catalog.FileWrite, types.FileWriteReceipt()
+		operation := "File.Write.new"
 		if w.name == "append" {
-			operationName, receiptType = catalog.FileAppend, types.FileAppendReceipt()
+			operation = "File.Append.new"
 		}
-		operation, ok := catalog.Lookup(operationName)
-		if !ok {
-			return fmt.Errorf("missing File constructor %s", operationName)
-		}
-		target, err := value.NewEffect(operation, output, empty)
-		if err != nil {
-			return err
-		}
-		fields, err := value.NewRecord([]value.Field{{Name: "path", Value: output}, {Name: "bytes_written", Value: integer}})
-		if err != nil {
-			return err
-		}
-		receipt, err := value.NewReceipt(receiptType, fields)
-		if err != nil {
-			return err
-		}
-		targetWeight := uint64(w.size) + target.Weight()
-		weights = append(weights, output.Weight(), output.Weight(), targetWeight)
-		// The write completes before the receipt's first charge.
+		output := pathWeight("output")
+		target := header + uint64(len(operation)) + output + bytesWeight
+		receipt := 2*header + uint64(len("path")+len("bytes_written")) + output + integerWeight
+		weights = append(weights, output, output, target)
 		commitIndex = len(weights)
-		weights = append(weights, receipt.Weight(), integer.Weight(), wrappedInteger.Weight())
+		weights = append(weights, receipt, integerWeight, header+integerWeight)
 	}
-	limits := execution.DefaultBudgetInput().Limits
 	var total uint64
 	for index, weight := range weights {
-		if (limits.ValueBytes != 0 && weight > limits.ValueBytes) ||
-			(limits.LiveBytes != 0 && (total > limits.LiveBytes || weight > limits.LiveBytes-total)) {
+		if weight > maxValue || total > maxLive || weight > maxLive-total {
 			w.expected = "runtime.limit"
 			w.limitAfterCommit = commitIndex >= 0 && index >= commitIndex
 			return nil

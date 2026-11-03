@@ -1,6 +1,9 @@
 # Compiler Implementation Audit
 
 This document records historical implementation evidence before I011.
+The source paths and test names below describe those earlier revisions.
+I014 through I018 remove the Go runtime paths recorded here.
+The [single-runtime plan](single-runtime-plan.md) defines the current architecture and validation owners.
 The [native compilation contract](native-compilation-contract.md) defines the current LLVM build requirements.
 The [compiler plan](standalone-compiler-plan.md) records the current migration status.
 
@@ -22,10 +25,10 @@ F001 extends this audit with the native compiler and shared runtime described be
 | [Inspection tests](../tests/integration/inspect_test.go) | Report fields, references, conditions, capabilities, errors, and deterministic output. |
 | [Runtime tests](../tests/integration/run_test.go) | CLI values, serialization, recoverable errors, traces, file reads, and host limits. |
 | [Runtime catalog tests](../tests/integration/runtime_catalog_test.go) | Expected runtime behavior for all 101 built-in operations. |
-| [Evaluator tests](../tests/integration/eval_test.go) | Evaluation order, branch selection, repeated reads, error precedence, cancellation, and immutable results. |
+| `tests/integration/eval_test.go` (historical) | Evaluation order, branch selection, repeated reads, error precedence, cancellation, and immutable results. |
 | [File tests](../tests/integration/activation_test.go) | Commit order, failure handling, authorization, and the executable File workflow. |
 | [HTTP tests](../tests/integration/serve_test.go) | Real CLI processes, local HTTP requests, readiness, failures, and shutdown. |
-| [Adapter tests](../tests/integration/adapter_test.go) | File cancellation, concurrent append, partial startup, nested servers, and forced shutdown. |
+| `tests/integration/adapter_test.go` (historical) | File cancellation, concurrent append, partial startup, nested servers, and forced shutdown. |
 
 The test names below identify executable fixtures in these files.
 `TestConformance` executes every entry in the [conformance manifest](../testdata/conformance/manifest.json).
@@ -103,29 +106,29 @@ Their source programs and expected values are in the named tests.
 | Text and JSON use one deterministic report | `report.Text`, `report.MarshalJSON`, and repeated CLI calls in `TestInspectionResources`. |
 | Empty report collections serialize as arrays | `newReport` constructs each collection, and the reference validator accepts the serialized report. |
 | Inspection limits reject without partial output | `TestInspectionContextLimit` and `TestInspectionCalculatedTextLimit`. |
-| Immutable runtime values protect shared integers and collections | `TestEvaluatorImmutableResults` and [value representations](../internal/value/value.go). |
+| Immutable runtime values protect shared integers and collections | `TestEvaluatorImmutableResults` and `internal/value/value.go` (historical). |
 | All 52 built-ins have runtime behavior | `TestRunBuiltinCatalog` checks each catalog entry and its expected result or error. |
 | Integer arithmetic preserves arbitrary precision | `TestRunValues/large`, `TestRunValues/immutable`, and signed arithmetic cases in `TestRunRangeOrder`. |
 | Empty aggregates and duplicate map keys obey the specification | `TestRunValues`, `TestRunRecoverableErrors`, and runtime catalog cases. |
 | Scalar, string, and range comparisons obey the specification | `TestRunRangeOrder` covers endpoint inclusion, reversed ranges, Unicode gaps, and string successors. |
 | List context arguments and callback order are explicit | `TestRunListProcessors` covers map, filter, fold, flat_map, and unfold. |
 | Lo error kinds survive propagation and list processing | `TestRunRecoverableErrors` and `TestRunFallibleListVariants`. |
-| Flow and list trace frames precede handler entry | `TestRunRecoverableErrors`, `TestRunFallibleListVariants`, and [error values](../internal/value/error.go). |
+| Flow and list trace frames precede handler entry | `TestRunRecoverableErrors`, `TestRunFallibleListVariants`, and `internal/value/error.go` (historical). |
 | Outer failures differ from stored failures | `TestRunStoredFallibility` and `TestEvaluatorErrorPrecedence`. |
 | Host cancellation, authorization, and limits bypass Lo handlers | `TestEvaluatorBoundaryHostFailures`, `TestEvaluatorCancellation`, and `TestRunHostLimitsAndAuthorization`. |
 | Client disconnection does not stop the service | `TestServerDisconnectedErrorResponse` checks cancellation during a large error response. |
 | Runtime JSON preserves numeric precision and every value category | `TestRunBuiltinCatalog`, `TestRunValues`, and `TestRunStoredFallibility`. |
 | Text results and traces use the documented contract | `TestRunValues`, `TestRunCountLetterExample`, and `TestRunRecoverableErrors`. |
-| A program without a return omits its result | `TestRunValues` and `writeExecution` in [shared CLI execution](../internal/runner/execute.go). |
+| A program without a return omits its result | `TestRunValues` and `writeExecution` in `internal/runner/execute.go` (historical). |
 | Source and invocation failures use stable exit classes | `TestCLIErrorBoundary`, `TestFirstVerifierSlice`, and `TestRunRecoverableErrors`. |
-| Runtime options reject invalid or duplicate inputs | `TestRunHostLimitsAndAuthorization` and `parseArgs` in [the shared runner](../internal/runner/command.go). |
+| Runtime options reject invalid or duplicate inputs | `TestRunHostLimitsAndAuthorization` and `parseArgs` in `internal/runner/command.go` (historical). |
 | Reads need a matching directory root | `TestRunFileReads` and `TestRunHostLimitsAndAuthorization`. |
-| Path normalization and most-specific root selection occur at the adapter edge | `files.resolve` and `openRoots` in [the File adapter](../internal/adapter/files.go). |
+| Path normalization and most-specific root selection occur at the adapter edge | `files.resolve` and `openRoots` in `internal/adapter/files.go` (historical). |
 | Root traversal and symlink escape fail | `TestRunHostLimitsAndAuthorization` and `TestFileCommitAuthorization`. |
 | Invalid UTF-8 produces the specified Lo error | `TestRunFileReads` and `TestServeRequestValidation`. |
 | Steps, integer magnitude, collection count, and flow depth have host limits | `TestRunHostLimitsAndAuthorization` and `TestRunResourceLimits`. |
 | File bytes, expanded values, and cumulative value weight have host limits | `TestRunResourceLimits` and `TestRunExpandedValueLimit`. |
-| String construction checks byte limits before publication | [Shared operations](../internal/runtimeops/builtin.go) and value weight checks in [execution sessions](../internal/execution/session.go). |
+| String construction checks byte limits before publication | `internal/runtimeops/builtin.go` (historical) and value weight checks in `internal/execution/session.go` (historical). |
 
 ## Stage Acceptance
 
@@ -231,7 +234,7 @@ The Linux container image is:
 golang@sha256:8d48e12ec56735e9358640898b9d9b9fcca110612ed8a5567438c0a1baa24e66
 ```
 
-The race command is:
+The historical race command was:
 
 ```bash
 GOFLAGS=-race make test-integration \

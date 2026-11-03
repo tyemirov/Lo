@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"slices"
 	"strconv"
@@ -20,13 +21,6 @@ import (
 )
 
 func TestSemanticCoverageRunIdentity(t *testing.T) {
-	backend := os.Getenv("LO_TEST_BACKEND")
-	if backend == "" {
-		backend = "interpreter"
-	}
-	if backend != "interpreter" && backend != "llvm" {
-		t.Fatalf("unknown semantic backend %q", backend)
-	}
 	var paths []string
 	for _, directory := range []string{"cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "runtime", "tools/metalbuild", "tools/nativeruntime", "tools/lodistribution", "tools/loqualification", "testdata", "examples", "docs/examples"} {
 		err := filepath.WalkDir(filepath.Join(repository, directory), func(path string, entry fs.DirEntry, err error) error {
@@ -87,45 +81,58 @@ func TestSemanticCoverageRunIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	implementation := "go-interpreter"
 	fields := map[string]string{
-		"backend": backend, "implementation": implementation, "target": runtime.GOOS + "/" + runtime.GOARCH,
-		"compiler": filepath.ToSlash(compilerPath), "compiler_sha256": fmt.Sprintf("%x", sha256.Sum256(compilerData)),
-		"source_sha256": fmt.Sprintf("%x", hash.Sum(nil)), "matrix_sha256": fmt.Sprintf("%x", sha256.Sum256(matrix)),
+		"implementation": "llvm-native", "target": runtime.GOOS + "/" + runtime.GOARCH,
+		"profile": "software", "compiler": filepath.ToSlash(compilerPath),
+		"compiler_sha256": fmt.Sprintf("%x", sha256.Sum256(compilerData)),
+		"source_sha256":   fmt.Sprintf("%x", hash.Sum(nil)), "matrix_sha256": fmt.Sprintf("%x", sha256.Sum256(matrix)),
 	}
-	if backend == "llvm" {
-		fields["implementation"] = "llvm-native"
-		manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
-		if os.Getenv("LO_TEST_COMPILER") != "" {
-			manifest = filepath.Join(filepath.Dir(filepath.Dir(binary)), "toolchain.json")
+	manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
+	data, err := os.ReadFile(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	relative, err := filepath.Rel(repository, manifest)
+	if err != nil || !filepath.IsLocal(relative) {
+		t.Fatalf("toolchain outside repository: %s", manifest)
+	}
+	fields["toolchain"] = filepath.ToSlash(relative)
+	fields["toolchain_sha256"] = fmt.Sprintf("%x", sha256.Sum256(data))
+	type runtimeIdentity struct{ Path, SHA256 string }
+	var distribution struct {
+		ABI     string
+		Targets map[string]struct{ Runtime runtimeIdentity }
+		Metal   *struct{ Runtime runtimeIdentity }
+	}
+	if err := json.Unmarshal(data, &distribution); err != nil {
+		t.Fatal(err)
+	}
+	if distribution.ABI != "lo-native-3" {
+		t.Fatalf("runtime ABI mismatch: %s", distribution.ABI)
+	}
+	fields["abi"] = distribution.ABI
+	verifyRuntime := func(selected runtimeIdentity) string {
+		t.Helper()
+		if !filepath.IsLocal(selected.Path) {
+			t.Fatalf("runtime path must be local: %s", selected.Path)
 		}
-		data, err := os.ReadFile(manifest)
+		path, err := filepath.EvalSymlinks(filepath.Join(filepath.Dir(manifest), selected.Path))
 		if err != nil {
 			t.Fatal(err)
 		}
-		relative, err := filepath.Rel(repository, manifest)
-		if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
-			t.Fatalf("toolchain outside repository: %s", manifest)
+		relative, err := filepath.Rel(repository, path)
+		if err != nil || !filepath.IsLocal(relative) {
+			t.Fatalf("runtime outside repository: %s", path)
 		}
-		fields["toolchain"] = filepath.ToSlash(relative)
-		fields["toolchain_sha256"] = fmt.Sprintf("%x", sha256.Sum256(data))
-		var distribution struct {
-			Targets map[string]struct {
-				Runtime struct {
-					Path   string
-					SHA256 string
-				}
-			}
-		}
-		if err := json.Unmarshal(data, &distribution); err != nil {
-			t.Fatal(err)
-		}
-		selected := distribution.Targets[fields["target"]].Runtime
-		runtimeData, err := os.ReadFile(filepath.Join(filepath.Dir(manifest), selected.Path))
-		if err != nil || fmt.Sprintf("%x", sha256.Sum256(runtimeData)) != selected.SHA256 {
+		contents, err := os.ReadFile(path)
+		if err != nil || fmt.Sprintf("%x", sha256.Sum256(contents)) != selected.SHA256 {
 			t.Fatalf("runtime identity mismatch: %v", err)
 		}
-		fields["runtime_sha256"] = selected.SHA256
+		return selected.SHA256
+	}
+	fields["runtime_sha256"] = verifyRuntime(distribution.Targets[fields["target"]].Runtime)
+	if fields["target"] == "darwin/arm64" && distribution.Metal != nil {
+		fields["metal_runtime_sha256"] = verifyRuntime(distribution.Metal.Runtime)
 	}
 	identity, err := json.Marshal(fields)
 	if err != nil {
@@ -139,26 +146,21 @@ type semanticOperation struct {
 	Capability            string   `json:"capability"`
 	Errors                []string `json:"errors"`
 	ActivationErrors      []string `json:"activation_errors"`
-	Positive              []string `json:"positive"`
-	Negative              []string `json:"negative"`
-	RuntimeNegative       []string `json:"runtime_negative"`
 	NegativeApplicability string   `json:"negative_applicability"`
-	Oracle                string   `json:"oracle"`
-	Boundary              string   `json:"boundary"`
 }
 type semanticContract struct {
-	ID       string   `json:"id"`
-	Tests    []string `json:"tests"`
-	Oracle   string   `json:"oracle"`
-	Boundary string   `json:"boundary"`
+	ID        string   `json:"id"`
+	Operation string   `json:"operation"`
+	Axis      string   `json:"axis"`
+	Boundary  string   `json:"boundary"`
+	Targets   []string `json:"targets"`
+	Profile   string   `json:"profile"`
+	Tests     []string `json:"tests"`
 }
 type semanticMatrix struct {
-	NativeTests map[string][]string                                     `json:"native_tests"`
-	Operations  []semanticOperation                                     `json:"operations"`
-	CLI         []semanticContract                                      `json:"cli"`
-	Semantics   []semanticContract                                      `json:"semantics"`
-	Profiles    []semanticContract                                      `json:"profiles"`
-	Gaps        []struct{ ID, Scope, Reason, Owner, Acceptance string } `json:"gaps"`
+	Operations []semanticOperation                                     `json:"operations"`
+	Contracts  []semanticContract                                      `json:"contracts"`
+	Gaps       []struct{ ID, Scope, Reason, Owner, Acceptance string } `json:"gaps"`
 }
 
 func semanticMatrixBytes(t *testing.T) []byte {
@@ -210,136 +212,144 @@ func TestSemanticCoverageInventory(t *testing.T) {
 			t.Fatal(err)
 		}
 		for _, declaration := range file.Decls {
-			if fn, ok := declaration.(*ast.FuncDecl); ok && strings.HasPrefix(fn.Name.Name, "Test") {
-				tests[fn.Name.Name] = true
+			if function, ok := declaration.(*ast.FuncDecl); ok && strings.HasPrefix(function.Name.Name, "Test") {
+				tests[function.Name.Name] = true
 			}
-		}
-	}
-	checkRefs := func(id string, refs []string) {
-		if len(refs) == 0 {
-			t.Errorf("%s: missing test reference", id)
-		}
-		for _, ref := range refs {
-			name, _, _ := strings.Cut(ref, "/")
-			if !tests[name] {
-				t.Errorf("%s: absent test %s", id, ref)
-			}
-		}
-	}
-	references := map[string]bool{}
-	for _, row := range matrix.Operations {
-		for _, group := range [][]string{row.Positive, row.Negative, row.RuntimeNegative} {
-			for _, ref := range group {
-				references[ref] = true
-			}
-		}
-	}
-	for _, rows := range [][]semanticContract{matrix.CLI, matrix.Semantics, matrix.Profiles} {
-		for _, row := range rows {
-			for _, ref := range row.Tests {
-				references[ref] = true
-			}
-		}
-	}
-	for ref := range references {
-		native, declared := matrix.NativeTests[ref]
-		if !declared {
-			t.Errorf("missing native mapping %s", ref)
-		}
-		if len(native) > 0 {
-			checkRefs(ref, native)
-		}
-	}
-	for ref := range matrix.NativeTests {
-		if !references[ref] {
-			t.Errorf("obsolete native mapping %s", ref)
 		}
 	}
 	operations := map[string]catalog.Operation{}
-	for _, op := range catalog.All() {
-		operations[op.Name()] = op
+	for _, operation := range catalog.All() {
+		operations[operation.Name()] = operation
 	}
-	seen := map[string]bool{}
+	metadata := map[string]semanticOperation{}
 	for _, row := range matrix.Operations {
 		op, exists := operations[row.Operation]
-		if !exists || seen[row.Operation] {
+		if !exists || metadata[row.Operation].Operation != "" {
 			t.Errorf("unknown or repeated operation %q", row.Operation)
 			continue
 		}
-		seen[row.Operation] = true
+		metadata[row.Operation] = row
 		if row.Capability != op.Capability() || !slices.Equal(row.Errors, op.ErrorKinds()) || !slices.Equal(row.ActivationErrors, op.ActivationKinds()) {
-			t.Errorf("%s: catalog contract changed; review migration coverage", row.Operation)
+			t.Errorf("%s: catalog metadata changed", row.Operation)
 		}
-		checkRefs(row.Operation, row.Positive)
-		checkRefs(row.Operation, row.Negative)
-		if len(row.Errors)+len(row.ActivationErrors) > 0 && row.NegativeApplicability != "verifier_only_canonical_state_constructor" {
-			checkRefs(row.Operation, row.RuntimeNegative)
+		if !slices.Contains([]string{"catalog_failure_or_activation", "verifier_and_callback", "verifier_only_typed_total", "verifier_only_canonical_state_constructor"}, row.NegativeApplicability) {
+			t.Errorf("%s: invalid negative applicability", row.Operation)
 		}
 		if row.NegativeApplicability == "verifier_only_canonical_state_constructor" && row.Operation != catalog.SGDStateNew {
-			t.Errorf("%s: unreviewed runtime negative exemption", row.Operation)
-		}
-		if row.Oracle == "" || row.Boundary == "" || row.NegativeApplicability == "" {
-			t.Errorf("%s: missing oracle, execution boundary, or negative applicability", row.Operation)
+			t.Errorf("%s: unreviewed constructor exemption", row.Operation)
 		}
 	}
 	for name := range operations {
-		if !seen[name] {
+		if metadata[name].Operation == "" {
 			t.Errorf("missing operation %s", name)
 		}
 	}
-	cli := map[string]bool{}
-	for _, rows := range [][]semanticContract{matrix.CLI, matrix.Semantics, matrix.Profiles} {
-		ids := map[string]bool{}
-		for _, row := range rows {
-			if ids[row.ID] || row.ID == "" {
-				t.Errorf("duplicate/empty contract %q", row.ID)
+	ids, compilerCLI := map[string]bool{}, map[string]bool{}
+	axes := map[string]map[string]bool{}
+	identity := regexp.MustCompile(`^Test[A-Za-z0-9_]+(?:/[^\n]+)?$`)
+	for _, row := range matrix.Contracts {
+		if row.ID == "" || ids[row.ID] {
+			t.Errorf("duplicate/empty contract %q", row.ID)
+		}
+		ids[row.ID] = true
+		if !slices.Contains([]string{"compiler-command", "program-command", "native-abi"}, row.Boundary) {
+			t.Errorf("%s: invalid boundary", row.ID)
+		}
+		if !slices.Contains([]string{"frontend", "software", "controlled-metal", "metal-artifact"}, row.Profile) {
+			t.Errorf("%s: invalid profile", row.ID)
+		}
+		if (row.Profile == "frontend") != (row.Boundary == "compiler-command") || row.Profile == "controlled-metal" && row.Boundary != "native-abi" {
+			t.Errorf("%s: boundary/profile mismatch", row.ID)
+		}
+		if row.Profile == "metal-artifact" && !slices.Equal(row.Targets, []string{"darwin/arm64"}) {
+			t.Errorf("%s: invalid Metal artifact target", row.ID)
+		}
+		seenTargets := map[string]bool{}
+		if len(row.Targets) == 0 {
+			t.Errorf("%s: missing targets", row.ID)
+		}
+		for _, target := range row.Targets {
+			if !slices.Contains([]string{"darwin/arm64", "linux/arm64"}, target) || seenTargets[target] {
+				t.Errorf("%s: unknown/duplicate target %s", row.ID, target)
 			}
-			ids[row.ID] = true
-			checkRefs(row.ID, row.Tests)
-			if row.Oracle == "" || row.Boundary == "" {
-				t.Errorf("%s: missing oracle or boundary", row.ID)
+			seenTargets[target] = true
+		}
+		seenRefs := map[string]bool{}
+		if len(row.Tests) == 0 {
+			t.Errorf("%s: missing test reference", row.ID)
+		}
+		for _, ref := range row.Tests {
+			name, _, _ := strings.Cut(ref, "/")
+			if !identity.MatchString(ref) || !tests[name] {
+				t.Errorf("%s: absent/invalid test %s", row.ID, ref)
 			}
+			if seenRefs[ref] {
+				t.Errorf("%s: duplicate test reference %s", row.ID, ref)
+			}
+			seenRefs[ref] = true
+		}
+		if row.Operation != "" {
+			if metadata[row.Operation].Operation == "" {
+				t.Errorf("%s: unknown operation %s", row.ID, row.Operation)
+			}
+			if !slices.Contains([]string{"positive", "negative", "runtime-negative"}, row.Axis) {
+				t.Errorf("%s: invalid operation axis", row.ID)
+			}
+			if axes[row.Operation] == nil {
+				axes[row.Operation] = map[string]bool{}
+			}
+			axes[row.Operation][row.Axis] = true
+		} else if row.Axis != "contract" {
+			t.Errorf("%s: missing operation for axis", row.ID)
+		}
+		if row.Boundary == "compiler-command" {
+			compilerCLI[row.ID] = true
 		}
 	}
-	for _, row := range matrix.CLI {
-		cli[row.ID] = true
+	for name, row := range metadata {
+		for _, axis := range []string{"positive", "negative"} {
+			if !axes[name][axis] {
+				t.Errorf("%s: missing %s contract", name, axis)
+			}
+		}
+		if len(row.Errors)+len(row.ActivationErrors) > 0 && row.NegativeApplicability != "verifier_only_canonical_state_constructor" && !axes[name]["runtime-negative"] {
+			t.Errorf("%s: missing runtime-negative contract", name)
+		}
 	}
-	file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(repository, "internal", "runner", "command.go"), nil, 0)
+	file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(repository, "internal", "compilercli", "command.go"), nil, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, decl := range file.Decls {
-		gen, ok := decl.(*ast.GenDecl)
-		if !ok || gen.Tok != token.CONST {
+	for _, declaration := range file.Decls {
+		group, ok := declaration.(*ast.GenDecl)
+		if !ok || group.Tok != token.CONST {
 			continue
 		}
-		for _, spec := range gen.Specs {
-			value := spec.(*ast.ValueSpec)
-			for i, name := range value.Names {
+		for _, specification := range group.Specs {
+			value := specification.(*ast.ValueSpec)
+			for index, name := range value.Names {
 				if !strings.HasSuffix(name.Name, "Command") && !strings.HasSuffix(name.Name, "Option") {
 					continue
 				}
-				literal, ok := value.Values[i].(*ast.BasicLit)
+				literal, ok := value.Values[index].(*ast.BasicLit)
 				if !ok {
-					t.Fatalf("CLI contract is not a literal: %s", name)
+					t.Fatalf("compiler CLI contract is not literal: %s", name)
 				}
-				id, err := strconv.Unquote(literal.Value)
+				command, err := strconv.Unquote(literal.Value)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if !cli[id] {
-					t.Errorf("missing CLI contract %s", id)
+				found := false
+				for id := range compilerCLI {
+					if id == "cli:"+command || strings.HasPrefix(id, "cli:"+command+":") {
+						found = true
+					}
 				}
-				delete(cli, id)
+				if !found {
+					t.Errorf("missing compiler CLI contract %s", command)
+				}
 			}
 		}
-	}
-	// Native executables add metadata and omit the compiler's source operand.
-	delete(cli, "metadata")
-	delete(cli, "exit-status")
-	delete(cli, "artifact-invocation")
-	for id := range cli {
-		t.Errorf("obsolete CLI contract %s", id)
 	}
 }
 

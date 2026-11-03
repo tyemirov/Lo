@@ -1,0 +1,120 @@
+flow ProbeRequire(condition: Bool, reason: String) -> Bool! {
+    return Match.new(condition, true: true, _: Error.new("Probe.InvalidFields", reason, Record.new()))
+}
+
+flow ProbeAnd(previous: Bool, value: Bool) -> Bool {
+    return Match.new(previous, true: value, _: false)
+}
+
+flow ProbeDigit(character: Scalar) -> Bool {
+    return Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), character)
+}
+
+flow PathGroup(paths: List<File.Path>) -> List<File.Path> {
+    return paths
+}
+
+flow ConcatPaths(left: List<File.Path>, right: List<File.Path>) -> List<File.Path> {
+    return List.flat_map(List.new(left, right), PathGroup)
+}
+
+flow PathMemberStep(path: File.Path, found: Bool, candidate: File.Path) -> Bool {
+    return Match.new(found, true: true, _: File.Path.eq(path, candidate))
+}
+
+flow PathMember(paths: List<File.Path>, path: File.Path) -> Bool {
+    return List.fold(paths, false, path, PathMemberStep)
+}
+
+flow UniquePathStep(paths: List<File.Path>, path: File.Path) -> List<File.Path> {
+    return Match.new(PathMember(paths, path), true: paths, _: ConcatPaths(paths, List.new(path)))
+}
+
+flow UniquePaths(paths: List<File.Path>) -> List<File.Path> {
+    return List.fold(paths, List.new(), UniquePathStep)
+}
+
+flow ProbeNonemptyName(name: String) -> Bool! {
+    return Match.new(Math.gt(String.length(name), 0), true: true, _: Error.new("Probe.EmptyName", "empty probe name", Record.new()))
+}
+
+flow ProbeKnownPath(batch: List<File.Path>, path: File.Path) -> Bool! {
+    return Match.new(PathMember(batch, path), true: true, _: Error.new("Probe.UnexpectedPath", "probe name outside candidate batch", Record.new()))
+}
+
+flow ProbeName(batch: List<File.Path>, names: List<File.Path>, field: Bytes) -> List<File.Path>! {
+    name = UTF8.String.new(Bytes.slice(field, 1, Bytes.length(field)))
+    nonempty = ProbeNonemptyName(name)
+    path = File.Path.new(name)
+    known = ProbeKnownPath(batch, path)
+    return UniquePathStep(names, path)
+}
+
+flow ProbeProcess(names: List<File.Path>, field: Bytes) -> List<File.Path>! {
+    digits = UTF8.String.new(Bytes.slice(field, 1, Bytes.length(field)))
+    nonempty = ProbeRequire(Math.gt(String.length(digits), 0), "empty process identifier")
+    valid = ProbeRequire(List.fold(List.map(digits, ProbeDigit), true, ProbeAnd), "invalid process identifier")
+    return names
+}
+
+flow ProbeField(batch: List<File.Path>, names: List<File.Path>, raw: Bytes) -> List<File.Path>! {
+    field = Bytes.trim_start(raw, Bytes.new("\n"))
+    nonempty = ProbeRequire(Math.gt(Bytes.length(field), 0), "empty probe field")
+    return Match.new(Bytes.starts_with(field, Bytes.new("n")),
+        true: ProbeName(batch, names, field),
+        _: Match.new(Bytes.starts_with(field, Bytes.new("p")), true: ProbeProcess(names, field), _: Error.new("Probe.InvalidFields", "unknown probe field", Record.new())))
+}
+
+flow ParseNonemptyProbe(input: Bytes, batch: List<File.Path>) -> List<File.Path>! {
+    fields = Bytes.split(input, Bytes.new("\u0000"))
+    delimited = ProbeRequire(Math.gt(List.length(fields), 1), "probe lacks NUL fields")
+    trailer = Bytes.trim_start(List.at(fields, -1), Bytes.new("\n"))
+    framed = ProbeRequire(Math.eq(Bytes.length(trailer), 0), "probe lacks terminal NUL")
+    records = List.slice(fields, 0, Math.sub(List.length(fields), 1))
+    return List.fold(records, List.new(), batch, ProbeField)
+}
+
+flow ParseProbe(input: Bytes, batch: List<File.Path>) -> List<File.Path>! {
+    return Match.new(Bytes.length(input), 0: List.new(), _: ParseNonemptyProbe(input, batch))
+}
+
+flow PathChunk(paths: List<File.Path>, size: Int, start: Int) -> Record{next_state: Int, value: List<File.Path>}! {
+    proposed = Math.add(start, size)
+    end = Match.new(Math.gt(proposed, List.length(paths)), true: List.length(paths), _: proposed)
+    return Record.new(next_state: end, value: List.slice(paths, start, end))
+}
+
+flow PositiveBatchSize(size: Int) -> Bool! {
+    return Match.new(Math.gt(size, 0), true: true, _: Error.new("Probe.InvalidBatchSize", "batch size must be positive", Record.new()))
+}
+
+flow PathChunks(paths: List<File.Path>, size: Int) -> List<List<File.Path>>! {
+    valid = PositiveBatchSize(size)
+    count = Math.div(Math.add(List.length(paths), Math.sub(size, 1)), size)
+    return List.unfold(0, count, paths, size, PathChunk)
+}
+
+flow PathEqualAt(left: List<File.Path>, right: List<File.Path>, index: Int) -> Record{next_state: Int, value: Bool}! {
+    return Record.new(next_state: Math.add(index, 1), value: File.Path.eq(List.at(left, index), List.at(right, index)))
+}
+
+flow EqualLengthPaths(left: List<File.Path>, right: List<File.Path>) -> Bool! {
+    comparisons = List.unfold(0, List.length(left), left, right, PathEqualAt)
+    return List.fold(comparisons, true, ProbeAnd)
+}
+
+flow PathsEqual(left: List<File.Path>, right: List<File.Path>) -> Bool! {
+    return Match.new(Math.eq(List.length(left), List.length(right)), true: EqualLengthPaths(left, right), _: false)
+}
+
+flow JoinPathStep(separator: String, state: Record{first: Bool, text: String}, path: File.Path) -> Record{first: Bool, text: String} {
+    boundary = Match.new(state.first, true: "", _: separator)
+    return Record.new(first: false, text: String.concat(state.text, boundary, File.Path.to_string(path)))
+}
+
+flow JoinPathNames(paths: List<File.Path>, separator: String) -> String {
+    joined = List.fold(paths, Record.new(first: true, text: ""), separator, JoinPathStep)
+    return joined.text
+}
+
+return ParseProbe(Bytes.new("n/example/file\u0000"), List.new(File.Path.new("/example/file")))

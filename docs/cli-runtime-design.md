@@ -1,7 +1,7 @@
 # Console, Terminal Results, And Declared CLI Options
 
 Status: implemented contract for F026, F027, and F028.
-Focused interpreter and native Darwin checks pass.
+Focused compiled-program checks pass on Darwin.
 Linux checks pass under QEMU TCG.
 Metal-linked artifacts pass the generic CLI checks without GPU work.
 Final local `make ci` passed.
@@ -87,13 +87,17 @@ The host releases the gate before it waits for child I/O.
 The parent kills and joins the writer on cancellation or protocol failure.
 It reports only acknowledged byte prefixes. An uncertain unacknowledged tail never becomes successful output.
 
-The request is `LCW1`, one destination byte, one big-endian uint32 body length, and the exact output bytes.
+Each request frame is `LCW2`, one destination byte, one big-endian uint32 body length, and the exact output bytes.
 Destination 1 is stdout. Destination 2 is stderr. Other values are invalid.
-The encoded body has a 2097152-byte maximum.
+Each encoded frame body has a 2097152-byte maximum.
+
+The worker accepts successive frames until request EOF.
+A zero-length frame receives a completion acknowledgment with zero confirmed bytes.
 
 Acknowledgments contain one kind byte, a big-endian uint64 confirmed byte count, and one closed error-class byte.
 Kind 1 reports progress. Kind 2 reports completion. Kind 3 reports write failure.
 Error class 0 is none, 1 is a closed pipe, and 2 is another write failure.
+Confirmed byte counts apply to the current frame.
 
 Malformed frames, inconsistent counts, early EOF, and unsuccessful worker exit fail explicitly.
 The parent joins worker ownership before returning from each output operation.
@@ -182,10 +186,10 @@ Help and invalid arguments complete before cleanup locks, probes, cleaners, or f
 Public acceptance covers constructors, commits, snapshots, failure progress, cancellation, pipes, limits, and self-image protection.
 It covers requested statuses 0, 1, and 2 with output and retained-cleanup failure precedence.
 It covers every parser rule, malformed inputs, work limits, and deterministic help.
-The same small CLI example runs in the interpreter, native Darwin, and native Linux under QEMU TCG.
+The same small CLI example runs as compiled artifacts on Darwin and Linux under QEMU TCG.
 Metal-linked artifacts exercise these generic operations without GPU work.
 
 The [executable example](examples/cli-cleanup-preview.lo) contains only application mode selection and output.
 Its pure startup handler returns status and message data.
 The outer flow constructs the fallible terminal result.
-The [Go host guide](go-console-host.md) defines explicit sink registration and completion through the runner.
+The [native embedding guide](native-embedding.md) defines explicit sink registration, value ownership, diagnostics, and completion.

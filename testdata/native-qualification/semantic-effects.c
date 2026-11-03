@@ -1,14 +1,12 @@
+#include "lo_runtime.h"
 #include "capture.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct {U32 status,code;const Value *value;} Result;
-extern void lo_semantic_entry(Context*,const Value**,U64,U64,Result*);
-extern void lo_op_File_2Eread(Context*,const Value**,U64,U64,Result*);
-extern void lo_commit(Context*,const Value**,U64,U64,Result*);
-extern void lo_context_cancel(Context*);
+extern void lo_semantic_entry(Context*,const Value**,U64,U64,ResultSlot*);
+extern void lo_op_File_2Eread(Context*,const Value**,U64,U64,ResultSlot*);
+extern void lo_commit(Context*,const Value**,U64,U64,ResultSlot*);
+
 extern int lo_cli_main(int,const char**,const char**);
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int open(const char*,int,...),close(int),dup2(int,int),fcntl(int,int,...),unlink(const char*);
@@ -24,13 +22,13 @@ static unsigned reads,commits;
 static int hook_error;
 static int contains(const char *text,const char *needle){for(;*text;++text){Size i=0;while(needle[i]&&text[i]==needle[i])++i;if(!needle[i])return 1;}return 0;}
 static int put(const char*path,const char*text){int fd=open(path,CREATE,0666);if(fd<0)return 1;Size size=strlen(text);long count=write(fd,text,size);return close(fd)||count!=(long)size;}
-void lo_semantic_read(Context*c,const Value**a,U64 n,U64 s,Result*out){
+void lo_semantic_read(Context*c,const Value**a,U64 n,U64 s,ResultSlot*out){
  ++reads;
  if(LO_CASE==0){const char*names[]={"unused","repeat","b","a"};for(unsigned i=0;i<4;++i){char text[64];Size size=strlen(names[i]);for(Size j=0;j<size;++j)text[j]=names[i][j];text[size++]=':';text[size++]=(char)('0'+reads);text[size++]=';';text[size]=0;if(put(names[i],text))hook_error=1;}}
  lo_op_File_2Eread(c,a,n,s,out);
 }
-void lo_semantic_commit(Context*c,const Value**a,U64 n,U64 s,Result*out){++commits;lo_commit(c,a,n,s,out);}
-void lo_entry(Context*c,const Value**a,U64 n,U64 s,Result*out){if(LO_CASE==3)lo_context_cancel(c);lo_semantic_entry(c,a,n,s,out);}
+void lo_semantic_commit(Context*c,const Value**a,U64 n,U64 s,ResultSlot*out){++commits;lo_commit(c,a,n,s,out);}
+void lo_entry(Context*c,const Value**a,U64 n,U64 s,ResultSlot*out){if(LO_CASE==3)lo_context_cancel(c);lo_semantic_entry(c,a,n,s,out);}
 static int large_output(Size count){
  const char prefix[]="{\"command\":\"run\",\"status\":\"ok\",\"result\":{\"type\":\"String\",\"value\":\"";
  const char suffix[]="CAPTURE_TRAILER_B005\"}}\n";
@@ -57,6 +55,7 @@ int main(void){
  if(reads!=expected||commits||hook_error)failure=30;
  int later=open("unwritten",0);if(later>=0){close(later);failure=31;}
  if(lo_runtime_live_contexts()||lo_runtime_live_values())failure=32;
+ if(!failure&&LO_CASE==2&&write(1,lo_capture_bytes,lo_capture_length)!=(long)lo_capture_length)failure=34;
  if(!failure&&LO_CASE==4){const char done[]="capture-complete\n";if(write(1,done,sizeof(done)-1)!=(long)(sizeof(done)-1))failure=33;}
  return failure;
 }

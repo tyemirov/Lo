@@ -16,7 +16,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/MarcoPoloResearchLab/Lo/internal/runner"
 	"github.com/MarcoPoloResearchLab/Lo/tests/corpus"
 )
 
@@ -101,14 +100,7 @@ func buildForTest(t *testing.T, path string) (string, result) {
 	t.Helper()
 	build := func(artifact string) result {
 		args := []string{"build", path, "--output", artifact, "--format", "json"}
-		if os.Getenv("LO_TEST_BACKEND") == "llvm" && os.Getenv("LO_TEST_COMPILER") == "" {
-			manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
-			if manifest == "" {
-				t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")
-			}
-			args = append(args, "--toolchain", manifest)
-		}
-		built := runExecutable(t, nativeCompiler, args...)
+		built := run(t, args...)
 		if built.status == 0 {
 			var receipt struct {
 				Codegen, ABI string
@@ -148,36 +140,22 @@ func buildForTest(t *testing.T, path string) (string, result) {
 	}
 	return artifact, r
 }
-func runtimeCommand(t *testing.T, args ...string) *exec.Cmd {
+func runProgram(t *testing.T, path, command string, args ...string) result {
 	t.Helper()
-	if path, runtimeArgs, ok := nativeInvocation(args); ok {
-		artifact, r := buildForTest(t, path)
-		if r.status != 0 {
-			t.Fatalf("build runtime fixture: %+v", r)
-		}
-		return exec.Command(artifact, runtimeArgs...)
+	artifact, built := buildForTest(t, path)
+	if built.status != 0 {
+		return built
 	}
-	return exec.Command(binary, args...)
+	return runExecutable(t, artifact, append([]string{command}, args...)...)
 }
 
-func nativeInvocation(args []string) (string, []string, bool) {
-	backend := os.Getenv("LO_TEST_BACKEND")
-	if backend != "llvm" || len(args) == 0 || args[0] != "run" && args[0] != "serve" {
-		return "", nil, false
+func programCommand(t *testing.T, path, command string, args ...string) *exec.Cmd {
+	t.Helper()
+	artifact, built := buildForTest(t, path)
+	if built.status != 0 {
+		t.Fatalf("build program fixture: %+v", built)
 	}
-	inv, err := runner.ParseCompiler(args)
-	if err != nil {
-		// Invalid compiler invocations test the public compiler CLI parser.
-		return "", nil, false
-	}
-	for i := 1; i < len(args); i++ {
-		if strings.HasPrefix(args[i], "--") {
-			i++
-			continue
-		}
-		return inv.Path(), append(append([]string{}, args[:i]...), args[i+1:]...), true
-	}
-	panic("validated invocation has no source argument")
+	return exec.Command(artifact, append([]string{command}, args...)...)
 }
 
 func TestNativeBuildBoundary(t *testing.T) {
@@ -318,23 +296,19 @@ func TestNativeLargeCallbackContexts(t *testing.T) {
 				t.Fatalf("check callback contexts: %+v", checked)
 			}
 			want := strconv.Itoa(count*(count+1)*(2*count+1)/3+3) + "\n"
-			expected := runExecutable(t, binary, "run", source)
-			if expected.status != 0 || expected.stdout != want || expected.stderr != "" {
-				t.Fatalf("interpreter callback result: %+v, want %q", expected, want)
-			}
 			artifact, built := buildForTest(t, source)
 			if built.status != 0 {
 				t.Fatalf("build callback contexts: %+v", built)
 			}
 			actual := runExecutable(t, artifact, "run")
-			if actual != expected {
-				t.Fatalf("callback result: native %+v interpreter %+v", actual, expected)
+			if actual.status != 0 || actual.stdout != want || actual.stderr != "" {
+				t.Fatalf("compiled callback result: %+v, want %q", actual, want)
 			}
 			for _, steps := range []string{"1", "100", "500", "1000", "100000"} {
-				expected := runExecutable(t, binary, "run", source, "--max-steps", steps, "--format", "json")
 				actual := runExecutable(t, artifact, "run", "--max-steps", steps, "--format", "json")
-				if actual != expected {
-					t.Fatalf("budget %s: native %+v interpreter %+v", steps, actual, expected)
+				nativeBudgetOrSuccess(t, actual)
+				if actual.status == 0 {
+					nativeValueCheck("Int", strconv.Quote(strings.TrimSpace(want)))(t, actual)
 				}
 			}
 		})
@@ -347,17 +321,18 @@ func TestNativeRemovedSourceDiagnostics(t *testing.T) {
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}
-	expected := map[string]result{}
-	for _, format := range []string{"text", "json"} {
-		expected[format] = runExecutable(t, binary, "run", source, "--format", format)
-	}
 	if err := os.Remove(source); err != nil {
 		t.Fatal(err)
 	}
 	for _, format := range []string{"text", "json"} {
 		actual := runExecutable(t, artifact, "run", "--format", format)
-		if actual != expected[format] || actual.status != 1 {
-			t.Fatalf("%s diagnostics: native %+v interpreter %+v", format, actual, expected[format])
+		if format == "json" {
+			nativeFailure(t, actual, 1, "runtime.unhandled-error", "Math.DivideByZero")
+			if diagnostics(t, actual.stderr).Diagnostics[0].Span.File != source {
+				t.Fatalf("removed source location: %+v", actual)
+			}
+		} else if actual.status != 1 || actual.stdout != "" || !strings.Contains(actual.stderr, "Math.DivideByZero") || !strings.Contains(actual.stderr, source) {
+			t.Fatalf("removed source text diagnostic: %+v", actual)
 		}
 	}
 	invalid := runExecutable(t, artifact, "run", "--format", "json", source)
@@ -366,7 +341,7 @@ func TestNativeRemovedSourceDiagnostics(t *testing.T) {
 	}
 }
 
-func TestNativeRuntimeDifferential(t *testing.T) {
+func TestNativeRuntimeBudgetContracts(t *testing.T) {
 	cases := []string{
 		`return -0.0`,
 		`flow H(e: Error) -> Error {return e}; flow F(x: Int) -> Int! {return Math.div(8,x)}; flow G() -> Error onError H {unused=F(0);return Error.new("missed","",Record.new())};return G()`,
@@ -380,16 +355,28 @@ func TestNativeRuntimeDifferential(t *testing.T) {
 			t.Fatalf("build differential fixture: %+v", r)
 		}
 		for _, steps := range []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "20", "30", "100"} {
-			expected := runExecutable(t, binary, "run", source, "--max-steps", steps, "--format", "json")
 			actual := runExecutable(t, artifact, "run", "--max-steps", steps, "--format", "json")
-			if actual != expected {
-				t.Fatalf("budget %s: native %+v interpreter %+v", steps, actual, expected)
+			nativeBudgetOrSuccess(t, actual)
+			if actual.status == 0 {
+				value := nativeValue(t, actual)
+				switch text {
+				case cases[0]:
+					valueJSON(t, value, `"-0"`)
+				case cases[1]:
+					if value.Kind != "Math.DivideByZero" || len(value.Trace) != 2 {
+						t.Fatalf("handled error context: %+v", value)
+					}
+				case cases[2]:
+					valueJSON(t, value, `[{"type":"Int","value":"3"},{"type":"Int","value":"6"},{"type":"Int","value":"9"}]`)
+				case cases[3]:
+					valueJSON(t, value, `"7"`)
+				}
 			}
 		}
 	}
 }
 
-func TestNativeTensorBudgetDifferential(t *testing.T) {
+func TestNativeTensorBudgetContracts(t *testing.T) {
 	cases := []string{
 		`flow Work() -> Tensor<FP32>! { seed=Tensor.new(List.new(1.0),List.new()); a=Tensor.broadcast(seed,List.new(2,3)); b=Tensor.broadcast(seed,List.new(3,2)); return Tensor.matmul(a,b) }; return Work()`,
 		`flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.sum(Tensor.mul(p.x,p.x),List.new(0)) }; flow Run() -> Tensor<FP32>! { one=Tensor.new(List.new(1.0),List.new()); x=Tensor.broadcast(one,List.new(10)); r=Autodiff.grad(Record.new(x:x),Loss); return r.gradients.x }; return Run()`,
@@ -402,7 +389,7 @@ func TestNativeTensorBudgetDifferential(t *testing.T) {
 	}
 	for i, text := range cases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			minimum := minimumTensorSteps(t, text)
+			minimum := minimumLLVMWorkSteps(t, text)
 			source := sourceFile(t, text)
 			artifact, built := buildForTest(t, source)
 			if built.status != 0 {
@@ -410,10 +397,10 @@ func TestNativeTensorBudgetDifferential(t *testing.T) {
 			}
 			for _, steps := range []uint64{1, minimum / 4, minimum / 2, minimum - 1, minimum, minimum + 1} {
 				budget := strconv.FormatUint(steps, 10)
-				expected := runExecutable(t, binary, "run", source, "--format", "json", "--max-steps", budget)
 				actual := runExecutable(t, artifact, "run", "--format", "json", "--max-steps", budget)
-				if actual != expected {
-					t.Fatalf("budget %d: native %+v interpreter %+v", steps, actual, expected)
+				nativeBudgetOrSuccess(t, actual)
+				if steps < minimum && actual.status != 2 {
+					t.Fatalf("early budget completion: %+v", actual)
 				}
 				if steps >= minimum && actual.status != 0 {
 					t.Fatalf("completion: %+v", actual)
@@ -423,7 +410,7 @@ func TestNativeTensorBudgetDifferential(t *testing.T) {
 	}
 }
 
-func TestNativeEffectBudgetDifferential(t *testing.T) {
+func TestNativeEffectBudgetContracts(t *testing.T) {
 	const prelude = `flow Failed(e: Error) -> Int { return -100 }
 flow Read(label: String) -> Int onError Failed { path=File.Path.new("order"); target=File.Append.new(path, UTF8.Bytes.new(label)); commit target; text=UTF8.String.new(File.read(path)); return String.length(text) }
 flow Head(path: String) -> Int onError Failed { text=UTF8.String.new(File.read(File.Path.new(path))); return String.length(text) }
@@ -443,9 +430,6 @@ flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),s
 			invoke := func(executable string, steps int) (result, string) {
 				directory := t.TempDir()
 				args := []string{"run"}
-				if executable == binary {
-					args = append(args, source)
-				}
 				args = append(args, "--read-root", ".", "--write-root", ".", "--max-steps", strconv.Itoa(steps))
 				command := exec.Command(executable, args...)
 				command.Dir = directory
@@ -463,14 +447,14 @@ flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),s
 				}
 				return result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}, string(contents)
 			}
-			baseline, effects := invoke(binary, 1000)
+			baseline, effects := invoke(artifact, 1000)
 			if baseline.status != 0 || baseline.stdout != fixture.output || effects != fixture.effects {
 				t.Fatalf("independent result: %+v effects %q", baseline, effects)
 			}
 			low, high := 1, 1000
 			for low < high {
 				middle := (low + high) / 2
-				r, _ := invoke(binary, middle)
+				r, _ := invoke(artifact, middle)
 				if r.status == 0 {
 					high = middle
 				} else {
@@ -478,10 +462,13 @@ flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),s
 				}
 			}
 			for _, steps := range []int{1, low / 4, low / 2, low - 1, low, low + 1} {
-				expected, expectedEffects := invoke(binary, steps)
 				actual, actualEffects := invoke(artifact, steps)
-				if actual != expected || actualEffects != expectedEffects {
-					t.Fatalf("steps %d: native %+v %q, interpreter %+v %q", steps, actual, actualEffects, expected, expectedEffects)
+				if steps >= low {
+					if actual.status != 0 || actual.stdout != fixture.output || actual.stderr != "" || actualEffects != fixture.effects {
+						t.Fatalf("completed effect contract: %+v %q", actual, actualEffects)
+					}
+				} else if actual.status != 2 || actual.stdout != "" || !strings.Contains(actual.stderr, "runtime.limit") || !strings.HasPrefix(fixture.effects, actualEffects) {
+					t.Fatalf("budget retained an invalid effect prefix: %+v %q", actual, actualEffects)
 				}
 			}
 		})

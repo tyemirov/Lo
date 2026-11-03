@@ -21,9 +21,6 @@ const nativeProcessLifecycleSource = `flow Main()->Process.Result!{executable=Pr
 
 func nativeProcessLifecycleScenarios(t *testing.T, cases []int) {
 	t.Helper()
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	names := []string{"exited", "signaled", "exact-stream-capacity", "partial-stdout", "early-stdin-close", "partial-start", "release-host-failure", "stdout-over-limit", "stderr-over-limit", "cancel-joins-owner"}
 	var scenarios []llvmRuntimeScenario
 	for _, number := range cases {
@@ -45,9 +42,6 @@ func TestLLVMProcessLifecycleFailures(t *testing.T) {
 func TestLLVMProcessLifecycleCancellation(t *testing.T) { nativeProcessLifecycleScenarios(t, []int{9}) }
 
 func TestLLVMHTTPClientCleanupEvidence(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	var scenarios []llvmRuntimeScenario
 	for _, number := range []int{2, 3} {
 		name := "ordinary-read-failure"
@@ -60,9 +54,6 @@ func TestLLVMHTTPClientCleanupEvidence(t *testing.T) {
 }
 
 func TestLLVMProcessTransportCompleted(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires the Darwin process transport")
 	}
@@ -91,10 +82,9 @@ func TestLLVMProcessTransportCompleted(t *testing.T) {
 				t.Fatalf("build process program: %+v", built)
 			}
 			args := []string{"--format", "json", "--process-allow", fmt.Sprintf("%x,%s", digest, child), "--process-read-root", directory, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher")}
-			reference := runExecutable(t, binary, append([]string{"run", source}, args...)...)
 			actual := runExecutable(t, artifact, append([]string{"run"}, args...)...)
-			if reference.status != 0 || actual != reference {
-				t.Fatalf("native process transport differs: native=%+v reference=%+v", actual, reference)
+			if actual.status != 0 || actual.stderr != "" {
+				t.Fatalf("native process transport: %+v", actual)
 			}
 			var envelope struct{ Result runtimeValue }
 			if err := json.Unmarshal([]byte(actual.stdout), &envelope); err != nil {
@@ -115,9 +105,6 @@ func TestLLVMProcessTransportCompleted(t *testing.T) {
 }
 
 func TestLLVMProcessTransportCancellation(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires the Darwin process transport")
 	}
@@ -207,9 +194,6 @@ func TestLLVMProcessTransportCancellation(t *testing.T) {
 }
 
 func TestLLVMProcessTransportOutputLimits(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the LLVM runtime lane")
-	}
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires the Darwin process transport")
 	}
@@ -234,11 +218,10 @@ func TestLLVMProcessTransportOutputLimits(t *testing.T) {
 				t.Fatalf("build output contract: %+v", built)
 			}
 			args := []string{"--format", "json", "--process-allow", fmt.Sprintf("%x,%s", digest, child), "--process-read-root", directory, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--max-steps", "10000000"}
-			reference := runExecutable(t, binary, append([]string{"run", source}, args...)...)
 			actual := runExecutable(t, artifact, append([]string{"run"}, args...)...)
 			if name == "exact" {
-				if actual.status != 0 || actual != reference {
-					t.Fatalf("exact transport output differs: native status=%d reference status=%d", actual.status, reference.status)
+				if actual.status != 0 || actual.stderr != "" {
+					t.Fatalf("exact transport output: %+v", actual)
 				}
 				var envelope struct{ Result runtimeValue }
 				if err := json.Unmarshal([]byte(actual.stdout), &envelope); err != nil {
@@ -256,7 +239,7 @@ func TestLLVMProcessTransportOutputLimits(t *testing.T) {
 					}
 				}
 			} else {
-				for lane, result := range map[string]result{"native": actual, "interpreter": reference} {
+				for lane, result := range map[string]result{"native": actual} {
 					if result.status != 2 || result.stdout != "" || !strings.Contains(result.stderr, "runtime.limit") || !strings.Contains(result.stderr, "process_progress") || !strings.Contains(result.stderr, name) || !strings.Contains(result.stderr, "1048576") {
 						t.Fatalf("%s %s over-limit diagnostics: %+v", lane, name, result)
 					}

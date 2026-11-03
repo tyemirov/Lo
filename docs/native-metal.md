@@ -1,7 +1,7 @@
 # Native Metal Artifacts
 
 F014 adds explicit Metal selection to native artifact construction.
-The artifact uses the same `metal-fp32` kernels and numeric profile as the Metal interpreter.
+The artifact uses the selected `metal-fp32` kernels and numeric profile in the single Rust runtime.
 The [arithmetic contract](metal-arithmetic.md) defines its numeric behavior.
 
 ## Build And Execution
@@ -38,19 +38,21 @@ File, listen, and device grants remain execution inputs for `run` and `serve`.
 
 ## Developer Preparation
 
-`make build-metal` prepares the kernel files and the Metal-enabled interpreter.
-Go 1.27.1, Xcode 27.1 build 27A9275, macOS SDK 27.0, and Apple Clang 21.0.0 are necessary for this developer operation.
-The producer verifies those versions and the kernel tools before construction.
-The [Metal build contract](metal-transfers.md) owns the fixed kernel compilers and arithmetic flags.
+`make build-metal` verifies the precompiled kernel inputs and builds the Go compiler frontend without cgo.
+It does not compile kernels or require an Apple development toolchain.
+`make reproduce-metal-kernels` separately requires the pinned kernel compiler and linker.
+The [kernel validator](../tools/nativeruntime/metal_assets.py) owns the exact tools, arithmetic flags, and provenance schema.
 
 `runtime/metal/kernels.metal` contains the kernel source.
-The producer writes `runtime/metal/metal.metallib` and `runtime/metal/manifest.json`.
-The manifest records the complete source list, file digests, and numeric profile.
-`bin/lo-metal-build.json` records the producer inputs and output identities.
-The interpreter embeds the same kernel library through `runtime/metal/embed.go`.
+`runtime/metal/metal.metallib` and `runtime/metal/manifest.json` are canonical precompiled inputs.
+The manifest records exact tool identities, current source digests, compiled source snapshots, and the kernel digest.
+The validator expands each local include graph and requires identical current and compiled translation units.
+It bounds source counts, source text, and expanded bytes.
+It rejects unknown fields, unused sources, cycles, path escapes, and changed inputs.
+Historical source snapshots establish provenance and never select executable code.
 
 The [native device guide](native-devices.md) describes `make build-native-runtime-metal`.
-That producer verifies the kernel files and compiles the Objective-C adapter with the pinned LLVM compiler.
+That producer verifies kernel provenance and compiles the current Objective-C adapter with the pinned LLVM compiler.
 It embeds the kernel bytes in the static native runtime.
 The package producer supplies that runtime and its declared link inputs to the installed compiler.
 
@@ -89,7 +91,7 @@ Metal artifacts also record these fields:
 | `metal.kernel_sha256` | Digest of the compiled kernel library. |
 
 Metadata contains no grants or runtime device identity.
-The producer manifest and receipt are not part of artifact metadata.
+The provenance manifest and native build receipt are not part of artifact metadata.
 
 ## Validation
 

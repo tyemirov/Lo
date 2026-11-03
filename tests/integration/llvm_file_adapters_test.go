@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,14 +10,11 @@ import (
 )
 
 func TestLLVMFileAdapters(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	t.Run("append-create", func(t *testing.T) {
 		root := t.TempDir()
 		path := filepath.Join(root, "output")
 		source := sourceFile(t, fmt.Sprintf(`path=File.Path.new(%q); first=File.Append.new(path,UTF8.Bytes.new("hé")); a=commit first; second=File.Append.new(path,UTF8.Bytes.new("!")); b=commit second; return Record.new(first:a,second:b)`, path))
-		result := run(t, "run", source, "--write-root", root, "--format", "json")
+		result := runProgram(t, source, "run", "--write-root", root, "--format", "json")
 		if result.status != 0 {
 			t.Fatalf("append: %+v", result)
 		}
@@ -30,7 +28,7 @@ func TestLLVMFileAdapters(t *testing.T) {
 		writeLLVMFixture(t, filepath.Join(root, "b"), []byte("two"))
 		writeLLVMFixture(t, filepath.Join(root, "a"), []byte("one"))
 		source := sourceFile(t, fmt.Sprintf(`flow Main()->File.RemoveReceipt! {entries=File.list(File.Path.new(%q)); target=File.Remove.new(entries); receipt=commit target; return receipt}; return Main()`, root))
-		result := run(t, "run", source, "--list-root", root, "--remove-root", root, "--format", "json")
+		result := runProgram(t, source, "run", "--list-root", root, "--remove-root", root, "--format", "json")
 		if result.status != 0 {
 			t.Fatalf("remove: %+v", result)
 		}
@@ -96,21 +94,20 @@ func TestLLVMLinuxFileObservationIsolation(t *testing.T) {
 }
 
 func TestLLVMFileUnicodeDiagnosticParity(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	root := t.TempDir()
 	path := filepath.Join(root, "line\u2028separator")
 	source := sourceFile(t, fmt.Sprintf(`flow Handle(e:Error)->String{return e.message};flow Main()->String onError Handle {path=File.Path.new(%q);first=File.Write.new(path,Bytes.new("original"));commit first;entries=File.list(File.Path.new(%q));changed=File.Write.new(path,Bytes.new("x"));commit changed;target=File.Remove.new(entries);commit target;return "unexpected"};return Main()`, path, root))
 	arguments := []string{"--write-root", root, "--list-root", root, "--remove-root", root, "--format", "json"}
-	expected := runExecutable(t, binary, append([]string{"run", source}, arguments...)...)
 	artifact, built := buildForTest(t, source)
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}
 	actual := runExecutable(t, artifact, append([]string{"run"}, arguments...)...)
-	if actual != expected {
-		t.Fatalf("Unicode file diagnostic differs: native %+v evaluator %+v", actual, expected)
+	message := nativeValue(t, actual)
+	var text string
+	want := fmt.Sprintf("File.EntryChanged: selected file %q changed since discovery", filepath.Base(path))
+	if message.Type != "String" || json.Unmarshal(message.Value, &text) != nil || text != want {
+		t.Fatalf("Unicode file diagnostic lost its observed path or change: %+v", actual)
 	}
 }
 

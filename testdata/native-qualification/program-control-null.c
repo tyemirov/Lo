@@ -1,24 +1,14 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-typedef struct Program Program;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct { U32 status; U32 code; const Value *value; } ResultSlot;
-extern const Program *lo_program_new(void);
-extern void lo_program_free(const Program *);
-extern Context *lo_context_from_program(const Program *,const ContextOptions *);
-extern void lo_context_free(Context *);
-extern void lo_context_run(Context *,ResultSlot *);
-extern void lo_context_cancel(Context *);
+
 extern U64 lo_context_remaining_steps(const Context *);
 extern U64 lo_runtime_live_programs(void);
 extern U64 lo_runtime_live_contexts(void);
 extern U64 lo_runtime_live_values(void);
 extern void lo_step(Context *,const Value *const *,U64,U64,ResultSlot *);
-extern void lo_value_retain(const Value *);
-extern void lo_value_release(const Value *);
+
 extern const U64 lo_test_step_site;
 int main(void){
  for(unsigned iteration=0;iteration<32;++iteration){

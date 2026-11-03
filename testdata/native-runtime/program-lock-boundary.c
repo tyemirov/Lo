@@ -1,13 +1,10 @@
-#include "lo_context_options.h"
+#include "lo_runtime.h"
 #include "lo_program_lock.h"
 #include "lo_console.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-typedef struct {U32 status,code;const Value *value;} ResultSlot;
-extern Context *lo_context_new(const ContextOptions *);
 extern int lo_cli_main(int,const char *const *,const char *const *);
-extern void lo_context_run(Context *,ResultSlot *),lo_context_cancel(Context *),lo_context_free(Context *),lo_value_release(const Value *);
 extern int lo_boolean_value(const Value *);
 extern Context *lo_context_process_peer(Context *);
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);

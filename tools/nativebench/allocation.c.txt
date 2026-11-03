@@ -1,19 +1,7 @@
-typedef struct { __UINT64_TYPE__ steps,value_bytes,live_bytes,data_bytes,list_items,file_entries,file_directories; } ContextOptions;
+#include "lo_runtime.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
-/* Separate allocation-volume driver; the timing executable has no interposer. */
-typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
-typedef __UINT32_TYPE__ U32;
-typedef struct Program Program;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct {U32 status,code;const Value *value;} Result;
-extern const Program *lo_program_new(void);
-extern void lo_program_free(const Program*);
-extern Context *lo_context_from_program(const Program*,const ContextOptions *);
-extern void lo_context_run(Context*,Result*);
-extern void lo_context_free(Context*);
-extern void lo_value_release(const Value*);
+typedef __SIZE_TYPE__ Size;
 extern U64 lo_runtime_live_values(void),lo_runtime_live_contexts(void);
 extern long write(int,const void*,Size);
 static int collecting;
@@ -50,13 +38,14 @@ int main(void){
  const Program *program=lo_program_new();if(!program)return 10;
  collecting=1;
  Context *context=lo_context_from_program(program,LO_OPTIONS(10000000));if(!context)return 11;
- Result output={0,0,0};lo_context_run(context,&output);
+ ResultSlot output={0,0,0};lo_context_run(context,&output);
  if(output.status||!output.value)return 12;
+ if(!lo_context_close(context))return 15;
  lo_context_free(context);lo_value_release(output.value);collecting=0;
  lo_program_free(program);
  if(lo_runtime_live_values()||lo_runtime_live_contexts())return 13;
  const char first[]="{\"bytes\":";const char second[]=",\"allocations\":";
- const char last[]=",\"method\":\"successful allocator requests during fresh session execution and complete cleanup; admission excluded\"}\n";
+ const char last[]=",\"method\":\"successful allocator requests during fresh session execution and checked cleanup; admission excluded\"}\n";
  if(write(1,first,sizeof(first)-1)!=sizeof(first)-1||!number(bytes)||write(1,second,sizeof(second)-1)!=sizeof(second)-1||!number(allocations)||write(1,last,sizeof(last)-1)!=sizeof(last)-1)return 14;
  return 0;
 }

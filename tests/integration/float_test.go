@@ -84,7 +84,7 @@ func TestFloatFailures(t *testing.T) {
 		{`Int.to_float(` + overflow + `)`, "Numeric.NonFinite"},
 	} {
 		t.Run(tc.expression, func(t *testing.T) {
-			got := run(t, "run", sourceFile(t, "return "+tc.expression), "--format", "json")
+			got := runProgram(t, sourceFile(t, "return "+tc.expression), "run", "--format", "json")
 			var out struct {
 				Diagnostics []struct {
 					Code  string

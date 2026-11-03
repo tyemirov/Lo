@@ -1,15 +1,13 @@
+#include "lo_runtime.h"
 /* Trusted ABI fixture: retain a real OnError argument, then publish it by CLI. */
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __SIZE_TYPE__ Size;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct { U32 status,code; const Value *value; } Result;
 extern int lo_cli_main(int,const char *const *,const char *const *);
-extern void lo_http_original_entry(Context *,const Value *const *,U64,U64,Result *);
-extern void lo_http_original_onerror(Context *,const Value *const *,U64,U64,Result *);
-extern void lo_value_retain(const Value *),lo_value_release(const Value *);
+extern void lo_http_original_entry(Context *,const Value *const *,U64,U64,ResultSlot *);
+extern void lo_http_original_onerror(Context *,const Value *const *,U64,U64,ResultSlot *);
+
 extern U64 lo_runtime_live_programs(void),lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern U64 lo_runtime_live_storages(void),lo_runtime_live_storage_bytes(void);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *),pthread_join(Thread,void **);
@@ -25,13 +23,13 @@ extern int ioctl(int,unsigned long,...);
 static const Value *captured;
 static U64 callback_count;
 static int callback_problem,dump_mode,service_status=99;
-void lo_http_error_capture(Context *context,const Value *const *arguments,U64 count,U64 site,Result *out){
+void lo_http_error_capture(Context *context,const Value *const *arguments,U64 count,U64 site,ResultSlot *out){
  if(count!=1||!arguments||!arguments[0])__atomic_store_n(&callback_problem,1,__ATOMIC_RELAXED);
  else if(__atomic_fetch_add(&callback_count,1,__ATOMIC_RELAXED)==0){lo_value_retain(arguments[0]);__atomic_store_n(&captured,arguments[0],__ATOMIC_RELEASE);}
  else __atomic_store_n(&callback_problem,1,__ATOMIC_RELAXED);
  lo_http_original_onerror(context,arguments,count,site,out);
 }
-void lo_entry(Context *context,const Value *const *arguments,U64 count,U64 site,Result *out){
+void lo_entry(Context *context,const Value *const *arguments,U64 count,U64 site,ResultSlot *out){
  if(dump_mode){out->status=0;out->code=0;out->value=__atomic_exchange_n(&captured,(const Value *)0,__ATOMIC_ACQ_REL);return;}
  lo_http_original_entry(context,arguments,count,site,out);
 }

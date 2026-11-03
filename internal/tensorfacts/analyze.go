@@ -4,8 +4,9 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
 	"github.com/MarcoPoloResearchLab/Lo/internal/identity"
+	"github.com/MarcoPoloResearchLab/Lo/internal/shapefacts"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"math"
 	"math/big"
 	"slices"
@@ -15,7 +16,6 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/catalog"
 	"github.com/MarcoPoloResearchLab/Lo/internal/diagnostic"
 	"github.com/MarcoPoloResearchLab/Lo/internal/ir"
-	"github.com/MarcoPoloResearchLab/Lo/internal/tensor"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
@@ -33,7 +33,7 @@ type Metadata struct {
 }
 
 func Unknown() *Metadata {
-	return &Metadata{Dtype: tensor.Dtype, Profile: "unknown", Device: "unknown", Layout: "row-major"}
+	return &Metadata{Dtype: shapefacts.Dtype, Profile: "unknown", Device: "unknown", Layout: "row-major"}
 }
 
 type fact struct {
@@ -44,7 +44,7 @@ type fact struct {
 	List     bool
 	Items    []fact
 	Fields   map[string]fact
-	Shape    tensor.Shape
+	Shape    shapefacts.Shape
 }
 
 // Each immutable fact has a fixed-size structural key. Shared nested lists
@@ -116,14 +116,14 @@ func Analyze(p ir.Program) (map[ir.Expression]*Metadata, diagnostic.Diagnostic) 
 		if f.Location != "" {
 			m.Device = f.Location
 			switch f.Location {
-			case device.CPU:
-				m.Profile = tensor.Profile
-			case device.Simulation:
-				m.Profile = device.SimulationProfile
-			case device.CUDA:
-				m.Profile = device.CUDAProfile
-			case device.Metal:
-				m.Profile = device.MetalProfile
+			case targetconfig.CPU:
+				m.Profile = shapefacts.Profile
+			case targetconfig.Simulation:
+				m.Profile = targetconfig.SimulationProfile
+			case targetconfig.CUDA:
+				m.Profile = targetconfig.CUDAProfile
+			case targetconfig.Metal:
+				m.Profile = targetconfig.MetalProfile
 				m.Execution = "synchronous"
 			}
 		}
@@ -255,7 +255,7 @@ func (a *analyzer) expression(e ir.Expression, env map[ir.BindingID]fact) (resul
 func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 	op := call.Operation().Name()
 	failure := func(err error) {
-		var f tensor.Fault
+		var f shapefacts.Fault
 		if errors.As(err, &f) && (f.Kind() == catalog.InvalidShape || f.Kind() == catalog.ShapeMismatch) {
 			a.err = diagnostic.ShapeMismatch(op, f.Expected(), f.Actual(), call.Span())
 		}
@@ -268,7 +268,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 	case catalog.ParametersTo, catalog.SGDStateTo, catalog.AdamWStateTo:
 		return trainingLocation(args[0], args[1].Text)
 	case catalog.CheckpointDecode:
-		return trainingLocation(args[1], device.CPU)
+		return trainingLocation(args[1], targetconfig.CPU)
 	case catalog.TensorDevice:
 		return fact{Text: args[0].Location}
 	case catalog.SGDStateNew, catalog.AdamWStateNew:
@@ -319,20 +319,20 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 	case catalog.TensorNew:
 		dims, known := integers(args[1])
 		if !known {
-			return fact{Location: device.CPU}
+			return fact{Location: targetconfig.CPU}
 		}
-		s, err := tensor.NewShape(dims)
+		s, err := shapefacts.NewShape(dims)
 		if err != nil {
 			failure(err)
 			return fact{}
 		}
 		if s.Limits() == nil && args[0].List {
-			if err = tensor.ValidateCount(s, len(args[0].Items)); err != nil {
+			if err = shapefacts.ValidateCount(s, len(args[0].Items)); err != nil {
 				failure(err)
 				return fact{}
 			}
 		}
-		return fact{Shape: s, Location: device.CPU}
+		return fact{Shape: s, Location: targetconfig.CPU}
 	case catalog.TensorShape:
 		if args[0].Shape != nil {
 			items := make([]fact, args[0].Shape.Rank())
@@ -343,7 +343,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 		}
 	case catalog.TensorToFloat:
 		if args[0].Shape != nil {
-			if err := tensor.ValidateScalar(args[0].Shape); err != nil {
+			if err := shapefacts.ValidateScalar(args[0].Shape); err != nil {
 				failure(err)
 			}
 		}
@@ -357,7 +357,7 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 		if args[0].Shape == nil || args[1].Shape == nil {
 			return fact{Location: args[0].Location}
 		}
-		p, err := tensor.Prepare(op, args[0].Shape, args[1].Shape, nil)
+		p, err := shapefacts.Prepare(op, args[0].Shape, args[1].Shape, nil)
 		if err != nil {
 			failure(err)
 			return fact{}
@@ -370,19 +370,19 @@ func (a *analyzer) builtin(call ir.BuiltinCall, args []fact) fact {
 		}
 		if args[0].Shape == nil {
 			if op == catalog.TensorReshape || op == catalog.TensorBroadcast {
-				s, err := tensor.NewShape(dims)
+				s, err := shapefacts.NewShape(dims)
 				if err != nil {
 					failure(err)
 					return fact{}
 				}
 				return fact{Shape: s, Location: args[0].Location}
 			}
-			if _, err := tensor.ValidateAxes(op, dims, nil); err != nil {
+			if _, err := shapefacts.ValidateAxes(op, dims, nil); err != nil {
 				failure(err)
 			}
 			return fact{}
 		}
-		p, err := tensor.Prepare(op, args[0].Shape, nil, dims)
+		p, err := shapefacts.Prepare(op, args[0].Shape, nil, dims)
 		if err != nil {
 			failure(err)
 			return fact{}

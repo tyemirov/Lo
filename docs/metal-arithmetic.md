@@ -13,8 +13,9 @@ It returns the original `[1,-2]`, updated values near `[0.8,-1.6]`, and the init
 make build-metal
 ./bin/lo-metal check examples/metal_arithmetic.lo
 ./bin/lo-metal inspect examples/metal_arithmetic.lo --format json
-./bin/lo-metal run examples/metal_arithmetic.lo --allow-device metal:0 --format json
-make test-metal TEST_ARGS='-count=1 -race -v'
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/metal_arithmetic.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --device-backend metal --output ./bin/metal_arithmetic
+./bin/metal_arithmetic run --allow-device metal:0 --format json
+make test-native-metal TEST_ARGS='-count=1 -race -v'
 ```
 
 ## Operations and Resources

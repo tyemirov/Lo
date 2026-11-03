@@ -1,15 +1,12 @@
+#include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __INT64_TYPE__ Offset;
-typedef struct Context Context;
-typedef struct Value Value;
-typedef struct { U32 status,code; const Value *value; } Result;
 extern int lo_cli_main(int,const char **,const char **);
-extern void lo_op_File_2Elist(Context*,const Value**,U64,U64,Result*);
-extern void lo_op_File_2ERemove_2Enew(Context*,const Value**,U64,U64,Result*);
-extern void lo_value_retain(const Value*);
-extern void lo_value_release(const Value*);
+extern void lo_op_File_2Elist(Context*,const Value**,U64,U64,ResultSlot*);
+extern void lo_op_File_2ERemove_2Enew(Context*,const Value**,U64,U64,ResultSlot*);
+
 extern U64 lo_runtime_live_values(void);
 extern U64 lo_runtime_live_contexts(void);
 extern int open(const char*,int,...);
@@ -31,7 +28,7 @@ static int invocation;
 static int hook_error;
 static int put(const char *path,const char *data,Size count){int file=open(path,CREATE,0666);if(file<0)return 1;long n=write(file,data,count);return close(file)||n!=(long)count;}
 static int contains(const char *text,const char *needle){for(;*text;++text){Size i=0;while(needle[i]&&text[i]==needle[i])++i;if(!needle[i])return 1;}return 0;}
-void lo_files_list_bridge(Context *context,const Value **args,U64 count,U64 site,Result *out){
+void lo_files_list_bridge(Context *context,const Value **args,U64 count,U64 site,ResultSlot *out){
  lo_op_File_2Elist(context,args,count,site,out);
  if(out->status)return;
  if(LO_CASE==0){
@@ -40,7 +37,7 @@ void lo_files_list_bridge(Context *context,const Value **args,U64 count,U64 site
   if(rename("grant","held")||mkdir("grant",0777)||put("grant/selected","replacement",11))hook_error=1;
  }
 }
-void lo_files_selection_bridge(Context *context,const Value **args,U64 count,U64 site,Result *out){
+void lo_files_selection_bridge(Context *context,const Value **args,U64 count,U64 site,ResultSlot *out){
  lo_op_File_2ERemove_2Enew(context,args,count,site,out);
  if(!out->status&&LO_CASE==1&&put("grant/selected","changed",7))hook_error=1;
 }

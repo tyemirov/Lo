@@ -146,7 +146,7 @@ func TestAutodiffFailures(t *testing.T) {
 		{`return Tensor.div(p.x,p.x)`, `0.0`, "Numeric.DivideByZero"},
 	} {
 		source := fmt.Sprintf(`flow Loss(p: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { %s }; flow Run() -> Tensor<FP32>! { x=Tensor.new(List.new(%s),List.new()); r=Autodiff.grad(Record.new(x:x),Loss); return r.gradients.x }; return Run()`, tc.body, tc.values)
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 || got.stdout != "" || !strings.Contains(got.stderr, `"kind":"`+tc.kind+`"`) || !strings.Contains(got.stderr, `"value":"Loss"`) {
 			t.Fatalf("derivative failure %s: %+v", tc.kind, got)
 		}

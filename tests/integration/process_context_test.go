@@ -23,7 +23,7 @@ func TestProcessContextEnvironment(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			got := fileOutput(t, run(t, "run", sourceFile(t, processContextProgram(test.typ, test.source)), "--format", "json"))
+			got := fileOutput(t, runProgram(t, sourceFile(t, processContextProgram(test.typ, test.source)), "run", "--format", "json"))
 			valueJSON(t, got, test.expected)
 		})
 	}
@@ -43,7 +43,7 @@ func TestProcessContextAbsentEnvironment(t *testing.T) {
 func TestProcessContextInvalidInitialInputs(t *testing.T) {
 	t.Setenv("LO_F024_INVALID", "private"+string([]byte{255}))
 	processConstructorFailure(t, `return Process.Context.current()`, "Process.ContextUnavailable")
-	got := fileOutput(t, run(t, "run", sourceFile(t, `return "ordinary"`), "--format", "json"))
+	got := fileOutput(t, runProgram(t, sourceFile(t, `return "ordinary"`), "run", "--format", "json"))
 	valueJSON(t, got, `"ordinary"`)
 }
 
@@ -69,7 +69,7 @@ func TestProcessContextStructuralRedaction(t *testing.T) {
 		{"Error", `Error.new("Probe", "safe", Record.new(context: context, nested: List.new(context)))`},
 	} {
 		source := processContextProgram(test.typ, `context = Process.Context.current(); return `+test.expression)
-		got := run(t, "run", sourceFile(t, source), "--format", "json")
+		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 0 {
 			t.Fatalf("context output: %+v", got)
 		}
@@ -98,7 +98,7 @@ func TestProcessContextObservationPurity(t *testing.T) {
 func TestProcessContextPureConstruction(t *testing.T) {
 	root := fileFixtureRoot(t)
 	source := fmt.Sprintf(`flow Build(path: File.Path) -> Process.Command! { context = Process.Context.new(Map.new(), path); executable = Process.Executable.new(path); return Process.Command.new(context, executable, List.new(), Bytes.new("")) }; return List.map(List.new(File.Path.new(%s)), Build)`, processLiteral(t, root+"/never-created"))
-	got := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 	if got.Type != "List<Process.Command>" {
 		t.Fatalf("pure construction: %+v", got)
 	}
@@ -121,7 +121,7 @@ func TestProcessExecutableDiscovery(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			source := processContextProgram("Process.Executable", fmt.Sprintf(`context = Process.Context.new(Map.new(Record.new(key: "PATH", value: %s)), File.Path.new(%s)); return Process.Executable.resolve(context, %s)`, processLiteral(t, test.path), processLiteral(t, first), processLiteral(t, test.lookup)))
-			got := fileOutput(t, run(t, "run", sourceFile(t, source), "--format", "json"))
+			got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 			fields := processFields(t, got)
 			valueJSON(t, fields["path"], processLiteral(t, test.executable))
 		})
@@ -167,7 +167,7 @@ func TestProcessExecutableDiscoveryUnauthorizedFirst(t *testing.T) {
 	}
 	digest := sha256.Sum256(data)
 	source := processContextProgram("Process.Result", fmt.Sprintf(`context = Process.Context.new(Map.new(Record.new(key: "PATH", value: %q)), File.Path.new(%q)); executable = Process.Executable.resolve(context, "fixture-tool"); command = Process.Command.new(context, executable, List.new(), Bytes.new("")); result = commit command; return result`, first+":"+second, first))
-	got := run(t, "run", sourceFile(t, source), "--process-allow", fmt.Sprintf("%x,%s", digest, filepath.Join(second, "fixture-tool")), "--process-read-root", first, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--format", "json")
+	got := runProgram(t, sourceFile(t, source), "run", "--process-allow", fmt.Sprintf("%x,%s", digest, filepath.Join(second, "fixture-tool")), "--process-read-root", first, "--process-launcher", filepath.Join(repository, "bin", "lo-process-launcher"), "--format", "json")
 	diagnostic := receiptHostDiagnostic(t, got)
 	if got.status != 2 || diagnostic.Code != "runtime.capability-denied" || diagnostic.Error != nil || diagnostic.ProcessProgress == nil {
 		t.Fatalf("unauthorized first candidate: %+v", got)

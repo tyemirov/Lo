@@ -14,6 +14,9 @@ import tomllib
 
 from prepare import ROOT, DEPENDENCIES, local, digest, verified, tree_digest, validate_prepared
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'nativeruntime'))
+from metal_assets import BRIDGE_SOURCES, KERNEL_SOURCES, LIBRARY, MANIFEST, validate_assets
+
 HOSTS = ('darwin/arm64', 'linux/arm64')
 VARIANTS = ('software', 'metal')
 TRIPLES = {'darwin/arm64': 'aarch64-apple-darwin', 'linux/arm64': 'aarch64-unknown-linux-gnu'}
@@ -155,18 +158,7 @@ def notices(output: Path, prepared: dict, host: str) -> list[dict]:
 
 
 PROCESS_SOURCES = {'launcher.c', 'normalization.c', 'protocol.h'}
-METAL_SOURCES = {
-    'internal/device/metal_bridge.h',
-    'internal/device/metal_bridge_darwin.m',
-    'internal/device/metal_darwin.go',
-    'internal/device/metal_types.h',
-    'internal/metalconfig/config.go',
-    'runtime/metal/embed.go',
-    'runtime/metal/kernels.metal',
-    'runtime/metal/manifest.json',
-    'runtime/metal/metal.metallib',
-    'tools/metalbuild/main.go',
-}
+METAL_SOURCES = KERNEL_SOURCES | BRIDGE_SOURCES | {LIBRARY}
 
 
 def validate_runtime(runtime: Path, variant: str) -> dict:
@@ -178,27 +170,27 @@ def validate_runtime(runtime: Path, variant: str) -> dict:
     if set(receipt['process_sources']) != PROCESS_SOURCES:
         raise ValueError('runtime process source inventory differs')
     for name, record in receipt['process_sources'].items():
-        if record['path'] != 'internal/processhost/native/' + name:
+        if record['path'] != 'runtime/native/host/process/' + name:
             raise ValueError(f'runtime process source path differs: {name}')
         verified(record)
     if variant == 'metal':
         metal = receipt['metal']
+        if set(metal) != {'manifest', 'sources'}:
+            raise ValueError('runtime Metal provenance field set differs')
         if set(metal['sources']) != METAL_SOURCES:
             raise ValueError('runtime Metal source inventory differs')
         for name, record in metal['sources'].items():
             if record['path'] != name:
                 raise ValueError(f'runtime Metal source path differs: {name}')
             verified(record)
-        for key, name in [('manifest', 'runtime/metal/manifest.json'),
-                          ('producer', 'bin/lo-metal-build.json')]:
-            if metal[key]['path'] != name:
-                raise ValueError(f'runtime Metal {key} path differs')
-            verified(metal[key])
-        source_manifest = json.loads(verified(metal['manifest']).read_text())
+        if metal['manifest']['path'] != MANIFEST:
+            raise ValueError('runtime Metal provenance field set differs')
+        verified(metal['manifest'])
+        _, identity = validate_assets(ROOT)
         runtime_manifest = json.loads(local(runtime / 'toolchain.json').read_text())
-        if runtime_manifest['metal']['identity'] != source_manifest['identity']:
+        if runtime_manifest['metal']['identity'] != identity:
             raise ValueError('runtime Metal identity differs from source assets')
-        if runtime_manifest['metal']['kernel']['sha256'] != source_manifest['identity']['kernel_sha256']:
+        if runtime_manifest['metal']['kernel']['sha256'] != identity['kernel_sha256']:
             raise ValueError('runtime Metal kernel differs from source assets')
     return receipt
 

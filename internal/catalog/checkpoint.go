@@ -1,7 +1,7 @@
 package catalog
 
 import (
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
@@ -19,13 +19,13 @@ const (
 
 func addCheckpoints(operations map[string]Operation) {
 	operations[CheckpointEncode] = operation{name: CheckpointEncode, rule: CheckpointOperation, parameters: []types.Parameter{{Name: ParamValue}}, errors: []string{HostObservationRequired}}
-	operations[CheckpointDecode] = operation{name: CheckpointDecode, rule: CheckpointOperation, parameters: []types.Parameter{{Name: ParamData, Type: types.Bytes()}, {Name: ParamTemplate}}, errors: []string{CheckpointInvalidData, CheckpointSchemaMismatch, HostObservationRequired, device.AllocationFailed}}
+	operations[CheckpointDecode] = operation{name: CheckpointDecode, rule: CheckpointOperation, parameters: []types.Parameter{{Name: ParamData, Type: types.Bytes()}, {Name: ParamTemplate}}, errors: []string{CheckpointInvalidData, CheckpointSchemaMismatch, HostObservationRequired, targetconfig.AllocationFailed}}
 	for _, name := range []string{ParametersTo, SGDStateTo, AdamWStateTo} {
 		parameter := ParamState
 		if name == ParametersTo {
 			parameter = ParamParameters
 		}
-		operations[name] = operation{name: name, rule: CheckpointOperation, parameters: []types.Parameter{{Name: parameter}, {Name: ParamDevice, Type: types.Device()}}, errors: []string{device.Mismatch, device.Unavailable, device.AllocationFailed, device.TransferFailed, device.UnsupportedProfile, device.LibraryFailed, device.Lost}}
+		operations[name] = operation{name: name, rule: CheckpointOperation, parameters: []types.Parameter{{Name: parameter}, {Name: ParamDevice, Type: types.Device()}}, errors: []string{targetconfig.Mismatch, targetconfig.Unavailable, targetconfig.AllocationFailed, targetconfig.TransferFailed, targetconfig.UnsupportedProfile, targetconfig.LibraryFailed, targetconfig.Lost}}
 	}
 }
 

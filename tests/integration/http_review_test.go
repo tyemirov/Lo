@@ -58,7 +58,7 @@ func TestHTTPClientResponseGrammar(t *testing.T) {
 			later := filepath.Join(directory, "later")
 			origin := "http://" + listener.Addr().String()
 			tail := fmt.Sprintf(`response=commit target; write=File.Write.new(File.Path.new(%q),Bytes.new("committed")); commit write; return response`, later)
-			got := run(t, "run", sourceFile(t, httpClientSource(origin, "GET", `List.new()`, "", tail)), "--http-allow", httpGrant("GET", origin), "--write-root", directory, "--format", "json")
+			got := runProgram(t, sourceFile(t, httpClientSource(origin, "GET", `List.new()`, "", tail)), "run", "--http-allow", httpGrant("GET", origin), "--write-root", directory, "--format", "json")
 			_ = listener.Close()
 			<-done
 			if test.stage == "" {
@@ -139,9 +139,6 @@ func TestHTTPClientDisconnectIsolation(t *testing.T) {
 }
 
 func TestLLVMHTTPDisconnectAfterCommit(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires the explicit LLVM runtime lane")
-	}
 	directory := t.TempDir()
 	input := filepath.Join(directory, "body")
 	later := filepath.Join(directory, "committed")

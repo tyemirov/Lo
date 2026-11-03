@@ -1,21 +1,27 @@
 # Metal Transfers
 
-F012 implements explicit Metal transfers through the interpreter on macOS arm64.
+F012 implements explicit Metal transfers through compiled artifacts on macOS arm64.
 The device selector is `metal:0`. Its host grant is `--allow-device metal:0`.
-The standard interpreter build reports `Device.Unavailable` for authorized Metal access.
+The software runtime reports `Device.Unavailable` for authorized Metal access.
+
 The Darwin Metal package supports native Metal artifacts through the static runtime.
 F013 adds [tensor arithmetic and training](metal-arithmetic.md). F014 owns native Metal artifacts.
 
 ## Developer Build and Execution
 
+Prepare the native inputs with the [Metal guide](native-metal.md#developer-preparation).
 Use the repository root for these commands:
 
 ```bash
-make build-metal
-./bin/lo-metal check examples/metal_transfer.lo
-./bin/lo-metal inspect examples/metal_transfer.lo --format json
-./bin/lo-metal run examples/metal_transfer.lo --allow-device metal:0 --format json
-make test-metal TEST_ARGS='-count=1 -v'
+make build
+make build-native-runtime-metal
+./bin/lo check examples/metal_transfer.lo
+./bin/lo inspect examples/metal_transfer.lo --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/metal_transfer.lo \
+  --toolchain _scratch/native-runtime/distribution/toolchain.json \
+  --device-backend metal --output ./bin/metal-transfer
+./bin/metal-transfer run --allow-device metal:0 --format json
+make test-native-metal TEST_ARGS='-count=1 -v'
 ```
 
 The example returns shape `[2,2]` and values `[1.25,-0,1e-45,-2.5]` on `cpu`.
@@ -23,37 +29,12 @@ No command automatically selects another backend after a Metal failure.
 Static compiler commands do not initialize the device.
 The runtime initializes the default Apple GPU only after the grant matches the source selector.
 
-The [build manifest](../tools/metalbuild/main.go) pins the following inputs:
+The [native Metal guide](native-metal.md) owns kernel provenance, numeric profiles, source identities, and native artifact construction.
+The repository retains verified precompiled kernels and their canonical source manifest.
+The native producer compiles the Objective-C adapter with pinned LLVM and embeds the kernel bytes in the Rust archive.
+The Go compiler frontend executes no Metal operations.
+Installed compilation requires no Apple development tools.
 
-| Input | Selection |
-| --- | --- |
-| Host and target | `darwin/arm64`, macOS 27 deployment target. |
-| Go | `go1.27.1`. |
-| Xcode | `27.1`, build `27A9275`. |
-| SDK | macOS `27.0`. |
-| Clang | `21.0.0`, build `clang-2100.3.34.2`. |
-| Metal compiler and linker | `32023.921`, build `metalfe-32023.921.6`. |
-| Kernel language | MSL `3.1`. |
-| Kernel math options | Safe math, precise FP32 functions, and disabled contraction. |
-| Device features | Apple GPU family 7 support and unified memory. |
-
-I002 records the current Xcode pin and its [training qualification](metal-training.md).
-
-If the Metal compiler component is absent, install it with `xcodebuild -downloadComponent MetalToolchain`.
-Missing or different build inputs stop the build.
-The build does not install tools or change its selected compiler automatically.
-The Go build uses the selected SDK and clears conflicting Go and cgo flag overrides.
-
-The build compiles `runtime/metal/kernels.metal` into the ignored `runtime/metal/metal.metallib` artifact.
-`runtime/metal/manifest.json` records the source files, digests, and numeric profile.
-Go embeds that library through `runtime/metal/embed.go` in `bin/lo-metal`.
-The resulting compiler needs system Apple frameworks during execution, with no external kernel file.
-The generated `bin/lo-metal-build.json` records tool versions, source hashes, compiler flags, kernel hash, and binary hash.
-It also records the build host's macOS version and build identifier.
-
-These development tools are not installed-compiler dependencies.
-The [distribution guide](compiler-distribution.md) defines installed compilation with packaged LLVM and LLD.
-The [native Metal guide](native-metal.md) describes direct kernel files and native artifact construction.
 
 ## Transfer Profile and Storage
 
@@ -106,14 +87,14 @@ The [native device guide](native-devices.md#verification) defines current native
 
 The initial public tests rejected the absent selector, grant, transfer profile, and lost-session error.
 The [initial failure record](evidence/metal-red.txt) contains that evidence.
-The [software tests](../tests/integration/metal_test.go) exercise the real compiler, evaluator, resource ledger, and CLI serialization.
+The [native software tests](../tests/integration/llvm_device_resources_test.go) exercise compiled entries, the resource ledger, and device hooks.
 They inject the storage boundary to verify failure and cancellation behavior without GPU access.
 They cover authorization order, exact transfers, empty tensors, source retention, budgets, error kinds, and cleanup.
 They also verify that failed transfers prevent subsequent commits and unusable sessions reject further submissions.
 The [cancellation regression](evidence/metal-cancel-red.txt) first exposed incorrect error priority when cancellation coincided with a transfer failure.
 The [software execution record](evidence/metal-software.txt) records the successful regression tests after correction.
 
-The [local Metal tests](../tests/integration/metal_live_test.go) use the compiled Metal adapter and its embedded kernel.
+The [native Metal tests](../tests/integration/native_metal_live_test.go) use the compiled Metal adapter and its embedded kernel.
 On the Apple M5 Pro, 513 finite edge cases and samples matched CPU values after a transfer round trip.
 Empty and rank-zero tensors also passed.
 A 100-step loop completed 200 transfers with 80 peak accounted bytes and complete cleanup.
@@ -122,8 +103,10 @@ The [build receipt](evidence/metal-build.json) records the qualified build input
 
 The [final CI record](evidence/metal-ci.txt) records successful formatting, static analysis, software tests, native tests, and the standard build.
 The local Metal tests also passed with the Go race detector.
-Metal-specific static analysis passed with `go vet -tags=metal ./internal/device` under the pinned build environment.
+The historical Metal-specific static analysis used the former Go device package.
+Current device execution resides in the Rust runtime.
 
 Routine acceptance uses software integration tests without a GPU prerequisite.
-`make test-metal` explicitly requests local Metal execution and fails when that environment is unavailable.
+Optional tests tagged `metal` exercise actual Metal execution.
+Their availability does not control software acceptance.
 These results establish transfers and resource handling. They do not establish Metal arithmetic, training, or performance.

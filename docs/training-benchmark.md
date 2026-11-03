@@ -1,6 +1,8 @@
 # CPU Training Baseline for F001
 
-This report records the interpreter baseline from October 13, 2026, before F001.
+This report preserves the interpreter baseline from October 13, 2026, before F001.
+The [native measurements guide](native-benchmarks.md) defines current commands and report fields.
+These earlier values do not qualify the current native implementation.
 F005, F006, and F007 implemented CPU training through the interpreter.
 The small network completed 200 SGD updates with final loss `0.00013215476064942777`.
 This result was the same as the independent FP32 fixture result.
@@ -104,22 +106,29 @@ This baseline alone does not establish native performance or Linux execution.
 F001 supplies that evidence in the native acceptance report.
 Neither report establishes CUDA execution or completion of I001.
 
-## Reproduction
+## Current Commands
 
-These commands measure the repository's implementation.
-The linked raw samples preserve the October 13 baseline.
+The current commands separate frontend checks from native application processes.
+The linked raw samples retain the October 13 baseline.
+They do not describe these commands.
 
+Prepare the native runtime with the [runtime guide](native-runtime.md#prepare-and-build).
 Run these commands sequentially from the repository root:
 
 ```bash
-make benchmark-training
-make benchmark-training-cli
-make benchmark-training-profile
+make benchmark-training BENCH_COUNT=10 BENCH_TIME=300ms
+make benchmark-training-cli NATIVE_RUNTIME_STATE=_scratch/native-runtime BENCH_COUNT=10
 ```
 
-The first command reports phase times and allocations.
-The second command reports CLI samples and environment data as JSON after its build commands.
-The third command writes local profiles under `bin/` and prints CPU and allocation reports.
-The profile commands use three seconds per execution workload.
-`BENCH_COUNT` and `BENCH_TIME` control repeated phase measurements.
-CLI measurements require at least ten samples.
+The first command reports frontend check times and Go compiler allocation counters.
+The second command builds the two native artifacts before their process measurements.
+Its JSON report includes artifact identities, raw times, medians, bootstrap intervals, and independent result checks.
+It uses two warmups and a minimum of ten measured processes for each workload.
+
+MVP200 uses the stored independent numerical reference.
+Dense20 uses the scalar matrix and SGD calculation in `tools/nativebench/oracles.py`.
+The checks verify losses, parameter fields, tensor shapes, and parameter values.
+The earlier Dense20 baseline did not have this independent arithmetic check.
+
+The interpreter execution, serialization, and CPU profile commands are removed.
+The [native measurements guide](native-benchmarks.md) defines current C execution and allocation measurements.

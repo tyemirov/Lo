@@ -1,5 +1,10 @@
 # Native Compilation Results
 
+This document preserves measurements from the recorded historical implementation.
+Its Go execution paths, command examples, and comparison limits are historical.
+The [native measurements guide](native-benchmarks.md) defines the current native tools and report schema.
+These recorded numbers do not qualify the current implementation.
+
 This document records historical implementation evidence before I011.
 The [native compilation contract](native-compilation-contract.md) defines the current LLVM build requirements.
 The [compiler plan](standalone-compiler-plan.md) records the current migration status.
@@ -215,7 +220,7 @@ Generated flows allocate error-frame inputs only after a failure.
 These changes retain the logical charge order and immutable value contracts.
 The [initial allocation profile](evidence/native-allocation-profile.txt) identified integer construction and successful flow calls as allocation costs.
 
-## Reproduction
+## Historical Commands
 
 Run semantic acceptance with:
 

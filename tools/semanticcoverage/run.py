@@ -2,38 +2,26 @@ import argparse
 import json
 import os
 from pathlib import Path
-import re
 import platform
 import subprocess
 import sys
 
 import report
 
-TEST_IDENTITY = re.compile(r"Test[A-Za-z0-9_]+(?:/[^\n]+)?")
 
-
-def select_tests(matrix: Path) -> str:
+def select_tests(matrix: Path, target: str | None = None) -> str:
     data = json.loads(matrix.read_text())
-    references = []
-    for row in data["operations"]:
-        for axis in ("positive", "negative", "runtime_negative"):
-            references.extend(row[axis])
-    for section in ("cli", "semantics", "profiles"):
-        for row in data[section]:
-            references.extend(row["tests"])
-    if not references:
-        raise ValueError("matrix has no test references")
-    for native_refs in data["native_tests"].values():
-        references.extend(native_refs)
+    references = report.references(data)
+    if target is not None:
+        if target not in report.TARGETS:
+            raise ValueError(f"unsupported semantic execution target: {target}")
+        references = {reference for row in data["contracts"] if target in row["targets"] for reference in row["tests"]}
     tests = set(report.COVERAGE_GATES)
-    for reference in references:
-        if not isinstance(reference, str) or not TEST_IDENTITY.fullmatch(reference):
-            raise ValueError(f"invalid test identity: {reference}")
-        tests.add(reference.split("/", 1)[0])
+    tests.update(reference.split("/", 1)[0] for reference in references)
     return "^(" + "|".join(sorted(tests)) + ")$"
 
 
-def run(matrix: Path, output_root: Path, pattern: str, compiler: Path,
+def run(matrix: Path, output_root: Path, compiler: Path,
         toolchain: Path, additional: dict[str, Path], allow_partial: bool) -> int:
     for name in ("HOME", "TMPDIR", "GOCACHE", "GOMODCACHE", "GOPATH"):
         raw = os.environ.get(name)
@@ -44,33 +32,30 @@ def run(matrix: Path, output_root: Path, pattern: str, compiler: Path,
     target = host + "/" + {"arm64": "arm64", "aarch64": "arm64"}.get(platform.machine(), "unsupported")
     if target not in report.TARGETS:
         raise ValueError(f"unsupported semantic execution target: {target}")
-    output_root.mkdir(parents=True, exist_ok=True)
-    logs = [report.contained(str(output_root / f"semantic-{lane}.jsonl"))
-            for lane in ("interpreter", "llvm-" + target.replace("/", "-"))]
+    log = report.contained(str(output_root / ("semantic-native-" + target.replace("/", "-") + ".jsonl")))
     output = report.contained(str(output_root / "semantic-coverage.json"))
-    if matrix in (*logs, output) or matrix in additional.values():
-        raise ValueError("semantic migration output overlaps matrix")
     if not compiler.is_file() or not toolchain.is_file():
         raise ValueError("run requires --compiler and --toolchain installed distribution inputs")
     if target in additional:
-        raise ValueError(f"additional LLVM log duplicates current host target: {target}")
+        raise ValueError(f"additional native log duplicates current host target: {target}")
+    report.validate_output_paths((log, output), report.consumed_inputs(matrix, additional, compiler, toolchain))
+    output_root.mkdir(parents=True, exist_ok=True)
     output.unlink(missing_ok=True)
+    pattern = select_tests(matrix, target)
     command = ["go", "test", "-json", "-count=1", "-timeout=120m", "-run", pattern, "./tests/integration"]
-    for lane, path in zip(("interpreter", "llvm"), logs):
-        environment = dict(os.environ)
-        environment["LO_SEMANTIC_MATRIX"] = str(matrix)
-        environment["LO_TEST_COMPILER"] = str(compiler)
-        environment["LO_LLVM_TOOLCHAIN"] = str(toolchain)
-        environment["LO_TEST_TARGET"] = target
-        environment["LO_TEST_BACKEND"] = lane
-        print(f"semantic migration: {lane}:{target}", flush=True)
-        with path.open("wb") as stream:
-            result = subprocess.run(command, cwd=report.ROOT, env=environment,
-                                    stdin=subprocess.DEVNULL, stdout=stream)
-        if result.returncode:
-            print(f"semantic migration: {lane}:{target} failed; see {path.relative_to(report.ROOT)}", file=sys.stderr)
-            return 1
-    return report.report(report.Inputs(matrix, logs[0], {**additional, target: logs[1]}, output, allow_partial))
+    environment = dict(os.environ)
+    environment["LO_SEMANTIC_MATRIX"] = str(matrix)
+    environment["LO_TEST_COMPILER"] = str(compiler)
+    environment["LO_LLVM_TOOLCHAIN"] = str(toolchain)
+    environment["LO_TEST_TARGET"] = target
+    print(f"semantic execution: native:{target}", flush=True)
+    with log.open("wb") as stream:
+        result = subprocess.run(command, cwd=report.ROOT, env=environment,
+                                stdin=subprocess.DEVNULL, stdout=stream)
+    if result.returncode:
+        print(f"semantic execution: native:{target} failed; see {log.relative_to(report.ROOT)}", file=sys.stderr)
+        return 1
+    return report.report(report.Inputs(matrix, {**additional, target: log}, output, allow_partial))
 
 
 def main() -> int:
@@ -80,7 +65,7 @@ def main() -> int:
     parser.add_argument("--output-root", default="_scratch/build-state")
     parser.add_argument("--compiler", default=os.environ.get("LO_TEST_COMPILER", ""))
     parser.add_argument("--toolchain", default=os.environ.get("LO_LLVM_TOOLCHAIN", ""))
-    parser.add_argument("--llvm-log", action="append", default=[], metavar="TARGET=LOG")
+    parser.add_argument("--native", action="append", default=[], metavar="TARGET=LOG")
     parser.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args()
     try:
@@ -89,9 +74,9 @@ def main() -> int:
         if args.action == "select":
             print(pattern)
             return 0
-        return run(matrix, report.contained(args.output_root), pattern,
+        return run(matrix, report.contained(args.output_root),
                    report.contained(args.compiler), report.contained(args.toolchain),
-                   report.llvm_logs(args.llvm_log), args.allow_partial)
+                   report.native_logs(args.native), args.allow_partial)
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"semantic migration: {error}", file=sys.stderr)
         return 1

@@ -2,7 +2,7 @@ package integration_test
 
 import (
 	"fmt"
-	"os"
+
 	"regexp"
 	"runtime"
 	"strings"
@@ -109,21 +109,14 @@ func llvmTapeBudgetSource() string {
 }
 
 func TestLLVMNumericalTapeBudgetBoundary(t *testing.T) {
-	if os.Getenv("LO_TEST_BACKEND") != "llvm" {
-		t.Skip("requires explicit LLVM lane")
-	}
 	source := sourceFile(t, llvmTapeBudgetSource())
 	artifact, built := buildForTest(t, source)
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}
-	expected := runExecutable(t, binary, "run", source, "--format", "json", "--max-steps", "100000000")
 	actual := runExecutable(t, artifact, "run", "--format", "json", "--max-steps", "100000000")
-	if expected.status != 2 || !strings.Contains(expected.stderr, "boundary operation failed: execution limit: live value bytes") {
-		t.Fatalf("evaluator tape boundary: %+v", expected)
-	}
-	if actual != expected {
-		t.Fatalf("tape boundary native %+v evaluator %+v", actual, expected)
+	if actual.status != 2 || actual.stdout != "" || !strings.Contains(actual.stderr, "boundary operation failed: execution limit: live value bytes") {
+		t.Fatalf("compiled tape boundary: %+v", actual)
 	}
 	scenarios := []llvmRuntimeScenario{{name: "live-value-boundary-tape-cleanup", source: llvmTapeBudgetSource(), number: 8, harness: "testdata/native-runtime/numerical.c"}}
 	runLLVMRuntimeScenarios(t, scenarios)

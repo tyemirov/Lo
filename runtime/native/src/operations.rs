@@ -83,6 +83,9 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
     }
 }
 pub fn admit(s: &Site) -> Result<(), String> {
+    if crate::processors::SUPPORTED.contains(&s.operation.as_str()) {
+        return crate::processors::admit(s);
+    }
     if s.operation == crate::program_entry::OPERATION {
         return crate::program_entry::admit(s);
     }
@@ -321,6 +324,9 @@ pub fn admit(s: &Site) -> Result<(), String> {
     Ok(())
 }
 pub fn parameter_names(op: &str) -> Vec<&'static str> {
+    if crate::processors::SUPPORTED.contains(&op) {
+        return crate::processors::parameter_names(op);
+    }
     match op {
         "Parameters.new" => vec!["values"],
         "Parameters.values" | "Gradients.zero" => vec!["parameters"],

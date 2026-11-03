@@ -1,20 +1,13 @@
 package integration_test
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"math"
 	"os"
-	"reflect"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/device"
-	"github.com/MarcoPoloResearchLab/Lo/internal/value"
 )
 
 func semanticNativeTarget() string {
@@ -26,17 +19,7 @@ func semanticNativeTarget() string {
 
 func semanticNativeScenarios(t *testing.T, scenarios []llvmRuntimeScenario) {
 	t.Helper()
-	t.Setenv("LO_TEST_BACKEND", "llvm")
 	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), scenarios)
-}
-
-func semanticNativeEnvelope(t *testing.T, result value.Value) string {
-	t.Helper()
-	serialized, err := json.Marshal(result)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return `{"command":"run","status":"ok","result":` + string(serialized) + "}\n"
 }
 
 func semanticNativeObservation(source string, number int) llvmRuntimeScenario {
@@ -53,18 +36,8 @@ func TestSemanticNativeReadOrder(t *testing.T) {
 	const text = `flow Read(path: String) -> String! { bytes=File.read(File.Path.new(path)); return UTF8.String.new(bytes) }
 flow Join(a: String,b: String) -> String { return String.concat(a,b) }
 flow Main() -> String! { unused=Read("unused");first=Read("repeat");second=Read("repeat");ordered=Join(b:Read("b"),a:Read("a"));return String.concat(first,second,ordered) };return Main()`
-	boundary := &observedBoundary{read: func(path string, count int) (value.Bytes, error) {
-		return value.NewBytes([]byte(fmt.Sprintf("%s:%d;", path, count))), nil
-	}}
-	reference, err := evaluate(t, text, boundary)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if value.TextResult(reference) != "repeat:2;repeat:3;a:5;b:4;" || !reflect.DeepEqual(boundary.reads, []string{"unused", "repeat", "repeat", "b", "a"}) || boundary.commits != 0 {
-		t.Fatalf("independent read order: %v, %v", reference, boundary)
-	}
 	scenario := semanticNativeObservation(text, 0)
-	scenario.expectedStdout = semanticNativeEnvelope(t, reference)
+	scenario.verify = nativeValueCheck("String", `"repeat:2;repeat:3;a:5;b:4;"`)
 	semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
 }
 
@@ -72,37 +45,47 @@ func TestSemanticNativeMatchRegions(t *testing.T) {
 	const text = `flow Handle(error: Error) -> String { return "failed" }
 flow Read(path: String) -> String onError Handle { bytes=File.read(File.Path.new(path)); return UTF8.String.new(bytes) }
 return Match.new(Read("selector"),"miss":Read("unselected"),"selector":Read("selected"),"unreached":Read("unreached-body"),_:Read("default"))`
-	boundary := &observedBoundary{read: func(path string, _ int) (value.Bytes, error) { return value.NewBytes([]byte(path)), nil }}
-	reference, err := evaluate(t, text, boundary)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if value.TextResult(reference) != "selected" || !reflect.DeepEqual(boundary.reads, []string{"selector", "selected"}) || boundary.commits != 0 {
-		t.Fatalf("independent match regions: %v, %v", reference, boundary)
-	}
 	scenario := semanticNativeObservation(text, 1)
-	scenario.expectedStdout = semanticNativeEnvelope(t, reference)
+	scenario.verify = nativeValueCheck("String", `"selected"`)
 	semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
+}
+
+func TestSemanticNativeRepeatedFrames(t *testing.T) {
+	const text = `flow Recover(error:Error)->Error{return error};flow Divide(seed:Int,divisor:Int)->Int!{numerator=Math.add(seed,1);result=Math.div(numerator,divisor);return Math.add(result,seed)};flow Capture(seed:Int,divisor:Int)->Error onError Recover{result=Divide(seed,divisor);return Error.new("success",Int.to_string(result),Record.new(seed:seed,divisor:divisor))};return List.new(Capture(10,0),Capture(20,2),Capture(30,0),Capture(40,4))`
+	value := nativeValue(t, runProgram(t, sourceFile(t, text), "run", "--format", "json"))
+	var items []runtimeValue
+	if err := json.Unmarshal(value.Value, &items); err != nil || len(items) != 4 {
+		t.Fatalf("native frame results: %s (%v)", value.Value, err)
+	}
+	for index, numerator := range map[int]string{0: `"11"`, 2: `"31"`} {
+		failure := items[index]
+		if failure.Kind != "Math.DivideByZero" || failure.Input == nil || len(failure.Trace) != 2 {
+			t.Fatalf("native frame failure %d: %+v", index, failure)
+		}
+		valueJSON(t, recordField(t, *failure.Input, "left_value"), numerator)
+		for frame, name := range []string{`"Divide"`, `"Capture"`} {
+			valueJSON(t, recordField(t, failure.Trace[frame], "flow"), name)
+		}
+	}
+	for index, message := range map[int]string{1: "30", 3: "50"} {
+		if items[index].Kind != "success" || items[index].Message != message || len(items[index].Trace) != 0 {
+			t.Fatalf("native frame success %d reused prior failure: %+v", index, items[index])
+		}
+	}
 }
 
 func TestSemanticNativeErrorPrecedence(t *testing.T) {
 	const text = `flow Handle(error: Error) -> Error { return error }
 flow Main() -> Error onError Handle { first=File.read(File.Path.new("first"));later=File.read(File.Path.new("later"));return Error.new("missed","",Record.new()) };return Main()`
-	boundary := &observedBoundary{read: func(path string, _ int) (value.Bytes, error) {
-		return nil, fmt.Errorf("read %s: injected failure", path)
-	}}
-	reference, err := evaluate(t, text, boundary)
-	if err != nil {
-		t.Fatal(err)
-	}
-	failure, ok := reference.(value.Error)
-	if !ok || failure.Kind() != "File.ReadFailed" || len(failure.Trace()) != 1 || !reflect.DeepEqual(boundary.reads, []string{"first"}) || boundary.commits != 0 {
-		t.Fatalf("independent first failure: %v, %v", reference, boundary)
-	}
-	if failure.Input().Field("file_path").(value.Text).Text() != "first" {
-		t.Fatal("wrong failed read input")
-	}
-	semanticNativeScenarios(t, []llvmRuntimeScenario{semanticNativeObservation(text, 2)})
+	scenario := semanticNativeObservation(text, 2)
+	scenario.verify = nativeValuesCheck(1, func(t *testing.T, failure runtimeValue) {
+		if failure.Type != "Error" || failure.Kind != "File.ReadFailed" || failure.Input == nil || len(failure.Trace) != 1 {
+			t.Fatalf("first native error: %+v", failure)
+		}
+		valueJSON(t, recordField(t, *failure.Input, "file_path"), `"first"`)
+		valueJSON(t, recordField(t, failure.Trace[0], "flow"), `"Main"`)
+	})
+	semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
 }
 
 func TestSemanticNativeCaptureLargeOutput(t *testing.T) {
@@ -115,8 +98,6 @@ func TestSemanticNativeCaptureLargeOutput(t *testing.T) {
 }
 
 func TestSemanticNativeCancellation(t *testing.T) {
-	// Both implementations must reject cancellation before any host observation.
-	TestEvaluatorCancellation(t)
 	const text = `flow Handle(error: Error)->Int{return 99}
 flow Main()->Int onError Handle { bytes=File.read(File.Path.new("unread"));target=File.Write.new(File.Path.new("unwritten"),bytes);commit target;return 1 };return Main()`
 	semanticNativeScenarios(t, []llvmRuntimeScenario{semanticNativeObservation(text, 3)})
@@ -130,43 +111,21 @@ func TestSemanticNativeMetalProfile(t *testing.T) {
  arithmetic=Tensor.add(a,b);layout=Tensor.transpose(a,List.new(0))
  values=Tensor.to(Tensor.new(List.new(16777216.0,1.0,-16777216.0),List.new(3)),metal);reduction=Tensor.sum(values,List.new(0))
  return Record.new(arithmetic:Tensor.to(arithmetic,cpu),layout:Tensor.to(layout,cpu),reduction:Tensor.to(reduction,cpu)) };return Main()`
-	result, receipts, expected := metalResult(t, text, metalComputeFactory())
-	for field, bits := range map[string][]uint32{"arithmetic": {0, 0, 0}, "layout": {0x80000000, 1, 0x80000001}, "reduction": {0}} {
-		numbers := tensorNumbers(t, recordField(t, result, field))
-		if len(numbers) != len(bits) {
-			t.Fatalf("%s length", field)
-		}
-		for index, number := range numbers {
-			if math.Float32bits(float32(number)) != bits[index] {
-				t.Fatalf("%s[%d] bits", field, index)
-			}
-		}
-	}
-	semanticTransferCount(t, receipts, 6)
-	semanticNativeScenarios(t, []llvmRuntimeScenario{{name: "profile", source: text, expectedStdout: expected, harness: "testdata/native-qualification/semantic-metal.c", number: 0}})
-}
-
-func semanticTransferCount(t *testing.T, receipts []device.Receipt, expected int) {
-	t.Helper()
-	transfers := 0
-	for _, receipt := range receipts {
-		if receipt.Event == device.EventTransfer {
-			transfers++
-		}
-	}
-	if transfers != expected {
-		t.Fatalf("explicit transfers %d want %d", transfers, expected)
-	}
-	assertReleased(t, receipts)
+	scenario := llvmRuntimeScenario{name: "profile", source: text, harness: "testdata/native-qualification/semantic-metal.c", number: 0}
+	scenario.verify = nativeValuesCheck(1, func(t *testing.T, result runtimeValue) {
+		checkNativeTensorBits(t, recordField(t, result, "arithmetic"), []string{"3"}, []uint32{0, 0, 0})
+		checkNativeTensorBits(t, recordField(t, result, "layout"), []string{"3"}, []uint32{0x80000000, 1, 0x80000001})
+		checkNativeTensorBits(t, recordField(t, result, "reduction"), nil, []uint32{0})
+	})
+	semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
 }
 
 func TestSemanticNativeMetalCheckpointResume(t *testing.T) {
 	for index, fixture := range []struct {
 		optimizer, config, first, second string
-		transfers                        int
 	}{
-		{"SGD", `Optimizer.SGD.Config.new(0.25)`, semanticOptimizerCheckpoint("SGD", "1.5", "1", "", "", ""), semanticOptimizerCheckpoint("SGD", "1", "2", "", "", ""), 5},
-		{"AdamW", `Optimizer.AdamW.Config.new(0.25,0.5,0.5,2.0,0.5)`, semanticOptimizerCheckpoint("AdamW", "1.625", "1", "1", "2", "0.5"), semanticOptimizerCheckpoint("AdamW", "1.296875", "2", "1.5", "3", "0.25"), 13},
+		{"SGD", `Optimizer.SGD.Config.new(0.25)`, semanticOptimizerCheckpoint("SGD", "1.5", "1", "", "", ""), semanticOptimizerCheckpoint("SGD", "1", "2", "", "", "")},
+		{"AdamW", `Optimizer.AdamW.Config.new(0.25,0.5,0.5,2.0,0.5)`, semanticOptimizerCheckpoint("AdamW", "1.625", "1", "1", "2", "0.5"), semanticOptimizerCheckpoint("AdamW", "1.296875", "2", "1.5", "3", "0.25")},
 	} {
 		t.Run(fixture.optimizer, func(t *testing.T) {
 			text := fmt.Sprintf(`flow Main()->Bytes!{
@@ -175,30 +134,21 @@ func TestSemanticNativeMetalCheckpointResume(t *testing.T) {
  restored=Checkpoint.decode(Bytes.new(%q),template);moved=Optimizer.%s.State.to(restored,metal)
  gradient=Tensor.to(x,metal);g=Gradients.new(moved.parameters,Record.new(x:gradient));resumed=Optimizer.%s.step(moved,g)
  host=Optimizer.%s.State.to(resumed,cpu);return Checkpoint.encode(host) };return Main()`, fixture.optimizer, fixture.config, fixture.first, fixture.optimizer, fixture.optimizer, fixture.optimizer)
-			result, receipts, expected := metalResult(t, text, metalComputeFactory())
-			assertSemanticCheckpoint(t, result, fixture.second)
-			semanticTransferCount(t, receipts, fixture.transfers)
-			semanticNativeScenarios(t, []llvmRuntimeScenario{{name: "resume", source: text, expectedStdout: expected, harness: "testdata/native-qualification/semantic-metal.c", number: index + 1}})
+			scenario := llvmRuntimeScenario{name: "resume", source: text, harness: "testdata/native-qualification/semantic-metal.c", number: index + 1}
+			scenario.verify = nativeValuesCheck(1, func(t *testing.T, result runtimeValue) {
+				assertSemanticCheckpoint(t, result, fixture.second)
+			})
+			semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
 		})
 	}
 }
 
 func TestSemanticNativeMetalFailureCleanup(t *testing.T) {
 	const text = `flow Handle(e:Error)->String{return e.kind};flow Main()->String onError Handle {a=Tensor.to(Tensor.new(List.new(-1.0),List.new()),Device.new("metal:0"));unused=Tensor.sqrt(a);target=File.Write.new(File.Path.new("later"),Bytes.new("bad"));commit target;return "unexpected"};return Main()`
-	result, _, expected := metalResult(t, text, metalComputeFactory())
-	valueJSON(t, result, `"Numeric.Domain"`)
-	semanticNativeScenarios(t, []llvmRuntimeScenario{{name: "numeric-error", source: text, expectedStdout: strings.Repeat(expected, 3), harness: "testdata/native-runtime/metal-executor.c"}})
-	// The native model cancels the real context during compute and checks that
-	// cancellation wins over a concurrent device error and releases all buffers.
+	scenario := llvmRuntimeScenario{name: "numeric-error", source: text, harness: "testdata/native-runtime/metal-executor.c"}
+	scenario.verify = nativeValuesCheck(3, func(t *testing.T, result runtimeValue) {
+		valueJSON(t, result, `"Numeric.Domain"`)
+	})
+	semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
 	semanticNativeScenarios(t, llvmMetalCancellationScenarios())
-	ctx, cancel := context.WithCancel(context.Background())
-	model := &metalModel{before: func(device.Operation) error { cancel(); return ctx.Err() }}
-	got, receipts := runWithDevices(t, ctx, text, model, "--allow-device", "metal:0")
-	if got.status != 2 || !strings.Contains(got.stderr, "runtime.cancelled") || strings.Contains(got.stderr, "Numeric.Domain") {
-		t.Fatalf("interpreter device cancellation: %+v", got)
-	}
-	if !errors.Is(ctx.Err(), context.Canceled) {
-		t.Fatal("reference context not cancelled")
-	}
-	assertReleased(t, receipts)
 }

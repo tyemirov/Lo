@@ -1,16 +1,15 @@
+#include "lo_runtime.h"
 #include "lo_file_observer.h"
 
 typedef __SIZE_TYPE__ Size;
-typedef struct Value Value;
-typedef struct { uint32_t status, code; const Value *value; } Result;
-extern void lo_qualified_entry(LoContext *, const Value **, uint64_t, uint64_t, Result *);
-extern void lo_context_cancel(LoContext *);
+extern void lo_qualified_entry(Context *, const Value **, uint64_t, uint64_t, ResultSlot *);
+
 extern int lo_cli_main(int, const char **, const char **);
 extern uint64_t lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int open(const char *, int, ...), close(int), fcntl(int, int, ...), dup2(int, int);
 extern long write(int, const void *, Size);
 
-static LoContext *active;
+static Context *active;
 static int installed, hook_error;
 static unsigned preflight[2], removing[2], discovery[2], directories;
 
@@ -54,10 +53,10 @@ static int observe(uintptr_t userdata, uint32_t phase, const unsigned char *root
     return 0;
 }
 
-void lo_entry(LoContext *context, const Value **arguments, uint64_t count,
-              uint64_t site, Result *result) {
+void lo_entry(Context *context, const Value **arguments, uint64_t count,
+              uint64_t site, ResultSlot *result) {
     active = context;
-    if (lo_context_file_metadata_observer(context, observe, 25) != 1) hook_error = 1;
+    if (lo_context_file_metadata_observer((LoContext *)context, observe, 25) != 1) hook_error = 1;
     else installed = 1;
     lo_qualified_entry(context, arguments, count, site, result);
     active = 0;

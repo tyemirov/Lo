@@ -29,8 +29,8 @@ The reference implementation has a Go frontend, verifier, checked execution grap
 The parser and verifier accept all six specification examples.
 `lo check` validates built-in signatures, flows, fallibility, and transitive effects.
 `lo inspect` reports effects, targets, error kinds, and capability requirements without program execution.
-`lo run` evaluates checked programs with immutable values, error traces, authorized file reads, and ordered file commits.
-`lo serve` activates authorized HTTP servers with request handlers, error handlers, and orderly shutdown.
+`lo build` compiles checked programs into executables with immutable values, typed errors, and explicit host authority.
+The executable supplies `run` and `serve` commands through the single Rust runtime.
 The six implementation stages passed their integration tests.
 The [implementation audit](docs/implementation-audit.md) records the completed requirements and validation evidence.
 
@@ -60,18 +60,19 @@ The [XOR tutorial](docs/xor-neural-network.md) adds a small neural network that 
 Its [CPU example](examples/xor_cpu.lo) and [Metal example](examples/xor_metal.lo) use two ReLU units and 500 SGD updates.
 The [checkpoint workflow](docs/model-checkpoints.md#execution) saves trained Parameters for separate inference and restores complete SGD or AdamW state.
 The XOR examples save after 250 updates and resume for another 250 updates on CPU or Metal.
-F008 adds device grants, explicit transfers, and a resource ledger to interpreter and native execution.
+F008 supplies device grants, explicit transfers, and a resource ledger in native execution.
 The [device resource contract](docs/device-resources.md) records the implementation and software validation.
 P002 adds the [Metal implementation plan](docs/metal-backend-plan.md).
-F012 adds explicit Apple GPU transfers through the Metal interpreter build.
+F012 supplies explicit Apple GPU transfers through the Metal runtime.
 The [Metal transfer contract](docs/metal-transfers.md) defines the build, device profile, and validation evidence.
 F013 adds [Metal arithmetic, derivatives, gradient operations, and optimizers](docs/metal-arithmetic.md).
 F014 adds [standalone Metal artifacts](docs/native-metal.md).
-I002 qualifies [complete Metal training](docs/metal-training.md) through software tests, the local interpreter, and standalone artifacts.
+I002 qualifies [complete Metal training](docs/metal-training.md) through controlled software tests and standalone artifacts.
 The [Metal training example](examples/training_metal.lo) completes 200 SGD updates with six uploads and six downloads.
 F009, F010, F011, and I001 retain NVIDIA arithmetic, deferred execution, later precision work, and complete NVIDIA training acceptance.
-The [training benchmark](docs/training-benchmark.md) records the interpreter baseline before F001.
-The [native acceptance report](docs/native-compilation-results.md) compares the two execution backends, including CPU training.
+The [native benchmark guide](docs/native-benchmarks.md) defines current execution and resource measurements.
+The [training benchmark](docs/training-benchmark.md) retains historical training results.
+The [native acceptance report](docs/native-compilation-results.md) records historical comparisons, including CPU training.
 
 This repository is public early so the design can be evaluated as an AI-agent execution language. It is not production-ready.
 
@@ -87,7 +88,7 @@ The [native lowering path](docs/native-lowering.md) adds `lo build --emit llvm` 
 Module emission uses no external compiler tools.
 Installed executable builds use the packaged LLVM backend, linker, static runtime, and platform inputs.
 
-The Makefile requires installed Go 1.27.1 and keeps tool state under `_scratch/build-state/`.
+The Makefile requires Go 1.27.1 or later and keeps tool state under `_scratch/build-state/`.
 For executable builds, set `LO_BUILD_ROOT` to that absolute directory.
 The qualified platforms are macOS on arm64 and Linux on arm64.
 A Darwin arm64 host is necessary for the following developer preparation procedure.
@@ -100,17 +101,22 @@ make build </dev/null
 ./bin/lo parse examples/http_division.lo --format json
 ./bin/lo check examples/list_sum.lo
 ./bin/lo inspect examples/agent_file_workflow.lo --format json
-./bin/lo run examples/list_sum.lo
 LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo \
   --toolchain _scratch/native-runtime/distribution/toolchain.json \
   --output ./bin/list-sum
 ./bin/list-sum run
-./bin/lo run examples/tensor_forward.lo
-./bin/lo run examples/training_cpu.lo --format json
-./bin/lo run examples/xor_cpu.lo --format json
-./bin/lo run examples/device_transfer.lo --allow-device cuda-sim:0 --format json
-./bin/lo run examples/count_letter.lo --read-root examples
-./bin/lo serve examples/http_echo.lo --listen 0 --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/tensor_forward.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/tensor_forward
+./bin/tensor_forward run
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/training_cpu.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/training_cpu
+./bin/training_cpu run --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/xor_cpu.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/xor_cpu
+./bin/xor_cpu run --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/device_transfer.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/device_transfer
+./bin/device_transfer run --allow-device cuda-sim:0 --format json
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/count_letter.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/count_letter
+./bin/count_letter run --read-root examples
+LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/http_echo.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/http_echo
+./bin/http_echo serve --listen 0 --format json
 make test-conformance
 ```
 
@@ -119,18 +125,20 @@ Then run `make ci </dev/null`.
 CI uses the selected installed distribution for semantic reporter checks.
 Set `SEMANTIC_COMPILER` and `SEMANTIC_TOOLCHAIN` when that distribution is outside the default package directory.
 
-The conformance suite runs 83 static and runtime fixtures.
-The catalog tests verify all 122 built-in operations.
+The conformance suite verifies static and runtime fixtures.
+The catalog tests verify every current built-in operation.
 The integration suite also tests built-in signatures, runtime values, evaluation order, error traces, and adapter authorization.
 The server command runs until a stop signal.
 `Ctrl+C` starts orderly shutdown.
 The [adapter examples](docs/compiler-design.md#executable-adapter-examples) specify file grants, listen grants, and expected results.
 
-Go 1.27.1 is necessary for development builds through `make build`.
+Go 1.27.1 or later is necessary for frontend builds through `make build`.
 Artifacts need no Go installation, Lo installation, source file, or repository checkout during execution.
+
 Programs that use `File.open_paths` require `lsof` on the execution host.
 Use `--target darwin/arm64` or `--target linux/arm64` to select the artifact target.
 The build uses the host target when this option is absent.
+
 Supply file, listen, and device grants when you execute the artifact.
 Use the artifact's `metadata` command to inspect its source digest, runtime archive digest, target, and toolchain.
 The default artifact backend is `software`.
@@ -142,7 +150,6 @@ make build-native-runtime-metal </dev/null
 ./bin/lo-metal parse examples/training_metal.lo --format json
 ./bin/lo-metal check examples/training_metal.lo --format json
 ./bin/lo-metal inspect examples/training_metal.lo --format json
-./bin/lo-metal run examples/training_metal.lo --allow-device metal:0 --format json
 LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training_metal.lo \
   --toolchain _scratch/native-runtime/distribution/toolchain.json \
   --device-backend metal --output ./bin/metal-training
@@ -150,17 +157,19 @@ LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo-metal build examples/training
 ./bin/metal-training metadata
 ```
 
-The pinned Apple toolchain is necessary for kernel preparation.
+The pinned Apple toolchain is necessary to reproduce kernels after kernel source changes.
+Unchanged kernels use the verified precompiled inputs in the repository.
 Installed Metal compilation uses precompiled kernels.
 Its target must be local `darwin/arm64`.
 The [native Metal contract](docs/native-metal.md) specifies the toolchain, metadata, and validation commands.
+
 The training example returns initial loss `2.46875` and final loss `0.00013215476064942777` after 200 updates.
 The [training acceptance report](docs/metal-training.md) separates software acceptance from optional local Metal execution.
-`lo run` and `lo serve` select interpreter execution.
-P009 selects their removal in I014 through I018.
-The [single-runtime plan](docs/single-runtime-plan.md) retains the Go compiler frontend and one Rust application runtime.
-Its selected workflow is `lo build`, then the produced program's `run` or `serve` command.
-The current interpreter remains until that implementation completes.
+
+The compiler supplies `parse`, `check`, `inspect`, and `build`.
+Applications execute through the produced program's `run` or `serve` command.
+The [single-runtime plan](docs/single-runtime-plan.md) defines the Go frontend and single Rust application runtime.
+The [native embedding guide](docs/native-embedding.md) defines compiled entry ownership and diagnostics.
 
 ## Core Idea
 
@@ -397,8 +406,10 @@ The reference implementation has these commands:
 lo parse examples/list_sum.lo
 lo check examples/list_sum.lo
 lo inspect examples/agent_file_workflow.lo
-lo run examples/list_sum.lo
-lo serve examples/http_division.lo --listen 8080
+lo build examples/list_sum.lo --output ./bin/list_sum
+./bin/list_sum run
+lo build examples/http_division.lo --output ./bin/http_division
+./bin/http_division serve --listen 8080
 ```
 
 The most important command is:
@@ -415,15 +426,17 @@ Applications can parse declared flags with `CLI.parse` and write lines through c
 A final `Program.Exit` result selects the application status after output and resource cleanup.
 The [CLI contract](docs/cli-runtime-design.md) defines text, JSON, quotas, and embedding behavior.
 
-`Program.path` observes the source entry or actual native executable.
+`Program.path` observes the actual executable or an explicitly injected native entry identity.
 Committed `Lock.File` targets require exact host lock authority and retain their leases through application cleanup.
 The [lock contract](docs/program-lock-design.md) defines identity checks, contention, and embedding ownership.
 
 Run the [mode selection example](docs/examples/cli-cleanup-preview.lo) inside this repository:
 
 ```sh
-bin/lo run docs/examples/cli-cleanup-preview.lo -- --help
-bin/lo run docs/examples/cli-cleanup-preview.lo -- --dry-run
+LO_BUILD_ROOT="$PWD/_scratch/build-state" bin/lo build docs/examples/cli-cleanup-preview.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/cli-cleanup-preview
+./bin/cli-cleanup-preview run -- --help
+LO_BUILD_ROOT="$PWD/_scratch/build-state" bin/lo build docs/examples/cli-cleanup-preview.lo --toolchain _scratch/native-runtime/distribution/toolchain.json --output ./bin/cli-cleanup-preview
+./bin/cli-cleanup-preview run -- --dry-run
 ```
 
 The example performs no cleanup.
@@ -501,7 +514,7 @@ The inspection report includes:
 
 ### Milestone 3: Minimal Interpreter
 
-The interpreter executes pure expressions and File workflows.
+The native runtime executes pure expressions and File workflows.
 
 Initial support:
 
@@ -523,7 +536,8 @@ Initial support:
 Command:
 
 ```bash
-lo run examples/count_letter.lo
+lo build examples/count_letter.lo --output ./bin/count_letter
+./bin/count_letter run
 ```
 
 ### Milestone 4: Commit and HTTP
@@ -548,7 +562,8 @@ Initial support:
 Command:
 
 ```bash
-lo serve examples/http_division.lo
+lo build examples/http_division.lo --output ./bin/http_division
+./bin/http_division serve
 ```
 
 ### Milestone 5: Native Compilation
@@ -652,13 +667,13 @@ The [F024 evidence](docs/evidence/process-context-cleanup/checkpoint.json) recor
 Package helpers and a local Docker-like protocol qualify the bounded profile, rather than installed package managers or Docker/buildx.
 The [package-cache example](docs/examples/package-cache-cleanup.lo) uses context overrides, optional discovery, and sequential command activation.
 
-One canonical session owns Process, participating File adapters, and shutdown for interpreter, generated-native, and server execution.
+One canonical session owns Process, participating File adapters, and shutdown for compiled program and server execution.
 `Close(ctx)` starts one shutdown owner. `WaitRetained()` joins it when the caller deadline expires.
 Trusted Go embeddings can supply a driver through the [lifecycle and registry APIs](docs/adapter-design.md#executable-registry-phase).
 The [implementation evidence](docs/evidence/adapter-implementation-review.json) keeps earlier CI and injected execution results separate from current public acceptance.
 
 The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
-The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, interpreter tests, and native tests.
+The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, and compiled-program tests.
 The [mac-cleanup plan](docs/mac-cleanup-plan.md) records application requirements and acceptance criteria.
 The [full cleanup source](docs/examples/mac-cleanup.lo) contains the cleanup policy in Lo application code.
 Its [application design](docs/mac-cleanup-script-design.md) identifies implemented operations and proposed interfaces.

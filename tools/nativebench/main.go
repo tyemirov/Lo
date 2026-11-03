@@ -1,8 +1,9 @@
-// Command nativebench emits paired execution benchmarks from the fixed corpus.
+// Command nativebench emits native execution fixtures and independent oracle metadata.
 package main
 
 import (
 	_ "embed"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/MarcoPoloResearchLab/Lo/tests/corpus"
@@ -61,24 +62,15 @@ func run(out string) error {
 		if err := write(filepath.Join(dir, "allocation.c"), nativeAllocationHarness); err != nil {
 			return err
 		}
-		test := fmt.Sprintf(`package fixture
-import("context";"testing";"github.com/MarcoPoloResearchLab/Lo/internal/compiler";"github.com/MarcoPoloResearchLab/Lo/internal/eval";"github.com/MarcoPoloResearchLab/Lo/internal/execution"
-"github.com/MarcoPoloResearchLab/Lo/internal/device";"github.com/MarcoPoloResearchLab/Lo/internal/source";"github.com/MarcoPoloResearchLab/Lo/internal/value")
-type boundary struct{execution.Boundary}
-func(boundary)Read(context.Context,value.Text)(value.Bytes,error){return nil,execution.Denied("read","benchmark")}
-func(boundary)Commit(context.Context,value.Target)(value.Value,error){return nil,execution.Denied("commit","benchmark")}
-var sink value.Value
-func BenchmarkExecution(b *testing.B){
- file,err:=source.New(%q,%q);if err!=nil{b.Fatal(err)};p,d:=compiler.Check(file);if d!=nil{b.Fatal(d)}
- interpreted,err:=eval.Program(p);if err!=nil{b.Fatal(err)}
- policy:=execution.DefaultBudgetInput();policy.Steps=10000000;budget,err:=execution.NewBudget(policy);if err!=nil{b.Fatal(err)}
- reference,err:=interpreted.Run(context.Background(),boundary{},budget,device.DefaultConfig());if err!=nil{b.Fatal(err)}
- expected:=value.TextResult(reference);if independent:=%q;independent!=""&&expected!=independent{b.Fatalf("reference %%s want %%s",expected,independent)}
- b.ReportAllocs();b.ResetTimer();for b.Loop(){v,err:=interpreted.Run(context.Background(),boundary{},budget,device.DefaultConfig());if err!=nil{b.Fatal(err)};sink=v}
-}
-
-`, fixture.Name+".lo", fixture.Source, fixture.Expected)
-		if err := write(filepath.Join(dir, "program_test.go"), test); err != nil {
+		oracle := map[string]string{"kind": "exact", "expected": fixture.Expected}
+		if fixture.Name == "training_mvp" || fixture.Name == "training_dense" {
+			oracle = map[string]string{"kind": fixture.Name}
+		}
+		data, err := json.Marshal(oracle)
+		if err != nil {
+			return err
+		}
+		if err := write(filepath.Join(dir, "oracle.json"), string(data)+"\n"); err != nil {
 			return err
 		}
 		if err := write(filepath.Join(dir, "source.lo"), fixture.Source); err != nil {

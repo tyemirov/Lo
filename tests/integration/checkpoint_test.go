@@ -64,38 +64,3 @@ func TestCheckpointFreshProcess(t *testing.T) {
 		})
 	}
 }
-
-func TestCheckpointRejectsInvalidData(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "model.json")
-	successfulValue(t, runValue(t, checkpointWriteSource("Parameters", path), "--write-root", dir))
-	valid, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, tc := range []struct{ name, data, kind string }{
-		{"truncated", string(valid[:len(valid)-1]), "Checkpoint.InvalidData"},
-		{"trailing", string(valid) + "{}", "Checkpoint.InvalidData"},
-		{"whitespace", " " + string(valid), "Checkpoint.InvalidData"},
-		{"duplicate", strings.Replace(string(valid), `"dtype":"fp32"`, `"dtype":"fp32","dtype":"fp32"`, 1), "Checkpoint.InvalidData"},
-		{"extra", strings.Replace(string(valid), `"dtype":"fp32"`, `"extra":true,"dtype":"fp32"`, 1), "Checkpoint.InvalidData"},
-		{"dtype", strings.Replace(string(valid), `"fp32"`, `"fp16"`, 1), "Checkpoint.SchemaMismatch"},
-		{"shape", strings.Replace(string(valid), `"shape":["2"]`, `"shape":["1","2"]`, 1), "Checkpoint.SchemaMismatch"},
-		{"field", strings.ReplaceAll(string(valid), `"x":`, `"y":`), "Checkpoint.SchemaMismatch"},
-		{"nonfinite", strings.Replace(string(valid), `"values":["1","-2"]`, `"values":["NaN","-2"]`, 1), "Checkpoint.InvalidData"},
-		{"device", strings.Replace(string(valid), `"cpu"`, `"metal:0"`, 1), "Checkpoint.SchemaMismatch"},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			if tc.data == string(valid) {
-				t.Fatal("invalid-data fixture did not change")
-			}
-			setup, typ := checkpointSetup("Parameters")
-			source := fmt.Sprintf(`flow Run() -> %s! { %s restored=Checkpoint.decode(Bytes.new(%q),original); effect=File.Write.new(File.Path.new("never"),Bytes.new("bad")); commit effect; return restored }; return Run()`, typ, setup, tc.data)
-			boundary := &observedBoundary{}
-			_, err := evaluate(t, source, boundary)
-			if err == nil || !strings.Contains(err.Error(), tc.kind) || boundary.commits != 0 {
-				t.Fatalf("invalid checkpoint: %v commits=%d", err, boundary.commits)
-			}
-		})
-	}
-}

@@ -75,7 +75,7 @@ func TestAdapterServerFailureContext(t *testing.T) {
 func TestAdapterServerStartupFailureContext(t *testing.T) {
 	root := fileFixtureRoot(t)
 	program := `flow Handle(request:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,"ok")}; flow OnError(error:Error)->HTTP.Response{return HTTP.Response.Text.new(500,"error")}; flow Main()->Int!{server=HTTP.Server.new(0,Handle,OnError); commit server; ` + processGateSource(root) + `commit target; return 0}; return Main()`
-	got := run(t, "serve", sourceFile(t, program), "--listen", "0", "--format", "json")
+	got := runProgram(t, sourceFile(t, program), "serve", "--listen", "0", "--format", "json")
 	assertServerProcessFailure(t, got, "HTTP.listen")
 }
 
