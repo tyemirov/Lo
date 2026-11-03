@@ -12,53 +12,18 @@ import subprocess
 import sys
 
 from prepare import LOCK, ROOT, RUST_COMPONENTS, digest, local, pin_file, tree_digest
+from metal_assets import BRIDGE_SOURCES, KERNEL_SOURCES, LIBRARY, MANIFEST, validate_assets
 
 TARGETS = {'darwin/arm64': 'aarch64-apple-darwin', 'linux/arm64': 'aarch64-unknown-linux-gnu'}
 
 
-METAL_FILES = {
-    'internal/device/metal_bridge.h',
-    'internal/device/metal_bridge_darwin.m',
-    'internal/device/metal_darwin.go',
-    'internal/device/metal_types.h',
-    'internal/metalconfig/config.go',
-    'runtime/metal/embed.go',
-    'runtime/metal/kernels.metal',
-    'runtime/metal/metal.metallib',
-    'tools/metalbuild/main.go',
-}
-METAL_LIBRARY = 'runtime/metal/metal.metallib'
-METAL_MANIFEST = 'runtime/metal/manifest.json'
+METAL_FILES = KERNEL_SOURCES | BRIDGE_SOURCES | {LIBRARY}
 
 
 def metal_assets() -> tuple[bytes, dict[str, object], dict[str, object]]:
-    manifest = local(ROOT / METAL_MANIFEST)
-    producer = local(ROOT / 'bin/lo-metal-build.json')
-    if not all(local(ROOT / name).is_file() for name in (*METAL_FILES, METAL_MANIFEST, 'bin/lo-metal-build.json')):
-        raise ValueError('Metal requires the prepared kernel assets and producer receipt from make build-metal')
-    record = json.loads(manifest.read_text())
-    receipt = json.loads(producer.read_text())
-    if set(record) != {'identity', 'files'}:
-        raise ValueError('Metal asset manifest has an incorrect field set')
-    identity, files = record['identity'], record['files']
-    identity_fields = {'profile', 'xcode', 'sdk', 'clang', 'metal_compiler', 'kernel_linker',
-                       'deployment_target', 'kernel_flags', 'kernel_sha256'}
-    if set(identity) != identity_fields or set(files) != METAL_FILES:
-        raise ValueError('Metal assets have an incorrect identity or source set')
-    if identity['profile'] != 'metal-fp32' or identity['deployment_target'] != '27.0':
-        raise ValueError('Metal assets use an unsupported numeric profile')
-    verified_sources = METAL_FILES | {METAL_MANIFEST}
-    for name in sorted(verified_sources):
-        source = local(ROOT / name)
-        if digest(source) != receipt['source_sha256'].get(name):
-            raise ValueError(f'Metal producer source identity differs: {name}')
-        if name in METAL_FILES and digest(source) != files[name]:
-            raise ValueError(f'Metal asset source differs: {name}')
-    library = local(ROOT / METAL_LIBRARY).read_bytes()
-    if files[METAL_LIBRARY] != identity['kernel_sha256'] or receipt['metallib_sha256'] != identity['kernel_sha256']:
-        raise ValueError('Metal kernel identity differs from its producer receipt')
-    return library, identity, {'manifest': pin_file(manifest), 'producer': pin_file(producer),
-                               'sources': {name: pin_file(local(ROOT / name)) for name in sorted(verified_sources)}}
+    library, identity = validate_assets(ROOT)
+    return library, identity, {'manifest': pin_file(local(ROOT / MANIFEST)),
+                               'sources': {name: pin_file(local(ROOT / name)) for name in sorted(METAL_FILES)}}
 
 
 def metal_archive(preparation: Path, tools: dict[str, dict[str, str]], archive: Path,
@@ -67,7 +32,7 @@ def metal_archive(preparation: Path, tools: dict[str, dict[str, str]], archive: 
     work.mkdir(parents=True, exist_ok=True)
     compiler = str(local(Path(tools['clang']['path'])))
     headers = local(ROOT / 'runtime/native/include')
-    bridge = local(ROOT / 'internal/device/metal_bridge_darwin.m')
+    bridge = local(ROOT / 'runtime/native/host/metal/metal_bridge_darwin.m')
     embedding = local(work / 'kernel.c')
     embedding.write_text('#include <stddef.h>\nconst unsigned char lo_native_metal_kernel_bytes[]={'
                          + ','.join(f'0x{byte:02x}' for byte in library)
@@ -143,8 +108,8 @@ def process_archive(preparation: Path, tools: dict[str, dict[str, str]], archive
     headers = local(ROOT / 'runtime/native/include')
     environment = {'CI': '1', 'PATH': '', 'TMPDIR': str(work)}
     sources = [('transport', ROOT / 'runtime/native/src/process_transport.c', []),
-               ('launcher', ROOT / 'internal/processhost/native/launcher.c', ['-Dmain=lo_process_launcher_main']),
-               ('normalization', ROOT / 'internal/processhost/native/normalization.c', [])]
+               ('launcher', ROOT / 'runtime/native/host/process/launcher.c', ['-Dmain=lo_process_launcher_main']),
+               ('normalization', ROOT / 'runtime/native/host/process/normalization.c', [])]
     objects = []
     for name, source, defines in sources:
         output = local(work / (name + '.o'))
@@ -216,7 +181,7 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
         from platforms import verify_platform
         verify_platform(preparation)
     source_digest = tree_digest(local(ROOT / 'runtime/native'))
-    process_sources = {name: pin_file(local(ROOT / 'internal/processhost/native' / name))
+    process_sources = {name: pin_file(local(ROOT / 'runtime/native/host/process' / name))
                        for name in ('launcher.c', 'normalization.c', 'protocol.h')}
     tools = json.loads(local(preparation / 'tools.json').read_text())
     if tools['version'] != '21.1.8' or tools['archive'] != lock['artifacts'][0]:
@@ -323,11 +288,11 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
     manifest = local(output / 'toolchain.json')
     if tree_digest(local(ROOT / 'runtime/native')) != source_digest:
         raise ValueError('runtime source changed during build')
-    if process_sources != {name: pin_file(local(ROOT / 'internal/processhost/native' / name))
+    if process_sources != {name: pin_file(local(ROOT / 'runtime/native/host/process' / name))
                            for name in process_sources}:
         raise ValueError('process source changed during build')
     if metal_inputs is not None and metal_assets()[2] != metal_provenance:
-        raise ValueError('Metal producer inputs changed during build')
+        raise ValueError('Metal kernel or native bridge inputs changed during build')
     manifest.write_text(json.dumps(distribution, indent=2) + '\n')
     provenance = {'runtime_source_sha256': source_digest, 'rust': rust,
                   'llvm': tools, 'cargo_environment': environment, 'manifest_sha256': digest(manifest),

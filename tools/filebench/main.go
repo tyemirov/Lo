@@ -21,12 +21,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/MarcoPoloResearchLab/Lo/internal/adapter"
-	"github.com/MarcoPoloResearchLab/Lo/internal/compiler"
-	"github.com/MarcoPoloResearchLab/Lo/internal/eval"
-	"github.com/MarcoPoloResearchLab/Lo/internal/runner"
-	"github.com/MarcoPoloResearchLab/Lo/internal/source"
 )
 
 const (
@@ -42,22 +36,13 @@ const (
 var knownCases = []string{"startup", "list", "scan", "remove", "checked-remove", "read", "write", "append", "append-many", "directories", "open-paths"}
 
 type configuration struct {
-	work, compiler, toolchain, backend, cases, sizes, ioSizes, directories, label string
-	samples, appendBytes                                                          int
-	timeout                                                                       time.Duration
-}
-
-type allocation struct {
-	Count            uint64 `json:"count"`
-	Bytes            uint64 `json:"bytes"`
-	RunNS            int64  `json:"runner_wall_ns"`
-	WorkerSHA        string `json:"worker_executable_sha256"`
-	RuntimeSourceSHA string `json:"worker_runtime_source_sha256"`
+	work, compiler, toolchain, cases, sizes, ioSizes, directories, label string
+	samples, appendBytes                                                 int
+	timeout                                                              time.Duration
 }
 
 type settings struct {
 	Cases           []string `json:"cases"`
-	Backends        []string `json:"backends"`
 	EntrySizes      []int    `json:"entry_sizes"`
 	PayloadSizes    []int    `json:"payload_sizes"`
 	DirectoryCounts []int    `json:"directory_counts"`
@@ -68,25 +53,22 @@ type settings struct {
 }
 
 type sample struct {
-	Case          string      `json:"case"`
-	Backend       string      `json:"backend"`
-	Size          int         `json:"size"`
-	Index         int         `json:"sample"`
-	SourceSHA     string      `json:"source_sha256"`
-	TemplateSHA   string      `json:"template_sha256"`
-	ProcessWallNS int64       `json:"process_wall_ns"`
-	PeakRSS       uint64      `json:"peak_rss_bytes"`
-	Status        int         `json:"exit_status"`
-	Expected      string      `json:"expected"`
-	Verified      bool        `json:"verified"`
-	Allocations   *allocation `json:"allocations"`
-	Pipeline      string      `json:"pipeline"`
-	Error         string      `json:"error,omitempty"`
+	Case          string `json:"case"`
+	Size          int    `json:"size"`
+	Index         int    `json:"sample"`
+	SourceSHA     string `json:"source_sha256"`
+	TemplateSHA   string `json:"template_sha256"`
+	ProcessWallNS int64  `json:"process_wall_ns"`
+	PeakRSS       uint64 `json:"peak_rss_bytes"`
+	Status        int    `json:"exit_status"`
+	Expected      string `json:"expected"`
+	Verified      bool   `json:"verified"`
+	Pipeline      string `json:"pipeline"`
+	Error         string `json:"error,omitempty"`
 }
 
 type summary struct {
 	Case        string `json:"case"`
-	Backend     string `json:"backend"`
 	Size        int    `json:"size"`
 	Samples     int    `json:"samples"`
 	MedianNS    int64  `json:"median_process_wall_ns"`
@@ -125,19 +107,6 @@ func (capture *boundedCapture) Write(data []byte) (int, error) {
 func (capture *boundedCapture) Bytes() []byte { return capture.buffer.Bytes() }
 
 func main() {
-	if adapter.HandleConsoleWriter(os.Args[1:]) {
-		return
-	}
-	if adapter.HandleFileProbe(os.Args[1:]) {
-		return
-	}
-	if len(os.Args) > 1 && os.Args[1] == "worker" {
-		if err := runWorker(os.Args[2:]); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		return
-	}
 	if err := execute(os.Args[1:], os.Stdout); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -150,7 +119,6 @@ func parse(args []string) (configuration, error) {
 	flags.StringVar(&c.work, "work", "", "existing owned directory inside Lo/_scratch")
 	flags.StringVar(&c.compiler, "compiler", "bin/lo", "compiler inside Lo")
 	flags.StringVar(&c.toolchain, "toolchain", "", "native toolchain manifest inside Lo")
-	flags.StringVar(&c.backend, "backend", "all", "all, interpreter, or native")
 	flags.StringVar(&c.cases, "cases", "startup,list,scan,remove,checked-remove,read,write,append,append-many,directories", "comma-separated workloads")
 	flags.StringVar(&c.sizes, "sizes", "100,1000,5000", "entry or append-commit counts; at most 10001")
 	flags.StringVar(&c.ioSizes, "io-sizes", "4096,65536,1048576", "payload bytes; at most 16777217")
@@ -175,9 +143,6 @@ func parse(args []string) (configuration, error) {
 		}
 		seen[name] = true
 	}
-	if c.backend != "all" && c.backend != "interpreter" && c.backend != "native" {
-		return c, fmt.Errorf("unknown backend %q", c.backend)
-	}
 	if c.samples < 1 || c.samples > maxSamples || c.appendBytes < 1 || c.appendBytes > 4096 || c.timeout <= 0 || c.timeout > 10*time.Minute {
 		return c, fmt.Errorf("sample, append, or timeout bound exceeded")
 	}
@@ -200,6 +165,14 @@ func rootDirectory() (string, error) {
 		}
 		current = parent
 	}
+}
+
+func toolPath(path string) (string, error) {
+	absolute, err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+	return filepath.EvalSymlinks(absolute)
 }
 
 func contained(root, path string) (string, error) {
@@ -315,12 +288,12 @@ func execute(args []string, stdout io.Writer) error {
 	if relative, err := filepath.Rel(filepath.Join(root, "_scratch"), work); err != nil || !filepath.IsLocal(relative) {
 		return fmt.Errorf("work must stay inside Lo/_scratch")
 	}
-	c.compiler, err = contained(root, c.compiler)
+	c.compiler, err = toolPath(c.compiler)
 	if err != nil {
 		return err
 	}
-	if c.backend != "interpreter" {
-		c.toolchain, err = contained(root, c.toolchain)
+	{
+		c.toolchain, err = toolPath(c.toolchain)
 		if err != nil {
 			return err
 		}
@@ -342,32 +315,19 @@ func execute(args []string, stdout io.Writer) error {
 		return err
 	}
 	r := report{Label: c.label, Work: run, Status: "running", Environment: map[string]string{"os": runtime.GOOS, "arch": runtime.GOARCH, "go": runtime.Version(), "logical_cpus": strconv.Itoa(runtime.NumCPU())}, Methods: map[string]string{
-		"process_wall_ns":         "fresh public CLI process including startup, runtime admission, evaluation, cleanup, and scalar JSON result; native compilation excluded; interpreter CLI includes frontend compilation",
-		"peak_rss_bytes":          "per-child getrusage maximum resident set; macOS bytes, Linux KiB converted to bytes; includes CLI admission and startup",
-		"interpreter_allocations": "separate fresh worker linked from current checkout; compile before observation; runtime.ReadMemStats deltas across runner.Execute including host setup, execution, cleanup, and scalar serialization; worker executable/runtime-source hashes identify its implementation, which may differ from configured CLI compiler; no cross-implementation allocator ratio is claimed; worker result and filesystem independently verified",
-		"native_allocations":      "not collected by generic CLI runner; commit-scoped native allocator regression supplies separate removal allocation evidence",
-		"cache":                   "freshly prepared fixtures before each invocation; filesystem cache uncontrolled and normally warm after fixture writes; no global cache purge; first sample retained; no subtraction or discarded samples",
-		"bounds":                  "default host resource quotas; sequential directory observations release after each callback; fixed read/write/append pipelines model distinct live values and their headers; child stdout/stderr capped at 8 MiB each",
-		"summary":                 "median uses the midpoint for even sample counts; p95 uses nearest rank; all samples retained",
+		"process_wall_ns":    "fresh public CLI process including startup, runtime admission, evaluation, cleanup, and scalar JSON result; native compilation excluded",
+		"peak_rss_bytes":     "per-child getrusage maximum resident set; macOS bytes, Linux KiB converted to bytes; includes CLI admission and startup",
+		"native_allocations": "not collected by generic CLI runner; commit-scoped native allocator regression supplies separate removal allocation evidence",
+		"cache":              "freshly prepared fixtures before each invocation; filesystem cache uncontrolled and normally warm after fixture writes; no global cache purge; first sample retained; no subtraction or discarded samples",
+		"bounds":             "default host resource quotas; sequential directory observations release after each callback; fixed read/write/append pipelines model distinct live values and their headers; child stdout/stderr capped at 8 MiB each",
+		"summary":            "median uses the midpoint for even sample counts; p95 uses nearest rank; all samples retained",
 	}, Identities: map[string]string{}}
 	inputs := map[string]string{"compiler_sha256": c.compiler}
-	runtimeIdentity, runtimeInputs, err := runtimeSourceIdentity(root)
-	if err != nil {
-		return err
-	}
-	r.Identities["worker_runtime_source_sha256"] = runtimeIdentity
-	for key, path := range runtimeInputs {
-		inputs[key] = path
-		r.Identities[key], err = digest(path)
-		if err != nil {
-			return err
-		}
-	}
 	self, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	self, err = contained(root, self)
+	self, err = toolPath(self)
 	if err != nil {
 		return err
 	}
@@ -389,7 +349,7 @@ func execute(args []string, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if c.backend != "interpreter" {
+	{
 		r.Identities["toolchain_sha256"], err = digest(c.toolchain)
 		if err != nil {
 			return err
@@ -409,7 +369,7 @@ func execute(args []string, stdout io.Writer) error {
 		if !ok {
 			return fmt.Errorf("toolchain lacks host target")
 		}
-		archive, err := contained(root, filepath.Join(filepath.Dir(c.toolchain), target.Runtime.Path))
+		archive, err := toolPath(filepath.Join(filepath.Dir(c.toolchain), target.Runtime.Path))
 		if err != nil {
 			return err
 		}
@@ -419,11 +379,7 @@ func execute(args []string, stdout io.Writer) error {
 		}
 		inputs["runtime_sha256"] = archive
 	}
-	backends := []string{"interpreter", "native"}
-	if c.backend != "all" {
-		backends = []string{c.backend}
-	}
-	r.Requested = settings{Cases: strings.Split(c.cases, ","), Backends: backends, EntrySizes: entrySizes, PayloadSizes: ioSizes, DirectoryCounts: directoryCounts, Samples: c.samples, AppendBytes: c.appendBytes, MaxSteps: stepBudget, ChildTimeoutNS: c.timeout.Nanoseconds()}
+	r.Requested = settings{Cases: strings.Split(c.cases, ","), EntrySizes: entrySizes, PayloadSizes: ioSizes, DirectoryCounts: directoryCounts, Samples: c.samples, AppendBytes: c.appendBytes, MaxSteps: stepBudget, ChildTimeoutNS: c.timeout.Nanoseconds()}
 	for _, name := range strings.Split(c.cases, ",") {
 		sizes := entrySizes
 		switch name {
@@ -435,9 +391,9 @@ func execute(args []string, stdout io.Writer) error {
 			sizes = directoryCounts
 		}
 		for _, size := range sizes {
-			for _, backend := range backends {
-				if err := measure(c, root, run, name, size, backend, &r); err != nil {
-					r.Status, r.Error = "failed", fmt.Sprintf("%s/%d/%s: %v", name, size, backend, err)
+			{
+				if err := measure(c, root, run, name, size, &r); err != nil {
+					r.Status, r.Error = "failed", fmt.Sprintf("%s/%d: %v", name, size, err)
 					if reportErr := saveReport(run, r, stdout); reportErr != nil {
 						return errors.Join(err, reportErr)
 					}
@@ -475,8 +431,8 @@ func saveReport(directory string, r report, stdout io.Writer) error {
 	return err
 }
 
-func measure(c configuration, root, run, name string, size int, backend string, r *report) (resultErr error) {
-	directory, err := os.MkdirTemp(run, fmt.Sprintf("%s-%d-%s-", name, size, backend))
+func measure(c configuration, root, run, name string, size int, r *report) (resultErr error) {
+	directory, err := os.MkdirTemp(run, fmt.Sprintf("%s-%d-", name, size))
 	if err != nil {
 		return err
 	}
@@ -494,9 +450,9 @@ func measure(c configuration, root, run, name string, size int, backend string, 
 		return err
 	}
 	templateHash := sha256.Sum256([]byte(w.canonicalSource()))
-	executable, arguments := c.compiler, append([]string{"run", sourcePath}, w.args...)
-	if backend == "native" {
-		executable = filepath.Join(directory, "program")
+	executable := filepath.Join(directory, "program")
+	arguments := append([]string{"run"}, w.args...)
+	{
 		ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 		out, errOut, status, _, _, err := child(ctx, root, c.compiler, "build", sourcePath, "--toolchain", c.toolchain, "--output", executable, "--format", "json")
 		cancel()
@@ -514,12 +470,9 @@ func measure(c configuration, root, run, name string, size int, backend string, 
 		ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 		out, errOut, status, elapsed, rss, err := child(ctx, root, executable, arguments...)
 		cancel()
-		s := sample{Case: name, Backend: backend, Size: size, Index: index, SourceSHA: sourceHash, TemplateSHA: hex.EncodeToString(templateHash[:]), ProcessWallNS: elapsed, PeakRSS: rss, Status: status, Expected: w.expected, Pipeline: w.pipeline}
+		s := sample{Case: name, Size: size, Index: index, SourceSHA: sourceHash, TemplateSHA: hex.EncodeToString(templateHash[:]), ProcessWallNS: elapsed, PeakRSS: rss, Status: status, Expected: w.expected, Pipeline: w.pipeline}
 		if err == nil {
 			err = w.verify(out, errOut, status)
-		}
-		if err == nil && backend == "interpreter" {
-			s.Allocations, err = measureAllocations(c, root, directory, sourcePath, index, status, w)
 		}
 		s.Verified = err == nil
 		if err != nil {
@@ -527,7 +480,7 @@ func measure(c configuration, root, run, name string, size int, backend string, 
 		}
 		r.Samples = append(r.Samples, s)
 		if err != nil {
-			return fmt.Errorf("verify %s/%d/%s sample %d: %w", name, size, backend, index, err)
+			return fmt.Errorf("verify %s/%d sample %d: %w", name, size, index, err)
 		}
 		wall = append(wall, elapsed)
 		maxRSS = max(maxRSS, rss)
@@ -540,152 +493,6 @@ func measure(c configuration, root, run, name string, size int, backend string, 
 	if finalSource != sourceHash {
 		return fmt.Errorf("workload source changed during execution: %s", sourcePath)
 	}
-	r.Summary = append(r.Summary, summary{Case: name, Backend: backend, Size: size, Samples: len(wall), MedianNS: (wall[len(wall)/2] + wall[(len(wall)-1)/2]) / 2, P95NS: wall[int(math.Ceil(float64(len(wall))*0.95))-1], MaxRSSBytes: maxRSS})
+	r.Summary = append(r.Summary, summary{Case: name, Size: size, Samples: len(wall), MedianNS: (wall[len(wall)/2] + wall[(len(wall)-1)/2]) / 2, P95NS: wall[int(math.Ceil(float64(len(wall))*0.95))-1], MaxRSSBytes: maxRSS})
 	return nil
-}
-
-func measureAllocations(c configuration, root, directory, sourcePath string, index, status int, w *workload) (*allocation, error) {
-	if err := w.prepare(); err != nil {
-		return nil, fmt.Errorf("prepare allocation worker fixture: %w", err)
-	}
-	self, err := os.Executable()
-	if err != nil {
-		return nil, fmt.Errorf("locate allocation worker: %w", err)
-	}
-	statsPath := filepath.Join(directory, fmt.Sprintf("allocation-%d.json", index))
-	workerArgs := append([]string{"worker", sourcePath, statsPath}, append([]string{"run"}, w.args...)...)
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	workerOut, workerErr, workerStatus, _, _, err := child(ctx, root, self, workerArgs...)
-	cancel()
-	if err != nil {
-		return nil, fmt.Errorf("run allocation worker: %w", err)
-	}
-	data, err := os.ReadFile(statsPath)
-	if err != nil {
-		return nil, fmt.Errorf("read worker allocation metrics: %w; stderr=%s", err, workerErr)
-	}
-	var stats struct {
-		Allocation allocation `json:"allocation"`
-		Status     int        `json:"status"`
-	}
-	if err := json.Unmarshal(data, &stats); err != nil {
-		return nil, fmt.Errorf("decode worker allocation metrics: %w", err)
-	}
-	if workerStatus != 0 || stats.Status != status {
-		return nil, fmt.Errorf("allocation worker status=%d execution=%d expected=%d stderr=%s", workerStatus, stats.Status, status, workerErr)
-	}
-	if err := w.verify(workerOut, workerErr, stats.Status); err != nil {
-		return nil, fmt.Errorf("verify allocation worker: %w", err)
-	}
-	return &stats.Allocation, nil
-}
-
-func runWorker(args []string) error {
-	if len(args) < 3 {
-		return fmt.Errorf("worker requires source, metrics path, and runtime arguments")
-	}
-	root, err := rootDirectory()
-	if err != nil {
-		return err
-	}
-	sourcePath, err := contained(root, args[0])
-	if err != nil {
-		return err
-	}
-	statsDirectory, err := contained(root, filepath.Dir(args[1]))
-	if err != nil {
-		return fmt.Errorf("worker metrics directory must stay inside Lo/_scratch: %w", err)
-	}
-	if relative, err := filepath.Rel(filepath.Join(root, "_scratch"), statsDirectory); err != nil || !filepath.IsLocal(relative) {
-		return fmt.Errorf("worker metrics directory must stay inside Lo/_scratch")
-	}
-	data, err := os.ReadFile(sourcePath)
-	if err != nil {
-		return err
-	}
-	input, err := source.New(sourcePath, string(data))
-	if err != nil {
-		return err
-	}
-	checked, problem := compiler.Check(input)
-	if problem != nil {
-		return problem
-	}
-	program, err := eval.Program(checked)
-	if err != nil {
-		return err
-	}
-	self, err := os.Executable()
-	if err != nil {
-		return err
-	}
-	workerSHA, err := digest(self)
-	if err != nil {
-		return err
-	}
-	runtimeSHA, _, err := runtimeSourceIdentity(root)
-	if err != nil {
-		return err
-	}
-	runtime.GC()
-	var before, after runtime.MemStats
-	runtime.ReadMemStats(&before)
-	start := time.Now()
-	console, err := adapter.OpenCLIConsole(context.Background(), adapter.ConsoleOptions{Format: adapter.ConsoleText, MaxBytes: adapter.DefaultConsoleBytes}, os.Stdout, os.Stderr)
-	if err != nil {
-		return err
-	}
-	status := runner.Execute(program, args[2:], console)
-	elapsed := time.Since(start).Nanoseconds()
-	runtime.ReadMemStats(&after)
-	stats := struct {
-		Allocation allocation `json:"allocation"`
-		Status     int        `json:"status"`
-	}{allocation{Count: after.Mallocs - before.Mallocs, Bytes: after.TotalAlloc - before.TotalAlloc, RunNS: elapsed, WorkerSHA: workerSHA, RuntimeSourceSHA: runtimeSHA}, status}
-	encoded, err := json.Marshal(stats)
-	if err != nil {
-		return err
-	}
-	return write(filepath.Join(statsDirectory, filepath.Base(args[1])), encoded)
-}
-
-func runtimeSourceIdentity(root string) (string, map[string]string, error) {
-	inputs := map[string]string{"go.mod_sha256": filepath.Join(root, "go.mod"), "go.sum_sha256": filepath.Join(root, "go.sum")}
-	err := filepath.WalkDir(filepath.Join(root, "internal"), func(path string, entry os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if entry.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
-			return nil
-		}
-		resolved, err := contained(root, path)
-		if err != nil {
-			return err
-		}
-		relative, err := filepath.Rel(root, resolved)
-		if err != nil {
-			return err
-		}
-		inputs[filepath.ToSlash(relative)] = resolved
-		return nil
-	})
-	if err != nil {
-		return "", nil, err
-	}
-	keys := make([]string, 0, len(inputs))
-	for key := range inputs {
-		keys = append(keys, key)
-	}
-	slices.Sort(keys)
-	hash := sha256.New()
-	for _, key := range keys {
-		value, err := digest(inputs[key])
-		if err != nil {
-			return "", nil, err
-		}
-		if _, err := fmt.Fprintf(hash, "%s\x00%s\x00", key, value); err != nil {
-			return "", nil, err
-		}
-	}
-	return hex.EncodeToString(hash.Sum(nil)), inputs, nil
 }

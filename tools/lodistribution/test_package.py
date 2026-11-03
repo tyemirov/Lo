@@ -123,7 +123,9 @@ def test_package_rejects_stale_runtime_identities(state: Path, prepared_inputs: 
     elif subject == 'process':
         receipt['process_sources']['launcher.c']['sha256'] = '0' * 64
     else:
-        receipt['metal']['sources'] = {}
+        # The supplied distribution may be software-only. Exercise the current
+        # Metal inventory guard through the CLI without requiring that profile.
+        receipt['metal'] = {'manifest': {}, 'sources': {}}
     (changed / 'build-receipt.json').write_text(json.dumps(receipt))
     args = package_args(prepared, changed, state / 'out')
     if subject == 'metal':
@@ -277,3 +279,67 @@ runpy.run_path(script, run_name='__main__')
     assert 'source files changed during package construction' in result.stderr
     assert not output.exists()
     assert not output.with_suffix('.tar').exists()
+
+
+@pytest.mark.parametrize('scenario', ['current', 'old-producer', 'go-sources', 'kernel-drift', 'bridge-drift', 'compiled-drift'])
+def test_native_metal_package_provenance(state: Path, scenario: str) -> None:
+    # Exercise the real package admission boundary against an isolated source root.
+    # The fixture substitutes only the repository root, not an identity verifier.
+    script = r'''
+import hashlib,json,sys,shutil
+from pathlib import Path
+sys.path.insert(0,str(Path.cwd()/'tools/lodistribution'))
+import package as package, prepare
+state=Path(sys.argv[1])
+scenario=sys.argv[2]
+source=Path.cwd()
+for name in package.METAL_SOURCES|{package.MANIFEST}|{'runtime/native/host/process/'+name for name in package.PROCESS_SOURCES}:
+    target=state/name
+    target.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(source/name,target)
+package.ROOT=prepare.ROOT=state
+runtime=state/'runtime-bundle'
+runtime.mkdir()
+def pin(name):
+    return {'path':name,'sha256':package.digest(state/name)}
+identity=json.loads((state/package.MANIFEST).read_text())['identity']
+manifest={'metal':{'identity':identity,'kernel':{'sha256':identity['kernel_sha256']}}}
+(runtime/'toolchain.json').write_text(json.dumps(manifest))
+receipt={'manifest_sha256':package.digest(runtime/'toolchain.json'),
+         'runtime_source_sha256':package.tree_digest(state/'runtime/native'),
+         'process_sources':{name:pin('runtime/native/host/process/'+name) for name in package.PROCESS_SOURCES},
+         'metal':{'manifest':pin(package.MANIFEST),'sources':{name:pin(name) for name in package.METAL_SOURCES}}}
+if scenario=='old-producer':
+    receipt['metal']['producer']={'path':'bin/lo-metal-build.json','sha256':'0'*64}
+elif scenario=='go-sources':
+    receipt['metal']['sources']['internal/device/metal_darwin.go']={'path':'internal/device/metal_darwin.go','sha256':'0'*64}
+elif scenario in {'kernel-drift','bridge-drift'}:
+    name=package.LIBRARY if scenario=='kernel-drift' else 'runtime/native/host/metal/metal_bridge.h'
+    (state/name).write_bytes(b'changed current input')
+    receipt['runtime_source_sha256']=package.tree_digest(state/'runtime/native')
+elif scenario=='compiled-drift':
+    path=state/package.MANIFEST
+    record=json.loads(path.read_text())
+    record['compiled']['translation_unit_sha256']='0'*64
+    path.write_text(json.dumps(record))
+    receipt['metal']['manifest']=pin(package.MANIFEST)
+(runtime/'build-receipt.json').write_text(json.dumps(receipt))
+try:
+    package.validate_runtime(runtime,'metal')
+except ValueError as error:
+    print(str(error),file=sys.stderr)
+    raise SystemExit(1)
+print('native Metal provenance accepted')
+'''
+    result = subprocess.run([sys.executable, '-B', '-c', script, str(state), scenario],
+                            cwd=ROOT, stdin=subprocess.DEVNULL, capture_output=True, text=True)
+    if scenario == 'current':
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.strip() == 'native Metal provenance accepted'
+        assert not (state / 'bin/lo-metal-build.json').exists()
+    else:
+        assert result.returncode == 1
+        expected = {'old-producer': 'provenance field set', 'go-sources': 'source inventory',
+                    'kernel-drift': 'input digest differs', 'bridge-drift': 'input digest differs',
+                    'compiled-drift': 'compiled translation unit differs'}[scenario]
+        assert expected in result.stderr

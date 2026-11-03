@@ -1,13 +1,59 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"testing"
 )
 
 func TestMain(tests *testing.M) {
+	if mode := os.Getenv("LO_TEST_HTTP_ENVELOPE"); mode != "" && len(os.Args) > 1 && os.Args[1] == "serve" {
+		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			os.Exit(2)
+		}
+		server := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "10") })}
+		done := make(chan os.Signal, 1)
+		signal.Notify(done, syscall.SIGTERM)
+		go server.Serve(listener)
+		ready := map[string]any{"command": "serve", "status": "ready", "servers": []map[string]string{{"address": listener.Addr().String()}}}
+		switch mode {
+		case "ready-wrong-command":
+			ready["command"] = "run"
+		case "ready-missing-command":
+			delete(ready, "command")
+		case "ready-wrong-status":
+			ready["status"] = "stopped"
+		case "ready-missing-status":
+			delete(ready, "status")
+		case "ready-empty-servers":
+			ready["servers"] = []any{}
+		case "ready-bad-address":
+			ready["servers"] = []map[string]string{{"address": "external.invalid:80"}}
+		}
+		json.NewEncoder(os.Stdout).Encode(ready)
+		<-done
+		server.Close()
+		stopped := map[string]string{"command": "serve", "status": "stopped"}
+		switch mode {
+		case "stopped-wrong-command":
+			stopped["command"] = "run"
+		case "stopped-missing-command":
+			delete(stopped, "command")
+		case "stopped-wrong-status":
+			stopped["status"] = "ready"
+		case "stopped-missing-status":
+			delete(stopped, "status")
+		}
+		json.NewEncoder(os.Stdout).Encode(stopped)
+		return
+	}
 	if len(os.Args) == 2 && os.Args[1] == "--verify" {
 		output := os.Getenv("LO_TEST_NATIVE_VERIFICATION")
 		if output == "child-failure" {
@@ -111,6 +157,29 @@ func TestReadConfigRequiresCanonicalLaneSamplePlan(t *testing.T) {
 			}
 			if scenario.valid && c.SamplePlan["http"] != 100 {
 				t.Fatal("HTTP plan lost")
+			}
+		})
+	}
+}
+
+func TestHTTPProtocolEnvelopeBoundary(t *testing.T) {
+	for _, mode := range []string{"valid", "ready-wrong-command", "ready-missing-command", "ready-wrong-status", "ready-missing-status", "ready-empty-servers", "ready-bad-address", "stopped-wrong-command", "stopped-missing-command", "stopped-wrong-status", "stopped-missing-status"} {
+		t.Run(mode, func(t *testing.T) {
+			t.Setenv("LO_TEST_HTTP_ENVELOPE", mode)
+			child, err := startServer(config{}, fixture{Artifact: os.Args[0], Work: t.TempDir()})
+			if strings.HasPrefix(mode, "ready-") {
+				if err == nil {
+					child.close()
+					t.Fatal("invalid ready envelope accepted")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = child.close()
+			if (err == nil) != (mode == "valid") {
+				t.Fatalf("stopped envelope acceptance %s: %v", mode, err)
 			}
 		})
 	}
