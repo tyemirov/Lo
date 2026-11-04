@@ -2,24 +2,9 @@
 
 [Documentation](README.md) · [Philosophy](philosophy.md) · [Syntax](syntax.md) · [Operations](operations/README.md)
 
-This guide uses the repository checkout.
-All source files and build output in the procedure stay inside that checkout.
-The [distribution guide](compiler-distribution.md) defines compiler packages and supported targets.
-The [repository README](../README.md#build-and-validate) defines developer toolchain preparation.
+A Lo program can calculate values and return a result.
 
-## Prepare The Compiler
-
-For a source checkout with the documented Go toolchain, build the frontend:
-
-```sh
-make build
-```
-
-The resulting `bin/lo` supplies `parse`, `check`, `inspect`, and `build`.
-Parsing, type checking, and static inspection do not execute the application.
-Executable construction also needs the native toolchain described in the preparation guide.
-
-## Read A Complete Program
+## Calculate A Total
 
 The existing [list-sum example](../examples/list_sum.lo) contains:
 
@@ -29,40 +14,27 @@ total = numbers |> Math.sum()
 return total
 ```
 
-`numbers` and `total` are immutable bindings.
-`List.new` constructs a homogeneous list of integers.
-`|>` passes the list as the first argument to `Math.sum`.
-The final `return` supplies the program result, which is `10`.
+The first line constructs a list of four `Int` values and binds it to `numbers`.
+The second line calculates their sum and binds it to `total`.
+Both bindings are immutable.
 
-## Type Checking And Inspection
+The pipe operator `|>` supplies its left value as the first argument to the call on its right.
+Thus, `numbers |> Math.sum()` has the same meaning as `Math.sum(numbers)`.
+The result is `10`.
 
-From the repository root, execute:
+## Return The Program Result
 
-```sh
-./bin/lo check examples/list_sum.lo --format json
-./bin/lo inspect examples/list_sum.lo --format json
+At the top level, `return total` gives `10` to the host.
+The host is the application that executes the Lo program.
+It receives the returned value as the program result.
+
+The CLI displays the program result as text by default:
+
+```text
+10
 ```
 
-Type checking verifies references, argument types, fallibility, and transitive flow effects.
-Static inspection reports the program's operations and possible host requirements.
-Neither command evaluates the calculation or activates a target.
-If a command reports a diagnostic, correct the source before compilation.
-
-## Compile And Execute
-
-After native toolchain preparation, execute:
-
-```sh
-mkdir -p _scratch/tutorial
-LO_BUILD_ROOT="$PWD/_scratch/build-state" ./bin/lo build examples/list_sum.lo \
-  --toolchain _scratch/native-runtime/distribution/toolchain.json \
-  --output _scratch/tutorial/list-sum
-./_scratch/tutorial/list-sum run --format json
-```
-
-The compiler produces a native executable.
-That executable's `run` command returns the integer `10` in the result envelope.
-An installed compiler distribution uses its packaged toolchain, as described in its guide.
+This example returns the integer `10` and exits with status `0`.
 
 ## Add A Named Flow
 
@@ -76,6 +48,8 @@ return List.new(1, 2, 3) |> List.map(10, AddOffset)
 
 The result is the list `11, 12, 13`.
 `List.map` supplies the explicit context `10` before each element.
+For each element, `AddOffset` returns its result to `List.map`.
+The final return gives the complete list to the host.
 The callback is a pure named flow.
 The [syntax guide](syntax.md#flows-and-callbacks) explains flow signatures and callback rules.
 
@@ -87,8 +61,6 @@ For example, constructing `File.Write` does not write a file.
 Only a reached `commit` statement attempts the write under the host's grant.
 
 The [operation reference](operations/README.md) states the authority and failure behavior for each API.
-The [adapter guide](native-adapters.md) explains executable grant options.
-The [embedding guide](native-embedding.md) defines the narrower retained C ABI.
 
 ## Continue
 
@@ -97,3 +69,6 @@ The [embedding guide](native-embedding.md) defines the narrower retained C ABI.
 - [Alphabetical operation index](operations/README.md#alphabetical-index)
 - [Normative grammar](../specification.md#17-surface-grammar)
 - [XOR tutorial](xor-neural-network.md)
+- [Compiler installation and distribution](compiler-distribution.md)
+- [Native compilation and execution](native-compilation-contract.md)
+- [Development toolchain preparation](../README.md#build-and-validate)

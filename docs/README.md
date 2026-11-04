@@ -13,7 +13,7 @@ Proposed features remain outside the operation reference until the compiler and 
 | Question | Guide |
 | --- | --- |
 | Why does Lo use immutable values, named flows, and explicit commits? | [Philosophy](philosophy.md) |
-| How do I check, inspect, compile, and execute a first program? | [First program](getting-started.md) |
+| How do I write a first program and understand its result? | [First program](getting-started.md) |
 | How do I write expressions, types, flows, branches, and handlers? | [Syntax guide](syntax.md) |
 | What does each built-in operation accept and return? | [Operation reference](operations/README.md) |
 | What are the exact grammar and semantic rules? | [Language reference](../specification.md) |
