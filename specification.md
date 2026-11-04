@@ -5,6 +5,7 @@ This reference defines the implemented Lo v0.4 language contract.
 CPU execution and the selected Metal backend support training.
 Compiled executables use one Rust runtime for these language contracts.
 The [reference audit](docs/language-reference-audit.md) records implementation evidence and its scope.
+The [documentation home](docs/README.md) supplies the philosophy, syntax guide, and individual operation reference.
 
 ## Version and Scope
 
