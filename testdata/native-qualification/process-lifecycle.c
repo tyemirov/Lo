@@ -19,9 +19,15 @@ extern long read(int,void*,Size),write(int,const void*,Size);
 extern void *memcpy(void*,const void*,Size);
 struct timespec {long sec,nsec;};
 extern int nanosleep(const struct timespec*,struct timespec*);
-static unsigned entered,finished,joined,released,embedding,slot_status;
+static unsigned entered,finished,joined,released,embedding,slot_status,cancellation_seen;
 static int invalid;
 static int contains(const char *text,const char *needle){for(;*text;++text){Size i=0;while(needle[i]&&text[i]==needle[i])++i;if(!needle[i])return 1;}return 0;}
+static int quarantine_diagnostic(Context *context){
+ unsigned char diagnostic[8192];Size required=0;
+ if(lo_context_diagnostic(context,0,diagnostic,sizeof(diagnostic)-1,&required)!=LO_DIAGNOSTIC_OK || required>=sizeof(diagnostic))return 0;
+ diagnostic[required]=0;
+ return contains((const char*)diagnostic,"runtime.host-failure") && contains((const char*)diagnostic,"registry is quarantined");
+}
 static U32 number(const unsigned char *p){return ((U32)p[0]<<24)|((U32)p[1]<<16)|((U32)p[2]<<8)|p[3];}
 static int equal(const unsigned char *bytes,Size size,const char*text){Size n=0;while(text[n])++n;if(n!=size)return 0;for(Size i=0;i<size;++i)if(bytes[i]!=(unsigned char)text[i])return 0;return 1;}
 static int invocation(const unsigned char*frame,Size size,const unsigned char*input,Size input_size){
@@ -35,9 +41,9 @@ static void execute(Size token,const unsigned char*frame,Size frame_size,const u
  if(invocation(frame,frame_size,input,input_size))invalid=1;
  r->started=1;r->cleanup_complete=1;r->termination_kind=LO_CASE==1||LO_CASE==9?2:1;r->termination_value=LO_CASE==1||LO_CASE==9?15:73;r->stdin_written=input_size;
  if(LO_CASE==9){
-  const struct timespec pause={0,1000000};unsigned polls=0;
-  while(!cancelled(cancel) && polls++<5000)nanosleep(&pause,0);
-  if(!cancelled(cancel))invalid=2;
+  const struct timespec pause={0,1000000};
+  while(!cancelled(cancel))nanosleep(&pause,0);
+  __atomic_store_n(&cancellation_seen,1,__ATOMIC_SEQ_CST);
   r->stage=7;r->class_id=1;r->termination_kind=2;r->termination_value=15;r->stdout_size=7;
   memcpy(out,"partial",7);
  }else if(LO_CASE==2||LO_CASE==7||LO_CASE==8){
@@ -75,8 +81,15 @@ int main(void){
  int host=LO_CASE>=6;
  if(host){
   Context*c=context();if(!c)return 10;ResultSlot result={99,99,0};embedding=1;lo_context_run(c,&result);embedding=0;
-  if(result.status!=2||result.value||!__atomic_load_n(&finished,__ATOMIC_SEQ_CST))return 11;
-  if(!lo_context_process_close(c)||!lo_context_process_wait_retained(c)||lo_context_process_ownership(c))return 12;
+  if(result.status!=2)return 11;
+  if(result.value)return 13;
+  int closed=lo_context_close(c);
+  if(!__atomic_load_n(&finished,__ATOMIC_SEQ_CST))return 14;
+  U32 ownership=lo_context_process_ownership(c);
+  if(ownership==0){if(!closed)return 12;}
+  else if(ownership==4){if(closed||!quarantine_diagnostic(c))return 15;}
+  else return 16;
+  if(lo_context_close(c)!=closed)return 17;
   lo_context_free(c);
  }else {
   int capture_error=lo_capture_start();if(capture_error)return capture_error;
@@ -92,5 +105,6 @@ int main(void){
   }
  }
  if(invalid||__atomic_load_n(&entered,__ATOMIC_SEQ_CST)!=1||__atomic_load_n(&joined,__ATOMIC_SEQ_CST)!=1||__atomic_load_n(&released,__ATOMIC_SEQ_CST)!=1)return 30;
+ if(LO_CASE==9 && !__atomic_load_n(&cancellation_seen,__ATOMIC_SEQ_CST))return 32;
  return lo_runtime_live_values()||lo_runtime_live_contexts()?31:0;
 }

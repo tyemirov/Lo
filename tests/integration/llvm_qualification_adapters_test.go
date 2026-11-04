@@ -19,6 +19,15 @@ import (
 
 const nativeProcessLifecycleSource = `flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new("/command"));target=Process.Command.new(executable: executable, arguments: List.new("one two","$VALUE"), context: Process.Context.new(Map.new(Record.new(key:"ONLY",value:"explicit")), File.Path.new("/work")), stdin: Bytes.new("input"));result=commit target;return result};return Main()`
 
+const nativeProcessLifecycleTimeout = 15 * time.Second
+
+func verifyNativeProcessLifecycle(t *testing.T, got result) {
+	t.Helper()
+	if got.status != 0 || got.stdout != "" || got.stderr != "" {
+		t.Fatalf("native Process lifecycle: %+v", got)
+	}
+}
+
 func nativeProcessLifecycleScenarios(t *testing.T, cases []int) {
 	t.Helper()
 	names := []string{"exited", "signaled", "exact-stream-capacity", "partial-stdout", "early-stdin-close", "partial-start", "release-host-failure", "stdout-over-limit", "stderr-over-limit", "cancel-joins-owner"}
@@ -28,6 +37,10 @@ func nativeProcessLifecycleScenarios(t *testing.T, cases []int) {
 			t.Helper()
 			return []byte(strings.Replace(string(module), "define void @lo_entry(", "define void @lo_process_lifecycle_entry(", 1))
 		}})
+		if number == 9 {
+			scenarios[len(scenarios)-1].timeout = nativeProcessLifecycleTimeout
+			scenarios[len(scenarios)-1].verify = verifyNativeProcessLifecycle
+		}
 	}
 	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), scenarios)
 }
@@ -40,6 +53,76 @@ func TestLLVMProcessLifecycleFailures(t *testing.T) {
 	nativeProcessLifecycleScenarios(t, []int{3, 4, 5, 6})
 }
 func TestLLVMProcessLifecycleCancellation(t *testing.T) { nativeProcessLifecycleScenarios(t, []int{9}) }
+
+func TestLLVMProcessLifecycleRetainedCancellation(t *testing.T) {
+	nativeProcessLifecycleRetainedCancellation(t, semanticNativeTarget())
+}
+
+func TestLLVMLinuxProcessLifecycleRetainedCancellation(t *testing.T) {
+	nativeProcessLifecycleRetainedCancellation(t, "linux/arm64")
+}
+
+func TestLLVMProcessLifecycleFastCancellationPolling(t *testing.T) {
+	runLLVMRuntimeTargetScenarios(t, semanticNativeTarget(), []llvmRuntimeScenario{{
+		name: "driver-polls-until-owner-cancels", source: nativeProcessLifecycleSource,
+		number: 9, harness: "testdata/native-qualification/process-lifecycle.c",
+		timeout: nativeProcessLifecycleTimeout, verify: verifyNativeProcessLifecycle,
+		transform: func(t *testing.T, module []byte) []byte {
+			t.Helper()
+			return []byte(strings.Replace(string(module), "define void @lo_entry(", "define void @lo_process_lifecycle_entry(", 1))
+		},
+		harnessTransform: func(t *testing.T, source []byte) []byte {
+			t.Helper()
+			declaration := "extern int nanosleep(const struct timespec*,struct timespec*);"
+			injected := declaration + `
+static int poll_without_wait(const struct timespec *requested,struct timespec *remaining) {
+ (void)requested;(void)remaining;return 0;
+}
+#define nanosleep(requested,remaining) poll_without_wait(requested,remaining)`
+			text := strings.Replace(string(source), declaration, injected, 1)
+			if !strings.Contains(text, injected) {
+				t.Fatal("fast driver polling injection did not bind nanosleep")
+			}
+			return []byte(text)
+		},
+	}})
+}
+
+func nativeProcessLifecycleRetainedCancellation(t *testing.T, target string) {
+	t.Helper()
+	runLLVMRuntimeTargetScenarios(t, target, []llvmRuntimeScenario{{
+		name: "checked-close-joins-retained-owner", source: nativeProcessLifecycleSource,
+		number: 9, harness: "testdata/native-qualification/process-lifecycle.c",
+		timeout: nativeProcessLifecycleTimeout, verify: verifyNativeProcessLifecycle,
+		transform: func(t *testing.T, module []byte) []byte {
+			t.Helper()
+			return []byte(strings.Replace(string(module), "define void @lo_entry(", "define void @lo_process_lifecycle_entry(", 1))
+		},
+		harnessTransform: func(t *testing.T, source []byte) []byte {
+			t.Helper()
+			text := string(source)
+			declaration := `static int invalid;`
+			gate := `static int invalid;
+static unsigned allow_finish, close_entered;
+static int release_on_close(Context *context) {
+ if(!__atomic_exchange_n(&close_entered,1,__ATOMIC_SEQ_CST)) {
+  if(lo_context_process_ownership(context)!=5 || __atomic_load_n(&finished,__ATOMIC_SEQ_CST))invalid=8;
+  __atomic_store_n(&allow_finish,1,__ATOMIC_SEQ_CST);
+ }
+ return lo_context_close(context);
+}
+#define lo_context_close(context) release_on_close(context)`
+			text = strings.Replace(text, declaration, gate, 1)
+			completed := `memcpy(out,"partial",7);`
+			text = strings.Replace(text, completed, completed+`
+  while(!__atomic_load_n(&allow_finish,__ATOMIC_SEQ_CST))nanosleep(&pause,0);`, 1)
+			if !strings.Contains(text, gate) || !strings.Contains(text, "while(!__atomic_load_n(&allow_finish") {
+				t.Fatal("retained cancellation injection did not bind the driver and checked close")
+			}
+			return []byte(text)
+		},
+	}})
+}
 
 func TestLLVMHTTPClientCleanupEvidence(t *testing.T) {
 	var scenarios []llvmRuntimeScenario
