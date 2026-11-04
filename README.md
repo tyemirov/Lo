@@ -11,7 +11,8 @@ Its language contract applies across applications.
 Lo programs contain file selection, retention rules, command arguments, output formats, and exit policy.
 Language operations supply typed contracts for values, control flow, and host access across applications.
 
-For language rules and training examples, start with the [Lo Language Reference](specification.md).
+Start with the [Lo documentation](docs/README.md) for philosophy, syntax, individual operations, and host integration.
+The [Lo Language Reference](specification.md) defines the normative language contract.
 The [adapter design](docs/adapter-design.md) defines the shared contract for File, HTTP, and Process.
 Its [implementation plan](docs/adapter-plan.md) records implementation status and remaining work.
 
@@ -668,8 +669,8 @@ Package helpers and a local Docker-like protocol qualify the bounded profile, ra
 The [package-cache example](docs/examples/package-cache-cleanup.lo) uses context overrides, optional discovery, and sequential command activation.
 
 One canonical session owns Process, participating File adapters, and shutdown for compiled program and server execution.
-`Close(ctx)` starts one shutdown owner. `WaitRetained()` joins it when the caller deadline expires.
-Trusted Go embeddings can supply a driver through the [lifecycle and registry APIs](docs/adapter-design.md#executable-registry-phase).
+The native host uses `lo_context_close` to join retained work on the context owner thread.
+The [native embedding guide](docs/native-embedding.md) defines compiled-entry ownership, diagnostics, and explicit trusted test-driver boundaries.
 The [implementation evidence](docs/evidence/adapter-implementation-review.json) keeps earlier CI and injected execution results separate from current public acceptance.
 
 The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
@@ -682,6 +683,7 @@ All work and fixtures obey the [Lo repository boundary](.mprlab/POLICY.md#lo-rep
 
 ## Language Reference
 
+The [documentation home](docs/README.md) connects the [philosophy](docs/philosophy.md), [syntax guide](docs/syntax.md), and [operation reference](docs/operations/README.md).
 The [Lo Language Reference](specification.md) defines the implemented v0.4 language, adapter, training, device, and checkpoint contracts.
 It includes a contents list, operation signatures, examples, and current backend limits.
 
