@@ -1305,6 +1305,37 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Record compiler and payload hashes, resource use, cold build time, and cleanup outcomes.
   - Keep F037 open for final corpus, performance, CI, and independent qualification.
 
+- [ ] [F042] (P1) {F041} Add staged GitHub delivery for compiler executables
+  Goal:
+  Supply downloadable Lo compiler artifacts through the standard release, publish, and deploy targets.
+
+  Requirements:
+  - Use the [GitHub delivery plan](docs/github-delivery-plan.md) and installed Gateway declaration contract.
+  - Reconcile Lo manifest policy with the admitted artifacts, publications, and targets catalogs.
+  - Reconcile external-operation policy for explicitly authorized GitHub delivery. Keep local task files and validation output inside Lo.
+  - Keep Lo artifact names, variants, build rules, version policy, and acceptance in this repository.
+  - Add the selected manifest and root release, publish, and deploy delegates.
+  - Include embedded payload construction before frontend compilation for each declared variant.
+  - Preserve sealed source identities, immutable assets, checksums, notices, and corresponding-source obligations.
+  - Consume release and publication receipts without manual digest transfer or artifact rebuilds.
+  - Use GitHub artifact delivery as the initial deployment target.
+  - Keep public release operations outside implementation acceptance.
+
+  Deliverables:
+  - Add repository-owned lifecycle wiring, artifact declarations, controlled integration fixtures, and operator documentation.
+  - Document download verification and consumer compilation acceptance separately from delivery status.
+
+  Validation:
+  - Verify public lifecycle entry points with controlled GitHub protocol responses before production publication.
+  - Validate the complete compiler declaration through the installed Gateway, including all three variants.
+  - Reject incomplete payloads, stale source, changed artifacts, mismatched identities, and uncertain publication outcomes.
+  - Verify retries, phase order, receipt reuse, and preservation of the selected release.
+  - Verify every supported compiler variant through F041 acceptance fixtures.
+  - Complete applicable repository checks and independent review.
+
+  Public operation:
+  The first public release requires F037 qualification and the operational checks in the delivery plan.
+
 ### Process workflows
 
 - [x] [F024] (P1) {I009} Add inherited Process.Context values and qualify cleanup execution
