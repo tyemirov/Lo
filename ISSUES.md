@@ -467,7 +467,7 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   - Verify that package boundaries cannot hide effects or grant capabilities.
   - Resolve each syntax and semantic decision before its dependent feature starts.
 
-- [ ] [P007] (P1) {F024} Select a confined descendant process ownership model
+- [-] [P007] (P1) {F024} Select a confined descendant process ownership model
   Goal:
   Select a generic execution profile that owns supported child processes through complete cleanup.
 
@@ -487,6 +487,14 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   - Prove containment and complete descendant cleanup before additional activation authority.
   - Reject process-group termination alone as proof for detached descendants.
   - Complete independent design review before F036 implementation.
+
+  Status:
+  The [selected ownership design](docs/process-descendant-ownership.md) passed independent review.
+  Controlled native probes and the bounded lifecycle model passed their selected checks.
+  Native Endpoint Security admission returned an entitlement error. Entitled event delivery remains unverified.
+
+  F036 must implement the controller and public acceptance with an injected provider.
+  The current execution profile continues to deny descendants. Final stack CI remains pending.
 
   The [implementation roadmap](docs/mac-cleanup-implementation-plan.md) records scope and acceptance boundaries.
 

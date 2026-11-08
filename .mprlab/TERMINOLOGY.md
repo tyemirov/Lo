@@ -138,6 +138,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `higher-order operation`: An operation that accepts a named flow and defines when that flow executes.
 - `callback phase`: The construction, evaluation, activation, or external event stage that invokes a stored flow.
 - `execution profile`: Host-enforced restrictions on a child program, its descendants, external access, channels, and lifetime.
+- `execution token`: An audit-token identity for one process image execution.
+- `sequence marker`: A supervisor event that identifies an ordered event-stream position.
+- `supervisor`: A trusted host process that owns one command and its descendants.
+- `Endpoint Security`: The Apple API that supplies process events and selected authorization decisions.
+- `entitlement`: An operating-system authorization attached to an executable.
 - `Process context`: An immutable Process value that contains environment variables and an absolute working directory.
 - `context origin`: Inspection information that identifies an inherited, explicit, derived, or dynamic Process context.
 - `mutation root`: A host-authorized directory for data writes or namespace removal by a specified executable.

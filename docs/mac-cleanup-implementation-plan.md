@@ -68,6 +68,9 @@ F031 and F036 remain planned work outside the implemented language reference.
 
 F030 through F036 and I013 depend on I018.
 P007 research can continue during filesystem implementation.
+P007 now selects the [descendant ownership design](process-descendant-ownership.md).
+Its controlled probes and bounded model do not establish entitled native-provider execution.
+F036 must implement the same ownership controller for native and injected providers.
 
 | Issue | Work package | Direct dependencies | Observable completion |
 | --- | --- | --- | --- |
