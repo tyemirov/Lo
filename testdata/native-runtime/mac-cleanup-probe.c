@@ -18,6 +18,13 @@ static int append_call(int argc, char **argv) {
     return close(descriptor) == 0;
 }
 
+static int batch_contains(int argc, char **argv, const char *path) {
+    for (int index = 3; index < argc; ++index) {
+        if (strcmp(argv[index], path) == 0) return 1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
     const char *calls = getenv("FIXTURE_CALLS");
     int prior = calls ? open(calls, O_RDONLY) : -1;
@@ -31,6 +38,7 @@ int main(int argc, char **argv) {
     const char *behavior = getenv("FIXTURE_BEHAVIOR");
     if (!behavior) return 72;
     if (first && strcmp(behavior, "first-fails") == 0) fputs("first probe failed\n", stderr);
+    if (!first && strcmp(behavior, "later-fails") == 0) fputs("later probe failed\n", stderr);
     if (strcmp(behavior, "stderr") == 0) fputs("probe failed\n", stderr);
     if (strcmp(behavior, "whitespace") == 0) fputs(" \t\n", stderr);
     if (strcmp(behavior, "status2") == 0) return 2;
@@ -39,7 +47,7 @@ int main(int argc, char **argv) {
         return fwrite(invalid, 1, sizeof(invalid), stdout) == sizeof(invalid) ? 0 : 73;
     }
     const char *changed = getenv("FIXTURE_CHANGED");
-    if (changed && *changed) {
+    if (changed && *changed && (strcmp(behavior, "scoped") != 0 || batch_contains(argc, argv, changed))) {
         if (strcmp(behavior, "vanish") == 0) {
             if (unlink(changed)) return 74;
         } else {
@@ -48,10 +56,26 @@ int main(int argc, char **argv) {
         }
     }
     const char *opened = getenv("FIXTURE_OPENED");
+    if (opened && *opened && strcmp(behavior, "scoped") == 0 && !batch_contains(argc, argv, opened)) opened = "";
     if (opened && *opened) {
-        if (gateway) printf("p123\nn%s\n", opened);
+        if (gateway || strcmp(behavior, "newline-framed-open") == 0) printf("p123\nn%s\n", opened);
+        else if (strcmp(behavior, "unterminated-open") == 0) {
+            if (fwrite("p123\0n", 1, 6, stdout) != 6 || fwrite(opened, 1, strlen(opened), stdout) != strlen(opened)) return 75;
+        }
+        else if (strcmp(behavior, "embedded-newline-open") == 0) {
+            printf("p123\nn%s", opened);
+            if (fwrite("\0\n", 1, 2, stdout) != 2) return 75;
+        }
+        else if (strcmp(behavior, "record-boundaries") == 0) {
+            const char *headers[] = {"p123\0\nf3\0n", "p456\0\nf4\0n"};
+            for (int index = 0; index < 2; ++index) {
+                if (fwrite(headers[index], 1, 10, stdout) != 10 ||
+                    fwrite(opened, 1, strlen(opened), stdout) != strlen(opened) ||
+                    fwrite("\0\n", 1, 2, stdout) != 2) return 75;
+            }
+        }
         else {
-            if (fwrite("p123\0n", 1, 6, stdout) != 6 ||
+            if (fwrite("p123\0\nn", 1, 7, stdout) != 7 ||
                 fwrite(opened, 1, strlen(opened), stdout) != strlen(opened) ||
                 fwrite("\0\n", 1, 2, stdout) != 2) return 75;
         }

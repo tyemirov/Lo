@@ -715,7 +715,6 @@ flow GatewayGuard(before: File.Entry, now: File.Entry) -> Bool {
 flow FileChanged(error: Error) -> Record{removed: Bool!} {
     return Record.new(removed: Match.new(error.kind, "File.EntryChanged": false, _: error))
 }
-flow NotRemoved() -> Record{removed: Bool!} { return Record.new(removed: false) }
 flow CommitStale(uid: Int, cutoff: Int, masks: List<Glob>, entry: File.Entry) -> Record{removed: Bool!} onError FileChanged {
     target = File.Remove.checked(List.new(entry), uid, cutoff, masks, StaleGuard)
     commit target
@@ -735,15 +734,32 @@ flow LsofStatus(result: Process.Result) -> Bool! {
     code = Process.Termination.exit_code(result.termination)
     return Match.new(IntMember(List.new(0, 1), code), true: true, _: Error.new("Cleanup.OpenFiles", "Cannot verify open files; stopping category", Record.new()))
 }
+flow ProbeFieldText(field: Bytes) -> String! {
+    clean = Match.new(Bytes.starts_with(field, Bytes.new("\n")), true: Bytes.slice(field, 1, Bytes.length(field)), _: field)
+    text = UTF8.String.new(clean)
+    valid = All(List.new(Math.gt(String.length(text), 1), Math.eq(List.length(String.split(text, "\n")), 1), Math.eq(List.length(String.split(text, "\r")), 1), Any(List.new(String.starts_with(text, "p"), String.starts_with(text, "f"), String.starts_with(text, "n")))))
+    checked = RequireOpenFiles(valid, "Malformed open-file field; stopping category")
+    return text
+}
+flow ProbePIDValid(field: String) -> Bool! {
+    return Match.new(String.starts_with(field, "p"), true: List.fold(String.slice(field, 1, String.length(field)), true, GatewayDigit), _: true)
+}
 flow FieldName(field: Bytes) -> List<File.Path>! {
-    clean = Bytes.trim_start(field, Bytes.new("\n"))
-    return Match.new(Bytes.starts_with(clean, Bytes.new("n")), true: List.new(File.Path.new(UTF8.String.new(Bytes.slice(clean, 1, Bytes.length(clean))))), _: List.new())
+    text = ProbeFieldText(field)
+    checked = RequireOpenFiles(ProbePIDValid(text), "Malformed open-file process identifier; stopping category")
+    return Match.new(String.starts_with(text, "n"), true: List.new(File.Path.new(String.slice(text, 1, String.length(text)))), _: List.new())
 }
 flow ParseNames(previous: List<File.Path>, field: Bytes) -> List<File.Path>! { return ConcatPaths(previous, FieldName(field)) }
 flow BatchNames(result: Process.Result) -> List<File.Path>! {
     accepted = LsofStatus(result)
     checked = RequireOpenFiles(Math.eq(Bytes.length(result.stderr), 0), "Cannot verify open files; stopping category")
-    return Flow.fold(Bytes.split(result.stdout, Bytes.new("\u0000")), List.new(), ParseNames)
+    fields = Bytes.split(result.stdout, Bytes.new("\u0000"))
+    last = Math.sub(List.length(fields), 1)
+    trailer = UTF8.String.new(List.at(fields, last))
+    framed = RequireOpenFiles(Any(List.new(String.eq(trailer, ""), String.eq(trailer, "\n"))), "Malformed open-file framing; stopping category")
+    names = Flow.fold(List.slice(fields, 0, last), List.new(), ParseNames)
+    named = RequireOpenFiles(Any(List.new(Math.eq(Bytes.length(result.stdout), 0), Math.gt(List.length(names), 0))), "Open-file output has no file names; stopping category")
+    return names
 }
 flow KnownOpen(batch: List<File.Path>, path: File.Path) -> Bool { return PathMember(batch, path) }
 flow ProbeBatch(context: Process.Context, opened: List<File.Path>, batch: List<File.Path>) -> List<File.Path>! {
@@ -925,16 +941,23 @@ flow CacheChild(uid: Int, device: Int, entry: File.Entry) -> Bool {
 flow CacheGuard(uid: Int, device: Int, cutoff: Int, original: File.Entry, current: File.Entry) -> Bool {
     return All(List.new(SameFile(original, current), CacheCandidate(uid, device, cutoff, current)))
 }
+flow RequireCacheDirectory(condition: Bool, directory: File.Directory) -> Bool! {
+    return Match.new(condition, true: true, _: Error.new("Cleanup.CacheDirectory", String.concat("Cache directory owner/device changed: ", File.Path.to_string(directory.path)), Record.new()))
+}
+flow RequireCacheOwner(directory: File.Directory, uid: Int) -> Bool! {
+    return Match.new(Math.eq(directory.owner_uid, uid), true: true, _: Error.new("Cleanup.CacheOwner", String.concat("Refusing cache owned by another user: ", File.Path.to_string(directory.path)), Record.new()))
+}
 flow CacheObserve(uid: Int, device: Int, directory: File.Directory) -> File.Scan! {
-    current = File.Directory.refresh(directory)
+    scan = File.Directory.scan(directory)
+    current = scan.directory
     valid = All(List.new(SameDirectory(directory, current), Math.eq(current.owner_uid, uid), Math.eq(current.device, device)))
-    checked = Match.new(valid, true: true, _: Error.new("Cleanup.CacheDirectory", String.concat("Cache directory owner/device changed: ", File.Path.to_string(directory.path)), Record.new()))
-    return File.Directory.scan(current)
+    checked = RequireCacheDirectory(valid, directory)
+    return scan
 }
 flow CacheProbe(context: Process.Context, directory: File.Directory, paths: List<File.Path>) -> List<File.Path>! {
     opened = OpenedPaths(context, paths)
     current = File.Directory.refresh(directory)
-    checked = Match.new(SameDirectory(directory, current), true: true, _: Error.new("Cleanup.CacheDirectory", String.concat("Cache directory changed: ", File.Path.to_string(directory.path)), Record.new()))
+    checked = RequireCacheDirectory(All(List.new(SameDirectory(directory, current), Math.eq(directory.owner_uid, current.owner_uid))), directory)
     return opened
 }
 flow CacheCommit(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Record{removed: Bool!} onError FileChanged {
@@ -943,23 +966,7 @@ flow CacheCommit(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Recor
     return Record.new(removed: true)
 }
 flow CacheRemove(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Bool! {
-    current = File.Entry.observe(entry)
-    selector_1 = List.length(current)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, CacheRemoveChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, current, cutoff, device, entry, uid, CacheRemoveChoice1Branch2)
-    return choice_1_result_2
-}
-flow CacheRemovePresent(uid: Int, device: Int, cutoff: Int, entry: File.Entry, current: File.Entry) -> Bool! {
-    selector_1 = CacheGuard(uid, device, cutoff, entry, current)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), NotRemoved(), cutoff, device, entry, uid, CacheRemovePresentChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, CacheRemovePresentChoice1Branch2)
-    result = choice_1_result_2
+    result = CacheCommit(uid, device, cutoff, entry)
     return result.removed
 }
 flow CacheRemoveStep(uid: Int, device: Int, cutoff: Int, opened: List<File.Path>, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
@@ -1009,7 +1016,7 @@ flow CacheProbeAndRemove(context: Record{apply: Bool, home: File.Path, uid: Int,
     return choice_1_result_2
 }
 flow CacheSummary(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}) -> Int! {
-    printed = Print(String.format("{folder}: {count:,} stale files / {eligible} allocated; deleted {deleted:,} / {deleted_size}; skipped {skipped:,}", Record.new(folder: File.Path.to_string(folder), count: state.count, eligible: HumanSize(state.eligible_bytes), deleted: state.deleted, deleted_size: HumanSize(state.deleted_bytes), skipped: state.skipped)))
+    printed = Print(String.concat(File.Path.to_string(folder), ": ", Int.to_string(state.count), " stale files / ", Int.to_string(state.eligible_bytes), " allocated bytes; deleted ", Int.to_string(state.deleted), " / ", Int.to_string(state.deleted_bytes), " allocated bytes; skipped ", Int.to_string(state.skipped)))
     selector_1 = context.apply
     choice_1 = Match.new(selector_1,
         true: 1,
@@ -1017,26 +1024,25 @@ flow CacheSummary(context: Record{apply: Bool, home: File.Path, uid: Int, proces
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, CacheSummaryChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, CacheSummaryChoice1Branch2)
     preview = choice_1_result_2
-    return Match.new(List.length(state.errors), 0: state.eligible_bytes, _: List.at(state.errors, 0))
+    return Match.new(List.length(state.errors), 0: state.eligible_bytes, _: CacheFailure(List.at(state.errors, 0)))
 }
-flow StaleCachePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
-    valid = Require(All(List.new(File.Path.eq(File.Path.resolve(folder), folder), File.Path.is_directory(folder))), String.concat("Refusing symlinked/non-directory cache: ", PathText(folder)))
-    directory = File.Directory.open(folder)
-    checked = Match.new(Math.eq(directory.owner_uid, context.uid), true: true, _: Error.new("Cleanup.CacheOwner", String.concat("Refusing cache owned by another user: ", File.Path.to_string(folder)), Record.new()))
+flow CacheFailure(error: Error) -> Int! { return error }
+flow StaleCachePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int, previous: Int, directory: File.Directory) -> Int! {
+    checked = RequireCacheOwner(directory, context.uid)
     cutoff = Cutoff(days)
     initial = CacheState(0, 0, 0, 0, 0, List.new())
     result = CacheWalk(context, directory.device, cutoff, directory, initial)
     return CacheSummary(context, folder, result)
 }
 flow StaleCache(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
-    absent = All(List.new(Not(File.Path.exists(folder)), Not(File.Path.is_symlink(folder))))
-    selector_1 = absent
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, folder, StaleCacheChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, days, folder, StaleCacheChoice1Branch2)
-    return choice_1_result_2
+    observation = OptionalDirectory(folder)
+    directories = observation.directories
+    absent = Flow.fold(List.filter(List.new(List.length(directories)), 0, SelectedChoice), 0, folder, StaleCacheChoice1Branch1)
+    return Flow.fold(directories, absent, context, folder, days, StaleCachePresent)
+}
+flow OptionalDirectory(folder: File.Path) -> Record{directories: List<File.Directory>!} onError ChildAbsent {
+    directory = File.directory(folder)
+    return Record.new(directories: List.new(directory))
 }
 flow SkipAbsentCache(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP absent cache: ", File.Path.to_string(folder))); return 0 }
 flow TreeDescend(uid: Int, device: Int, entry: File.Entry) -> Bool {
@@ -1220,7 +1226,7 @@ flow CacheWorkObserved(context: Record{apply: Bool, home: File.Path, uid: Int, p
     eligible = List.filter(scan.entries, context.uid, device, cutoff, CacheCandidate)
     candidates = List.filter(eligible, UnambiguousPath)
     children = List.filter(scan.entries, context.uid, device, CacheChild)
-    counted = CacheState(Math.add(state.count, List.length(candidates)), Math.add(state.eligible_bytes, Math.sum(List.map(candidates, EntryAllocation))), state.deleted, state.deleted_bytes, Math.add(state.skipped, Math.sub(List.length(eligible), List.length(candidates))), state.errors)
+    counted = CacheState(Math.add(state.count, List.length(eligible)), Math.add(state.eligible_bytes, Math.sum(List.map(eligible, EntryAllocation))), state.deleted, state.deleted_bytes, Math.add(state.skipped, Math.sub(List.length(eligible), List.length(candidates))), state.errors)
     selector_1 = All(List.new(context.apply, Math.gt(List.length(candidates), 0)))
     choice_1 = Match.new(selector_1,
         true: 1,
@@ -1531,22 +1537,6 @@ flow GatewayPresentChoice1Branch2(previous: Int, selected: Int) -> Int! {
 
 
 
-flow CacheRemoveChoice1Branch1(previous: Bool, selected: Int) -> Bool! {
-    return false
-}
-
-flow CacheRemoveChoice1Branch2(current: List<File.Entry>, cutoff: Int, device: Int, entry: File.Entry, uid: Int, previous: Bool, selected: Int) -> Bool! {
-    return CacheRemovePresent(uid, device, cutoff, entry, List.at(current, 0))
-}
-
-flow CacheRemovePresentChoice1Branch1(cutoff: Int, device: Int, entry: File.Entry, uid: Int, previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return CacheCommit(uid, device, cutoff, entry)
-}
-
-flow CacheRemovePresentChoice1Branch2(previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return NotRemoved()
-}
-
 flow CacheRemoveStepChoice1Branch1(cutoff: Int, device: Int, entry: File.Entry, opened: List<File.Path>, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, uid: Int, previous: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, selected: Int) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     return CacheRemoveActive(uid, device, cutoff, opened, state, entry)
 }
@@ -1581,10 +1571,6 @@ flow CacheSummaryChoice1Branch2(previous: Bool, selected: Int) -> Bool! {
 
 flow StaleCacheChoice1Branch1(folder: File.Path, previous: Int, selected: Int) -> Int! {
     return SkipAbsentCache(folder)
-}
-
-flow StaleCacheChoice1Branch2(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, days: Int, folder: File.Path, previous: Int, selected: Int) -> Int! {
-    return StaleCachePresent(context, folder, days)
 }
 
 flow BuildRemoveChoice1Branch1(folder: File.Path, parent: File.Directory, root: File.Entry, size: Int, previous: Int, selected: Int) -> Int! {

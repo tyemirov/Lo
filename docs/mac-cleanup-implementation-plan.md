@@ -137,6 +137,11 @@ Exact root operations replace draft observations. Checked removal supplies ident
 The fixtures cover probe framing, changed entries, confirmed counts, empty selection, and category continuation.
 The full workflow remains M5 work.
 
+M3 now uses retained root and child observations through the canonical cache flows.
+The fixtures cover sorted probes, directory preservation, owner changes, allocation counters, and cancellation with confirmed progress.
+The worklist can retain pending ancestors beyond 128 directories without one live descriptor for each ancestor.
+Whole-tree removal remains M4 work.
+
 I013 can add incremental fixture entry sources after each milestone.
 Its complete acceptance remains open until M5.
 P007 research can proceed during the single-runtime cleanup and file implementation.

@@ -56,6 +56,9 @@ Preview totals remain upper bounds because preview does not probe open files.
 Every candidate probe accepts exit status 0 or 1.
 Ordinary files and caches reject any stderr bytes and use NUL-framed exact-path batches of 100.
 Ordinary-file and cache probes reject names outside the current batch.
+They reject incomplete NUL fields, embedded line breaks, invalid process identifiers, and unknown field tags.
+Nonempty output must contain a file name.
+The [lsof field contract](https://lsof.readthedocs.io/en/latest/manpage/#output-for-other-programs) defines NUL terminators and newline set boundaries.
 The direct log probe uses newline framing and rejects nonempty stripped stderr.
 Whole-tree eviction rejects any probe stdout because an observed directory handle also prevents eviction.
 
@@ -98,6 +101,30 @@ A controlled executable supplies probe output and changes fixture files inside L
 Dry run and empty selection need no Process or removal grants.
 Direct-file summaries currently use decimal integers without grouping.
 F031 supplies the complete report format.
+
+## Recursive-cache Milestone
+
+`StaleCache` now uses one retained root and the F033 descendant operations.
+Only `File.DirectoryAbsent` produces an absent-root skip.
+Each scan validates its returned directory owner, device, and retained identity.
+Child selection excludes foreign owners and different devices.
+The application preserves every directory and skips symlink descent.
+
+Candidate probes use exact sorted batches and recheck directory ownership after execution.
+Checked singleton removal supplies entry revalidation and the application guard.
+The application counts only confirmed deletions.
+An ordinary failure stops the category and preserves its preceding progress.
+A terminal failure stops execution and retains worklist progress.
+
+The eligible count and allocation include unsafe names that the application excludes from probes.
+Those exclusions increase the skipped count.
+For a completed cleanup scan, deleted and skipped counts equal the eligible count.
+Allocation totals use `allocated_bytes`, not logical file sizes or measured reclaimed space.
+Preview performs no probes or removal and can retain unresolved candidates.
+
+The fixtures use the canonical cache flows, local probe executables, and trusted metadata injection.
+They cover pending ancestors beyond 128 directories, foreign subtrees, owner changes, allocation totals, and cancellation after a confirmed deletion.
+Cache summaries use decimal byte counts until F031 supplies presentation operations.
 The full workflow remains I013 work.
 
 ## Value Operations And Draft Helpers
