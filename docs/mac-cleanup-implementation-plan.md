@@ -30,8 +30,9 @@ This sequence does not depend on modules, user-defined types, generics, or packa
 | --- | --- | --- |
 | F024 | Immutable Process contexts, executable discovery, typed results, bounded transport, and selected cleanup scopes. | Current qualified activation is Darwin. Forked and spawned descendants remain denied. |
 | F025 | Invocation arguments, home, UIDs, captured time, file owner and timestamps, exact directory observations, scans, and checked removal. | F032 supplies public identity and allocated size. |
-| F032 | Public device, inode, and allocation fields, fresh time, and exact volume measurements. | Whole-tree snapshots and removal remain F034 work. |
-| F033 | Separate recursive grants, retained child observations, and bounded root leases. | Application cache traversal remains I013 M3 work. |
+| F032 | Public device, inode, and allocation fields, fresh time, and exact volume measurements. | Reported allocation does not prove a volume free-space increase. |
+| F033 | Separate recursive grants, retained child observations, and bounded root leases. | Exact grants do not authorize descendant observations. |
+| F034 | Bounded tree snapshots, complete eligibility preflight, and checked postorder removal. | Concurrent host writers can still cause partial removal. |
 | Control | Selected Match branches, self-handling flows, ordered folds, and category recovery. | Pure callbacks and pure error handlers cannot activate commits. |
 | Traversal | `Flow.worklist` and host quotas for work, values, and retained directory observations. | Scheduling does not grant descendant access or make tree snapshots descriptor-bounded. |
 | Runner I/O | Committed Console lines, explicit embedding sinks, and text/NDJSON output. | F035 supplies bounded command-output forwarding. |
@@ -62,7 +63,8 @@ F030 adds the selected value processors and executable policy examples.
 F032 now supplies the [filesystem observation contract](file-system-observations.md).
 F035 supplies admitted deadlines and bounded command-output forwarding.
 F033 supplies [retained descendant observations](file-descendant-observations.md).
-F031, F034, and F036 remain planned work outside the implemented language reference.
+F034 supplies [tree snapshots and checked removal](file-tree-removal.md).
+F031 and F036 remain planned work outside the implemented language reference.
 
 F030 through F036 and I013 depend on I018.
 P007 research can continue during filesystem implementation.
@@ -140,7 +142,13 @@ The full workflow remains M5 work.
 M3 now uses retained root and child observations through the canonical cache flows.
 The fixtures cover sorted probes, directory preservation, owner changes, allocation counters, and cancellation with confirmed progress.
 The worklist can retain pending ancestors beyond 128 directories without one live descriptor for each ancestor.
-Whole-tree removal remains M4 work.
+
+M4 now uses retained parent/root targets from Xcode discovery through checked tree removal.
+The application retains the original approved snapshot across the open-file probe.
+Root handles and any other probe output prevent whole-tree removal.
+Changed observations produce a visible skip before activation.
+Checked activation failures remain category failures with confirmed progress.
+Native fixtures cover root replacement, symlinks, retained descendant authority, and later independent categories.
 
 I013 can add incremental fixture entry sources after each milestone.
 Its complete acceptance remains open until M5.
@@ -260,7 +268,7 @@ New aliases for implemented behavior are outside this plan.
 | `Clock.now_unix_ns`, `File.System.usage` | F032 | Implemented fresh time and volume measurements under the selected observation contract. |
 | `File.Path.resolve`, `exists`, `is_directory`, `is_symlink` | F033 | Reuse equivalent exact observations or select an explicitly authorized observation contract. |
 | `File.Directory.*`, `File.Entry.observe` | F033 | Reuse exact-root operations and add only necessary retained child behavior. |
-| `File.Tree.snapshot`, `File.Tree.Remove.new` | F034 | Select bounded ownership and snapshot-bound activation. |
+| `File.Tree.snapshot`, `File.Tree.Remove.checked` | F034 | Implemented bounded snapshots and activation bound to approved state. |
 | `Process.Command.with_timeout`, `with_output` | F035 | Add host admission, bounded output, and confirmed timeout cleanup. |
 
 The quoted short path names belong to the `File.Path` family in their row.

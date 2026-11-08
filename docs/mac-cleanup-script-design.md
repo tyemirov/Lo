@@ -282,8 +282,11 @@ Retained entry observations supply kind and absence results without new path obs
 The remaining draft path observations require application conversion under I013.
 
 F034 supplies `File.Tree.snapshot` and `File.Tree.Remove.checked` under the [tree contract](file-tree-removal.md).
-I013 must replace the draft's obsolete `File.Tree.Remove.new(parent, root)` call with a target bound to the approved snapshot.
-Xcode discovery must retain parent and root observations instead of converting them to path-only tasks.
+I013 now constructs the checked target from the original approved snapshot.
+Xcode discovery returns retained parent and root observations for each selected tree.
+Shared roots retain the DerivedData parent. Each project Build root retains its observed project parent.
+Discovery skips foreign owners, other devices, absent Build entries, and symlink Build entries.
+It reports names that vanish during the DerivedData scan.
 
 `File.Tree.entries` has type `List<Record{relative: String, entry: File.Entry}>`.
 Its rows contain metadata without host authority.
@@ -303,12 +306,18 @@ The application uses the same exclusion for its comparison around the probe.
 Removal requires explicit recursive removal authority and the retained parent and root identities.
 It never follows a symlink or substitutes a replacement ancestor.
 The application compares two snapshots around the open-file probe before target construction.
-The checked target must retain the original approved snapshot and repeat complete preflight before mutation.
+Both application snapshots must be complete and satisfy the owner, device, age, kind, and link rules.
+The comparison includes allocation and excludes directory access time.
+The checked target retains the original approved snapshot and repeats complete preflight before mutation.
+An absent or replaced root after the probe produces a visible skip before activation.
+An activation failure retains its confirmed removal progress and failed category label.
+The workflow can then attempt the next independent tree.
 These observations and deletion remain separate operations with a race window.
 
 Retained descendant handles do not acquire authority from path text alone.
 Observation and removal grants remain separate.
-Resource admission and handle release require explicit tests before this example can become executable.
+Focused native fixtures verify retained discovery targets, root replacement, partial progress, and later category execution.
+Complete workflow acceptance remains pending.
 
 ## Program Entry And Locks
 

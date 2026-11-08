@@ -33,7 +33,8 @@ int main(int argc, char **argv) {
     if (prior >= 0) close(prior);
     if (argc < 3 || !append_call(argc, argv)) return 70;
     int gateway = strcmp(argv[1], "-Fn") == 0;
-    if (gateway ? (argc != 4 || strcmp(argv[2], "+D") != 0)
+    int tree = strcmp(argv[1], "-F0n") == 0 && strcmp(argv[2], "+D") == 0;
+    if (gateway || tree ? (argc != 4 || strcmp(argv[2], "+D") != 0)
                 : (strcmp(argv[1], "-F0n") != 0 || strcmp(argv[2], "--") != 0 || argc > 103)) return 71;
     const char *behavior = getenv("FIXTURE_BEHAVIOR");
     if (!behavior) return 72;
@@ -48,7 +49,14 @@ int main(int argc, char **argv) {
     }
     const char *changed = getenv("FIXTURE_CHANGED");
     if (changed && *changed && (strcmp(behavior, "scoped") != 0 || batch_contains(argc, argv, changed))) {
-        if (strcmp(behavior, "vanish") == 0) {
+        if (tree && (strcmp(behavior, "rename-root") == 0 || strcmp(behavior, "replace-root") == 0)) {
+            char retained[4096];
+            if (snprintf(retained, sizeof(retained), "%s-retained", changed) >= (int)sizeof(retained) || rename(changed, retained)) return 74;
+            if (strcmp(behavior, "replace-root") == 0) {
+                char replacement[4096];
+                if (snprintf(replacement, sizeof(replacement), "%s-replacement", changed) >= (int)sizeof(replacement) || rename(replacement, changed)) return 74;
+            }
+        } else if (strcmp(behavior, "vanish") == 0) {
             if (unlink(changed)) return 74;
         } else {
             int descriptor = open(changed, O_WRONLY | O_TRUNC);

@@ -2613,7 +2613,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep actual package-cache and Docker cleanup outside acceptance.
 
   Deliverables:
-  - Current status: typed helpers, direct-file flows, and recursive-cache flows use implemented contracts. Full workflow acceptance and final CI remain pending.
+  - Current status: typed helpers, direct-file flows, recursive-cache flows, and whole-tree flows use implemented contracts. Full workflow acceptance and final CI remain pending.
   - Make the complete application pass type checking and executable fixture acceptance without proposed APIs.
   - Add public fixtures, documented commands, source identities, and a category-level behavior matrix.
   - Keep later modules and packages outside the initial implementation dependency chain.

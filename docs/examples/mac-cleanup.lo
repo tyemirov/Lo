@@ -143,9 +143,7 @@ flow CacheTask(path: File.Path) -> Record{label: String, operation: String, path
     return PathTask("cache", path)
 }
 
-flow TreeTask(path: File.Path) -> Record{label: String, operation: String, path: File.Path, arguments: List<String>} {
-    return PathTask("tree", path)
-}
+
 
 flow CommandTasks() -> List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}> {
     return List.new(
@@ -355,7 +353,6 @@ flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
         "command": 1,
         "files": 2,
         "cache": 3,
-        "tree": 4,
         "temp": 5,
         "docker": 6,
         "logs": 7,
@@ -363,8 +360,7 @@ flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, context, task, PerformChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, task, PerformChoice1Branch2)
     choice_1_result_3 = Flow.fold(List.filter(List.new(choice_1), 3, SelectedChoice), choice_1_result_2, context, task, PerformChoice1Branch3)
-    choice_1_result_4 = Flow.fold(List.filter(List.new(choice_1), 4, SelectedChoice), choice_1_result_3, context, task, PerformChoice1Branch4)
-    choice_1_result_5 = Flow.fold(List.filter(List.new(choice_1), 5, SelectedChoice), choice_1_result_4, context, PerformChoice1Branch5)
+    choice_1_result_5 = Flow.fold(List.filter(List.new(choice_1), 5, SelectedChoice), choice_1_result_3, context, PerformChoice1Branch5)
     choice_1_result_6 = Flow.fold(List.filter(List.new(choice_1), 6, SelectedChoice), choice_1_result_5, context, PerformChoice1Branch6)
     choice_1_result_7 = Flow.fold(List.filter(List.new(choice_1), 7, SelectedChoice), choice_1_result_6, context, PerformChoice1Branch7)
     choice_1_result_8 = Flow.fold(List.filter(List.new(choice_1), 8, SelectedChoice), choice_1_result_7, PerformChoice1Branch8)
@@ -552,7 +548,7 @@ flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: P
     with_logs = Attempt(context, commands, logs)
     caches = Flow.fold(List.map(CacheTargets(context), CacheTask), with_logs, context, Attempt)
     trees = Xcode(context, caches)
-    printed = Print(String.concat("Stale-cache file allocation across completed scans: ", HumanSize(Math.sum(trees.estimates))))
+    printed = Print(String.concat("Observed allocation across completed cache scans and build trees: ", HumanSize(Math.sum(trees.estimates))))
     unknown = UnknownEstimate(context.apply)
     remaining = List.new(
         Task("Temporary files", "temp", File.Path.new("."), List.new()),
@@ -994,15 +990,15 @@ flow CacheRemoveClosed(uid: Int, device: Int, cutoff: Int, state: Record{count: 
 flow CacheRemoved(state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry, removed: Bool) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>} {
     return Match.new(removed, true: CacheState(state.count, state.eligible_bytes, Math.add(state.deleted, 1), Math.add(state.deleted_bytes, entry.allocated_bytes), state.skipped, state.errors), _: CacheState(state.count, state.eligible_bytes, state.deleted, state.deleted_bytes, Math.add(state.skipped, 1), state.errors))
 }
-flow ChildAbsent(error: Error) -> Record{directories: List<File.Directory>!} {
+flow AbsentDirectory(error: Error) -> Record{directories: List<File.Directory>!} {
     return Record.new(directories: Match.new(error.kind, "File.DirectoryAbsent": List.new(), _: error))
 }
-flow CacheOpenChild(directory: File.Directory, entry: File.Entry) -> Record{directories: List<File.Directory>!} onError ChildAbsent {
+flow OptionalChild(directory: File.Directory, entry: File.Entry) -> Record{directories: List<File.Directory>!} onError AbsentDirectory {
     child = File.Directory.child(directory, entry)
     return Record.new(directories: List.new(child))
 }
 flow CacheChildDirectories(directory: File.Directory, entry: File.Entry) -> List<File.Directory>! {
-    result = CacheOpenChild(directory, entry)
+    result = OptionalChild(directory, entry)
     return result.directories
 }
 flow CacheProbeAndRemove(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, directory: File.Directory, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, candidates: List<File.Entry>) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
@@ -1040,7 +1036,7 @@ flow StaleCache(context: Record{apply: Bool, home: File.Path, uid: Int, process:
     absent = Flow.fold(List.filter(List.new(List.length(directories)), 0, SelectedChoice), 0, folder, StaleCacheChoice1Branch1)
     return Flow.fold(directories, absent, context, folder, days, StaleCachePresent)
 }
-flow OptionalDirectory(folder: File.Path) -> Record{directories: List<File.Directory>!} onError ChildAbsent {
+flow OptionalDirectory(folder: File.Path) -> Record{directories: List<File.Directory>!} onError AbsentDirectory {
     directory = File.directory(folder)
     return Record.new(directories: List.new(directory))
 }
@@ -1060,17 +1056,17 @@ flow SameTreeRow(before: Record{relative: String, entry: File.Entry}, after: Rec
     original = before.entry
     current = after.entry
     accessed = Match.new(original.kind, "directory": true, _: Math.eq(original.accessed_unix_ns, current.accessed_unix_ns))
-    return All(List.new(String.eq(before.relative, after.relative), Math.eq(original.device, current.device), Math.eq(original.inode, current.inode), String.eq(original.kind, current.kind), Math.eq(original.owner_uid, current.owner_uid), Math.eq(original.link_count, current.link_count), Math.eq(original.size_bytes, current.size_bytes), Math.eq(original.modified_unix_ns, current.modified_unix_ns), Math.eq(original.changed_unix_ns, current.changed_unix_ns), accessed))
+    return All(List.new(String.eq(before.relative, after.relative), Math.eq(original.device, current.device), Math.eq(original.inode, current.inode), String.eq(original.kind, current.kind), Math.eq(original.owner_uid, current.owner_uid), Math.eq(original.link_count, current.link_count), Math.eq(original.size_bytes, current.size_bytes), Math.eq(original.allocated_bytes, current.allocated_bytes), Math.eq(original.modified_unix_ns, current.modified_unix_ns), Math.eq(original.changed_unix_ns, current.changed_unix_ns), accessed))
 }
 flow SameTree(before: File.Tree, after: File.Tree) -> Bool! {
-    return All(List.new(Math.eq(List.length(before.entries), List.length(after.entries)), TreeRowsEqual(before.entries, after.entries)))
+    return All(List.new(before.complete, after.complete, Math.eq(List.length(before.entries), List.length(after.entries)), TreeRowsEqual(before.entries, after.entries)))
 }
 flow BuildParent(uid: Int, parent: File.Directory) -> File.Directory! {
     current = File.Directory.refresh(parent)
     return Match.new(All(List.new(SameDirectory(parent, current), Math.eq(current.owner_uid, uid))), true: current, _: Error.new("Cleanup.BuildParent", String.concat("Build parent changed: ", File.Path.to_string(parent.path)), Record.new()))
 }
 flow BuildParentChanged(error: Error) -> Record{valid: Bool!} {
-    return Record.new(valid: Match.new(error.kind, "File.DirectoryChanged": false, "Cleanup.BuildParent": false, _: error))
+    return Record.new(valid: Match.new(error.kind, "File.DirectoryChanged": false, "File.DirectoryAbsent": false, "Cleanup.BuildParent": false, _: error))
 }
 flow TryBuildParent(uid: Int, parent: File.Directory) -> Record{valid: Bool!} onError BuildParentChanged {
     checked = BuildParent(uid, parent)
@@ -1079,31 +1075,42 @@ flow TryBuildParent(uid: Int, parent: File.Directory) -> Record{valid: Bool!} on
 flow BuildOpen(context: Process.Context, folder: File.Path) -> Bool! {
     result = Run(context, Lsof(context), List.new("-F0n", "+D", File.Path.to_string(folder)), "capture", 30)
     accepted = LsofStatus(result)
-    checked = Match.new(Math.eq(Bytes.length(result.stderr), 0), true: true, _: Error.new("Cleanup.OpenFiles", String.concat("Cannot verify open build tree: ", File.Path.to_string(folder)), Record.new()))
+    checked = RequireOpenFiles(Math.eq(Bytes.length(result.stderr), 0), String.concat("Cannot verify open build tree: ", File.Path.to_string(folder)))
     return Math.gt(Bytes.length(result.stdout), 0)
 }
 flow BuildSkipOpen(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP open build tree: ", File.Path.to_string(folder))); return 0 }
 flow BuildSkipChanged(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP changed build tree: ", File.Path.to_string(folder))); return 0 }
+flow BuildSnapshotChanged(error: Error) -> Record{trees: List<File.Tree>!} {
+    return Record.new(trees: Match.new(error.kind, "File.DirectoryChanged": List.new(), "File.DirectoryAbsent": List.new(), _: error))
+}
+flow TryBuildSnapshot(uid: Int, device: Int, parent: File.Directory, root: File.Entry) -> Record{trees: List<File.Tree>!} onError BuildSnapshotChanged {
+    tree = File.Tree.snapshot(parent, root, uid, device, TreeDescend)
+    return Record.new(trees: List.new(tree))
+}
 flow BuildRemove(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
-    after = File.Tree.snapshot(parent, root, context.uid, parent.device, TreeDescend)
+    observed = TryBuildSnapshot(context.uid, parent.device, parent, root)
+    trees = observed.trees
+    skipped = Flow.fold(List.filter(List.new(0), Math.eq(List.length(trees), 0), SelectedWhen), 0, folder, BuildRemoveChoice1Branch2)
+    return Flow.fold(trees, skipped, context, folder, parent, cutoff, before, size, BuildReobserved)
+}
+flow BuildReobserved(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, cutoff: Int, before: File.Tree, size: Int, previous: Int, after: File.Tree) -> Int! {
     parent_result = TryBuildParent(context.uid, parent)
     parent_valid = parent_result.valid
     eligible = All(List.map(after.entries, context.uid, parent.device, cutoff, TreeSupported))
     unchanged = All(List.new(parent_valid, eligible, SameTree(before, after)))
-    selector_1 = unchanged
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, folder, parent, root, size, BuildRemoveChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, folder, BuildRemoveChoice1Branch2)
-    return choice_1_result_2
+    choice = Match.new(unchanged, true: 1, _: 2)
+    removed = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context.uid, parent.device, cutoff, folder, before, size, BuildRemoveChoice1Branch1)
+    return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), removed, folder, BuildRemoveChoice1Branch2)
 }
-flow BuildCommit(folder: File.Path, parent: File.Directory, root: File.Entry, size: Int) -> Int! {
-    target = File.Tree.Remove.new(parent, root)
+flow SelectedWhen(selected: Bool, value: Int) -> Bool { return selected }
+
+flow BuildCommit(uid: Int, device: Int, cutoff: Int, folder: File.Path, before: File.Tree, size: Int) -> Int! {
+    target = File.Tree.Remove.checked(before, uid, device, cutoff, TreeSupported)
     commit target
-    printed = Print(String.format("Deleted whole build tree: {folder}; {size} observed allocation", Record.new(folder: File.Path.to_string(folder), size: HumanSize(size))))
+    printed = Print(String.concat("Deleted whole build tree: ", File.Path.to_string(folder), "; ", Int.to_string(size), " bytes observed allocation"))
     return size
 }
+
 flow BuildProbe(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
     selector_1 = BuildOpen(context.process, folder)
     choice_1 = Match.new(selector_1,
@@ -1114,7 +1121,7 @@ flow BuildProbe(context: Record{apply: Bool, home: File.Path, uid: Int, process:
     return choice_1_result_2
 }
 flow BuildEligible(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
-    printed = Print(String.format("{action} whole stale build tree: {folder}; {size} allocated", Record.new(action: Match.new(context.apply, true: "RUN", _: "PLAN"), folder: File.Path.to_string(folder), size: HumanSize(size))))
+    printed = Print(String.concat(Match.new(context.apply, true: "RUN", _: "PLAN"), " whole stale build tree: ", File.Path.to_string(folder), "; ", Int.to_string(size), " bytes allocated"))
     selector_1 = context.apply
     choice_1 = Match.new(selector_1,
         true: 1,
@@ -1124,49 +1131,77 @@ flow BuildEligible(context: Record{apply: Bool, home: File.Path, uid: Int, proce
     return choice_1_result_2
 }
 flow BuildSkipRecent(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP active/recent/unsupported build tree: ", File.Path.to_string(folder))); return 0 }
-flow StaleBuildTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
-    canonical = File.Path.resolve(folder)
-    checked = Match.new(File.Path.eq(folder, canonical), true: true, _: Error.new("Cleanup.BuildTree", String.concat("Refusing symlinked build tree: ", File.Path.to_string(folder)), Record.new()))
+flow StaleBuildTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, parent: File.Directory, root: File.Entry, days: Int) -> Int! {
+    folder = root.path
     cutoff = Cutoff(days)
-    parent = File.Directory.open(File.Path.parent(folder))
-    owned = Match.new(Math.eq(parent.owner_uid, context.uid), true: true, _: Error.new("Cleanup.BuildParent", String.concat("Foreign-owned build parent: ", File.Path.to_string(parent.path)), Record.new()))
     current_parent = BuildParent(context.uid, parent)
-    root = File.Directory.entry(parent, File.Path.name(folder))
-    before = File.Tree.snapshot(parent, root, context.uid, parent.device, TreeDescend)
-    eligible = All(List.map(before.entries, context.uid, parent.device, cutoff, TreeSupported))
+    before = File.Tree.snapshot(current_parent, root, context.uid, parent.device, TreeDescend)
+    eligible = All(List.new(before.complete, All(List.map(before.entries, context.uid, parent.device, cutoff, TreeSupported))))
     size = Math.sum(List.map(before.entries, TreeAllocation))
-    selector_1 = eligible
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, before, context, cutoff, folder, parent, root, size, StaleBuildTreeChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, folder, StaleBuildTreeChoice1Branch2)
-    return choice_1_result_2
+    choice = Match.new(eligible, true: 1, _: 2)
+    eligible_result = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, before, context, cutoff, folder, current_parent, root, size, StaleBuildTreeChoice1Branch1)
+    return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), eligible_result, folder, StaleBuildTreeChoice1Branch2)
 }
-flow XcodeTarget(entry: File.Entry) -> List<File.Path>! {
-    return Match.new(String.eq(entry.kind, "directory"), true: XcodeDirectoryTarget(entry), _: List.new())
+flow TreeTargetGroup(values: List<Record{parent: File.Directory, root: File.Entry}>) -> List<Record{parent: File.Directory, root: File.Entry}> { return values }
+flow ConcatTreeTargets(left: List<Record{parent: File.Directory, root: File.Entry}>, right: List<Record{parent: File.Directory, root: File.Entry}>) -> List<Record{parent: File.Directory, root: File.Entry}> { return List.flat_map(List.new(left, right), TreeTargetGroup) }
+flow XcodeTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    valid = All(List.new(String.eq(entry.kind, "directory"), Math.eq(entry.owner_uid, uid), Math.eq(entry.device, parent.device)))
+    return Match.new(valid, true: XcodeDirectoryTarget(uid, parent, entry), _: List.new())
 }
-flow XcodeDirectoryTarget(entry: File.Entry) -> List<File.Path>! {
+flow XcodeDirectoryTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
     shared = List.new("ModuleCache.noindex", "SDKStatCaches.noindex", "SDKExplicitPrecompiledModules", "CompilationCache.noindex")
-    return Match.new(StringMember(shared, entry.name), true: List.new(entry.path), _: XcodeProjectTarget(entry))
+    return Match.new(StringMember(shared, entry.name), true: List.new(Record.new(parent: parent, root: entry)), _: XcodeProjectTarget(uid, parent, entry))
 }
-flow XcodeProjectTarget(entry: File.Entry) -> List<File.Path>! {
-    build = File.Path.join(entry.path, "Build")
-    usable = All(List.new(File.Path.is_directory(build), Not(File.Path.is_symlink(build))))
-    return Match.new(usable, true: List.new(build), _: List.new())
+flow AbsentBuildEntry(error: Error) -> Record{entries: List<File.Entry>!} {
+    return Record.new(entries: Match.new(error.kind, "File.EntryAbsent": List.new(), _: error))
 }
-flow XcodeTargetStep(targets: List<File.Path>, entry: File.Entry) -> List<File.Path>! { return ConcatPaths(targets, XcodeTarget(entry)) }
-flow XcodePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, root: File.Path) -> List<File.Path>! {
-    directory = File.Directory.open(root)
-    checked = Match.new(Math.eq(directory.owner_uid, context.uid), true: true, _: Error.new("Cleanup.DerivedData", String.concat("Refusing untrusted DerivedData root: ", File.Path.to_string(root)), Record.new()))
+flow OptionalBuildEntry(parent: File.Directory) -> Record{entries: List<File.Entry>!} onError AbsentBuildEntry {
+    entry = File.Directory.entry(parent, "Build")
+    return Record.new(entries: List.new(entry))
+}
+flow XcodeBuildTarget(parent: File.Directory, targets: List<Record{parent: File.Directory, root: File.Entry}>, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}> {
+    return Match.new(String.eq(entry.kind, "directory"), true: ConcatTreeTargets(targets, List.new(Record.new(parent: parent, root: entry))), _: targets)
+}
+flow RequireXcodeDirectory(condition: Bool, directory: File.Directory) -> Bool! {
+    return Match.new(condition, true: true, _: Error.new("Cleanup.DerivedData", String.concat("Refusing changed or foreign-owned Xcode directory: ", File.Path.to_string(directory.path)), Record.new()))
+}
+flow XcodeProjectPresent(uid: Int, entry: File.Entry, targets: List<Record{parent: File.Directory, root: File.Entry}>, directory: File.Directory) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    valid = All(List.new(Math.eq(directory.owner_uid, uid), Math.eq(directory.device, entry.device), Math.eq(directory.inode, entry.inode)))
+    checked = RequireXcodeDirectory(valid, directory)
+    observed = OptionalBuildEntry(directory)
+    return List.fold(observed.entries, targets, directory, XcodeBuildTarget)
+}
+flow XcodeProjectTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    opened = OptionalChild(parent, entry)
+    return Flow.fold(opened.directories, List.new(), uid, entry, XcodeProjectPresent)
+}
+flow XcodeTargetStep(uid: Int, parent: File.Directory, targets: List<Record{parent: File.Directory, root: File.Entry}>, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    return ConcatTreeTargets(targets, XcodeTarget(uid, parent, entry))
+}
+flow XcodeVanished(root: File.Path, previous: Bool, name: String) -> Bool! {
+    return Print(String.concat("SKIP vanished Xcode entry: ", File.Path.to_string(File.Path.join(root, name))))
+}
+flow XcodePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, targets: List<Record{parent: File.Directory, root: File.Entry}>, directory: File.Directory) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    owned = RequireXcodeDirectory(Math.eq(directory.owner_uid, context.uid), directory)
     scan = File.Directory.scan(directory)
-    return Flow.fold(scan.entries, List.new(), XcodeTargetStep)
+    current = scan.directory
+    checked = RequireXcodeDirectory(All(List.new(SameDirectory(directory, current), Math.eq(current.owner_uid, context.uid))), current)
+    skipped = Flow.fold(scan.vanished_names, true, current.path, XcodeVanished)
+    return Flow.fold(scan.entries, targets, context.uid, current, XcodeTargetStep)
 }
-flow XcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path>! {
+flow XcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<Record{parent: File.Directory, root: File.Entry}>! {
     root = File.Path.join(context.home, "Library/Developer/Xcode/DerivedData")
-    return Match.new(File.Path.exists(root), true: XcodePresent(context, root), _: List.new())
+    opened = OptionalDirectory(root)
+    return Flow.fold(opened.directories, List.new(), context, XcodePresent)
 }
-
+flow TryStaleBuildTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, target: Record{parent: File.Directory, root: File.Entry}) -> Record{result: Int!, errors: List<Error>} onError CapturedPerformError {
+    result = StaleBuildTree(context, target.parent, target.root, 7)
+    return Record.new(result: result, errors: List.new())
+}
+flow AttemptTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}, target: Record{parent: File.Directory, root: File.Entry}) -> Record{failures: List<String>, estimates: List<Int>}! {
+    captured = TryStaleBuildTree(context, target)
+    return RecordOutcome(state, File.Path.to_string(target.root.path), captured)
+}
 
 // A bounded worklist visits retained directories in depth-first order.
 flow CacheWorkItem(parent: File.Directory, entry: File.Entry) -> Record{parent: File.Directory, entries: List<File.Entry>} {
@@ -1262,10 +1297,10 @@ flow TryPerform(context: Record{apply: Bool, home: File.Path, uid: Int, process:
     return Record.new(result: result, errors: List.new())
 }
 
-flow CapturedXcodeTargetsError(error: Error) -> Record{result: List<File.Path>!, errors: List<Error>} {
+flow CapturedXcodeTargetsError(error: Error) -> Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>} {
     return Record.new(result: error, errors: List.new(error))
 }
-flow TryXcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Record{result: List<File.Path>!, errors: List<Error>} onError CapturedXcodeTargetsError {
+flow TryXcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>} onError CapturedXcodeTargetsError {
     result = XcodeTargets(context)
     return Record.new(result: result, errors: List.new())
 }
@@ -1373,9 +1408,7 @@ flow PerformChoice1Branch3(context: Record{apply: Bool, home: File.Path, uid: In
     return StaleCache(context, task.path, 7)
 }
 
-flow PerformChoice1Branch4(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}, previous: Int, selected: Int) -> Int! {
-    return StaleBuildTree(context, task.path, 7)
-}
+
 
 flow PerformChoice1Branch5(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Int, selected: Int) -> Int! {
     return TemporaryFiles(context)
@@ -1401,11 +1434,11 @@ flow RecordFailure(captured: Record{result: Int!, errors: List<Error>}, state: R
     return AddFailure(state, label, List.at(captured.errors, 0))
 }
 
-flow XcodeChoice1Branch1(captured: Record{result: List<File.Path>!, errors: List<Error>}, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
-    return Flow.fold(List.map(captured.result, TreeTask), state, context, Attempt)
+flow XcodeChoice1Branch1(captured: Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>}, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
+    return Flow.fold(captured.result, state, context, AttemptTree)
 }
 
-flow XcodeChoice1Branch2(captured: Record{result: List<File.Path>!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
+flow XcodeChoice1Branch2(captured: Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
     return AddFailure(state, "Xcode build trees", List.at(captured.errors, 0))
 }
 
@@ -1573,8 +1606,8 @@ flow StaleCacheChoice1Branch1(folder: File.Path, previous: Int, selected: Int) -
     return SkipAbsentCache(folder)
 }
 
-flow BuildRemoveChoice1Branch1(folder: File.Path, parent: File.Directory, root: File.Entry, size: Int, previous: Int, selected: Int) -> Int! {
-    return BuildCommit(folder, parent, root, size)
+flow BuildRemoveChoice1Branch1(uid: Int, device: Int, cutoff: Int, folder: File.Path, before: File.Tree, size: Int, previous: Int, selected: Int) -> Int! {
+    return BuildCommit(uid, device, cutoff, folder, before, size)
 }
 
 flow BuildRemoveChoice1Branch2(folder: File.Path, previous: Int, selected: Int) -> Int! {
