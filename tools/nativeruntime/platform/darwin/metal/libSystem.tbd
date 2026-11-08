@@ -85,6 +85,7 @@ exports:
       - _fsetattrlist
       - _fstat
       - _fstatat
+      - _fstatvfs
       - _ftruncate
       - _gai_strerror
       - _getaddrinfo
@@ -127,6 +128,7 @@ exports:
       - _memset_pattern16
       - _mkdir
       - _mkfifo
+      - _mkdtemp
       - _mmap
       - _mprotect
       - _munmap

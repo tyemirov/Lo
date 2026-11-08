@@ -9,6 +9,7 @@ typedef struct {
     int64_t modified_sec, modified_nsec;
     int64_t changed_sec, changed_nsec;
     uint64_t link_count, size_bytes;
+    int64_t allocated_blocks;
 } LoFileMetadata;
 enum { LO_FILE_DIRECTORY=1, LO_FILE_DISCOVERY, LO_FILE_PREFLIGHT, LO_FILE_REMOVE };
 /* Trusted synchronous embedding hook. Callback and userdata must outlive every

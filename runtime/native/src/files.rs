@@ -31,6 +31,7 @@ pub const SUPPORTED: &[&str] = &[
     "File.list",
     "File.directory",
     "File.scan",
+    "File.System.usage",
     "File.open_paths",
     "File.Remove.new",
     "File.Remove.checked",
@@ -68,6 +69,10 @@ pub fn admit(site: &Site) -> Result<(), String> {
                     } else {
                         "File.Scan"
                     })))
+        }
+        "File.System.usage" => {
+            args == [atom("File.Path")]
+                && site.typ == Type::Fallible(Box::new(atom("File.System.Usage")))
         }
         "File.Remove.checked" => {
             args.first() == Some(&Type::List(Box::new(atom("File.Entry"))))
@@ -582,6 +587,7 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
         "File.list" => return entries::list(context, site, &args[0]),
         "File.directory" => return entries::directory(context, site, &args[0]),
         "File.scan" => return entries::scan(context, site, &args[0]),
+        "File.System.usage" => return entries::usage(context, site, &args[0]),
         "File.Remove.checked" => return entries::selection_checked(context, site, args),
         "File.open_paths" => return probe::open_paths(context, site, &args[0]),
         "File.Remove.new" => return entries::selection(context, site, &args[0]),

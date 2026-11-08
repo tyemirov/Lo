@@ -1,6 +1,6 @@
 # mac-cleanup Implementation Roadmap
 
-Status: technical plan and implementation backlog, updated on November 3, 2026.
+Status: technical plan and implementation backlog, updated on November 8, 2026.
 This plan does not implement a new language operation or establish full cleanup acceptance.
 The [application design](mac-cleanup-script-design.md) owns the observed workflow and its draft interfaces.
 The [application plan](mac-cleanup-plan.md) owns the cleanup policies and acceptance boundary.
@@ -29,7 +29,8 @@ This sequence does not depend on modules, user-defined types, generics, or packa
 | Area | Implemented behavior | Boundary that remains |
 | --- | --- | --- |
 | F024 | Immutable Process contexts, executable discovery, typed results, bounded transport, and selected cleanup scopes. | Current qualified activation is Darwin. Forked and spawned descendants remain denied. |
-| F025 | Invocation arguments, home, UIDs, captured time, file owner and timestamps, exact directory observations, scans, and checked removal. | Device, inode, and allocated size are not public metadata fields. |
+| F025 | Invocation arguments, home, UIDs, captured time, file owner and timestamps, exact directory observations, scans, and checked removal. | F032 supplies public identity and allocated size. |
+| F032 | Public device, inode, and allocation fields, fresh time, and exact volume measurements. | Recursive authority and tree removal remain F033 and F034 work. |
 | Control | Selected Match branches, self-handling flows, ordered folds, and category recovery. | Pure callbacks and pure error handlers cannot activate commits. |
 | Traversal | `Flow.worklist` and host quotas for work, values, and retained directory observations. | Scheduling does not grant descendant access or make tree snapshots descriptor-bounded. |
 | Runner I/O | Committed Console lines, explicit embedding sinks, and text/NDJSON output. | Command-output forwarding remains F035 work. |
@@ -57,9 +58,11 @@ The draft's `File.Directory.open` must not become an alias for the current root 
 F026 through F028 complete M1.
 The [CLI contract](cli-runtime-design.md) defines their selected interfaces and behavior.
 F030 adds the selected value processors and executable policy examples.
-F031 through F036 remain planned work outside the implemented language reference.
+F032 now supplies the [filesystem observation contract](file-system-observations.md).
+F031 and F033 through F036 remain planned work outside the implemented language reference.
+
 F030 through F036 and I013 depend on I018.
-P007 research can continue during the runtime cleanup.
+P007 research can continue during filesystem implementation.
 
 | Issue | Work package | Direct dependencies | Observable completion |
 | --- | --- | --- | --- |
@@ -241,7 +244,7 @@ New aliases for implemented behavior are outside this plan.
 | `File.Path.join`, `parent`, `name`, `to_string` | F030 | Implemented lexical paths without host observations. |
 | `Process.Arguments.format_shell` | F030 | Implemented POSIX shell display text. Process activation receives the original arguments. |
 | `Int.parse`, `Float.format_fixed`, `String.format`, `JSON.*` | F031 | Select numeric parsing, presentation, JSON values, and typed extraction. |
-| `Clock.now_unix_ns`, `File.System.usage` | F032 | Add authorized host observations and immutable results. |
+| `Clock.now_unix_ns`, `File.System.usage` | F032 | Implemented fresh time and volume measurements under the selected observation contract. |
 | `File.Path.resolve`, `exists`, `is_directory`, `is_symlink` | F033 | Reuse equivalent exact observations or select an explicitly authorized observation contract. |
 | `File.Directory.*`, `File.Entry.observe` | F033 | Reuse exact-root operations and add only necessary retained child behavior. |
 | `File.Tree.snapshot`, `File.Tree.Remove.new` | F034 | Select bounded ownership and snapshot-bound activation. |

@@ -235,7 +235,7 @@ func (o operation) Capability() string {
 		return FileAppendCapability
 	case FileRemove, FileRemoveChecked:
 		return FileRemoveCapability
-	case FileDirectory, FileScan:
+	case FileDirectory, FileScan, FileSystemUsage:
 		return FileList
 	}
 	switch o.boundary {

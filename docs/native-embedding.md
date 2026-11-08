@@ -62,3 +62,15 @@ The [lock contract](program-lock-design.md) owns retained identity and cleanup g
 Device and Process test drivers remain explicit trusted injection boundaries.
 General File, HTTP, and real Process grant configuration is outside this retained embedding API.
 Compiled program commands supply those explicit application grants.
+
+The [host observation header](../runtime/native/include/lo_host_observer.h) declares synchronous clock and volume providers.
+Install each provider on the owner thread before session evaluation.
+Keep callback code and userdata valid until all session requests finish.
+Providers can cancel their context but cannot reenter or destroy it.
+Volume providers run after native measurement under exact directory authority.
+
+A provider returns zero for success, positive errno for an observation failure, or a negative value for terminal failure.
+Invalid provider metadata produces a terminal host failure.
+The [file observation header](../runtime/native/include/lo_file_observer.h) includes the signed allocation block count.
+That provider cannot replace native device or inode identity.
+The [observation contract](file-system-observations.md) defines these values and their failure behavior.

@@ -5,6 +5,10 @@ import "github.com/MarcoPoloResearchLab/Lo/internal/types"
 const (
 	HostInvocationCurrent = "Host.Invocation.current"
 	HostInvocationFailed  = "Host.InvocationFailed"
+	ClockNowUnixNS        = "Clock.now_unix_ns"
+	ClockFailed           = "Clock.Failed"
+	FileSystemUsage       = "File.System.usage"
+	FileSystemUsageFailed = "File.System.UsageFailed"
 	FileDirectory         = "File.directory"
 	FileScan              = "File.scan"
 	FileRemoveChecked     = "File.Remove.checked"
@@ -19,6 +23,8 @@ func addObservations(operations map[string]Operation, fixed func(string, []types
 		errors     []string
 	}{
 		{HostInvocationCurrent, nil, types.HostInvocation(), []string{HostInvocationFailed}},
+		{ClockNowUnixNS, nil, types.Int(), []string{ClockFailed}},
+		{FileSystemUsage, []types.Parameter{{Name: ParamRoot, Type: types.Path()}}, types.FileSystemUsage(), []string{DirectoryAbsent, FileSystemUsageFailed}},
 		{FileDirectory, []types.Parameter{{Name: ParamRoot, Type: types.Path()}}, types.FileDirectory(), []string{DirectoryAbsent, DirectoryFailed}},
 		{FileScan, []types.Parameter{{Name: ParamRoot, Type: types.Path()}}, types.FileScan(), []string{DirectoryAbsent, ListFailed, InvalidName}},
 	} {

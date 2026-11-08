@@ -125,6 +125,9 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		if op.Name() == catalog.ProgramPath {
 			target = a.unknown(node, types.Path())
 		}
+		if op.Name() == catalog.ClockNowUnixNS {
+			target = a.unknown(node, types.Int())
+		}
 		if op.Name() == catalog.HostInvocationCurrent {
 			target = a.unknown(node, types.HostInvocation())
 		}

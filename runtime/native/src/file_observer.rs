@@ -11,6 +11,7 @@ pub struct Metadata {
     pub changed_nsec: i64,
     pub link_count: u64,
     pub size_bytes: u64,
+    pub allocated_blocks: i64,
 }
 type Callback =
     unsafe extern "C" fn(usize, u32, *const u8, u64, *const u8, u64, *mut Metadata) -> i32;
@@ -30,25 +31,27 @@ pub(super) fn apply(
     phase: u32,
     metadata: &mut Metadata,
 ) -> Result<(), Failure> {
-    let Some(observer) = context.files.observer else {
-        return Ok(());
-    };
-    let root = root.as_os_str().as_bytes();
-    let result = unsafe {
-        (observer.callback)(
-            observer.userdata,
-            phase,
-            root.as_ptr(),
-            root.len() as u64,
-            name.as_ptr(),
-            name.len() as u64,
-            metadata,
-        )
+    let result = if let Some(observer) = context.files.observer {
+        let root = root.as_os_str().as_bytes();
+        unsafe {
+            (observer.callback)(
+                observer.userdata,
+                phase,
+                root.as_ptr(),
+                root.len() as u64,
+                name.as_ptr(),
+                name.len() as u64,
+                metadata,
+            )
+        }
+    } else {
+        0
     };
     if result > 0 {
         return Err(Failure::IO(io::Error::from_raw_os_error(result)));
     }
     if result < 0
+        || metadata.allocated_blocks < 0
         || metadata.owner_uid > u32::MAX as u64
         || metadata.size_bytes > i64::MAX as u64
         || [

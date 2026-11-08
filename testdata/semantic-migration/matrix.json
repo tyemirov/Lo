@@ -118,6 +118,15 @@
       "negative_applicability": "catalog_failure_or_activation"
     },
     {
+      "operation": "Clock.now_unix_ns",
+      "capability": "Clock.now_unix_ns",
+      "errors": [
+        "Clock.Failed"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "Console.Line.new",
       "capability": "Console.write",
       "errors": [
@@ -219,6 +228,16 @@
         "File.EntryChanged",
         "File.RemoveFailed"
       ],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "File.System.usage",
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryAbsent",
+        "File.System.UsageFailed"
+      ],
+      "activation_errors": [],
       "negative_applicability": "catalog_failure_or_activation"
     },
     {
@@ -11864,6 +11883,188 @@
       "profile": "metal-artifact",
       "tests": [
         "TestLLVMF030MetalArtifact"
+      ]
+    },
+    {
+      "id": "operation:Clock.now_unix_ns:positive",
+      "operation": "Clock.now_unix_ns",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/Clock.now_unix_ns"
+      ]
+    },
+    {
+      "id": "operation:Clock.now_unix_ns:negative",
+      "operation": "Clock.now_unix_ns",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Clock.now_unix_ns"
+      ]
+    },
+    {
+      "id": "operation:File.System.usage:positive",
+      "operation": "File.System.usage",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.System.usage"
+      ]
+    },
+    {
+      "id": "operation:File.System.usage:negative",
+      "operation": "File.System.usage",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.System.usage"
+      ]
+    },
+    {
+      "id": "operation:Clock.now_unix_ns:positive:native:darwin/arm64",
+      "operation": "Clock.now_unix_ns",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF032Observations",
+        "TestLLVMF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:Clock.now_unix_ns:runtime-negative:native:darwin/arm64",
+      "operation": "Clock.now_unix_ns",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF032Observations",
+        "TestLLVMF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:Clock.now_unix_ns:positive:native:linux/arm64",
+      "operation": "Clock.now_unix_ns",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF032Observations",
+        "TestLLVMLinuxF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:Clock.now_unix_ns:runtime-negative:native:linux/arm64",
+      "operation": "Clock.now_unix_ns",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF032Observations",
+        "TestLLVMLinuxF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:File.System.usage:positive:native:darwin/arm64",
+      "operation": "File.System.usage",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF032Observations",
+        "TestLLVMF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:File.System.usage:runtime-negative:native:darwin/arm64",
+      "operation": "File.System.usage",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF032Observations",
+        "TestLLVMF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:File.System.usage:positive:native:linux/arm64",
+      "operation": "File.System.usage",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF032Observations",
+        "TestLLVMLinuxF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:File.System.usage:runtime-negative:native:linux/arm64",
+      "operation": "File.System.usage",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF032Observations",
+        "TestLLVMLinuxF032SessionInstallation"
+      ]
+    },
+    {
+      "id": "operation:File.scan:positive:identity-allocation",
+      "operation": "File.scan",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF032NativeFileIdentityAndAllocation"
       ]
     }
   ],

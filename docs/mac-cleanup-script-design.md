@@ -220,11 +220,11 @@ Snapshots keep public data without executable authority.
 
 ## Proposed Generic File Operations
 
-`File.Entry` adds `device: Int`, `inode: Int`, and `allocated_bytes: Int` for this design.
+F032 implements `device: Int`, `inode: Int`, and `allocated_bytes: Int` on `File.Entry` and `File.Directory`.
 Allocated bytes equal the native block count multiplied by 512.
-`File.Directory` adds device and inode identity.
 These metadata fields come from the same native observation as the other fields.
 Their projections remain pure.
+The [filesystem observation contract](file-system-observations.md) defines these fields and fresh host measurements.
 
 | Operations | Proposed contract |
 | --- | --- |
@@ -240,7 +240,7 @@ Their projections remain pure.
 | `File.Entry.observe(entry)` | Return one fresh observation through its retained parent, or an empty list for `ENOENT`. Other failures propagate. |
 | `File.Tree.snapshot(parent, root, context..., Descend) -> File.Tree!` | Observe a root and descendants through retained directories without following symlinks. |
 | `File.Tree.Remove.new(parent, root)` | Construct a descriptor-safe recursive removal target for one observed directory root. Only commit removes it. |
-| `File.System.usage(path)` | Read total, used, and free bytes for the containing volume. |
+| `File.System.usage(path)` | Implemented total, used, and available bytes for the containing volume under exact listing authority. |
 
 `File.Tree.entries` has type `List<Record{relative: String, entry: File.Entry}>`.
 The root row uses `.`.
@@ -279,7 +279,7 @@ The application lock remains held through resource cleanup, including failure an
 
 | Operations | Proposed contract |
 | --- | --- |
-| `Clock.now_unix_ns()` | Read fresh signed Unix nanoseconds for each application cutoff. |
+| `Clock.now_unix_ns()` | Implemented fresh signed Unix nanoseconds for each application cutoff. |
 | `Process.Arguments.format_shell(arguments)` | Pure shell quoting for display only. Execution continues to use argument lists. |
 | `Process.Command.with_output(command, output)` | Pure command copy with `capture` or inherited stdout/stderr. Stdin remains closed. |
 | `Process.Command.with_timeout(command, seconds)` | Pure command copy with a timeout subject to host admission limits. |

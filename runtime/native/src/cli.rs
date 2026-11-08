@@ -703,6 +703,7 @@ unsafe fn cli_main(
         locks: Arc::new(locks),
         initial_process_context: captured.process,
         initial_host_invocation: captured.host,
+        observations: std::sync::Mutex::new(crate::host_observations::Observers::default()),
         program: program.clone(),
         steps,
         limits,

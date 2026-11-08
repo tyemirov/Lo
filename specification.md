@@ -444,6 +444,7 @@ Examples:
 * `File.Entry`
 * `File.Directory`
 * `File.Scan`
+* `File.System.Usage`
 * `Host.Invocation`
 * `Console.Line`
 * `Lock.File`
@@ -750,6 +751,7 @@ The initial boundary-oriented built-in types are:
 * `File.Entry`
 * `File.Directory`
 * `File.Scan`
+* `File.System.Usage`
 * `Host.Invocation`
 * `Console.Line`
 * `Console.Receipt`
@@ -1132,6 +1134,7 @@ Independent source review closed the current findings.
 | `File.list(root: File.Path)` | `List<File.Entry>!` |
 | `File.directory(root: File.Path)` | `File.Directory!` |
 | `File.scan(root: File.Path)` | `File.Scan!` |
+| `File.System.usage(root: File.Path)` | `File.System.Usage!` |
 | `File.open_paths(root: File.Path)` | `List<File.Path>!` |
 | `File.Remove.new(entries: List<File.Entry>)` | `File.Remove!` |
 | `File.Remove.checked(entries, context..., Eligible)` | `File.Remove!` |
@@ -1155,6 +1158,9 @@ Each immutable `File.Entry` exposes these projections:
 | `name` | `String` | Direct-child basename. |
 | `kind` | `String` | `regular`, `directory`, `symlink`, or `other`. |
 | `size_bytes` | `Int` | Observed logical size. |
+| `device` | `Int` | Native filesystem device identifier. |
+| `inode` | `Int` | Native inode identifier on that device. |
+| `allocated_bytes` | `Int` | Nonnegative native block count multiplied by 512. |
 | `modified_unix_ns` | `Int` | Modification time since the Unix epoch, in nanoseconds. |
 | `link_count` | `Int` | Observed filesystem link count. |
 | `owner_uid` | `Int` | Observed owner UID. |
@@ -1163,6 +1169,9 @@ Each immutable `File.Entry` exposes these projections:
 
 Each entry contains fields from one native metadata result.
 Property access is pure and does not repeat the observation.
+Allocation arithmetic uses the full Lo integer range.
+Allocated bytes remain distinct from logical size and removal receipts.
+
 Timestamps use the signed 64-bit Unix-nanosecond range, including negative values.
 The change timestamp is not creation time.
 UIDs use the inclusive range `0..4294967295`.
@@ -1181,9 +1190,11 @@ A grant for an absent directory stays inert if the directory appears later.
 An absent granted directory produces `File.DirectoryAbsent` from listing.
 
 `File.directory` observes that exact root and returns `path`, `owner_uid`, `accessed_unix_ns`, `modified_unix_ns`, and `changed_unix_ns`.
+It also exposes `device`, `inode`, and `allocated_bytes` from that same observation.
 `File.scan` returns a `File.Scan` with `directory: File.Directory`, `entries: List<File.Entry>`, and `vanished_names: List<String>`.
 Both operations require `--list-root`.
 A parent or read grant does not authorize another root.
+
 Directory and scan values have no public constructors, equality, ordering, or checkpoint representation.
 A directory observation cannot become a removal selection.
 
@@ -1193,6 +1204,18 @@ Entries and vanished names are disjoint collections, each sorted in Unicode scal
 A configured file-entry quota counts every enumerated name, including vanished names, during enumeration.
 Strict `File.list` continues to fail when an enumerated child disappears.
 The [observation contract](docs/file-observation-extension-design.md#scan-reports-and-disappearance) defines scan limits and failure boundaries.
+
+`File.System.usage` measures the volume through an existing directory under exact listing authority.
+It returns immutable `total_bytes`, `used_bytes`, and `free_bytes` fields of type `Int`.
+The calculations use `f_blocks * f_frsize`, `(f_blocks - f_bfree) * f_frsize`, and `f_bavail * f_frsize`, respectively.
+`free_bytes` means space available to an ordinary caller.
+Reserved space can make used space plus available space less than total space.
+
+Each call obtains a fresh measurement and verifies the directory identity before completion.
+The runtime rejects zero fragment size and inconsistent block counts.
+Multiplication uses the full Lo integer range.
+The operation grants no descendant access or removal authority.
+The [filesystem observation contract](docs/file-system-observations.md) defines metadata, arithmetic, errors, and trusted provider behavior.
 
 `File.open_paths` runs a fixed `lsof -Fn +D .` probe from a retained directory descriptor.
 It returns sorted distinct paths, with no claim that the files remain open or closed.
@@ -1233,6 +1256,7 @@ The final metadata check and removal remain separate native operations.
 | --- | --- |
 | `File.DirectoryAbsent` | Granted listing directory is absent. |
 | `File.DirectoryFailed` | A directory observation cannot obtain root metadata. |
+| `File.System.UsageFailed` | A volume measurement fails or returns invalid native block counts. |
 | `File.ListFailed` | Discovery cannot obtain complete metadata. |
 | `File.InvalidName` | A directory entry has an invalid UTF-8 name. |
 | `File.OpenFilesFailed` | The probe cannot supply a valid observation. |
@@ -1568,6 +1592,13 @@ A captured failure does not stop a program that never invokes the operation.
 Automatic output redacts home and argument values recursively, including captured removal contexts.
 Explicit projections provide the selected values under ordinary output rules.
 Inspection does not capture host inputs or execute observations.
+
+`Clock.now_unix_ns() -> Int!` reads fresh wall-clock time on each call.
+It returns signed 64-bit Unix nanoseconds, including negative timestamps.
+It does not change the captured invocation time.
+Unavailable or out-of-range clock readings produce `Clock.Failed`.
+Cancellation, quota failures, and invalid trusted-provider data remain terminal.
+Pure callbacks cannot call this host observation.
 
 ### 9.7 Console Output, Terminal Results, And Declared Options
 

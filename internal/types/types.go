@@ -27,6 +27,7 @@ const (
 	FileEntryKind          Kind = "File.Entry"
 	FileDirectoryKind      Kind = "File.Directory"
 	FileScanKind           Kind = "File.Scan"
+	FileSystemUsageKind    Kind = "File.System.Usage"
 	HostInvocationKind     Kind = "Host.Invocation"
 	ConsoleLineKind        Kind = "Console.Line"
 	ConsoleReceiptKind     Kind = "Console.Receipt"
@@ -144,6 +145,7 @@ func Glob() Type              { return atom(GlobKind) }
 func FileEntry() Type         { return atom(FileEntryKind) }
 func FileDirectory() Type     { return atom(FileDirectoryKind) }
 func FileScan() Type          { return atom(FileScanKind) }
+func FileSystemUsage() Type   { return atom(FileSystemUsageKind) }
 func HostInvocation() Type    { return atom(HostInvocationKind) }
 func ConsoleLine() Type       { return atom(ConsoleLineKind) }
 func ConsoleReceipt() Type    { return atom(ConsoleReceiptKind) }
@@ -176,7 +178,7 @@ func ProcessTermination() Type { return atom(ProcessTerminationKind) }
 func AnyRecord() Type          { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case GlobKind, URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind, LockFileKind, LockLeaseKind:
+	case GlobKind, URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, FileSystemUsageKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind, LockFileKind, LockLeaseKind:
 		return atom(name), true
 	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true
@@ -361,7 +363,12 @@ func FieldType(t Type, name string) (Type, bool) {
 		switch name {
 		case "path":
 			return Path(), true
-		case "owner_uid", "accessed_unix_ns", "modified_unix_ns", "changed_unix_ns":
+		case "owner_uid", "accessed_unix_ns", "modified_unix_ns", "changed_unix_ns", "device", "inode", "allocated_bytes":
+			return Int(), true
+		}
+	case FileSystemUsageKind:
+		switch name {
+		case "total_bytes", "used_bytes", "free_bytes":
 			return Int(), true
 		}
 	case FileScanKind:
@@ -409,7 +416,7 @@ func FieldType(t Type, name string) (Type, bool) {
 			return Path(), true
 		case "name", "kind":
 			return String(), true
-		case "size_bytes", "modified_unix_ns", "link_count", "owner_uid", "accessed_unix_ns", "changed_unix_ns":
+		case "size_bytes", "modified_unix_ns", "link_count", "owner_uid", "accessed_unix_ns", "changed_unix_ns", "device", "inode", "allocated_bytes":
 			return Int(), true
 		}
 	case HeadersKind:

@@ -15,6 +15,7 @@ mod files;
 mod generated_operations;
 mod glob;
 mod host_invocation;
+mod host_observations;
 mod http;
 mod locks;
 mod metadata;

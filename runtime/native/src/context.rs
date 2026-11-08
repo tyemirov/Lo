@@ -782,6 +782,13 @@ impl Drop for ProgramLifetime {
 }
 impl Context {
     pub fn scope_enter(&mut self) -> usize {
+        if self.scopes == 0 {
+            self.session
+                .observations
+                .lock()
+                .expect("observation state poisoned")
+                .seal();
+        }
         let id = self.resources.scope_enter();
         self.values.scope_enter(id);
         self.files.scope_enter(id);

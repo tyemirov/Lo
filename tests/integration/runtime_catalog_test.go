@@ -19,6 +19,8 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.ConsoleLineNew:                 `{"type":"Console.Line","value":{"stream":"stdout","bytes":8,"flush":true,"redacted":true}}`,
 		catalog.ProgramExitNew:                 `{"type":"Record{terminal: Program.Exit}","value":{"terminal":{"type":"Program.Exit","value":{"code":2,"stdout_bytes":3,"stderr_bytes":3,"redacted":true}}}}`,
 		catalog.CLIParse:                       `{"type":"CLI.Options","value":{"flags":{"type":"Map<String, Bool>","value":[{"key":{"type":"String","value":"--verbose"},"value":{"type":"Bool","value":true}}]},"help_requested":{"type":"Bool","value":false},"help_text":{"type":"String","value":"Usage: catalog [OPTIONS]\n\nOptions:\n  -h, --help  Show this help message and exit.\n  --verbose, -v  Show detail\n"}}}`,
+		catalog.ClockNowUnixNS:                 `{"type":"Bool","value":true}`,
+		catalog.FileSystemUsage:                `{"type":"Bool","value":true}`,
 		catalog.HostInvocationCurrent:          `{"type":"Int","value":"0"}`,
 		catalog.FileDirectory:                  `{"type":"Bool","value":true}`,
 		catalog.FileScan:                       `{"type":"Int","value":"0"}`,
@@ -137,9 +139,11 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				return
 			}
 			var args []string
-			if tc.name == catalog.FileDirectory || tc.name == catalog.FileScan {
+			if tc.name == catalog.FileDirectory || tc.name == catalog.FileScan || tc.name == catalog.FileSystemUsage {
 				root := fileFixtureRoot(t)
-				if tc.name == catalog.FileDirectory {
+				if tc.name == catalog.FileSystemUsage {
+					tc.source = fmt.Sprintf(`flow Main() -> Bool! { usage = File.System.usage(File.Path.new(%q)); return Math.gte(usage.total_bytes, usage.free_bytes) }; return Main()`, root)
+				} else if tc.name == catalog.FileDirectory {
 					tc.source = fmt.Sprintf(`flow Main() -> Bool! { directory = File.directory(File.Path.new(%q)); return File.Path.eq(directory.path, File.Path.new(%q)) }; return Main()`, root, root)
 				} else {
 					tc.source = fmt.Sprintf(`flow Main() -> Int! { scan = File.scan(File.Path.new(%q)); return Math.add(List.length(scan.entries), List.length(scan.vanished_names)) }; return Main()`, root)

@@ -2,7 +2,7 @@
   "method": "LLVM native archive externals (--no-llvm-bc for both undefined and defined scans), verified by host dynamic symbol lookup",
   "rust": "1.85.1",
   "llvm": "21.1.8",
-  "archive_sha256": "d82e740efbd57186c7fd41d2e9108d2205206d32059b5ade3fc2de0766d2a938",
+  "archive_sha256": "bac72798f75d5fe8f3f1c89f90a49948c6f7dc907526b1a5b7c92b841c623768",
   "metal": false,
   "symbols": [
     "_CCRandomGenerateBytes",
@@ -82,6 +82,7 @@
     "_fsetattrlist",
     "_fstat",
     "_fstatat",
+    "_fstatvfs",
     "_ftruncate",
     "_gai_strerror",
     "_getaddrinfo",

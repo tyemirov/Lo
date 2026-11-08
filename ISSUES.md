@@ -1688,7 +1688,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Compare local Docker-like metadata extraction and report outputs with independent expectations on supported native targets.
   - Complete independent review and final stack CI.
 
-- [ ] [F032] (P1) {F025,I018} Add coherent file identity, allocation, clock, and volume observations
+- [-] [F032] (P1) {F025,I018} Add coherent file identity, allocation, clock, and volume observations
   Goal:
   Supply public metadata and fresh host measurements for generic filesystem decisions.
 
@@ -1709,6 +1709,12 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Inject advancing clocks, volume failures, and changed metadata through public boundaries.
   - Verify Darwin and Linux software target conformance and current removal receipt semantics.
   - Complete independent review and final stack CI.
+
+  Status:
+  File identity, allocation, fresh clock, and volume observations are implemented.
+  Focused Darwin and Linux QEMU fixtures passed, including shared-session provider registration and existing file-observation regressions.
+  Independent review found no remaining correctness issue.
+  Final stack CI remains pending.
 
 - [ ] [F033] (P1) {F025,I018} Add explicit descendant directory authority and retained child observations
   Goal:

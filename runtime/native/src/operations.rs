@@ -101,6 +101,9 @@ pub fn admit(s: &Site) -> Result<(), String> {
     if s.operation == crate::cli_options::OPERATION {
         return crate::cli_options::admit(s);
     }
+    if s.operation == crate::host_observations::CLOCK {
+        return crate::host_observations::admit(s);
+    }
     if s.operation == crate::host_invocation::OPERATION {
         return crate::host_invocation::admit(s);
     }

@@ -1852,3 +1852,24 @@ pub unsafe extern "C" fn lo_op_Process_2EArguments_2Eformat_5Fshell(
 ) {
     call(c, a, n, s, o, Some("Process.Arguments.format_shell"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Clock_2Enow_5Funix_5Fns(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Clock.now_unix_ns"))
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ESystem_2Eusage(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.System.usage"))
+}

@@ -222,6 +222,7 @@ Lists, records, and flow arguments keep that provenance.
 Published metadata cannot reconstruct it.
 
 Entries include owner UID, access time, and inode metadata-change time from one native metadata result.
+Entries and directory observations also expose device, inode, and allocated bytes from that result.
 Property projections are pure.
 `File.Directory` observes an exact granted root, and `File.Scan` reports entries and vanished names explicitly.
 The strict listing operation keeps its full discovery contract for the Gateway policy.
@@ -235,6 +236,7 @@ The selected File surface is:
 | `File.list(root)` | Immediate observation | `List<File.Entry>!`. |
 | `File.directory(root)` | Immediate observation | `File.Directory!` under exact listing authority. |
 | `File.scan(root)` | Immediate observation | `File.Scan!` with entries and explicitly reported vanished names. |
+| `File.System.usage(root)` | Immediate observation | Fresh `File.System.Usage!` under exact listing authority. |
 | `File.open_paths(root)` | Immediate observation | `List<File.Path>!`. |
 | `File.Write.new(path, content)` | Pure construction | Nominal `File.Write`. Commit produces `File.WriteReceipt`. |
 | `File.Append.new(path, content)` | Pure construction | Nominal `File.Append`. Commit produces `File.AppendReceipt`. |
@@ -297,6 +299,11 @@ Automatic snapshots redact argument values and the home path recursively, includ
 Explicit projections provide the selected values under ordinary output rules.
 The [language reference](../specification.md#96-host-invocation) defines the public fields, limits, and argument boundary.
 The [F025 contract](file-observation-extension-design.md#host-invocation) defines exact capture, framing, and redaction behavior.
+
+`Clock.now_unix_ns()` supplies a separate fresh host observation.
+Each call returns signed Unix nanoseconds without a change to the invocation snapshot.
+`File.System.usage(root)` observes total, used, and available volume space through an authorized directory descriptor.
+The [filesystem observation contract](file-system-observations.md) defines arithmetic, authority, errors, and trusted providers.
 
 ## HTTP
 

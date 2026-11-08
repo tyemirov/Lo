@@ -224,6 +224,7 @@ const ATOM_NAMES: &[&str] = &[
     "File.Entry",
     "File.Directory",
     "File.Scan",
+    "File.System.Usage",
     "Host.Invocation",
     "Console.Line",
     "Console.Receipt",

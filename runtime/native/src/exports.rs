@@ -230,6 +230,9 @@ pub unsafe fn call(
             if op == crate::cli_options::OPERATION {
                 return crate::cli_options::execute(&mut *c, &s, &a);
             }
+            if op == crate::host_observations::CLOCK {
+                return crate::host_observations::clock(&mut *c, &s);
+            }
             if op == crate::host_invocation::OPERATION {
                 return crate::host_invocation::execute(&mut *c, &s);
             }

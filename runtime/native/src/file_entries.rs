@@ -221,6 +221,7 @@ fn identity(info: &std::fs::Metadata) -> (u64, u64) {
 pub(super) struct FileInfo {
     pub identity: (u64, u64),
     size: u64,
+    allocated_blocks: i64,
     modified: i64,
     nanoseconds: i64,
     links: u64,
@@ -285,6 +286,7 @@ pub(super) fn lstat_at(parent: &File, name: &str) -> io::Result<FileInfo> {
     Ok(FileInfo {
         identity: (information.st_dev as u64, information.st_ino as u64),
         size: information.st_size as u64,
+        allocated_blocks: information.st_blocks as i64,
         modified: information.st_mtime as i64,
         nanoseconds: information.st_mtime_nsec as i64,
         links: information.st_nlink as u64,
@@ -315,6 +317,7 @@ fn observed_at(
         changed_nsec: info.changed_nsec,
         link_count: info.links,
         size_bytes: info.size,
+        allocated_blocks: info.allocated_blocks,
     };
     super::observer::apply(context, root, name, phase, &mut metadata)?;
     info.owner = metadata.owner_uid as u32;
@@ -326,6 +329,7 @@ fn observed_at(
     info.changed_nsec = metadata.changed_nsec;
     info.links = metadata.link_count;
     info.size = metadata.size_bytes;
+    info.allocated_blocks = metadata.allocated_blocks;
     Ok(info)
 }
 fn observation_failure(
@@ -452,8 +456,10 @@ fn exact_grant(
         .find(|grant| grant.path == path)
         .ok_or_else(|| denied(operation, &path))?;
     if grant.inert {
-        if matches!(operation, "File.list" | "File.directory" | "File.scan")
-            && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
+        if matches!(
+            operation,
+            "File.list" | "File.directory" | "File.scan" | "File.System.usage"
+        ) && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
         {
             return Err(file_fault(
                 site,
@@ -465,8 +471,10 @@ fn exact_grant(
         return Err(denied(operation, &path));
     }
     if let Err(message) = exact_path(&path) {
-        if matches!(operation, "File.list" | "File.directory" | "File.scan")
-            && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
+        if matches!(
+            operation,
+            "File.list" | "File.directory" | "File.scan" | "File.System.usage"
+        ) && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
         {
             return Err(file_fault(
                 site,
@@ -609,6 +617,15 @@ fn entry_value(
         ),
         ("link_count", int(info.nlink())),
         ("owner_uid", int(info.owner)),
+        ("device", int(info.identity.0)),
+        ("inode", int(info.identity.1)),
+        (
+            "allocated_bytes",
+            new(
+                atom("Int"),
+                Data::Int(BigInt::from(info.allocated_blocks) * 512),
+            ),
+        ),
         (
             "accessed_unix_ns",
             new(atom("Int"), Data::Int(BigInt::from(accessed))),
@@ -671,6 +688,15 @@ fn directory_value(
             ),
         ),
         ("owner_uid", int(info.owner)),
+        ("device", int(info.identity.0)),
+        ("inode", int(info.identity.1)),
+        (
+            "allocated_bytes",
+            new(
+                atom("Int"),
+                Data::Int(BigInt::from(info.allocated_blocks) * 512),
+            ),
+        ),
         (
             "accessed_unix_ns",
             new(atom("Int"), Data::Int(BigInt::from(accessed))),
@@ -733,6 +759,40 @@ fn finish_observation(
     }
     result
 }
+pub(super) fn usage(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
+    context.check_cancel()?;
+    let (directory, observed) = exact_grant(
+        &context.files.lists,
+        &context.files.base,
+        crate::host_observations::USAGE,
+        root.string(),
+        site,
+        root,
+    )?;
+    let result = (|| {
+        let value = crate::host_observations::usage(context, site, root, &directory)?;
+        let (checked, current) = exact_grant(
+            &context.files.lists,
+            &context.files.base,
+            crate::host_observations::USAGE,
+            root.string(),
+            site,
+            root,
+        )?;
+        close_file(checked).map_err(|error| host(system_error(&error)))?;
+        if current != observed {
+            return Err(denied(crate::host_observations::USAGE, &observed.path));
+        }
+        Ok(value)
+    })();
+    match (result, close_file(directory)) {
+        (Err(primary), Err(cleanup)) => Err(cleanup_failure(primary, cleanup)),
+        (Err(primary), Ok(())) => Err(primary),
+        (Ok(_), Err(cleanup)) => Err(host(system_error(&cleanup))),
+        (Ok(value), Ok(())) => Ok(value),
+    }
+}
+
 pub(super) fn directory(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
     context.check_cancel()?;
     let (directory, observation) = exact_grant(
