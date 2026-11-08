@@ -1134,6 +1134,11 @@ Independent source review closed the current findings.
 | `File.list(root: File.Path)` | `List<File.Entry>!` |
 | `File.directory(root: File.Path)` | `File.Directory!` |
 | `File.scan(root: File.Path)` | `File.Scan!` |
+| `File.Directory.refresh(directory: File.Directory)` | `File.Directory!` |
+| `File.Directory.scan(directory: File.Directory)` | `File.Scan!` |
+| `File.Directory.entry(directory: File.Directory, name: String)` | `File.Entry!` |
+| `File.Directory.child(directory: File.Directory, entry: File.Entry)` | `File.Directory!` |
+| `File.Entry.observe(entry: File.Entry)` | `List<File.Entry>!` |
 | `File.System.usage(root: File.Path)` | `File.System.Usage!` |
 | `File.open_paths(root: File.Path)` | `List<File.Path>!` |
 | `File.Remove.new(entries: List<File.Entry>)` | `File.Remove!` |
@@ -1192,8 +1197,28 @@ An absent granted directory produces `File.DirectoryAbsent` from listing.
 `File.directory` observes that exact root and returns `path`, `owner_uid`, `accessed_unix_ns`, `modified_unix_ns`, and `changed_unix_ns`.
 It also exposes `device`, `inode`, and `allocated_bytes` from that same observation.
 `File.scan` returns a `File.Scan` with `directory: File.Directory`, `entries: List<File.Entry>`, and `vanished_names: List<String>`.
-Both operations require `--list-root`.
-A parent or read grant does not authorize another root.
+Both operations require `--list-root` or an exact root match under `--observe-tree-root`.
+A parent or read grant does not authorize another path-based root observation.
+
+`--observe-tree-root` supplies retained descendant observation authority.
+`--remove-tree-root` supplies separate descendant removal authority.
+Neither grant implies the other. Existing exact grants retain their meanings.
+
+`File.Directory.child` requires recursive authority and an entry from that retained parent.
+It rejects symlink traversal, mismatched parents, foreign sessions, and released observations.
+Path-based operations cannot use a recursive grant to access descendant path text.
+
+`File.Directory.refresh` returns current metadata after retained identity checks.
+`File.Directory.scan` uses the same entries and vanished-name contract as `File.scan`.
+`File.Directory.entry` observes one valid basename and reports `File.EntryAbsent` for absence.
+`File.Entry.observe` returns one fresh entry, or an empty list only when the entry is absent.
+All five retained operations are host observations.
+
+Retained descendants share their acquisition root lease and retain ancestor identity witnesses.
+The runtime checks these witnesses before and after observation callbacks.
+A replaced retained directory or ancestor produces `File.DirectoryChanged`.
+Exact grant checks also reject replaced ancestors, including ancestors of an absent root.
+The [retained observation contract](docs/file-descendant-observations.md) defines authority, bounded descriptors, and failure behavior.
 
 Directory and scan values have no public constructors, equality, ordering, or checkpoint representation.
 A directory observation cannot become a removal selection.
@@ -1255,10 +1280,12 @@ The final metadata check and removal remain separate native operations.
 | Lo error kind | Condition |
 | --- | --- |
 | `File.DirectoryAbsent` | Granted listing directory is absent. |
-| `File.DirectoryFailed` | A directory observation cannot obtain root metadata. |
+| `File.DirectoryFailed` | A directory observation fails, or a selected child is not a directory. |
+| `File.DirectoryChanged` | A retained directory or ancestor identity changed. |
+| `File.EntryAbsent` | A strict retained entry lookup finds no entry. |
 | `File.System.UsageFailed` | A volume measurement fails or returns invalid native block counts. |
 | `File.ListFailed` | Discovery cannot obtain complete metadata. |
-| `File.InvalidName` | A directory entry has an invalid UTF-8 name. |
+| `File.InvalidName` | A directory entry has an invalid UTF-8 name, or a supplied basename is invalid. |
 | `File.OpenFilesFailed` | The probe cannot supply a valid observation. |
 | `File.InvalidSelection` | Removal construction receives an invalid selection. |
 | `File.EntryChanged` | A selected entry changed or disappeared before removal. |

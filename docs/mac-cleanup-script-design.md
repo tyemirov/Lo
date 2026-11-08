@@ -240,7 +240,7 @@ The application opens a child only when its work item is visited.
 Retained state and pending items keep the resources they require.
 Snapshots keep public data without executable authority.
 
-## Proposed Generic File Operations
+## File Operations And Remaining Proposals
 
 F032 implements `device: Int`, `inode: Int`, and `allocated_bytes: Int` on `File.Entry` and `File.Directory`.
 Allocated bytes equal the native block count multiplied by 512.
@@ -248,21 +248,16 @@ These metadata fields come from the same native observation as the other fields.
 Their projections remain pure.
 The [filesystem observation contract](file-system-observations.md) defines these fields and fresh host measurements.
 
-| Operations | Proposed contract |
+F033 implements [retained descendant observations](file-descendant-observations.md) under separate recursive grants.
+The remaining draft `File.Directory.open` calls must use the current root operation or an existing retained observation.
+Draft retained listings must use the selected scan contract with explicit disappearance policy.
+Retained entry observations supply kind and absence results without new path observation operations.
+The remaining draft path observations require application conversion under I013.
+
+| Proposed operation | Contract |
 | --- | --- |
-| `File.Path.join`, `File.Path.parent`, `File.Path.name`, `File.Path.to_string` | Implemented lexical path operations under F030. |
-| `File.Path.resolve(path) -> File.Path!` | Resolve links and produce an absolute canonical path. |
-| `File.Path.exists`, `File.Path.is_directory`, `File.Path.is_symlink` | Fallible observations. Only absence gives false. The symlink test examines the final entry without following it. |
-| `File.Directory.open(path) -> File.Directory!` | Require a canonical directory path and retain its descriptor after an identity check. |
-| `File.Directory.refresh(directory) -> File.Directory!` | Compare the named canonical path with the retained identity. Reject ancestor replacement. |
-| `File.Directory.list(directory)` | Strict sorted direct observations through the retained directory. A vanished child fails. |
-| `File.Directory.scan(directory)` | Sorted direct observations with explicit `ENOENT` names. Other metadata errors fail. |
-| `File.Directory.entry(directory, name)` | Observe one basename without following its final link. |
-| `File.Directory.child(directory, entry)` | Open an observed child directory and verify its observed identity. |
-| `File.Entry.observe(entry)` | Return one fresh observation through its retained parent, or an empty list for `ENOENT`. Other failures propagate. |
 | `File.Tree.snapshot(parent, root, context..., Descend) -> File.Tree!` | Observe a root and descendants through retained directories without following symlinks. |
 | `File.Tree.Remove.new(parent, root)` | Construct a descriptor-safe recursive removal target for one observed directory root. Only commit removes it. |
-| `File.System.usage(path)` | Implemented total, used, and available bytes for the containing volume under exact listing authority. |
 
 `File.Tree.entries` has type `List<Record{relative: String, entry: File.Entry}>`.
 The root row uses `.`.
@@ -299,7 +294,7 @@ The application lock remains held through resource cleanup, including failure an
 
 ## Proposed Generic Host Operations
 
-| Operations | Proposed contract |
+| Proposed operation | Contract |
 | --- | --- |
 | `Clock.now_unix_ns()` | Implemented fresh signed Unix nanoseconds for each application cutoff. |
 | `Process.Arguments.format_shell(arguments)` | Pure shell quoting for display only. Execution continues to use argument lists. |

@@ -122,7 +122,21 @@ func builtinExamples() []builtinExample {
 	examples = append(examples, optimizerBuiltinExamples()...)
 	examples = append(examples, checkpointBuiltinExamples()...)
 	examples = append(examples, processorBuiltinExamples()...)
+	examples = append(examples, retainedFileBuiltinExamples("fixtures")...)
 	return append(examples, tensorBuiltinExamples()...)
+}
+
+func retainedFileBuiltinExamples(root string) []builtinExample {
+	main := func(output, body string) string {
+		return fmt.Sprintf(`flow Main() -> %s! { directory = File.directory(File.Path.new(%q)); %s }; return Main()`, output, root, body)
+	}
+	return []builtinExample{
+		{"File.Directory.scan", main("Int", `scan = File.Directory.scan(directory); return Math.add(List.length(scan.entries), List.length(scan.vanished_names))`), "Int!"},
+		{"File.Directory.refresh", main("Bool", `fresh = File.Directory.refresh(directory); return Math.eq(directory.inode, fresh.inode)`), "Bool!"},
+		{"File.Directory.child", main("Bool", `entry = File.Directory.entry(directory, "child"); child = File.Directory.child(directory, entry); return Math.gt(child.inode, 0)`), "Bool!"},
+		{"File.Directory.entry", main("String", `entry = File.Directory.entry(directory, "entry"); return entry.name`), "String!"},
+		{"File.Entry.observe", main("Int", `entry = File.Directory.entry(directory, "entry"); observed = File.Entry.observe(entry); return List.length(observed)`), "Int!"},
+	}
 }
 
 func processorBuiltinExamples() []builtinExample {

@@ -30,7 +30,8 @@ This sequence does not depend on modules, user-defined types, generics, or packa
 | --- | --- | --- |
 | F024 | Immutable Process contexts, executable discovery, typed results, bounded transport, and selected cleanup scopes. | Current qualified activation is Darwin. Forked and spawned descendants remain denied. |
 | F025 | Invocation arguments, home, UIDs, captured time, file owner and timestamps, exact directory observations, scans, and checked removal. | F032 supplies public identity and allocated size. |
-| F032 | Public device, inode, and allocation fields, fresh time, and exact volume measurements. | Recursive authority and tree removal remain F033 and F034 work. |
+| F032 | Public device, inode, and allocation fields, fresh time, and exact volume measurements. | Whole-tree snapshots and removal remain F034 work. |
+| F033 | Separate recursive grants, retained child observations, and bounded root leases. | Application cache traversal remains I013 M3 work. |
 | Control | Selected Match branches, self-handling flows, ordered folds, and category recovery. | Pure callbacks and pure error handlers cannot activate commits. |
 | Traversal | `Flow.worklist` and host quotas for work, values, and retained directory observations. | Scheduling does not grant descendant access or make tree snapshots descriptor-bounded. |
 | Runner I/O | Committed Console lines, explicit embedding sinks, and text/NDJSON output. | F035 supplies bounded command-output forwarding. |
@@ -60,7 +61,8 @@ The [CLI contract](cli-runtime-design.md) defines their selected interfaces and 
 F030 adds the selected value processors and executable policy examples.
 F032 now supplies the [filesystem observation contract](file-system-observations.md).
 F035 supplies admitted deadlines and bounded command-output forwarding.
-F031, F033, F034, and F036 remain planned work outside the implemented language reference.
+F033 supplies [retained descendant observations](file-descendant-observations.md).
+F031, F034, and F036 remain planned work outside the implemented language reference.
 
 F030 through F036 and I013 depend on I018.
 P007 research can continue during filesystem implementation.

@@ -417,7 +417,10 @@ unsafe fn cli_main(
             }
         } else if arg == "--process-forward-output" && process_limits.forward_streams == 0 {
             process_limits.forward_streams = 3;
-        } else if matches!(arg, "--max-process-ms" | "--max-process-cleanup-ms" | "--max-process-output-bytes") {
+        } else if matches!(
+            arg,
+            "--max-process-ms" | "--max-process-cleanup-ms" | "--max-process-output-bytes"
+        ) {
             if !process_limit_flags.insert(arg) || i + 1 == args.len() {
                 error = Some(format!("{arg} requires one positive integer"));
                 break;
@@ -502,6 +505,8 @@ unsafe fn cli_main(
                 | "--write-root"
                 | "--list-root"
                 | "--remove-root"
+                | "--observe-tree-root"
+                | "--remove-tree-root"
                 | "--open-files-root"
                 | "--process-allow"
                 | "--process-launcher"
@@ -523,6 +528,8 @@ unsafe fn cli_main(
                 "--write-root" => roots.writes.push(value),
                 "--list-root" => roots.lists.push(value),
                 "--remove-root" => roots.removes.push(value),
+                "--observe-tree-root" => roots.observe_trees.push(value),
+                "--remove-tree-root" => roots.remove_trees.push(value),
                 "--open-files-root" => roots.open_files.push(value),
                 "--process-allow" => process_grants.push(value),
                 "--process-read-root" => process_roots.push(value),

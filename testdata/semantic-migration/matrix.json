@@ -163,6 +163,60 @@
       "negative_applicability": "catalog_failure_or_activation"
     },
     {
+      "operation": "File.Directory.child",
+      "capability": "File.observe_tree",
+      "errors": [
+        "File.DirectoryChanged",
+        "File.DirectoryFailed",
+        "File.DirectoryAbsent"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "File.Directory.entry",
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryChanged",
+        "File.EntryAbsent",
+        "File.InvalidName",
+        "File.ListFailed"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "File.Directory.refresh",
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryChanged",
+        "File.DirectoryFailed"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "File.Directory.scan",
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryChanged",
+        "File.ListFailed",
+        "File.InvalidName"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "File.Entry.observe",
+      "capability": "File.list",
+      "errors": [
+        "File.DirectoryChanged",
+        "File.ListFailed"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "File.Path.eq",
       "capability": "",
       "errors": [],
@@ -12169,6 +12223,281 @@
       "profile": "software",
       "tests": [
         "TestF032NativeFileIdentityAndAllocation"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.scan:positive",
+      "operation": "File.Directory.scan",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.Directory.scan",
+        "TestF033ExactRetainedObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.scan:negative",
+      "operation": "File.Directory.scan",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Directory.scan",
+        "TestF033RetainedObservationsAreHostReads",
+        "TestF033InspectionDynamicObservationsAndFailures/File.Directory.scan"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.scan:runtime-negative:native:darwin/arm64",
+      "operation": "File.Directory.scan",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF033DescendantObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.scan:runtime-negative:native:linux/arm64",
+      "operation": "File.Directory.scan",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF033DescendantObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.refresh:positive",
+      "operation": "File.Directory.refresh",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.Directory.refresh",
+        "TestF033ExactRetainedObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.refresh:negative",
+      "operation": "File.Directory.refresh",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Directory.refresh",
+        "TestF033RetainedObservationsAreHostReads",
+        "TestF033InspectionDynamicObservationsAndFailures/File.Directory.refresh"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.refresh:runtime-negative:native:darwin/arm64",
+      "operation": "File.Directory.refresh",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF033DescendantObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.refresh:runtime-negative:native:linux/arm64",
+      "operation": "File.Directory.refresh",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF033DescendantObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.child:positive",
+      "operation": "File.Directory.child",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.Directory.child",
+        "TestF033ExactGrantCannotDescend"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.child:negative",
+      "operation": "File.Directory.child",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Directory.child",
+        "TestF033RetainedObservationsAreHostReads",
+        "TestF033InspectionDynamicObservationsAndFailures/File.Directory.child"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.child:runtime-negative",
+      "operation": "File.Directory.child",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF033EntryNamesAndSymlinks"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.entry:positive",
+      "operation": "File.Directory.entry",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.Directory.entry",
+        "TestF033ExactRetainedObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.entry:negative",
+      "operation": "File.Directory.entry",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Directory.entry",
+        "TestF033RetainedObservationsAreHostReads",
+        "TestF033InspectionDynamicObservationsAndFailures/File.Directory.entry"
+      ]
+    },
+    {
+      "id": "operation:File.Directory.entry:runtime-negative",
+      "operation": "File.Directory.entry",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF033EntryFreshnessAndAbsence"
+      ]
+    },
+    {
+      "id": "operation:File.Entry.observe:positive",
+      "operation": "File.Entry.observe",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.Entry.observe",
+        "TestF033ExactRetainedObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Entry.observe:negative",
+      "operation": "File.Entry.observe",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Entry.observe",
+        "TestF033RetainedObservationsAreHostReads",
+        "TestF033InspectionDynamicObservationsAndFailures/File.Entry.observe"
+      ]
+    },
+    {
+      "id": "operation:File.Entry.observe:runtime-negative:native:darwin/arm64",
+      "operation": "File.Entry.observe",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF033DescendantObservations"
+      ]
+    },
+    {
+      "id": "operation:File.Entry.observe:runtime-negative:native:linux/arm64",
+      "operation": "File.Entry.observe",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF033DescendantObservations"
+      ]
+    },
+    {
+      "id": "contract:retained-file-observation-inspection",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestF033InspectionRetainsObservationRoot"
       ]
     }
   ],

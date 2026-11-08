@@ -224,8 +224,8 @@ Published metadata cannot reconstruct it.
 Entries include owner UID, access time, and inode metadata-change time from one native metadata result.
 Entries and directory observations also expose device, inode, and allocated bytes from that result.
 Property projections are pure.
-`File.Directory` observes an exact granted root, and `File.Scan` reports entries and vanished names explicitly.
-The strict listing operation keeps its full discovery contract for the Gateway policy.
+`File.Directory` retains root or descendant observations, and `File.Scan` reports entries and vanished names explicitly.
+The strict listing operation requires complete discovery.
 
 The selected File surface is:
 
@@ -234,8 +234,13 @@ The selected File surface is:
 | `File.Path.new(text)` and `File.Path.eq(a, b)` | Pure construction or comparison | Path or Bool. |
 | `File.read(path)` | Immediate observation | `Bytes!`. |
 | `File.list(root)` | Immediate observation | `List<File.Entry>!`. |
-| `File.directory(root)` | Immediate observation | `File.Directory!` under exact listing authority. |
+| `File.directory(root)` | Immediate observation | `File.Directory!` at an exact granted root. |
 | `File.scan(root)` | Immediate observation | `File.Scan!` with entries and explicitly reported vanished names. |
+| `File.Directory.refresh(directory)` | Immediate observation | Current retained `File.Directory!` metadata. |
+| `File.Directory.scan(directory)` | Immediate observation | `File.Scan!` through retained authority. |
+| `File.Directory.entry(directory, name)` | Immediate observation | One direct `File.Entry!`. |
+| `File.Directory.child(directory, entry)` | Immediate observation | Retained child `File.Directory!` under recursive authority. |
+| `File.Entry.observe(entry)` | Immediate observation | One fresh entry, or an empty list for absence. |
 | `File.System.usage(root)` | Immediate observation | Fresh `File.System.Usage!` under exact listing authority. |
 | `File.open_paths(root)` | Immediate observation | `List<File.Path>!`. |
 | `File.Write.new(path, content)` | Pure construction | Nominal `File.Write`. Commit produces `File.WriteReceipt`. |
@@ -273,6 +278,9 @@ During commit, mandatory identity checks precede the guard at preflight and imme
 A false predicate produces `File.EntryChanged` with `predicate-false` and the current progress stage.
 The current `File.RemoveReceipt` and confirmed-prefix rules apply to either constructor.
 The [observation implementation contract](file-observation-extension-design.md) owns exact callback, framing, and budget rules.
+The [retained descendant contract](file-descendant-observations.md) defines separate recursive grants and ancestor checks.
+Descendants share one acquisition root lease without a descriptor for each visited directory.
+Diagnostic snapshots cannot restore that authority.
 
 `File.open_paths` remains a File observation with an independent grant.
 Its domain meaning is an observation of open paths beneath the authorized directory.

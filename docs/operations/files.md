@@ -248,7 +248,7 @@ Observe metadata for the exact root directory. The result exposes its path, owne
 
 **Failures:** `File.DirectoryAbsent` or `File.DirectoryFailed`. An authority failure remains a terminal host diagnostic.
 
-**Authority:** Host observation. Execution requires an exact `--list-root` grant. A directory observation cannot become a removal selection.
+**Authority:** Host observation. Execution requires `--list-root` or `--observe-tree-root` at that exact root. A directory observation cannot become a removal selection.
 
 **Example:**
 
@@ -270,7 +270,7 @@ Each entry has a path, name, kind, logical size, link count, owner UID, and acce
 
 **Failures:** `File.DirectoryAbsent`, `File.ListFailed`, or `File.InvalidName`. A child that disappears during observation makes this strict operation fail.
 
-**Authority:** Host observation. Execution requires an exact `--list-root` grant. Entries retain session and directory provenance.
+**Authority:** Host observation. Execution requires `--list-root` or `--observe-tree-root` at that exact root. Entries retain session and directory provenance.
 
 **Example:**
 
@@ -336,7 +336,7 @@ A vanished name records only a child that disappears before metadata lookup. Ent
 
 **Failures:** `File.DirectoryAbsent`, `File.ListFailed`, or `File.InvalidName`. Other discovery errors stop the scan without a partial result.
 
-**Authority:** Host observation. Execution requires an exact `--list-root` grant. The observation does not describe an atomic filesystem snapshot.
+**Authority:** Host observation. Execution requires `--list-root` or `--observe-tree-root` at that exact root. The observation does not describe an atomic filesystem snapshot.
 
 **Example:**
 
@@ -345,3 +345,135 @@ return File.scan(File.Path.new("examples"))
 ```
 
 [Contract](../../specification.md#91-file-adapter)
+
+## File.Directory.refresh
+
+```text
+File.Directory.refresh(directory: File.Directory) -> File.Directory!
+```
+
+Return current directory metadata after retained root and ancestor identity checks.
+The result retains the input authority and root lease.
+
+**Failures:** `File.DirectoryChanged` or `File.DirectoryFailed`.
+
+**Authority:** Host observation through a live retained directory in the current session.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Directory! {
+    directory = File.directory(File.Path.new("examples"))
+    return File.Directory.refresh(directory)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Directory.scan
+
+```text
+File.Directory.scan(directory: File.Directory) -> File.Scan!
+```
+
+Observe sorted direct entries through a retained directory.
+The result separates entries from names that vanish during metadata lookup.
+Other discovery failures stop the operation without a partial result.
+
+**Failures:** `File.DirectoryChanged`, `File.ListFailed`, or `File.InvalidName`.
+
+**Authority:** Host observation through a live retained directory in the current session.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Scan! {
+    directory = File.directory(File.Path.new("examples"))
+    return File.Directory.scan(directory)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Directory.entry
+
+```text
+File.Directory.entry(directory: File.Directory, name: String) -> File.Entry!
+```
+
+Observe one direct entry without following its final symlink.
+The basename cannot be empty, `.`, `..`, or contain `/` or NUL.
+
+**Failures:** `File.DirectoryChanged`, `File.EntryAbsent`, `File.InvalidName`, or `File.ListFailed`.
+
+**Authority:** Host observation through a live retained directory in the current session.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Entry! {
+    directory = File.directory(File.Path.new("examples"))
+    return File.Directory.entry(directory, "list_sum.lo")
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Directory.child
+
+```text
+File.Directory.child(directory: File.Directory, entry: File.Entry) -> File.Directory!
+```
+
+Retain an observed child directory after parent, entry, and ancestor identity checks.
+A symlink cannot supply child directory authority.
+All descendants share the retained acquisition root lease.
+
+**Failures:** `File.DirectoryChanged`, `File.DirectoryFailed`, or `File.DirectoryAbsent`.
+
+**Authority:** Host observation under the parent's retained `--observe-tree-root` grant.
+An exact grant does not authorize descent.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Directory! {
+    directory = File.directory(File.Path.new("."))
+    entry = File.Directory.entry(directory, "examples")
+    return File.Directory.child(directory, entry)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Entry.observe
+
+```text
+File.Entry.observe(entry: File.Entry) -> List<File.Entry>!
+```
+
+Observe the entry's current metadata through its retained parent.
+Return an empty list only when that entry is absent.
+A replacement entry receives a new observation with its current identity.
+
+**Failures:** `File.DirectoryChanged` or `File.ListFailed`.
+
+**Authority:** Host observation through a live retained entry in the current session.
+Snapshot rows have no retained authority.
+
+**Example:**
+
+```lo
+flow Observe() -> List<File.Entry>! {
+    directory = File.directory(File.Path.new("examples"))
+    entry = File.Directory.entry(directory, "list_sum.lo")
+    return File.Entry.observe(entry)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)

@@ -1878,3 +1878,18 @@ pub unsafe extern "C" fn lo_op_File_2ESystem_2Eusage(
 ) {
     call(c, a, n, s, o, Some("File.System.usage"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Escan(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.scan")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Erefresh(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.refresh")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Echild(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.child")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Eentry(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.entry")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EEntry_2Eobserve(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Entry.observe")) }

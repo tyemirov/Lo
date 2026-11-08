@@ -186,7 +186,7 @@ pub fn usage(context: &mut Context, site: &Site, root: &Handle, directory: &File
     ))
 }
 
-fn install(context: &Context) -> Option<MutexGuard<'_, Observers>> {
+pub(crate) fn registration(context: &Context) -> Option<MutexGuard<'_, Observers>> {
     if context.owner != std::thread::current().id()
         || context.scopes != 0
         || context.depth != 0
@@ -211,7 +211,7 @@ pub unsafe extern "C" fn lo_context_clock_observer(
     let (Some(context), Some(callback)) = (context.as_ref(), callback) else {
         return 0;
     };
-    let Some(mut observers) = install(context) else {
+    let Some(mut observers) = registration(context) else {
         return 0;
     };
     if observers.clock.is_some() {
@@ -229,7 +229,7 @@ pub unsafe extern "C" fn lo_context_volume_observer(
     let (Some(context), Some(callback)) = (context.as_ref(), callback) else {
         return 0;
     };
-    let Some(mut observers) = install(context) else {
+    let Some(mut observers) = registration(context) else {
         return 0;
     };
     if observers.volume.is_some() {

@@ -238,8 +238,10 @@ func (o operation) Capability() string {
 		return FileAppendCapability
 	case FileRemove, FileRemoveChecked:
 		return FileRemoveCapability
-	case FileDirectory, FileScan, FileSystemUsage:
+	case FileDirectory, FileScan, FileSystemUsage, FileDirectoryScan, FileDirectoryRefresh, FileDirectoryEntry, FileEntryObserve:
 		return FileList
+	case FileDirectoryChild:
+		return FileObserveTree
 	}
 	switch o.boundary {
 	case Read, Effect:

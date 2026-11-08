@@ -1716,7 +1716,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Independent review found no remaining correctness issue.
   Final stack CI remains pending.
 
-- [ ] [F033] (P1) {F025,I018} Add explicit descendant directory authority and retained child observations
+- [-] [F033] (P1) {F025,I018} Add explicit descendant directory authority and retained child observations
   Goal:
   Support recursive filesystem traversal without expanding existing exact grants.
 
@@ -1730,6 +1730,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Release completed handles under existing worklist resource accounting.
 
   Deliverables:
+  - Current status: compiler and native implementation passed focused validation and independent review. Final stack CI remains pending.
   - Add selected child, refresh, entry, and re-observation operations in the single native runtime.
   - Specify bounded retained handles and snapshot authority rules.
 

@@ -27,6 +27,11 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.HostInvocationCurrent:          `{"type":"Int","value":"0"}`,
 		catalog.FileDirectory:                  `{"type":"Bool","value":true}`,
 		catalog.FileScan:                       `{"type":"Int","value":"0"}`,
+		"File.Directory.scan":                  `{"type":"Int","value":"0"}`,
+		"File.Directory.refresh":               `{"type":"Bool","value":true}`,
+		"File.Directory.child":                 `{"type":"Bool","value":true}`,
+		"File.Directory.entry":                 `{"type":"String","value":"entry"}`,
+		"File.Entry.observe":                   `{"type":"Int","value":"1"}`,
 		catalog.FileRemoveChecked:              `{"type":"Int","value":"0"}`,
 		catalog.ProcessContextCurrent:          `{"type":"Process.Context","value":{"origin":"inherited","redacted":true}}`,
 		catalog.ProcessContextNew:              `{"type":"Process.Context","value":{"origin":"explicit","redacted":true}}`,
@@ -144,6 +149,28 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				return
 			}
 			var args []string
+			for _, retained := range retainedFileBuiltinExamples("fixtures") {
+				if retained.name != tc.name {
+					continue
+				}
+				root := fileFixtureRoot(t)
+				flag := "--list-root"
+				switch tc.name {
+				case "File.Directory.child":
+					f033Directory(t, root, "child")
+					flag = "--observe-tree-root"
+				case "File.Directory.entry", "File.Entry.observe":
+					fileFixture(t, root, "entry", "data")
+				}
+				for _, fixture := range retainedFileBuiltinExamples(root) {
+					if fixture.name == tc.name {
+						tc.source = fixture.source
+						break
+					}
+				}
+				args = []string{flag, root}
+				break
+			}
 			if tc.name == catalog.FileDirectory || tc.name == catalog.FileScan || tc.name == catalog.FileSystemUsage {
 				root := fileFixtureRoot(t)
 				if tc.name == catalog.FileSystemUsage {

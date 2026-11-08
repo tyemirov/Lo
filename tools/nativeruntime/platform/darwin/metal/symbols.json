@@ -125,6 +125,7 @@
     "_memset_pattern16",
     "_mkdir",
     "_mkfifo",
+    "_mkstemp",
     "_mmap",
     "_mprotect",
     "_munmap",

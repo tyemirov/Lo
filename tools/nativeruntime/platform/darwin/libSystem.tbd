@@ -134,6 +134,7 @@ exports:
       - _mkdir
       - _mkfifo
       - _mkdtemp
+      - _mkstemp
       - _mmap
       - _mprotect
       - _munmap
@@ -212,6 +213,7 @@ exports:
       - _sigemptyset
       - _signal
       - _socket
+      - _snprintf
       - _socketpair
       - _stat
       - _strchr

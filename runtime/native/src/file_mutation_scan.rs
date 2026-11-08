@@ -82,8 +82,10 @@ impl Scan {
                 "Process cleanup directory depth".into(),
             ));
         }
-        let mut stream = DirectoryStream::open(directory)
-            .map_err(|error| host(format!("open Process cleanup directory: {error}")))?;
+        let mut stream = DirectoryStream::open(directory).map_err(|error| {
+            let fault = host(format!("open Process cleanup directory: {}", error.primary));
+            error.fault(fault)
+        })?;
         let scanned = (|| loop {
             context.check_cancel()?;
             let Some(name) = stream

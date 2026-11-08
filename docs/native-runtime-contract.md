@@ -159,6 +159,17 @@ Each pending item keeps its values, tensor storage, and directory observations u
 Scope cleanup releases resources that cannot escape through the result.
 The runtime checks new work without a separate worklist item limit.
 
+Retained File descendants share one acquisition root lease.
+The `file_directories` quota counts retained acquisition roots, not cumulative visited directories.
+Ancestor witnesses permit bounded descriptor use with deep pending work.
+Separate `--observe-tree-root` and `--remove-tree-root` grants control recursive authority.
+The [retained observation contract](file-descendant-observations.md) defines the exact authority rules.
+
+Trusted file metadata observers belong to the shared execution session.
+Registration must finish before any peer starts evaluation.
+All peers use the same installed observer.
+An evaluated peer permanently seals registration, including after that peer is released.
+
 ### Console Registration And Completion
 
 The [Console header](../runtime/native/include/lo_console.h) defines explicit native output registration and completion.

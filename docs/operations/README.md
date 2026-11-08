@@ -68,6 +68,11 @@ An empty error list in a constructor does not establish that its later commit su
 | [`File.Remove.new`](files.md#fileremovenew) | [Files](files.md) |
 | [`File.Write.new`](files.md#filewritenew) | [Files](files.md) |
 | [`File.directory`](files.md#filedirectory) | [Files](files.md) |
+| [`File.Directory.refresh`](files.md#filedirectoryrefresh) | [Files](files.md) |
+| [`File.Directory.scan`](files.md#filedirectoryscan) | [Files](files.md) |
+| [`File.Directory.entry`](files.md#filedirectoryentry) | [Files](files.md) |
+| [`File.Directory.child`](files.md#filedirectorychild) | [Files](files.md) |
+| [`File.Entry.observe`](files.md#fileentryobserve) | [Files](files.md) |
 | [`File.list`](files.md#filelist) | [Files](files.md) |
 | [`File.open_paths`](files.md#fileopen_paths) | [Files](files.md) |
 | [`File.read`](files.md#fileread) | [Files](files.md) |

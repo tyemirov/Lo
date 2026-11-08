@@ -129,6 +129,7 @@ exports:
       - _mkdir
       - _mkfifo
       - _mkdtemp
+      - _mkstemp
       - _mmap
       - _mprotect
       - _munmap
