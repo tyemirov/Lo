@@ -28,7 +28,7 @@ const (
 	TensorBundleOperation
 	OptimizerOperation
 	CheckpointOperation
-	CheckedRemovalConstructor
+	FilePredicateOperation
 	ListAccess
 	ListSortProcessor
 )
@@ -238,9 +238,11 @@ func (o operation) Capability() string {
 		return FileAppendCapability
 	case FileRemove, FileRemoveChecked:
 		return FileRemoveCapability
+	case FileTreeRemoveChecked:
+		return FileRemoveTree
 	case FileDirectory, FileScan, FileSystemUsage, FileDirectoryScan, FileDirectoryRefresh, FileDirectoryEntry, FileEntryObserve:
 		return FileList
-	case FileDirectoryChild:
+	case FileDirectoryChild, FileTreeSnapshot:
 		return FileObserveTree
 	}
 	switch o.boundary {
@@ -505,6 +507,7 @@ var activationTargets = map[types.Kind]activationTarget{
 	types.FileWriteKind:      {FileWrite, types.FileWriteReceipt()},
 	types.FileAppendKind:     {FileAppend, types.FileAppendReceipt()},
 	types.FileRemoveKind:     {FileRemove, types.FileRemoveReceipt()},
+	types.FileTreeRemoveKind: {FileTreeRemoveChecked, types.FileRemoveReceipt()},
 	types.ServerKind:         {ServerNew, types.ServerReceipt()},
 	types.ClientRequestKind:  {ClientRequestNew, types.Response()},
 }

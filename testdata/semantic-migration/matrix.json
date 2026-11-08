@@ -295,6 +295,31 @@
       "negative_applicability": "catalog_failure_or_activation"
     },
     {
+      "operation": "File.Tree.Remove.checked",
+      "capability": "File.remove_tree",
+      "errors": [
+        "File.InvalidSelection"
+      ],
+      "activation_errors": [
+        "File.EntryChanged",
+        "File.RemoveFailed"
+      ],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "File.Tree.snapshot",
+      "capability": "File.observe_tree",
+      "errors": [
+        "File.DirectoryChanged",
+        "File.DirectoryAbsent",
+        "File.DirectoryFailed",
+        "File.ListFailed",
+        "File.InvalidName"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "File.Write.new",
       "capability": "File.write",
       "errors": [],
@@ -12498,6 +12523,122 @@
       "profile": "frontend",
       "tests": [
         "TestF033InspectionRetainsObservationRoot"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.snapshot:positive",
+      "operation": "File.Tree.snapshot",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.Tree.snapshot"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.snapshot:negative",
+      "operation": "File.Tree.snapshot",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Tree.snapshot",
+        "TestF034RejectsInvalidCallbackContracts",
+        "TestF034Inspection",
+        "TestF034DynamicTargetInspection"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.snapshot:runtime-negative:native:darwin/arm64",
+      "operation": "File.Tree.snapshot",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF034TreeLifecycle"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.snapshot:runtime-negative:native:linux/arm64",
+      "operation": "File.Tree.snapshot",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF034TreeLifecycle"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.Remove.checked:positive",
+      "operation": "File.Tree.Remove.checked",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/File.Tree.Remove.checked"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.Remove.checked:negative",
+      "operation": "File.Tree.Remove.checked",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/File.Tree.Remove.checked",
+        "TestF034RejectsInvalidCallbackContracts",
+        "TestF034Inspection",
+        "TestF034DynamicTargetInspection"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.Remove.checked:runtime-negative:native:darwin/arm64",
+      "operation": "File.Tree.Remove.checked",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMF034TreeLifecycle",
+        "TestLLVMF034TreeFailureEvidence"
+      ]
+    },
+    {
+      "id": "operation:File.Tree.Remove.checked:runtime-negative:native:linux/arm64",
+      "operation": "File.Tree.Remove.checked",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMLinuxF034TreeLifecycle",
+        "TestLLVMLinuxF034TreeFailureEvidence"
       ]
     }
   ],

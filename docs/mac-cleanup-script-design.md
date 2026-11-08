@@ -262,7 +262,7 @@ Steps and cancellation still stop excessive work.
 
 This processor preserves existing authority boundaries.
 A parent directory grant does not authorize an unopened child.
-The proposed descendant operations below still need their own authority and ownership contracts.
+F033 supplies retained descendant authority and bounded root leases.
 The application opens a child only when its work item is visited.
 Retained state and pending items keep the resources they require.
 Snapshots keep public data without executable authority.
@@ -281,12 +281,13 @@ Draft retained listings must use the selected scan contract with explicit disapp
 Retained entry observations supply kind and absence results without new path observation operations.
 The remaining draft path observations require application conversion under I013.
 
-| Proposed operation | Contract |
-| --- | --- |
-| `File.Tree.snapshot(parent, root, context..., Descend) -> File.Tree!` | Observe a root and descendants through retained directories without following symlinks. |
-| `File.Tree.Remove.new(parent, root)` | Construct a descriptor-safe recursive removal target for one observed directory root. Only commit removes it. |
+F034 supplies `File.Tree.snapshot` and `File.Tree.Remove.checked` under the [tree contract](file-tree-removal.md).
+I013 must replace the draft's obsolete `File.Tree.Remove.new(parent, root)` call with a target bound to the approved snapshot.
+Xcode discovery must retain parent and root observations instead of converting them to path-only tasks.
 
 `File.Tree.entries` has type `List<Record{relative: String, entry: File.Entry}>`.
+Its rows contain metadata without host authority.
+The `complete` field records whether descent included every observed directory.
 The root row uses `.`.
 Other rows use relative names with sorted depth-first traversal.
 Each opened directory must match its preceding observation.
@@ -296,12 +297,14 @@ Any vanished name or unrelated metadata failure fails the snapshot.
 A false result prevents descent but preserves the directory row.
 The application uses this rule to reject a foreign owner or another device without entering that subtree.
 The application separately computes age, allocation, link rules, and whole-tree equality.
-Directory access time is excluded only in that application's tree predicate.
+Mandatory tree comparison excludes directory access time because traversal can change it.
+The application uses the same exclusion for its comparison around the probe.
 
 Removal requires explicit recursive removal authority and the retained parent and root identities.
 It never follows a symlink or substitutes a replacement ancestor.
 The application compares two snapshots around the open-file probe before target construction.
-That comparison and deletion remain separate operations with a race window.
+The checked target must retain the original approved snapshot and repeat complete preflight before mutation.
+These observations and deletion remain separate operations with a race window.
 
 Retained descendant handles do not acquire authority from path text alone.
 Observation and removal grants remain separate.
@@ -356,7 +359,7 @@ Static review found no flow-call cycles or commit-bearing Match expressions.
 
 The current catalog implements `Flow.worklist`, Console, terminal construction, declared options, and the F030 value processors.
 The application now uses typed flows for the helper operations listed above.
-The full application fails type checking at the proposed `File.Tree` type.
+Full application acceptance still requires conversion of obsolete file calls and the remaining value and Process operations.
 Parser acceptance and structural review do not establish type correctness or runtime parity for the full application.
 The compiler and runtimes must implement or remove the other selected proposals before executable acceptance.
 

@@ -161,6 +161,9 @@ fn visit_storages(
                 guard: Some(guard),
                 ..
             })) => stack.extend_from_slice(&guard.contexts),
+            Data::Adapter(crate::adapters::AdapterValue::File(crate::files::Value::TreeRemove {
+                guard, ..
+            })) => stack.extend_from_slice(&guard.contexts),
             Data::Adapter(value) => {
                 if let Some(fields) = value.fields() {
                     stack.extend(fields.values().cloned());

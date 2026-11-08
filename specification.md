@@ -539,6 +539,7 @@ A top-level failure aborts execution before later statements.
 | `File.Write` | `File.WriteReceipt` |
 | `File.Append` | `File.AppendReceipt` |
 | `File.Remove` | `File.RemoveReceipt` |
+| `File.Tree.Remove` | `File.RemoveReceipt` |
 | `HTTP.Server` | `HTTP.ServerReceipt` |
 | `HTTP.Client.Request` | `HTTP.Response` |
 | `Process.Command` | `Process.Result`, under the selected host execution profile |
@@ -751,6 +752,7 @@ The initial boundary-oriented built-in types are:
 * `File.Entry`
 * `File.Directory`
 * `File.Scan`
+* `File.Tree`
 * `File.System.Usage`
 * `Host.Invocation`
 * `Console.Line`
@@ -765,6 +767,7 @@ The initial boundary-oriented built-in types are:
 * `File.Write`
 * `File.Append`
 * `File.Remove`
+* `File.Tree.Remove`
 * `File.WriteReceipt`
 * `File.AppendReceipt`
 * `File.RemoveReceipt`
@@ -1139,10 +1142,12 @@ Independent source review closed the current findings.
 | `File.Directory.entry(directory: File.Directory, name: String)` | `File.Entry!` |
 | `File.Directory.child(directory: File.Directory, entry: File.Entry)` | `File.Directory!` |
 | `File.Entry.observe(entry: File.Entry)` | `List<File.Entry>!` |
+| `File.Tree.snapshot(parent: File.Directory, root: File.Entry, context..., Descend)` | `File.Tree!` |
 | `File.System.usage(root: File.Path)` | `File.System.Usage!` |
 | `File.open_paths(root: File.Path)` | `List<File.Path>!` |
 | `File.Remove.new(entries: List<File.Entry>)` | `File.Remove!` |
 | `File.Remove.checked(entries, context..., Eligible)` | `File.Remove!` |
+| `File.Tree.Remove.checked(expected: File.Tree, context..., Eligible)` | `File.Tree.Remove!` |
 | `File.Append.new(file_path: File.Path, file_content: Bytes)` | `File.Append` |
 | `File.Write.new(file_path: File.Path, file_content: Bytes)` | `File.Write` |
 
@@ -1277,6 +1282,58 @@ New observation values and ordinary guard execution receive separate value and e
 Lo flows select owner, timestamp, and link-count rules explicitly.
 The final metadata check and removal remain separate native operations.
 
+`File.Tree.snapshot` observes a directory tree through a retained parent and its observed root entry.
+The parent must retain recursive observation authority.
+`Descend(context..., entry: File.Entry) -> Bool` must be pure and total.
+It runs for directories only, including the root.
+A rejected directory remains a row, but its descendants do not.
+Any rejection sets `complete` to false, including rejection of an empty directory.
+
+`File.Tree` exposes `entries: List<Record{relative: String, entry: File.Entry}>` and `complete: Bool`.
+The rows use preorder traversal with ascending sibling names and root relative name `.`.
+Each row contains metadata without host authority.
+The private tree shares one acquisition lease and retains identity witnesses.
+Iterative traversal uses bounded temporary descriptors and charges the whole snapshot against file-entry, work, value, and live-resource limits.
+It never follows a symlink.
+
+`File.Tree.Remove.checked` captures a complete expected tree, immutable contexts, and an eligibility flow.
+Its signature is `Eligible(context..., row: Record{relative: String, entry: File.Entry}) -> Bool`.
+The flow must be pure and total.
+Construction performs no observation, callback invocation, or mutation.
+An incomplete tree or missing private observation produces `File.InvalidSelection`.
+
+Activation requires `File.remove_tree` authority through a separate recursive removal grant.
+The grant's complete identity witnesses must form an identity-equal prefix of the selected root's witnesses.
+This permits the acquisition-root grant or a narrower selected-root grant.
+An exact removal grant cannot authorize tree removal.
+Foreign sessions, released leases, missing authority, and replaced grant ancestors produce terminal failures.
+
+Complete preflight compares topology, private identity, and all public metadata except directory access time.
+It checks protected resources and invokes eligibility for every reached fresh row before any mutation.
+A false predicate produces `File.EntryChanged` with condition `predicate-false`.
+The runtime does not invoke eligibility after mutation starts.
+Removal uses postorder with ascending sibling names and the root last.
+Each step rechecks the selected row, ancestors, and approved remaining names.
+
+Each successful unlink immediately increases the confirmed count and logical-byte total.
+Postchecks update only approved parent fields and selected hardlink counts and change times.
+They require unchanged identities, exact remaining names, and the expected hardlink count decrement.
+The approved public snapshot remains immutable.
+After the final root unlink, the runtime does not reopen that removed grant root.
+
+Tree failures retain `total_count`, `completed_count`, `completed_bytes`, `failed_index`, `failed_relative`, and `stage` in progress evidence.
+Indexes address the original preorder rows.
+Stages are `preflight`, `remove`, `postcheck`, and `finalize`.
+A failure without one row uses index `-1` and an empty relative name.
+Recoverable messages also state the confirmed counts, approved logical bytes, and failure stage.
+Existing terminal failure and compound cleanup rules remain applicable.
+
+Snapshot, preflight, checks, and unlink remain separate native operations.
+Concurrent writers can change entries between these operations or during metadata updates caused by removal.
+The runtime stops at a detected mismatch or failed operation and reports the confirmed prefix.
+It does not promise atomic deletion, rollback, or detection of every concurrent change.
+The [tree contract](docs/file-tree-removal.md) specifies exact metadata updates, failures, and resource ownership.
+
 | Lo error kind | Condition |
 | --- | --- |
 | `File.DirectoryAbsent` | Granted listing directory is absent. |
@@ -1298,13 +1355,15 @@ Each nominal target has one receipt type:
 | `File.Write` | `File.WriteReceipt` | `path: File.Path`, `bytes_written: Int` |
 | `File.Append` | `File.AppendReceipt` | `path: File.Path`, `bytes_written: Int` |
 | `File.Remove` | `File.RemoveReceipt` | `total_count: Int`, `completed_count: Int`, `observed_bytes: Int` |
+| `File.Tree.Remove` | `File.RemoveReceipt` | `total_count: Int`, `completed_count: Int`, `observed_bytes: Int` |
 
 Receipt values have no public constructors.
 After removal success, the total and completed counts are equal.
-`observed_bytes` sums selected file observations and does not measure reclaimed storage.
+`observed_bytes` sums original selected `size_bytes` values, including tree directory and symlink rows.
+It does not measure reclaimed storage.
 Write and append failures keep confirmed byte counts without a bound receipt.
 Operation success includes necessary resource release.
-Retained directory handles stay open until session cleanup.
+Retained root leases remain live while reachable values or pending work require them.
 A later cleanup failure keeps confirmed progress.
 
 The [File design](docs/file-adapter-design.md) specifies limits, progress records, and concurrency boundaries.
@@ -2449,6 +2508,7 @@ Unsupported or unconfigured Process activation returns `runtime.process-unavaila
 
 * `File.Remove.new`
 * `File.Remove.checked`
+* `File.Tree.Remove.checked`
 * `File.Append.new`
 * `File.Write.new`
 * `HTTP.Server.new`

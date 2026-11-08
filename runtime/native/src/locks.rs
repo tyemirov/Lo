@@ -259,6 +259,13 @@ pub struct Locks {
     state: Mutex<State>,
 }
 impl Locks {
+    pub(crate) fn protect_tree_identity(&self, identity: Identity) -> Result<(), Fault> {
+        let state = self.state.lock().map_err(|_| host("lock ownership poisoned"))?;
+        if state.leases.iter().any(|(active, _)| *active == identity) {
+            return Err(Fault::Host("runtime.capability-denied", "File.remove_tree cannot remove an active lock identity".into()));
+        }
+        Ok(())
+    }
     pub fn empty() -> Self {
         Self {
             state: Mutex::new(State::default()),

@@ -165,6 +165,12 @@ Ancestor witnesses permit bounded descriptor use with deep pending work.
 Separate `--observe-tree-root` and `--remove-tree-root` grants control recursive authority.
 The [retained observation contract](file-descendant-observations.md) defines the exact authority rules.
 
+File tree snapshots retain one private acquisition lease and rows without host authority.
+Checked tree targets retain that snapshot and their callback contexts across flow returns.
+Traversal uses bounded temporary descriptors and charges pending names, private rows, and operation work.
+Diagnostic snapshots cannot restore this authority.
+The [tree contract](file-tree-removal.md) defines preflight, postorder removal, metadata updates, and confirmed progress.
+
 Trusted file metadata observers belong to the shared execution session.
 Registration must finish before any peer starts evaluation.
 All peers use the same installed observer.

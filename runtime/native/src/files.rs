@@ -42,6 +42,8 @@ pub const SUPPORTED: &[&str] = &[
     "File.open_paths",
     "File.Remove.new",
     "File.Remove.checked",
+    "File.Tree.snapshot",
+    "File.Tree.Remove.checked",
 ];
 static SESSION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 pub fn admit(site: &Site) -> Result<(), String> {
@@ -108,6 +110,18 @@ pub fn admit(site: &Site) -> Result<(), String> {
                 && site.arguments.len() == args.len() + 1
                 && site.typ == Type::Fallible(Box::new(atom("File.Remove")))
         }
+        "File.Tree.snapshot" => {
+            args.starts_with(&[atom("File.Directory"), atom("File.Entry")])
+                && matches!(site.arguments.last(), Some(Argument::Flow(_)))
+                && site.arguments.len() == args.len() + 1
+                && site.typ == Type::Fallible(Box::new(atom("File.Tree")))
+        }
+        "File.Tree.Remove.checked" => {
+            args.first() == Some(&atom("File.Tree"))
+                && matches!(site.arguments.last(), Some(Argument::Flow(_)))
+                && site.arguments.len() == args.len() + 1
+                && site.typ == Type::Fallible(Box::new(atom("File.Tree.Remove")))
+        }
         "File.open_paths" => {
             args == [atom("File.Path")]
                 && site.typ == Type::Fallible(Box::new(Type::List(Box::new(atom("File.Path")))))
@@ -118,7 +132,7 @@ pub fn admit(site: &Site) -> Result<(), String> {
         }
         _ => false,
     };
-    if valid && (args.len() == site.arguments.len() || site.operation == "File.Remove.checked") {
+    if valid && (args.len() == site.arguments.len() || matches!(site.operation.as_str(), "File.Remove.checked" | "File.Tree.snapshot" | "File.Tree.Remove.checked")) {
         Ok(())
     } else {
         Err("file operation metadata type mismatch".into())
@@ -131,14 +145,19 @@ pub fn admit_guard(site: &Site, flows: &[Flow]) -> Result<(), String> {
     };
     let flow = flows.get(*callback).ok_or_else(invalid)?;
     let mut parameters = Vec::new();
-    for argument in &site.arguments[1..site.arguments.len() - 1] {
+    let fixed = if site.operation == "File.Tree.snapshot" { 2 } else { 1 };
+    for argument in &site.arguments[fixed..site.arguments.len() - 1] {
         let Argument::Value(typ) = argument else {
             return Err(invalid());
         };
         parameters.push(typ.clone());
     }
-    parameters.push(atom("File.Entry"));
-    parameters.push(atom("File.Entry"));
+    if site.operation == "File.Tree.Remove.checked" {
+        parameters.push(entries::tree::row_type());
+    } else {
+        parameters.push(atom("File.Entry"));
+        if site.operation == "File.Remove.checked" { parameters.push(atom("File.Entry")); }
+    }
     if parameters.len() != flow.parameters.len()
         || parameters
             .iter()
@@ -332,11 +351,13 @@ fn cleanup_failure(primary: Fault, cleanup: io::Error) -> Fault {
             };
             let mut cause = cause.clone();
             let mut fields = cause.input.fields().clone();
+            let mut errors = fields.get("cleanup_errors").map_or_else(Vec::new, |value| value.items().to_vec());
+            errors.push(text(&message));
             fields.insert(
                 "cleanup_errors".into(),
                 new(
                     Type::List(Box::new(atom("String"))),
-                    Data::List(vec![text(&message)]),
+                    Data::List(errors),
                 ),
             );
             cause.input = view(&record(fields));
@@ -636,6 +657,8 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
         "File.Entry.observe" => return entries::observe(context, site, &args[0]),
         "File.System.usage" => return entries::usage(context, site, &args[0]),
         "File.Remove.checked" => return entries::selection_checked(context, site, args),
+        "File.Tree.snapshot" => return entries::tree::snapshot(context, site, args),
+        "File.Tree.Remove.checked" => return entries::tree::checked(context, site, args),
         "File.open_paths" => return probe::open_paths(context, site, &args[0]),
         "File.Remove.new" => return entries::selection(context, site, &args[0]),
         _ => (),
@@ -791,7 +814,7 @@ fn mutation_failure(fault: Fault, operation: &str, path: &Path) -> Fault {
 pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     let removal = matches!(
         &target.data,
-        Data::Adapter(crate::adapters::AdapterValue::File(Value::Remove { .. }))
+        Data::Adapter(crate::adapters::AdapterValue::File(Value::Remove { .. } | Value::TreeRemove { .. }))
     );
     if !removal {
         *context.files.write_progress.borrow_mut() = Some(record([
@@ -821,6 +844,9 @@ fn commit_inner(context: &mut Context, site: &Site, target: &Handle) -> Outcome 
     };
     if let Value::Remove { .. } = target {
         return entries::remove(context, site, target);
+    }
+    if let Value::TreeRemove { .. } = target {
+        return entries::tree::remove(context, site, target);
     }
     let Value::Content {
         path,

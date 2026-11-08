@@ -78,8 +78,10 @@ It does not create, truncate, or remove a file.
 Missing or invalid grant inputs produce host admission failures.
 The application cannot expand admitted authority through a constructed path.
 
-Lock authority does not change separately granted File or Process authority.
+File and Process operations still require their separate grants.
 Applications can write locked file content when their File grants permit that operation.
+`File.Tree.Remove` preserves active lock identities and their hardlink aliases as protected runtime resources.
+This protection does not change existing single-file removal or content-write behavior.
 
 Each acquisition opens a fresh independent file descriptor.
 It does not duplicate the descriptor retained by the grant.
@@ -132,9 +134,8 @@ The host retains and joins that stub during creation failure and cancellation.
 
 The lock applies to the retained file object.
 Hardlinks to that object contend for the same lock.
-Both runtimes use the same native lock protocol.
-An interpreted caller and a native caller contend when their grants select the same object.
-An interpreted source and its compiled executable are separate objects.
+Separate compiled programs contend when their grants select the same object.
+A source file and its compiled executable are separate objects.
 
 The lock is advisory.
 Uncooperative external operations can rename or replace a locked pathname.
@@ -151,7 +152,7 @@ Darwin image identity uses the [kernel region interface](https://github.com/appl
 
 - Confirm absent interfaces through public tests before production changes.
 - Verify constructor purity, redaction, authority separation, and callback effects.
-- Verify two-process contention and mixed interpreted/native contention.
+- Verify two-process contention through compiled programs and shared-session acquisition.
 - Verify hardlinks, symlinks, relocation, replacement, and unavailable entry identity.
 - Verify independent acquisition and release after success and recoverable failure.
 - Verify cancellation, retained child cleanup, and ordinary value disposal.

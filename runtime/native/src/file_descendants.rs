@@ -10,7 +10,7 @@ pub(super) fn changed(site: &Site, input: &Handle, path: &Path) -> Fault {
     )
 }
 
-fn directory_observation(site: &Site, value: &Handle) -> Result<Observation, Fault> {
+pub(super) fn directory_observation(site: &Site, value: &Handle) -> Result<Observation, Fault> {
     match &value.data {
         Data::Adapter(crate::adapters::AdapterValue::File(Value::Directory {
             observation: Some(observation),
@@ -20,7 +20,7 @@ fn directory_observation(site: &Site, value: &Handle) -> Result<Observation, Fau
     }
 }
 
-fn entry_observation(site: &Site, value: &Handle) -> Result<Observation, Fault> {
+pub(super) fn entry_observation(site: &Site, value: &Handle) -> Result<Observation, Fault> {
     match &value.data {
         Data::Adapter(crate::adapters::AdapterValue::File(Value::Entry {
             observation: Some(observation),
@@ -30,7 +30,7 @@ fn entry_observation(site: &Site, value: &Handle) -> Result<Observation, Fault> 
     }
 }
 
-fn check_lease(context: &Context, site: &Site, observed: &Observation) -> Result<(), Fault> {
+pub(super) fn check_lease(context: &Context, site: &Site, observed: &Observation) -> Result<(), Fault> {
     let denied = || denied(&site.operation, &observed.directory.path);
     if observed.session != context.files.session {
         return Err(denied());

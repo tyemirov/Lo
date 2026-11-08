@@ -371,6 +371,80 @@ return Observe()
 
 [Contract](../file-descendant-observations.md)
 
+## File.Tree.snapshot
+
+```text
+File.Tree.snapshot(parent: File.Directory, root: File.Entry, context..., Descend) -> File.Tree!
+```
+
+Observe a tree through a retained parent and its observed directory entry.
+The pure, total callback has signature `Descend(context..., entry: File.Entry) -> Bool`.
+It runs only for directories, including the root.
+A rejected directory remains a row and makes `complete` false.
+
+The result exposes `entries: List<Record{relative: String, entry: File.Entry}>` and `complete: Bool`.
+Rows use preorder with ascending siblings and root relative name `.`.
+Rows contain metadata without host authority.
+The private tree shares one root lease and uses bounded temporary descriptors.
+Traversal never follows a symlink.
+
+**Failures:** `File.DirectoryChanged`, `File.DirectoryAbsent`, `File.DirectoryFailed`, `File.ListFailed`, or `File.InvalidName`.
+
+**Authority:** Host observation through the parent's retained recursive observation grant.
+Exact listing authority cannot authorize this operation.
+
+**Example:**
+
+```lo
+flow Descend(entry: File.Entry) -> Bool { return true }
+flow Observe(parent: File.Directory, root: File.Entry) -> File.Tree! {
+    return File.Tree.snapshot(parent, root, Descend)
+}
+return 0
+```
+
+[Contract](../file-tree-removal.md)
+
+## File.Tree.Remove.checked
+
+```text
+File.Tree.Remove.checked(expected: File.Tree, context..., Eligible) -> File.Tree.Remove!
+```
+
+Construct an inert target from a complete, privately observed tree.
+The pure, total callback has signature `Eligible(context..., row: Record{relative: String, entry: File.Entry}) -> Bool`.
+Construction performs no observation, callback invocation, or mutation.
+
+Commit compares the complete tree and checks eligibility before any mutation.
+It removes rows in postorder, with ascending siblings and the root last.
+Each step checks identities and the approved remaining names.
+The callback runs during preflight only.
+Successful activation returns `File.RemoveReceipt` with original logical bytes, including directory and symlink rows.
+
+**Failures:** Construction can produce `File.InvalidSelection`.
+Commit can produce `File.EntryChanged` or `File.RemoveFailed`.
+Failure evidence retains confirmed progress and the failed row when known.
+Recoverable messages also report the confirmed prefix and stage.
+Authority, lifetime, cancellation, resource, and lone close failures remain terminal.
+
+**Authority:** Pure construction. Activation requires a covering recursive removal grant with matching private identity witnesses.
+An exact removal grant cannot authorize this target.
+The operation preserves the program entry, active lock identities, and protected namespace resources.
+
+**Example:**
+
+```lo
+flow Owned(uid: Int, row: Record{relative: String, entry: File.Entry}) -> Bool {
+    return Math.eq(row.entry.owner_uid, uid)
+}
+flow Prepare(tree: File.Tree, uid: Int) -> File.Tree.Remove! {
+    return File.Tree.Remove.checked(tree, uid, Owned)
+}
+return 0
+```
+
+[Contract](../file-tree-removal.md)
+
 ## File.Directory.scan
 
 ```text

@@ -275,6 +275,12 @@ fn for_each_child<'a>(value: &'a Handle, mut push: impl FnMut(&'a Handle)) {
                 guard.contexts.iter().for_each(&mut push);
             }
         }
+        Data::Adapter(crate::adapters::AdapterValue::File(crate::files::Value::TreeRemove {
+            expected, guard,
+        })) => {
+            push(expected);
+            guard.contexts.iter().for_each(&mut push);
+        }
         Data::Adapter(value) => {
             if let Some(fields) = value.fields() {
                 fields.values().for_each(&mut push);

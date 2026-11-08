@@ -72,7 +72,7 @@ Each public operation must specify these fields before implementation:
 | Failure | Constructor errors, boundary errors, host failures, and confirmed partial progress. |
 | Resources | Work, bytes, handles, lifetime, cancellation, and release rules. |
 | Inspection | Immediate requirements, stored callback requirements, and calculated targets. |
-| Backend contract | Observable behavior shared by interpreter and native execution. |
+| Backend contract | Portable behavior and explicitly selected host profiles. |
 
 Construction validates supplied data without access to external state.
 Each constructor establishes its result type's invariants.
@@ -241,12 +241,14 @@ The selected File surface is:
 | `File.Directory.entry(directory, name)` | Immediate observation | One direct `File.Entry!`. |
 | `File.Directory.child(directory, entry)` | Immediate observation | Retained child `File.Directory!` under recursive authority. |
 | `File.Entry.observe(entry)` | Immediate observation | One fresh entry, or an empty list for absence. |
+| `File.Tree.snapshot(parent, root, context..., Descend)` | Immediate observation | `File.Tree!` with rows without host authority and a completeness flag. |
 | `File.System.usage(root)` | Immediate observation | Fresh `File.System.Usage!` under exact listing authority. |
 | `File.open_paths(root)` | Immediate observation | `List<File.Path>!`. |
 | `File.Write.new(path, content)` | Pure construction | Nominal `File.Write`. Commit produces `File.WriteReceipt`. |
 | `File.Append.new(path, content)` | Pure construction | Nominal `File.Append`. Commit produces `File.AppendReceipt`. |
 | `File.Remove.new(entries)` | Pure fallible construction | Nominal `File.Remove!`. Commit produces `File.RemoveReceipt`. |
 | `File.Remove.checked(entries, context..., Eligible)` | Pure fallible construction | Nominal `File.Remove!` with a total pure guard evaluated during commit. |
+| `File.Tree.Remove.checked(expected, context..., Eligible)` | Pure fallible construction | Nominal `File.Tree.Remove!` with complete preflight and confirmed removal progress. |
 
 Write and append accept `Bytes`.
 An explicit `UTF8.Bytes.new(text: String) -> Bytes` constructor supplies text encoding.
@@ -895,7 +897,7 @@ Source inspection without host configuration reports the profile as unavailable.
 Process activation verifies backend support and establishes enforcement before launch.
 It does not infer the executable's internal algorithm or specific effects from its path.
 
-Interpreter and native execution must agree on results, order, errors, authority, and progress.
+Each native target must obey the same language contract for results, order, errors, authority, and progress.
 Neither backend can silently repeat an observation or activate a constructed target.
 Resources remain host-owned, even when immutable observations or receipts outlive a particular operation.
 Diagnostic output must not expose secret header or environment values.

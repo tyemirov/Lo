@@ -18,6 +18,9 @@ const (
 	FileEntryObserve      = "File.Entry.observe"
 	FileObserveTree       = "File.observe_tree"
 	FileRemoveChecked     = "File.Remove.checked"
+	FileTreeSnapshot      = "File.Tree.snapshot"
+	FileTreeRemoveChecked = "File.Tree.Remove.checked"
+	FileRemoveTree        = "File.remove_tree"
 	DirectoryFailed       = "File.DirectoryFailed"
 	DirectoryChanged      = "File.DirectoryChanged"
 	EntryAbsent           = "File.EntryAbsent"
@@ -46,7 +49,30 @@ func addObservations(operations map[string]Operation, fixed func(string, []types
 		operation.boundary, operation.errors = Read, spec.errors
 		operations[spec.name] = operation
 	}
-	operations[FileRemoveChecked] = operation{name: FileRemoveChecked, rule: CheckedRemovalConstructor,
-		boundary: Effect, output: must(types.NewFallible(types.FileRemove())),
+	operations[FileRemoveChecked] = operation{name: FileRemoveChecked, rule: FilePredicateOperation,
+		parameters: []types.Parameter{{Name: ParamEntries, Type: must(types.NewList(types.FileEntry()))}},
+		boundary:   Effect, output: must(types.NewFallible(types.FileRemove())),
 		errors: []string{InvalidSelection}, activation: []string{EntryChanged, RemoveFailed}}
+	operations[FileTreeSnapshot] = operation{name: FileTreeSnapshot, rule: FilePredicateOperation,
+		parameters: []types.Parameter{{Name: "parent", Type: types.FileDirectory()}, {Name: ParamRoot, Type: types.FileEntry()}},
+		boundary:   Read, output: must(types.NewFallible(types.FileTree())),
+		errors: []string{DirectoryChanged, DirectoryAbsent, DirectoryFailed, ListFailed, InvalidName}}
+	operations[FileTreeRemoveChecked] = operation{name: FileTreeRemoveChecked, rule: FilePredicateOperation,
+		parameters: []types.Parameter{{Name: "expected", Type: types.FileTree()}},
+		boundary:   Effect, output: must(types.NewFallible(types.FileTreeRemove())),
+		errors: []string{InvalidSelection}, activation: []string{EntryChanged, RemoveFailed}}
+}
+
+// FilePredicateElements returns the observed arguments after a predicate's contexts.
+func FilePredicateElements(name string) []types.Type {
+	switch name {
+	case FileRemoveChecked:
+		return []types.Type{types.FileEntry(), types.FileEntry()}
+	case FileTreeSnapshot:
+		return []types.Type{types.FileEntry()}
+	case FileTreeRemoveChecked:
+		return []types.Type{types.FileTreeRow()}
+	default:
+		return nil
+	}
 }

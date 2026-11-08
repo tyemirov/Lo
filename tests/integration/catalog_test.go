@@ -123,7 +123,15 @@ func builtinExamples() []builtinExample {
 	examples = append(examples, checkpointBuiltinExamples()...)
 	examples = append(examples, processorBuiltinExamples()...)
 	examples = append(examples, retainedFileBuiltinExamples("fixtures")...)
+	examples = append(examples, treeBuiltinExamples("fixtures")...)
 	return append(examples, tensorBuiltinExamples()...)
+}
+
+func treeBuiltinExamples(root string) []builtinExample {
+	return []builtinExample{
+		{catalog.FileTreeSnapshot, f034Predicates + f034Program(root, "Int", "", `return List.length(tree.entries)`), "Int!"},
+		{catalog.FileTreeRemoveChecked, f034Predicates + f034Program(root, "Int", "", `pending = File.Tree.Remove.checked(tree, Eligible); receipt = commit pending; return receipt.completed_count`), "Int!"},
+	}
 }
 
 func retainedFileBuiltinExamples(root string) []builtinExample {

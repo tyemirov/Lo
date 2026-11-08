@@ -335,17 +335,16 @@ Command arguments, batch size, stderr policy, and filename predicates stay in ap
 
 ### F034: Tree Ownership And Removal
 
-A snapshot list of ordinary authoritative File entries would retain one directory handle per visited parent.
-That shape can exceed the default live-directory quota on ordinary build trees.
-F034 must select bounded snapshot ownership before implementation.
-The preferred direction is retained parent/root authority with authority-free metadata rows.
+F034 uses one retained acquisition lease with rows without host authority.
 Temporary traversal handles close as visits finish.
-Later operations reopen relative paths and verify identities under the retained root.
+Later operations reopen relative paths and verify identity witnesses under that lease.
+The [tree contract](file-tree-removal.md) defines the selected snapshot and checked target.
 
 The root row is `.`. Other rows have sorted depth-first relative names.
 Rows include supported symlinks without following them.
 Application predicates select supported kinds, owners, devices, links, ages, and equality.
-Directory access time is excluded only by the application's tree predicate.
+Mandatory tree metadata comparison excludes directory access time because traversal can change it.
+Application predicates can impose additional requirements.
 
 Requirements:
 
@@ -360,8 +359,8 @@ Requirements:
 - Keep logical bytes, allocated bytes, and observed free-space change separate.
 - Verify bounded handles with snapshots containing more than 128 directories.
 
-The draft's target names only parent and root after two snapshot comparisons.
-That shape must change if it cannot enforce the selected expected-state contract.
+I013 must replace the draft's parent/root-only target with `File.Tree.Remove.checked` and the approved snapshot.
+The draft's path-only tree tasks must retain the discovered parent and root observations instead.
 Snapshot comparison, probes, final checks, and deletion remain separate operations.
 The implementation must state its bounded race guarantee and trusted-host assumptions.
 It must not claim atomic whole-tree removal, rollback, or exclusion of arbitrary host writers.

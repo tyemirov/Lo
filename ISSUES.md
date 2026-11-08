@@ -1741,7 +1741,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Visit more than 128 cumulative directories under bounded live quotas in deep and wide fixtures.
   - Complete public native target conformance checks, independent review, and final stack CI.
 
-- [ ] [F034] (P1) {F032,F033,I018} Add bounded tree snapshots and checked recursive removal
+- [-] [F034] (P1) {F032,F033,I018} Add bounded tree snapshots and checked recursive removal
   Goal:
   Bind descriptor-safe recursive removal to an approved tree observation with complete eligibility preflight.
 
@@ -1755,6 +1755,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Report confirmed partial progress without a claim of atomic deletion or rollback.
 
   Deliverables:
+  - Current status: compiler checks, focused native checks, and independent review passed. Final stack CI remains pending.
   - Add the selected snapshot, removal target, guard, receipt, and resource-lifetime contracts in the single native runtime.
   - Update the draft's parent/root-only target if it cannot enforce expected state.
 

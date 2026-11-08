@@ -33,6 +33,8 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		"File.Directory.entry":                 `{"type":"String","value":"entry"}`,
 		"File.Entry.observe":                   `{"type":"Int","value":"1"}`,
 		catalog.FileRemoveChecked:              `{"type":"Int","value":"0"}`,
+		catalog.FileTreeSnapshot:               `{"type":"Int","value":"1"}`,
+		catalog.FileTreeRemoveChecked:          `{"type":"Int","value":"1"}`,
 		catalog.ProcessContextCurrent:          `{"type":"Process.Context","value":{"origin":"inherited","redacted":true}}`,
 		catalog.ProcessContextNew:              `{"type":"Process.Context","value":{"origin":"explicit","redacted":true}}`,
 		catalog.ProcessContextOverride:         `{"type":"Process.Context","value":{"origin":"derived","redacted":true}}`,
@@ -149,6 +151,20 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				return
 			}
 			var args []string
+			if tc.name == catalog.FileTreeSnapshot || tc.name == catalog.FileTreeRemoveChecked {
+				root := fileFixtureRoot(t)
+				tree := f033Directory(t, root, "tree")
+				for _, fixture := range treeBuiltinExamples(root) {
+					if fixture.name == tc.name {
+						tc.source = fixture.source
+						break
+					}
+				}
+				args = []string{"--observe-tree-root", root}
+				if tc.name == catalog.FileTreeRemoveChecked {
+					args = append(args, "--remove-tree-root", tree)
+				}
+			}
 			for _, retained := range retainedFileBuiltinExamples("fixtures") {
 				if retained.name != tc.name {
 					continue

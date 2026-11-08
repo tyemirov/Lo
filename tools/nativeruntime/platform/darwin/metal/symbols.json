@@ -103,6 +103,7 @@
     "_kill",
     "_kqueue",
     "_lchown",
+    "_link",
     "_linkat",
     "_listen",
     "_log",

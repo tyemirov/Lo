@@ -8,6 +8,8 @@ pub(crate) use mutation_scan::{validate_namespace, MutationAccess};
 #[path = "file_descendants.rs"]
 mod descendants;
 pub(super) use descendants::{child, named_entry, observe};
+#[path = "file_tree.rs"]
+pub(super) mod tree;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Directory {
@@ -54,6 +56,14 @@ pub enum Value {
     Scan {
         fields: Handle,
     },
+    Tree {
+        fields: Handle,
+        observation: Option<std::sync::Arc<tree::Tree>>,
+    },
+    TreeRemove {
+        expected: Handle,
+        guard: Guard,
+    },
     Content {
         append: bool,
         path: Handle,
@@ -88,6 +98,8 @@ impl Value {
                         .map_or(0, |observation| observation.directory.weight())
             }
             Self::Scan { fields } => fields.weight,
+            Self::Tree { fields, observation } => fields.weight + observation.as_ref().map_or(0, |tree| tree.weight()),
+            Self::TreeRemove { expected, guard } => expected.weight + 64 + guard.predicate.len() as u64 + guard.contexts.iter().map(|value| value.weight).sum::<u64>(),
             Self::Content {
                 append,
                 path,
@@ -107,7 +119,7 @@ impl Value {
     }
     pub fn fields(&self) -> Option<&BTreeMap<String, Handle>> {
         match self {
-            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } | Self::Tree { fields, .. } => {
                 Some(fields.fields())
             }
             _ => None,
@@ -115,7 +127,7 @@ impl Value {
     }
     pub fn json(&self) -> Json {
         match self {
-            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } | Self::Tree { fields, .. } => {
                 Json::Object(
                     fields
                         .fields()
@@ -138,11 +150,12 @@ impl Value {
                 }
                 result
             }
+            Self::TreeRemove { expected, guard } => json!({"operation":"File.Tree.Remove.checked", "expected":expected.json(), "guard":{"predicate":guard.predicate,"context":guard.contexts.iter().map(|v|crate::value::snapshot(v).json()).collect::<Vec<_>>()}}),
         }
     }
     pub fn canonical_json(&self) -> String {
         match self {
-            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } | Self::Tree { fields, .. } => {
                 format!(
                     "{{{}}}",
                     fields
@@ -193,6 +206,7 @@ impl Value {
                     suffix
                 )
             }
+            Self::TreeRemove { expected, guard } => format!("{{\"operation\":\"File.Tree.Remove.checked\",\"expected\":{},\"guard\":{{\"predicate\":{},\"context\":[{}]}}}}", expected.canonical_json(), serde_json::to_string(&guard.predicate).unwrap(), guard.contexts.iter().map(|value|crate::value::snapshot(value).canonical_json()).collect::<Vec<_>>().join(",")),
         }
     }
     pub fn output(&self) -> String {
@@ -211,6 +225,8 @@ impl Value {
             Self::Scan { fields } => Self::Scan {
                 fields: crate::value::snapshot(fields),
             },
+            Self::Tree { fields, .. } => Self::Tree { fields: crate::value::snapshot(fields), observation: None },
+            Self::TreeRemove { expected, guard } => Self::TreeRemove { expected: crate::value::snapshot(expected), guard: Guard { flow: guard.flow, predicate: guard.predicate.clone(), contexts: guard.contexts.iter().map(crate::value::snapshot).collect() } },
             Self::Remove { entries, guard, .. } => Self::Remove {
                 entries: crate::value::snapshot(entries),
                 session: 0,
@@ -771,11 +787,45 @@ fn postcheck<T>(observed: Result<T, Fault>, checked: Result<(), Fault>) -> Resul
         (result, Ok(())) => result,
         (Ok(_), Err(fault)) => Err(fault),
         (Err(primary), Err(fault)) if matches!(primary.primary(), Fault::Recoverable(_)) => {
-            Err(fault)
+            Err(preserve_cleanup(fault, &primary))
         }
         (Err(primary), Err(fault)) => {
             Err(combine_cleanup(Some(primary), Some(fault)).expect("observation fault"))
         }
+    }
+}
+fn preserve_cleanup(selected: Fault, prior: &Fault) -> Fault {
+    let mut messages = vec![];
+    fn collect(fault: &Fault, messages: &mut Vec<String>) {
+        match fault {
+            Fault::Recoverable(value) => {
+                if let Data::Error(error) = &value.data {
+                    if let Some(errors) = error.input.fields().get("cleanup_errors") {
+                        messages.extend(errors.items().iter().map(|value| value.string().to_owned()));
+                    }
+                }
+            }
+            Fault::Boundary { primary, details } => {
+                collect(primary, messages);
+                messages.extend(details.cleanup_errors.iter().cloned());
+            }
+            _ => (),
+        }
+    }
+    collect(prior, &mut messages);
+    if messages.is_empty() { return selected; }
+    match selected {
+        Fault::Recoverable(value) => {
+            let Data::Error(error) = &value.data else { return host("invalid observation failure"); };
+            let mut error = error.clone();
+            let mut fields = error.input.fields().clone();
+            let mut errors: Vec<_> = messages.into_iter().map(text).collect();
+            if let Some(existing) = fields.get("cleanup_errors") { errors.extend(existing.items().iter().cloned()); }
+            fields.insert("cleanup_errors".into(), new(Type::List(Box::new(atom("String"))), Data::List(errors)));
+            error.input = view(&record(fields));
+            Fault::Recoverable(new(atom("Error"), Data::Error(error)))
+        }
+        other => other.with_details(BoundaryDetails { cleanup_errors: messages, ..Default::default() }),
     }
 }
 fn finish_observation(

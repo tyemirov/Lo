@@ -1893,3 +1893,9 @@ pub unsafe extern "C" fn lo_op_File_2EDirectory_2Eentry(c: *mut Context, a: *con
 
 #[no_mangle]
 pub unsafe extern "C" fn lo_op_File_2EEntry_2Eobserve(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Entry.observe")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ETree_2Esnapshot(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Tree.snapshot")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ETree_2ERemove_2Echecked(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Tree.Remove.checked")) }
