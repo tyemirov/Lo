@@ -3,32 +3,13 @@ package integration_test
 import (
 	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
 func f030DraftPredicates(t *testing.T) string {
 	t.Helper()
-	data, err := os.ReadFile(filepath.Join(repository, "docs", "examples", "mac-cleanup.lo"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var selected []string
-	for _, name := range []string{"BuilderFirst", "BuilderSuffix", "BuilderValue", "GatewayDigit", "GatewayDigits", "GatewayName"} {
-		start := strings.Index(string(data), "flow "+name+"(")
-		if start < 0 {
-			t.Fatalf("missing draft predicate %s", name)
-		}
-		body := string(data[start:])
-		end := strings.Index(body, "\n}")
-		if end < 0 {
-			t.Fatalf("unterminated draft predicate %s", name)
-		}
-		selected = append(selected, body[:end+2])
-	}
-	return strings.Join(selected, "\n") + "\n"
+	return cleanupFlows(t, "BuilderFirst", "BuilderSuffix", "BuilderValue", "GatewayDigit", "GatewayDigits", "GatewayName")
 }
 
 func TestF030DraftPredicateBounds(t *testing.T) {

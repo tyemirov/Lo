@@ -45,7 +45,9 @@ Those records describe the earlier validation of their contracts.
 
 F030 supplies the [selected pure value operations](value-processors.md).
 The executable file-policy and probe examples use those operations with ordinary typed flows.
-The full application draft still contains proposed interfaces and helper abbreviations.
+The full application draft still contains proposed file and Process interfaces.
+Typed application flows now supply Boolean operations and collection policies.
+
 Some draft calls can use current operations or ordinary named flows.
 For example, exact root observations can use `File.directory`, `File.list`, and `File.scan`.
 The draft's `File.Directory.open` must not become an alias for the current root operation.
@@ -235,7 +237,7 @@ New aliases for implemented behavior are outside this plan.
 | `Console.Line.new` | F026 | Implemented committed output boundary. |
 | `Program.Exit.new` | F027 | Implemented inert terminal result and type-correct startup path. |
 | `Program.path`, `Lock.File.new` | F029 | Implemented entry identity and explicit lock authority. |
-| Boolean, list, byte, glob, and text processors | F030 | Implemented selected processors. Ordinary flows own Boolean composition, chunks, duplicate removal, and typed equality. |
+| Boolean, list, byte, glob, and text processors | F030, I013 | Implemented selected processors. Typed application flows supply Boolean composition, chunks, duplicate removal, and equality. |
 | `File.Path.join`, `parent`, `name`, `to_string` | F030 | Implemented lexical paths without host observations. |
 | `Process.Arguments.format_shell` | F030 | Implemented POSIX shell display text. Process activation receives the original arguments. |
 | `Int.parse`, `Float.format_fixed`, `String.format`, `JSON.*` | F031 | Select numeric parsing, presentation, JSON values, and typed extraction. |

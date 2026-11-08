@@ -86,19 +86,23 @@ The [file-policy example](../examples/file_policy.lo) executes direct-file selec
 The [probe-fields example](../examples/probe_fields.lo) executes NUL-framed parsing with exact batch membership.
 These examples have no removal effects.
 
-The full draft still uses helper names that require ordinary application flows.
-Those names do not propose additional builtins.
+The application uses typed helper flows for Boolean operations and collection policies.
+These flows use current processors without additional builtins.
 
-| Draft helper | Current composition |
+| Application helper | Current composition |
 | --- | --- |
-| `Bool.all`, `Bool.any`, `Bool.not` | `Match.new` and `List.fold`. |
-| `List.concat` | `List.flat_map` over the two lists. |
-| `List.contains`, `List.unique`, `List.equal`, `List.equal_by` | Typed predicates and ordered folds. Path comparison uses `File.Path.eq`. |
-| `List.chunks` | A positive-size guard, `List.unfold`, and `List.slice`. |
-| `String.join` | An ordered fold with an explicit separator. |
+| `All`, `Any`, `Not` | `Match.new` and `List.fold`. |
+| `ConcatStrings`, `ConcatPaths`, `ConcatInts`, `ConcatGlobs`, `ConcatTasks`, `ConcatStorageRows` | `List.flat_map` over two typed lists. |
+| `PathMember`, `StringMember`, `ScalarMember`, `IntMember`, `UniquePaths` | Typed predicates and ordered folds. Path comparison uses `File.Path.eq`. |
+| `StringsEqual`, `TreeRowsEqual` | Equal-length selection and indexed comparisons. |
+| `PathChunks` | A positive-size guard, `List.unfold`, and `List.slice`. |
+| `JoinStrings` | An ordered fold with an explicit separator. |
 
-The probe example contains executable Path composition flows for these collection policies.
-The full application draft still requires their integration under I013.
+The public integration fixtures extract current flow definitions and their dependencies from the application AST.
+These fixtures execute application helpers through the native compiler and program commands.
+`ReportPath` declares its fallible result. `StoragePaths` uses an ordered flow fold for those results.
+The complete application remains under I013.
+
 F028 owns `CLI.parse` and does not add public value helper aliases.
 The existing String view as `List<Scalar>` supplies scalar iteration.
 
@@ -201,6 +205,7 @@ Host resource quotas bound retained value weight and simultaneous directory obse
 Completed helpers release unreferenced observations before later visits.
 A long scan can exceed 128 total directory observations while retaining fewer than 128 at once.
 The host can change that live-observation quota.
+
 Value-byte and live-value quotas default to 16 MiB and 64 MiB.
 Cumulative data has no default quota.
 
@@ -304,14 +309,10 @@ The source has no `Flow.select` or `Flow.capture` calls and retains one `Flow.wo
 The audit compared all 100 branch bodies with the previous source AST.
 It verified unchanged selection heads, one selector evaluation, callback contexts, branch order, and accumulator chains.
 Static review found no flow-call cycles or commit-bearing Match expressions.
-The earlier catalog comparison identified 66 proposed operation names after the control revision.
-The current catalog also implements `Flow.worklist`, Console, terminal construction, and declared options.
-The draft retains 62 proposed operation names after exclusion of implemented Match behavior.
-This list records draft dependencies and does not establish a minimal language backlog.
 
-The revised source contains 302 flows after the startup handler correction.
-The public parser accepts the revised source.
-The full application fails type checking at the proposed `Glob` type.
+The current catalog implements `Flow.worklist`, Console, terminal construction, declared options, and the F030 value processors.
+The application now uses typed flows for the helper operations listed above.
+The full application fails type checking at the proposed `File.Tree` type.
 Parser acceptance and structural review do not establish type correctness or runtime parity for the full application.
 The compiler and runtimes must implement or remove the other selected proposals before executable acceptance.
 
@@ -321,6 +322,7 @@ Fresh Linux artifacts passed the same checks under QEMU.
 Preview selected no actions, required no write grant, and created no fixture file.
 Apply preserved ordered effects before and after a recoverable category failure.
 It retained existing counters, failure labels, and state.
+
 Missing write authority remained terminal, and invalid arguments failed explicitly.
 A separate exact outcome probe verified nested fallible result storage and lazy result projection in all three runtimes.
 
