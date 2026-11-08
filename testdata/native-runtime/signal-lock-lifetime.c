@@ -1,4 +1,5 @@
 #include "lo_runtime.h"
+#include "lo_process.h"
 #include "capture.h"
 typedef __UINTPTR_TYPE__ Thread;
 extern void lo_signal_entry(Context *,const Value *const *,uint64_t,uint64_t,ResultSlot *);
@@ -80,12 +81,11 @@ void lo_signal_commit(Context *context,const Value *const *arguments,uint64_t co
   store(&state->owner_gate,1);while(!load(&state->release_owner))poll(0,0,1);
  }
 }
-struct ProcessResult{int stage,class_id,started,cleanup_complete,termination_kind,termination_value;__SIZE_TYPE__ stdin_written,stdout_size,stderr_size;unsigned cleanup_failures;__UINTPTR_TYPE__ ownership;};
-int lo_native_process_execute(const char *launcher,int embedded,const char *directory,const unsigned char *frame,__SIZE_TYPE__ frame_size,const unsigned char *configuration,__SIZE_TYPE__ configuration_size,const unsigned char *input,__SIZE_TYPE__ input_size,unsigned char *output,unsigned char *diagnostic,__SIZE_TYPE__ capacity,int (*cancelled)(void *),void *token,uint64_t timeout,struct ProcessResult *result){
- (void)launcher;(void)embedded;(void)directory;(void)frame;(void)frame_size;(void)configuration;(void)configuration_size;(void)input;(void)input_size;(void)output;(void)diagnostic;(void)capacity;(void)timeout;
- store(&state->worker_started,1);while(!cancelled(token))poll(0,0,1);
+int lo_native_process_execute(const char *launcher,int embedded,const char *directory,const unsigned char *configuration,uintptr_t configuration_size,const LoProcessRequest *request,LoProcessResult *result){
+ (void)launcher;(void)embedded;(void)directory;(void)configuration;(void)configuration_size;
+ store(&state->worker_started,1);while(!request->stop(request->stop_token))poll(0,0,1);
  store(&state->worker_cleanup,1);while(!load(&state->release_worker))poll(0,0,1);
- result->stage=7;result->class_id=1;result->started=1;result->cleanup_complete=1;result->termination_kind=2;result->termination_value=15;
+ result->stage=7;result->class_id=LO_PROCESS_CANCELLED;result->started=1;result->cleanup_complete=1;result->termination_kind=2;result->termination_value=15;
  store(&state->worker_finished,1);return 0;
 }
 static int busy(int expected){int file=open(image,0);if(file<0)return 1;int result=flock(file,6),error=LO_ERRNO;if(close(file))return 1;return expected?result!=-1||error!=LO_BUSY:result!=0;}

@@ -1444,6 +1444,8 @@ The inherited `PWD` variable remains environment data. It does not select the ph
 | `Process.Executable.new(path: File.Path)` | `Process.Executable!`, pure construction of an absolute executable description. |
 | `Process.Executable.resolve(context: Process.Context, name: String)` | `Process.Executable!`, host observation that selects an executable. |
 | `Process.Command.new(context: Process.Context, executable: Process.Executable, arguments: List<String>, stdin: Bytes)` | `Process.Command!`, pure construction of an inert command. |
+| `Process.Command.with_timeout(command: Process.Command, timeout_ms: Int)` | `Process.Command!`, pure selection of a positive millisecond deadline. |
+| `Process.Command.with_output(command: Process.Command, mode: String)` | `Process.Command!`, pure selection of `capture` or `forward`. |
 
 Context changes return new values and keep their inputs unchanged.
 An empty environment remains empty. An empty variable value differs from an absent variable.
@@ -1506,7 +1508,10 @@ It is not a hard CPU quota. Unresolved creation or termination leaves that bound
 
 Activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
 `Process.run` is not a callable builtin.
-`Process.Result` has exact fields `termination: Process.Termination`, `stdout: Bytes`, and `stderr: Bytes`.
+`Process.Result` has exact fields `termination: Process.Termination`, `stdout: Bytes`, `stderr: Bytes`, `output: String`, `stdout_bytes: Int`, and `stderr_bytes: Int`.
+Capture retains output bytes. Forwarding returns empty byte payloads and confirmed byte counts.
+Both modes retain termination and output mode.
+
 `Process.Termination.kind` is `exited` or `signaled`.
 `Process.Termination.exit_code(value) -> Int!` returns the exit code only for `exited`.
 `Process.Termination.signal(value) -> Int!` returns the signal only for `signaled`.
@@ -1518,12 +1523,26 @@ Without Process grants, ordinary execution remains available. Only attempted Pro
 Configured Process policy on an unsupported backend fails session open before program evaluation.
 Lo `onError` cannot handle this host diagnostic.
 
+Command changes leave the original command unchanged.
+A new command selects capture and the host's default duration.
+An explicit timeout must fit a positive signed 64-bit millisecond value.
+Invalid command options produce `Process.InvalidCommand`.
+Construction supplies no duration or output authority.
+
+Activation rejects a duration above the host maximum before process creation.
+Forwarding requires explicit host authority and enabled Console destinations.
+Forwarded bytes use Console accounting and owned sinks, including JSON event framing.
+
+A command timeout produces recoverable `Process.Timeout` only after complete cleanup.
+Cancellation, output limits, sink failure, cleanup failure, and unknown ownership remain terminal.
+The [command policy](docs/process-command-policy.md) defines host limits and transport ownership.
+
 Automatic context output contains origin and redaction status, without environment or directory payloads.
 Constructor diagnostics and nested snapshots redact context, command environment, argument, and stdin payloads.
 Explicit lookup and program output of a selected environment value remain available.
 
 The inspector adds an optional `process` object to command targets and capabilities.
-It contains `context`, `executable`, `arguments`, and `stdin` input descriptions.
+It contains `context`, `executable`, `arguments`, `stdin`, `timeout_ms`, and `output` input descriptions.
 The context describes its `source` and `origin`, with explicit environment, directory, base, updates, or removals when present.
 Origins are `inherited`, `explicit`, `derived`, or `dynamic`.
 Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
@@ -2368,6 +2387,12 @@ include additional fields in Error.input when useful.
   * Required Error.kind: String.new("Process.ExecutableAbsent") or String.new("Process.DiscoveryFailed"), respectively.
 * `Process.Command.new(context, executable, arguments, stdin) -> Process.Command!`
   * Failure: the command inputs violate section 9.5.
+  * Required Error.kind: String.new("Process.InvalidCommand")
+* `Process.Command.with_timeout(command, timeout_ms) -> Process.Command!`
+  * Failure: the timeout is not a positive signed 64-bit millisecond value.
+  * Required Error.kind: String.new("Process.InvalidCommand")
+* `Process.Command.with_output(command, mode) -> Process.Command!`
+  * Failure: the output mode is not `capture` or `forward`.
   * Required Error.kind: String.new("Process.InvalidCommand")
 * Any list processor invocation whose referenced pure flow is fallible.
   * Failure: the referenced flow returns Error for an element.

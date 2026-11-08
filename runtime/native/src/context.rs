@@ -788,6 +788,7 @@ impl Context {
                 .lock()
                 .expect("observation state poisoned")
                 .seal();
+            self.session.processes.seal_registration();
         }
         let id = self.resources.scope_enter();
         self.values.scope_enter(id);

@@ -1,22 +1,15 @@
-#include "lo_runtime.h"
+#include "lo_process.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 #include "capture.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-typedef struct {int stage,class_id,started,cleanup_complete,termination_kind,termination_value;Size stdin_written,stdout_size,stderr_size;unsigned int cleanup_failures;Size ownership;} NativeResult;
-typedef int (*Cancel)(const void*);
-typedef void (*Driver)(Size,const unsigned char*,Size,const unsigned char*,Size,unsigned char*,unsigned char*,Size,Cancel,const void*,U64,NativeResult*);
-
 extern void lo_context_cancel_after_polls(Context*,U64);
-extern int lo_context_process_driver(Context*,Driver,Size),lo_context_process_driver_limits(Context*,U64,U64,Size),lo_context_process_close(Context*),lo_context_process_wait_retained(Context*);
-extern U32 lo_context_process_ownership(Context*);
 extern void lo_process_lifecycle_entry(Context*,const Value**,U64,U64,ResultSlot*);
 extern int lo_cli_main(int,const char**,const char**);
 extern U64 lo_runtime_live_values(void),lo_runtime_live_contexts(void);
 extern int dup2(int,int),fcntl(int,int,...),close(int);
 extern long read(int,void*,Size),write(int,const void*,Size);
-extern void *memcpy(void*,const void*,Size);
 struct timespec {long sec,nsec;};
 extern int nanosleep(const struct timespec*,struct timespec*);
 static unsigned entered,finished,joined,released,embedding,slot_status,cancellation_seen;
@@ -36,36 +29,47 @@ static int invocation(const unsigned char*frame,Size size,const unsigned char*in
  for(unsigned i=0;i<6;++i){if(offset+4>size)return 2;Size count=number(frame+offset);offset+=4;if(offset+count>size||!equal(frame+offset,count,expected[i]))return 3;offset+=count;}
  return offset!=size;
 }
-static void execute(Size token,const unsigned char*frame,Size frame_size,const unsigned char*input,Size input_size,unsigned char*out,unsigned char*err,Size capacity,Cancel cancelled,const void*cancel,U64 timeout,NativeResult*r){
- (void)token;(void)timeout;__atomic_fetch_add(&entered,1,__ATOMIC_SEQ_CST);
- if(invocation(frame,frame_size,input,input_size))invalid=1;
- r->started=1;r->cleanup_complete=1;r->termination_kind=LO_CASE==1||LO_CASE==9?2:1;r->termination_value=LO_CASE==1||LO_CASE==9?15:73;r->stdin_written=input_size;
+static int publish(const LoProcessRequest *request,LoProcessResult *result,U32 stream,const void *bytes,Size size){
+ uintptr_t confirmed=0;
+ int status=request->output(request->output_token,stream,(const unsigned char *)bytes,size,&confirmed);
+ if(stream==1)result->stdout_size+=confirmed;else result->stderr_size+=confirmed;
+ if(!status&&confirmed!=size)invalid=8;
+ return status;
+}
+static void execute(Size token,const LoProcessRequest *request,LoProcessResult*r){
+ (void)token;__atomic_fetch_add(&entered,1,__ATOMIC_SEQ_CST);
+ if(invocation(request->frame,request->frame_size,request->input,request->input_size))invalid=1;
+ r->started=1;r->cleanup_complete=1;r->termination_kind=LO_CASE==1||LO_CASE==9?2:1;r->termination_value=LO_CASE==1||LO_CASE==9?15:73;r->stdin_written=request->input_size;
  if(LO_CASE==9){
+  if(publish(request,r,1,"partial",7))invalid=9;
   const struct timespec pause={0,1000000};
-  while(!cancelled(cancel))nanosleep(&pause,0);
+  while(!request->stop(request->stop_token))nanosleep(&pause,0);
   __atomic_store_n(&cancellation_seen,1,__ATOMIC_SEQ_CST);
-  r->stage=7;r->class_id=1;r->termination_kind=2;r->termination_value=15;r->stdout_size=7;
-  memcpy(out,"partial",7);
+  r->stage=7;r->class_id=LO_PROCESS_CANCELLED;r->termination_kind=2;r->termination_value=15;
  }else if(LO_CASE==2||LO_CASE==7||LO_CASE==8){
-  if(capacity!=4)invalid=3;
-  memcpy(out,"four",4);memcpy(err,"four",4);r->stdout_size=4;r->stderr_size=4;
-  if(LO_CASE==7||LO_CASE==8){r->stage=LO_CASE==7?3:4;r->class_id=3;}
+  if(request->output_bytes!=4)invalid=3;
+  if(publish(request,r,1,"four",4)||publish(request,r,2,"four",4))invalid=10;
+  if(LO_CASE==7||LO_CASE==8){
+   r->stage=LO_CASE==7?3:4;r->class_id=publish(request,r,LO_CASE==7?1:2,"x",1);
+   if(r->class_id!=LO_PROCESS_LIMIT)invalid=11;
+  }
  }else if(LO_CASE>=3&&LO_CASE<=6){
   r->stage=LO_CASE==3?3:LO_CASE==4?2:LO_CASE==5?1:6;
-  r->class_id=LO_CASE==6?2:0;r->stdin_written=LO_CASE==4?2:LO_CASE==5?0:input_size;
+  r->class_id=LO_CASE==6?LO_PROCESS_HOST:LO_PROCESS_EXECUTION;r->stdin_written=LO_CASE==4?2:LO_CASE==5?0:request->input_size;
   static const char secret[]="process-argument-secret-sentinel";
-  memcpy(out,secret,sizeof(secret)-1);r->stdout_size=sizeof(secret)-1;
+  if(publish(request,r,1,secret,sizeof(secret)-1))invalid=12;
   if(LO_CASE==6)r->cleanup_failures=4;
  }else {
-  if(capacity<12)invalid=4;
-  const unsigned char binary[]={0,255,'o'};memcpy(out,binary,3);memcpy(err,"error-output",12);r->stdout_size=3;r->stderr_size=12;
+  if(request->output_bytes<12)invalid=4;
+  const unsigned char binary[]={0,255,'o'};
+  if(publish(request,r,1,binary,3)||publish(request,r,2,"error-output",12))invalid=13;
  }
  // The synchronous driver owns all endpoints until its one wait and release finish.
  __atomic_fetch_add(&joined,1,__ATOMIC_SEQ_CST);__atomic_fetch_add(&released,1,__ATOMIC_SEQ_CST);__atomic_store_n(&finished,1,__ATOMIC_SEQ_CST);
 }
 static Context *context(void){
  Context*c=lo_context_new(LO_OPTIONS(1000000));if(!c)return 0;
- if(!lo_context_process_driver(c,execute,0)||!lo_context_process_driver_limits(c,5000,1000,LO_CASE==2||LO_CASE==7||LO_CASE==8?4:1024)){invalid=5;return c;}
+ if(!lo_context_process_driver(c,execute,0)||!lo_context_process_driver_limits(c,&(LoProcessLimits){5000,1000,LO_CASE==2||LO_CASE==7||LO_CASE==8?4:1024,0})){invalid=5;return c;}
  if(LO_CASE==9)lo_context_cancel_after_polls(c,128);
  return c;
 }

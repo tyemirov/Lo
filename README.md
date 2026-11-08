@@ -650,6 +650,10 @@ F024 adds immutable `Process.Context` values, controlled executable discovery, a
 Pure context changes keep their inputs unchanged. Execution authority remains in host policy.
 `Process.Command.new(context, executable, arguments, stdin)` uses exact arguments and stdin bytes without a shell.
 
+`Process.Command.with_timeout(command, timeout_ms)` selects a deadline within the host maximum.
+`Process.Command.with_output(command, "forward")` sends bounded bytes through enabled Console sinks.
+The [command policy](docs/process-command-policy.md) defines host options and confirmed output counts.
+
 The default profile denies writes and network access. Optional scopes supply authority for selected mutation roots and Unix endpoints.
 Registered exec chains keep the initial executable's scope. Forked and spawned descendants remain denied.
 The launcher clears the specified inherited Mach slots and keeps its fixed environment separate from child environment values.

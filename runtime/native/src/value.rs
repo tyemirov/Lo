@@ -763,8 +763,8 @@ fn canonical_typed_payload(typ: Option<&str>, value: &Json) -> String {
             "now_unix_ns",
             "redacted",
         ],
-        Some("Process.Command") => &["context", "executable", "arguments", "stdin"],
-        Some("Process.Result") => &["termination", "stdout", "stderr"],
+        Some("Process.Command") => &["context", "executable", "arguments", "stdin", "timeout_ms", "output"],
+        Some("Process.Result") => &["termination", "stdout", "stderr", "output", "stdout_bytes", "stderr_bytes"],
         Some("Process.Termination") => &["kind", "exit_code", "signal"],
         _ => return canonical_json_value(value),
     };

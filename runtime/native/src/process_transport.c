@@ -17,17 +17,13 @@
 #include <stdlib.h>
 #endif
 
+#include "lo_process.h"
+
 extern void *lo_native_spawn_acquire(int (*cancelled)(void *),void *token);
 extern void lo_native_spawn_release(void *ownership);
 
 /* A single synchronous owner retains every endpoint and primary until reap.
  * The Rust caller can stop waiting; this owner still completes cleanup. */
-struct lo_process_result {
-    int stage, class_id, started, cleanup_complete, termination_kind, termination_value;
-    size_t stdin_written, stdout_size, stderr_size;
-    unsigned int cleanup_failures;
-    uintptr_t ownership;
-};
 struct ambiguous_descriptor {int number,error;};
 struct lo_process_inventory {struct ambiguous_descriptor descriptors[32];unsigned int count,failures;pid_t uncertain_pid;void *actions,*attributes;};
 static _Thread_local struct lo_process_inventory *owned;
@@ -36,10 +32,14 @@ static uint64_t now_ms(void) {
     struct timespec now; clock_gettime(CLOCK_MONOTONIC, &now);
     return (uint64_t)now.tv_sec * 1000 + (uint64_t)now.tv_nsec / 1000000;
 }
-struct startup_cancellation {int (*cancelled)(void *);void *token;uint64_t deadline;};
+struct startup_cancellation {LoProcessStop cancelled;const void *token;uint64_t deadline;};
+static int startup_reason(const struct startup_cancellation *startup) {
+    int reason=startup->cancelled(startup->token);
+    return reason ? reason : now_ms()>=startup->deadline ? LO_PROCESS_TIMEOUT : 0;
+}
 static int startup_cancelled(void *token) {
     const struct startup_cancellation *startup=token;
-    return startup->cancelled(startup->token)||now_ms()>=startup->deadline;
+    return startup_reason(startup)!=0;
 }
 static int release_fd(int *fd) {
     if (*fd < 0) return 0;
@@ -53,13 +53,15 @@ static int release_fd(int *fd) {
 static int nonblock(int fd) {
     int flags=fcntl(fd,F_GETFL); return flags<0?-1:fcntl(fd,F_SETFL,flags|O_NONBLOCK);
 }
-static void fail(struct lo_process_result *r,int stage,int class_id) {
+static void fail(LoProcessResult *r,int stage,int class_id) {
     if (!r->stage) {r->stage=stage;r->class_id=class_id;}
 }
 int lo_native_process_execute(const char *launcher,int embedded,const char *directory,
-    const unsigned char *frame,size_t frame_size,const unsigned char *configuration,size_t configuration_size,
-    const unsigned char *input,size_t input_size,unsigned char *output,unsigned char *diagnostic,size_t capacity,
-    int (*cancelled)(void*),void *token,uint64_t timeout_ms,struct lo_process_result *r) {
+    const unsigned char *configuration,size_t configuration_size,const LoProcessRequest *request,LoProcessResult *r) {
+    const unsigned char *frame=request->frame,*input=request->input;
+    size_t frame_size=request->frame_size,input_size=request->input_size,capacity=request->output_bytes;
+    LoProcessStop cancelled=request->stop;const void *token=request->stop_token;
+    uint64_t timeout_ms=request->timeout_ms;
     memset(r,0,sizeof(*r));
     owned=malloc(sizeof(*owned));
     if(!owned){r->stage=1;r->class_id=2;r->cleanup_complete=1;return 0;}
@@ -69,7 +71,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     uint64_t deadline=now_ms()+timeout_ms;
     struct startup_cancellation startup={cancelled,token,deadline};
     void *spawn_ownership=lo_native_spawn_acquire(startup_cancelled,&startup);
-    if(!spawn_ownership){fail(r,1,startup_cancelled(&startup)?1:2);goto finish;}
+    if(!spawn_ownership){fail(r,1,startup_reason(&startup)?startup_reason(&startup):2);goto finish;}
     for(int i=0;i<7;i++) {
         if(pipe(pipes[i])) {fail(r,1,2);goto finish;}
         for(int j=0;j<2;j++) if(fcntl(pipes[i][j],F_SETFD,FD_CLOEXEC)) {fail(r,1,2);goto finish;}
@@ -100,7 +102,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     if(!temporary) setup=1;
     else {memcpy(temporary,"TMPDIR=",7);strcpy(temporary+7,directory);}
     char *environment[]={"CI=1",temporary,NULL};
-    if(startup_cancelled(&startup)) {fail(r,1,1);setup=1;}
+    if(startup_cancelled(&startup)) {fail(r,1,startup_reason(&startup));setup=1;}
     int spawned=setup ? -1 : posix_spawn(&pid,launcher,&actions,&attributes,arguments,environment);
     free(temporary);
     int destroyed=posix_spawn_file_actions_destroy(&actions);
@@ -123,8 +125,9 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     unsigned char status[6];
     int ready=0,permitted=0,executed=0,exit_seen=0,reaped=0,stopping=0;
     for(;;) {
-        if(!r->stage && cancelled(token)) fail(r,7,1);
-        if(!r->stage && now_ms()>=deadline) fail(r,7,1);
+        int reason=cancelled(token);
+        if(!r->stage && reason) fail(r,7,reason);
+        if(!r->stage && now_ms()>=deadline) fail(r,7,LO_PROCESS_TIMEOUT);
         if(r->stage && !stopping) {
             stopping=1;
             for(int i=0;i<7;i++) for(int j=0;j<2;j++) if(release_fd(&pipes[i][j])) r->cleanup_complete=-1;
@@ -178,7 +181,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
                             ready=1;
                             EV_SET(&watch,(uintptr_t)pid,EVFILT_PROC,EV_ADD|EV_ENABLE|EV_CLEAR,NOTE_EXEC|NOTE_EXIT,0,NULL);
                             if(kevent(queue,&watch,1,NULL,0,NULL)<0) {fail(r,1,0);continue;}
-                            if(cancelled(token)) {fail(r,7,1);continue;}
+                            if(startup_cancelled(&startup)) {fail(r,7,startup_reason(&startup));continue;}
                             unsigned char permit='P';
                             ssize_t sent=write(pipes[5][1],&permit,1);permitted=sent==1;
                             if(!permitted || release_fd(&pipes[5][1])) fail(r,1,0);
@@ -191,12 +194,16 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
                 } else if(errno!=EAGAIN&&errno!=EINTR) fail(r,1,0);
             } else {
                 size_t *size=i==1?&r->stdout_size:&r->stderr_size;
-                unsigned char *destination=i==1?output:diagnostic;
                 unsigned char buffer[4096];size_t remain=capacity-*size;
                 ssize_t got=read(ports[i].fd,buffer,remain<sizeof(buffer)?remain+1:sizeof(buffer));
                 if(got>0) {
                     size_t keep=(size_t)got<remain?(size_t)got:remain;
-                    memcpy(destination+*size,buffer,keep);*size+=keep;
+                    if(keep) {
+                        size_t confirmed=0;
+                        int outcome=request->output(request->output_token,(uint32_t)i,buffer,keep,&confirmed);
+                        if(confirmed>keep || outcome<0 || outcome>5 || (!outcome && confirmed!=keep)) {fail(r,i==1?3:4,2);}
+                        else {*size+=confirmed;if(outcome)fail(r,i==1?3:4,outcome);}
+                    }
                     if((size_t)got>remain) fail(r,i==1?3:4,3);
                 } else if(got==0) {if(release_fd(&pipes[i][0])) fail(r,i==1?3:4,0);}
                 else if(errno!=EAGAIN&&errno!=EINTR) fail(r,i==1?3:4,0);

@@ -219,7 +219,7 @@ impl Console {
                 }
                 let mut offset = 0;
                 while offset < bytes.len() {
-                    check().map_err(WriteFailure::Terminal)?;
+                    check().map_err(|fault| WriteFailure::TerminalPrefix(offset, fault))?;
                     let mut confirmed = 0;
                     let code = unsafe {
                         (callbacks.write)(
@@ -234,7 +234,7 @@ impl Console {
                         || !(0..=3).contains(&code)
                         || (code == 0 && confirmed == 0)
                     {
-                        return Err(WriteFailure::Terminal(host(
+                        return Err(WriteFailure::TerminalPrefix(offset, host(
                             "Console callback protocol failure",
                         )));
                     }
@@ -247,7 +247,7 @@ impl Console {
                 }
                 if flush {
                     loop {
-                        check().map_err(WriteFailure::Terminal)?;
+                        check().map_err(|fault| WriteFailure::TerminalPrefix(offset, fault))?;
                         match unsafe {
                             (callbacks.flush)(callbacks.userdata as *mut c_void, destination)
                         } {
@@ -255,14 +255,14 @@ impl Console {
                             1 => std::thread::sleep(Duration::from_millis(1)),
                             2 | 3 => return Err(WriteFailure::Recoverable(offset, "flush")),
                             _ => {
-                                return Err(WriteFailure::Terminal(host(
+                                return Err(WriteFailure::TerminalPrefix(offset, host(
                                     "Console flush callback protocol failure",
                                 )))
                             }
                         }
                     }
                 }
-                check().map_err(WriteFailure::Terminal)
+                check().map_err(|fault| WriteFailure::TerminalPrefix(offset, fault))
             }
         }
     }
@@ -285,6 +285,26 @@ impl Console {
                 ("flushed".into(), boolean(line.flush)),
             ])),
         ))
+    }
+    pub fn authorize_process(&self) -> Result<(), Fault> {
+        self.authorize("stdout")?;
+        self.authorize("stderr")
+    }
+    pub fn forward(&self, stream: &str, bytes: &[u8], check: &mut impl FnMut() -> Result<(), Fault>) -> Result<usize, (usize, Fault)> {
+        let mut state = self.lock(check).map_err(|fault| (0, fault))?;
+        if state.closed { return Err((0, host("Console is closed"))); }
+        self.authorize(stream).map_err(|fault| (0, fault))?;
+        Self::reserve(&mut state, bytes.len()).map_err(|fault| (0, fault))?;
+        let encoded = Self::encoded(&state, stream, bytes, false);
+        self.write(stream, &encoded, false, check).map_err(|failure| {
+            let confirmed = match &failure {
+                WriteFailure::Recoverable(count, _) | WriteFailure::TerminalPrefix(count, _) if !state.json => *count,
+                WriteFailure::Recoverable(count, _) | WriteFailure::TerminalPrefix(count, _) if *count == encoded.len() => bytes.len(),
+                _ => 0,
+            };
+            (confirmed, failure.terminal())
+        })?;
+        Ok(bytes.len())
     }
     pub fn terminal(
         &self,
@@ -377,12 +397,13 @@ impl Console {
 }
 pub(super) enum WriteFailure {
     Terminal(Fault),
+    TerminalPrefix(usize, Fault),
     Recoverable(usize, &'static str),
 }
 impl WriteFailure {
     fn terminal(self) -> Fault {
         match self {
-            Self::Terminal(f) => f,
+            Self::Terminal(f) | Self::TerminalPrefix(_, f) => f,
             Self::Recoverable(n, stage) => {
                 host(format!("Console output failed after {n} bytes at {stage}"))
             }
@@ -390,7 +411,7 @@ impl WriteFailure {
     }
     fn fault(self, site: &Site, stream: &str) -> Fault {
         match self {
-            Self::Terminal(f) => f,
+            Self::Terminal(f) | Self::TerminalPrefix(_, f) => f,
             Self::Recoverable(n, stage) => Fault::Recoverable(error(
                 site,
                 "Console.WriteFailed",

@@ -991,8 +991,27 @@
         "Process.InvalidCommand"
       ],
       "activation_errors": [
-        "Process.ExecutionFailed"
+        "Process.ExecutionFailed",
+        "Process.Timeout"
       ],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "Process.Command.with_output",
+      "capability": "",
+      "errors": [
+        "Process.InvalidCommand"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "Process.Command.with_timeout",
+      "capability": "",
+      "errors": [
+        "Process.InvalidCommand"
+      ],
+      "activation_errors": [],
       "negative_applicability": "catalog_failure_or_activation"
     },
     {
@@ -5751,6 +5770,91 @@
       "tests": [
         "TestAdapterProcessConstructorValidation",
         "TestLLVMProcessConstructors"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_output:positive",
+      "operation": "Process.Command.with_output",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/Process.Command.with_output"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_output:negative",
+      "operation": "Process.Command.with_output",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Process.Command.with_output"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_output:runtime-negative",
+      "operation": "Process.Command.with_output",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF035InvalidCommandOptions"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_timeout:positive",
+      "operation": "Process.Command.with_timeout",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/Process.Command.with_timeout"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_timeout:negative",
+      "operation": "Process.Command.with_timeout",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Process.Command.with_timeout"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_timeout:runtime-negative",
+      "operation": "Process.Command.with_timeout",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF035InvalidCommandOptions",
+        "TestF035TimeoutRecoveryPreservesOriginal"
       ]
     },
     {

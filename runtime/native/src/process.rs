@@ -6,7 +6,7 @@ use std::{
     os::unix::fs::{MetadataExt, OpenOptionsExt},
     path::{Path, PathBuf},
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicU32, Ordering},
         Arc, Condvar, Mutex,
     },
     time::{Duration, Instant},
@@ -23,6 +23,9 @@ mod cleanup;
 mod context_values;
 #[path = "process_policy.rs"]
 mod policy;
+#[path = "process_io.rs"]
+mod io;
+pub use io::{DriverCallback, Limits, NativeResult};
 pub use context_values::{
     capture_context, capture_context_with_environment, parse_initial_context,
 };
@@ -42,6 +45,8 @@ pub const SUPPORTED: &[&str] = &[
     "Process.Executable.resolve",
     "Process.Executable.new",
     "Process.Command.new",
+    "Process.Command.with_timeout",
+    "Process.Command.with_output",
     "Process.Termination.exit_code",
     "Process.Termination.signal",
 ];
@@ -77,8 +82,8 @@ impl Value {
         }
         let names: &[&str] = match self.kind.as_str() {
             "Process.Executable" => &["path"],
-            "Process.Command" => &["context", "executable", "arguments", "stdin"],
-            "Process.Result" => &["termination", "stdout", "stderr"],
+            "Process.Command" => &["context", "executable", "arguments", "stdin", "timeout_ms", "output"],
+            "Process.Result" => &["termination", "stdout", "stderr", "output", "stdout_bytes", "stderr_bytes"],
             "Process.Termination" if self.fields.contains_key("exit_code") => {
                 &["kind", "exit_code"]
             }
@@ -170,6 +175,8 @@ pub fn admit(site: &Site) -> Result<(), String> {
             ],
             "Process.Command!",
         ),
+        "Process.Command.with_timeout" => (vec!["Process.Command", "Int"], "Process.Command!"),
+        "Process.Command.with_output" => (vec!["Process.Command", "String"], "Process.Command!"),
         "Process.Termination.exit_code" | "Process.Termination.signal" => {
             (vec!["Process.Termination"], "Int!")
         }
@@ -217,8 +224,28 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
                 ["context", "executable", "arguments", "stdin"]
                     .into_iter()
                     .zip(args.iter().cloned())
-                    .map(|(n, v)| (n.into(), v)),
+                    .map(|(n, v)| (n.into(), v))
+                    .chain([("timeout_ms".into(), int(0)), ("output".into(), text("capture"))]),
             ))
+        }
+        "Process.Command.with_timeout" | "Process.Command.with_output" => {
+            let field = if site.operation.ends_with("with_timeout") {
+                let Ok(duration) = args[1].integer().to_string().parse::<u64>() else {
+                    return invalid(site, "Process.InvalidCommand", "Process timeout requires positive representable milliseconds");
+                };
+                if duration == 0 || duration > i64::MAX as u64 {
+                    return invalid(site, "Process.InvalidCommand", "Process timeout requires positive representable milliseconds");
+                }
+                "timeout_ms"
+            } else {
+                if !matches!(args[1].string(), "capture" | "forward") {
+                    return invalid(site, "Process.InvalidCommand", "Process output requires capture or forward");
+                }
+                "output"
+            };
+            let mut fields = payload(&args[0]).fields.clone();
+            fields.insert(field.into(), args[1].clone());
+            Ok(value("Process.Command", fields))
         }
         "Process.Termination.exit_code" | "Process.Termination.signal" => {
             let v = payload(&args[0]);
@@ -291,6 +318,7 @@ struct Registration {
     ancestors: Vec<(PathBuf, Identity)>,
 }
 struct State {
+    registration_sealed: bool,
     active: bool,
     unresolved: bool,
     closing: bool,
@@ -299,20 +327,6 @@ struct State {
     closed: bool,
     close_error: Option<String>,
 }
-pub type DriverCallback = unsafe extern "C" fn(
-    usize,
-    *const u8,
-    usize,
-    *const u8,
-    usize,
-    *mut u8,
-    *mut u8,
-    usize,
-    extern "C" fn(*const AtomicBool) -> i32,
-    *const AtomicBool,
-    u64,
-    *mut NativeResult,
-);
 #[derive(Clone, Copy)]
 struct Driver {
     callback: DriverCallback,
@@ -329,9 +343,7 @@ pub struct Processes {
     configurations: BTreeMap<String, Vec<u8>>,
     scopes: BTreeMap<String, policy::Scope>,
     roots: Vec<String>,
-    timeout_ms: u64,
-    output_bytes: usize,
-    cleanup_ms: u64,
+    limits: Limits,
     state: Mutex<State>,
     changed: Condvar,
 }
@@ -347,10 +359,9 @@ pub fn empty() -> Processes {
         configurations: BTreeMap::new(),
         scopes: BTreeMap::new(),
         roots: vec![],
-        timeout_ms: 5000,
-        output_bytes: 1 << 20,
-        cleanup_ms: 1000,
+        limits: Limits::default(),
         state: Mutex::new(State {
+            registration_sealed: false,
             active: false,
             unresolved: false,
             closing: false,
@@ -499,12 +510,11 @@ fn validate_base_policy(grants: &[String], launcher: &str, roots: &[String]) -> 
 }
 pub fn configure(
     policy: &Policy,
-    timeout_ms: u64,
-    output_bytes: usize,
-    cleanup_ms: u64,
+    limits: Limits,
 ) -> Result<Processes, String> {
     let (grants, launcher, roots) = (&policy.grants, policy.launcher.as_str(), &policy.roots);
     let mut p = empty();
+    p.limits = limits.validate()?;
     if grants.is_empty() && launcher.is_empty() && roots.is_empty() {
         return Ok(p);
     }
@@ -513,17 +523,6 @@ pub fn configure(
     }
     if !supported() {
         return Err(UNAVAILABLE.into());
-    }
-    if timeout_ms == 0
-        || timeout_ms > 5000
-        || cleanup_ms == 0
-        || cleanup_ms > 1000
-        || output_bytes == 0
-        || output_bytes > 1 << 20
-    {
-        return Err(startup_error(
-            "native lifecycle limits exceed the selected profile",
-        ));
     }
     if grants.len() > MAX_POLICY_ENTRIES || roots.len() > MAX_POLICY_ENTRIES {
         return Err("Process startup failed during input".into());
@@ -537,9 +536,6 @@ pub fn configure(
     if !canonical(launcher) {
         return Err(startup_error("invalid native helper path"));
     }
-    p.timeout_ms = timeout_ms;
-    p.output_bytes = output_bytes;
-    p.cleanup_ms = cleanup_ms;
     p.launcher = launcher.into();
     let helper = open_read(launcher).map_err(|_| startup_error("native helper unavailable"))?;
     if !helper.metadata().map_or(false, |info| info.is_file()) {
@@ -620,6 +616,9 @@ pub fn protection(paths: &[String]) -> Result<Processes, String> {
     Ok(registry)
 }
 impl Processes {
+    pub fn seal_registration(&self) {
+        self.state.lock().unwrap().registration_sealed = true;
+    }
     pub fn validate_image(
         &self,
         path: &str,
@@ -790,7 +789,7 @@ impl Processes {
     }
 
     pub fn close(&self) -> Result<(), String> {
-        self.close_wait(Some(Duration::from_millis(self.cleanup_ms)), false)
+        self.close_wait(Some(Duration::from_millis(self.limits.cleanup_ms)), false)
     }
     pub fn wait_retained(&self) -> Result<(), String> {
         self.close_wait(None, false)
@@ -866,49 +865,13 @@ impl Processes {
         state.close_error.clone().map_or(Ok(()), Err)
     }
 }
-#[repr(C)]
-#[derive(Default, Clone, Copy)]
-pub struct NativeResult {
-    stage: i32,
-    class_id: i32,
-    started: i32,
-    cleanup_complete: i32,
-    termination_kind: i32,
-    termination_value: i32,
-    stdin_written: usize,
-    stdout_size: usize,
-    stderr_size: usize,
-    cleanup_failures: u32,
-    ownership: usize,
-}
-struct Completed {
-    receipt: NativeResult,
-    stdout: Vec<u8>,
-    stderr: Vec<u8>,
-}
 #[cfg(target_os = "macos")]
 extern "C" {
     fn lo_native_process_execute(
-        launcher: *const i8,
-        embedded: i32,
-        directory: *const i8,
-        frame: *const u8,
-        frame_size: usize,
-        configuration: *const u8,
-        configuration_size: usize,
-        input: *const u8,
-        input_size: usize,
-        output: *mut u8,
-        diagnostic: *mut u8,
-        capacity: usize,
-        cancelled: extern "C" fn(*const AtomicBool) -> i32,
-        token: *const AtomicBool,
-        timeout_ms: u64,
-        result: *mut NativeResult,
+        launcher: *const i8, embedded: i32, directory: *const i8,
+        configuration: *const u8, configuration_size: usize,
+        request: *const io::Request, result: *mut NativeResult,
     ) -> i32;
-}
-extern "C" fn cancelled(token: *const AtomicBool) -> i32 {
-    unsafe { (*token).load(Ordering::SeqCst) as i32 }
 }
 fn termination(r: &NativeResult) -> Option<Handle> {
     match r.termination_kind {
@@ -944,6 +907,7 @@ fn progress(r: &NativeResult) -> Handle {
         1 => "cancelled",
         2 | 4 => "host",
         3 => "limit",
+        5 => "timeout",
         _ => "execution",
     };
     let mut fields = vec![
@@ -977,7 +941,7 @@ fn process_failure(site: &Site, r: &NativeResult) -> Fault {
                 activation.operation = "Process.run".into();
                 return Fault::Recoverable(error(
                     &activation,
-                    "Process.ExecutionFailed",
+                    if r.class_id == 5 { "Process.Timeout" } else { "Process.ExecutionFailed" },
                     &message,
                     record([("progress".into(), progress)]),
                 ));
@@ -1004,6 +968,16 @@ fn process_failure(site: &Site, r: &NativeResult) -> Fault {
 // Trusted embedding boundary. Install before evaluation and before a session is shared.
 // The callback retains all child ownership until it returns, including after cancellation.
 // Callback code and userdata must outlive Session::wait_retained.
+fn driver_registration_ready(context: &Context) -> bool {
+    context.owner == std::thread::current().id() && context.owns_session
+        && !context.evaluated && !context.completed && context.final_result.is_none()
+        && context.scopes == 0 && context.depth == 0 && context.weight == 0
+        && context.remaining == context.session.steps && context.fault.is_none()
+        && {
+            let state = context.session.processes.state.lock().unwrap();
+            !state.registration_sealed && !state.closing
+        }
+}
 #[no_mangle]
 pub unsafe extern "C" fn lo_context_process_driver(
     context: *mut Context,
@@ -1013,9 +987,7 @@ pub unsafe extern "C" fn lo_context_process_driver(
     let Some(context) = context.as_mut() else {
         return 0;
     };
-    if context.owner != std::thread::current().id() || context.scopes != 0 || context.depth != 0 {
-        return 0;
-    }
+    if !driver_registration_ready(context) { return 0; }
     let Some(callback) = callback else { return 0 };
     let Some(session) = Arc::get_mut(&mut context.session) else {
         return 0;
@@ -1029,38 +1001,15 @@ pub unsafe extern "C" fn lo_context_process_driver(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lo_context_process_driver_limits(
-    context: *mut Context,
-    timeout_ms: u64,
-    cleanup_ms: u64,
-    output_bytes: usize,
+    context: *mut Context, limits: *const Limits,
 ) -> i32 {
-    let Some(context) = context.as_mut() else {
-        return 0;
-    };
-    if context.owner != std::thread::current().id() || context.scopes != 0 || context.depth != 0 {
-        return 0;
-    }
-    if timeout_ms == 0
-        || timeout_ms > 5000
-        || cleanup_ms == 0
-        || cleanup_ms > 1000
-        || output_bytes == 0
-        || output_bytes > 1 << 20
-    {
-        return 0;
-    }
-    let Some(session) = Arc::get_mut(&mut context.session) else {
-        return 0;
-    };
-    let Some(processes) = Arc::get_mut(&mut session.processes) else {
-        return 0;
-    };
-    if processes.driver.is_none() {
-        return 0;
-    }
-    processes.timeout_ms = timeout_ms;
-    processes.cleanup_ms = cleanup_ms;
-    processes.output_bytes = output_bytes;
+    let (Some(context), Some(limits)) = (context.as_mut(), limits.as_ref()) else { return 0; };
+    if !driver_registration_ready(context) { return 0; }
+    let Ok(limits) = limits.validate() else { return 0; };
+    let Some(session) = Arc::get_mut(&mut context.session) else { return 0; };
+    let Some(processes) = Arc::get_mut(&mut session.processes) else { return 0; };
+    if processes.driver.is_none() { return 0; }
+    processes.limits = limits;
     1
 }
 #[no_mangle]
@@ -1108,6 +1057,13 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     }
     context.check_cancel()?;
     let command = payload(target);
+    let requested = command.fields["timeout_ms"].integer().to_string().parse::<u64>().unwrap();
+    let timeout_ms = if requested == 0 { processes.limits.timeout_ms } else { requested };
+    let forward = command.fields["output"].string() == "forward";
+    if timeout_ms > processes.limits.timeout_ms || (forward && processes.limits.forward_streams != 3) {
+        return Err(process_failure(site, &NativeResult { stage: 1, class_id: 4, cleanup_complete: 1, ..Default::default() }));
+    }
+    if forward { context.session.console.authorize_process()?; }
     let executable = payload(&command.fields["executable"]).fields["path"]
         .string()
         .to_owned();
@@ -1265,185 +1221,164 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
         }
         state.active = true;
     }
-    let cancel = Arc::new(AtomicBool::new(false));
+    let cancel = Arc::new(AtomicU32::new(0));
     let worker_cancel = cancel.clone();
     let worker_processes = processes.clone();
     let worker_locks = context.session.locks.clone();
     let worker_entry = context.session.entry.clone();
     let (tx, rx) = std::sync::mpsc::sync_channel(1);
-    let spawned = std::thread::Builder::new()
-        .name("lo-process-owner".into())
-        .spawn(move || {
-            let p = &worker_processes;
-            let mut result = NativeResult::default();
-            let mut stdout = vec![0; p.output_bytes];
-            let mut stderr = vec![0; p.output_bytes];
-            if let Some(driver) = p.driver {
-                unsafe {
-                    (driver.callback)(
-                        driver.userdata,
-                        frame.as_ptr(),
-                        frame.len(),
-                        input.as_ptr(),
-                        input.len(),
-                        stdout.as_mut_ptr(),
-                        stderr.as_mut_ptr(),
-                        p.output_bytes,
-                        cancelled,
-                        Arc::as_ptr(&worker_cancel),
-                        p.timeout_ms,
-                        &mut result,
-                    );
-                }
-            } else {
-                #[cfg(target_os = "macos")]
-                unsafe {
-                    use std::ffi::CString;
-                    let launcher = CString::new(p.launcher.clone()).unwrap();
-                    let directory =
-                        CString::new(Path::new(&p.launcher).parent().unwrap().to_str().unwrap())
-                            .unwrap();
-                    lo_native_process_execute(
-                        launcher.as_ptr(),
-                        p.embedded as i32,
-                        directory.as_ptr(),
-                        frame.as_ptr(),
-                        frame.len(),
-                        configuration.as_ptr(),
-                        configuration.len(),
-                        input.as_ptr(),
-                        input.len(),
-                        stdout.as_mut_ptr(),
-                        stderr.as_mut_ptr(),
-                        p.output_bytes,
-                        cancelled,
-                        Arc::as_ptr(&worker_cancel),
-                        p.timeout_ms,
-                        &mut result,
-                    );
-                }
-                #[cfg(not(target_os = "macos"))]
-                {
-                    let _ = (&frame, &input, &worker_cancel);
-                    result.stage = 1;
-                    result.class_id = 2;
-                    result.cleanup_complete = 1;
-                }
+    let command_deadline = Instant::now() + Duration::from_millis(timeout_ms);
+    let deadline = command_deadline + Duration::from_millis(processes.limits.cleanup_ms);
+    let spawned = std::thread::Builder::new().name("lo-process-owner".into()).spawn(move || {
+        let p = &worker_processes;
+        let mut result = NativeResult::default();
+        let output = io::Output { events: tx.clone(), stop: worker_cancel.clone(), state: Mutex::new(io::OutputState::default()), maximum: p.limits.output_bytes };
+        let request = io::Request::new(&frame, &input, p.limits, timeout_ms, forward, &output);
+        if let Some(driver) = p.driver {
+            unsafe { (driver.callback)(driver.userdata, &request, &mut result); }
+        } else {
+            #[cfg(target_os = "macos")]
+            unsafe {
+                use std::ffi::CString;
+                let launcher = CString::new(p.launcher.clone()).unwrap();
+                let directory = CString::new(Path::new(&p.launcher).parent().unwrap().to_str().unwrap()).unwrap();
+                lo_native_process_execute(launcher.as_ptr(), p.embedded as i32, directory.as_ptr(),
+                    configuration.as_ptr(), configuration.len(), &request, &mut result);
             }
-            if !(0..=7).contains(&result.stage)
-                || !(0..=4).contains(&result.class_id)
-                || !(0..=1).contains(&result.started)
-                || !(0..=1).contains(&result.cleanup_complete)
-                || !(0..=2).contains(&result.termination_kind)
-                || result.cleanup_failures & !7 != 0
-                || (result.cleanup_complete == 1 && result.ownership != 0)
-                || (result.termination_kind == 1 && result.termination_value < 0)
-                || (result.termination_kind == 2 && result.termination_value <= 0)
-                || (result.stage == 0 && result.class_id != 0)
-                || (result.termination_kind != 0 && result.started != 1)
-                || (result.started == 1
-                    && result.termination_kind == 0
-                    && result.cleanup_complete == 1)
+            #[cfg(not(target_os = "macos"))]
             {
-                result.stage = 5;
-                result.class_id = 2;
-                result.cleanup_complete = 0;
+                let _ = (&request, &configuration);
+                result.stage = 1; result.class_id = 2; result.cleanup_complete = 1;
             }
-            // A driver returning no termination and no failure has not settled ownership.
-            if result.stage == 0 && result.termination_kind == 0 {
-                result.stage = 1;
-                result.class_id = 2;
-                result.cleanup_complete = 0;
+        }
+        let observed = output.state.lock().unwrap();
+        if let Some((stage, class)) = observed.failure { result.stage = stage; result.class_id = class; }
+        if !(0..=7).contains(&result.stage) || !(0..=5).contains(&result.class_id)
+            || !(0..=1).contains(&result.started) || !(0..=1).contains(&result.cleanup_complete)
+            || !(0..=2).contains(&result.termination_kind) || result.cleanup_failures & !7 != 0
+            || (result.cleanup_complete == 1 && result.ownership != 0)
+            || (result.stage == 0 && result.cleanup_failures != 0)
+            || (result.termination_kind == 1 && result.termination_value < 0)
+            || (result.termination_kind == 2 && result.termination_value <= 0)
+            || (result.stage == 0 && result.class_id != 0)
+            || (result.termination_kind != 0 && result.started != 1)
+            || (result.started == 1 && result.termination_kind == 0 && result.cleanup_complete == 1)
+            || result.stdin_written > input.len()
+            || [result.stdout_size, result.stderr_size] != observed.counts {
+            result.stage = 5; result.class_id = 2; result.cleanup_complete = 0;
+            result.stdout_size = observed.counts[0]; result.stderr_size = observed.counts[1];
+        }
+        drop(observed);
+        if result.stage == 0 && result.termination_kind == 0 {
+            result.stage = 1; result.class_id = 2; result.cleanup_complete = 0;
+        }
+        if result.stage == 0 && result.cleanup_complete == 0 { result.stage = 6; result.class_id = 2; }
+        {
+            let mut state = p.state.lock().unwrap();
+            state.active = false;
+            if result.cleanup_complete == 0 {
+                state.quarantined = true;
+                state.unresolved = true;
+                std::mem::forget(Box::new((result, worker_processes.clone(), worker_locks.clone(), worker_entry.clone())));
             }
-            if result.stage == 0 && result.cleanup_complete == 0 {
-                result.stage = 6;
-                result.class_id = 2;
-            }
-            if result.stdout_size > p.output_bytes || result.stderr_size > p.output_bytes {
-                result.stage = 5;
-                result.class_id = 2;
-                result.cleanup_complete = 0;
-                result.stdout_size = result.stdout_size.min(p.output_bytes);
-                result.stderr_size = result.stderr_size.min(p.output_bytes);
-            }
-            stdout.truncate(result.stdout_size);
-            stderr.truncate(result.stderr_size);
-            {
-                let mut state = p.state.lock().unwrap();
-                state.active = false;
-                if result.cleanup_complete == 0 {
-                    state.quarantined = true;
-                    state.unresolved = true;
-                    // No proof of release exists. Retain the registry and its frozen
-                    // descriptors; a caller cannot discharge unknown ownership.
-                    std::mem::forget(Box::new((
-                        result,
-                        worker_processes.clone(),
-                        worker_locks.clone(),
-                        worker_entry.clone(),
-                    )));
-                }
-                p.changed.notify_all();
-            }
-            let _ = tx.send(Completed {
-                receipt: result,
-                stdout,
-                stderr,
-            });
-        });
+            p.changed.notify_all();
+        }
+        let _ = tx.send(io::Event::Complete(result));
+    });
     if spawned.is_err() {
         let mut state = processes.state.lock().unwrap();
         state.active = false;
         processes.changed.notify_all();
         drop(state);
-        return Err(process_failure(
-            site,
-            &NativeResult {
-                stage: 1,
-                class_id: 2,
-                cleanup_complete: 1,
-                ..Default::default()
-            },
-        ));
+        return Err(process_failure(site, &NativeResult { stage: 1, class_id: 2, cleanup_complete: 1, ..Default::default() }));
     }
-
-    let deadline =
-        Instant::now() + Duration::from_millis(processes.timeout_ms + processes.cleanup_ms);
-    let mut cancellation_started = None;
-    let completed = loop {
-        match rx.recv_timeout(Duration::from_millis(10)) {
-            Ok(v) => break v,
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let mut primary = None;
+    let mut stopping = None;
+    let mut confirmed = [0usize; 2];
+    let mut receipt = loop {
+        if primary.is_none() && matches!(cancel.load(Ordering::SeqCst), 0 | 5) {
+            if let Err(fault) = context.check_cancel() {
+                if cancel.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |current|
+                    matches!(current, 0 | 5).then(|| stop_class(&fault))).is_ok() {
+                    primary = Some(fault);
+                    stopping.get_or_insert_with(Instant::now);
+                }
+            }
+        }
+        if Instant::now() >= command_deadline && cancel.compare_exchange(0, 5, Ordering::SeqCst, Ordering::SeqCst).is_ok() {
+            stopping.get_or_insert(command_deadline);
+        }
+        if cancel.load(Ordering::SeqCst) != 0 { stopping.get_or_insert_with(Instant::now); }
+        if Instant::now() >= deadline || stopping.is_some_and(|start| Instant::now() - start >= Duration::from_millis(processes.limits.cleanup_ms)) {
+            processes.state.lock().unwrap().quarantined = true;
+            return Err(process_failure(site, &NativeResult { stage: 7, class_id: cancel.load(Ordering::SeqCst) as i32,
+                stdout_size: confirmed[0], stderr_size: confirmed[1], ..Default::default() }));
+        }
+        match rx.recv_timeout(Duration::from_millis(5)) {
+            Ok(io::Event::Complete(result)) => break result,
+            Ok(io::Event::Output { stream, bytes, reply }) => {
+                let reason = cancel.load(Ordering::SeqCst);
+                let delivered = if reason != 0 {
+                    Err((0, if reason == 5 { host_timeout() } else { primary.clone().unwrap_or_else(|| host("Process output stopped")) }))
+                } else if forward {
+                    let console = context.session.console.clone();
+                    match context.reserve_file(1, bytes.len() as u64 + 512) {
+                        Ok(()) => {
+                            let mut check = || {
+                                context.check_cancel()?;
+                                if Instant::now() >= command_deadline { return Err(host_timeout()); }
+                                Ok(())
+                            };
+                            console.forward(if stream == 1 { "stdout" } else { "stderr" }, &bytes, &mut check)
+                        },
+                        Err(fault) => Err((0, fault)),
+                    }
+                } else {
+                    let weight = (stdout.len() as u64).checked_add(stderr.len() as u64).and_then(|n| n.checked_add(bytes.len() as u64)).and_then(|n| n.checked_add(512)).ok_or_else(|| limit("Process output bytes"));
+                    match weight.and_then(|weight| context.reserve_file(1, weight)) {
+                        Ok(()) => {
+                            let target = if stream == 1 { &mut stdout } else { &mut stderr };
+                            if target.try_reserve(bytes.len()).is_err() { Err((0, host("Process output allocation failed"))) }
+                            else { target.extend_from_slice(&bytes); Ok(bytes.len()) }
+                        }
+                        Err(fault) => Err((0, fault)),
+                    }
+                };
+                let response = match delivered {
+                    Ok(count) => (count, 0),
+                    Err((count, fault)) => {
+                        let class = stop_class(&fault);
+                        if class != 5 && primary.is_none() { primary = Some(fault); }
+                        cancel.store(class, Ordering::SeqCst);
+                        stopping.get_or_insert_with(Instant::now);
+                        (count, class as i32)
+                    }
+                };
+                confirmed[(stream - 1) as usize] += response.0;
+                let _ = reply.send(response);
+            }
             Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
                 processes.state.lock().unwrap().quarantined = true;
-                return Err(host("Process cleanup was not verified"));
+                return Err(process_failure(site, &NativeResult { stage: 5, class_id: 2,
+                    stdout_size: confirmed[0], stderr_size: confirmed[1], ..Default::default() }));
             }
             Err(_) => (),
-        };
-        if context.check_cancel().is_err() {
-            cancel.store(true, Ordering::SeqCst);
-            cancellation_started.get_or_insert_with(Instant::now);
-        }
-        if Instant::now() >= deadline
-            || cancellation_started.map_or(false, |start| {
-                Instant::now() - start >= Duration::from_millis(processes.cleanup_ms)
-            })
-        {
-            cancel.store(true, Ordering::SeqCst);
-            processes.state.lock().unwrap().quarantined = true;
-            return Err(process_failure(
-                site,
-                &NativeResult {
-                    stage: 7,
-                    class_id: 1,
-                    ..Default::default()
-                },
-            ));
         }
     };
-    let r = &completed.receipt;
-    if r.stage != 0 {
-        return Err(process_failure(site, r));
+    if receipt.cleanup_complete == 0 { return Err(process_failure(site, &receipt)); }
+    if primary.is_none() && !(receipt.stage != 0 && (1..=4).contains(&receipt.class_id)) {
+        if let Err(fault) = context.check_cancel() { primary = Some(fault); }
     }
+    if let Some(primary) = primary {
+        return Err(boundary_host_fault(primary.with_details(BoundaryDetails { process_progress: Some(progress(&receipt).json()), ..Default::default() })));
+    }
+    if receipt.stage == 0 && cancel.load(Ordering::SeqCst) != 0 {
+        receipt.stage = 7; receipt.class_id = cancel.load(Ordering::SeqCst) as i32;
+    }
+    let r = &receipt;
+    if r.stage != 0 { return Err(process_failure(site, r)); }
     let Some(termination) = termination(r) else {
         return Err(host("Process termination was not confirmed"));
     };
@@ -1453,12 +1388,15 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
             ("termination".into(), termination),
             (
                 "stdout".into(),
-                new(atom("Bytes"), Data::Bytes(completed.stdout)),
+                new(atom("Bytes"), Data::Bytes(stdout)),
             ),
             (
                 "stderr".into(),
-                new(atom("Bytes"), Data::Bytes(completed.stderr)),
+                new(atom("Bytes"), Data::Bytes(stderr)),
             ),
+            ("output".into(), text(if forward { "forward" } else { "capture" })),
+            ("stdout_bytes".into(), int(r.stdout_size)),
+            ("stderr_bytes".into(), int(r.stderr_size)),
         ],
     );
     let completed = record([
@@ -1474,4 +1412,15 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     );
     context.charge(&receipt)?;
     Ok(receipt)
+}
+
+fn host_timeout() -> Fault { Fault::Host("runtime.process-timeout", "Process command deadline expired".into()) }
+fn stop_class(fault: &Fault) -> u32 {
+    match fault.primary() {
+        Fault::RawCancellation | Fault::Host("runtime.cancelled", _) => 1,
+        Fault::Budget { .. } | Fault::Host("runtime.limit", _) => 3,
+        Fault::Host("runtime.capability-denied", _) => 4,
+        Fault::Host("runtime.process-timeout", _) => 5,
+        _ => 2,
+    }
 }

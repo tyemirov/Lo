@@ -97,7 +97,7 @@ flow HumanSize(value: Int) -> String! {
 
 flow Run(context: Process.Context, executable: Process.Executable, arguments: List<String>, output: String, timeout_seconds: Int) -> Process.Result! {
     command = Process.Command.new(context, executable, arguments, Bytes.new(""))
-    timed = Process.Command.with_timeout(command, timeout_seconds)
+    timed = Process.Command.with_timeout(command, Math.mul(timeout_seconds, 1000))
     configured = Process.Command.with_output(timed, output)
     result = commit configured
     return result
@@ -178,7 +178,7 @@ flow Action(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pro
 }
 
 flow ApplyAction(context: Process.Context, executable: Process.Executable, arguments: List<String>) -> Int! {
-    result = Run(context, executable, arguments, "inherit", 1800) |> RequireSuccess()
+    result = Run(context, executable, arguments, "forward", 1800) |> RequireSuccess()
     return 0
 }
 
@@ -303,7 +303,7 @@ flow DockerApply(context: Record{apply: Bool, home: File.Path, uid: Int, process
     driver = Require(StringsEqual(drivers, List.new("docker")), "Expected one Docker-driver builder on the selected local context")
     builder_endpoint = Require(StringsEqual(endpoints, List.new("desktop-linux")), "Expected one Docker-driver builder on the selected local context")
     printed = Print(String.concat("Docker target: desktop-linux (", endpoint, ")"))
-    usage = DockerCommand(context, executable, List.new("system", "df"), "inherit")
+    usage = DockerCommand(context, executable, List.new("system", "df"), "forward")
     build = Action(context, executable, List.new("--context", "desktop-linux", "buildx", "prune", "--builder", "desktop-linux", "--all", "--force"), List.new("docker", "--context", "desktop-linux", "buildx", "prune", "--builder", "desktop-linux", "--all", "--force"))
     images = Action(context, executable, List.new("--context", "desktop-linux", "image", "prune", "--all", "--force"), List.new("docker", "--context", "desktop-linux", "image", "prune", "--all", "--force"))
     return 0

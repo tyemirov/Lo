@@ -148,6 +148,8 @@ An empty error list in a constructor does not establish that its later commit su
 | [`Parameters.values`](training.md#parametersvalues) | [Training And Checkpoints](training.md) |
 | [`Process.Arguments.format_shell`](process.md#processargumentsformat_shell) | [Processes](process.md) |
 | [`Process.Command.new`](process.md#processcommandnew) | [Processes](process.md) |
+| [`Process.Command.with_output`](process.md#processcommandwith_output) | [Processes](process.md) |
+| [`Process.Command.with_timeout`](process.md#processcommandwith_timeout) | [Processes](process.md) |
 | [`Process.Context.current`](process.md#processcontextcurrent) | [Processes](process.md) |
 | [`Process.Context.environment_value`](process.md#processcontextenvironment_value) | [Processes](process.md) |
 | [`Process.Context.new`](process.md#processcontextnew) | [Processes](process.md) |

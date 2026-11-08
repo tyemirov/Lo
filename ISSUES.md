@@ -1764,7 +1764,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify complete preflight, postorder removal, late failure progress, cancellation, and close failures.
   - Complete native target conformance checks, independent review, and final stack CI.
 
-- [ ] [F035] (P1) {F024,F026,I018} Add host-admitted command deadlines and forwarded output
+- [-] [F035] (P1) {F024,F026,I018} Add host-admitted command deadlines and forwarded output
   Goal:
   Support bounded command duration and explicit forwarded output under trusted host policy.
 
@@ -1789,6 +1789,12 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify timeout recovery permits the next category only after ownership resolves.
   - Preserve explicit Linux activation unavailability unless a separate platform contract changes it.
   - Complete independent review and final stack CI.
+
+  Status:
+  Immutable command options, host limits, forwarded output, and the canonical native driver ABI are implemented.
+  Focused Darwin and Linux QEMU checks passed, including output failures, cleanup bounds, and shared-session registration.
+  Existing Process, Console, transport, and lock regressions passed.
+  Independent review found no remaining correctness issue. Final stack CI remains pending.
 
 - [ ] [F036] (P1) {P007,F035,I018} Implement the qualified descendant process profile
   Goal:

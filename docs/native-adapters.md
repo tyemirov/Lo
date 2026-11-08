@@ -22,6 +22,7 @@ Only an explicit `commit` activates a target.
 | File removal | `--remove-root` | Validate the ordered selection before removal. |
 | Open-file probe | `--open-files-root` | Use the fixed probe with its executable identity and bounded output. |
 | Process execution | `--process-allow`, `--process-launcher`, `--process-read-root` | Authorize explicit executable identities and directory roots. |
+| Process limits | `--max-process-ms`, `--max-process-cleanup-ms`, `--max-process-output-bytes`, `--process-forward-output` | Set duration, cleanup, per-stream output, and forwarding authority. |
 | HTTP client | `--http-allow` | Authorize the selected method and HTTP origin. |
 | HTTP server | `serve --listen` | Authorize the port. |
 | Console output | `--max-console-bytes` | Enable inherited stdout/stderr with a logical-byte quota. |
@@ -67,7 +68,11 @@ The embedded launcher lets the artifact execute without a Lo installation.
 Neither route adds an implicit capability.
 
 The launcher keeps the private configuration channel, confinement, execution witness, and permit sequence.
-Process results keep termination, standard output, and standard error.
+Process results keep termination, output mode, and confirmed per-stream byte counts.
+Capture retains standard output and standard error bytes.
+Forwarding uses the enabled Console sinks and returns empty byte payloads.
+The [command policy](process-command-policy.md) defines immutable command options and host admission.
+
 Failure diagnostics keep safe progress without command arguments, environment values, or captured output.
 A completed activation remains visible after a later execution limit.
 

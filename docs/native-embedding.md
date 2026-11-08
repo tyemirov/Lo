@@ -59,7 +59,12 @@ Console registration does not grant File, Process, HTTP, device, or lock authori
 
 The [entry and lock header](../runtime/native/include/lo_program_lock.h) declares explicit identity and lock registration.
 The [lock contract](program-lock-design.md) owns retained identity and cleanup guarantees.
+
 Device and Process test drivers remain explicit trusted injection boundaries.
+The [Process header](../runtime/native/include/lo_process.h) owns the test-driver request and response contract.
+Forwarded output callbacks run on the context owner thread through the registered Console sinks.
+Keep Process driver state alive until its owned work and cleanup finish.
+
 General File, HTTP, and real Process grant configuration is outside this retained embedding API.
 Compiled program commands supply those explicit application grants.
 

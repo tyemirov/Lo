@@ -13,6 +13,9 @@ import (
 func TestRunBuiltinCatalog(t *testing.T) {
 	executablePath := repository + "/testdata/inert-process/executable"
 	executableJSON := fmt.Sprintf(`{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":%q}}}`, executablePath)
+	commandJSON := func(timeout, output string) string {
+		return fmt.Sprintf(`{"type":"Process.Command","value":{"context":{"type":"Process.Context","value":{"origin":"explicit","redacted":true}},"executable":%s,"arguments":{"type":"List<String>","value":[{"type":"String","value":"argument"}]},"stdin":{"type":"Bytes","value":"c3RkaW4="},"timeout_ms":{"type":"Int","value":%q},"output":{"type":"String","value":%q}}}`, executableJSON, timeout, output)
+	}
 	want := map[string]string{
 		catalog.ProgramPath:                    `{"type":"Bool","value":true}`,
 		catalog.LockFileNew:                    `{"redacted":true}`,
@@ -35,7 +38,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.ProcessExecutableNew:           executableJSON,
 		catalog.ProcessTerminationExitCode:     `"0"`,
 		catalog.ProcessTerminationSignal:       `"0"`,
-		catalog.ProcessCommandNew:              fmt.Sprintf(`{"type":"Process.Command","value":{"context":{"type":"Process.Context","value":{"origin":"explicit","redacted":true}},"executable":%s,"arguments":{"type":"List<String>","value":[{"type":"String","value":"argument"}]},"stdin":{"type":"Bytes","value":"c3RkaW4="}}}`, executableJSON),
+		catalog.ProcessCommandNew:              commandJSON("0", "capture"),
+		"Process.Command.with_timeout":         commandJSON("30000", "capture"),
+		"Process.Command.with_output":          commandJSON("0", "forward"),
 		catalog.AutodiffGrad:                   `{"type":"Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}","value":{"gradients":{"type":"Record{x: Tensor<FP32>}","value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}},"value":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}}`,
 		catalog.FloatAdd:                       `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
 		catalog.FloatMul: `{"type":"Float","value":"2.5"}`, catalog.FloatDiv: `{"type":"Float","value":"1.5"}`,

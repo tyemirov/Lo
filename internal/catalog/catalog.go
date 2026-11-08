@@ -169,10 +169,13 @@ const (
 	ProcessDiscoveryFailed         = "Process.DiscoveryFailed"
 	ProcessExecutableNew           = "Process.Executable.new"
 	ProcessCommandNew              = "Process.Command.new"
+	ProcessCommandWithTimeout      = "Process.Command.with_timeout"
+	ProcessCommandWithOutput       = "Process.Command.with_output"
 	ProcessRun                     = "Process.run"
 	ProcessInvalidExecutable       = "Process.InvalidExecutable"
 	ProcessInvalidCommand          = "Process.InvalidCommand"
 	ProcessExecutionFailed         = "Process.ExecutionFailed"
+	ProcessTimeout                 = "Process.Timeout"
 	ProcessTerminationExitCode     = "Process.Termination.exit_code"
 	ProcessTerminationSignal       = "Process.Termination.signal"
 	ProcessTerminationKind         = "Process.TerminationKind"
@@ -278,6 +281,7 @@ func build() map[string]Operation {
 	fixed(ProcessExecutableNew, []types.Parameter{{Name: "path", Type: types.Path()}}, must(types.NewFallible(types.ProcessExecutable())))
 	fixed(ProcessCommandNew, []types.Parameter{{Name: "context", Type: types.ProcessContext()}, {Name: "executable", Type: types.ProcessExecutable()}, {Name: "arguments", Type: must(types.NewList(types.String()))}, {Name: "stdin", Type: types.Bytes()}}, must(types.NewFallible(types.ProcessCommand())))
 	addProcessContexts(m, fixed)
+	addProcessCommands(m, fixed)
 	addApplications(m, fixed)
 	addProcessors(m, fixed)
 	executable := m[ProcessExecutableNew].(operation)
@@ -287,7 +291,7 @@ func build() map[string]Operation {
 	command.boundary = Effect
 	command.targetPosition = 1
 	command.errors = []string{ProcessInvalidCommand}
-	command.activation = []string{ProcessExecutionFailed}
+	command.activation = []string{ProcessExecutionFailed, ProcessTimeout}
 	m[ProcessCommandNew] = command
 	for _, name := range []string{ProcessTerminationExitCode, ProcessTerminationSignal} {
 		one(name, types.ProcessTermination(), must(types.NewFallible(types.Int())))

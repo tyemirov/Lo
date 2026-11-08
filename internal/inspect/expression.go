@@ -145,7 +145,7 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 			r.Method = &method
 		}
 		if op.Name() == catalog.ProcessCommandNew {
-			r.Process = a.processInputs(values)
+			r.Process = a.processInputs(values, node)
 		}
 		if op.Name() == catalog.FileRemove || op.Name() == catalog.FileRemoveChecked {
 			r.Target.Kind = "calculated"
@@ -254,6 +254,8 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		out.targets = values[0].targets
 	}
 	switch op.Name() {
+	case catalog.ProcessCommandWithTimeout, catalog.ProcessCommandWithOutput:
+		out.targets = a.transformCommand(c, node, op.Name(), values[0], values[1])
 	case catalog.ProcessContextCurrent:
 		out.processContext = &processContextDescription{Origin: "inherited"}
 	case catalog.ProcessContextNew:

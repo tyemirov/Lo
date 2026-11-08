@@ -375,6 +375,8 @@ unsafe fn cli_main(
     let mut process_prunes = vec![];
     let mut process_endpoints = vec![];
     let mut process_launcher = String::new();
+    let mut process_limits = crate::process::Limits::default();
+    let mut process_limit_flags = std::collections::BTreeSet::new();
     let mut launcher_set = false;
     let mut http_grants = vec![];
     let mut ports = vec![];
@@ -412,6 +414,25 @@ unsafe fn cli_main(
             format_set = true;
             if format != "text" && format != "json" {
                 error = Some(format!("unknown output format {format:?}"))
+            }
+        } else if arg == "--process-forward-output" && process_limits.forward_streams == 0 {
+            process_limits.forward_streams = 3;
+        } else if matches!(arg, "--max-process-ms" | "--max-process-cleanup-ms" | "--max-process-output-bytes") {
+            if !process_limit_flags.insert(arg) || i + 1 == args.len() {
+                error = Some(format!("{arg} requires one positive integer"));
+                break;
+            }
+            i += 1;
+            match args[i].parse::<u64>() {
+                Ok(value) if value > 0 => match arg {
+                    "--max-process-ms" => process_limits.timeout_ms = value,
+                    "--max-process-cleanup-ms" => process_limits.cleanup_ms = value,
+                    _ => match usize::try_from(value) {
+                        Ok(value) => process_limits.output_bytes = value,
+                        Err(_) => error = Some(format!("invalid {arg}")),
+                    },
+                },
+                _ => error = Some(format!("invalid {arg}: value must be positive")),
             }
         } else if arg == "--max-console-bytes" && !console_limit_set && i + 1 < args.len() {
             console_limit_set = true;
@@ -611,7 +632,7 @@ unsafe fn cli_main(
     }
     signal(2, stop as *const () as usize);
     signal(15, stop as *const () as usize);
-    let processes = match crate::process::configure(&process_policy.unwrap(), 5000, 1 << 20, 1000) {
+    let processes = match crate::process::configure(&process_policy.unwrap(), process_limits) {
         Ok(processes) => Arc::new(processes),
         Err(message) => {
             let fault = if message == crate::process::UNAVAILABLE {

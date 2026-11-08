@@ -281,8 +281,8 @@ The application lock remains held through resource cleanup, including failure an
 | --- | --- |
 | `Clock.now_unix_ns()` | Implemented fresh signed Unix nanoseconds for each application cutoff. |
 | `Process.Arguments.format_shell(arguments)` | Pure shell quoting for display only. Execution continues to use argument lists. |
-| `Process.Command.with_output(command, output)` | Pure command copy with `capture` or inherited stdout/stderr. Stdin remains closed. |
-| `Process.Command.with_timeout(command, seconds)` | Pure command copy with a timeout subject to host admission limits. |
+| `Process.Command.with_output(command, mode)` | Pure command copy with `capture` or `forward`. Forwarding uses owned Console sinks. Stdin remains closed. |
+| `Process.Command.with_timeout(command, timeout_ms)` | Pure command copy with a millisecond deadline subject to host admission limits. Application flows convert seconds to milliseconds. |
 
 `CLI.Options` exposes `flags: Map<String,Bool>`, `help_requested: Bool`, and `help_text: String`.
 All declared flags are present and false until selected.
@@ -295,7 +295,7 @@ A command deadline produces recoverable `Process.Timeout` only after owned-proce
 A self-handling flow can then return error data for category reports and continuation.
 Caller cancellation, session cancellation, budget failures, and uncertain process ownership remain terminal.
 A timeout does not undo confirmed filesystem or daemon effects.
-This proposed command deadline is distinct from the current terminal host lifetime limit.
+The command deadline is distinct from terminal caller cancellation and execution-budget limits.
 
 Process authority remains explicit and scoped per executable.
 The current profile and fixture evidence do not establish support for arbitrary installed command descendants.

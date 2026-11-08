@@ -36,7 +36,7 @@ This sequence does not depend on modules, user-defined types, generics, or packa
 | Runner I/O | Committed Console lines, explicit embedding sinks, and text/NDJSON output. | Command-output forwarding remains F035 work. |
 | Program arguments | Literal capture after `--`, declared Boolean options, and deterministic help. | The selected parser does not accept value-bearing options or operands. |
 | Program completion | Nominal terminal results select status after resource cleanup and required output. | An ordinary returned Int remains data. |
-| Process duration | The default lifetime is five seconds. Native admission also enforces that ceiling. | The draft requests 30, 60, 180, and 1800 seconds for different command classes. |
+| Process duration | The host selects the duration limit. The default is five seconds. | The application requests 30, 60, 180, and 1800 seconds for different command classes. |
 
 Compiler anchors include `internal/compilercli/command.go` and `internal/catalog/observations.go`.
 Runtime anchors include `runtime/native/src/cli.rs`, `file_observer.rs`, `file_leases.rs`, and `process.rs`.
@@ -355,9 +355,9 @@ It must not claim atomic whole-tree removal, rollback, or exclusion of arbitrary
 
 ## Process Duration, Output, And Descendants
 
-F035 needs coordinated Go, C, Rust, CLI, embedding, and launcher-protocol work.
-Adding only `Process.Command.with_timeout` cannot bypass the existing five-second native admission limit.
-The host must authorize maximum duration, cleanup duration, output volume, and enabled output modes.
+F035 coordinates compiler schemas, C, Rust, CLI, embedding, and transport changes.
+The [command policy](process-command-policy.md) defines the selected millisecond contract.
+The host authorizes maximum duration, cleanup duration, output volume, and forwarding.
 Requests above those limits fail before process creation.
 They must not be silently shortened.
 

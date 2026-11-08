@@ -55,6 +55,7 @@ impl Image {
                 .validate_image(path, &mut *check)
                 .map_err(WriteFailure::Terminal)?;
         }
+        let mut confirmed_total = 0usize;
         let result = (|| -> Result<Result<(), WriteFailure>, Fault> {
             let spawn_ownership = crate::spawn_ownership::acquire(&mut *check)?;
             let (request_read, mut request_write) = pipe()?;
@@ -133,8 +134,8 @@ impl Image {
                             return Err(host("Console acknowledgment count invalid"));
                         }
                         match (ack[0], ack[9]) {
-                            (1, 0) if count > confirmed => confirmed = count,
-                            (2, 0) if count == frame.len() as u64 => break,
+                            (1, 0) if count > confirmed => { confirmed = count; confirmed_total = offset + count as usize; },
+                            (2, 0) if count == frame.len() as u64 => { confirmed_total = offset + count as usize; break; },
                             (3, 1 | 2) => {
                                 return Ok(Err(WriteFailure::Recoverable(
                                     offset + count as usize,
@@ -175,7 +176,7 @@ impl Image {
             }
             operation
         })();
-        result.map_err(WriteFailure::Terminal)?
+        result.map_err(|fault| WriteFailure::TerminalPrefix(confirmed_total, fault))?
     }
 }
 fn pipe() -> Result<(File, File), Fault> {

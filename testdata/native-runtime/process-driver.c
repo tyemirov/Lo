@@ -1,14 +1,8 @@
-#include "lo_runtime.h"
+#include "lo_process.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-typedef struct {int stage,class_id,started,cleanup_complete,termination_kind,termination_value;Size stdin_written,stdout_size,stderr_size;unsigned int cleanup_failures;Size ownership;} NativeResult;
-typedef int (*Cancel)(const void *);
-typedef void (*Driver)(Size,const unsigned char*,Size,const unsigned char*,Size,unsigned char*,unsigned char*,Size,Cancel,const void*,U64,NativeResult*);
-
-extern int lo_context_process_driver(Context*,Driver,Size);
-extern int lo_context_process_driver_limits(Context*,U64,U64,Size);
 extern int lo_context_process_close(Context*);
 extern Context *lo_context_process_peer(Context*);
 extern int lo_context_process_wait_retained(Context*);
@@ -30,8 +24,8 @@ int pthread_create(__UINTPTR_TYPE__ *thread,const void *attributes,void *(*start
 #endif
 static unsigned calls;
 static unsigned call_count(void){return __atomic_load_n(&calls,__ATOMIC_SEQ_CST);}
-static void execute(Size token,const unsigned char*frame,Size frame_size,const unsigned char*input,Size input_size,unsigned char*out,unsigned char*err,Size capacity,Cancel cancelled,const void*cancel,U64 timeout,NativeResult*r){
- (void)token;(void)frame;(void)frame_size;(void)input;(void)input_size;(void)out;(void)err;(void)capacity;(void)cancelled;(void)cancel;(void)timeout;
+static void execute(Size token,const LoProcessRequest *request,LoProcessResult *r){
+ (void)token;(void)request;
  __atomic_fetch_add(&calls,1,__ATOMIC_SEQ_CST);
  if(LO_CASE==1){const struct timespec delay={0,200000000};nanosleep(&delay,0);}
  if(LO_CASE==2)return; /* nil termination and nil error is unresolved ownership. */
@@ -44,7 +38,7 @@ static void execute(Size token,const unsigned char*frame,Size frame_size,const u
 int main(void){
  Context *context=lo_context_new(LO_OPTIONS(100000));if(!context)return 10;
  if(!lo_context_process_driver(context,execute,0))return 11;
- if(!lo_context_process_driver_limits(context,20,20,1024))return 12;
+ if(!lo_context_process_driver_limits(context,&(LoProcessLimits){20,20,1024,0}))return 12;
  ResultSlot result={0,0,0};lo_context_run(context,&result);
  if(LO_CASE==0){if(result.status!=0||!result.value||call_count()!=1)return 20;lo_value_release(result.value);if(!lo_context_process_close(context)||!lo_context_process_wait_retained(context))return 21;}
  else if(LO_CASE==5){if(result.status!=2||result.value||call_count()!=0||lo_context_process_ownership(context)!=0)return 60;if(!lo_context_process_close(context)||!lo_context_process_wait_retained(context))return 61;}

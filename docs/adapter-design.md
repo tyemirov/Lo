@@ -467,8 +467,10 @@ The API keeps context data separate from host authority and shell source.
 | `Process.Executable.new(path: File.Path) -> Process.Executable!` | Validate an absolute executable description without access or launch. |
 | `Process.Executable.resolve(context: Process.Context, name: String) -> Process.Executable!` | Discover the first executable candidate under the context's search rules. |
 | `Process.Command.new(context, executable, arguments, stdin) -> Process.Command!` | Construct an inert command with `Process.Context`, `Process.Executable`, `List<String>`, and `Bytes` inputs. |
-| Bound command commit | Return `Process.Result` after bounded execution and output capture complete. |
-| `Process.Result` runtime value | Exact fields: `termination: Process.Termination`, `stdout: Bytes`, `stderr: Bytes`. |
+| `Process.Command.with_timeout(command, timeout_ms) -> Process.Command!` | Return an immutable command with a positive millisecond deadline. |
+| `Process.Command.with_output(command, mode) -> Process.Command!` | Select `capture` or `forward` without changing the original command. |
+| Bound command commit | Return `Process.Result` after bounded execution, output, and cleanup complete. |
+| `Process.Result` runtime value | Exact fields: `termination: Process.Termination`, `stdout: Bytes`, `stderr: Bytes`, `output: String`, `stdout_bytes: Int`, `stderr_bytes: Int`. |
 | `Process.Termination` | A nominal runtime value with `kind: String`, restricted to `exited` or `signaled`. |
 | `Process.Termination.exit_code(value) -> Int!` | Return the exit code for `exited`, otherwise `Process.TerminationKind`. |
 | `Process.Termination.signal(value) -> Int!` | Return the signal number for `signaled`, otherwise `Process.TerminationKind`. |
@@ -499,7 +501,6 @@ An empty input is explicit and closes without terminal interaction.
 The runner captures the environment and physical working directory once before program evaluation.
 Every `Process.Context.current()` observation uses those initial inputs, including observations in later server callbacks.
 The inherited `PWD` value remains environment data and does not select the physical directory.
-Go embeddings can inject inputs through the execution context.
 Native embeddings can call `lo_context_set_process_context` before evaluation with canonical JSON context inputs.
 The native setter copies the supplied input bytes.
 
@@ -534,196 +535,75 @@ Activation requires an exact grant for the selected resolved path, plus identity
 An unauthorized first candidate produces `runtime.capability-denied`, without a search for a later authorized candidate.
 Replacement before activation fails identity verification even when replacement bytes have the approved digest.
 
-### Pure Process Phase
+### Pure Process Values
 
-This approved phase is implemented, and focused interpreter validation passed.
-It can proceed before execution profile qualification.
-It adds pure constructors, inspection, and host rejection without child execution.
+Command construction and transformations are pure.
+They validate immutable inputs without filesystem access, clock observation, or command execution.
+The [command policy](process-command-policy.md) defines duration and output options.
+Only commit requests activation.
 
-| Operation | Result |
-| --- | --- |
-| `Process.Executable.new(path: File.Path)` | `Process.Executable!` |
-| `Process.Command.new(context: Process.Context, executable: Process.Executable, arguments: List<String>, stdin: Bytes)` | `Process.Command!` |
+Without Process grants, an attempted activation produces terminal `runtime.process-unavailable`.
+Configured Process policy on an unsupported backend fails session setup.
+Inspection reports the required profile without granting authority.
 
-Executable and directory paths must be absolute and contain no NUL.
-Arguments and environment values must contain no NUL.
-Environment names must be nonempty and contain neither NUL nor `=`.
-Pure construction keeps exact lexical data without access, path resolution, or shell expansion.
-The context supplies the environment and directory. Construction does not read additional host inputs.
+The inspector records context, executable, arguments, stdin, requested duration, and output mode.
+Each immutable command variant keeps its own input descriptions.
+A transformed command retains `Process.run` as its activation capability.
+Constructor diagnostics and automatic snapshots exclude environment, argument, and stdin payloads.
 
-Command activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
-`Process.run` is not a callable builtin.
-The earlier pure checkpoint provided no result runtime values or accessors.
-The shared core provides results and termination accessors through trusted injection and the selected native host.
-Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
-Configured Process policy on an unsupported backend fails session open before program evaluation.
-Lo `onError` cannot handle this host diagnostic.
-Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
-Automatic context output and nested snapshots omit environment and directory payloads.
-Explicit lookup and output of selected environment values remain available.
-Inspection adds no access or launch authority.
+### Native Results And Lifecycle
 
-The inspector adds an optional `process` object to command targets and capabilities.
-It contains `context`, `executable`, `arguments`, and `stdin` input descriptions.
-The context contains `source` and `origin`, plus explicit environment, directory, base, updates, or removals when present.
-Origins are `inherited`, `explicit`, `derived`, or `dynamic`.
-Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
-It also contains `execution_profile: {required: true, status: "unavailable"}`.
+The native Session owns Process policy, the executable registry, participating File protection, and retained cleanup.
+The [Process header](../runtime/native/include/lo_process.h) defines the trusted driver boundary.
+The driver receives one admitted request and owns its command until the callback returns.
+The host keeps provider code and userdata alive until all retained session work finishes.
 
-Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
-Explicit executable descriptions trace the supplied `File.Path`.
-Discovery descriptions keep the context, name, and dynamic dependencies.
-Dynamic command descriptions retain whole-command dependencies.
-Text inspection shows `execution_profile=required/unavailable` and the named inputs.
-Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
+`Process.Result` keeps termination, output mode, captured payloads, and confirmed per-stream byte counts.
+The [result table](process-command-policy.md#output-and-results) defines each field.
+Nonzero exit codes and signals remain completed-process data.
+The application decides which outcomes it accepts.
 
-The standard runner opens one canonical `processhost.Session` for `run`, `serve`, and server callbacks.
-The session owns native policy, the executable registry, participating File adapters, and retained shutdown.
-`Close(ctx)` closes admission and starts one shutdown owner. Its context bounds only the caller wait.
-`WaitRetained()` joins that same owner without a cleanup retry. A caller timeout does not release ownership.
-Custom Go boundaries are trusted host implementations and must enforce qualification.
-Generic commit execution validates the result type without a universal host qualification gate.
-HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
-HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
+Successful activation requires complete stdin delivery, output completion, known termination, and complete resource cleanup.
+A timeout becomes recoverable `Process.Timeout` only after those cleanup guarantees hold.
+Ordinary execution failure produces `Process.ExecutionFailed` after cleanup.
+Caller cancellation, output failure, quota exhaustion, and unknown cleanup remain terminal.
 
-Qualification remains mandatory before standard-host native Process activation acceptance.
-Bounded repository-contained qualification probes have a separate review gate.
-This phase authorizes no new probe launch.
-This earlier pure checkpoint did not establish native execution. Current canonical public acceptance passed. Final stack CI and independent completion review passed.
-The earlier File/HTTP CI remains valid for its recorded scope.
-Final focused interpreter validation passed in 2.934 seconds.
-Final focused native Process validation passed in 14.086 seconds.
-Current-stack CI passed, including the pure Process phase.
-Independent review approved the implemented pure Process checkpoint.
+Failure progress records confirmed creation, termination, and byte counts.
+An unconfirmed start does not prove that no process exists.
+Automatic diagnostics exclude partial output payloads.
+An immutable progress record keeps the evidence available when the runtime produced that record.
 
-### Host-Independent Results and Lifecycle Core
+The host supplies execution, cleanup, and per-stream output limits.
+The defaults are five seconds, one second, and 1 MiB per stream.
+An explicit command duration cannot exceed the selected host maximum.
+The runtime rejects excessive requests before launch.
 
-Status: the host-independent result and lifecycle core is implemented.
-The [lifecycle evidence](evidence/process-start-lifecycle.json) records focused checks, race checks, and current-stack CI.
-Current-stack CI passed with interpreter integration in 39.879 seconds and generated-native integration in 462.176 seconds.
-Independent final review approved the pending-start correction without a remaining finding.
-This core can precede native execution profile qualification.
-It uses an injected OS boundary without an OS launcher or CLI execution opt-in.
-`NewProcessLifecycle` and `WithProcessLifecycle` are trusted Go embedding APIs only.
-Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
-Configured Process policy on an unsupported backend fails session open before program evaluation.
+A cleanup deadline bounds the caller's wait.
+It does not release unresolved ownership.
+The owner continues cleanup, and the session retains dependent registries and locks.
+Unknown cleanup prevents another command activation and successful resource release.
+The [embedding contract](native-embedding.md) defines context completion and retained lifetime.
 
-The selected result shape is `{termination: Process.Termination, stdout: Bytes, stderr: Bytes}`.
-`Process.Termination.kind` is `exited` or `signaled`.
-Fallible `Process.Termination.exit_code` and `Process.Termination.signal` accessors select the matching variant.
-Neither type has a Lo constructor.
-The core derives an immutable invocation from the exact executable, `argv[0]`, environment, directory, and stdin.
-Every nonnil child returned by `Start` transfers ownership, including a child returned with an error.
-An owned launch can still wait for OS process creation.
-`ProcessChild.StartConfirmed()` reports known primary creation, including late creation.
-The query is prompt, safe for concurrent calls, and valid after release.
-Its result never changes from true to false.
-It does not show target execution or an execution permit.
-The core keeps positive query results and valid termination as creation evidence.
-The core closes each pipe exactly once.
-Pipe `Close` must return promptly and unblock I/O even when it reports an error.
-One `Wait` continues after request cancellation through a fresh bounded cleanup context.
-`Stop` covers descendants.
-Successful `Release` means creation is finished and no owned primary, descendant, or private resource is left.
-No child can appear after successful release.
-Failed release keeps ownership and any registry quarantine.
+### Executable Registry
 
-Failure progress uses `start_confirmed` for creation evidence.
-False means that creation is unknown, without an independent guarantee that no child exists.
-With successful release and no creation evidence, cancellation does not require a termination value.
-Creation evidence without observed termination causes a host cleanup failure.
-Returned progress is an immutable snapshot, even if the owner later obtains creation evidence.
+The native registry retains exact executable identities and their protected names.
+Process admission checks the selected executable, launcher, and authorized scope before launch.
+Identity replacement and digest mismatch fail before command execution.
 
-Success requires complete stdin delivery, stdout and stderr EOF, known termination, joined I/O, and successful `Release`.
-Early stdin closure produces ordinary `Process.ExecutionFailed`.
-Nonzero exit and signal termination remain completed-process data.
-Cancellation and limits remain host failures.
-Missing termination after known creation, or unresolved containment, produces host cleanup failure and overrides an ordinary failure.
-Safe evidence preserves the original failure class and stage.
-
-Trusted Go `ProcessFailure` keeps bounded partial stdout and stderr bytes.
-Lo errors and automatic diagnostics keep counts and status only, without raw partial bytes.
-Before result charging, a completion summary keeps termination and byte counts without payloads.
-`MaxProcessOutputBytes` is 1 MiB per stream.
-`DefaultProcessLimits` uses a five-second execution timeout and a one-second cleanup timeout.
-Configured durations must be positive, and each stream limit must be from one byte through 1 MiB.
-
-Pipe-close cleanup errors remain host failures with `cleanup_complete: false`.
-A failed `Release` followed by successful `Stop` and a second successful `Release` remains a host failure.
-That recovered cleanup records `cleanup_complete: true`, without an unresolved-containment claim.
-Execution timeout and cancellation produce host cancellation.
-Output overflow produces a host limit failure.
-Ordinary activation errors use catalog kind `Process.ExecutionFailed`.
-
-1. Add public integration fixtures for the approved result and lifecycle contract.
-2. Confirm the expected failures before production changes.
-3. Implement the host-independent core through an injected OS boundary.
-4. Verify the core and unchanged standard-host rejection in interpreter and native paths.
-5. Run final stack CI and obtain independent checkpoint review.
-
-These checks do not qualify a native launcher or its confinement.
-Native launch remains dependent on qualification.
-
-### Executable Registry Phase
-
-Status: the registry is implemented, and focused public tests passed in 0.804 seconds.
-Post-correction Process, File, and Gateway fixture race checks passed in 13.547 seconds.
-Independent source/test review closed the nested-ownership and quarantine-test findings.
-Final current-stack CI passed: interpreter integration 49.549 seconds and generated native integration 574.835 seconds.
-Runtime bundle verification, formatting, Go vet, all Go tests, native integration, and build passed.
-Independent final review approved the registry checkpoint with both findings closed.
-Validation uses byte fixtures, real Lo File operations, and injected lifecycle drivers without native Process execution.
-Initial public fixtures reached expected missing-API failures before implementation.
-This phase protects identity within the trusted host model and does not enable native execution.
-Untrusted Lo programs and children remain subject to registry and confinement controls.
-The model excludes hostile unsandboxed host mutation.
-
-Registry new-file creation uses `os.CreateTemp` default creation semantics within the frozen registry model.
-Before creation, the parent pathname device/inode must match the retained granted parent.
-The namespace must remain stable during this operation.
-Publication uses a root-relative link and temporary-file cleanup.
-A replaced parent pathname fails before creation, even when the retained handle still reaches the original directory.
-This edge check does not establish protection against hostile concurrent host namespace mutation.
-Standalone File behavior remains unchanged.
-
-| Trusted Go API | Contract |
-| --- | --- |
-| `NewProcessExecutableGrant(path string, sha256 [32]byte) (ProcessExecutableGrant, error)` | Select one exact executable path and digest. |
-| `NewProcessRegistryLimits(maxExecutableBytes int64) (ProcessRegistryLimits, error)` | Validate the registration byte limit. |
-| `DefaultProcessRegistryLimits()` | Supply the 64 MiB default executable limit. |
-| `OpenProcessRegistry(ctx, []ProcessExecutableGrant, limits) (ProcessRegistry, error)` | Validate and freeze the registry under cancellation and byte limits. |
-| `registry.OpenFiles(FileRoots, FileIO) (Files, error)` | Share registered identity protection across File adapters. |
-| `registry.Driver(ProcessDriver) (ProcessDriver, error)` | Check exact grants and retain activation ownership around a trusted driver. |
-| `registry.Close() error` | Reject active ownership, then close idempotently. |
-
-Registered names, device/inode identities, and ancestors remain protected continuously.
-Lo File write, append, and removal must reject protected direct paths and aliases before mutation.
-Symlink and hardlink aliases cannot bypass protection across separate registry File adapters.
-A lease covers the whole execution and verified release, not only a hash check before exec.
-No coordinator lock remains held through child execution or injected callbacks.
-Registry/File protection does not establish native child filesystem confinement.
+Participating File writes, appends, and removals reject protected executable names and aliases.
+The protection includes retained ancestor identities.
 Unrelated sibling mutations remain available.
-Retained adapters cannot bypass registry closure.
+This protection does not exclude arbitrary concurrent changes by external host processes.
 
-Digest mismatch, identity replacement, an unregistered executable, and canceled admission fail before underlying `Start`.
-Every nonnil child returned by `Start` retains ownership, including a child returned with an error.
-A failed child `Release` leaves ownership active and quarantines later activation.
-Later successful `Release` discharges ownership but does not clear quarantine.
-`Start(nil, nil)` is a host contract violation with sticky quarantine and unresolved ownership.
-Its lifecycle evidence records `cleanup_complete: false`, without confirmed start or termination.
-A missing child handle does not prove cleanup, so `Close` must fail for that unresolved lease.
-There is no arbitrary recovery API.
-An ordinary trusted `Start(nil, error)` under the no-resource contract clears the lease.
-Its lifecycle evidence records `cleanup_complete: true`.
-Typed unresolved-start errors retain ownership and quarantine every registry wrapper, including after contextual error wrapping.
-
-The selected native profile now supplies child filesystem protection. Other backends require separate qualification.
-Registry/File integration can be validated independently through byte fixtures and injected lifecycle execution.
-No OS launcher or CLI execution opt-in belongs to this phase.
+An activation retains its registry through complete cleanup.
+Unresolved creation or cleanup keeps the registry in quarantine.
+The host cannot clear unknown ownership through an arbitrary release request.
+Registry protection supplies no child filesystem authority.
+The selected launcher profile enforces that separate boundary.
 
 ### Host Policy Inputs
 
-The compiler and generated-program runners accept these inputs with `run` and `serve`.
+Compiled programs accept these inputs with `run` and `serve`.
 The [policy checks](evidence/process-policy.json) passed through both public argument entry points.
 Parsing validates descriptions without filesystem access. The selected native profile and canonical public acceptance passed. Final stack CI and independent completion review passed.
 
@@ -735,6 +615,10 @@ Parsing validates descriptions without filesystem access. The selected native pr
 | `--process-write-root {"executable":"/absolute/tool","root":"/absolute/cache"}` | Repeatable data-write root for one exact granted initial executable. |
 | `--process-prune-root {"executable":"/absolute/tool","root":"/absolute/prune"}` | Repeatable namespace-removal root for one exact granted initial executable. |
 | `--process-unix-endpoint {"executable":"/absolute/tool","endpoint":"/absolute/socket"}` | Repeatable exact Unix socket endpoint for one granted initial executable. |
+| `--max-process-ms MILLISECONDS` | Positive execution maximum and default for commands without an explicit duration. Default: 5000. |
+| `--max-process-cleanup-ms MILLISECONDS` | Positive cleanup duration. Default: 1000. |
+| `--max-process-output-bytes BYTES` | Positive output bound for each stream. Default: 1048576. |
+| `--process-forward-output` | Permit forwarding through enabled Console sinks. |
 
 A configured policy requires command grants, one launcher, and child read roots.
 Cleanup scope inputs are optional and use strict JSON objects.

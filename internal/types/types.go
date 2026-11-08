@@ -386,6 +386,10 @@ func FieldType(t Type, name string) (Type, bool) {
 			return ProcessTermination(), true
 		case "stdout", "stderr":
 			return Bytes(), true
+		case "output":
+			return String(), true
+		case "stdout_bytes", "stderr_bytes":
+			return Int(), true
 		}
 	case ProcessTerminationKind:
 		if name == "kind" {
