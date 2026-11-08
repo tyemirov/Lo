@@ -33,7 +33,7 @@ This sequence does not depend on modules, user-defined types, generics, or packa
 | F032 | Public device, inode, and allocation fields, fresh time, and exact volume measurements. | Recursive authority and tree removal remain F033 and F034 work. |
 | Control | Selected Match branches, self-handling flows, ordered folds, and category recovery. | Pure callbacks and pure error handlers cannot activate commits. |
 | Traversal | `Flow.worklist` and host quotas for work, values, and retained directory observations. | Scheduling does not grant descendant access or make tree snapshots descriptor-bounded. |
-| Runner I/O | Committed Console lines, explicit embedding sinks, and text/NDJSON output. | Command-output forwarding remains F035 work. |
+| Runner I/O | Committed Console lines, explicit embedding sinks, and text/NDJSON output. | F035 supplies bounded command-output forwarding. |
 | Program arguments | Literal capture after `--`, declared Boolean options, and deterministic help. | The selected parser does not accept value-bearing options or operands. |
 | Program completion | Nominal terminal results select status after resource cleanup and required output. | An ordinary returned Int remains data. |
 | Process duration | The host selects the duration limit. The default is five seconds. | The application requests 30, 60, 180, and 1800 seconds for different command classes. |
@@ -59,7 +59,8 @@ F026 through F028 complete M1.
 The [CLI contract](cli-runtime-design.md) defines their selected interfaces and behavior.
 F030 adds the selected value processors and executable policy examples.
 F032 now supplies the [filesystem observation contract](file-system-observations.md).
-F031 and F033 through F036 remain planned work outside the implemented language reference.
+F035 supplies admitted deadlines and bounded command-output forwarding.
+F031, F033, F034, and F036 remain planned work outside the implemented language reference.
 
 F030 through F036 and I013 depend on I018.
 P007 research can continue during filesystem implementation.
@@ -128,6 +129,11 @@ flowchart LR
 | M3: recursive caches | M2, F033 | Sorted traversal, preserved directories, exact candidate batches, and bounded retained handles. |
 | M4: whole-tree eviction | M3, F034 | Root-inclusive snapshots, full eligibility, root-handle rejection, and checked postorder removal. |
 | M5: complete workflow | M4, F031, P007, F036, I013 | Package commands, temporary roots, Docker validation, report mode, summaries, and final aggregate status. |
+
+M2 now uses the canonical application flows through native integration fixtures.
+Exact root operations replace draft observations. Checked removal supplies identity and application-guard checks.
+The fixtures cover probe framing, changed entries, confirmed counts, empty selection, and category continuation.
+The full workflow remains M5 work.
 
 I013 can add incremental fixture entry sources after each milestone.
 Its complete acceptance remains open until M5.

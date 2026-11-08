@@ -55,7 +55,7 @@ Preview totals remain upper bounds because preview does not probe open files.
 
 Every candidate probe accepts exit status 0 or 1.
 Ordinary files and caches reject any stderr bytes and use NUL-framed exact-path batches of 100.
-Cache probes also reject names outside the current batch.
+Ordinary-file and cache probes reject names outside the current batch.
 The direct log probe uses newline framing and rejects nonempty stripped stderr.
 Whole-tree eviction rejects any probe stdout because an observed directory handle also prevents eviction.
 
@@ -77,6 +77,28 @@ The current reference remains authoritative for these implemented interfaces.
 Proposed additions below do not change that reference or the catalog.
 The existing exact File grants remain exact.
 Recursive observation and removal require separate explicit authority.
+
+## Direct-file Milestone
+
+The direct-file flows now use `File.scan`, `File.list`, and checked singleton removal.
+They contain no proposed path observations.
+An absent directory produces a skip. Other observation failures stop the category.
+The host requires exact observation and removal grants.
+Filesystem observations reject symlink traversal.
+
+`File.Remove.checked` supplies both removal checks and the application guard.
+The application counts only a successful commit.
+A changed or vanished entry produces a skip.
+The application resolves `lsof` through the declared Process context.
+Probe failures retain their category label through `RecordOutcome`.
+Later independent categories continue after ordinary failures.
+
+The integration fixtures extract these application flows and their dependencies without changes.
+A controlled executable supplies probe output and changes fixture files inside Lo.
+Dry run and empty selection need no Process or removal grants.
+Direct-file summaries currently use decimal integers without grouping.
+F031 supplies the complete report format.
+The full workflow remains I013 work.
 
 ## Value Operations And Draft Helpers
 

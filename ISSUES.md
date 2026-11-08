@@ -2595,7 +2595,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify package errors, denied capabilities, execution limits, and diagnostics across modules.
   - Verify the formatter, test runner, editor navigation, and source-level debugging on these applications.
 
-- [ ] [I013] (P1) {F028,F029,F030,F031,F032,F034,F035,F036,I018} Complete the mac-cleanup Lo application with confined workflow acceptance
+- [-] [I013] (P1) {F028,F029,F030,F031,F032,F034,F035,F036,I018} Complete the mac-cleanup Lo application with confined workflow acceptance
   Goal:
   Replace proposed calls with accepted generic contracts and validate one complete cleanup application inside Lo.
 
@@ -2611,6 +2611,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep actual package-cache and Docker cleanup outside acceptance.
 
   Deliverables:
+  - Current status: typed helpers and direct-file flows use implemented contracts. Full workflow acceptance and final CI remain pending.
   - Make the complete application pass type checking and executable fixture acceptance without proposed APIs.
   - Add public fixtures, documented commands, source identities, and a category-level behavior matrix.
   - Keep later modules and packages outside the initial implementation dependency chain.
