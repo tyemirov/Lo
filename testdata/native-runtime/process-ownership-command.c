@@ -1,5 +1,7 @@
 #include "process-ownership-fixture.h"
 #include <spawn.h>
+#include <sys/resource.h>
+#include <sys/sysctl.h>
 #include <sys/wait.h>
 
 static int child_work(const char *socket_path,const char *operation,const char *ready,
@@ -13,6 +15,24 @@ static int child_work(const char *socket_path,const char *operation,const char *
 
 int main(int argc,char **argv) {
     alarm(12);
+    if(argc==2&&!strcmp(argv[1],"--host-process-limits")) {
+        struct rlimit limits;int ceiling=0;size_t size=sizeof(ceiling);
+        if(getrlimit(RLIMIT_NPROC,&limits)
+           ||sysctlbyname("kern.maxprocperuid",&ceiling,&size,NULL,0)
+           ||size!=sizeof(ceiling)||ceiling<=0)return 77;
+        return printf("%llu %llu %u\n",(unsigned long long)limits.rlim_cur,
+                      (unsigned long long)limits.rlim_max,(unsigned)ceiling)<0?78:0;
+    }
+    if(argc>=5&&!strcmp(argv[1],"--host-process-limit-run")) {
+        if(!argv[2][0]||argv[2][0]=='0')return 77;
+        for(const char *digit=argv[2];*digit;++digit)if(*digit<'0'||*digit>'9')return 77;
+        errno=0;char *end=NULL;unsigned long long selected=strtoull(argv[2],&end,10);
+        if(errno||!end||*end||!selected||selected>UINT32_MAX)return 77;
+        struct rlimit limits={(rlim_t)selected,(rlim_t)selected},actual;
+        if(setrlimit(RLIMIT_NPROC,&limits)||getrlimit(RLIMIT_NPROC,&actual)
+           ||actual.rlim_cur!=limits.rlim_cur||actual.rlim_max!=limits.rlim_max)return 78;
+        execv(argv[3],argv+3);return 79;
+    }
     if(argc==4&&!strcmp(argv[1],"--host-signal")) {
         audit_token_t token;if(fixture_parse_token(argv[2],&token))return 64;
         int signal_number=atoi(argv[3]);

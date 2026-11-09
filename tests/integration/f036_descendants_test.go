@@ -17,6 +17,7 @@ import (
 
 type f036Fixture struct {
 	root, work, command, grant, socket, tokens, log, release, ready, lock string
+	kernelLimit                                                           uint32
 }
 
 func newF036Fixture(t *testing.T) f036Fixture {
@@ -103,7 +104,43 @@ func newF036Fixture(t *testing.T) f036Fixture {
 		t.Fatal(err)
 	}
 	fixture.grant = fmt.Sprintf("%x,%s", sha256.Sum256(contents), fixture.command)
+	fixture.kernelLimit = fixture.hostProcessLimit(t)
 	return fixture
+}
+
+func (fixture f036Fixture) hostProcessLimit(t *testing.T, prefix ...string) uint32 {
+	t.Helper()
+	command := exec.Command(fixture.command, append(prefix, "--host-process-limits")...)
+	command.Dir, command.Env = fixture.work, fixture.environment()
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("read fixture process limits: %v: %q", err, output)
+	}
+	if len(output) > 100 || !strings.HasSuffix(string(output), "\n") {
+		t.Fatalf("invalid fixture process-limit response: %q", output)
+	}
+	fields := strings.Split(strings.TrimSuffix(string(output), "\n"), " ")
+	if len(fields) != 3 {
+		t.Fatalf("invalid fixture process-limit fields: %q", output)
+	}
+	var limits [3]uint64
+	for index, field := range fields {
+		value, err := strconv.ParseUint(field, 10, 64)
+		if err != nil || value == 0 || strconv.FormatUint(value, 10) != field {
+			t.Fatalf("invalid fixture process-limit value %q: %v", field, err)
+		}
+		limits[index] = value
+	}
+	if limits[0] > limits[1] || limits[2] > uint64(^uint32(0)) {
+		t.Fatalf("inconsistent fixture process limits: %q", output)
+	}
+	selected := min(limits[1], limits[2])
+	t.Logf("fixture process limits: inherited soft=%d hard=%d kernel ceiling=%d selected=%d", limits[0], limits[1], limits[2], selected)
+	return uint32(selected)
+}
+
+func (fixture f036Fixture) kernelArgument() string {
+	return strconv.FormatUint(uint64(fixture.kernelLimit), 10)
 }
 
 func (fixture f036Fixture) environment() []string {
@@ -287,7 +324,7 @@ func TestF036InjectedDescendantOwnership(t *testing.T) {
 						t.Fatal(err)
 					}
 					defer stderr.Close()
-					arguments := append(fixture.flags(t, artifact), "--process-kernel-limit", "4096")
+					arguments := append(fixture.flags(t, artifact), "--process-kernel-limit", fixture.kernelArgument())
 					if scenario.number == 11 || scenario.number == 23 {
 						arguments = append(arguments, "--max-process-events", "32")
 					}

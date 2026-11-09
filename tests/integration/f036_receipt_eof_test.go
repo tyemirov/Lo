@@ -38,7 +38,7 @@ func TestF036FinalReceiptStartsCleanupDeadline(t *testing.T) {
 			return []byte(text + "\n" + string(appendix))
 		},
 		run: func(t *testing.T, artifact, work string) {
-			actual := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", "4096")
+			actual := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", fixture.kernelArgument())
 			nativeFailure(t, actual, 2, "runtime.host-failure", "")
 			macCleanupPresent(t, fixture.ready, true)
 			if !fixture.logged("C\n") || !fixture.logged("final-receipt-before-held-eof\n") {

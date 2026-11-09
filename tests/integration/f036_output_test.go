@@ -38,7 +38,7 @@ func TestF036DescendantOutputFailure(t *testing.T) {
 			runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "public-cli", number: 0, source: source,
 				harness: "testdata/native-runtime/process-ownership-provider.c", hostBootstrap: "lo_test_host_init", sdkHarness: true, harnessTransform: fixture.transform,
 				run: func(t *testing.T, artifact, work string) {
-					arguments := append(fixture.flags(t, artifact), "--process-kernel-limit", "4096")
+					arguments := append(fixture.flags(t, artifact), "--process-kernel-limit", fixture.kernelArgument())
 					if scenario == "capture-quota" {
 						arguments = append(arguments, "--max-process-output-bytes", "4")
 					} else {

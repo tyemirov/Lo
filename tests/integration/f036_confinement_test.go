@@ -19,6 +19,7 @@ import (
 func f036ConfinementCommand(t *testing.T, fixture f036Fixture, path string) string {
 	t.Helper()
 	compiler, flags := llvmDarwinSDKHarness(t, fixture.work)
+	flags = append(flags, fmt.Sprintf("-DLO_TEST_PROCESS_KERNEL_LIMIT=%du", fixture.kernelLimit))
 	command := exec.Command(compiler, append(flags, filepath.Join(repository, "testdata/native-runtime/process-confinement-command.c"), "-o", path)...)
 	command.Dir, command.Env = fixture.work, fixture.environment()
 	if output, err := command.CombinedOutput(); err != nil {
@@ -89,7 +90,7 @@ func TestF036NativeConfinement(t *testing.T) {
 				harness: "testdata/native-runtime/process-ownership-provider.c", harnessTransform: fixture.transform,
 				hostBootstrap: "lo_test_host_init", sdkHarness: true,
 				run: func(t *testing.T, artifact, work string) {
-					actual := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", "4096")
+					actual := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", fixture.kernelArgument())
 					f036ConfinementComplete(t, fixture, actual)
 				}}})
 		})
@@ -168,7 +169,7 @@ func TestF036RegisteredExecRetainsInitialScope(t *testing.T) {
 				hostBootstrap: "lo_test_host_init", sdkHarness: true,
 				run: func(t *testing.T, artifact, work string) {
 					actual := f036RunPolicyFixture(t, fixture, artifact,
-						"--process-kernel-limit", "4096", "--process-allow", secondGrant,
+						"--process-kernel-limit", fixture.kernelArgument(), "--process-allow", secondGrant,
 						"--process-write-root", cleanupScope(t, second, "root", secondWrites),
 						"--process-unix-endpoint", cleanupScope(t, second, "endpoint", fixture.socket),
 						"--process-unix-endpoint", cleanupScope(t, fixture.command, "endpoint", firstEndpoint),
