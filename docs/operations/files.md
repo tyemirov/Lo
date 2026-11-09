@@ -214,6 +214,34 @@ return File.Remove.new(EmptyEntries())
 
 [Contract](../../specification.md#91-file-adapter)
 
+## File.System.usage
+
+```text
+File.System.usage(root: File.Path) -> File.System.Usage!
+```
+
+Measure the volume that contains the selected directory through its authorized descriptor.
+The immutable result exposes `total_bytes`, `used_bytes`, and `free_bytes` as Int fields.
+Available space can exclude reserved blocks. Each call supplies a fresh measurement.
+
+Observed free-space changes can include concurrent host activity and filesystem effects.
+They do not measure the space reclaimed by one cleanup operation.
+
+**Failures:** `File.DirectoryAbsent` for an absent directory. `File.System.UsageFailed` for a volume measurement failure.
+Missing authority, invalid identity, cancellation, resource exhaustion, and descriptor close failures remain terminal.
+
+**Authority:** Host observation with an exact `--list-root` grant for `root`. Recursive authority does not supply this exact grant.
+
+```lo
+flow Available(root: File.Path) -> Int! {
+    usage = File.System.usage(root)
+    return usage.free_bytes
+}
+return Available(File.Path.new("fixture"))
+```
+
+[Contract](../file-system-observations.md#volume-usage)
+
 ## File.Write.new
 
 ```text

@@ -1,5 +1,5 @@
 #include "lo_runtime.h"
-#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128,256})
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 #define ABI(name) void name(Context *context, const Value *const *arguments, U64 count, U64 site, ResultSlot *out)

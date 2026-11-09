@@ -1,5 +1,5 @@
 #include "lo_process.h"
-#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128})
+#define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128,256})
 #include "capture.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;

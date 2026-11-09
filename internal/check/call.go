@@ -163,6 +163,8 @@ func (c *checker) builtin(op catalog.Operation, args []syntax.Argument, expected
 		return c.listSort(op, args, span)
 	case catalog.FilePredicateOperation:
 		return c.filePredicate(op, args, span)
+	case catalog.StringFormatOperation:
+		return c.stringFormat(op, args, span)
 	}
 	bound, d := bindArguments(op.Name(), op.Parameters(), args, span)
 	if d != nil {

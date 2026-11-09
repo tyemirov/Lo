@@ -16,6 +16,7 @@ Host quota failures are terminal.
 - [Float.add](#floatadd)
 - [Float.div](#floatdiv)
 - [Float.eq](#floateq)
+- [Float.format_fixed](#floatformat_fixed)
 - [Float.gt](#floatgt)
 - [Float.gte](#floatgte)
 - [Float.lt](#floatlt)
@@ -27,6 +28,7 @@ Host quota failures are terminal.
 - [Float.to_int](#floatto_int)
 - [Float.to_string](#floatto_string)
 - [Int.new](#intnew)
+- [Int.parse](#intparse)
 - [Int.to_float](#intto_float)
 - [Int.to_string](#intto_string)
 - [Math.add](#mathadd)
@@ -136,6 +138,26 @@ return Float.eq(1.25, 2.5)
 ```
 
 [Contract](../../specification.md#241-binary64-arithmetic)
+
+## Float.format_fixed
+
+```text
+Float.format_fixed(value: Float, places: Int) -> String!
+```
+
+Format the actual binary64 value with exactly `places` fractional digits and no exponent. Use decimal rounding with ties to even.
+
+Precision zero omits the decimal point. Preserve the negative sign when a negative value rounds to zero.
+
+**Failures:** `Numeric.InvalidPrecision` when `places` is outside 0 through 1000. Output and work limits remain terminal.
+
+**Authority:** Pure. No host grant or commit is necessary.
+
+```lo
+return Float.format_fixed(1.125, 2)
+```
+
+[Contract](../json-values-and-formatting.md)
 
 ## Float.gt
 
@@ -337,6 +359,24 @@ return Int.new(42)
 ```
 
 [Contract](../../specification.md#72-constructor-rules)
+
+## Int.parse
+
+```text
+Int.parse(text: String) -> Int!
+```
+
+Parse `[+-]?[0-9]+` as an exact decimal integer. Accept leading zeros and normalize zero. Reject whitespace, separators, prefixes, and Unicode digits.
+
+**Failures:** `Int.InvalidText` for invalid text. Integer-bit, work, and storage limits remain terminal.
+
+**Authority:** Pure. No host grant or commit is necessary.
+
+```lo
+return Int.parse("+00042")
+```
+
+[Contract](../json-values-and-formatting.md)
 
 ## Int.to_float
 

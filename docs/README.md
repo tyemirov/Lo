@@ -27,6 +27,7 @@ Each operation has a signature, behavior, failure contract, authority requiremen
 | --- | --- |
 | Atomic values and arithmetic | [Values](operations/values.md) |
 | Unicode text, bytes, and globs | [Text](operations/text.md) |
+| Immutable JSON values and exact extraction | [JSON](operations/json.md) |
 | Lists, maps, records, ranges, and sequential flows | [Collections](operations/collections.md) |
 | File paths, observations, and activation targets | [Files](operations/files.md) |
 | Process contexts, executables, commands, and results | [Processes](operations/process.md) |

@@ -701,6 +701,11 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 					return fmt.Errorf("native lowering: inconsistent list access argument for %s", op.Name())
 				}
 			}
+			if op.Rule() == catalog.StringFormatOperation {
+				if arg.Position() == 0 && !types.Equal(arg.Value().Type(), types.String()) || arg.Position() == 1 && !catalog.AcceptsFormatFields(arg.Value().Type()) {
+					return fmt.Errorf("native lowering: inconsistent formatting argument for %s", op.Name())
+				}
+			}
 		case ir.FlowArgument:
 			flow, ok := flows[arg.Flow()]
 			if !ok {

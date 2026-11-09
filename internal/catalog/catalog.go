@@ -31,6 +31,7 @@ const (
 	FilePredicateOperation
 	ListAccess
 	ListSortProcessor
+	StringFormatOperation
 )
 
 type Boundary uint8
@@ -446,6 +447,8 @@ func build() map[string]Operation {
 	addCheckpoints(m)
 	addComputeFailures(m)
 	addObservations(m, fixed)
+	addJSON(m, fixed)
+	addFormatting(m, fixed)
 	return m
 }
 func Lookup(name string) (Operation, bool) { o, ok := operations[name]; return o, ok }
@@ -462,7 +465,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "Lock", "CLI", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
+	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "Lock", "CLI", "UTF8", "JSON", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
 		return true
 	}
 	return false

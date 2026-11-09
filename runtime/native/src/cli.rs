@@ -122,7 +122,39 @@ fn host_progress_text(diagnostic: &Json) -> String {
     }
     message
 }
-pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str>) -> (Json, i32) {
+pub(crate) struct FaultDiagnostic { pub metadata: Json, error: Option<Handle>, progress: Vec<Handle> }
+impl FaultDiagnostic {
+    pub(crate) fn write(&self, writer: &mut impl std::io::Write) -> std::io::Result<()> {
+        const ORDER: &[&str]=&["code","stage","message","span","expected","actual","related","error","removal_entries","removal_progress","flow_progress","write_progress","http_progress","process_progress","last_completed_activation","cleanup_errors"];
+        let metadata=self.metadata.as_object().unwrap();
+        let mut first=true;
+        writer.write_all(b"{")?;
+        for name in ORDER.iter().copied().chain(metadata.keys().map(String::as_str).filter(|name|!ORDER.contains(name))) {
+            let has_value=match name {"error"=>self.error.is_some(),"flow_progress"=>!self.progress.is_empty(),_=>metadata.contains_key(name)};
+            if !has_value {continue;}
+            if !first {writer.write_all(b",")?;} first=false;
+            crate::value_output::quote(writer,name)?;writer.write_all(b":")?;
+            match name {
+                "error"=>self.error.as_ref().unwrap().write_json(writer)?,
+                "flow_progress"=>{
+                    writer.write_all(b"[")?;
+                    for (index,value) in self.progress.iter().enumerate(){if index>0{writer.write_all(b",")?;}value.write_json(writer)?;}
+                    writer.write_all(b"]")?;
+                }
+                _=>writer.write_all(canonical_json_value(&metadata[name]).as_bytes())?,
+            }
+        }
+        writer.write_all(b"}")
+    }
+    fn document(&self) -> String {
+        let mut bytes=b"{\"diagnostics\":[".to_vec();
+        self.write(&mut bytes).unwrap(); bytes.extend_from_slice(b"]}");
+        String::from_utf8(bytes).unwrap()
+    }
+}
+pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str>) -> (FaultDiagnostic, i32) {
+    let mut retained_error=None;
+    let mut progress=Vec::new();
     let program = &context.program;
     let (f, details) = match f {
         Fault::Boundary { primary, details } => (*primary, *details),
@@ -160,7 +192,8 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             if let Some(site) = program.sites.get(error.site as usize) {
                 d["span"] = site.source_record();
             }
-            d["error"] = e.json();
+            if !error.flow_progress.is_empty() { progress=error.flow_progress.clone(); }
+            retained_error=Some(e.clone());
             (d, 1)
         }
     };
@@ -170,16 +203,7 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             d["message"].as_str().unwrap()
         ));
     }
-    if status == 2 && !details.context_captured && !context.flow_progress.is_empty() {
-        d["flow_progress"] = json!(context
-            .flow_progress
-            .iter()
-            .map(|x| x.json())
-            .collect::<Vec<_>>())
-    }
-    if d["error"]["flow_progress"].is_array() {
-        d["flow_progress"] = d["error"]["flow_progress"].clone();
-    }
+    if status == 2 && !details.context_captured && !context.flow_progress.is_empty() { progress=context.flow_progress.clone(); }
     if !details.context_captured {
         if let Some(activation) = &context.last_activation {
             d["last_completed_activation"] = activation.clone();
@@ -200,13 +224,7 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             d[key] = value;
         }
     }
-    if !details.flow_progress.is_empty() {
-        d["flow_progress"] = json!(details
-            .flow_progress
-            .iter()
-            .map(|v| v.json())
-            .collect::<Vec<_>>());
-    }
+    if !details.flow_progress.is_empty() { progress=details.flow_progress; }
     if !details.cleanup_errors.is_empty() {
         d["cleanup_errors"] = json!(details.cleanup_errors);
     }
@@ -223,15 +241,25 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             .unwrap()
             .push(json!(cleanup));
     }
-    (d, status)
+    (FaultDiagnostic {metadata:d,error:retained_error,progress}, status)
 }
 fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>) -> i32 {
-    let (mut d, status) = fault_diagnostic(f, context, cleanup);
+    let (document, status) = fault_diagnostic(f, context, cleanup);
+    let mut d = document.metadata.clone();
     if json_format {
-        checked_stderr!("{}", canonical_json_value(&json!({"diagnostics":[d]})));
+        checked_stderr!("{}", document.document());
     } else {
         if status == 2 {
-            d["message"] = json!(host_progress_text(&d));
+            let mut message=host_progress_text(&d);
+            for flow in &document.progress {
+                let fields=flow.fields();
+                if fields["operation"].string()=="Flow.worklist" {
+                    message.push_str(&format!(" (Flow.worklist completed {}, pending {}, state {})", fields["completed_count"].output(),fields["pending_count"].output(),fields["state"].output()));
+                } else {
+                    message.push_str(&format!(" (Flow.fold completed {}/{}, state {})",fields["completed_count"].output(),fields["total_count"].output(),fields["state"].output()));
+                }
+            }
+            d["message"]=json!(message);
         }
         if d["span"].is_object() {
             checked_stderr!(
@@ -249,17 +277,14 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
                 d["message"].as_str().unwrap()
             );
         }
-        if let Some(frames) = d["error"]["trace"].as_array() {
-            for frame in frames {
-                let f = &frame["value"];
-                checked_stderr!(
-                    "  flow {}, operation {}, input {}",
-                    serde_json::to_string(f["flow"]["value"].as_str().unwrap()).unwrap(),
-                    serde_json::to_string(f["operation"]["value"].as_str().unwrap()).unwrap(),
-                    canonical_json_value(&f["input"])
-                );
+        if let Some(error)=&document.error {
+            let Data::Error(error)=&error.data else {unreachable!()};
+            for frame in &error.trace {
+                let fields=frame.fields();
+                checked_stderr!("  flow {}, operation {}, input {}", serde_json::to_string(fields["flow"].string()).unwrap(),serde_json::to_string(fields["operation"].string()).unwrap(),fields["input"].canonical_json());
             }
         }
+
     }
     status
 }
@@ -459,6 +484,7 @@ unsafe fn cli_main(
                 | "--max-list-items"
                 | "--max-file-entries"
                 | "--max-file-directories"
+                | "--max-json-depth"
         ) {
             if !limit_flags.insert(arg) || i + 1 == args.len() {
                 error = Some(format!("{arg} requires one non-negative integer"));
@@ -479,6 +505,7 @@ unsafe fn cli_main(
                 "--max-list-items" => limits.list_items = value,
                 "--max-file-entries" => limits.file_entries = value,
                 "--max-file-directories" => limits.file_directories = value,
+                "--max-json-depth" => limits.json_depth = value,
                 _ => unreachable!(),
             }
         } else if arg == "--allow-device" {

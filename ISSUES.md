@@ -1673,7 +1673,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Reject probe names outside the selected candidate batch.
   - Complete resource and native target conformance checks, independent review, and final stack CI.
 
-- [ ] [F031] (P1) {F030,I018} Add generic JSON extraction and numeric presentation
+- [-] [F031] (P1) {F030,I018} Add generic JSON extraction and numeric presentation
   Goal:
   Supply typed JSON values, decimal integer parsing, and deterministic numeric formatting for application reports.
 
@@ -1686,6 +1686,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep decoder depth, work, and value limits under explicit host quotas.
 
   Deliverables:
+  - Current status: compiler rules, native processors, strict checkpoint parsing, and bounded diagnostics are implemented. Focused native acceptance and independent review passed. Final stack CI remains pending.
   - Add selected pure processors in the single native runtime.
   - Add local JSON and report fixtures without a live Docker dependency.
 

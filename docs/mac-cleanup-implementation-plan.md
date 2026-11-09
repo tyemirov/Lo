@@ -64,7 +64,10 @@ F032 now supplies the [filesystem observation contract](file-system-observations
 F035 supplies admitted deadlines and bounded command-output forwarding.
 F033 supplies [retained descendant observations](file-descendant-observations.md).
 F034 supplies [tree snapshots and checked removal](file-tree-removal.md).
-F031 and F036 remain planned work outside the implemented language reference.
+F031 defines [JSON values and text formatting](json-values-and-formatting.md).
+Its compiler checks and focused native acceptance passed on Darwin and Linux QEMU.
+Final stack CI remains pending.
+F036 implementation follows the selected descendant design.
 
 F030 through F036 and I013 depend on I018.
 P007 research can continue during filesystem implementation.
@@ -500,22 +503,22 @@ The initial planning review covered language, links, issue identifiers, dependen
 Implementation tasks keep their own expected failures and final runtime evidence.
 The [M1 review](evidence/cli-runtime/review.md) records the implemented stack and corrected source findings.
 
-## Open Decisions Before Each Contract
+## Selected Contract Decisions
 
 The [CLI contract](cli-runtime-design.md) owns the selected F026, F027, and F028 decisions.
-The remaining decisions follow below.
+The following documents own the other selected decisions.
 
-| Owner | Decision to close before its implementation |
+| Owner | Selected contract |
 | --- | --- |
-| F031 | JSON value/extraction schema and formatting failures. |
-| F032 | Public metadata shapes, allocation arithmetic, fresh-clock errors, and containing-volume result schema. |
-| F033 | Recursive grant inputs, retained child representation, and provenance/release checks. |
-| F034 | Bounded snapshot representation, expected-state binding, quota admission, and recursive-removal receipt. |
-| F035 | Trusted host maxima, per-command admission, forwarded-output result shape, and recoverable-timeout boundary. |
-| P007, F036 | Complete descendant ownership and confinement guarantees for the selected profile. |
+| F031 | [JSON extraction, numeric conversion, formatting, and quotas](json-values-and-formatting.md). |
+| F032 | [Metadata, allocation, clock, and volume observations](file-system-observations.md). |
+| F033 | [Recursive authority and retained child observations](file-descendant-observations.md). |
+| F034 | [Tree snapshots, checked removal, and confirmed progress](file-tree-removal.md). |
+| F035 | [Command deadlines, output policy, and cleanup](process-command-policy.md). |
+| P007, F036 | [Descendant ownership and confinement](process-descendant-ownership.md). |
 
-These are implementation design decisions owned by their issues.
-They do not require another user approval for ordinary review or a specialized agent.
+Each issue owns implementation and acceptance of its selected contract.
+No additional language modules, generics, packages, or runtime are prerequisites.
 
 ## Planning Review
 

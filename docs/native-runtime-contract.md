@@ -143,8 +143,14 @@ The CLI uses these defaults:
 | `live_bytes` | `--max-live-bytes` | 67,108,864 |
 | `data_bytes` | `--max-data-bytes` | 0 |
 | `list_items` | `--max-list-items` | 0 |
+| `json_depth` | `--max-json-depth` | 256 |
 | `file_entries` | `--max-file-entries` | 0 |
 | `file_directories` | `--max-file-directories` | 128 |
+
+`json_depth` bounds nested containers in JSON and checkpoint input. Zero disables that depth bound.
+`list_items` also bounds each JSON array and object.
+JSON values retain exact number tokens and account for all extracted data.
+The [JSON contract](json-values-and-formatting.md) defines weights and iterative output, snapshots, and release.
 
 The `live_bytes` limit counts the value weight of each retained value once.
 Charges can count a container and its child separately.

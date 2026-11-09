@@ -124,7 +124,25 @@ func builtinExamples() []builtinExample {
 	examples = append(examples, processorBuiltinExamples()...)
 	examples = append(examples, retainedFileBuiltinExamples("fixtures")...)
 	examples = append(examples, treeBuiltinExamples("fixtures")...)
+	examples = append(examples, jsonFormattingBuiltinExamples()...)
 	return append(examples, tensorBuiltinExamples()...)
+}
+
+func jsonFormattingBuiltinExamples() []builtinExample {
+	return []builtinExample{
+		{catalog.JSONDecode, `return JSON.decode(Bytes.new("null"))`, "JSON.Value!"},
+		{catalog.JSONGet, `flow Main()->JSON.Value!{value=JSON.decode(Bytes.new("{\"key\":true}"));return JSON.get(value,"key")};return Main()`, "JSON.Value!"},
+		{catalog.JSONAt, `flow Main()->JSON.Value!{value=JSON.decode(Bytes.new("[null]"));return JSON.at(value,0)};return Main()`, "JSON.Value!"},
+		{catalog.JSONString, `flow Main()->String!{value=JSON.decode(Bytes.new("\"text\""));return JSON.string(value)};return Main()`, "String!"},
+		{catalog.JSONBool, `flow Main()->Bool!{value=JSON.decode(Bytes.new("true"));return JSON.bool(value)};return Main()`, "Bool!"},
+		{catalog.JSONInt, `flow Main()->Int!{value=JSON.decode(Bytes.new("123"));return JSON.int(value)};return Main()`, "Int!"},
+		{catalog.JSONFloat, `flow Main()->Float!{value=JSON.decode(Bytes.new("1.25"));return JSON.float(value)};return Main()`, "Float!"},
+		{catalog.JSONKind, `flow Main()->String!{value=JSON.decode(Bytes.new("[]"));return JSON.kind(value)};return Main()`, "String!"},
+		{catalog.JSONLength, `flow Main()->Int!{value=JSON.decode(Bytes.new("[null,true]"));return JSON.length(value)};return Main()`, "Int!"},
+		{catalog.IntParse, `return Int.parse("+00123")`, "Int!"},
+		{catalog.FloatFormatFixed, `return Float.format_fixed(1.125,2)`, "String!"},
+		{catalog.StringFormat, `return String.format(fields:Record.new(count:-1234),template:"{count:>8,}")`, "String!"},
+	}
 }
 
 func treeBuiltinExamples(root string) []builtinExample {

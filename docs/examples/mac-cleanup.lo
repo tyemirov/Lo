@@ -454,8 +454,12 @@ flow StorageLabel(targets: List<File.Path>, row: Record{bytes: Int, path: String
     )
 }
 
+flow StorageRowText(size: String, label: String, path: String) -> String! {
+    return String.format("{size:>12}  [{label}] {path}", Record.new(size: size, label: label, path: path))
+}
+
 flow PrintStorageRow(targets: List<File.Path>, count: Int, row: Record{bytes: Int, path: String}) -> Int! {
-    text = String.format("{size:>12}  [{label}] {path}", Record.new(size: HumanSize(row.bytes), label: StorageLabel(targets, row), path: row.path))
+    text = StorageRowText(HumanSize(row.bytes), StorageLabel(targets, row), row.path)
     printed = Print(text)
     return Math.add(count, 1)
 }

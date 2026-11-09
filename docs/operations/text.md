@@ -25,6 +25,7 @@ Host quota failures are terminal.
 - [String.concat](#stringconcat)
 - [String.ends_with](#stringends_with)
 - [String.eq](#stringeq)
+- [String.format](#stringformat)
 - [String.is_whitespace](#stringis_whitespace)
 - [String.length](#stringlength)
 - [String.lines](#stringlines)
@@ -323,6 +324,28 @@ return String.eq("Hello", "hello")
 ```
 
 [Contract](../../specification.md#81-string-processors)
+
+## String.format
+
+```text
+String.format(template: String, fields: Record) -> String!
+```
+
+Substitute named fields from a concrete record of total String, Int, Float, or Bool values. Use `{{` and `}}` for literal braces.
+
+A comma groups Int digits. `>width` adds spaces on the left to a minimum Unicode scalar width. A format can contain a comma after its width.
+
+Fallible or nonscalar fields are compile-time errors. Materialize fallible values through total scalar parameters before record construction.
+
+**Failures:** `String.InvalidFormat` for invalid syntax, absent fields, unsupported grouping, or width overflow. Valid excessive widths cause terminal resource failure before allocation.
+
+**Authority:** Pure. No host grant or commit is necessary.
+
+```lo
+return String.format("{name}: {count:>10,}", Record.new(name: "items", count: 1234567))
+```
+
+[Contract](../json-values-and-formatting.md)
 
 ## String.is_whitespace
 

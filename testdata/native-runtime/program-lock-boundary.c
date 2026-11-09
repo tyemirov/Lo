@@ -82,7 +82,7 @@ int main(int argc,const char **argv){
 #endif
  if(linkat(at_current,image,at_current,path,0))return 3;
  if(LO_CASE==19){const char *arguments[]={"forged-entry","run","--lock-entry","--format","json"};int status=lo_cli_main(5,arguments,0);return status!=2||injections!=1?79:0;}
- const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128};
+ const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128,256};
  Context *context=lo_context_new(&options);if(!context)return 4;
  if(LO_CASE==16){Context *peer=lo_context_process_peer(context);if(!peer)return 70;if(lo_context_set_program_entry(context,(const unsigned char *)path,length(path))||lo_context_set_lock_files(context,0,0,0)||lo_context_set_program_entry(peer,(const unsigned char *)path,length(path)))return 71;lo_context_free(peer);}
  const char *injected=path;char alias[4112];

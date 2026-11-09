@@ -80,7 +80,7 @@ static void execute(uintptr_t user,const LoProcessRequest *request,LoProcessResu
     }
 }
 int main(void) {
-    const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128};
+    const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128,256};
     active=lo_context_new(&options);owner=pthread_self();if(!active)return 10;
     LoProcessLimits limits={1800000,LO_CASE==24||LO_CASE==26?20:1000,LO_CASE==12||LO_CASE==21?2:LO_CASE==27?5:1048576,3};
     if(!lo_context_process_driver(active,execute,35) || !lo_context_process_driver_limits(active,&limits))return 11;

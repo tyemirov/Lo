@@ -127,6 +127,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	for name, expected := range processorCatalogResults() {
 		want[name] = expected
 	}
+	for name, expected := range jsonFormattingCatalogResults() {
+		want[name] = expected
+	}
 	covered := map[string]bool{}
 	for _, tc := range builtinExamples() {
 		if _, ok := want[tc.name]; ok {

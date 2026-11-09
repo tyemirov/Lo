@@ -35,7 +35,7 @@ int main(void) {
         if (status || invalid || observed != 1) return 20 + invalid;
         return lo_runtime_live_contexts() || lo_runtime_live_values() ? 23 : 0;
     }
-    const ContextOptions options = {100000, 16ULL << 20, 64ULL << 20, 0, 0, 0, 128};
+    const ContextOptions options = {100000, 16ULL << 20, 64ULL << 20, 0, 0, 0, 128,256};
     Context *control = lo_context_new(&options);
     if (!control) return 10;
     int early = lo_context_file_metadata_observer((LoContext *)control, observe, 33);

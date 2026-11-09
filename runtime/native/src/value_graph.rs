@@ -219,6 +219,7 @@ impl GraphCache {
                     continue;
                 }
             }
+            if let Data::JSON(document) = &value.data { graph.max_list_items=graph.max_list_items.max(document.max_items); }
             if let Data::List(values) = &value.data {
                 graph.max_list_items = graph.max_list_items.max(values.len());
             }

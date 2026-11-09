@@ -1899,3 +1899,39 @@ pub unsafe extern "C" fn lo_op_File_2ETree_2Esnapshot(c: *mut Context, a: *const
 
 #[no_mangle]
 pub unsafe extern "C" fn lo_op_File_2ETree_2ERemove_2Echecked(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Tree.Remove.checked")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Edecode(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.decode")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Eget(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.get")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Eat(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.at")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Estring(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.string")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Ebool(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.bool")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Eint(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.int")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Efloat(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.float")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Ekind(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.kind")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Elength(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.length")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Int_2Eparse(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Int.parse")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Float_2Eformat_5Ffixed(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Float.format_fixed")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Eformat(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("String.format")) }

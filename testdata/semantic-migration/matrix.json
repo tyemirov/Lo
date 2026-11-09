@@ -405,6 +405,15 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "Float.format_fixed",
+      "capability": "",
+      "errors": [
+        "Numeric.InvalidPrecision"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "Float.gt",
       "capability": "",
       "errors": [],
@@ -674,6 +683,15 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "Int.parse",
+      "capability": "",
+      "errors": [
+        "Int.InvalidText"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "Int.to_float",
       "capability": "",
       "errors": [
@@ -688,6 +706,89 @@
       "errors": [],
       "activation_errors": [],
       "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "JSON.at",
+      "capability": "",
+      "errors": [
+        "JSON.TypeMismatch",
+        "JSON.InvalidIndex"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "JSON.bool",
+      "capability": "",
+      "errors": [
+        "JSON.TypeMismatch"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "JSON.decode",
+      "capability": "",
+      "errors": [
+        "JSON.InvalidData"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "JSON.float",
+      "capability": "",
+      "errors": [
+        "JSON.TypeMismatch",
+        "JSON.InvalidNumber"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "JSON.get",
+      "capability": "",
+      "errors": [
+        "JSON.TypeMismatch",
+        "JSON.FieldAbsent"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "JSON.int",
+      "capability": "",
+      "errors": [
+        "JSON.TypeMismatch",
+        "JSON.InvalidNumber"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "JSON.kind",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "JSON.length",
+      "capability": "",
+      "errors": [
+        "JSON.TypeMismatch"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
+      "operation": "JSON.string",
+      "capability": "",
+      "errors": [
+        "JSON.TypeMismatch"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
     },
     {
       "operation": "List.at",
@@ -1285,6 +1386,15 @@
       "errors": [],
       "activation_errors": [],
       "negative_applicability": "verifier_only_typed_total"
+    },
+    {
+      "operation": "String.format",
+      "capability": "",
+      "errors": [
+        "String.InvalidFormat"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
     },
     {
       "operation": "String.is_whitespace",
@@ -12639,6 +12749,800 @@
       "tests": [
         "TestLLVMLinuxF034TreeLifecycle",
         "TestLLVMLinuxF034TreeFailureEvidence"
+      ]
+    },
+    {
+      "id": "operation:JSON.decode:negative",
+      "operation": "JSON.decode",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.decode",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.decode:positive:native:darwin/arm64",
+      "operation": "JSON.decode",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.decode:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.decode",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.decode:positive:native:linux/arm64",
+      "operation": "JSON.decode",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.decode:runtime-negative:native:linux/arm64",
+      "operation": "JSON.decode",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.get:negative",
+      "operation": "JSON.get",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.get",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.get:positive:native:darwin/arm64",
+      "operation": "JSON.get",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.get:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.get",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.get:positive:native:linux/arm64",
+      "operation": "JSON.get",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.get:runtime-negative:native:linux/arm64",
+      "operation": "JSON.get",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.at:negative",
+      "operation": "JSON.at",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.at",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.at:positive:native:darwin/arm64",
+      "operation": "JSON.at",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.at:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.at",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.at:positive:native:linux/arm64",
+      "operation": "JSON.at",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.at:runtime-negative:native:linux/arm64",
+      "operation": "JSON.at",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.string:negative",
+      "operation": "JSON.string",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.string",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.string:positive:native:darwin/arm64",
+      "operation": "JSON.string",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.string:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.string",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.string:positive:native:linux/arm64",
+      "operation": "JSON.string",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.string:runtime-negative:native:linux/arm64",
+      "operation": "JSON.string",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.bool:negative",
+      "operation": "JSON.bool",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.bool",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.bool:positive:native:darwin/arm64",
+      "operation": "JSON.bool",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.bool:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.bool",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.bool:positive:native:linux/arm64",
+      "operation": "JSON.bool",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.bool:runtime-negative:native:linux/arm64",
+      "operation": "JSON.bool",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.int:negative",
+      "operation": "JSON.int",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.int",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.int:positive:native:darwin/arm64",
+      "operation": "JSON.int",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.int:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.int",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.int:positive:native:linux/arm64",
+      "operation": "JSON.int",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.int:runtime-negative:native:linux/arm64",
+      "operation": "JSON.int",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.float:negative",
+      "operation": "JSON.float",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.float",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.float:positive:native:darwin/arm64",
+      "operation": "JSON.float",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.float:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.float",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.float:positive:native:linux/arm64",
+      "operation": "JSON.float",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.float:runtime-negative:native:linux/arm64",
+      "operation": "JSON.float",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.kind:negative",
+      "operation": "JSON.kind",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.kind",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.kind:positive:native:darwin/arm64",
+      "operation": "JSON.kind",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.kind:positive:native:linux/arm64",
+      "operation": "JSON.kind",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.length:negative",
+      "operation": "JSON.length",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/JSON.length",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:JSON.length:positive:native:darwin/arm64",
+      "operation": "JSON.length",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.length:runtime-negative:native:darwin/arm64",
+      "operation": "JSON.length",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.length:positive:native:linux/arm64",
+      "operation": "JSON.length",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:JSON.length:runtime-negative:native:linux/arm64",
+      "operation": "JSON.length",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Int.parse:negative",
+      "operation": "Int.parse",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Int.parse",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:Int.parse:positive:native:darwin/arm64",
+      "operation": "Int.parse",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Int.parse:runtime-negative:native:darwin/arm64",
+      "operation": "Int.parse",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Int.parse:positive:native:linux/arm64",
+      "operation": "Int.parse",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Int.parse:runtime-negative:native:linux/arm64",
+      "operation": "Int.parse",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Float.format_fixed:negative",
+      "operation": "Float.format_fixed",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/Float.format_fixed",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:Float.format_fixed:positive:native:darwin/arm64",
+      "operation": "Float.format_fixed",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Float.format_fixed:runtime-negative:native:darwin/arm64",
+      "operation": "Float.format_fixed",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Float.format_fixed:positive:native:linux/arm64",
+      "operation": "Float.format_fixed",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:Float.format_fixed:runtime-negative:native:linux/arm64",
+      "operation": "Float.format_fixed",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:String.format:negative",
+      "operation": "String.format",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.format",
+        "TestF031CompilerRejections"
+      ]
+    },
+    {
+      "id": "operation:String.format:positive:native:darwin/arm64",
+      "operation": "String.format",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:String.format:runtime-negative:native:darwin/arm64",
+      "operation": "String.format",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "darwin/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031ValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:String.format:positive:native:linux/arm64",
+      "operation": "String.format",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "operation:String.format:runtime-negative:native:linux/arm64",
+      "operation": "String.format",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF031LinuxValuesAndFailures"
+      ]
+    },
+    {
+      "id": "f031:formatting-binding-and-pure-inspection",
+      "operation": "",
+      "axis": "contract",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestF031CompilerContracts",
+        "TestF031FormattingArgumentBinding",
+        "TestF031InspectionPureFailures"
       ]
     }
   ],

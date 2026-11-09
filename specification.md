@@ -761,6 +761,7 @@ The initial boundary-oriented built-in types are:
 * `Lock.Lease`
 * `Program.Exit`
 * `CLI.Options`
+* `JSON.Value`
 * `HTTP.Request`
 * `HTTP.Response`
 * `HTTP.Server`
@@ -890,6 +891,7 @@ Processors are pure.
 * `String.lower(value) -> String`
 * `String.length(value) -> Int`
 * `String.eq(left_value, right_value) -> Bool`
+* `String.format(template: String, fields: Record) -> String!`
 
 Section 8.10 defines exact text boundaries, splitting, whitespace, and comparison.
 
@@ -903,6 +905,8 @@ Section 8.10 defines exact text boundaries, splitting, whitespace, and compariso
 * `Int.to_float(value: Int) -> Float!`
 * `Float.to_int(value: Float) -> Int`
 * `Float.to_string(value: Float) -> String`
+* `Int.parse(text: String) -> Int!`
+* `Float.format_fixed(value: Float, places: Int) -> String!`
 
 ### 8.4 Math Processors
 
@@ -1083,7 +1087,8 @@ Zero disables each listed resource quota.
 | `--max-value-bytes` | `16777216` | Expanded weight of one value. |
 | `--max-live-bytes` | `67108864` | Live value weight and worklist slots. |
 | `--max-data-bytes` | `0` | Cumulative weight of newly charged values and progress snapshots. |
-| `--max-list-items` | `0` | Items in one list. |
+| `--max-list-items` | `0` | Items in one list, JSON array, or JSON object. |
+| `--max-json-depth` | `256` | Nested JSON containers during JSON or checkpoint decoding. |
 | `--max-file-entries` | `0` | Entries enumerated or selected by one file operation. |
 | `--max-file-directories` | `128` | Simultaneously retained directory observations. |
 
@@ -1113,6 +1118,65 @@ The [value processor contract](docs/value-processors.md) defines 26 additional p
 It specifies text, bytes, indexed collections, stable sorting, lexical paths, globs, and command display.
 Those processors use current resource quotas and have no host authority.
 Application flows own chunking, duplicate removal, typed equality, and other composition.
+
+### 8.11 JSON Values And Text Formatting
+
+The [JSON and formatting contract](docs/json-values-and-formatting.md) defines twelve pure operations.
+`JSON.Value` is an immutable nominal type without projected fields or host authority.
+Its kinds are `null`, `bool`, `number`, `string`, `array`, and `object`.
+
+| Operation | Recoverable errors |
+| --- | --- |
+| `JSON.decode(data: Bytes) -> JSON.Value!` | `JSON.InvalidData` |
+| `JSON.get(value: JSON.Value, key: String) -> JSON.Value!` | `JSON.TypeMismatch`, `JSON.FieldAbsent` |
+| `JSON.at(value: JSON.Value, index: Int) -> JSON.Value!` | `JSON.TypeMismatch`, `JSON.InvalidIndex` |
+| `JSON.string(value: JSON.Value) -> String!` | `JSON.TypeMismatch` |
+| `JSON.bool(value: JSON.Value) -> Bool!` | `JSON.TypeMismatch` |
+| `JSON.int(value: JSON.Value) -> Int!` | `JSON.TypeMismatch`, `JSON.InvalidNumber` |
+| `JSON.float(value: JSON.Value) -> Float!` | `JSON.TypeMismatch`, `JSON.InvalidNumber` |
+| `JSON.kind(value: JSON.Value) -> String` | None |
+| `JSON.length(value: JSON.Value) -> Int!` | `JSON.TypeMismatch` |
+| `Int.parse(text: String) -> Int!` | `Int.InvalidText` |
+| `Float.format_fixed(value: Float, places: Int) -> String!` | `Numeric.InvalidPrecision` |
+| `String.format(template: String, fields: Record) -> String!` | `String.InvalidFormat` |
+
+JSON decoding accepts exactly one document with strict UTF-8, paired surrogate escapes, and unique decoded object keys.
+It rejects a byte-order mark, comments, trailing commas, raw string controls, and trailing content.
+The JSON and checkpoint operations share this strict parser.
+Checkpoint decoding retains exact schema validation and canonical-byte comparison.
+
+Numbers retain their exact source tokens until extraction.
+`JSON.int` accepts only integer tokens without a fraction or exponent.
+`JSON.float` rounds to the nearest binary64 value with ties to even.
+Nonfinite results and nonzero values rounded to zero produce `JSON.InvalidNumber`.
+Finite subnormals and signed zero remain valid.
+
+Object lookup uses exact decoded keys without normalization or case conversion.
+Array indexes start at zero and must be nonnegative.
+Kind validation precedes field, index, or number validation.
+`JSON.length` accepts arrays and objects only.
+
+The default depth limit is 256 nested containers. Zero disables that limit.
+A scalar root has depth zero. An array or object root has depth one.
+
+Parsing, output, snapshots, and release do not require a recursive call stack.
+Subvalue extraction must account for all retained data.
+Node weights, temporary storage, item counts, work, and cancellation obey the detailed resource contract.
+
+`Int.parse` accepts `[+-]?[0-9]+`, including leading zeros, and normalizes integer zero.
+It rejects whitespace, separators, prefixes, and Unicode digits.
+The integer-bit limit remains terminal.
+
+`Float.format_fixed` accepts precision 0 through 1000 and uses decimal rounding with ties to even.
+It formats the actual binary64 value without an exponent or group separator.
+The output keeps the sign of zero, including a negative value rounded to zero.
+
+`String.format` requires a concrete record of total String, Int, Float, or Bool fields.
+This constraint does not introduce a source generic declaration.
+Named placeholders support escaped braces, Int grouping, and a minimum Unicode scalar width with spaces on the left.
+The detailed contract defines the complete grammar and width bounds.
+Missing fields, invalid syntax, and unsupported grouping produce `String.InvalidFormat`.
+A valid excessive width produces a terminal resource failure before allocation.
 
 ---
 
