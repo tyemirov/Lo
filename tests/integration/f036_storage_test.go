@@ -18,7 +18,7 @@ func TestF036StorageAdmissionPrecedesLaunch(t *testing.T) {
 				harness: "testdata/native-runtime/process-ownership-provider.c", hostBootstrap: "lo_test_host_init", sdkHarness: true, harnessTransform: fixture.transform,
 				run: func(t *testing.T, artifact, work string) {
 					actual := f036RunPolicyFixture(t, fixture, artifact, "--max-process-tokens", "4294967295",
-						"--max-value-bytes", scenario.value, "--max-live-bytes", scenario.live, "--process-kernel-limit", "4096")
+						"--max-value-bytes", scenario.value, "--max-live-bytes", scenario.live, "--process-kernel-limit", fixture.kernelArgument())
 					nativeFailure(t, actual, 2, "runtime.limit", "")
 					macCleanupPresent(t, fixture.ready, false)
 					if fixture.logged("O\n") || fixture.lockBusy(t) {

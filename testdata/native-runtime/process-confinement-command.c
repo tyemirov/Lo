@@ -4,6 +4,10 @@
 #include <dlfcn.h>
 #include <sys/resource.h>
 
+#ifndef LO_TEST_PROCESS_KERNEL_LIMIT
+#error "The confinement fixture requires its exact selected process limit"
+#endif
+
 static void confinement_trace(const char *path, const char *phase, int result) {
     int descriptor = open(path, O_WRONLY | O_APPEND | O_CLOEXEC);
     if (descriptor < 0) _exit(100);
@@ -15,7 +19,8 @@ static void confinement_trace(const char *path, const char *phase, int result) {
 static int confinement_state(void) {
     struct rlimit processes;
     if (getuid() == 0 || getuid() != geteuid() || getrlimit(RLIMIT_NPROC, &processes)) return 80;
-    return processes.rlim_cur == 4096 && processes.rlim_max == 4096 ? 0 : 81;
+    return processes.rlim_cur == LO_TEST_PROCESS_KERNEL_LIMIT
+        && processes.rlim_max == LO_TEST_PROCESS_KERNEL_LIMIT ? 0 : 81;
 }
 static int confinement_syscalls(void) {
     int state = confinement_state(); if (state) return state;

@@ -59,7 +59,7 @@ flow Main()->Int!{lock=Lock.File.new(File.Path.new(%q));lease=commit lock;contex
 					return []byte(text + "\n" + strings.NewReplacer("@F036_BOUNDARY_CASE@", strconv.Itoa(number), "@F036_LATER_LOCK@", strconv.Quote(later)).Replace(string(extra)))
 				},
 				run: func(t *testing.T, artifact, work string) {
-					got := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", "4096", "--lock-file", later)
+					got := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", fixture.kernelArgument(), "--lock-file", later)
 					nativeFailure(t, got, 0, "runtime.host-failure", "")
 					if !fixture.logged(scenario.injection+"\n") || !fixture.logged("boundary-probed\n") {
 						t.Fatalf("boundary injection or shared-session probes did not execute: %+v", got)

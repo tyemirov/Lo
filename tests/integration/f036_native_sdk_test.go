@@ -75,7 +75,7 @@ func TestF036NativeSDKAdapter(t *testing.T) {
 				number: 0, harness: "testdata/native-runtime/process-es-sdk.c", hostBootstrap: "lo_test_host_init",
 				sdkHarness: true, harnessTransform: transform,
 				run: func(t *testing.T, artifact, work string) {
-					actual := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", "4096")
+					actual := f036RunPolicyFixture(t, fixture, artifact, "--process-kernel-limit", fixture.kernelArgument())
 					if scenario.number == 0 {
 						nativeValueCheck("Int", `"0"`)(t, actual)
 					} else if actual.status != 2 || !strings.Contains(actual.stderr, "runtime.") {

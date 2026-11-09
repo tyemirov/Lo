@@ -49,7 +49,7 @@ flow Main()->Int!{target=Lock.File.new(File.Path.new(%q));lease=commit target;se
 			defer stderr.Close()
 			arguments := fixture.flags(t, artifact)
 			arguments[0] = "serve"
-			arguments = append(arguments, "--listen", "0", "--lock-file", later, "--process-kernel-limit", "4096")
+			arguments = append(arguments, "--listen", "0", "--lock-file", later, "--process-kernel-limit", fixture.kernelArgument())
 			command := exec.Command(artifact, arguments...)
 			command.Dir, command.Env = fixture.work, fixture.environment()
 			command.Stdout, command.Stderr = stdout, stderr

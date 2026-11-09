@@ -59,7 +59,7 @@ func TestF036LaunchEvidenceOrder(t *testing.T) {
 						t.Fatal(err)
 					}
 					defer stderr.Close()
-					command := exec.Command(artifact, append(fixture.flags(t, artifact), "--process-kernel-limit", "4096")...)
+					command := exec.Command(artifact, append(fixture.flags(t, artifact), "--process-kernel-limit", fixture.kernelArgument())...)
 					command.Dir, command.Env = fixture.work, fixture.environment()
 					command.Stdout, command.Stderr = stdout, stderr
 					if err := command.Start(); err != nil {

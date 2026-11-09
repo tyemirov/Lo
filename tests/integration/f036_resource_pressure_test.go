@@ -35,7 +35,7 @@ func TestF036ResourceTransferBackpressure(t *testing.T) {
 				_ = file.Close()
 				t.Logf("bounded resource-transfer evidence: %q", data)
 			})
-			flags := []string{"--process-kernel-limit", "4096"}
+			flags := []string{"--process-kernel-limit", fixture.kernelArgument()}
 			for index := 0; index < 8; index++ {
 				alias := filepath.Join(fixture.root, fmt.Sprintf("registered-%02d", index))
 				if err := os.Link(fixture.command, alias); err != nil {

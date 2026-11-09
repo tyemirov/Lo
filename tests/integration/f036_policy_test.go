@@ -69,9 +69,14 @@ func f036UnavailableAfterLock(t *testing.T, actual result) {
 
 func f036RunPolicyFixture(t *testing.T, fixture f036Fixture, artifact string, extra ...string) result {
 	t.Helper()
+	return f036RunPolicyCommand(t, fixture, artifact, append(fixture.flags(t, artifact), extra...))
+}
+
+func f036RunPolicyCommand(t *testing.T, fixture f036Fixture, executable string, arguments []string) result {
+	t.Helper()
 	deadline, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
-	command := exec.CommandContext(deadline, artifact, append(fixture.flags(t, artifact), extra...)...)
+	command := exec.CommandContext(deadline, executable, arguments...)
 	command.Dir, command.Env = fixture.work, fixture.environment()
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
@@ -96,11 +101,15 @@ func TestF036AdmittedHostLimits(t *testing.T) {
 		processes, tokens, events, kernel int
 	}{
 		{name: "defaults", processes: 256, tokens: 1024, events: 1000000, kernel: 1024},
-		{name: "explicit", args: []string{"--max-process-descendants", "8", "--max-process-tokens", "64", "--max-process-events", "2000", "--process-kernel-limit", "4096"}, processes: 8, tokens: 64, events: 2000, kernel: 4096},
+		{name: "explicit", args: []string{"--max-process-descendants", "8", "--max-process-tokens", "64", "--max-process-events", "2000"}, processes: 8, tokens: 64, events: 2000},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			fixture := newF036Fixture(t)
-			runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "public-cli", source: fixture.source("finish"),
+			if test.name == "explicit" {
+				test.kernel = int(fixture.kernelLimit)
+				test.args = append(test.args, "--process-kernel-limit", fixture.kernelArgument())
+			}
+			runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "public-cli", source: strings.Replace(fixture.source("finish"), "Main()->Int onError Recover", "Main()->Int!", 1),
 				harness: "testdata/native-runtime/process-ownership-provider.c", hostBootstrap: "lo_test_host_init", sdkHarness: true,
 				harnessTransform: func(t *testing.T, source []byte) []byte {
 					text := string(fixture.transform(t, source))
@@ -132,6 +141,44 @@ func TestF036AdmittedHostLimits(t *testing.T) {
 				}}})
 		})
 	}
+}
+
+func TestF036FixtureUsesInheritedKernelLimit(t *testing.T) {
+	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
+		t.Skip("requires Darwin process and audit-token fixtures")
+	}
+	fixture := newF036Fixture(t)
+	parentLimit := fixture.kernelLimit
+	bounded := min(fixture.kernelLimit, uint32(2048))
+	limit := fmt.Sprint(bounded)
+	fixture.kernelLimit = fixture.hostProcessLimit(t, "--host-process-limit-run", limit, fixture.command)
+	if fixture.kernelLimit != bounded {
+		t.Fatalf("child process-limit selection: got %d, want %d", fixture.kernelLimit, bounded)
+	}
+	runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "public-cli", source: strings.Replace(fixture.source("finish"), "Main()->Int onError Recover", "Main()->Int!", 1),
+		harness: "testdata/native-runtime/process-ownership-provider.c", hostBootstrap: "lo_test_host_init", sdkHarness: true,
+		harnessTransform: func(t *testing.T, source []byte) []byte {
+			text := string(fixture.transform(t, source))
+			const anchor = "    if(user!=36||!configuration||!emit)return LO_PROCESS_OWNER_FAILED;"
+			if strings.Count(text, anchor) != 1 {
+				t.Fatal("provider inherited-limit assertion did not bind")
+			}
+			check := fmt.Sprintf("\n    if(configuration->kernel_processes!=%du)_exit(81);\n    fixture_log(\"inherited-limit-ok\\n\");", bounded)
+			return []byte(strings.Replace(text, anchor, anchor+check, 1))
+		},
+		run: func(t *testing.T, artifact, _ string) {
+			arguments := append([]string{"--host-process-limit-run", limit, artifact}, fixture.flags(t, artifact)...)
+			arguments = append(arguments, "--process-kernel-limit", fixture.kernelArgument())
+			actual := f036RunPolicyCommand(t, fixture, fixture.command, arguments)
+			nativeValueCheck("Int", `"0"`)(t, actual)
+			if !fixture.logged("inherited-limit-ok\n") || !fixture.logged("C\n") || fixture.lockBusy(t) {
+				t.Fatal("bounded inherited limit did not complete activation and release the lock")
+			}
+			macCleanupPresent(t, fixture.ready, true)
+			if after := fixture.hostProcessLimit(t); after != parentLimit {
+				t.Fatalf("child wrapper changed its parent limit: got %d, want %d", after, parentLimit)
+			}
+		}}})
 }
 
 func TestF036KernelLimitAboveInheritedHardLimit(t *testing.T) {

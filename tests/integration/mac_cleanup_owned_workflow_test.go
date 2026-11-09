@@ -33,7 +33,7 @@ func TestMacCleanupOwnedWorkflow(t *testing.T) {
 	}
 	childMarker := fileFixture(t, fixture.prunes, "owned-child", "")
 	fixture.overrides = [][2]string{{"FIXTURE_OWNER_SOCKET", owner.socket}, {"FIXTURE_OWNER_CHILD", childMarker}}
-	fixture.extraFlags = []string{"--process-descendants", "--max-process-descendants", "8", "--max-process-tokens", "64", "--max-process-events", "10000", "--process-kernel-limit", "4096", "--process-read-root", owner.root}
+	fixture.extraFlags = []string{"--process-descendants", "--max-process-descendants", "8", "--max-process-tokens", "64", "--max-process-events", "10000", "--process-kernel-limit", owner.kernelArgument(), "--process-read-root", owner.root}
 	for _, name := range []string{"npm", "go", "uv", "pnpm", "python3", "getconf", "du", "lsof", "docker"} {
 		fixture.extraFlags = append(fixture.extraFlags, "--process-unix-endpoint", cleanupScope(t, fixture.tools[name], "endpoint", owner.socket))
 	}
