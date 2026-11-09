@@ -21,21 +21,26 @@ impl Tree {
 
     fn directory(&self, index: Option<usize>) -> Observation {
         let mut observation = self.parent.clone();
+        if index.is_none() {
+            return observation;
+        }
+        let mut directory = observation.directory.as_ref().clone();
         let mut ancestors = vec![];
         let mut current = index;
         while let Some(index) = current {
             ancestors.push(index);
             current = self.rows[index].parent;
         }
-        let mut chain = (*observation.directory.witnesses).clone();
+        let mut chain = (*directory.witnesses).clone();
         for index in ancestors.into_iter().rev() {
             let row = &self.rows[index];
-            observation.directory.path.push(&row.name);
-            observation.directory.identity = row.info.identity;
+            directory.path.push(&row.name);
+            directory.identity = row.info.identity;
             chain.push(witnesses::Witness { name: row.name.clone().into(), identity: row.info.identity });
         }
-        observation.directory.witnesses = std::sync::Arc::new(chain);
-        observation.identity = observation.directory.identity;
+        directory.witnesses = std::sync::Arc::new(chain);
+        observation.identity = directory.identity;
+        observation.directory = std::sync::Arc::new(directory);
         observation
     }
 }
