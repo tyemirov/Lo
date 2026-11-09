@@ -88,7 +88,7 @@ pub(super) fn acquire(
     context: &mut Context,
     site: &Site,
     root: &Handle,
-) -> Result<(File, Directory, bool, u64), Fault> {
+) -> Result<(File, std::sync::Arc<Directory>, bool, u64), Fault> {
     context.check_cancel()?;
     if root.typ == atom("File.Directory") {
         let observed = directory_observation(site, root)?;
@@ -114,14 +114,14 @@ pub(super) fn acquire(
     } else {
         context.files.observed_leases[&observed]
     };
-    Ok((file, observed, fresh, lease))
+    Ok((file, std::sync::Arc::new(observed), fresh, lease))
 }
 
 pub(super) fn recheck(
     context: &mut Context,
     site: &Site,
     root: &Handle,
-    observed: &Directory,
+    observed: &std::sync::Arc<Directory>,
     lease: u64,
 ) -> Result<(), Fault> {
     let (check, current) = if root.typ != atom("File.Path") {
@@ -131,13 +131,14 @@ pub(super) fn recheck(
             directory: observed.clone(),
             identity: observed.identity,
         };
-        (retained(context, site, &prior, root)?, prior.directory)
+        (retained(context, site, &prior, root)?, None)
     } else {
         context.reserve_file(observed.witnesses.len() as u64, observed.weight())?;
-        observation_grant(context, site, root)?
+        let (check, current) = observation_grant(context, site, root)?;
+        (check, Some(current))
     };
     close_file(check).map_err(|error| host(system_error(&error)))?;
-    if current != *observed {
+    if current.as_ref().is_some_and(|current| current != observed.as_ref()) {
         return Err(denied(&site.operation, &observed.path));
     }
     Ok(())
@@ -222,13 +223,13 @@ pub(crate) fn child(
             name: name.into(),
             identity: info.identity,
         });
-        let observed = Directory {
+        let observed = std::sync::Arc::new(Directory {
             path,
             identity: info.identity,
             anchor: parent.directory.anchor.clone(),
             witnesses: std::sync::Arc::new(chain),
             recursive: true,
-        };
+        });
         let result = directory_value(context, site, entry, &file, &observed, parent.lease, 0);
         finish(file, result)
     })();
