@@ -119,4 +119,5 @@ F035 preserves the current descendant denial.
 It does not add a Linux command execution profile.
 Injected driver fixtures exercise the ABI on Darwin arm64 and Linux arm64 under QEMU.
 Real command fixtures exercise the selected Darwin profile.
-P007 and F036 own additional process-tree behavior.
+The [descendant profile](process-descendant-ownership.md) defines the separate F036 host selection and its lifecycle provider.
+It uses the same command duration, output, and cleanup policy.

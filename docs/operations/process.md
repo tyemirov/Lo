@@ -42,7 +42,9 @@ Construct an inert command with explicit context, executable, literal arguments,
 Commit returns `Process.Result` with termination, output mode, captured bytes, and confirmed per-stream byte counts.
 
 Nonzero exit codes and signals remain result data.
-The default host duration is five seconds. The current profile denies forked or spawned descendants.
+The default host duration is five seconds. The default profile denies forked or spawned descendants.
+The host can explicitly select the bounded [descendant profile](../process-descendant-ownership.md).
+That profile preserves the initial command scope and requires complete descendant cleanup before release.
 
 Native admission also bounds paths, arguments, environment entries, transport bytes, output, and child resources.
 

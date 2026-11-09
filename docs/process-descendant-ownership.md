@@ -1,14 +1,15 @@
 # Descendant Process Ownership
 
-Status: P007 design and explicit profile selection passed independent root-agent review. F036 implementation is open.
-This document does not change the implemented Process contract.
-Current activation continues to deny descendant creation.
+Status: P007 design and F036 implementation passed independent review.
+Focused software acceptance passed.
+Final shared stack CI passed.
+The default profile denies descendant creation.
 The [application roadmap](mac-cleanup-implementation-plan.md) gives the application dependencies.
 
 ## Selected Profile
 
 The host selects descendant authority explicitly with `--process-descendants`.
-This selector is a proposed F036 host interface, not an implemented language operation.
+This F036 host interface supplies explicit authority for descendant creation.
 Without this selector, the existing qualified profile continues to deny fork and spawn.
 That profile has less authority and does not need Endpoint Security admission.
 
@@ -34,6 +35,83 @@ An isolated trusted provider can supply the same event contract for software acc
 Injected provider tests do not verify entitled native-provider execution.
 Missing native authorization is a platform availability result.
 Implementation acceptance uses its own evidence.
+
+## Finite Host Limits
+
+The selected profile has five host flags.
+These flags do not change the language value schema or `ContextOptions`.
+
+| Flag | Default | Bound |
+| --- | --- | --- |
+| `--process-descendants` | Absent | Explicit selection of descendant authority. |
+| `--max-process-descendants` | `256` | Live command processes, including the initial command and excluding the supervisor. |
+| `--max-process-tokens` | `1024` | Retained execution tokens, including unresolved exec aliases. |
+| `--max-process-events` | `1000000` | Activation event work, including admission and completion events. |
+| `--process-kernel-limit` | `1024` | Exact hard `RLIMIT_NPROC` value for the initial command. |
+
+Each count must be a positive decimal integer.
+The event limit fits an unsigned 64-bit integer. Other counts fit unsigned 32-bit integers.
+The CLI rejects repeated flags, zero, negative values, overflow, and `unlimited`.
+A descendant limit flag requires `--process-descendants`.
+
+The runtime never silently reduces a requested limit.
+A requested kernel limit above the inherited hard limit causes unavailable admission.
+Configuration alone does not open a provider or change a kernel limit.
+Process activation performs provider, kernel-limit, and storage admission before command creation.
+
+The process and token tables have finite storage.
+The controller does not retain an event history proportional to the event-work limit.
+Resource admission accounts for the tables, transfer frames, retained records, and copied executable registry before activation.
+
+Event-work exhaustion permanently fails the activation.
+It cannot produce a success or release proof.
+Fixed-storage cleanup continues to process fork, exec, exit, and denied authorization events during quarantine.
+This cleanup can continue after the caller deadline.
+It does not reset the event counter or restore admission.
+Later marker or synchronization events cannot repair the failed proof.
+
+Table exhaustion prevents retention of additional process identities.
+The supervisor continues to signal known execution tokens and retains all ownership leases.
+It cannot guarantee termination of a child whose identity did not fit in the tables.
+It never publishes release proof after this failure.
+
+The native provider borrows one authorization message inside its serial callback.
+It does not retain opaque SDK argument or environment payloads after that callback.
+The owner answers through a separate thread and one protected reply transition.
+If the owner misses the bounded message deadline, the callback denies execution and records permanent provider failure.
+A late response fails without a second reply.
+
+## Supervisor Identity And Build Inputs
+
+The supervisor executes the same compiled image as its caller.
+The image's CodeDirectory identifier and exact execution token identify that supervisor.
+The parent also checks the unreaped child PID from the spawn result.
+Both peers exchange identity messages before resource transfer.
+They capture and check the socket peer token after this exchange.
+
+The compiled host registers its provider factory before internal CLI dispatch.
+The supervisor repeats this registration after re-exec.
+Arguments and environment values cannot supply a factory or function pointer.
+Internal supervisor dispatch occurs before Console initialization.
+The supervisor starts in a separate session so terminal cancellation cannot destroy the resource owner before cleanup starts.
+This session does not establish descendant membership.
+
+Both Process profiles use one launcher receipt with an exact execution token.
+The default profile checks that token against its unreaped initial child.
+The descendant profile also waits for matching lifecycle evidence.
+Either the receipt or the lifecycle event can arrive first.
+Only the initial gated child can use the trusted launcher image authority.
+Later exec requests retain the initial command scope and registered executable identities.
+
+Native preparation uses installed SDK declarations for the Endpoint Security, bootstrap, and execution-token boundaries.
+The objects retain the existing macOS `27.0` deployment target.
+Optional Endpoint Security and token-signal functions use explicit runtime symbol admission.
+The build records compiler, SDK, transitive header, source, object, and archive identities.
+
+Package validation checks exact compiler flags and repository source and header hashes.
+External SDK paths remain producer evidence.
+Package consumers do not reopen those paths or need an installed SDK.
+The distributed archive contains the compiled boundary objects.
 
 ## Admission And Scope
 
@@ -75,6 +153,8 @@ The trusted initial child waits until the supervisor verifies its identity and r
 The supervisor can receive the initial fork event before the creation call returns.
 The supervisor keeps that event until the launch result verifies the direct child's identity.
 A creation call that returns an error needs synchronization before the supervisor resolves the initial launch without a child.
+The ready signal requires a confirmed initial launcher exec event.
+An initial fork event alone cannot supply that proof.
 
 The inherited sandbox keeps access in the initial executable's scope.
 An exec chain cannot add a different executable's filesystem or endpoint grants.
@@ -109,9 +189,11 @@ The [message contract](https://developer.apple.com/documentation/endpointsecurit
 An execution token includes the PID and its execution version.
 Exec changes that version when the PID stays the same.
 The [process contract](https://developer.apple.com/documentation/endpointsecurity/es_process_t) specifies this identity.
+
 A denied exec request can cause no successful exec notification.
 The ledger keeps proposed token aliases until a verified transition or exit resolves them.
 Token storage has a different host limit.
+An unconfirmed proposed token cannot identify an exit or open event.
 
 Termination uses `proc_signal_with_audittoken` with a known execution token.
 A stale token can return an error while the process completes an exec transition.
@@ -145,6 +227,10 @@ The callback can also execute during client destruction.
 The supervisor checks client generation and active status before it accepts the callback.
 A null client or a callback from client destruction cannot verify completion.
 
+A launcher failure before readiness needs retained initial identity, creation and reap evidence, and an empty ledger.
+A matching sequence marker and synchronization callback must also complete before ordinary failure recovery.
+Absent identity or incomplete cleanup keeps the activation in quarantine.
+
 The completion argument depends on complete lifecycle ordering.
 A child creation precedes the creator's exit in that sequence.
 An observed exit cannot remove the last creator while an earlier child creation stays unaccounted for.
@@ -177,7 +263,7 @@ This uses the [client's execution restriction](https://developer.apple.com/docum
 The registered executable contract excludes privileged credential authority.
 The provider checks proposed exec credentials before it sends an allow reply.
 Spawn credential attributes cannot change the admitted identities or the inherited hard limit.
-F036 acceptance must verify these restrictions through direct syscalls and spawn attributes.
+Native fixtures verify these restrictions through direct syscalls and spawn attributes.
 The [kernel creation path](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_fork.c) checks the real-UID process count.
 
 The model does not claim synchronous fork admission for each tree.
@@ -204,13 +290,14 @@ An unexpected supervisor exit makes ownership unknown.
 
 ## Resource Lease Lifetime
 
-The current runtime retains quarantined registries and locks in the CLI process.
-That retention ends when the CLI exits.
-It does not supply the selected profile's lifetime guarantee.
-F036 must add an explicit ownership transfer to the trusted supervisor before command creation.
+The selected profile transfers explicit ownership to the trusted supervisor before command creation.
+Retention in the CLI alone cannot supply the required lifetime after CLI exit.
 
 The transfer includes duplicate lock descriptors, executable descriptors, scope descriptors, and their immutable identity records.
+It also retains the current program entry and its original ancestor witnesses when the launcher is external.
+That entry record does not add command execution authority.
 The supervisor acknowledges receipt only after it retains and validates each required owner.
+
 The CLI cannot release the activation successfully before the supervisor supplies a complete cleanup receipt.
 CLI exit closes the control channel and starts supervisor cleanup.
 The supervisor keeps the leases during cleanup and quarantine after the CLI exits.
@@ -221,7 +308,30 @@ The launcher closes these descriptors before it activates untrusted code.
 The inherited sandbox denies command access to supervisor signals, task ports, and control resources.
 The trusted supervisor has explicit host authority to retain these owners.
 This guarantee excludes forced owner destruction by an external actor.
-F036 acceptance must verify CLI exit, supervisor cleanup, retained lock exclusion, and release after proven completion.
+Native fixtures verify CLI exit, supervisor cleanup, retained lock exclusion, and release after proven completion.
+
+One lock mutex covers the active-lease snapshot and the acquisition freeze.
+While remote ownership remains active, every new lock acquisition produces `Lock.Failed` before an open or lock attempt.
+This includes acquisition of a path that already has a retained lease.
+Only complete remote release proof can remove the matching freeze generation.
+Incomplete closure of a duplicated local lease also preserves the acquisition freeze.
+Existing lease closure never issues an explicit unlock operation.
+
+Each resource frame transfers one descriptor with its immutable identity record.
+The sender waits for an indexed adoption acknowledgment before it sends the next resource.
+The acknowledgment uses the same channel generation and sequence checks and carries no descriptor.
+The supervisor sends it only after it owns the received descriptor.
+This bounds descriptor transfers to one outstanding frame under the original deadline and cancellation checks.
+
+The supervisor validates complete ancestor chains and executable hashes before it acknowledges the inventory.
+Malformed frames retain received descriptors for explicit cleanup.
+A failed close prevents successful ownership release.
+
+Resource adoption can fail before the inventory transfer finishes.
+The parent then validates the final cleanup receipt, channel closure, and supervisor reap before it releases its owners.
+An adoption acknowledgment alone never proves complete inventory validation or cleanup.
+Receipt arrival starts the configured cleanup wait for channel closure and reap.
+This wait cannot extend an earlier cancellation or final deadline.
 
 ## Rejected Mechanisms And Observed Results
 
@@ -261,4 +371,12 @@ The driver builds repository-owned helpers and records their results and source 
 The model checks 19 lifecycle traces and all selected loss and delivery prefixes.
 More cases include cancellation, delayed births, exec replies, token limits, marker generations, missing cleanup conditions, client destruction, and permanent quarantine.
 The model is a bounded algorithm check, not native Endpoint Security acceptance.
-F036 must use the real ownership algorithm with an injected provider for public-entrypoint acceptance.
+
+F036 public-entrypoint fixtures use the real ownership algorithm with an injected provider.
+They exercise actual command processes, confinement, output, retained locks, and completion proof.
+SDK adapter fixtures exercise native event conversion and reply ownership with controlled SDK boundaries.
+The complete application fixture uses the same controller for each command and confirms an actual command child.
+These checks do not establish entitled Endpoint Security connectivity or arbitrary installed-tool behavior.
+
+Signal fixtures hold a confirmed `waitpid` result before the transport receives it.
+The runtime retains the entry lock during that interval.

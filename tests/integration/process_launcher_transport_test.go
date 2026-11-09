@@ -106,8 +106,11 @@ func TestProcessLauncherRejectsMalformedFrames(t *testing.T) {
 			}
 			observed, readErr := io.ReadAll(status)
 			if test.name == "valid-frame" {
-				if err == nil || ctx.Err() != nil || readErr != nil || command.ProcessState == nil || command.ProcessState.ExitCode() != 67 || len(observed) != 12 || observed[0] != 'R' || observed[6] != 'F' || observed[7] != 3 {
+				if err == nil || ctx.Err() != nil || readErr != nil || command.ProcessState == nil || command.ProcessState.ExitCode() != 67 || len(observed) != 44 || observed[0] != 'R' || observed[38] != 'F' || observed[39] != 3 {
 					t.Fatalf("valid frame did not reach the permit boundary: %v %x", err, observed)
+				}
+				if tokenPID := wire.BigEndian.Uint32(observed[26:30]); tokenPID != uint32(command.Process.Pid) {
+					t.Fatalf("Ready execution token PID %d differs from child %d", tokenPID, command.Process.Pid)
 				}
 				return
 			}

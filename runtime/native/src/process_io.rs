@@ -60,6 +60,8 @@ pub type DriverCallback = unsafe extern "C" fn(usize, *const Request, *mut Nativ
 pub enum Event {
     Output { stream: u32, bytes: Vec<u8>, reply: SyncSender<(usize, i32)> },
     Complete(NativeResult),
+    Released(u64),
+    Unavailable(NativeResult),
 }
 pub struct Output {
     pub events: SyncSender<Event>,
@@ -73,6 +75,35 @@ pub struct OutputState {
     pub failure: Option<(i32, i32)>,
 }
 impl Output {
+    pub fn deliver(&self, stream: u32, bytes: &[u8]) -> (usize, i32) {
+        let mut confirmed = 0;
+        let class = unsafe { publish((self as *const Self).cast_mut().cast(), stream,
+            bytes.as_ptr(), bytes.len(), &mut confirmed) };
+        (confirmed, class)
+    }
+    pub fn complete(&self, result: &mut NativeResult, input_length: usize) {
+        let observed = self.state.lock().unwrap();
+        if let Some((stage, class)) = observed.failure { result.stage = stage; result.class_id = class; }
+        if !(0..=7).contains(&result.stage) || !(0..=5).contains(&result.class_id)
+            || !(0..=1).contains(&result.started) || !(0..=1).contains(&result.cleanup_complete)
+            || !(0..=2).contains(&result.termination_kind) || result.cleanup_failures & !7 != 0
+            || (result.cleanup_complete == 1 && result.ownership != 0)
+            || (result.stage == 0 && result.cleanup_failures != 0)
+            || (result.termination_kind == 1 && result.termination_value < 0)
+            || (result.termination_kind == 2 && result.termination_value <= 0)
+            || (result.stage == 0 && result.class_id != 0)
+            || (result.termination_kind != 0 && result.started != 1)
+            || (result.started == 1 && result.termination_kind == 0 && result.cleanup_complete == 1)
+            || result.stdin_written > input_length
+            || [result.stdout_size, result.stderr_size] != observed.counts {
+            result.stage = 5; result.class_id = 2; result.cleanup_complete = 0;
+            result.stdout_size = observed.counts[0]; result.stderr_size = observed.counts[1];
+        }
+        if result.stage == 0 && result.termination_kind == 0 {
+            result.stage = 1; result.class_id = 2; result.cleanup_complete = 0;
+        }
+        if result.stage == 0 && result.cleanup_complete == 0 { result.stage = 6; result.class_id = 2; }
+    }
     fn reject(&self, state: &mut OutputState, stream: u32, class: i32) -> i32 {
         let (_, first) = *state.failure.get_or_insert((if stream == 2 { 4 } else { 3 }, class));
         let _ = self.stop.compare_exchange(0, first as u32, Ordering::SeqCst, Ordering::SeqCst);

@@ -698,7 +698,8 @@ Command environment values never enter the launcher's fixed environment.
 
 Repository helpers qualify exact package arguments, six environment overrides, inherited variables, directory selection, closed input, and captured results.
 The package example preserves pure command descriptions and uses `Flow.fold` for explicit sequential activation.
-Wrapper fixtures qualify registered exec chains separately from denied forked and spawned descendants.
+Wrapper fixtures qualify registered exec chains and verify descendant denial without explicit descendant authority.
+The separate [descendant profile](process-descendant-ownership.md) supplies bounded ownership across fork, spawn, exec, and detached sessions.
 
 A local Docker-like protocol records confirmed requests and checks responses over an authorized Unix endpoint.
 Client cancellation does not reverse a confirmed daemon effect.
@@ -839,7 +840,11 @@ Current acceptance and final stack CI passed. Independent completion review pass
 
 The selected host verifies the pinned helper and exact registered command identities.
 Continuous protection and ownership leases cover participating File mutations and the command lifetime.
-The default profile denies child writes and network access. Both default and cleanup profiles deny forked and spawned descendants.
+The default profile denies child writes and network access.
+
+Both default and cleanup profiles deny forked and spawned descendants unless the host selects `--process-descendants`.
+The [descendant profile](process-descendant-ownership.md) retains the initial scope and all ownership leases until complete cleanup proof.
+Its native Darwin provider requires Endpoint Security admission. Linux activation remains unavailable.
 
 The [F024 checkpoint](evidence/process-context-cleanup/checkpoint.json) adds context, discovery, transport, mutation, endpoint, and exec-chain qualification.
 The checkpoint records interpreter integration, native integration, semantic checks, qualification-tool checks, and their exact source identities.

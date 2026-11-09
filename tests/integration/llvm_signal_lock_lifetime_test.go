@@ -24,7 +24,11 @@ func runNativeSignalLockLifetime(t *testing.T, target string) {
 		root = t.TempDir()
 		code := filepath.Join(root, "command.c")
 		command = filepath.Join(root, "command")
-		writeLLVMFixture(t, code, []byte("int main(void){return 0;}\n"))
+		writeLLVMFixture(t, code, []byte(`extern long write(int,const void*,__SIZE_TYPE__);
+extern int poll(void*,unsigned long,int);
+extern unsigned alarm(unsigned);
+int main(void){alarm(12);if(write(1,"~",1)!=1)return 1;for(;;)poll(0,0,1000);}
+`))
 		compiler := exec.Command("cc", code, "-o", command)
 		compiler.Dir = root
 		if output, err := compiler.CombinedOutput(); err != nil {

@@ -31,6 +31,7 @@ struct Address{unsigned char length,family;unsigned short port;unsigned address;
 struct State{unsigned phase,signal_number,group,pid,port,ready,writer_entered,writer_pid,signal_seen,release_writer,owner_gate,release_owner,worker_started,worker_cleanup,release_worker,worker_finished,returned,failed,bridge_calls;};
 static struct State *state;
 static Thread owner;
+static _Thread_local int transport_owner;
 static const char *image;
 static void (*handlers[2])(int);
 static unsigned load(unsigned *value){return __atomic_load_n(value,__ATOMIC_SEQ_CST);}
@@ -81,12 +82,31 @@ void lo_signal_commit(Context *context,const Value *const *arguments,uint64_t co
   store(&state->owner_gate,1);while(!load(&state->release_owner))poll(0,0,1);
  }
 }
-int lo_native_process_execute(const char *launcher,int embedded,const char *directory,const unsigned char *configuration,uintptr_t configuration_size,const LoProcessRequest *request,LoProcessResult *result){
- (void)launcher;(void)embedded;(void)directory;(void)configuration;(void)configuration_size;
- store(&state->worker_started,1);while(!request->stop(request->stop_token))poll(0,0,1);
- store(&state->worker_cleanup,1);while(!load(&state->release_worker))poll(0,0,1);
- result->stage=7;result->class_id=LO_PROCESS_CANCELLED;result->started=1;result->cleanup_complete=1;result->termination_kind=2;result->termination_value=15;
- store(&state->worker_finished,1);return 0;
+/* Keep the real transport and its receipt. The admitted command emits this
+ * byte only after launch. Delay delivery of its confirmed reap receipt. */
+long read(int descriptor,void *bytes,__SIZE_TYPE__ size){
+ long (*delegate)(int,void *,__SIZE_TYPE__)=(long (*)(int,void *,__SIZE_TYPE__))dlsym((void *)-1,"read");
+ if(!delegate)return -1;
+ long count=delegate(descriptor,bytes,size);
+ if(state&&state->phase==2&&pthread_self()!=owner&&!load(&state->worker_started)
+    &&count==1&&((const unsigned char *)bytes)[0]=='~'){
+  transport_owner=1;store(&state->worker_started,1);
+ }
+ return count;
+}
+int waitpid(int pid,int *status,int options){
+ int (*delegate)(int,int *,int)=(int (*)(int,int *,int))dlsym((void *)-1,"waitpid");
+ if(!delegate)return -1;
+ int result=delegate(pid,status,options);
+ int held=state&&state->phase==2&&pid>0&&result==pid&&transport_owner
+    &&load(&state->worker_started)&&!load(&state->worker_finished);
+ if(held){
+  /* A zero-result WNOHANG poll passes through. Hold only the confirmed reap
+   * receipt, so the runtime owner cannot finish before the release gate. */
+  store(&state->worker_cleanup,1);while(!load(&state->release_worker))poll(0,0,1);
+  store(&state->worker_finished,1);
+ }
+ return result;
 }
 static int busy(int expected){int file=open(image,0);if(file<0)return 1;int result=flock(file,6),error=LO_ERRNO;if(close(file))return 1;return expected?result!=-1||error!=LO_BUSY:result!=0;}
 static int wait_for(unsigned *value){for(unsigned n=0;n<5000;++n){if(load(value))return 0;poll(0,0,1);}return 1;}

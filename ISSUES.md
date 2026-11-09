@@ -1807,7 +1807,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Existing Process, Console, transport, and lock regressions passed.
   Independent review found no remaining correctness issue. Final stack CI remains pending.
 
-- [ ] [F036] (P1) {P007,F035,I018} Implement the qualified descendant process profile
+- [x] [F036] (P1) {P007,F035,I018} Implement the qualified descendant process profile
   Goal:
   Enable only the process-tree behavior selected and qualified by P007.
 
@@ -1819,6 +1819,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep trusted-host assumptions and platform availability explicit.
 
   Deliverables:
+  - Current status: controller, provider, transfer, and build integration are implemented. Focused software acceptance and independent review passed. Final shared stack CI passed. Entitled native Endpoint Security delivery remains unverified.
   - Add host policy, launcher, transport, and runtime support for the selected profile.
   - Add repository-owned command helpers with the process shapes required by the application.
 

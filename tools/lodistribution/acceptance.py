@@ -79,8 +79,8 @@ def profile(path: Path, readable: list[Path], writable: Path) -> None:
             '(allow sysctl-read)', '(allow process-info* (target self))',
             '(allow file-read* (subpath "/usr/lib") (subpath "/System/Library"))',
             '(allow file-read* (literal "/dev/null") (literal "/dev/random") (literal "/dev/urandom"))',
-            '(allow file-read-data (literal "/"))',
-            '(allow file-read-metadata file-test-existence ' + ' '.join('(literal ' + json.dumps(item) + ')' for item in parents) + ')',
+            # Retained program-entry witnesses open each exact ancestor directory.
+            '(allow file-read-data file-read-metadata file-test-existence ' + ' '.join('(literal ' + json.dumps(item) + ')' for item in parents) + ')',
             '(allow file-read* ' + ' '.join('(subpath ' + json.dumps(str(item)) + ')' for item in roots) + ')',
             '(allow file-write* (subpath ' + json.dumps(str(writable.resolve())) + '))',
             '(deny network* (with no-log))']

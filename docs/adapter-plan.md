@@ -374,7 +374,8 @@ Automatic output and nested snapshots redact context payloads. Explicit lookup o
 Inspection records context origins, overrides, dynamic dependencies, and required execution authority.
 
 Cleanup policy selects mutation roots and exact Unix endpoints for each initial executable.
-Registered exec chains retain that initial scope. Forked and spawned descendants remain denied.
+Registered exec chains retain that initial scope.
+Forked and spawned descendants remain denied without explicit [descendant profile](process-descendant-ownership.md) selection.
 Data-write admission checks bounded root inventories, directory identity, and hardlink ownership across write and prune roots.
 The [adapter design](adapter-design.md#cleanup-execution-profile) owns complete scope restrictions and native admission limits.
 

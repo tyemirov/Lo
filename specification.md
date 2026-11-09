@@ -1635,7 +1635,13 @@ Optional cleanup inputs select authority for one initial executable:
 
 Without these cleanup inputs, the selected profile denies child writes and network access.
 Cleanup scopes remain separate for each initial executable. Registered in-process exec chains keep that initial scope.
-Both profiles deny forked and spawned descendants.
+
+Both profiles deny forked and spawned descendants unless the host selects `--process-descendants`.
+The [descendant profile](docs/process-descendant-ownership.md) retains the initial scope across fork, spawn, exec, and detached sessions.
+It requires explicit finite host limits and a lifecycle provider that owns all supported descendants through complete cleanup.
+Native Darwin activation requires admitted Endpoint Security support. Linux activation remains unavailable.
+Failed admission never selects another execution profile.
+
 Cleanup admission checks canonical roots, socket kinds, bounded directory inventories, and hardlink aliases before activation.
 The [cleanup profile contract](docs/adapter-design.md#cleanup-execution-profile) defines the restrictions and qualification evidence.
 

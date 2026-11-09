@@ -655,7 +655,10 @@ Pure context changes keep their inputs unchanged. Execution authority remains in
 The [command policy](docs/process-command-policy.md) defines host options and confirmed output counts.
 
 The default profile denies writes and network access. Optional scopes supply authority for selected mutation roots and Unix endpoints.
-Registered exec chains keep the initial executable's scope. Forked and spawned descendants remain denied.
+Registered exec chains keep the initial executable's scope.
+Forked and spawned descendants remain denied unless the host selects the bounded [descendant profile](docs/process-descendant-ownership.md).
+That profile retains ownership through complete cleanup and requires native Endpoint Security admission on Darwin.
+
 The launcher clears the specified inherited Mach slots and keeps its fixed environment separate from child environment values.
 The conditional work bound uses host parallelism and completed lifetime. It is not a hard CPU quota.
 

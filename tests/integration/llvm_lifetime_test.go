@@ -28,6 +28,9 @@ type llvmRuntimeScenario struct {
 	number           int
 	transform        func(*testing.T, []byte) []byte
 	harnessTransform func(*testing.T, []byte) []byte
+	hostBootstrap    string
+	sdkHarness       bool
+	run              func(*testing.T, string, string)
 	captureOutput    bool
 	verify           func(*testing.T, result)
 }
@@ -210,7 +213,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 					command = exec.Command("/lib/ld-linux-aarch64.so.1", append(loaderArguments, arguments...)...)
 				}
 				command.Dir = work
-				command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work, "TMP=" + work, "TEMP=" + work, "LC_ALL=C", "LANG=C", "ZERO_AR_DATE=1"}
+				command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work, "TMP=" + work, "TEMP=" + work, "LC_ALL=C", "LANG=C", "ZERO_AR_DATE=1", "CLANG_MODULE_CACHE_PATH=" + work}
 				if output, err := command.CombinedOutput(); err != nil {
 					t.Fatalf("%s: %v\n%s", filepath.Base(tool), err, output)
 				}
@@ -220,6 +223,23 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 				flags = append(flags, "-mmacosx-version-min=27.0")
 			}
 			runTool(compiler, append(append([]string{}, flags...), "-c", module, "-o", object)...)
+			harnessCompiler := compiler
+			harnessSDK := ""
+			harnessFlags := append(append([]string{}, flags...), "-nostdinc")
+			if scenario.sdkHarness {
+				if host != "darwin/arm64" || selectedTarget != host {
+					t.Fatal("SDK harness requires the Darwin host and target")
+				}
+				harnessCompiler, harnessFlags = llvmDarwinSDKHarness(t, work)
+				for index, flag := range harnessFlags {
+					if flag == "-isysroot" && index+1 < len(harnessFlags) {
+						harnessSDK = harnessFlags[index+1]
+					}
+				}
+				if harnessSDK == "" {
+					t.Fatal("SDK harness omitted its system root")
+				}
+			}
 			harnessSource := scenario.harness
 			if harnessSource == "" {
 				harnessSource = "testdata/native-runtime/lifetime.c"
@@ -246,7 +266,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 				}
 			}
 			preprocessed := filepath.Join(work, "preprocessed-harness.c")
-			runTool(compiler, append(append([]string{}, flags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-I", originalHarnessDirectory, "-nostdinc", "-E", "-P", selectedHarness, "-o", preprocessed)...)
+			runTool(harnessCompiler, append(append([]string{}, harnessFlags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-iquote", originalHarnessDirectory, "-E", "-P", selectedHarness, "-o", preprocessed)...)
 			contents, err := os.ReadFile(preprocessed)
 			if err != nil {
 				t.Fatal(err)
@@ -279,16 +299,25 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 				}
 			}
 			entrySource, entryObject := filepath.Join(work, "entry.c"), filepath.Join(work, "entry.o")
+			bootstrapDeclaration, bootstrapCall := "", ""
+			if scenario.hostBootstrap != "" {
+				if !regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`).MatchString(scenario.hostBootstrap) {
+					t.Fatal("invalid host bootstrap symbol")
+				}
+				bootstrapDeclaration = fmt.Sprintf("extern int %s(int, char **, char **);\n", scenario.hostBootstrap)
+				bootstrapCall = fmt.Sprintf("    if (%s(argc, argv, environment)) return 73;\n", scenario.hostBootstrap)
+			}
 			entry := fmt.Sprintf(`extern int lo_cli_main(int, const char *const *, const char *const *);
 extern int lo_test_main(%s);
+%s
 static int equal(const char *a, const char *b) { while (*a && *a == *b) { ++a; ++b; } return *a == *b; }
 int main(int argc, char **argv, char **environment) {
-    if (argc > 1 && equal(argv[1], "--lo-console-writer")) {
+%s    if (argc == 2 && (equal(argv[1], "--lo-console-writer") || equal(argv[1], "--lo-process-supervisor") || equal(argv[1], "--lo-process-launcher"))) {
         return lo_cli_main(argc, (const char *const *)argv, (const char *const *)environment);
     }
     return lo_test_main(%s);
 }
-`, parameters, callArguments)
+`, parameters, bootstrapDeclaration, bootstrapCall, callArguments)
 			entryFile, err := os.Create(entrySource)
 			if err != nil {
 				t.Fatal(err)
@@ -299,7 +328,7 @@ int main(int argc, char **argv, char **environment) {
 				t.Fatalf("write runtime entry: %v, %v", writeErr, closeErr)
 			}
 			runTool(compiler, append(append([]string{}, flags...), "-fno-stack-protector", "-nostdinc", "-c", entrySource, "-o", entryObject)...)
-			runTool(compiler, append(append([]string{}, flags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-I", originalHarnessDirectory, "-fno-stack-protector", "-nostdinc", "-c", ownedHarness, "-o", harness)...)
+			runTool(harnessCompiler, append(append([]string{}, harnessFlags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-iquote", originalHarnessDirectory, "-fno-stack-protector", "-c", ownedHarness, "-o", harness)...)
 			var arguments []string
 			for _, argument := range target.LinkArgs {
 				switch argument {
@@ -322,8 +351,16 @@ int main(int argc, char **argv, char **environment) {
 					}
 				}
 			}
-			runTool(linker, arguments...)
-			if selectedTarget == "linux/arm64" && (host != selectedTarget || scenario.timeout == 0) {
+			if scenario.sdkHarness {
+				t.Logf("SDK fixture link: %s -target %s -mmacosx-version-min=27.0 -isysroot %s -Wl,-dead_strip %s %s %s %s -lbsm -framework Security -framework CoreFoundation -o %s", harnessCompiler, target.Triple, harnessSDK, object, harness, entryObject, archive, executable)
+				runTool(harnessCompiler, "-target", target.Triple, "-mmacosx-version-min=27.0", "-isysroot", harnessSDK,
+					"-Wl,-dead_strip", object, harness, entryObject, archive, "-lbsm", "-framework", "Security", "-framework", "CoreFoundation", "-o", executable)
+			} else {
+				runTool(linker, arguments...)
+			}
+			if scenario.run != nil {
+				scenario.run(t, executable, work)
+			} else if selectedTarget == "linux/arm64" && (host != selectedTarget || scenario.timeout == 0) {
 				capturePath := ""
 				if scenario.captureOutput {
 					capturePath = filepath.Join(work, llvmCaptureName)

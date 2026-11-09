@@ -18,6 +18,8 @@
 #endif
 
 #include "lo_process.h"
+#include "lo_process_supervisor.h"
+#include "../host/process/protocol.h"
 
 extern void *lo_native_spawn_acquire(int (*cancelled)(void *),void *token);
 extern void lo_native_spawn_release(void *ownership);
@@ -56,8 +58,9 @@ static int nonblock(int fd) {
 static void fail(LoProcessResult *r,int stage,int class_id) {
     if (!r->stage) {r->stage=stage;r->class_id=class_id;}
 }
-int lo_native_process_execute(const char *launcher,int embedded,const char *directory,
-    const unsigned char *configuration,size_t configuration_size,const LoProcessRequest *request,LoProcessResult *r) {
+static int execute(const char *launcher,int embedded,const char *directory,
+    const unsigned char *configuration,size_t configuration_size,const LoProcessRequest *request,LoProcessResult *r,
+    const LoProcessLifecycleHooks *hooks) {
     const unsigned char *frame=request->frame,*input=request->input;
     size_t frame_size=request->frame_size,input_size=request->input_size,capacity=request->output_bytes;
     LoProcessStop cancelled=request->stop;const void *token=request->stop_token;
@@ -103,6 +106,10 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     else {memcpy(temporary,"TMPDIR=",7);strcpy(temporary+7,directory);}
     char *environment[]={"CI=1",temporary,NULL};
     if(startup_cancelled(&startup)) {fail(r,1,startup_reason(&startup));setup=1;}
+    if(!setup && hooks) {
+        int denied=hooks->launch(hooks->context);
+        if(denied) {fail(r,1,denied>=1&&denied<=5?denied:2);setup=1;}
+    }
     int spawned=setup ? -1 : posix_spawn(&pid,launcher,&actions,&attributes,arguments,environment);
     free(temporary);
     int destroyed=posix_spawn_file_actions_destroy(&actions);
@@ -111,6 +118,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     if(attributes_destroyed){owned->attributes=attributes;owned->failures|=4;}
     if(spawned) {fail(r,1,2);goto finish;}
     r->started=1;
+    if(hooks) hooks->created(hooks->context,(int32_t)pid);
     if(destroyed||attributes_destroyed) fail(r,1,2);
     for(int i=0;i<7;i++) {
         int child_end=(i==1||i==2||i==4)?1:0;
@@ -122,7 +130,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
     EV_SET(&watch,(uintptr_t)pid,EVFILT_PROC,EV_ADD|EV_ENABLE|EV_CLEAR,NOTE_EXIT,0,NULL);
     if(kevent(queue,&watch,1,NULL,0,NULL)<0) fail(r,1,0);
     size_t frame_offset=0,configuration_offset=0,status_size=0;
-    unsigned char status[6];
+    unsigned char status[PROCESS_READY_BYTES];
     int ready=0,permitted=0,executed=0,exit_seen=0,reaped=0,stopping=0;
     for(;;) {
         int reason=cancelled(token);
@@ -130,8 +138,9 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
         if(!r->stage && now_ms()>=deadline) fail(r,7,LO_PROCESS_TIMEOUT);
         if(r->stage && !stopping) {
             stopping=1;
+            if(hooks) hooks->stopping(hooks->context,r->stage,r->class_id);
             for(int i=0;i<7;i++) for(int j=0;j<2;j++) if(release_fd(&pipes[i][j])) r->cleanup_complete=-1;
-            if(!reaped && !exit_seen) (void)kill(pid,SIGKILL);
+            if(!hooks && !reaped && !exit_seen) (void)kill(pid,SIGKILL);
         }
         struct kevent events[8]; struct timespec zero={0,0};
         int count=kevent(queue,NULL,0,events,8,&zero);
@@ -148,6 +157,7 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
             int state=0;pid_t observed=waitpid(pid,&state,WNOHANG);
             if(observed==pid) {
                 reaped=1;
+                if(hooks) hooks->reaped(hooks->context);
                 if(WIFEXITED(state)) {r->termination_kind=1;r->termination_value=WEXITSTATUS(state);}
                 else if(WIFSIGNALED(state)) {r->termination_kind=2;r->termination_value=WTERMSIG(state);}
                 else fail(r,5,2);
@@ -173,11 +183,26 @@ int lo_native_process_execute(const char *launcher,int embedded,const char *dire
                 }
                 if(*offset==size && release_fd(&pipes[i][1])) fail(r,i==0?2:1,0);
             } else if(i==4) {
-                ssize_t got=read(ports[i].fd,status+status_size,6-status_size);
+                size_t expected=status_size<6?6:status[0]=='R'?PROCESS_READY_BYTES:6;
+                ssize_t got=read(ports[i].fd,status+status_size,expected-status_size);
                 if(got>0) {
                     status_size+=(size_t)got;
-                    if(status_size==6) {
+                    if(status_size==6 && status[0]=='R') continue;
+                    if(status_size==(status[0]=='R'?PROCESS_READY_BYTES:6)) {
                         if(status[0]=='R' && status[1]==0 && status[2]==0 && status[3]==0 && status[4]==0 && status[5]==0 && !ready) {
+                            uint32_t execution_token[8];
+                            for(size_t word=0;word<8;word++) {
+                                size_t offset=6+word*4;
+                                execution_token[word]=((uint32_t)status[offset]<<24)|((uint32_t)status[offset+1]<<16)
+                                    |((uint32_t)status[offset+2]<<8)|status[offset+3];
+                            }
+                            if(lo_process_execution_matches(pid,execution_token)!=0) {fail(r,1,2);continue;}
+                            if(hooks) {
+                                LoProcessExecutionToken exact;
+                                memcpy(exact.word,execution_token,sizeof(exact.word));
+                                int denied=hooks->ready(hooks->context,(int32_t)pid,&exact);
+                                if(denied) {fail(r,1,denied>=1&&denied<=5?denied:2);continue;}
+                            }
                             ready=1;
                             EV_SET(&watch,(uintptr_t)pid,EVFILT_PROC,EV_ADD|EV_ENABLE|EV_CLEAR,NOTE_EXEC|NOTE_EXIT,0,NULL);
                             if(kevent(queue,&watch,1,NULL,0,NULL)<0) {fail(r,1,0);continue;}
@@ -220,5 +245,17 @@ finish:
     else {r->cleanup_complete=1;free(owned);}
     owned=NULL;
     return 0;
+}
+int lo_native_process_execute(const char *launcher,int embedded,const char *directory,
+    const unsigned char *configuration,size_t configuration_size,const LoProcessRequest *request,LoProcessResult *result) {
+    return execute(launcher,embedded,directory,configuration,configuration_size,request,result,NULL);
+}
+int lo_native_process_execute_descendants(const char *launcher,int embedded,const char *directory,
+    const unsigned char *configuration,size_t configuration_size,const LoProcessRequest *request,LoProcessResult *result,
+    const LoProcessLifecycleHooks *hooks) {
+    if(!hooks || !hooks->launch || !hooks->created || !hooks->ready || !hooks->reaped || !hooks->stopping) {
+        memset(result,0,sizeof(*result));result->stage=1;result->class_id=2;result->cleanup_complete=1;return 0;
+    }
+    return execute(launcher,embedded,directory,configuration,configuration_size,request,result,hooks);
 }
 #endif

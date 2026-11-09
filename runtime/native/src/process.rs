@@ -25,6 +25,19 @@ mod context_values;
 mod policy;
 #[path = "process_io.rs"]
 mod io;
+#[path = "process_ownership.rs"]
+mod ownership;
+#[path = "process_provider.rs"]
+mod provider;
+#[path = "process_supervisor.rs"]
+mod supervisor;
+#[path = "process_supervisor_wire.rs"]
+mod supervisor_wire;
+#[path = "process_resources.rs"]
+mod resources;
+pub(crate) use ownership::Limits as DescendantLimits;
+pub(crate) fn seal_ownership_provider() { provider::seal_registration(); }
+pub(crate) fn supervisor_main() -> i32 { supervisor::main() }
 pub use io::{DriverCallback, Limits, NativeResult};
 pub use context_values::{
     capture_context, capture_context_with_environment, parse_initial_context,
@@ -344,6 +357,7 @@ pub struct Processes {
     scopes: BTreeMap<String, policy::Scope>,
     roots: Vec<String>,
     limits: Limits,
+    descendants: Option<DescendantLimits>,
     state: Mutex<State>,
     changed: Condvar,
 }
@@ -360,6 +374,7 @@ pub fn empty() -> Processes {
         scopes: BTreeMap::new(),
         roots: vec![],
         limits: Limits::default(),
+        descendants: None,
         state: Mutex::new(State {
             registration_sealed: false,
             active: false,
@@ -515,6 +530,7 @@ pub fn configure(
     let (grants, launcher, roots) = (&policy.grants, policy.launcher.as_str(), &policy.roots);
     let mut p = empty();
     p.limits = limits.validate()?;
+    p.descendants = policy.descendants;
     if grants.is_empty() && launcher.is_empty() && roots.is_empty() {
         return Ok(p);
     }
@@ -1047,9 +1063,39 @@ pub unsafe extern "C" fn lo_context_process_ownership(context: *mut Context) -> 
     let state = context.session.processes.state.lock().unwrap();
     state.active as u32 | ((state.unresolved as u32) << 1) | ((state.quarantined as u32) << 2)
 }
+static REMOTE_GENERATION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+fn prepare_remote(context: &mut Context, processes: &Processes, executable: &str,
+    configuration: &[u8], frame: &[u8], input: &[u8], limits: DescendantLimits,
+    deadlines: supervisor::Deadlines, forward: bool) -> Result<supervisor::Inputs, Fault> {
+    let generation = REMOTE_GENERATION.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |value| value.checked_add(1))
+        .map_err(|_| host("Process supervisor generation is exhausted"))?;
+    let image = context.session.entry.path.as_ref().map_err(|_| host("Process program entry is unavailable"))?.clone();
+    let mut inventory = resources::Inventory::capture(context, processes, executable, generation)?;
+    let reserved = (|| {
+        let storage = supervisor::reservation(limits, configuration.len(), frame.len(), input.len(), inventory.storage()).map_err(limit)?;
+        context.values.preflight(storage)?;
+        context.values.reserve_temporary(storage)?;
+        Ok::<_, Fault>(storage)
+    })();
+    let storage = match reserved {
+        Ok(storage) => storage,
+        Err(primary) => {
+            let cleanup = inventory.close().and_then(|()| inventory.release_remote(resources::RemoteReleaseProof::complete(true, true, true).unwrap()));
+            if cleanup.is_ok() { context.values.release_temporary(inventory.storage()); }
+            else { std::mem::forget(inventory); }
+            return Err(crate::context::combine_cleanup(Some(primary), cleanup.err().map(host)).unwrap());
+        }
+    };
+    let setup = supervisor::Setup { descendants: limits, limits: processes.limits, deadlines,
+        launcher: processes.launcher.clone(), directory: Path::new(&processes.launcher).parent().unwrap().to_str().unwrap().to_owned(),
+        embedded: processes.embedded, forward, resources: inventory.len(), resource_storage: inventory.storage(), storage,
+        configuration: configuration.len(), command: frame.len(), input: input.len() };
+    Ok(supervisor::Inputs { image, generation, inventory, setup, configuration: configuration.to_vec(),
+        command: frame.to_vec(), input: input.to_vec() })
+}
 pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     let processes = context.session.processes.clone();
-    if processes.launcher.is_empty() {
+    if processes.launcher.is_empty() || (processes.descendants.is_some() && (!cfg!(target_os = "macos") || processes.driver.is_some())) {
         return Err(boundary_host_fault(Fault::Host(
             "runtime.process-unavailable",
             UNAVAILABLE.into(),
@@ -1205,7 +1251,6 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     let Data::Bytes(input) = &command.fields["stdin"].data else {
         return Err(host("invalid Process stdin"));
     };
-    let input = input.clone();
     {
         let mut state = processes.state.lock().unwrap();
         if state.closing || state.active || state.quarantined {
@@ -1221,20 +1266,44 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
         }
         state.active = true;
     }
+    let command_deadline = Instant::now() + Duration::from_millis(timeout_ms);
+    let deadline = command_deadline + Duration::from_millis(processes.limits.cleanup_ms);
+    let remote = if let Some(limits) = processes.descendants {
+        let absolute = match supervisor::Deadlines::new(timeout_ms, processes.limits.cleanup_ms) {
+            Ok(deadlines) => deadlines,
+            Err(reason) => { processes.state.lock().unwrap().active = false; processes.changed.notify_all(); return Err(host(reason)); }
+        };
+        match prepare_remote(context, &processes, &entries[0], &configuration, &frame, input, limits, absolute, forward) {
+            Ok(remote) => Some(remote),
+            Err(fault) => {
+                processes.state.lock().unwrap().active = false;
+                processes.changed.notify_all();
+                return Err(fault);
+            }
+        }
+    } else { None };
+    let input = if remote.is_none() { input.clone() } else { Vec::new() };
     let cancel = Arc::new(AtomicU32::new(0));
     let worker_cancel = cancel.clone();
     let worker_processes = processes.clone();
     let worker_locks = context.session.locks.clone();
     let worker_entry = context.session.entry.clone();
     let (tx, rx) = std::sync::mpsc::sync_channel(1);
-    let command_deadline = Instant::now() + Duration::from_millis(timeout_ms);
-    let deadline = command_deadline + Duration::from_millis(processes.limits.cleanup_ms);
+    let handoff = Arc::new(Mutex::new(remote));
+    let worker_handoff = handoff.clone();
     let spawned = std::thread::Builder::new().name("lo-process-owner".into()).spawn(move || {
         let p = &worker_processes;
+        let remote = worker_handoff.lock().unwrap().take();
         let mut result = NativeResult::default();
         let output = io::Output { events: tx.clone(), stop: worker_cancel.clone(), state: Mutex::new(io::OutputState::default()), maximum: p.limits.output_bytes };
+        let mut unavailable = false;
+        let mut released = 0;
+        let input_length = remote.as_ref().map_or(input.len(), |remote| remote.input.len());
         let request = io::Request::new(&frame, &input, p.limits, timeout_ms, forward, &output);
-        if let Some(driver) = p.driver {
+        if let Some(remote) = remote {
+            let completed = supervisor::execute(remote, &output);
+            result = completed.result; unavailable = completed.unavailable; released = completed.released;
+        } else if let Some(driver) = p.driver {
             unsafe { (driver.callback)(driver.userdata, &request, &mut result); }
         } else {
             #[cfg(target_os = "macos")]
@@ -1251,28 +1320,7 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
                 result.stage = 1; result.class_id = 2; result.cleanup_complete = 1;
             }
         }
-        let observed = output.state.lock().unwrap();
-        if let Some((stage, class)) = observed.failure { result.stage = stage; result.class_id = class; }
-        if !(0..=7).contains(&result.stage) || !(0..=5).contains(&result.class_id)
-            || !(0..=1).contains(&result.started) || !(0..=1).contains(&result.cleanup_complete)
-            || !(0..=2).contains(&result.termination_kind) || result.cleanup_failures & !7 != 0
-            || (result.cleanup_complete == 1 && result.ownership != 0)
-            || (result.stage == 0 && result.cleanup_failures != 0)
-            || (result.termination_kind == 1 && result.termination_value < 0)
-            || (result.termination_kind == 2 && result.termination_value <= 0)
-            || (result.stage == 0 && result.class_id != 0)
-            || (result.termination_kind != 0 && result.started != 1)
-            || (result.started == 1 && result.termination_kind == 0 && result.cleanup_complete == 1)
-            || result.stdin_written > input.len()
-            || [result.stdout_size, result.stderr_size] != observed.counts {
-            result.stage = 5; result.class_id = 2; result.cleanup_complete = 0;
-            result.stdout_size = observed.counts[0]; result.stderr_size = observed.counts[1];
-        }
-        drop(observed);
-        if result.stage == 0 && result.termination_kind == 0 {
-            result.stage = 1; result.class_id = 2; result.cleanup_complete = 0;
-        }
-        if result.stage == 0 && result.cleanup_complete == 0 { result.stage = 6; result.class_id = 2; }
+        output.complete(&mut result, input_length);
         {
             let mut state = p.state.lock().unwrap();
             state.active = false;
@@ -1283,14 +1331,28 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
             }
             p.changed.notify_all();
         }
-        let _ = tx.send(io::Event::Complete(result));
+        if released != 0 { let _ = tx.send(io::Event::Released(released)); }
+        let _ = tx.send(if unavailable { io::Event::Unavailable(result) } else { io::Event::Complete(result) });
     });
     if spawned.is_err() {
+        let mut complete = true;
+        if let Some(mut remote) = handoff.lock().unwrap().take() {
+            let storage = remote.setup.storage + remote.inventory.storage();
+            let closed = remote.inventory.close();
+            let released = if closed.is_ok() {
+                remote.inventory.release_remote(resources::RemoteReleaseProof::complete(true, true, true).unwrap())
+            } else { Err("Process unstarted owner cleanup failed".into()) };
+            complete = closed.is_ok() && released.is_ok();
+            if complete { context.values.release_temporary(storage); }
+            else { std::mem::forget(remote.inventory); }
+        }
         let mut state = processes.state.lock().unwrap();
         state.active = false;
+        if !complete { state.quarantined = true; state.unresolved = true; }
         processes.changed.notify_all();
         drop(state);
-        return Err(process_failure(site, &NativeResult { stage: 1, class_id: 2, cleanup_complete: 1, ..Default::default() }));
+        return Err(process_failure(site, &NativeResult { stage: 1, class_id: 2,
+            cleanup_complete: i32::from(complete), cleanup_failures: if complete { 0 } else { 4 }, ..Default::default() }));
     }
     let mut stdout = Vec::new();
     let mut stderr = Vec::new();
@@ -1318,6 +1380,11 @@ pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
         }
         match rx.recv_timeout(Duration::from_millis(5)) {
             Ok(io::Event::Complete(result)) => break result,
+            Ok(io::Event::Released(bytes)) => { context.values.release_temporary(bytes); }
+            Ok(io::Event::Unavailable(result)) => {
+                if result.cleanup_complete != 1 { return Err(process_failure(site, &result)); }
+                return Err(boundary_host_fault(Fault::Host("runtime.process-unavailable", UNAVAILABLE.into())));
+            }
             Ok(io::Event::Output { stream, bytes, reply }) => {
                 let reason = cancel.load(Ordering::SeqCst);
                 let delivered = if reason != 0 {

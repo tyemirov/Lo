@@ -2,6 +2,7 @@ use crate::locks::{close_file, identity, Grant, Identity};
 use crate::{context::*, value::*};
 use std::{
     fs::File,
+    os::fd::{AsRawFd, FromRawFd},
     path::{Path, PathBuf},
     sync::Mutex,
 };
@@ -104,6 +105,25 @@ impl Entry {
             .unwrap()
             .take()
             .map_or(Ok(()), |mut grant| grant.close())
+    }
+    pub(crate) fn duplicate_witnesses(
+        &self,
+        mut check: impl FnMut() -> Result<(), Fault>,
+        mut retain: impl FnMut(&Path, Identity, File),
+    ) -> Result<(), Fault> {
+        let pinned = self.pinned.lock().map_err(|_| host("program entry ownership is poisoned"))?;
+        let grant = pinned.as_ref().ok_or_else(|| host("program entry identity is unavailable"))?;
+        grant.visit_retained_witnesses(|path, identity, original| {
+            check()?;
+            let duplicate = unsafe { libc::fcntl(original.as_raw_fd(), libc::F_DUPFD_CLOEXEC, 16) };
+            if duplicate < 0 {
+                return Err(host(format!("duplicate retained program entry witness: {}", std::io::Error::last_os_error())));
+            }
+            // The caller owns each duplicate immediately, including partial
+            // snapshots. It must close them explicitly on every failure path.
+            retain(path, identity, unsafe { File::from_raw_fd(duplicate) });
+            Ok(())
+        })
     }
     pub fn expected_identity(&self) -> Result<Identity, String> {
         let pinned = self.pinned.lock().unwrap();

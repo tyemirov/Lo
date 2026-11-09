@@ -13,6 +13,7 @@ import sys
 
 from prepare import LOCK, ROOT, RUST_COMPONENTS, digest, local, pin_file, tree_digest
 from metal_assets import BRIDGE_SOURCES, KERNEL_SOURCES, LIBRARY, MANIFEST, validate_assets
+from process_sdk import build_objects
 
 TARGETS = {'darwin/arm64': 'aarch64-apple-darwin', 'linux/arm64': 'aarch64-unknown-linux-gnu'}
 
@@ -101,7 +102,7 @@ def native_c_environment(preparation: Path, tools: dict[str, dict[str, str]]) ->
     return result
 
 
-def process_archive(preparation: Path, tools: dict[str, dict[str, str]], archive: Path) -> Path:
+def process_archive(preparation: Path, tools: dict[str, dict[str, str]], archive: Path) -> tuple[Path, dict[str, object]]:
     work = local(preparation / 'process-native')
     work.mkdir(parents=True, exist_ok=True)
     compiler = str(local(Path(tools['clang']['path'])))
@@ -121,12 +122,14 @@ def process_archive(preparation: Path, tools: dict[str, dict[str, str]], archive
         if result.returncode:
             raise ValueError(f'native process {name} build failed: {result.stderr}')
         objects.append(str(output))
+    sdk_objects, sdk_receipt = build_objects(ROOT, work / 'sdk')
+    objects.extend(str(path) for path in sdk_objects)
     combined = local(work / 'liblo_runtime.a')
     shutil.copyfile(archive, combined)
     command = [str(local(Path(tools['llvm-ar']['path']))), 'q', str(combined), *objects]
     subprocess.run(command, env=environment, cwd=ROOT, stdin=subprocess.DEVNULL, check=True,
                    capture_output=True, text=True)
-    return combined
+    return combined, sdk_receipt
 
 
 def prepare_host_linker(preparation: Path, tool_pins: dict[str, dict[str, str]]) -> tuple[Path, Path]:
@@ -182,7 +185,7 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
         verify_platform(preparation)
     source_digest = tree_digest(local(ROOT / 'runtime/native'))
     process_sources = {name: pin_file(local(ROOT / 'runtime/native/host/process' / name))
-                       for name in ('launcher.c', 'normalization.c', 'protocol.h')}
+                       for name in ('launcher.c', 'normalization.c', 'protocol.h', 'execution_token.c')}
     tools = json.loads(local(preparation / 'tools.json').read_text())
     if tools['version'] != '21.1.8' or tools['archive'] != lock['artifacts'][0]:
         raise ValueError('prepared LLVM receipt differs from repository pins')
@@ -217,6 +220,7 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
     distribution: dict[str, object] = {'abi': 'lo-native-3', 'llvm': '21.1.8', 'host': 'darwin/arm64',
                                        'compiler': tool('clang'), 'targets': {}}
     target_records = {}
+    process_sdk_receipt = None
     for target in targets:
         triple = TARGETS[target]
         command = [str(cargo), 'build', '--frozen', '--offline', '--release', '--target', triple,
@@ -230,7 +234,7 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
             raise ValueError(f'{triple} runtime build failed: {result.stderr}')
         archive = local(preparation / 'cargo-target' / triple / 'release/liblo_runtime.a')
         if target == 'darwin/arm64':
-            archive = process_archive(preparation, tools['tools'], archive)
+            archive, process_sdk_receipt = process_archive(preparation, tools['tools'], archive)
         runtime = copy_file(archive, 'runtime/' + triple + '/liblo_runtime.a')
         if target == 'darwin/arm64':
             inputs = {'system': copy_file(local(ROOT / 'tools/nativeruntime/platform/darwin/libSystem.tbd'),
@@ -269,8 +273,10 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
                                                                 'stdout': result.stdout, 'stderr': result.stderr}, indent=2) + '\n')
         if result.returncode:
             raise ValueError(f'Metal runtime build failed: {result.stderr}')
-        archive = process_archive(preparation, tools['tools'],
+        archive, metal_sdk_receipt = process_archive(preparation, tools['tools'],
                                   local(preparation / 'cargo-target' / triple / 'release/liblo_runtime.a'))
+        if metal_sdk_receipt != process_sdk_receipt:
+            raise ValueError('Process SDK inputs changed between runtime variants')
         archive, kernel = metal_archive(preparation, tools['tools'], archive, library, identity)
         metal_record = dict(target_records['darwin/arm64'])
         metal_record['runtime'] = copy_file(archive, 'runtime/' + triple + '/metal/liblo_runtime.a')
@@ -296,7 +302,7 @@ def build(preparation: Path, output: Path, targets: list[str], include_metal: bo
     manifest.write_text(json.dumps(distribution, indent=2) + '\n')
     provenance = {'runtime_source_sha256': source_digest, 'rust': rust,
                   'llvm': tools, 'cargo_environment': environment, 'manifest_sha256': digest(manifest),
-                  'process_sources': process_sources,
+                  'process_sources': process_sources, 'process_sdk': process_sdk_receipt,
                   'host_linker': {'executable': pin_file(host_linker),
                                   'source': pin_file(local(ROOT / 'tools/nativeruntime/host_linker.c')),
                                   'sdk_sha256': tree_digest(sdk)}}

@@ -100,13 +100,16 @@ The standard runner opens one canonical `processhost.Session` for `run`, `serve`
 The session owns native policy, the executable registry, participating File adapters, and retained shutdown.
 `Close(ctx)` closes admission and starts one shutdown owner. Its context bounds only the caller wait.
 `WaitRetained()` joins that same owner without a cleanup retry. A caller timeout does not release ownership.
+
 Custom Go boundaries are trusted host implementations and must enforce qualification.
 Generic commit execution validates the result type without a universal host qualification gate.
 HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
 HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
+
 Qualification remains mandatory before standard-host native activation acceptance. Reviewed qualification probes have a separate execution gate.
 The selected cleanup profile adds per-initial-executable mutation roots and Unix endpoints, without combined authority across commands.
-Registered exec chains retain the initial scope. Forked and spawned descendants remain denied.
+Registered exec chains retain the initial scope.
+Forked and spawned descendants remain denied without explicit [descendant profile](process-descendant-ownership.md) selection.
 
 Specification sections 22 and 23 define the verifier and runtime contracts.
 The [Open Decisions](#open-decisions) section identifies the final contract status.

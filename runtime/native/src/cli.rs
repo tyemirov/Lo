@@ -294,6 +294,10 @@ pub unsafe extern "C" fn lo_cli_main(
     argv: *const *const c_char,
     _entry_environment: *const *const c_char,
 ) -> c_int {
+    crate::process::seal_ownership_provider();
+    if argc == 2 && CStr::from_ptr(*argv.add(1)).to_bytes() == b"--lo-process-supervisor" {
+        return crate::process::supervisor_main();
+    }
     if argc == 2 && CStr::from_ptr(*argv.add(1)).to_bytes() == b"--lo-console-writer" {
         return crate::console::worker();
     }
@@ -401,6 +405,9 @@ unsafe fn cli_main(
     let mut process_endpoints = vec![];
     let mut process_launcher = String::new();
     let mut process_limits = crate::process::Limits::default();
+    let mut process_descendants = false;
+    let mut descendant_limits = crate::process::DescendantLimits::default();
+    let mut descendant_limit_flags = std::collections::BTreeSet::new();
     let mut process_limit_flags = std::collections::BTreeSet::new();
     let mut launcher_set = false;
     let mut http_grants = vec![];
@@ -439,6 +446,32 @@ unsafe fn cli_main(
             format_set = true;
             if format != "text" && format != "json" {
                 error = Some(format!("unknown output format {format:?}"))
+            }
+        } else if arg == "--process-descendants" {
+            if process_descendants {
+                error = Some("duplicate --process-descendants".into());
+            }
+            process_descendants = true;
+        } else if matches!(arg, "--max-process-descendants" | "--max-process-tokens"
+                          | "--max-process-events" | "--process-kernel-limit") {
+            if !descendant_limit_flags.insert(arg) || i + 1 == args.len() {
+                error = Some(format!("{arg} requires one positive decimal integer"));
+                break;
+            }
+            i += 1;
+            let value = &args[i];
+            let parsed = value.parse::<u64>().ok().filter(|value| *value > 0);
+            if value.is_empty() || !value.bytes().all(|byte| byte.is_ascii_digit())
+                || parsed.is_none() || (arg != "--max-process-events" && parsed.unwrap() > u32::MAX as u64) {
+                error = Some(format!("invalid {arg}: require a positive decimal integer within its finite bound"));
+            } else {
+                let value = parsed.unwrap();
+                match arg {
+                    "--max-process-descendants" => descendant_limits.max_processes = value as u32,
+                    "--max-process-tokens" => descendant_limits.max_tokens = value as u32,
+                    "--max-process-events" => descendant_limits.max_events = value,
+                    _ => descendant_limits.kernel_processes = value as u32,
+                }
             }
         } else if arg == "--process-forward-output" && process_limits.forward_streams == 0 {
             process_limits.forward_streams = 3;
@@ -597,6 +630,9 @@ unsafe fn cli_main(
     if let Err(message) = &http {
         error = Some(message.clone());
     }
+    if !process_descendants && !descendant_limit_flags.is_empty() {
+        error = Some("descendant limits require --process-descendants".into());
+    }
     let process_policy = crate::process::Policy::new(
         process_grants,
         process_launcher,
@@ -604,7 +640,7 @@ unsafe fn cli_main(
         &process_writes,
         &process_prunes,
         &process_endpoints,
-    );
+    ).and_then(|policy| policy.with_descendants(process_descendants.then_some(descendant_limits)));
     console.configure(console_maximum, format == "json", serving);
     if let Ok(policy) = &process_policy {
         if let Err(message) = policy.protect_images(&console.image_paths()) {

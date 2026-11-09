@@ -20,9 +20,16 @@ Only an explicit `commit` activates a target.
 | File writes and appends | `--write-root` | Confine changes to an opened directory root. |
 | Directory observations | `--list-root` | Keep directory identity and request identity. |
 | File removal | `--remove-root` | Validate the ordered selection before removal. |
+| Recursive observations | `--observe-tree-root` | Authorize retained descendant observations and tree snapshots. |
+| Recursive removal | `--remove-tree-root` | Authorize removal under retained recursive authority. |
 | Open-file probe | `--open-files-root` | Use the fixed probe with its executable identity and bounded output. |
 | Process execution | `--process-allow`, `--process-launcher`, `--process-read-root` | Authorize explicit executable identities and directory roots. |
 | Process limits | `--max-process-ms`, `--max-process-cleanup-ms`, `--max-process-output-bytes`, `--process-forward-output` | Set duration, cleanup, per-stream output, and forwarding authority. |
+| Descendant Process execution | `--process-descendants` | Select the Darwin descendant profile with explicit provider admission. |
+| Live process limit | `--max-process-descendants` | Set the maximum number of live command processes. Default: `256`. |
+| Execution token limit | `--max-process-tokens` | Set the maximum number of retained execution tokens. Default: `1024`. |
+| Event work limit | `--max-process-events` | Set the maximum event work for one activation. Default: `1000000`. |
+| Kernel process limit | `--process-kernel-limit` | Set the initial command's exact hard `RLIMIT_NPROC` value. Default: `1024`. |
 | HTTP client | `--http-allow` | Authorize the selected method and HTTP origin. |
 | HTTP server | `serve --listen` | Authorize the port. |
 | Console output | `--max-console-bytes` | Enable inherited stdout/stderr with a logical-byte quota. |
@@ -33,6 +40,7 @@ File observations belong to one request.
 Removal rejects foreign observations, changed identities, duplicate names, and invalid entry kinds.
 Process registrations and the open-file probe protect their executable paths from file changes.
 Cancellation stops blocked file work and prevents subsequent commits.
+The [retained observation contract](file-descendant-observations.md#host-authority) and [tree removal contract](file-tree-removal.md#removal-authority) define recursive grants.
 
 ## Console Output And Terminal Results
 
@@ -60,6 +68,11 @@ The [lock header](../runtime/native/include/lo_program_lock.h) supplies embeddin
 Darwin arm64 supplies the current qualified process host.
 Linux arm64 keeps `runtime.process-unavailable`.
 Pure process constructors are available on both targets.
+
+The [F036 descendant profile](process-descendant-ownership.md) defines explicit descendant authority and provider admission.
+Without `--process-descendants`, the Process profile denies fork and spawn.
+The four descendant limits require this selector and positive decimal values.
+The [finite-limit contract](process-descendant-ownership.md#finite-host-limits) defines the ranges, defaults, and counting rules.
 
 The Darwin artifact contains the process launcher.
 The operator can select that artifact with `--process-launcher` and its absolute path.
