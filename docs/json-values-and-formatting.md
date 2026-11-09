@@ -2,7 +2,7 @@
 
 This document specifies the F031 contract.
 Compiler checks and focused native acceptance passed on Darwin and Linux QEMU.
-Final stack CI remains pending.
+Final shared stack CI passed.
 All selected operations are pure and require no host authority or commit activation.
 Application field names, report text, and selection policy remain in application flows.
 

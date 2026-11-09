@@ -2,7 +2,7 @@
 
 This document specifies the implemented F034 contract.
 Focused native checks and independent review passed.
-Final stack CI remains pending.
+Final shared stack CI passed.
 The [metadata contract](file-system-observations.md) defines file observations.
 The [retained observation contract](file-descendant-observations.md) defines descendant authority.
 

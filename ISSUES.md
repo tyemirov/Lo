@@ -467,7 +467,7 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   - Verify that package boundaries cannot hide effects or grant capabilities.
   - Resolve each syntax and semantic decision before its dependent feature starts.
 
-- [-] [P007] (P1) {F024} Select a confined descendant process ownership model
+- [x] [P007] (P1) {F024} Select a confined descendant process ownership model
   Goal:
   Select a generic execution profile that owns supported child processes through complete cleanup.
 
@@ -493,8 +493,9 @@ M400R, M401R, M402R, M403R, M404R, M405R, M406R, and M407R remain open as recurr
   Controlled native probes and the bounded lifecycle model passed their selected checks.
   Native Endpoint Security admission returned an entitlement error. Entitled event delivery remains unverified.
 
-  F036 must implement the controller and public acceptance with an injected provider.
-  The current execution profile continues to deny descendants. Final stack CI remains pending.
+  F036 implements the controller and public acceptance with an injected provider.
+  The default execution profile continues to deny descendants. The explicit descendant profile passed software acceptance.
+  Final shared stack CI passed.
 
   The [implementation roadmap](docs/mac-cleanup-implementation-plan.md) records scope and acceptance boundaries.
 
@@ -1673,7 +1674,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Reject probe names outside the selected candidate batch.
   - Complete resource and native target conformance checks, independent review, and final stack CI.
 
-- [-] [F031] (P1) {F030,I018} Add generic JSON extraction and numeric presentation
+- [x] [F031] (P1) {F030,I018} Add generic JSON extraction and numeric presentation
   Goal:
   Supply typed JSON values, decimal integer parsing, and deterministic numeric formatting for application reports.
 
@@ -1686,7 +1687,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep decoder depth, work, and value limits under explicit host quotas.
 
   Deliverables:
-  - Current status: compiler rules, native processors, strict checkpoint parsing, and bounded diagnostics are implemented. Focused native acceptance and independent review passed. Final stack CI remains pending.
+  - Current status: compiler rules, native processors, strict checkpoint parsing, and bounded diagnostics are implemented. Focused native acceptance and independent review passed. Final shared stack CI passed.
   - Add selected pure processors in the single native runtime.
   - Add local JSON and report fixtures without a live Docker dependency.
 
@@ -1697,7 +1698,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Compare local Docker-like metadata extraction and report outputs with independent expectations on supported native targets.
   - Complete independent review and final stack CI.
 
-- [-] [F032] (P1) {F025,I018} Add coherent file identity, allocation, clock, and volume observations
+- [x] [F032] (P1) {F025,I018} Add coherent file identity, allocation, clock, and volume observations
   Goal:
   Supply public metadata and fresh host measurements for generic filesystem decisions.
 
@@ -1723,9 +1724,9 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   File identity, allocation, fresh clock, and volume observations are implemented.
   Focused Darwin and Linux QEMU fixtures passed, including shared-session provider registration and existing file-observation regressions.
   Independent review found no remaining correctness issue.
-  Final stack CI remains pending.
+  Final shared stack CI passed.
 
-- [-] [F033] (P1) {F025,I018} Add explicit descendant directory authority and retained child observations
+- [x] [F033] (P1) {F025,I018} Add explicit descendant directory authority and retained child observations
   Goal:
   Support recursive filesystem traversal without expanding existing exact grants.
 
@@ -1739,7 +1740,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Release completed handles under existing worklist resource accounting.
 
   Deliverables:
-  - Current status: compiler and native implementation passed focused validation and independent review. Final stack CI remains pending.
+  - Current status: compiler and native implementation passed focused validation and independent review. Final shared stack CI passed. Shared immutable directory metadata preserves the existing allocation budgets.
   - Add selected child, refresh, entry, and re-observation operations in the single native runtime.
   - Specify bounded retained handles and snapshot authority rules.
 
@@ -1750,7 +1751,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Visit more than 128 cumulative directories under bounded live quotas in deep and wide fixtures.
   - Complete public native target conformance checks, independent review, and final stack CI.
 
-- [-] [F034] (P1) {F032,F033,I018} Add bounded tree snapshots and checked recursive removal
+- [x] [F034] (P1) {F032,F033,I018} Add bounded tree snapshots and checked recursive removal
   Goal:
   Bind descriptor-safe recursive removal to an approved tree observation with complete eligibility preflight.
 
@@ -1764,7 +1765,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Report confirmed partial progress without a claim of atomic deletion or rollback.
 
   Deliverables:
-  - Current status: compiler checks, focused native checks, and independent review passed. Final stack CI remains pending.
+  - Current status: compiler checks, focused native checks, and independent review passed. Final shared stack CI passed.
   - Add the selected snapshot, removal target, guard, receipt, and resource-lifetime contracts in the single native runtime.
   - Update the draft's parent/root-only target if it cannot enforce expected state.
 
@@ -1775,7 +1776,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify complete preflight, postorder removal, late failure progress, cancellation, and close failures.
   - Complete native target conformance checks, independent review, and final stack CI.
 
-- [-] [F035] (P1) {F024,F026,I018} Add host-admitted command deadlines and forwarded output
+- [x] [F035] (P1) {F024,F026,I018} Add host-admitted command deadlines and forwarded output
   Goal:
   Support bounded command duration and explicit forwarded output under trusted host policy.
 
@@ -1805,7 +1806,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   Immutable command options, host limits, forwarded output, and the canonical native driver ABI are implemented.
   Focused Darwin and Linux QEMU checks passed, including output failures, cleanup bounds, and shared-session registration.
   Existing Process, Console, transport, and lock regressions passed.
-  Independent review found no remaining correctness issue. Final stack CI remains pending.
+  Independent review found no remaining correctness issue. Final shared stack CI passed.
 
 - [x] [F036] (P1) {P007,F035,I018} Implement the qualified descendant process profile
   Goal:
@@ -2607,7 +2608,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Verify package errors, denied capabilities, execution limits, and diagnostics across modules.
   - Verify the formatter, test runner, editor navigation, and source-level debugging on these applications.
 
-- [-] [I013] (P1) {F028,F029,F030,F031,F032,F034,F035,F036,I018} Complete the mac-cleanup Lo application with confined workflow acceptance
+- [x] [I013] (P1) {F028,F029,F030,F031,F032,F034,F035,F036,I018} Complete the mac-cleanup Lo application with confined workflow acceptance
   Goal:
   Replace proposed calls with accepted generic contracts and validate one complete cleanup application inside Lo.
 
@@ -2623,7 +2624,7 @@ The [Metal implementation plan](docs/metal-backend-plan.md) owns the planned bac
   - Keep actual package-cache and Docker cleanup outside acceptance.
 
   Deliverables:
-  - Current status: typed helpers, direct-file flows, recursive-cache flows, and whole-tree flows use implemented contracts. Full workflow acceptance and final CI remain pending.
+  - Current status: the complete application uses implemented contracts. All five milestones and full workflow software acceptance passed. Independent review and final shared stack CI passed.
   - Make the complete application pass type checking and executable fixture acceptance without proposed APIs.
   - Add public fixtures, documented commands, source identities, and a category-level behavior matrix.
   - Keep later modules and packages outside the initial implementation dependency chain.

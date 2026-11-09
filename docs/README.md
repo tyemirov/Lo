@@ -76,7 +76,8 @@ The [reference audit](language-reference-audit.md) connects language rules with 
 
 The [planned features](../specification.md#planned-features) are separate from implemented behavior.
 Application designs can contain proposed calls and need not be executable.
-For example, the [mac-cleanup roadmap](mac-cleanup-implementation-plan.md) records work that remains outside the implemented contract.
+The [mac-cleanup source](examples/mac-cleanup.lo) now uses implemented operations and passes type checking.
+Its [roadmap](mac-cleanup-implementation-plan.md) records the completed implementation and software acceptance.
 
 ## Documentation Changes
 

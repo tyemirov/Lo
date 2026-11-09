@@ -389,10 +389,15 @@ The [checkpoint](evidence/process-context-cleanup/checkpoint.json) preserves exa
 
 ## Deferred Work
 
-The current contract does not include cleanup locks, extra file metadata, file watching, HTTP retry policy, or live command pipelines.
+The current contract does not include file watching, HTTP retry policy, or live command pipelines.
 Before implementation, specify each addition through the shared operation contract.
 Higher-order adapter functions remain available for justified domain semantics.
-The full mac-cleanup workflow also depends on the other inputs and policies in its application plan.
+
+F029 supplies cleanup locks, and F032 supplies additional file metadata.
+The complete application composes these contracts with its own inputs and policies.
+Focused application acceptance passed. Final shared stack CI passed.
+
+## Earlier Adapter Checkpoints
 
 The earlier pure Process checkpoint passed `CI=1 make ci </dev/null` with exit status `0`.
 Full interpreter integration took 43.391 seconds, and full native integration took 522.053 seconds.

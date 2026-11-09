@@ -1,7 +1,7 @@
 # Retained Descendant Observations
 
 Status: implemented F033 contract. Focused validation and independent review passed.
-Final stack CI remains pending.
+Final shared stack CI passed.
 
 Lo supplies retained filesystem observations for general application traversal.
 Applications select owners, devices, ages, names, and descent rules.

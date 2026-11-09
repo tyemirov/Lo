@@ -1,8 +1,10 @@
 # mac-cleanup Implementation Roadmap
 
-Status: technical plan and implementation backlog, updated on November 8, 2026.
-This plan does not implement a new language operation or establish full cleanup acceptance.
-The [application design](mac-cleanup-script-design.md) owns the observed workflow and its draft interfaces.
+Status: implementation and acceptance record, updated on November 9, 2026.
+The complete application passes type checking and focused workflow acceptance.
+F036 workflow composition passed. The Metal-linked application CLI passed without GPU operations. Final shared stack CI passed.
+
+The [application design](mac-cleanup-script-design.md) owns the current workflow and its source identity.
 The [application plan](mac-cleanup-plan.md) owns the cleanup policies and acceptance boundary.
 
 ## Outcome And First Work
@@ -21,14 +23,14 @@ P009 and I014 through I018 complete the [single-runtime cleanup](single-runtime-
 The Go compiler frontend remains. The Rust native runtime is the only application runtime.
 Compiler commands build the program. The produced executable supplies run and serve commands.
 
-M2 then combines those leases with F030 processors, F032 observations, and F035 command policy.
+M2 combines those leases with F030 processors, F032 observations, and F035 command policy.
 This sequence does not depend on modules, user-defined types, generics, or packages.
 
 ## Verified Foundation
 
 | Area | Implemented behavior | Boundary that remains |
 | --- | --- | --- |
-| F024 | Immutable Process contexts, executable discovery, typed results, bounded transport, and selected cleanup scopes. | Current qualified activation is Darwin. Forked and spawned descendants remain denied. |
+| F024 | Immutable Process contexts, executable discovery, typed results, bounded transport, and selected cleanup scopes. | Darwin activation uses explicit host authority. Descendants require the separate F036 selection. |
 | F025 | Invocation arguments, home, UIDs, captured time, file owner and timestamps, exact directory observations, scans, and checked removal. | F032 supplies public identity and allocated size. |
 | F032 | Public device, inode, and allocation fields, fresh time, and exact volume measurements. | Reported allocation does not prove a volume free-space increase. |
 | F033 | Separate recursive grants, retained child observations, and bounded root leases. | Exact grants do not authorize descendant observations. |
@@ -48,32 +50,32 @@ Those records describe the earlier validation of their contracts.
 
 F030 supplies the [selected pure value operations](value-processors.md).
 The executable file-policy and probe examples use those operations with ordinary typed flows.
-The full application draft still contains proposed file and Process interfaces.
+The full application uses implemented file and Process interfaces.
 Typed application flows now supply Boolean operations and collection policies.
 
-Some draft calls can use current operations or ordinary named flows.
-For example, exact root observations can use `File.directory`, `File.list`, and `File.scan`.
-The draft's `File.Directory.open` must not become an alias for the current root operation.
+Exact root observations use `File.directory`, `File.list`, and `File.scan`.
+Retained parent and child observations replace the proposed path-only predicates.
 
 ## Work Packages And Dependencies
 
 F026 through F028 complete M1.
 The [CLI contract](cli-runtime-design.md) defines their selected interfaces and behavior.
 F030 adds the selected value processors and executable policy examples.
+
 F032 now supplies the [filesystem observation contract](file-system-observations.md).
 F035 supplies admitted deadlines and bounded command-output forwarding.
 F033 supplies [retained descendant observations](file-descendant-observations.md).
 F034 supplies [tree snapshots and checked removal](file-tree-removal.md).
+
 F031 defines [JSON values and text formatting](json-values-and-formatting.md).
 Its compiler checks and focused native acceptance passed on Darwin and Linux QEMU.
-Final stack CI remains pending.
+Final shared stack CI passed.
 F036 implementation follows the selected descendant design.
 
 F030 through F036 and I013 depend on I018.
-P007 research can continue during filesystem implementation.
 P007 now selects the [descendant ownership design](process-descendant-ownership.md).
 Its controlled probes and bounded model do not establish entitled native-provider execution.
-F036 must implement the same ownership controller for native and injected providers.
+F036 uses the same ownership controller for native and injected providers.
 
 | Issue | Work package | Direct dependencies | Observable completion |
 | --- | --- | --- | --- |
@@ -143,7 +145,7 @@ flowchart LR
 M2 now uses the canonical application flows through native integration fixtures.
 Exact root operations replace draft observations. Checked removal supplies identity and application-guard checks.
 The fixtures cover probe framing, changed entries, confirmed counts, empty selection, and category continuation.
-The full workflow remains M5 work.
+M5 extends this acceptance to the complete workflow.
 
 M3 now uses retained root and child observations through the canonical cache flows.
 The fixtures cover sorted probes, directory preservation, owner changes, allocation counters, and cancellation with confirmed progress.
@@ -156,10 +158,11 @@ Changed observations produce a visible skip before activation.
 Checked activation failures remain category failures with confirmed progress.
 Native fixtures cover root replacement, symlinks, retained descendant authority, and later independent categories.
 
-I013 can add incremental fixture entry sources after each milestone.
-Its complete acceptance remains open until M5.
-P007 research can proceed during the single-runtime cleanup and file implementation.
-It must not delay M1 through M4 or weaken current descendant denial.
+M5 now checks the complete application source with explicit fixture settings.
+Focused fixtures cover package commands, temporary roots, Docker validation, reports, category continuation, and terminal failure.
+Linux QEMU fixtures cover help, argument errors, and UID rejection before Process activation.
+The complete workflow passed under the F036 controller with an actual command child and per-command cleanup proof.
+The Metal-linked application CLI passed without GPU operations. Final shared stack CI passed.
 
 ## Console And Terminal Contracts
 
@@ -182,9 +185,8 @@ Requirements:
 - Keep earlier confirmed output visible after a later failure.
 - Define CLI defaults, embedding injection, and server-request sink ownership before implementation.
 
-The Go implementation wraps `execution.Boundary` with Console activation.
-The runner supplies an explicit output owner to that boundary.
-Native Session, adapter dispatch, values, ABI exports, and CLI setup implement the same contract.
+Native Session, adapter dispatch, values, ABI exports, and CLI setup implement the output contract.
+The native host supplies an explicit output owner.
 The catalog, type checker, Rust runtime, inspector, and semantic inventory include the Console target.
 
 The selected output protocol resolves `--format json` through NDJSON console events and the final result envelope.
@@ -204,12 +206,12 @@ Nested values must not select a status or emit trailing payloads.
 An ordinary Int return keeps its ordinary value semantics.
 
 Pure error handlers cannot commit Console targets.
-The draft uses terminal payloads for help, startup errors, and UID rejection.
+The application uses terminal payloads for help, startup errors, and UID rejection.
 The selected constructor accepts status, stdout bytes, and stderr bytes.
 
-The draft startup handler returns structured status and message data.
+The application startup handler returns structured status and message data.
 The outer reporting flow constructs the fallible terminal result.
-The executable CLI example verifies this pattern without the draft's remaining proposed operations.
+The executable CLI example and complete application fixtures verify this pattern.
 
 Requirements:
 
@@ -261,7 +263,7 @@ Boolean composition can use Match and ordinary pure flows.
 UTF-8 conversions and scalar predicates already exist.
 New aliases for implemented behavior are outside this plan.
 
-| Draft call family | Owner | Disposition |
+| Application call family | Owner | Disposition |
 | --- | --- | --- |
 | `CLI.parse` | F028 | Implemented pure declarations, structured errors, and help. |
 | `Console.Line.new` | F026 | Implemented committed output boundary. |
@@ -270,15 +272,15 @@ New aliases for implemented behavior are outside this plan.
 | Boolean, list, byte, glob, and text processors | F030, I013 | Implemented selected processors. Typed application flows supply Boolean composition, chunks, duplicate removal, and equality. |
 | `File.Path.join`, `parent`, `name`, `to_string` | F030 | Implemented lexical paths without host observations. |
 | `Process.Arguments.format_shell` | F030 | Implemented POSIX shell display text. Process activation receives the original arguments. |
-| `Int.parse`, `Float.format_fixed`, `String.format`, `JSON.*` | F031 | Select numeric parsing, presentation, JSON values, and typed extraction. |
+| `Int.parse`, `Float.format_fixed`, `String.format`, `JSON.*` | F031 | Implemented numeric parsing, presentation, JSON values, and typed extraction. |
 | `Clock.now_unix_ns`, `File.System.usage` | F032 | Implemented fresh time and volume measurements under the selected observation contract. |
-| `File.Path.resolve`, `exists`, `is_directory`, `is_symlink` | F033 | Reuse equivalent exact observations or select an explicitly authorized observation contract. |
-| `File.Directory.*`, `File.Entry.observe` | F033 | Reuse exact-root operations and add only necessary retained child behavior. |
+| Retained parent and entry observations | F033, I013 | Implemented optional-directory flows replace proposed path predicates. |
+| `File.Directory.*`, `File.Entry.observe` | F033 | Implemented retained child observations under explicit recursive authority. |
 | `File.Tree.snapshot`, `File.Tree.Remove.checked` | F034 | Implemented bounded snapshots and activation bound to approved state. |
-| `Process.Command.with_timeout`, `with_output` | F035 | Add host admission, bounded output, and confirmed timeout cleanup. |
+| `Process.Command.with_timeout`, `with_output` | F035 | Implemented host admission, bounded output, and confirmed timeout cleanup. |
 
 The quoted short path names belong to the `File.Path` family in their row.
-The draft family table assigns selection work without requiring every draft name to become a builtin.
+Application helper flows remain separate from generic language operations.
 
 Requirements:
 
@@ -343,8 +345,7 @@ Quota exhaustion fails explicitly before additional mutation.
 
 These policies are distinct.
 The current fixed probe cannot silently stand in for the other two policies.
-The first implementation choice is explicit Process composition with F030 byte helpers and F035 deadlines.
-A new generic probe operation needs a separate contract if that composition cannot retain the necessary identities.
+The application uses explicit Process composition with F030 byte helpers and F035 deadlines.
 Command arguments, batch size, stderr policy, and filename predicates stay in application code.
 
 ### F034: Tree Ownership And Removal
@@ -373,8 +374,8 @@ Requirements:
 - Keep logical bytes, allocated bytes, and observed free-space change separate.
 - Verify bounded handles with snapshots containing more than 128 directories.
 
-I013 must replace the draft's parent/root-only target with `File.Tree.Remove.checked` and the approved snapshot.
-The draft's path-only tree tasks must retain the discovered parent and root observations instead.
+I013 uses `File.Tree.Remove.checked` with the approved snapshot.
+Tree tasks retain the discovered parent and root observations.
 Snapshot comparison, probes, final checks, and deletion remain separate operations.
 The implementation must state its bounded race guarantee and trusted-host assumptions.
 It must not claim atomic whole-tree removal, rollback, or exclusion of arbitrary host writers.
@@ -399,22 +400,22 @@ A command deadline becomes recoverable `Process.Timeout` only after complete own
 Parent cancellation, budget failure, cleanup failure, and uncertain ownership remain terminal.
 Confirmed filesystem and daemon effects remain visible after timeout or cancellation.
 
-Forwarded child output needs bounded transport through host-owned output sinks.
-It must not bypass output quotas or expose unrelated host descriptors.
-The contract must select result fields, output order, backpressure, sink failure, and cleanup behavior for each output mode.
+Forwarded child output uses bounded transport through host-owned output sinks.
+It obeys output quotas and does not expose unrelated host descriptors.
+The [command policy](process-command-policy.md) defines result fields, output order, backpressure, sink failure, and cleanup behavior.
 Trusted launcher inputs and child environment values remain separate.
 Any changed wire format has one canonical decoder and rejects obsolete frames.
 
 P007 supplies controlled evidence for a stronger process ownership model.
 Its fixtures include fork, spawn, registered exec chains, detached sessions, inherited pipes, and child exit races.
 Process-group termination alone is insufficient evidence for detached descendants.
-The design must preserve per-initial-executable scopes and prevent authority union across an exec chain.
-F036 implements only the selected, qualified model.
-Until then, the current descendant denial remains effective.
+The [descendant profile](process-descendant-ownership.md) preserves each initial executable's scope across registered exec chains.
+F036 implements this selected model.
+Without explicit descendant authority, the current profile denies fork and spawn.
 
 ## Application Composition And Acceptance
 
-I013 turns the current design source into one checked executable application.
+I013 supplies one checked executable application.
 The workflow accepts explicit settings and host inputs in shared named flows.
 The default entry supplies the application's declared macOS paths and modes.
 Fixture entries supply repository-owned roots and controlled host observations to those same flows.
@@ -436,7 +437,7 @@ The harness must verify that shared flow definitions match the current applicati
 | Docker | Ambient overrides, selected context/builder/endpoint validation, malformed JSON, response failures, and confirmed daemon requests. |
 | Completion | Ordered labels, ordinary failure continuation, terminal failure stop, accurate counters, free-space reports, and aggregate status. |
 
-The fixtures use controlled commands and a local Docker-like endpoint.
+The fixtures use controlled commands with strict argument and response contracts.
 They do not run actual package-cache or Docker cleanup.
 Their proof does not extend to arbitrary installed tool versions.
 The process profile must support every process behavior that the application claims to support.
@@ -444,7 +445,7 @@ Unsupported behavior remains an explicit availability result, not another execut
 
 ### Native Acceptance Matrix
 
-This matrix applies to the planned application after I018.
+This matrix applies to the current application after I018.
 Current interpreter evidence remains historical evidence for the migration ledger.
 
 | Environment | Required acceptance |
@@ -525,6 +526,8 @@ No additional language modules, generics, packages, or runtime are prerequisites
 The [review record](evidence/mac-cleanup-planning.json) contains source identities, issue dependencies, draft-call ownership, and scoped language results.
 Two independent source and plan reviews found no unresolved material defect after corrections.
 The record covers the initial planning checks only.
+
 The M1 review records source and focused runtime checks.
-The completion record contains final stack CI.
-Later milestones still require their own implementation and acceptance.
+The M1 completion record contains that milestone's final stack CI.
+Later milestones have implementations, focused acceptance evidence, and final shared stack validation.
+Final shared stack CI passed.

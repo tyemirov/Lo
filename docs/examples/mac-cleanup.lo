@@ -1,5 +1,4 @@
-// Application design source. Proposed generic APIs are listed in
-// ../mac-cleanup-script-design.md. This file is not executable yet.
+// Cleanup application. The host supplies explicit file and process authority.
 // Names, paths, command arguments, retention rules, and reports belong here.
 
 flow And(previous: Bool, value: Bool) -> Bool { return Match.new(previous, true: value, _: false) }
@@ -280,21 +279,37 @@ flow BuilderField(key: String, state: Record{pending: Bool, values: List<String>
         _: Record.new(pending: prefix.pending, values: ConcatStrings(state.values, prefix.values)))
 }
 
+flow StrictBuilderField(key: String, state: Record{pending: Bool, values: List<String>}, line: String) -> Record{pending: Bool, values: List<String>}! {
+    continued = String.split_whitespace(line)
+    key_line = String.starts_with(line, String.concat(key, ":"))
+    suffix = Match.new(key_line, true: String.slice(line, Math.add(String.length(key), 1), String.length(line)), _: "")
+    spaced = Match.new(String.length(suffix), 0: true, _: String.is_whitespace(String.slice(suffix, 0, 1)))
+    valid = Match.new(state.pending,
+        true: Math.lte(List.length(continued), 1),
+        _: Match.new(key_line, true: All(List.new(spaced, Math.lte(List.length(String.split_whitespace(suffix)), 1))), _: true))
+    checked = Require(valid, String.concat("Malformed Docker builder field: ", key))
+    return BuilderField(key, state, line)
+}
+
 flow DockerApply(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, executable: Process.Executable) -> Int! {
     inspected = DockerCommand(context, executable, List.new("context", "inspect", "desktop-linux"), "capture")
+    context_output = Require(Math.eq(Bytes.length(inspected.stderr), 0), "Docker context inspection wrote to stderr")
     contexts = JSON.decode(inspected.stdout)
+    context_count = Require(Math.eq(JSON.length(contexts), 1), "Expected one selected Docker context")
     selected = JSON.at(contexts, 0)
+    context_name = Require(String.eq(JSON.get(selected, "Name") |> JSON.string(), "desktop-linux"), "Expected the desktop-linux Docker context")
     endpoint = JSON.get(selected, "Endpoints") |> JSON.get("docker") |> JSON.get("Host") |> JSON.string()
-    local = Require(String.starts_with(endpoint, "unix://"), String.concat("Refusing nonlocal Docker endpoint: ", endpoint))
+    local = Require(All(List.new(String.starts_with(endpoint, "unix:///"), Math.gt(String.length(endpoint), 8), All(List.map(endpoint, UnambiguousCharacter)))), String.concat("Refusing invalid or nonlocal Docker endpoint: ", endpoint))
     inspected_builder = DockerCommand(context, executable, List.new("buildx", "inspect", "desktop-linux"), "capture")
+    builder_output = Require(Math.eq(Bytes.length(inspected_builder.stderr), 0), "Docker builder inspection wrote to stderr")
     builder_text = String.replace_all(String.replace_all(UTF8.String.new(inspected_builder.stdout), "\r\n", "\n"), "\r", "\n")
     lines = String.split(builder_text, "\n")
-    drivers_found = List.fold(lines, Record.new(pending: false, values: List.new()), "Driver", BuilderField)
-    endpoints_found = List.fold(lines, Record.new(pending: false, values: List.new()), "Endpoint", BuilderField)
+    drivers_found = Flow.fold(lines, Record.new(pending: false, values: List.new()), "Driver", StrictBuilderField)
+    endpoints_found = Flow.fold(lines, Record.new(pending: false, values: List.new()), "Endpoint", StrictBuilderField)
     drivers = drivers_found.values
     endpoints = endpoints_found.values
-    driver = Require(StringsEqual(drivers, List.new("docker")), "Expected one Docker-driver builder on the selected local context")
-    builder_endpoint = Require(StringsEqual(endpoints, List.new("desktop-linux")), "Expected one Docker-driver builder on the selected local context")
+    driver = Require(All(List.new(Not(drivers_found.pending), StringsEqual(drivers, List.new("docker")))), "Expected one Docker-driver builder on the selected local context")
+    builder_endpoint = Require(All(List.new(Not(endpoints_found.pending), StringsEqual(endpoints, List.new("desktop-linux")))), "Expected one Docker-driver builder on the selected local context")
     printed = Print(String.concat("Docker target: desktop-linux (", endpoint, ")"))
     usage = DockerCommand(context, executable, List.new("system", "df"), "forward")
     build = Action(context, executable, List.new("--context", "desktop-linux", "buildx", "prune", "--builder", "desktop-linux", "--all", "--force"), List.new("docker", "--context", "desktop-linux", "buildx", "prune", "--builder", "desktop-linux", "--all", "--force"))
@@ -342,9 +357,18 @@ flow CleanTempRoot(context: Record{apply: Bool, home: File.Path, uid: Int, proce
     return Math.add(count, cleaned)
 }
 
-flow TemporaryFiles(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Int! {
-    roots = TempRoots(context)
+flow PreviewTemporary(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, previous: Int, selected: Int) -> Int! {
+    printed = Print("PLAN per-user temporary files: discovery deferred until cleanup")
+    return CleanTempRoot(context, 0, shared)
+}
+flow ApplyTemporary(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path, previous: Int, selected: Int) -> Int! {
+    roots = TempRoots(context, shared, prefix, getconf)
     return Flow.fold(roots, 0, context, CleanTempRoot)
+}
+flow TemporaryFiles(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path) -> Int! {
+    choice = Match.new(context.apply, true: 1, _: 2)
+    applied = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context, shared, prefix, getconf, ApplyTemporary)
+    return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), applied, context, shared, PreviewTemporary)
 }
 
 flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}) -> Int! {
@@ -360,7 +384,7 @@ flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, context, task, PerformChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, task, PerformChoice1Branch2)
     choice_1_result_3 = Flow.fold(List.filter(List.new(choice_1), 3, SelectedChoice), choice_1_result_2, context, task, PerformChoice1Branch3)
-    choice_1_result_5 = Flow.fold(List.filter(List.new(choice_1), 5, SelectedChoice), choice_1_result_3, context, PerformChoice1Branch5)
+    choice_1_result_5 = Flow.fold(List.filter(List.new(choice_1), 5, SelectedChoice), choice_1_result_3, context, task, PerformChoice1Branch5)
     choice_1_result_6 = Flow.fold(List.filter(List.new(choice_1), 6, SelectedChoice), choice_1_result_5, context, PerformChoice1Branch6)
     choice_1_result_7 = Flow.fold(List.filter(List.new(choice_1), 7, SelectedChoice), choice_1_result_6, context, PerformChoice1Branch7)
     choice_1_result_8 = Flow.fold(List.filter(List.new(choice_1), 8, SelectedChoice), choice_1_result_7, PerformChoice1Branch8)
@@ -420,12 +444,20 @@ flow StoragePaths(context: Record{apply: Bool, home: File.Path, uid: Int, proces
     return ConcatPaths(CacheTargets(context), Flow.fold(additional, List.new(), context.home, ReportPathStep))
 }
 
+flow OptionalReportEntry(parent: File.Directory, name: String) -> Record{entries: List<File.Entry>!} onError AbsentBuildEntry {
+    entry = File.Directory.entry(parent, name)
+    return Record.new(entries: List.new(entry))
+}
+flow ReportEntryPath(paths: List<File.Path>, entry: File.Entry) -> List<File.Path> {
+    return Match.new(StringMember(List.new("regular", "directory"), entry.kind), true: ConcatPaths(paths, List.new(entry.path)), _: paths)
+}
+flow ReportParentPath(path: File.Path, paths: List<File.Path>, parent: File.Directory) -> List<File.Path>! {
+    observed = OptionalReportEntry(parent, File.Path.name(path))
+    return List.fold(observed.entries, paths, ReportEntryPath)
+}
 flow ExistingReportPath(paths: List<File.Path>, path: File.Path) -> List<File.Path>! {
-    exists = File.Path.exists(path)
-    return Match.new(exists,
-        true: Match.new(File.Path.is_symlink(path), true: paths, _: ConcatPaths(paths, List.new(path))),
-        _: paths
-    )
+    observed = OptionalDirectory(File.Path.parent(path))
+    return Flow.fold(observed.directories, paths, path, ReportParentPath)
 }
 
 flow ParseStorageLine(line: String) -> Record{bytes: Int, path: String}! {
@@ -464,15 +496,20 @@ flow PrintStorageRow(targets: List<File.Path>, count: Int, row: Record{bytes: In
     return Math.add(count, 1)
 }
 
-flow StorageInventory(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>) -> Int! {
-    executable = Process.Executable.new(File.Path.new("/usr/bin/du"))
-    result = Run(context.process, executable, ConcatStrings(List.new("-k", "-s"), List.map(paths, PathText)), "capture", 180)
+flow StorageRowPath(row: Record{bytes: Int, path: String}) -> File.Path { return File.Path.new(row.path) }
+flow StorageRowValid(paths: List<String>, row: Record{bytes: Int, path: String}) -> Bool {
+    return All(List.new(Math.gte(row.bytes, 0), StringMember(paths, row.path)))
+}
+
+flow StorageInventory(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>, du: File.Path) -> Int! {
+    executable = Process.Executable.new(du)
+    result = RequireSuccess(Run(context.process, executable, ConcatStrings(List.new("-k", "-s"), List.map(paths, PathText)), "capture", 180))
+    complete = Require(Math.eq(Bytes.length(result.stderr), 0), String.concat("Storage inventory incomplete: ", String.trim(UTF8.String.new(result.stderr))))
     lines = String.lines(UTF8.String.new(result.stdout))
     rows = Flow.fold(lines, List.new(), ParseStorageRows)
+    valid = Require(All(List.new(Math.eq(List.length(rows), List.length(paths)), Math.eq(List.length(UniquePaths(List.map(rows, StorageRowPath))), List.length(paths)), All(List.map(rows, List.map(paths, PathText), StorageRowValid)))), "Storage inventory does not contain one nonnegative row for each selected path")
     printed = Print("Storage inventory (allocated size; NOT an estimate of reclaimable space):")
     count = Flow.fold(List.sort(rows, CompareStorageRows), 0, CacheTargets(context), PrintStorageRow)
-    code = Process.Termination.exit_code(result.termination)
-    valid = Require(All(List.new(Math.eq(code, 0), Math.eq(Bytes.length(result.stderr), 0))), String.concat("Storage inventory incomplete: ", String.trim(UTF8.String.new(result.stderr))))
     return 0
 }
 
@@ -481,14 +518,14 @@ flow ParseStorageRows(rows: List<Record{bytes: Int, path: String}>, line: String
     return ConcatStorageRows(rows, List.new(row))
 }
 
-flow StorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Int! {
+flow StorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Int! {
     paths = Flow.fold(StoragePaths(context), List.new(), ExistingReportPath)
     selector_1 = List.length(paths)
     choice_1 = Match.new(selector_1,
         0: 1,
         _: 2)
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, StorageReportChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, paths, StorageReportChoice1Branch2)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, paths, du, StorageReportChoice1Branch2)
     return choice_1_result_2
 }
 
@@ -535,7 +572,7 @@ flow UnknownEstimate(apply: Bool) -> Bool! {
     return choice_1_result_2
 }
 
-flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, before: Int) -> Program.Exit! {
+flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, before: Int, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
     notice = PlanNotice(context.apply)
     pip = TryPreparePip(context)
     initial = InitialWorkflow()
@@ -546,7 +583,7 @@ flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: P
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), initial, initial, WorkflowChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, initial, pip, WorkflowChoice1Branch2)
     pip_state = choice_1_result_2
-    pip_tasks = Match.new(List.length(pip.errors), 0: pip.result, _: List.new())
+    pip_tasks = TaskGroup(Match.new(List.length(pip.errors), 0: pip.result, _: List.new()))
     commands = Flow.fold(ConcatTasks(CommandTasks(), pip_tasks), pip_state, context, Attempt)
     logs = Task("npm logs", "files", File.Path.join(context.home, ".npm/_logs"), List.new())
     with_logs = Attempt(context, commands, logs)
@@ -555,7 +592,7 @@ flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: P
     printed = Print(String.concat("Observed allocation across completed cache scans and build trees: ", HumanSize(Math.sum(trees.estimates))))
     unknown = UnknownEstimate(context.apply)
     remaining = List.new(
-        Task("Temporary files", "temp", File.Path.new("."), List.new()),
+        Task("Temporary files", "temp", settings.shared_temp, List.new(settings.user_temp_prefix, PathText(settings.getconf))),
         Task("Docker", "docker", File.Path.new("."), List.new()),
         Task("Gateway logs", "logs", File.Path.new("."), List.new())
     )
@@ -573,8 +610,8 @@ flow PreparePip(context: Record{apply: Bool, home: File.Path, uid: Int, process:
     return choice_1_result_2
 }
 
-flow Report(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Program.Exit! {
-    captured = TryStorageReport(context)
+flow Report(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Program.Exit! {
+    captured = TryStorageReport(context, du)
     selector_1 = List.length(captured.errors)
     choice_1 = Match.new(selector_1,
         0: 1,
@@ -590,7 +627,7 @@ flow ReportFailure(error: Error) -> Bool! {
     return true
 }
 
-flow Started(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit! {
+flow Started(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
     printed = Print("Starting mac-cleanup")
     before = File.System.usage(invocation.home)
     free_bytes = before.free_bytes
@@ -611,12 +648,12 @@ flow Started(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit!
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), context, StartedChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, free_bytes, context, StartedChoice1Branch2)
+    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), context, settings.du, StartedChoice1Branch1)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, free_bytes, context, settings, StartedChoice1Branch2)
     return choice_1_result_2
 }
 
-flow Locked(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit! {
+flow Locked(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
     lock = Lock.File.new(Program.path())
     lease = commit lock
     selector_1 = invocation.effective_uid
@@ -624,7 +661,7 @@ flow Locked(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit! 
         0: 1,
         _: 2)
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), LockedChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, LockedChoice1Branch2)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, settings, LockedChoice1Branch2)
     return choice_1_result_2
 }
 
@@ -641,7 +678,7 @@ flow ArgumentFlags() -> List<Record{name: String, aliases: List<String>, group: 
     )
 }
 
-flow Startup() -> Record{results: List<Program.Exit>, code: Int, message: String} onError StartupFailure {
+flow Startup(settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Record{results: List<Program.Exit>, code: Int, message: String} onError StartupFailure {
     invocation = Host.Invocation.current()
     flags = ArgumentFlags()
     options = CLI.parse(invocation.arguments, flags, "mac-cleanup", "Clean known macOS development caches; optional read-only preview/report.", true)
@@ -650,12 +687,12 @@ flow Startup() -> Record{results: List<Program.Exit>, code: Int, message: String
         true: 1,
         _: 2)
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), options, MainChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, MainChoice1Branch2)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, settings, MainChoice1Branch2)
     return Record.new(results: List.new(choice_1_result_2), code: 0, message: "")
 }
 
-flow Main() -> Program.Exit! {
-    startup = Startup()
+flow MainWithSettings(settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
+    startup = Startup(settings)
     return Match.new(List.length(startup.results),
         0: Program.Exit.new(startup.code, Bytes.new(""), UTF8.Bytes.new(String.concat(startup.message, "\n"))),
         _: List.at(startup.results, 0)
@@ -665,7 +702,6 @@ flow Main() -> Program.Exit! {
 // File-selection, retained-directory, recursive-cache, and whole-tree flows
 // follow below. All application policy stays in these named Lo flows.
 
-// Proposed generic operations are specified in ../mac-cleanup-script-design.md.
 flow EntryPath(entry: File.Entry) -> File.Path { return entry.path }
 flow EntryBytes(entry: File.Entry) -> Int { return entry.size_bytes }
 flow EntryAllocation(entry: File.Entry) -> Int { return entry.allocated_bytes }
@@ -917,13 +953,21 @@ flow GatewayAbsent() -> Int! { printed = Print("SKIP Gateway logs: directory abs
 flow CacheTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path>! {
     return Flow.fold(List.new("Library/Caches/staticcheck", "Library/Caches/gopls", "Library/Caches/goimports", "Library/Caches/Homebrew/downloads", ".cache/gh"), List.new(), context.home, ReportPathStep)
 }
-flow TempRoots(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path>! {
-    executable = Process.Executable.resolve(context.process, "/usr/bin/getconf")
+flow TemporaryPath(text: String, prefix: String) -> File.Path! {
+    canonical = Match.new(String.starts_with(text, "/var/folders/"), true: String.concat("/private", text), _: text)
+    path = File.Path.new(canonical)
+    normalized = PathText(path)
+    checked = Require(All(List.new(Math.eq(List.length(String.lines(text)), 1), String.starts_with(normalized, prefix), String.eq(File.Path.name(path), "T"))), "Cannot validate macOS per-user temporary directory")
+    return path
+}
+flow TempRoots(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path) -> List<File.Path>! {
+    executable = Process.Executable.new(getconf)
     result = RequireSuccess(Run(context.process, executable, List.new("DARWIN_USER_TEMP_DIR"), "capture", 1800))
-    user_temp = File.Path.resolve(File.Path.new(String.trim(UTF8.String.new(result.stdout))))
-    directory = File.Directory.open(user_temp)
-    valid = All(List.new(String.starts_with(File.Path.to_string(user_temp), "/private/var/folders/"), String.eq(File.Path.name(user_temp), "T"), Math.eq(directory.owner_uid, context.uid)))
-    return Match.new(valid, true: List.new(File.Path.new("/private/tmp"), user_temp), _: Error.new("Cleanup.TemporaryRoot", "Cannot validate macOS per-user temporary directory", Record.new()))
+    checked = Require(Math.eq(Bytes.length(result.stderr), 0), "Temporary directory discovery wrote to stderr")
+    user_temp = TemporaryPath(String.trim(UTF8.String.new(result.stdout)), prefix)
+    directory = File.directory(user_temp)
+    owned = Require(Math.eq(directory.owner_uid, context.uid), "Cannot validate macOS per-user temporary directory owner")
+    return UniquePaths(List.new(shared, user_temp))
 }
 
 flow CacheState(count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>} {
@@ -1320,8 +1364,8 @@ flow TryPreparePip(context: Record{apply: Bool, home: File.Path, uid: Int, proce
 flow CapturedStorageReportError(error: Error) -> Record{result: Int!, errors: List<Error>} {
     return Record.new(result: error, errors: List.new(error))
 }
-flow TryStorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Record{result: Int!, errors: List<Error>} onError CapturedStorageReportError {
-    result = StorageReport(context)
+flow TryStorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Record{result: Int!, errors: List<Error>} onError CapturedStorageReportError {
+    result = StorageReport(context, du)
     return Record.new(result: result, errors: List.new())
 }
 
@@ -1414,8 +1458,8 @@ flow PerformChoice1Branch3(context: Record{apply: Bool, home: File.Path, uid: In
 
 
 
-flow PerformChoice1Branch5(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Int, selected: Int) -> Int! {
-    return TemporaryFiles(context)
+flow PerformChoice1Branch5(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}, previous: Int, selected: Int) -> Int! {
+    return TemporaryFiles(context, task.path, List.at(task.arguments, 0), File.Path.new(List.at(task.arguments, 1)))
 }
 
 flow PerformChoice1Branch6(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Int, selected: Int) -> Int! {
@@ -1450,8 +1494,8 @@ flow StorageReportChoice1Branch1(previous: Int, selected: Int) -> Int! {
     return 0
 }
 
-flow StorageReportChoice1Branch2(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>, previous: Int, selected: Int) -> Int! {
-    return StorageInventory(context, paths)
+flow StorageReportChoice1Branch2(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>, du: File.Path, previous: Int, selected: Int) -> Int! {
+    return StorageInventory(context, paths, du)
 }
 
 flow FinishChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Program.Exit, selected: Int) -> Program.Exit! {
@@ -1502,28 +1546,28 @@ flow ReportChoice1Branch2(captured: Record{result: Int!, errors: List<Error>}, p
     return ReportFailure(List.at(captured.errors, 0))
 }
 
-flow StartedChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Report(context)
+flow StartedChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Report(context, du)
 }
 
-flow StartedChoice1Branch2(free_bytes: Int, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Workflow(context, free_bytes)
+flow StartedChoice1Branch2(free_bytes: Int, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Workflow(context, free_bytes, settings)
 }
 
 flow LockedChoice1Branch1(previous: Program.Exit, selected: Int) -> Program.Exit! {
     return Program.Exit.new(2, Bytes.new(""), UTF8.Bytes.new("Run mac-cleanup as your normal user, without sudo\n"))
 }
 
-flow LockedChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Started(invocation, options)
+flow LockedChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Started(invocation, options, settings)
 }
 
 flow MainChoice1Branch1(options: CLI.Options, previous: Program.Exit, selected: Int) -> Program.Exit! {
     return Program.Exit.new(0, UTF8.Bytes.new(options.help_text), Bytes.new(""))
 }
 
-flow MainChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Locked(invocation, options)
+flow MainChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Locked(invocation, options, settings)
 }
 
 flow RemoveStaleStepChoice1Branch1(deleted: Int, entry: File.Entry, previous: Int, selected: Int) -> Int! {
@@ -1689,6 +1733,11 @@ flow CacheWorkObservedChoice1Branch1(candidates: List<File.Entry>, context: Reco
 flow CacheWorkObservedChoice1Branch2(counted: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, previous: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, selected: Int) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     return counted
 }
+
+flow DefaultSettings() -> Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path} {
+    return Record.new(shared_temp: File.Path.new("/private/tmp"), user_temp_prefix: "/private/var/folders/", getconf: File.Path.new("/usr/bin/getconf"), du: File.Path.new("/usr/bin/du"))
+}
+flow Main() -> Program.Exit! { return MainWithSettings(DefaultSettings()) }
 
 return Main()
 
