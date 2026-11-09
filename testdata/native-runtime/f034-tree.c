@@ -16,6 +16,21 @@ extern int *__error(void);
 #else
 extern int *__errno_location(void);
 extern long readlink(const char *, char *, size_t);
+/* The prepared Linux AArch64 sysroot defines this readdir ABI. */
+typedef struct FixtureDirectory FixtureDirectory;
+struct FixtureDirectoryEntry {
+    uint64_t inode;
+    int64_t offset;
+    unsigned short record_length;
+    unsigned char type;
+    char name[256];
+};
+_Static_assert(offsetof(struct FixtureDirectoryEntry, name) == 19, "Linux dirent name offset");
+extern FixtureDirectory *opendir(const char *);
+extern struct FixtureDirectoryEntry *readdir(FixtureDirectory *);
+extern int dirfd(FixtureDirectory *), closedir(FixtureDirectory *);
+static unsigned descriptor_measurements, descriptor_entries, reference_probes;
+static unsigned metadata_observations, reference_matches, sparse_checks;
 #define ERROR_ADDRESS __errno_location
 #endif
 
@@ -48,10 +63,64 @@ static int bytes_equal(const unsigned char *bytes, uint64_t length, const char *
     return index == length;
 }
 
-static unsigned descriptors(void) {
+static unsigned descriptor_reference(void) {
+    int saved_error = *ERROR_ADDRESS();
     unsigned count = 0;
-    for (int descriptor = 0; descriptor < 512; ++descriptor) if (fcntl(descriptor, 1) >= 0) ++count;
+    for (int descriptor = 0; descriptor < 512; ++descriptor) {
+#if !defined(__APPLE__)
+        ++reference_probes;
+#endif
+        if (fcntl(descriptor, 1) >= 0) ++count;
+    }
+    *ERROR_ADDRESS() = saved_error;
     return count;
+}
+
+static unsigned descriptors(void) {
+#if defined(__APPLE__)
+    return descriptor_reference();
+#else
+    int saved_error = *ERROR_ADDRESS();
+    unsigned count = 0, own_seen = 0;
+    ++descriptor_measurements;
+    FixtureDirectory *directory = opendir("/proc/self/fd");
+    if (!directory) { invalid = 10; *ERROR_ADDRESS() = saved_error; return 0; }
+    int own = dirfd(directory);
+    if (own < 0) invalid = 10;
+    while (own >= 0) {
+        *ERROR_ADDRESS() = 0;
+        struct FixtureDirectoryEntry *entry = readdir(directory);
+        if (!entry) {
+            if (*ERROR_ADDRESS()) invalid = 10;
+            break;
+        }
+        ++descriptor_entries;
+        size_t header = offsetof(struct FixtureDirectoryEntry, name);
+        if (entry->record_length < header + 2 || entry->record_length > sizeof(*entry)
+            || entry->record_length % 8) { invalid = 10; break; }
+        size_t capacity = entry->record_length - header, length = 0;
+        if (capacity > sizeof(entry->name)) { invalid = 10; break; }
+        while (length < capacity && entry->name[length]) ++length;
+        if (!length || length == capacity) { invalid = 10; break; }
+        if ((length == 1 && entry->name[0] == '.')
+            || (length == 2 && entry->name[0] == '.' && entry->name[1] == '.')) continue;
+        if (length > 1 && entry->name[0] == '0') { invalid = 10; break; }
+        unsigned descriptor = 0;
+        size_t index = 0;
+        for (; index < length; ++index) {
+            unsigned digit = (unsigned char)entry->name[index] - '0';
+            if (digit > 9 || descriptor > (2147483647U - digit) / 10) break;
+            descriptor = 10 * descriptor + digit;
+        }
+        if (index != length) { invalid = 10; break; }
+        if (descriptor == (unsigned)own) ++own_seen;
+        else if (++count > 512) { invalid = 10; break; }
+    }
+    if (closedir(directory)) invalid = 10;
+    if (own_seen != 1) invalid = 10;
+    *ERROR_ADDRESS() = saved_error;
+    return count;
+#endif
 }
 
 static int directory(const char *path) {
@@ -134,6 +203,9 @@ static int observer(uintptr_t user, uint32_t phase, const unsigned char *root, u
     const unsigned char *name, uint64_t name_length, LoFileMetadata *metadata) {
     (void)phase;
     if (user != 34 || !root || !root_length || !metadata) { invalid = 3; return -1; }
+#if !defined(__APPLE__)
+    ++metadata_observations;
+#endif
     unsigned current = descriptors();
     if (current > peak) peak = current;
     int alias = bytes_equal(name, name_length, "b");
@@ -261,7 +333,21 @@ int main(void) {
     if (setup_status) return 10 + setup_status;
     int saved = fcntl(2, 0, 3);
     if (saved < 0 || dup2(1, 2) < 0) return 20;
+#if !defined(__APPLE__)
+    unsigned before_sparse = descriptors();
+    int sparse = fcntl(saved, 0, 384);
+    if (sparse < 384 || sparse >= 512) {
+        if (sparse >= 0 && close(sparse)) invalid = 10;
+        return 24;
+    }
+    *ERROR_ADDRESS() = 0;
+    if (fcntl(sparse - 1, 1) >= 0 || *ERROR_ADDRESS() != 9) invalid = 10;
+#endif
     unsigned baseline = descriptors();
+#if !defined(__APPLE__)
+    if (baseline == before_sparse + 1) ++sparse_checks; else invalid = 10;
+    if (baseline == descriptor_reference()) ++reference_matches; else invalid = 10;
+#endif
     char working_directory[4096], lock_path[4096];
     if (!getcwd(working_directory, sizeof(working_directory))) return 22;
     int lock_length = snprintf(lock_path, sizeof(lock_path), "%s%slock", working_directory, same(working_directory, "/") ? "" : "/");
@@ -276,6 +362,18 @@ int main(void) {
     lo_value_release(retained);
     lo_value_release(diagnostic);
     unsigned after = descriptors();
+#if !defined(__APPLE__)
+    if (after == descriptor_reference()) ++reference_matches; else invalid = 10;
+    if (close(sparse)) invalid = 10;
+    if (descriptors() + 1 == after) ++sparse_checks; else invalid = 10;
+    if (reference_matches != 2 || sparse_checks != 2 || reference_probes != 1024) invalid = 10;
+    if (LO_CASE == 34) {
+        char evidence[256];
+        int length = snprintf(evidence, sizeof(evidence), "F034 descriptor measurement: observations=%u measurements=%u entries=%u reference_probes=%u high_fd=%d reference_matches=%u sparse_checks=%u\n", metadata_observations, descriptor_measurements, descriptor_entries, reference_probes, sparse, reference_matches, sparse_checks);
+        if (length <= 0 || (size_t)length >= sizeof(evidence)
+            || write(1, evidence, (size_t)length) != length) invalid = 10;
+    }
+#endif
     if (dup2(saved, 2) < 0 || close(saved)) return 21;
     int expected = LO_CASE == 0 || LO_CASE == 10 || LO_CASE == 27 || LO_CASE == 28 || LO_CASE >= 32 ? 0
         : LO_CASE == 2 || LO_CASE == 3 || LO_CASE == 16 || LO_CASE == 21 || LO_CASE == 22

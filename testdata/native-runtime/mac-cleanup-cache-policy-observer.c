@@ -18,6 +18,7 @@ static const char *stage_path = LO_FIXTURE_STAGE;
 static const char *removed_path = LO_FIXTURE_REMOVED;
 static Context *active;
 static unsigned installed, injected, directory_observations, allocation_observations;
+static unsigned access_changes, remove_observations, owned_discoveries;
 static int hook_error;
 
 static int equal(const unsigned char *value, uint64_t length, const char *expected) {
@@ -45,10 +46,24 @@ static int observe(uintptr_t userdata, uint32_t phase, const unsigned char *root
         hook_error = 1;
         return -1;
     }
+    if ((LO_CASE == 0 || LO_CASE == 1 || LO_CASE == 2) && phase != LO_FILE_DIRECTORY) {
+        /* Isolate ownership, cancellation, and allocation from access-time changes. */
+        metadata->accessed_sec = 0;
+        metadata->accessed_nsec = 0;
+    }
+    if (LO_CASE == 4 && equal(name, name_length, "access.cache")) {
+        metadata->accessed_sec = 0;
+        metadata->accessed_nsec = phase == LO_FILE_DISCOVERY ? 0 : 1;
+        if (phase == LO_FILE_PREFLIGHT) ++access_changes;
+        if (phase == LO_FILE_REMOVE) ++remove_observations;
+    }
     if (LO_CASE == 0) {
         if (under(root, root_length, stage_path)) {
             hook_error = 2;
             return -1;
+        }
+        if (phase == LO_FILE_DISCOVERY && equal(name, name_length, "old.cache")) {
+            ++owned_discoveries;
         }
         if (phase == LO_FILE_DISCOVERY && equal(root, root_length, fixture_root)
             && equal(name, name_length, "a-foreign")) {
@@ -109,6 +124,8 @@ int main(void) {
     if (LO_CASE == 2 && allocation_observations < 3) return 24;
     /* One scan can replace refresh+scan. Its returned owner must still be valid. */
     if (LO_CASE == 3 && directory_observations < 2) return 25;
+    if (LO_CASE == 4 && (access_changes != 1 || remove_observations != 0)) return 27;
+    if (LO_CASE == 0 && owned_discoveries != 1) return 28;
     if (lo_runtime_live_contexts() || lo_runtime_live_values()) return 26;
     return 0;
 }
