@@ -32,7 +32,7 @@ impl Directory {
 pub struct Observation {
     pub session: u64,
     pub lease: u64,
-    pub directory: Directory,
+    pub directory: std::sync::Arc<Directory>,
     pub identity: (u64, u64),
 }
 #[derive(Clone)]
@@ -608,7 +608,7 @@ fn metadata_times(info: &FileInfo) -> Result<(i64, i64, i64), String> {
 fn entry_value(
     context: &mut Context,
     site: &Site,
-    observation: &Directory,
+    observation: &std::sync::Arc<Directory>,
     lease: u64,
     name: &str,
     info: &FileInfo,
@@ -683,7 +683,7 @@ fn directory_value(
     site: &Site,
     root: &Handle,
     directory: &File,
-    observation: &Directory,
+    observation: &std::sync::Arc<Directory>,
     lease: u64,
     prior_weight: u64,
 ) -> Outcome {
@@ -780,7 +780,7 @@ fn postcheck<T>(observed: Result<T, Fault>, checked: Result<(), Fault>) -> Resul
 }
 fn finish_observation(
     context: &mut Context,
-    observation: Directory,
+    observation: std::sync::Arc<Directory>,
     directory: File,
     retained: File,
     fresh: bool,
@@ -796,7 +796,7 @@ fn finish_observation(
     if result.is_ok() && fresh {
         context
             .files
-            .retain_observation(observation, lease, retained);
+            .retain_observation(observation.as_ref().clone(), lease, retained);
     } else if let Err(cleanup) = close_file(retained) {
         result = Err(match result {
             Err(primary) => cleanup_failure(primary, cleanup),
