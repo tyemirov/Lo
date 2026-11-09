@@ -191,3 +191,28 @@ return CachePolicyFixture()`, fixture.writes)
 	actual := runProgram(t, sourceFile(t, source), "run", "--format", "json", "--observe-tree-root", fixture.writes)
 	valueJSON(t, fileOutput(t, actual), `{"candidate":{"type":"Bool","value":true},"foreign_file":{"type":"Bool","value":false},"other_file_device":{"type":"Bool","value":false},"child":{"type":"Bool","value":true},"foreign_child":{"type":"Bool","value":false},"other_child_device":{"type":"Bool","value":false},"file_as_child":{"type":"Bool","value":false},"child_as_file":{"type":"Bool","value":false}}`)
 }
+
+func TestMacCleanupCacheAccessTimeRevalidation(t *testing.T) {
+	fixture := newMacCleanupFixture(t)
+	selected := fileFixture(t, fixture.writes, "access.cache", "preserved")
+	source := cleanupFlows(t, "CacheCommit") + fmt.Sprintf(`
+flow AccessTimeFixture() -> Bool! {
+    lock = Lock.File.new(Program.path())
+    lease = commit lock
+    directory = File.directory(File.Path.new(%q))
+    entry = File.Directory.entry(directory, "access.cache")
+    result = CacheCommit(entry.owner_uid, entry.device, Clock.now_unix_ns(), entry)
+    return result.removed
+}
+return AccessTimeFixture()`, fixture.writes)
+	scenario := macCleanupCachePolicyScenario(t, fixture, "changed-access-time", 4, source, "", "", func(t *testing.T, actual result) {
+		t.Helper()
+		valueJSON(t, fileOutput(t, actual), `false`)
+		macCleanupPresent(t, selected, true)
+		calls, err := os.ReadFile(fixture.calls)
+		if err != nil || len(calls) != 0 {
+			t.Fatalf("cache guard fixture started a probe: %q, %v", calls, err)
+		}
+	})
+	runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{scenario})
+}
