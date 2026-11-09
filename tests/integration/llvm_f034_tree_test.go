@@ -1,19 +1,21 @@
 package integration_test
 
 import (
+	"fmt"
+	"runtime"
 	"strings"
 	"testing"
 )
 
 func TestLLVMF034TreeLifecycle(t *testing.T) {
-	runLLVMRuntimeScenarios(t, f034NativeScenarios())
+	runLLVMRuntimeScenarios(t, f034NativeScenarios(runtime.GOOS))
 }
 
 func TestLLVMLinuxF034TreeLifecycle(t *testing.T) {
-	runLLVMRuntimeTargetScenarios(t, "linux/arm64", f034NativeScenarios())
+	runLLVMRuntimeTargetScenarios(t, "linux/arm64", f034NativeScenarios("linux"))
 }
 
-func f034NativeScenarios() []llvmRuntimeScenario {
+func f034NativeScenarios(targetOS string) []llvmRuntimeScenario {
 	var scenarios []llvmRuntimeScenario
 	for number, fixture := range []struct {
 		name, expected, stage string
@@ -98,6 +100,19 @@ flow Eligible(row: Record{relative: String, entry: File.Entry}) -> Bool { items 
 			}
 			if number == 4 && !strings.Contains(got.stdout, `"cleanup_errors"`) {
 				t.Fatalf("recoverable primary lost cleanup failure: %s", got.stdout)
+			}
+			if number == 34 && targetOS == "linux" {
+				const marker = "F034 descriptor measurement: "
+				_, evidence, found := strings.Cut(got.stdout, marker)
+				if !found || strings.Count(got.stdout, marker) != 1 || len(strings.Fields(evidence)) != 7 {
+					t.Fatalf("missing descriptor measurement evidence: %s", got.stdout)
+				}
+				var observations, measurements, entries, probes, highFD, matches, sparseChecks uint64
+				count, err := fmt.Sscanf(strings.TrimSpace(evidence), "observations=%d measurements=%d entries=%d reference_probes=%d high_fd=%d reference_matches=%d sparse_checks=%d", &observations, &measurements, &entries, &probes, &highFD, &matches, &sparseChecks)
+				if err != nil || count != 7 || observations < 321 || measurements != observations+5 || entries < measurements || entries >= 512*measurements || probes != 1024 || highFD < 384 || highFD >= 512 || matches != 2 || sparseChecks != 2 {
+					t.Fatalf("descriptor measurement contract: %s (%v)", evidence, err)
+				}
+				t.Logf("descriptor measurement: %s", strings.TrimSpace(evidence))
 			}
 		}
 		scenarios = append(scenarios, scenario)
