@@ -116,8 +116,13 @@ func TestF032VolumeAbsentAndSymlink(t *testing.T) {
 	}
 	source = sourceFile(t, fmt.Sprintf(`return File.System.usage(File.Path.new(%q))`, link))
 	got = runProgram(t, source, "run", "--format", "json", "--list-root", link)
-	if got.status != 2 || !strings.Contains(got.stderr, "symlink") {
+	if got.status != 2 || got.stdout != "" {
 		t.Fatalf("symlink volume root: %+v", got)
+	}
+	reported := diagnostics(t, got.stderr).Diagnostics
+	if len(reported) != 1 || reported[0].Code != "runtime.host-failure" || reported[0].Stage != "runtime" ||
+		!strings.HasPrefix(reported[0].Message, fmt.Sprintf("open adapter root %q: ", link)) {
+		t.Fatalf("symlink volume root admission: %+v", got)
 	}
 }
 
