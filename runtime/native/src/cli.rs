@@ -122,7 +122,39 @@ fn host_progress_text(diagnostic: &Json) -> String {
     }
     message
 }
-pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str>) -> (Json, i32) {
+pub(crate) struct FaultDiagnostic { pub metadata: Json, error: Option<Handle>, progress: Vec<Handle> }
+impl FaultDiagnostic {
+    pub(crate) fn write(&self, writer: &mut impl std::io::Write) -> std::io::Result<()> {
+        const ORDER: &[&str]=&["code","stage","message","span","expected","actual","related","error","removal_entries","removal_progress","flow_progress","write_progress","http_progress","process_progress","last_completed_activation","cleanup_errors"];
+        let metadata=self.metadata.as_object().unwrap();
+        let mut first=true;
+        writer.write_all(b"{")?;
+        for name in ORDER.iter().copied().chain(metadata.keys().map(String::as_str).filter(|name|!ORDER.contains(name))) {
+            let has_value=match name {"error"=>self.error.is_some(),"flow_progress"=>!self.progress.is_empty(),_=>metadata.contains_key(name)};
+            if !has_value {continue;}
+            if !first {writer.write_all(b",")?;} first=false;
+            crate::value_output::quote(writer,name)?;writer.write_all(b":")?;
+            match name {
+                "error"=>self.error.as_ref().unwrap().write_json(writer)?,
+                "flow_progress"=>{
+                    writer.write_all(b"[")?;
+                    for (index,value) in self.progress.iter().enumerate(){if index>0{writer.write_all(b",")?;}value.write_json(writer)?;}
+                    writer.write_all(b"]")?;
+                }
+                _=>writer.write_all(canonical_json_value(&metadata[name]).as_bytes())?,
+            }
+        }
+        writer.write_all(b"}")
+    }
+    fn document(&self) -> String {
+        let mut bytes=b"{\"diagnostics\":[".to_vec();
+        self.write(&mut bytes).unwrap(); bytes.extend_from_slice(b"]}");
+        String::from_utf8(bytes).unwrap()
+    }
+}
+pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str>) -> (FaultDiagnostic, i32) {
+    let mut retained_error=None;
+    let mut progress=Vec::new();
     let program = &context.program;
     let (f, details) = match f {
         Fault::Boundary { primary, details } => (*primary, *details),
@@ -160,7 +192,8 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             if let Some(site) = program.sites.get(error.site as usize) {
                 d["span"] = site.source_record();
             }
-            d["error"] = e.json();
+            if !error.flow_progress.is_empty() { progress=error.flow_progress.clone(); }
+            retained_error=Some(e.clone());
             (d, 1)
         }
     };
@@ -170,16 +203,7 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             d["message"].as_str().unwrap()
         ));
     }
-    if status == 2 && !details.context_captured && !context.flow_progress.is_empty() {
-        d["flow_progress"] = json!(context
-            .flow_progress
-            .iter()
-            .map(|x| x.json())
-            .collect::<Vec<_>>())
-    }
-    if d["error"]["flow_progress"].is_array() {
-        d["flow_progress"] = d["error"]["flow_progress"].clone();
-    }
+    if status == 2 && !details.context_captured && !context.flow_progress.is_empty() { progress=context.flow_progress.clone(); }
     if !details.context_captured {
         if let Some(activation) = &context.last_activation {
             d["last_completed_activation"] = activation.clone();
@@ -200,13 +224,7 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             d[key] = value;
         }
     }
-    if !details.flow_progress.is_empty() {
-        d["flow_progress"] = json!(details
-            .flow_progress
-            .iter()
-            .map(|v| v.json())
-            .collect::<Vec<_>>());
-    }
+    if !details.flow_progress.is_empty() { progress=details.flow_progress; }
     if !details.cleanup_errors.is_empty() {
         d["cleanup_errors"] = json!(details.cleanup_errors);
     }
@@ -223,15 +241,25 @@ pub(crate) fn fault_diagnostic(f: Fault, context: &Context, cleanup: Option<&str
             .unwrap()
             .push(json!(cleanup));
     }
-    (d, status)
+    (FaultDiagnostic {metadata:d,error:retained_error,progress}, status)
 }
 fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>) -> i32 {
-    let (mut d, status) = fault_diagnostic(f, context, cleanup);
+    let (document, status) = fault_diagnostic(f, context, cleanup);
+    let mut d = document.metadata.clone();
     if json_format {
-        checked_stderr!("{}", canonical_json_value(&json!({"diagnostics":[d]})));
+        checked_stderr!("{}", document.document());
     } else {
         if status == 2 {
-            d["message"] = json!(host_progress_text(&d));
+            let mut message=host_progress_text(&d);
+            for flow in &document.progress {
+                let fields=flow.fields();
+                if fields["operation"].string()=="Flow.worklist" {
+                    message.push_str(&format!(" (Flow.worklist completed {}, pending {}, state {})", fields["completed_count"].output(),fields["pending_count"].output(),fields["state"].output()));
+                } else {
+                    message.push_str(&format!(" (Flow.fold completed {}/{}, state {})",fields["completed_count"].output(),fields["total_count"].output(),fields["state"].output()));
+                }
+            }
+            d["message"]=json!(message);
         }
         if d["span"].is_object() {
             checked_stderr!(
@@ -249,17 +277,14 @@ fn report(f: Fault, context: &Context, json_format: bool, cleanup: Option<&str>)
                 d["message"].as_str().unwrap()
             );
         }
-        if let Some(frames) = d["error"]["trace"].as_array() {
-            for frame in frames {
-                let f = &frame["value"];
-                checked_stderr!(
-                    "  flow {}, operation {}, input {}",
-                    serde_json::to_string(f["flow"]["value"].as_str().unwrap()).unwrap(),
-                    serde_json::to_string(f["operation"]["value"].as_str().unwrap()).unwrap(),
-                    canonical_json_value(&f["input"])
-                );
+        if let Some(error)=&document.error {
+            let Data::Error(error)=&error.data else {unreachable!()};
+            for frame in &error.trace {
+                let fields=frame.fields();
+                checked_stderr!("  flow {}, operation {}, input {}", serde_json::to_string(fields["flow"].string()).unwrap(),serde_json::to_string(fields["operation"].string()).unwrap(),fields["input"].canonical_json());
             }
         }
+
     }
     status
 }
@@ -269,6 +294,10 @@ pub unsafe extern "C" fn lo_cli_main(
     argv: *const *const c_char,
     _entry_environment: *const *const c_char,
 ) -> c_int {
+    crate::process::seal_ownership_provider();
+    if argc == 2 && CStr::from_ptr(*argv.add(1)).to_bytes() == b"--lo-process-supervisor" {
+        return crate::process::supervisor_main();
+    }
     if argc == 2 && CStr::from_ptr(*argv.add(1)).to_bytes() == b"--lo-console-writer" {
         return crate::console::worker();
     }
@@ -375,6 +404,11 @@ unsafe fn cli_main(
     let mut process_prunes = vec![];
     let mut process_endpoints = vec![];
     let mut process_launcher = String::new();
+    let mut process_limits = crate::process::Limits::default();
+    let mut process_descendants = false;
+    let mut descendant_limits = crate::process::DescendantLimits::default();
+    let mut descendant_limit_flags = std::collections::BTreeSet::new();
+    let mut process_limit_flags = std::collections::BTreeSet::new();
     let mut launcher_set = false;
     let mut http_grants = vec![];
     let mut ports = vec![];
@@ -413,6 +447,54 @@ unsafe fn cli_main(
             if format != "text" && format != "json" {
                 error = Some(format!("unknown output format {format:?}"))
             }
+        } else if arg == "--process-descendants" {
+            if process_descendants {
+                error = Some("duplicate --process-descendants".into());
+            }
+            process_descendants = true;
+        } else if matches!(arg, "--max-process-descendants" | "--max-process-tokens"
+                          | "--max-process-events" | "--process-kernel-limit") {
+            if !descendant_limit_flags.insert(arg) || i + 1 == args.len() {
+                error = Some(format!("{arg} requires one positive decimal integer"));
+                break;
+            }
+            i += 1;
+            let value = &args[i];
+            let parsed = value.parse::<u64>().ok().filter(|value| *value > 0);
+            if value.is_empty() || !value.bytes().all(|byte| byte.is_ascii_digit())
+                || parsed.is_none() || (arg != "--max-process-events" && parsed.unwrap() > u32::MAX as u64) {
+                error = Some(format!("invalid {arg}: require a positive decimal integer within its finite bound"));
+            } else {
+                let value = parsed.unwrap();
+                match arg {
+                    "--max-process-descendants" => descendant_limits.max_processes = value as u32,
+                    "--max-process-tokens" => descendant_limits.max_tokens = value as u32,
+                    "--max-process-events" => descendant_limits.max_events = value,
+                    _ => descendant_limits.kernel_processes = value as u32,
+                }
+            }
+        } else if arg == "--process-forward-output" && process_limits.forward_streams == 0 {
+            process_limits.forward_streams = 3;
+        } else if matches!(
+            arg,
+            "--max-process-ms" | "--max-process-cleanup-ms" | "--max-process-output-bytes"
+        ) {
+            if !process_limit_flags.insert(arg) || i + 1 == args.len() {
+                error = Some(format!("{arg} requires one positive integer"));
+                break;
+            }
+            i += 1;
+            match args[i].parse::<u64>() {
+                Ok(value) if value > 0 => match arg {
+                    "--max-process-ms" => process_limits.timeout_ms = value,
+                    "--max-process-cleanup-ms" => process_limits.cleanup_ms = value,
+                    _ => match usize::try_from(value) {
+                        Ok(value) => process_limits.output_bytes = value,
+                        Err(_) => error = Some(format!("invalid {arg}")),
+                    },
+                },
+                _ => error = Some(format!("invalid {arg}: value must be positive")),
+            }
         } else if arg == "--max-console-bytes" && !console_limit_set && i + 1 < args.len() {
             console_limit_set = true;
             i += 1;
@@ -435,6 +517,7 @@ unsafe fn cli_main(
                 | "--max-list-items"
                 | "--max-file-entries"
                 | "--max-file-directories"
+                | "--max-json-depth"
         ) {
             if !limit_flags.insert(arg) || i + 1 == args.len() {
                 error = Some(format!("{arg} requires one non-negative integer"));
@@ -455,6 +538,7 @@ unsafe fn cli_main(
                 "--max-list-items" => limits.list_items = value,
                 "--max-file-entries" => limits.file_entries = value,
                 "--max-file-directories" => limits.file_directories = value,
+                "--max-json-depth" => limits.json_depth = value,
                 _ => unreachable!(),
             }
         } else if arg == "--allow-device" {
@@ -481,6 +565,8 @@ unsafe fn cli_main(
                 | "--write-root"
                 | "--list-root"
                 | "--remove-root"
+                | "--observe-tree-root"
+                | "--remove-tree-root"
                 | "--open-files-root"
                 | "--process-allow"
                 | "--process-launcher"
@@ -502,6 +588,8 @@ unsafe fn cli_main(
                 "--write-root" => roots.writes.push(value),
                 "--list-root" => roots.lists.push(value),
                 "--remove-root" => roots.removes.push(value),
+                "--observe-tree-root" => roots.observe_trees.push(value),
+                "--remove-tree-root" => roots.remove_trees.push(value),
                 "--open-files-root" => roots.open_files.push(value),
                 "--process-allow" => process_grants.push(value),
                 "--process-read-root" => process_roots.push(value),
@@ -542,6 +630,9 @@ unsafe fn cli_main(
     if let Err(message) = &http {
         error = Some(message.clone());
     }
+    if !process_descendants && !descendant_limit_flags.is_empty() {
+        error = Some("descendant limits require --process-descendants".into());
+    }
     let process_policy = crate::process::Policy::new(
         process_grants,
         process_launcher,
@@ -549,7 +640,7 @@ unsafe fn cli_main(
         &process_writes,
         &process_prunes,
         &process_endpoints,
-    );
+    ).and_then(|policy| policy.with_descendants(process_descendants.then_some(descendant_limits)));
     console.configure(console_maximum, format == "json", serving);
     if let Ok(policy) = &process_policy {
         if let Err(message) = policy.protect_images(&console.image_paths()) {
@@ -611,7 +702,7 @@ unsafe fn cli_main(
     }
     signal(2, stop as *const () as usize);
     signal(15, stop as *const () as usize);
-    let processes = match crate::process::configure(&process_policy.unwrap(), 5000, 1 << 20, 1000) {
+    let processes = match crate::process::configure(&process_policy.unwrap(), process_limits) {
         Ok(processes) => Arc::new(processes),
         Err(message) => {
             let fault = if message == crate::process::UNAVAILABLE {

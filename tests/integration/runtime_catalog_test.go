@@ -13,6 +13,9 @@ import (
 func TestRunBuiltinCatalog(t *testing.T) {
 	executablePath := repository + "/testdata/inert-process/executable"
 	executableJSON := fmt.Sprintf(`{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":%q}}}`, executablePath)
+	commandJSON := func(timeout, output string) string {
+		return fmt.Sprintf(`{"type":"Process.Command","value":{"context":{"type":"Process.Context","value":{"origin":"explicit","redacted":true}},"executable":%s,"arguments":{"type":"List<String>","value":[{"type":"String","value":"argument"}]},"stdin":{"type":"Bytes","value":"c3RkaW4="},"timeout_ms":{"type":"Int","value":%q},"output":{"type":"String","value":%q}}}`, executableJSON, timeout, output)
+	}
 	want := map[string]string{
 		catalog.ProgramPath:                    `{"type":"Bool","value":true}`,
 		catalog.LockFileNew:                    `{"redacted":true}`,
@@ -24,7 +27,14 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.HostInvocationCurrent:          `{"type":"Int","value":"0"}`,
 		catalog.FileDirectory:                  `{"type":"Bool","value":true}`,
 		catalog.FileScan:                       `{"type":"Int","value":"0"}`,
+		"File.Directory.scan":                  `{"type":"Int","value":"0"}`,
+		"File.Directory.refresh":               `{"type":"Bool","value":true}`,
+		"File.Directory.child":                 `{"type":"Bool","value":true}`,
+		"File.Directory.entry":                 `{"type":"String","value":"entry"}`,
+		"File.Entry.observe":                   `{"type":"Int","value":"1"}`,
 		catalog.FileRemoveChecked:              `{"type":"Int","value":"0"}`,
+		catalog.FileTreeSnapshot:               `{"type":"Int","value":"1"}`,
+		catalog.FileTreeRemoveChecked:          `{"type":"Int","value":"1"}`,
 		catalog.ProcessContextCurrent:          `{"type":"Process.Context","value":{"origin":"inherited","redacted":true}}`,
 		catalog.ProcessContextNew:              `{"type":"Process.Context","value":{"origin":"explicit","redacted":true}}`,
 		catalog.ProcessContextOverride:         `{"type":"Process.Context","value":{"origin":"derived","redacted":true}}`,
@@ -35,7 +45,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 		catalog.ProcessExecutableNew:           executableJSON,
 		catalog.ProcessTerminationExitCode:     `"0"`,
 		catalog.ProcessTerminationSignal:       `"0"`,
-		catalog.ProcessCommandNew:              fmt.Sprintf(`{"type":"Process.Command","value":{"context":{"type":"Process.Context","value":{"origin":"explicit","redacted":true}},"executable":%s,"arguments":{"type":"List<String>","value":[{"type":"String","value":"argument"}]},"stdin":{"type":"Bytes","value":"c3RkaW4="}}}`, executableJSON),
+		catalog.ProcessCommandNew:              commandJSON("0", "capture"),
+		"Process.Command.with_timeout":         commandJSON("30000", "capture"),
+		"Process.Command.with_output":          commandJSON("0", "forward"),
 		catalog.AutodiffGrad:                   `{"type":"Record{gradients: Record{x: Tensor<FP32>}, value: Tensor<FP32>}","value":{"gradients":{"type":"Record{x: Tensor<FP32>}","value":{"x":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}},"value":{"type":"Tensor<FP32>","value":{"dtype":"fp32","device":"cpu","shape":[],"values":["4"]}}}}`,
 		catalog.FloatAdd:                       `{"type":"Float","value":"3.75"}`, catalog.FloatSub: `{"type":"Float","value":"-1.25"}`,
 		catalog.FloatMul: `{"type":"Float","value":"2.5"}`, catalog.FloatDiv: `{"type":"Float","value":"1.5"}`,
@@ -115,6 +127,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 	for name, expected := range processorCatalogResults() {
 		want[name] = expected
 	}
+	for name, expected := range jsonFormattingCatalogResults() {
+		want[name] = expected
+	}
 	covered := map[string]bool{}
 	for _, tc := range builtinExamples() {
 		if _, ok := want[tc.name]; ok {
@@ -139,6 +154,42 @@ func TestRunBuiltinCatalog(t *testing.T) {
 				return
 			}
 			var args []string
+			if tc.name == catalog.FileTreeSnapshot || tc.name == catalog.FileTreeRemoveChecked {
+				root := fileFixtureRoot(t)
+				tree := f033Directory(t, root, "tree")
+				for _, fixture := range treeBuiltinExamples(root) {
+					if fixture.name == tc.name {
+						tc.source = fixture.source
+						break
+					}
+				}
+				args = []string{"--observe-tree-root", root}
+				if tc.name == catalog.FileTreeRemoveChecked {
+					args = append(args, "--remove-tree-root", tree)
+				}
+			}
+			for _, retained := range retainedFileBuiltinExamples("fixtures") {
+				if retained.name != tc.name {
+					continue
+				}
+				root := fileFixtureRoot(t)
+				flag := "--list-root"
+				switch tc.name {
+				case "File.Directory.child":
+					f033Directory(t, root, "child")
+					flag = "--observe-tree-root"
+				case "File.Directory.entry", "File.Entry.observe":
+					fileFixture(t, root, "entry", "data")
+				}
+				for _, fixture := range retainedFileBuiltinExamples(root) {
+					if fixture.name == tc.name {
+						tc.source = fixture.source
+						break
+					}
+				}
+				args = []string{flag, root}
+				break
+			}
 			if tc.name == catalog.FileDirectory || tc.name == catalog.FileScan || tc.name == catalog.FileSystemUsage {
 				root := fileFixtureRoot(t)
 				if tc.name == catalog.FileSystemUsage {

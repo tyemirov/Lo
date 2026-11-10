@@ -83,6 +83,8 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
     }
 }
 pub fn admit(s: &Site) -> Result<(), String> {
+    if crate::json_values::SUPPORTED.contains(&s.operation.as_str()) { return crate::json_values::admit(s); }
+    if crate::text_format::SUPPORTED.contains(&s.operation.as_str()) { return crate::text_format::admit(s); }
     if crate::processors::SUPPORTED.contains(&s.operation.as_str()) {
         return crate::processors::admit(s);
     }
@@ -327,6 +329,8 @@ pub fn admit(s: &Site) -> Result<(), String> {
     Ok(())
 }
 pub fn parameter_names(op: &str) -> Vec<&'static str> {
+    if crate::json_values::SUPPORTED.contains(&op) { return crate::json_values::parameter_names(op); }
+    if crate::text_format::SUPPORTED.contains(&op) { return crate::text_format::parameter_names(op); }
     if crate::processors::SUPPORTED.contains(&op) {
         return crate::processors::parameter_names(op);
     }

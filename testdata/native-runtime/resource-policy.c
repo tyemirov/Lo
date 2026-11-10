@@ -12,14 +12,14 @@ int main(void) {
     const Program *program = lo_program_new();
     if (!program || lo_context_new(0) || lo_context_from_program(program, 0)) return 1;
     ContextOptions policies[] = {
-        {100000, 0, 0, 0, 0, 0, 0},
-        {100000, 49, 0, 0, 0, 0, 0},
-        {100000, 50, 0, 0, 0, 0, 0},
-        {100000, 0, 1, 0, 0, 0, 0},
-        {100000, 0, 0, 1, 0, 0, 0},
-        {100000, 0, 0, 0, 1, 0, 0},
-        {100000, 0, 0, 0, 2, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0},
+        {100000, 0, 0, 0, 0, 0, 0, 256},
+        {100000, 49, 0, 0, 0, 0, 0, 256},
+        {100000, 50, 0, 0, 0, 0, 0, 256},
+        {100000, 0, 1, 0, 0, 0, 0, 256},
+        {100000, 0, 0, 1, 0, 0, 0, 256},
+        {100000, 0, 0, 0, 1, 0, 0, 256},
+        {100000, 0, 0, 0, 2, 0, 0, 256},
+        {0, 0, 0, 0, 0, 0, 0, 256},
     };
     U32 expected[] = {0, 2, 0, 2, 2, 2, 0};
     for (unsigned index = 0; index < sizeof(policies) / sizeof(*policies); ++index) {
@@ -36,7 +36,7 @@ int main(void) {
             if (lo_runtime_live_contexts()) return 30 + index;
         }
     }
-    ContextOptions repeated_policy = {100000, 0, 128, 0, 0, 0, 0};
+    ContextOptions repeated_policy = {100000, 0, 128, 0, 0, 0, 0,256};
     Context *repeated = lo_context_from_program(program, &repeated_policy);
     if (!repeated) return 41;
     for (unsigned index = 0; index < 100; ++index) {

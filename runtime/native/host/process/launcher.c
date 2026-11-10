@@ -45,6 +45,23 @@ static void fail(unsigned char stage, int error) {
     _exit(64 + stage);
 }
 
+static void ready(const uint32_t token[8]) {
+    unsigned char bytes[PROCESS_READY_BYTES] = {'R', 0, 0, 0, 0, 0};
+    for (size_t word = 0; word != 8; ++word) {
+        bytes[6 + word * 4] = (unsigned char)(token[word] >> 24);
+        bytes[7 + word * 4] = (unsigned char)(token[word] >> 16);
+        bytes[8 + word * 4] = (unsigned char)(token[word] >> 8);
+        bytes[9 + word * 4] = (unsigned char)token[word];
+    }
+    size_t offset = 0;
+    while (offset < sizeof(bytes)) {
+        ssize_t count = write(STATUS, bytes + offset, sizeof(bytes) - offset);
+        if (count < 0 && errno == EINTR) continue;
+        if (count <= 0) _exit(90);
+        offset += (size_t)count;
+    }
+}
+
 static uint32_t number(const unsigned char *bytes) {
     return ((uint32_t)bytes[0] << 24) | ((uint32_t)bytes[1] << 16) | ((uint32_t)bytes[2] << 8) | bytes[3];
 }
@@ -110,6 +127,8 @@ int main(int argc, char **argv, char **host_environment) {
     if (setrlimit(RLIMIT_CORE, &core) != 0 || setrlimit(RLIMIT_NOFILE, &descriptors) != 0) fail(1, errno);
     if (fcntl(STATUS, F_SETFD, FD_CLOEXEC) != 0 || fcntl(PERMIT, F_SETFD, FD_CLOEXEC) != 0) fail(5, errno);
     if (lo_normalize_inherited_rights() != 0) fail(1, EPERM);
+    uint32_t execution_token[8];
+    if (lo_process_execution_token(execution_token) != 0) fail(1, EPERM);
     unsigned char configuration_header[16], configuration[MAX_CONFIGURATION], extra;
     if (exact_read(CONFIGURATION, configuration_header, sizeof(configuration_header)) != 0 || memcmp(configuration_header, "LOC2", 4) != 0) fail(1, EINVAL);
     uint32_t configuration_size = number(configuration_header + 4), command_count = number(configuration_header + 8), root_count = number(configuration_header + 12);
@@ -156,7 +175,7 @@ int main(int argc, char **argv, char **host_environment) {
     }
     environment[environment_count] = NULL;
     if (offset != size || strcmp(arguments[0], executable) != 0 || chdir(directory) != 0) fail(2, EINVAL);
-    packet('R', 0, 0);
+    ready(execution_token);
     unsigned char permit;
     if (exact_read(PERMIT, &permit, 1) != 0 || permit != 'P') fail(3, EINVAL);
     do { tail = read(PERMIT, &extra, 1); } while (tail < 0 && errno == EINTR);

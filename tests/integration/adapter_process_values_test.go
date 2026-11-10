@@ -85,7 +85,7 @@ func TestAdapterProcessCommandValue(t *testing.T) {
 		t.Fatalf("command type %s", command.Type)
 	}
 	fields := processFields(t, command)
-	if len(fields) != 4 || fields["context"].Type != "Process.Context" {
+	if len(fields) != 6 || fields["context"].Type != "Process.Context" || fields["timeout_ms"].Type != "Int" || fields["output"].Type != "String" {
 		t.Fatalf("command fields %+v", fields)
 	}
 	executable := processFields(t, fields["executable"])
@@ -96,6 +96,8 @@ func TestAdapterProcessCommandValue(t *testing.T) {
 	valueJSON(t, fields["context"], `{"origin":"explicit","redacted":true}`)
 	valueJSON(t, fields["arguments"], `[{"type":"String","value":"one two"},{"type":"String","value":"$HOME"},{"type":"String","value":"$(printf literal); echo literal"},{"type":"String","value":"line\nbreak"}]`)
 	valueJSON(t, fields["stdin"], `"AP8KgA=="`)
+	valueJSON(t, fields["timeout_ms"], `"0"`)
+	valueJSON(t, fields["output"], `"capture"`)
 	if strings.Contains(string(fields["context"].Value), "ambient-value-must-not-enter-command") {
 		t.Fatal("command inherited an environment value")
 	}
@@ -188,6 +190,8 @@ func TestAdapterProcessCommandDiagnosticSnapshot(t *testing.T) {
 	valueJSON(t, snapshot["arguments"], `[]`)
 	valueJSON(t, snapshot["context"], `{"origin":"explicit","redacted":true}`)
 	valueJSON(t, snapshot["stdin"], `""`)
+	valueJSON(t, snapshot["timeout_ms"], `"0"`)
+	valueJSON(t, snapshot["output"], `"capture"`)
 }
 
 func TestAdapterProcessFailureTraceRedaction(t *testing.T) {

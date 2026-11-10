@@ -441,7 +441,7 @@ LO_BUILD_ROOT="$PWD/_scratch/build-state" bin/lo build docs/examples/cli-cleanup
 ```
 
 The example performs no cleanup.
-The [mac-cleanup roadmap](docs/mac-cleanup-implementation-plan.md) records the remaining application dependencies.
+The [mac-cleanup roadmap](docs/mac-cleanup-implementation-plan.md) records application implementation and acceptance.
 
 ## Repository Layout
 
@@ -650,8 +650,15 @@ F024 adds immutable `Process.Context` values, controlled executable discovery, a
 Pure context changes keep their inputs unchanged. Execution authority remains in host policy.
 `Process.Command.new(context, executable, arguments, stdin)` uses exact arguments and stdin bytes without a shell.
 
+`Process.Command.with_timeout(command, timeout_ms)` selects a deadline within the host maximum.
+`Process.Command.with_output(command, "forward")` sends bounded bytes through enabled Console sinks.
+The [command policy](docs/process-command-policy.md) defines host options and confirmed output counts.
+
 The default profile denies writes and network access. Optional scopes supply authority for selected mutation roots and Unix endpoints.
-Registered exec chains keep the initial executable's scope. Forked and spawned descendants remain denied.
+Registered exec chains keep the initial executable's scope.
+Forked and spawned descendants remain denied unless the host selects the bounded [descendant profile](docs/process-descendant-ownership.md).
+That profile retains ownership through complete cleanup and requires native Endpoint Security admission on Darwin.
+
 The launcher clears the specified inherited Mach slots and keeps its fixed environment separate from child environment values.
 The conditional work bound uses host parallelism and completed lifetime. It is not a hard CPU quota.
 
@@ -675,10 +682,14 @@ The [implementation evidence](docs/evidence/adapter-implementation-review.json) 
 
 The [Gateway log example](docs/examples/gateway-log-cleanup.lo) selects old logs, excludes observed open files, and skips changed candidates.
 The [acceptance plan](docs/file-adapter-plan.md) records grants, failure progress, and compiled-program tests.
+
 The [mac-cleanup plan](docs/mac-cleanup-plan.md) records application requirements and acceptance criteria.
 The [full cleanup source](docs/examples/mac-cleanup.lo) contains the cleanup policy in Lo application code.
-Its [application design](docs/mac-cleanup-script-design.md) identifies implemented operations and proposed interfaces.
-The source includes proposed operations that the current compiler and runtimes do not implement.
+Its [application design](docs/mac-cleanup-script-design.md) describes the implemented flows and fixture boundaries.
+
+The complete source passes type checking and focused native workflow acceptance.
+The Metal-linked application CLI passed without GPU operations.
+Final shared stack CI passed.
 All work and fixtures obey the [Lo repository boundary](.mprlab/POLICY.md#lo-repository-boundary).
 
 ## Language Reference

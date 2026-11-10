@@ -180,6 +180,14 @@ impl Scratch {
         Ok(Self { context, bytes })
     }
 }
+impl Scratch {
+    pub(crate) fn grow(&mut self, bytes: u64) -> Result<(), Fault> {
+        let total = self.bytes.checked_add(bytes).ok_or_else(|| limit("temporary bytes"))?;
+        unsafe { (*self.context).values.reserve_temporary(bytes)?; }
+        self.bytes = total;
+        Ok(())
+    }
+}
 impl Drop for Scratch {
     fn drop(&mut self) {
         unsafe {

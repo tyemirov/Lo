@@ -60,6 +60,8 @@ func builtinExamples() []builtinExample {
 		{"Process.Termination.exit_code", `flow Read(value: Process.Termination) -> Int! { return Process.Termination.exit_code(value) }; return 0`, "Int"},
 		{"Process.Termination.signal", `flow Read(value: Process.Termination) -> Int! { return Process.Termination.signal(value) }; return 0`, "Int"},
 		{"Process.Command.new", fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(File.Path.new(%q)); return Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN",value: "value")), File.Path.new(%q)), stdin: Bytes.new("stdin")) }; return Main()`, executablePath, directoryPath), "Process.Command!"},
+		{"Process.Command.with_timeout", fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(File.Path.new(%q)); command = Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN", value: "value")), File.Path.new(%q)), stdin: Bytes.new("stdin")); return Process.Command.with_timeout(command, 30000) }; return Main()`, executablePath, directoryPath), "Process.Command!"},
+		{"Process.Command.with_output", fmt.Sprintf(`flow Main() -> Process.Command! { executable = Process.Executable.new(File.Path.new(%q)); command = Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN", value: "value")), File.Path.new(%q)), stdin: Bytes.new("stdin")); return Process.Command.with_output(command, "forward") }; return Main()`, executablePath, directoryPath), "Process.Command!"},
 		{"HTTP.Server.new", `flow H(r: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow E(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; return HTTP.Server.new(8080, H, E)`, "HTTP.Server"},
 		{"HTTP.URL.new", `return HTTP.URL.new("http://127.0.0.1/resource")`, "HTTP.URL!"},
 		{"HTTP.Method.new", `return HTTP.Method.new("GET")`, "HTTP.Method!"},
@@ -120,7 +122,47 @@ func builtinExamples() []builtinExample {
 	examples = append(examples, optimizerBuiltinExamples()...)
 	examples = append(examples, checkpointBuiltinExamples()...)
 	examples = append(examples, processorBuiltinExamples()...)
+	examples = append(examples, retainedFileBuiltinExamples("fixtures")...)
+	examples = append(examples, treeBuiltinExamples("fixtures")...)
+	examples = append(examples, jsonFormattingBuiltinExamples()...)
 	return append(examples, tensorBuiltinExamples()...)
+}
+
+func jsonFormattingBuiltinExamples() []builtinExample {
+	return []builtinExample{
+		{catalog.JSONDecode, `return JSON.decode(Bytes.new("null"))`, "JSON.Value!"},
+		{catalog.JSONGet, `flow Main()->JSON.Value!{value=JSON.decode(Bytes.new("{\"key\":true}"));return JSON.get(value,"key")};return Main()`, "JSON.Value!"},
+		{catalog.JSONAt, `flow Main()->JSON.Value!{value=JSON.decode(Bytes.new("[null]"));return JSON.at(value,0)};return Main()`, "JSON.Value!"},
+		{catalog.JSONString, `flow Main()->String!{value=JSON.decode(Bytes.new("\"text\""));return JSON.string(value)};return Main()`, "String!"},
+		{catalog.JSONBool, `flow Main()->Bool!{value=JSON.decode(Bytes.new("true"));return JSON.bool(value)};return Main()`, "Bool!"},
+		{catalog.JSONInt, `flow Main()->Int!{value=JSON.decode(Bytes.new("123"));return JSON.int(value)};return Main()`, "Int!"},
+		{catalog.JSONFloat, `flow Main()->Float!{value=JSON.decode(Bytes.new("1.25"));return JSON.float(value)};return Main()`, "Float!"},
+		{catalog.JSONKind, `flow Main()->String!{value=JSON.decode(Bytes.new("[]"));return JSON.kind(value)};return Main()`, "String!"},
+		{catalog.JSONLength, `flow Main()->Int!{value=JSON.decode(Bytes.new("[null,true]"));return JSON.length(value)};return Main()`, "Int!"},
+		{catalog.IntParse, `return Int.parse("+00123")`, "Int!"},
+		{catalog.FloatFormatFixed, `return Float.format_fixed(1.125,2)`, "String!"},
+		{catalog.StringFormat, `return String.format(fields:Record.new(count:-1234),template:"{count:>8,}")`, "String!"},
+	}
+}
+
+func treeBuiltinExamples(root string) []builtinExample {
+	return []builtinExample{
+		{catalog.FileTreeSnapshot, f034Predicates + f034Program(root, "Int", "", `return List.length(tree.entries)`), "Int!"},
+		{catalog.FileTreeRemoveChecked, f034Predicates + f034Program(root, "Int", "", `pending = File.Tree.Remove.checked(tree, Eligible); receipt = commit pending; return receipt.completed_count`), "Int!"},
+	}
+}
+
+func retainedFileBuiltinExamples(root string) []builtinExample {
+	main := func(output, body string) string {
+		return fmt.Sprintf(`flow Main() -> %s! { directory = File.directory(File.Path.new(%q)); %s }; return Main()`, output, root, body)
+	}
+	return []builtinExample{
+		{"File.Directory.scan", main("Int", `scan = File.Directory.scan(directory); return Math.add(List.length(scan.entries), List.length(scan.vanished_names))`), "Int!"},
+		{"File.Directory.refresh", main("Bool", `fresh = File.Directory.refresh(directory); return Math.eq(directory.inode, fresh.inode)`), "Bool!"},
+		{"File.Directory.child", main("Bool", `entry = File.Directory.entry(directory, "child"); child = File.Directory.child(directory, entry); return Math.gt(child.inode, 0)`), "Bool!"},
+		{"File.Directory.entry", main("String", `entry = File.Directory.entry(directory, "entry"); return entry.name`), "String!"},
+		{"File.Entry.observe", main("Int", `entry = File.Directory.entry(directory, "entry"); observed = File.Entry.observe(entry); return List.length(observed)`), "Int!"},
+	}
 }
 
 func processorBuiltinExamples() []builtinExample {

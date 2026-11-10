@@ -4,13 +4,13 @@ typedef __UINT64_TYPE__ U64;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __SIZE_TYPE__ Size;
 _Static_assert(sizeof(ResultSlot)==16 && offsetof(ResultSlot,value)==8,"native result ABI");
-_Static_assert(sizeof(ContextOptions)==56,"native context options ABI");
+_Static_assert(sizeof(ContextOptions)==64,"native context options ABI");
 extern U64 lo_runtime_live_programs(void),lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int lo_cli_main(int,const char *const *,const char *const *);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *),pthread_join(Thread,void **);
 extern int poll(void *,unsigned long,int),getpid(void),kill(int,int);
 extern unsigned alarm(unsigned);
-#define OPTIONS (&(const ContextOptions){100000,16ULL<<20,64ULL<<20,0,0,0,128})
+#define OPTIONS (&(const ContextOptions){100000,16ULL<<20,64ULL<<20,0,0,0,128,256})
 static int contains(const unsigned char *bytes,Size size,const char *text){for(Size i=0;i<size;++i){Size n=0;while(text[n] && i+n<size && bytes[i+n]==(unsigned char)text[n])++n;if(!text[n])return 1;}return 0;}
 #if LO_CASE <= 1
 extern int lo_context_set_host_invocation(Context *,const unsigned char *,Size);

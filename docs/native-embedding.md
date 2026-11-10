@@ -59,7 +59,18 @@ Console registration does not grant File, Process, HTTP, device, or lock authori
 
 The [entry and lock header](../runtime/native/include/lo_program_lock.h) declares explicit identity and lock registration.
 The [lock contract](program-lock-design.md) owns retained identity and cleanup guarantees.
+
 Device and Process test drivers remain explicit trusted injection boundaries.
+The [Process header](../runtime/native/include/lo_process.h) owns the test-driver request and response contract.
+Forwarded output callbacks run on the context owner thread through the registered Console sinks.
+Keep Process driver state alive until its owned work and cleanup finish.
+
+The [ownership provider header](../runtime/native/include/lo_process_ownership.h) defines the separate trusted boundary for descendant lifecycle events.
+This provider supplies events to the real supervisor and ownership controller.
+It does not replace command execution or its resource checks.
+The compiled host registers its factory before CLI dispatch and repeats registration after supervisor re-exec.
+The [descendant profile](process-descendant-ownership.md) defines finite host limits, registration lifetime, platform availability, and release proof.
+
 General File, HTTP, and real Process grant configuration is outside this retained embedding API.
 Compiled program commands supply those explicit application grants.
 

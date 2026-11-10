@@ -111,7 +111,7 @@ def test_package_rejects_stale_runtime_receipt(state: Path, prepared_inputs: tup
     assert not (state / 'out').exists()
 
 
-@pytest.mark.parametrize('subject,expected', [('manifest', 'runtime manifest'), ('process', 'launcher.c'), ('metal', 'Metal source inventory')])
+@pytest.mark.parametrize('subject,expected', [('manifest', 'runtime manifest'), ('process', 'launcher.c'), ('sdk', 'Process SDK'), ('metal', 'Metal source inventory')])
 def test_package_rejects_stale_runtime_identities(state: Path, prepared_inputs: tuple[Path, Path], subject: str, expected: str) -> None:
     prepared, runtime = prepared_inputs
     changed = state / 'runtime'
@@ -122,6 +122,8 @@ def test_package_rejects_stale_runtime_identities(state: Path, prepared_inputs: 
         receipt['manifest_sha256'] = '0' * 64
     elif subject == 'process':
         receipt['process_sources']['launcher.c']['sha256'] = '0' * 64
+    elif subject == 'sdk':
+        receipt['process_sdk']['objects']['process_es']['flags'].append('-DUNDECLARED=1')
     else:
         # The supplied distribution may be software-only. Exercise the current
         # Metal inventory guard through the CLI without requiring that profile.
@@ -289,11 +291,11 @@ def test_native_metal_package_provenance(state: Path, scenario: str) -> None:
 import hashlib,json,sys,shutil
 from pathlib import Path
 sys.path.insert(0,str(Path.cwd()/'tools/lodistribution'))
-import package as package, prepare
+import package as package, prepare, process_sdk
 state=Path(sys.argv[1])
 scenario=sys.argv[2]
 source=Path.cwd()
-for name in package.METAL_SOURCES|{package.MANIFEST}|{'runtime/native/host/process/'+name for name in package.PROCESS_SOURCES}:
+for name in package.METAL_SOURCES|{package.MANIFEST}|{'runtime/native/host/process/'+name for name in package.PROCESS_SOURCES}|set(process_sdk.SOURCES.values())|{'runtime/native/include/lo_process_ownership.h'}:
     target=state/name
     target.parent.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(source/name,target)
@@ -303,11 +305,17 @@ runtime.mkdir()
 def pin(name):
     return {'path':name,'sha256':package.digest(state/name)}
 identity=json.loads((state/package.MANIFEST).read_text())['identity']
-manifest={'metal':{'identity':identity,'kernel':{'sha256':identity['kernel_sha256']}}}
+manifest={'targets':{'darwin/arm64':{}},'metal':{'identity':identity,'kernel':{'sha256':identity['kernel_sha256']}}}
 (runtime/'toolchain.json').write_text(json.dumps(manifest))
 receipt={'manifest_sha256':package.digest(runtime/'toolchain.json'),
          'runtime_source_sha256':package.tree_digest(state/'runtime/native'),
          'process_sources':{name:pin('runtime/native/host/process/'+name) for name in package.PROCESS_SOURCES},
+         'process_sdk':{'compiler':{'path':'/producer/clang','sha256':'a'*64,'version':'fixture compiler'},
+                        'sdk':{'path':'/producer/SDK','version':'27.0','settings_sha256':'b'*64},
+                        'objects':{name:{'source':pin(source),
+                                         'headers':{'runtime/native/include/lo_process_ownership.h':package.digest(state/'runtime/native/include/lo_process_ownership.h')},
+                                         'flags':process_sdk.compiler_flags('/producer/SDK'),
+                                         'object_sha256':'c'*64,'deployment':'27.0'} for name,source in process_sdk.SOURCES.items()}},
          'metal':{'manifest':pin(package.MANIFEST),'sources':{name:pin(name) for name in package.METAL_SOURCES}}}
 if scenario=='old-producer':
     receipt['metal']['producer']={'path':'bin/lo-metal-build.json','sha256':'0'*64}

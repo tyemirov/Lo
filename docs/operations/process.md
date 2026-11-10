@@ -38,13 +38,17 @@ return Process.Arguments.format_shell(List.new("tool", "two words", ""))
 Process.Command.new(context: Process.Context, executable: Process.Executable, arguments: List<String>, stdin: Bytes) -> Process.Command!
 ```
 
-Construct an inert command with explicit context, executable, literal arguments, and stdin bytes. Commit returns `Process.Result` with `termination`, `stdout`, and `stderr`.
+Construct an inert command with explicit context, executable, literal arguments, and stdin bytes.
+Commit returns `Process.Result` with termination, output mode, captured bytes, and confirmed per-stream byte counts.
 
-Nonzero exit codes and signals remain result data. The current profile has a five-second lifetime and denies forked or spawned descendants.
+Nonzero exit codes and signals remain result data.
+The default host duration is five seconds. The default profile denies forked or spawned descendants.
+The host can explicitly select the bounded [descendant profile](../process-descendant-ownership.md).
+That profile preserves the initial command scope and requires complete descendant cleanup before release.
 
 Native admission also bounds paths, arguments, environment entries, transport bytes, output, and child resources.
 
-**Failures:** `Process.InvalidCommand` during construction. Activation can produce `Process.ExecutionFailed` after resolved cleanup.
+**Failures:** `Process.InvalidCommand` during construction. Activation can produce `Process.ExecutionFailed` or `Process.Timeout` after complete cleanup.
 
 Missing configuration, denied authority, cancellation, resource limits, and unresolved cleanup remain terminal host diagnostics.
 
@@ -60,6 +64,58 @@ return 0
 ```
 
 [Contract](../../specification.md#95-process-adapter)
+
+## Process.Command.with_output
+
+```text
+Process.Command.with_output(command: Process.Command, mode: String) -> Process.Command!
+```
+
+Return a new command with `capture` or `forward` output. Keep the original command unchanged.
+Capture retains separate stdout and stderr bytes.
+Forwarding uses the enabled Console sinks and returns empty payloads with confirmed byte counts.
+
+**Failures:** `Process.InvalidCommand` if the mode is not `capture` or `forward`.
+Sink failure, output limits, cancellation, and unknown cleanup remain terminal during activation.
+
+**Authority:** Pure construction. Forwarding needs explicit host authority and both Console destinations at activation.
+
+**Example:**
+
+```lo
+flow Forward(command: Process.Command) -> Process.Command! {
+    return Process.Command.with_output(command, "forward")
+}
+return 0
+```
+
+[Contract](../process-command-policy.md#output-and-results)
+
+## Process.Command.with_timeout
+
+```text
+Process.Command.with_timeout(command: Process.Command, timeout_ms: Int) -> Process.Command!
+```
+
+Return a new command with the requested positive millisecond deadline. Keep the original command unchanged.
+The deadline covers startup, execution, and output delivery.
+
+**Failures:** `Process.InvalidCommand` if the duration is not a positive signed 64-bit millisecond value.
+Activation rejects a request above the host maximum before launch.
+A timeout produces recoverable `Process.Timeout` only after complete cleanup.
+
+**Authority:** Pure construction without clock observation. The host supplies maximum duration and cleanup limits.
+
+**Example:**
+
+```lo
+flow Timed(command: Process.Command) -> Process.Command! {
+    return Process.Command.with_timeout(command, 30000)
+}
+return 0
+```
+
+[Contract](../process-command-policy.md#timeout-and-cleanup)
 
 ## Process.Context.current
 

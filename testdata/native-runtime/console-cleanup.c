@@ -15,7 +15,7 @@ static int flush(void *user,uint32_t destination){(void)user;(void)destination;+
 int main(void) {
  LoDeviceDriver driver={0,model_open,failing_close,model_allocate,model_upload,model_download,model_release,model_supports,model_compute};
  if(!lo_device_install_driver(&driver))return 1;
- const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128};
+ const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128,256};
  Context *context=lo_context_new(&options);
  if(!context || !lo_context_set_console(context,3,0,output,flush,1048576) || !lo_context_set_device_grant(context,"metal:0"))return 2;
  ResultSlot result={99,99,0};lo_context_run(context,&result);

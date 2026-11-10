@@ -17,6 +17,7 @@ pub struct Limits {
     pub list_items: u64,
     pub file_entries: u64,
     pub file_directories: u64,
+    pub json_depth: u64,
 }
 impl Default for Limits {
     fn default() -> Self {
@@ -27,6 +28,7 @@ impl Default for Limits {
             list_items: 0,
             file_entries: 0,
             file_directories: 128,
+            json_depth: 256,
         }
     }
 }

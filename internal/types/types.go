@@ -24,9 +24,12 @@ const (
 	ErrorKind              Kind = "Error"
 	PathKind               Kind = "File.Path"
 	GlobKind               Kind = "Glob"
+	JSONValueKind          Kind = "JSON.Value"
 	FileEntryKind          Kind = "File.Entry"
 	FileDirectoryKind      Kind = "File.Directory"
 	FileScanKind           Kind = "File.Scan"
+	FileTreeKind           Kind = "File.Tree"
+	FileTreeRemoveKind     Kind = "File.Tree.Remove"
 	FileSystemUsageKind    Kind = "File.System.Usage"
 	HostInvocationKind     Kind = "Host.Invocation"
 	ConsoleLineKind        Kind = "Console.Line"
@@ -142,18 +145,24 @@ func Device() Type            { return atom(DeviceKind) }
 func Error() Type             { return atom(ErrorKind) }
 func Path() Type              { return atom(PathKind) }
 func Glob() Type              { return atom(GlobKind) }
+func JSONValue() Type         { return atom(JSONValueKind) }
 func FileEntry() Type         { return atom(FileEntryKind) }
 func FileDirectory() Type     { return atom(FileDirectoryKind) }
 func FileScan() Type          { return atom(FileScanKind) }
-func FileSystemUsage() Type   { return atom(FileSystemUsageKind) }
-func HostInvocation() Type    { return atom(HostInvocationKind) }
-func ConsoleLine() Type       { return atom(ConsoleLineKind) }
-func ConsoleReceipt() Type    { return atom(ConsoleReceiptKind) }
-func ProgramExit() Type       { return atom(ProgramExitKind) }
-func LockFile() Type          { return atom(LockFileKind) }
-func LockLease() Type         { return atom(LockLeaseKind) }
-func CLIOptions() Type        { return atom(CLIOptionsKind) }
-func Headers() Type           { return atom(HeadersKind) }
+func FileTree() Type          { return atom(FileTreeKind) }
+func FileTreeRemove() Type    { return atom(FileTreeRemoveKind) }
+func FileTreeRow() Record {
+	return must(NewRecord([]Field{{Name: "relative", Type: String()}, {Name: "entry", Type: FileEntry()}}))
+}
+func FileSystemUsage() Type { return atom(FileSystemUsageKind) }
+func HostInvocation() Type  { return atom(HostInvocationKind) }
+func ConsoleLine() Type     { return atom(ConsoleLineKind) }
+func ConsoleReceipt() Type  { return atom(ConsoleReceiptKind) }
+func ProgramExit() Type     { return atom(ProgramExitKind) }
+func LockFile() Type        { return atom(LockFileKind) }
+func LockLease() Type       { return atom(LockLeaseKind) }
+func CLIOptions() Type      { return atom(CLIOptionsKind) }
+func Headers() Type         { return atom(HeadersKind) }
 func HeaderEntries() List {
 	return must(NewList(must(NewRecord([]Field{{Name: "name", Type: String()}, {Name: "value", Type: Bytes()}}))))
 }
@@ -178,7 +187,7 @@ func ProcessTermination() Type { return atom(ProcessTerminationKind) }
 func AnyRecord() Type          { return atom(AnyRecordKind) }
 func Named(name string) (Type, bool) {
 	switch Kind(name) {
-	case GlobKind, URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, FileSystemUsageKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind, LockFileKind, LockLeaseKind:
+	case JSONValueKind, GlobKind, URLKind, MethodKind, ClientRequestKind, ProcessContextKind, ProcessExecutableKind, ProcessCommandKind, ProcessResultKind, ProcessTerminationKind, FileDirectoryKind, FileScanKind, FileTreeKind, FileTreeRemoveKind, FileSystemUsageKind, HostInvocationKind, ConsoleLineKind, ConsoleReceiptKind, ProgramExitKind, CLIOptionsKind, LockFileKind, LockLeaseKind:
 		return atom(name), true
 	case IntKind, StringKind, BoolKind, NullKind, ScalarKind, BytesKind, FloatKind, DeviceKind, ErrorKind, PathKind, FileEntryKind, HeadersKind, RequestKind, ResponseKind, ServerKind, FileWriteKind, FileAppendKind, FileRemoveKind, FileWriteReceiptKind, FileAppendReceiptKind, FileRemoveReceiptKind, ServerReceiptKind, AnyRecordKind, SGDConfigKind, AdamWConfigKind:
 		return atom(name), true
@@ -380,12 +389,23 @@ func FieldType(t Type, name string) (Type, bool) {
 		case "vanished_names":
 			return must(NewList(String())), true
 		}
+	case FileTreeKind:
+		switch name {
+		case "entries":
+			return must(NewList(FileTreeRow())), true
+		case "complete":
+			return Bool(), true
+		}
 	case ProcessResultKind:
 		switch name {
 		case "termination":
 			return ProcessTermination(), true
 		case "stdout", "stderr":
 			return Bytes(), true
+		case "output":
+			return String(), true
+		case "stdout_bytes", "stderr_bytes":
+			return Int(), true
 		}
 	case ProcessTerminationKind:
 		if name == "kind" {

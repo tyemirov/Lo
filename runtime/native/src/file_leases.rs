@@ -22,6 +22,11 @@ fn observation_leases(roots: &[Handle]) -> BTreeSet<u64> {
                     }
                 }
                 Value::Scan { fields } => pending.push(fields.clone()),
+                Value::Tree { observation: Some(tree), .. } => { leases.insert(tree.parent.lease); }
+                Value::TreeRemove { expected, guard } => {
+                    pending.push(expected.clone());
+                    pending.extend(guard.contexts.iter().cloned());
+                }
                 Value::Remove { entries, guard, .. } => {
                     pending.push(entries.clone());
                     if let Some(guard) = guard {

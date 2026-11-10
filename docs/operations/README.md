@@ -2,7 +2,7 @@
 
 [Documentation](../README.md) · [Philosophy](../philosophy.md) · [Syntax](../syntax.md)
 
-This reference describes all 165 implemented operations in the built-in catalog.
+This reference describes all 188 implemented operations in the built-in catalog.
 Each operation has an individual entry with a signature, behavior, failures, authority requirements, example, and detailed contract.
 Namespace names group related operations.
 They are not import statements or user-defined modules.
@@ -28,15 +28,16 @@ An empty error list in a constructor does not establish that its later commit su
 
 | Subject | Operations |
 | --- | --- |
-| [Values And Arithmetic](values.md) | 32 |
-| [Text, Bytes, And Globs](text.md) | 30 |
+| [Values And Arithmetic](values.md) | 34 |
+| [Text, Bytes, And Globs](text.md) | 31 |
 | [Collections And Sequential Flows](collections.md) | 20 |
-| [Files](files.md) | 15 |
-| [Processes](process.md) | 12 |
+| [Files](files.md) | 23 |
+| [Processes](process.md) | 14 |
 | [HTTP](http.md) | 9 |
-| [Applications](applications.md) | 6 |
+| [Applications](applications.md) | 7 |
 | [Tensors And Devices](tensors.md) | 21 |
 | [Training And Checkpoints](training.md) | 20 |
+| [JSON](json.md) | 9 |
 
 ## Alphabetical Index
 
@@ -54,10 +55,16 @@ An empty error list in a constructor does not establish that its later commit su
 | [`CLI.parse`](applications.md#cliparse) | [Applications](applications.md) |
 | [`Checkpoint.decode`](training.md#checkpointdecode) | [Training And Checkpoints](training.md) |
 | [`Checkpoint.encode`](training.md#checkpointencode) | [Training And Checkpoints](training.md) |
+| [`Clock.now_unix_ns`](applications.md#clocknow_unix_ns) | [Applications](applications.md) |
 | [`Console.Line.new`](applications.md#consolelinenew) | [Applications](applications.md) |
 | [`Device.new`](tensors.md#devicenew) | [Tensors And Devices](tensors.md) |
 | [`Error.new`](values.md#errornew) | [Values And Arithmetic](values.md) |
 | [`File.Append.new`](files.md#fileappendnew) | [Files](files.md) |
+| [`File.Directory.child`](files.md#filedirectorychild) | [Files](files.md) |
+| [`File.Directory.entry`](files.md#filedirectoryentry) | [Files](files.md) |
+| [`File.Directory.refresh`](files.md#filedirectoryrefresh) | [Files](files.md) |
+| [`File.Directory.scan`](files.md#filedirectoryscan) | [Files](files.md) |
+| [`File.Entry.observe`](files.md#fileentryobserve) | [Files](files.md) |
 | [`File.Path.eq`](files.md#filepatheq) | [Files](files.md) |
 | [`File.Path.join`](files.md#filepathjoin) | [Files](files.md) |
 | [`File.Path.name`](files.md#filepathname) | [Files](files.md) |
@@ -66,6 +73,9 @@ An empty error list in a constructor does not establish that its later commit su
 | [`File.Path.to_string`](files.md#filepathto_string) | [Files](files.md) |
 | [`File.Remove.checked`](files.md#fileremovechecked) | [Files](files.md) |
 | [`File.Remove.new`](files.md#fileremovenew) | [Files](files.md) |
+| [`File.System.usage`](files.md#filesystemusage) | [Files](files.md) |
+| [`File.Tree.Remove.checked`](files.md#filetreeremovechecked) | [Files](files.md) |
+| [`File.Tree.snapshot`](files.md#filetreesnapshot) | [Files](files.md) |
 | [`File.Write.new`](files.md#filewritenew) | [Files](files.md) |
 | [`File.directory`](files.md#filedirectory) | [Files](files.md) |
 | [`File.list`](files.md#filelist) | [Files](files.md) |
@@ -75,6 +85,7 @@ An empty error list in a constructor does not establish that its later commit su
 | [`Float.add`](values.md#floatadd) | [Values And Arithmetic](values.md) |
 | [`Float.div`](values.md#floatdiv) | [Values And Arithmetic](values.md) |
 | [`Float.eq`](values.md#floateq) | [Values And Arithmetic](values.md) |
+| [`Float.format_fixed`](values.md#floatformat_fixed) | [Values And Arithmetic](values.md) |
 | [`Float.gt`](values.md#floatgt) | [Values And Arithmetic](values.md) |
 | [`Float.gte`](values.md#floatgte) | [Values And Arithmetic](values.md) |
 | [`Float.lt`](values.md#floatlt) | [Values And Arithmetic](values.md) |
@@ -105,8 +116,18 @@ An empty error list in a constructor does not establish that its later commit su
 | [`HTTP.URL.new`](http.md#httpurlnew) | [HTTP](http.md) |
 | [`Host.Invocation.current`](applications.md#hostinvocationcurrent) | [Applications](applications.md) |
 | [`Int.new`](values.md#intnew) | [Values And Arithmetic](values.md) |
+| [`Int.parse`](values.md#intparse) | [Values And Arithmetic](values.md) |
 | [`Int.to_float`](values.md#intto_float) | [Values And Arithmetic](values.md) |
 | [`Int.to_string`](values.md#intto_string) | [Values And Arithmetic](values.md) |
+| [`JSON.at`](json.md#jsonat) | [JSON](json.md) |
+| [`JSON.bool`](json.md#jsonbool) | [JSON](json.md) |
+| [`JSON.decode`](json.md#jsondecode) | [JSON](json.md) |
+| [`JSON.float`](json.md#jsonfloat) | [JSON](json.md) |
+| [`JSON.get`](json.md#jsonget) | [JSON](json.md) |
+| [`JSON.int`](json.md#jsonint) | [JSON](json.md) |
+| [`JSON.kind`](json.md#jsonkind) | [JSON](json.md) |
+| [`JSON.length`](json.md#jsonlength) | [JSON](json.md) |
+| [`JSON.string`](json.md#jsonstring) | [JSON](json.md) |
 | [`List.at`](collections.md#listat) | [Collections And Sequential Flows](collections.md) |
 | [`List.filter`](collections.md#listfilter) | [Collections And Sequential Flows](collections.md) |
 | [`List.flat_map`](collections.md#listflat_map) | [Collections And Sequential Flows](collections.md) |
@@ -148,6 +169,8 @@ An empty error list in a constructor does not establish that its later commit su
 | [`Parameters.values`](training.md#parametersvalues) | [Training And Checkpoints](training.md) |
 | [`Process.Arguments.format_shell`](process.md#processargumentsformat_shell) | [Processes](process.md) |
 | [`Process.Command.new`](process.md#processcommandnew) | [Processes](process.md) |
+| [`Process.Command.with_output`](process.md#processcommandwith_output) | [Processes](process.md) |
+| [`Process.Command.with_timeout`](process.md#processcommandwith_timeout) | [Processes](process.md) |
 | [`Process.Context.current`](process.md#processcontextcurrent) | [Processes](process.md) |
 | [`Process.Context.environment_value`](process.md#processcontextenvironment_value) | [Processes](process.md) |
 | [`Process.Context.new`](process.md#processcontextnew) | [Processes](process.md) |
@@ -172,6 +195,7 @@ An empty error list in a constructor does not establish that its later commit su
 | [`String.concat`](text.md#stringconcat) | [Text, Bytes, And Globs](text.md) |
 | [`String.ends_with`](text.md#stringends_with) | [Text, Bytes, And Globs](text.md) |
 | [`String.eq`](text.md#stringeq) | [Text, Bytes, And Globs](text.md) |
+| [`String.format`](text.md#stringformat) | [Text, Bytes, And Globs](text.md) |
 | [`String.is_whitespace`](text.md#stringis_whitespace) | [Text, Bytes, And Globs](text.md) |
 | [`String.length`](text.md#stringlength) | [Text, Bytes, And Globs](text.md) |
 | [`String.lines`](text.md#stringlines) | [Text, Bytes, And Globs](text.md) |

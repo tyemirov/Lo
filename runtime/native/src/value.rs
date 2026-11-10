@@ -173,6 +173,7 @@ pub enum Data {
     Null,
     Bytes(Vec<u8>),
     Glob(crate::glob::Glob),
+    JSON(Arc<crate::json::Document>),
     List(Vec<Handle>),
     Record(BTreeMap<String, Handle>),
     Map(Vec<(Handle, Handle)>),
@@ -211,6 +212,7 @@ const ATOM_NAMES: &[&str] = &[
     "Scalar",
     "Bytes",
     "Glob",
+    "JSON.Value",
     "Float",
     "Error",
     "Record",
@@ -224,6 +226,8 @@ const ATOM_NAMES: &[&str] = &[
     "File.Entry",
     "File.Directory",
     "File.Scan",
+    "File.Tree",
+    "File.Tree.Remove",
     "File.System.Usage",
     "Host.Invocation",
     "Console.Line",
@@ -280,6 +284,7 @@ pub fn new(typ: Type, data: Data) -> Handle {
             Data::Null | Data::Flow(_) => 0,
             Data::Bytes(b) => b.len() as u64,
             Data::Glob(pattern) => pattern.weight(),
+            Data::JSON(document) => document.weight()-16,
             Data::List(v) => sum_weight(v.iter().map(|x| x.weight)),
             Data::Record(v) => {
                 sum_weight(v.iter().map(|(n, x)| add_weight(n.len() as u64, x.weight)))
@@ -331,6 +336,7 @@ pub fn new(typ: Type, data: Data) -> Handle {
         | Data::Bool(_)
         | Data::Null
         | Data::Bytes(_)
+        | Data::JSON(_)
         | Data::Glob(_)
         | Data::Flow(_)
         | Data::Device(_) => false,
@@ -440,6 +446,7 @@ impl Value {
             Data::Null => Json::Null,
             Data::Bytes(v) => json!(STANDARD.encode(v)),
             Data::Glob(pattern) => json!(pattern.pattern),
+            Data::JSON(_) => panic!("JSON values require the iterative writer"),
             Data::List(v) => json!(v.iter().map(|x| x.json()).collect::<Vec<_>>()),
             Data::Record(v) => Json::Object(v.iter().map(|(n, x)| (n.clone(), x.json())).collect()),
             Data::Map(v) => json!(v
@@ -467,121 +474,9 @@ impl Value {
         };
         json!({"type":self.typ.name(),"value":data})
     }
+    pub fn write_json(&self, output:&mut impl std::io::Write)->std::io::Result<()> { crate::value_output::write(self,output) }
     pub fn canonical_json(&self) -> String {
-        fn quote(s: &str) -> String {
-            serde_json::to_string(s)
-                .unwrap()
-                .replace('&', "\\u0026")
-                .replace('<', "\\u003c")
-                .replace('>', "\\u003e")
-                .replace('\u{2028}', "\\u2028")
-                .replace('\u{2029}', "\\u2029")
-        }
-        fn list(items: &[Handle]) -> String {
-            format!(
-                "[{}]",
-                items
-                    .iter()
-                    .map(|v| v.canonical_json())
-                    .collect::<Vec<_>>()
-                    .join(",")
-            )
-        }
-        let data = match &self.data {
-            Data::Tensor(t) => format!(
-                "{{\"dtype\":\"fp32\",\"shape\":{},\"device\":{},\"values\":{}}}",
-                canonical_json_value(&json!(t
-                    .shape
-                    .dims
-                    .iter()
-                    .map(|d| d.to_string())
-                    .collect::<Vec<_>>())),
-                quote(&t.storage.location),
-                canonical_json_value(&json!(t
-                    .storage
-                    .host_values()
-                    .iter()
-                    .map(|n| format_float32(*n))
-                    .collect::<Vec<_>>()))
-            ),
-            Data::Device(d) => quote(d),
-            Data::Wrapped(v) => format!(
-                "{{{}}}",
-                v.fields()
-                    .iter()
-                    .map(|(n, v)| format!("{}:{}", quote(n), v.canonical_json()))
-                    .collect::<Vec<_>>()
-                    .join(",")
-            ),
-            Data::Adapter(v) => v.canonical_json(),
-            Data::Int(n) => quote(&n.to_string()),
-            Data::Float(n) => quote(&format_float(*n)),
-            Data::Text(s) => quote(s),
-            Data::Bool(v) => v.to_string(),
-            Data::Null => "null".into(),
-            Data::Bytes(b) => quote(&STANDARD.encode(b)),
-            Data::Glob(pattern) => quote(&pattern.pattern),
-            Data::List(v) => list(v),
-            Data::Record(v) => format!(
-                "{{{}}}",
-                v.iter()
-                    .map(|(n, v)| format!("{}:{}", quote(n), v.canonical_json()))
-                    .collect::<Vec<_>>()
-                    .join(",")
-            ),
-            Data::Map(v) => format!(
-                "[{}]",
-                v.iter()
-                    .map(|(k, v)| format!(
-                        "{{\"key\":{},\"value\":{}}}",
-                        k.canonical_json(),
-                        v.canonical_json()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(",")
-            ),
-            Data::Range(a, b, c, d) => format!(
-                "{{\"start\":{},\"end\":{},\"include_start\":{},\"include_end\":{}}}",
-                a.canonical_json(),
-                b.canonical_json(),
-                c,
-                d
-            ),
-            Data::Success(v) => {
-                return format!(
-                    "{{\"type\":{},\"status\":\"ok\",\"value\":{}}}",
-                    quote(&self.typ.name()),
-                    v.canonical_json()
-                )
-            }
-            Data::Failure(e) => {
-                return format!(
-                    "{{\"type\":{},\"status\":\"error\",\"error\":{}}}",
-                    quote(&self.typ.name()),
-                    e.canonical_json()
-                )
-            }
-            Data::Error(e) => {
-                return format!(
-                    "{{\"type\":\"Error\",\"kind\":{},\"message\":{},\"input\":{},\"trace\":{}{}}}",
-                    quote(&e.kind),
-                    quote(&e.message),
-                    e.input.canonical_json(),
-                    list(&e.trace),
-                    if e.flow_progress.is_empty() {
-                        String::new()
-                    } else {
-                        format!(",\"flow_progress\":{}", list(&e.flow_progress))
-                    }
-                )
-            }
-            Data::Flow(_) => std::process::abort(),
-        };
-        format!(
-            "{{\"type\":{},\"value\":{}}}",
-            quote(&self.typ.name()),
-            data
-        )
+        let mut bytes=Vec::new(); self.write_json(&mut bytes).unwrap(); String::from_utf8(bytes).unwrap()
     }
     pub fn output(&self) -> String {
         match &self.data {
@@ -763,8 +658,8 @@ fn canonical_typed_payload(typ: Option<&str>, value: &Json) -> String {
             "now_unix_ns",
             "redacted",
         ],
-        Some("Process.Command") => &["context", "executable", "arguments", "stdin"],
-        Some("Process.Result") => &["termination", "stdout", "stderr"],
+        Some("Process.Command") => &["context", "executable", "arguments", "stdin", "timeout_ms", "output"],
+        Some("Process.Result") => &["termination", "stdout", "stderr", "output", "stdout_bytes", "stderr_bytes"],
         Some("Process.Termination") => &["kind", "exit_code", "signal"],
         _ => return canonical_json_value(value),
     };
@@ -805,9 +700,9 @@ pub fn format_float32(n: f32) -> String {
         n.to_string()
     }
 }
-pub fn snapshot(v: &Handle) -> Handle {
-    match &v.data {
-        Data::Tensor(t) => record([
+pub(crate) fn tensor_snapshot(value: &Value) -> Handle {
+    let Data::Tensor(t)=&value.data else {unreachable!()};
+    record([
             ("tensor_type".into(), text("Tensor<FP32>")),
             ("dtype".into(), text("fp32")),
             (
@@ -818,7 +713,11 @@ pub fn snapshot(v: &Handle) -> Handle {
                 ),
             ),
             ("device".into(), text(&t.storage.location)),
-        ]),
+        ])
+}
+pub fn snapshot(v: &Handle) -> Handle {
+    match &v.data {
+        Data::Tensor(_) => tensor_snapshot(v),
         Data::Adapter(payload) => new(v.typ.clone(), Data::Adapter(payload.snapshot())),
         Data::Wrapped(contents) => snapshot(contents),
         Data::Record(fields) => {
@@ -863,7 +762,7 @@ impl Type {
         }
     }
 }
-fn snapshot_type(t: &Type) -> Type {
+pub(crate) fn snapshot_type(t: &Type) -> Type {
     match t {
         Type::Nominal(_, schema) => snapshot_type(schema),
         Type::List(e) => Type::List(Box::new(snapshot_type(e))),

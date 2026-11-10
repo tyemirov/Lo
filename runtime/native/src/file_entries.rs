@@ -5,17 +5,36 @@ use serde_json::{json, Value as Json};
 #[path = "file_mutation_scan.rs"]
 mod mutation_scan;
 pub(crate) use mutation_scan::{validate_namespace, MutationAccess};
+#[path = "file_descendants.rs"]
+mod descendants;
+pub(super) use descendants::{child, named_entry, observe};
+#[path = "file_tree.rs"]
+pub(super) mod tree;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Directory {
     pub path: PathBuf,
     pub identity: (u64, u64),
+    pub anchor: PathBuf,
+    pub witnesses: std::sync::Arc<Vec<witnesses::Witness>>,
+    pub recursive: bool,
+}
+impl Directory {
+    fn weight(&self) -> u64 {
+        160 + self.path.as_os_str().len() as u64
+            + self.anchor.as_os_str().len() as u64
+            + self
+                .witnesses
+                .iter()
+                .map(|w| 32 + w.name.len() as u64)
+                .sum::<u64>()
+    }
 }
 #[derive(Clone)]
 pub struct Observation {
     pub session: u64,
     pub lease: u64,
-    pub directory: Directory,
+    pub directory: std::sync::Arc<Directory>,
     pub identity: (u64, u64),
 }
 #[derive(Clone)]
@@ -37,6 +56,14 @@ pub enum Value {
     Scan {
         fields: Handle,
     },
+    Tree {
+        fields: Handle,
+        observation: Option<std::sync::Arc<tree::Tree>>,
+    },
+    TreeRemove {
+        expected: Handle,
+        guard: Guard,
+    },
     Content {
         append: bool,
         path: Handle,
@@ -57,20 +84,22 @@ impl Value {
                 observation,
             } => {
                 fields.weight
-                    + observation.as_ref().map_or(0, |observation| {
-                        128 + observation.directory.path.as_os_str().len() as u64
-                    })
+                    + observation
+                        .as_ref()
+                        .map_or(0, |observation| observation.directory.weight())
             }
             Self::Directory {
                 fields,
                 observation,
             } => {
                 fields.weight
-                    + observation.as_ref().map_or(0, |observation| {
-                        128 + observation.directory.path.as_os_str().len() as u64
-                    })
+                    + observation
+                        .as_ref()
+                        .map_or(0, |observation| observation.directory.weight())
             }
             Self::Scan { fields } => fields.weight,
+            Self::Tree { fields, observation } => fields.weight + observation.as_ref().map_or(0, |tree| tree.weight()),
+            Self::TreeRemove { expected, guard } => expected.weight + 64 + guard.predicate.len() as u64 + guard.contexts.iter().map(|value| value.weight).sum::<u64>(),
             Self::Content {
                 append,
                 path,
@@ -90,7 +119,7 @@ impl Value {
     }
     pub fn fields(&self) -> Option<&BTreeMap<String, Handle>> {
         match self {
-            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } | Self::Tree { fields, .. } => {
                 Some(fields.fields())
             }
             _ => None,
@@ -98,7 +127,7 @@ impl Value {
     }
     pub fn json(&self) -> Json {
         match self {
-            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } | Self::Tree { fields, .. } => {
                 Json::Object(
                     fields
                         .fields()
@@ -121,11 +150,12 @@ impl Value {
                 }
                 result
             }
+            Self::TreeRemove { expected, guard } => json!({"operation":"File.Tree.Remove.checked", "expected":expected.json(), "guard":{"predicate":guard.predicate,"context":guard.contexts.iter().map(|v|crate::value::snapshot(v).json()).collect::<Vec<_>>()}}),
         }
     }
     pub fn canonical_json(&self) -> String {
         match self {
-            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } => {
+            Self::Entry { fields, .. } | Self::Directory { fields, .. } | Self::Scan { fields } | Self::Tree { fields, .. } => {
                 format!(
                     "{{{}}}",
                     fields
@@ -176,6 +206,7 @@ impl Value {
                     suffix
                 )
             }
+            Self::TreeRemove { expected, guard } => format!("{{\"operation\":\"File.Tree.Remove.checked\",\"expected\":{},\"guard\":{{\"predicate\":{},\"context\":[{}]}}}}", expected.canonical_json(), serde_json::to_string(&guard.predicate).unwrap(), guard.contexts.iter().map(|value|crate::value::snapshot(value).canonical_json()).collect::<Vec<_>>().join(",")),
         }
     }
     pub fn output(&self) -> String {
@@ -194,6 +225,8 @@ impl Value {
             Self::Scan { fields } => Self::Scan {
                 fields: crate::value::snapshot(fields),
             },
+            Self::Tree { fields, .. } => Self::Tree { fields: crate::value::snapshot(fields), observation: None },
+            Self::TreeRemove { expected, guard } => Self::TreeRemove { expected: crate::value::snapshot(expected), guard: Guard { flow: guard.flow, predicate: guard.predicate.clone(), contexts: guard.contexts.iter().map(crate::value::snapshot).collect() } },
             Self::Remove { entries, guard, .. } => Self::Remove {
                 entries: crate::value::snapshot(entries),
                 session: 0,
@@ -346,79 +379,38 @@ fn observation_failure(
         super::observer::Failure::Host(fault) => fault,
     }
 }
-fn exact_path(path: &Path) -> Result<(), String> {
-    let resolved = std::fs::canonicalize(path).map_err(|error| {
-        format!(
-            "resolve file directory {}: lstat {}: {}",
-            quote(path),
-            path.display(),
-            system_error(&error)
-        )
-    })?;
-    if resolved != path {
-        return Err(format!(
-            "file directory {} traverses a symlink",
-            quote(path)
-        ));
-    }
-    Ok(())
-}
 pub(super) fn open_exact_roots(base: &Path, paths: &[String]) -> Result<Vec<Grant>, String> {
-    let mut roots = Vec::new();
+    let mut roots: Vec<Grant> = Vec::new();
     let mut seen = BTreeSet::new();
-    for path in paths {
-        let absolute = clean(&base.join(path));
-        if !seen.insert(absolute.clone()) {
-            return Err(format!("duplicate adapter root {}", quote(&absolute)));
+    let result = (|| {
+        for path in paths {
+            let absolute = clean(&base.join(path));
+            if !seen.insert(absolute.clone()) {
+                return Err(format!("duplicate adapter root {}", quote(&absolute)));
+            }
+            let (directory, witnesses, inert) = witnesses::capture(&absolute).map_err(|error| {
+                format!(
+                    "open adapter root {}: {}",
+                    quote(&absolute),
+                    system_error(&error)
+                )
+            })?;
+            roots.push(Grant {
+                path: absolute,
+                directory,
+                witnesses,
+                inert,
+            });
         }
-        let mut prefix = absolute.clone();
-        loop {
-            match std::fs::symlink_metadata(&prefix) {
-                Ok(_) => {
-                    exact_path(&prefix)?;
-                    break;
-                }
-                Err(error) if error.kind() == io::ErrorKind::NotFound => {
-                    if !prefix.pop() {
-                        return Err(format!(
-                            "observe adapter root {}: {}",
-                            quote(&absolute),
-                            system_error(&error)
-                        ));
-                    }
-                }
-                Err(error) => {
-                    return Err(format!(
-                        "observe adapter root {}: {}",
-                        quote(&absolute),
-                        system_error(&error)
-                    ))
-                }
+        Ok(())
+    })();
+    if let Err(mut error) = result {
+        for grant in roots {
+            if let Err(cleanup) = close_file(grant.directory) {
+                error.push_str(&format!("\nclose adapter root: {}", system_error(&cleanup)));
             }
         }
-        let inert = prefix != absolute;
-        let directory = File::open(&prefix).map_err(|error| {
-            format!(
-                "open adapter root {}: {}",
-                quote(&absolute),
-                system_error(&error)
-            )
-        })?;
-        if !directory
-            .metadata()
-            .map_err(|error| error.to_string())?
-            .is_dir()
-        {
-            return Err(format!(
-                "open adapter root {}: not a directory",
-                quote(&absolute)
-            ));
-        }
-        roots.push(Grant {
-            path: absolute,
-            directory,
-            inert,
-        });
+        return Err(error);
     }
     Ok(roots)
 }
@@ -455,73 +447,119 @@ fn exact_grant(
         .iter()
         .find(|grant| grant.path == path)
         .ok_or_else(|| denied(operation, &path))?;
+    let observes = matches!(
+        operation,
+        "File.list" | "File.directory" | "File.scan" | "File.System.usage"
+    );
+    let absent = || {
+        file_fault(
+            site,
+            "File.DirectoryAbsent",
+            &format!("File.DirectoryAbsent: directory {} is absent", quote(&path)),
+            operation_input(root),
+        )
+    };
     if grant.inert {
-        if matches!(
-            operation,
-            "File.list" | "File.directory" | "File.scan" | "File.System.usage"
-        ) && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
-        {
-            return Err(file_fault(
-                site,
-                "File.DirectoryAbsent",
-                &format!("File.DirectoryAbsent: directory {} is absent", quote(&path)),
-                operation_input(root),
-            ));
+        if !observes {
+            return Err(denied(operation, &path));
         }
-        return Err(denied(operation, &path));
+        let missing = witnesses::reopen(&grant.witnesses).and_then(|prefix| {
+            let names: Vec<_> = path
+                .components()
+                .filter_map(|part| match part {
+                    Component::Normal(name) => Some(name.to_owned()),
+                    _ => None,
+                })
+                .skip(grant.witnesses.len() - 1)
+                .collect();
+            witnesses::suffix_absent(prefix, &names)
+        });
+        return Err(match missing {
+            Ok(true) => absent(),
+            Err(witnesses::Failure::Close(error)) => host(system_error(&error)),
+            _ => denied(operation, &path),
+        });
     }
-    if let Err(message) = exact_path(&path) {
-        if matches!(
-            operation,
-            "File.list" | "File.directory" | "File.scan" | "File.System.usage"
-        ) && matches!(std::fs::symlink_metadata(&path),Err(error) if error.kind()==io::ErrorKind::NotFound)
+    let directory = match witnesses::reopen(&grant.witnesses) {
+        Ok(directory) => directory,
+        Err(witnesses::Failure::Close(error)) => return Err(host(system_error(&error))),
+        Err(witnesses::Failure::Missing(index))
+            if observes && index + 1 == grant.witnesses.len() =>
         {
-            return Err(file_fault(
-                site,
-                "File.DirectoryAbsent",
-                &format!("File.DirectoryAbsent: {message}"),
-                operation_input(root),
-            ));
+            return Err(absent())
         }
-        return Err(denied(operation, &path));
-    }
-    let current = std::fs::symlink_metadata(&path).map_err(|_| denied(operation, &path))?;
-    let retained = grant.directory.metadata().map_err(|error| {
-        host(format!(
-            "{operation} {}: {}",
-            quote(&path),
-            system_error(&error)
-        ))
-    })?;
-    if !current.is_dir() || identity(&current) != identity(&retained) {
-        return Err(denied(operation, &path));
-    }
+        Err(_) => return Err(denied(operation, &path)),
+    };
+    let identity = grant.witnesses.last().expect("exact root witness").identity;
     Ok((
-        grant
-            .directory
-            .try_clone()
-            .map_err(|error| host(error.to_string()))?,
+        directory,
         Directory {
+            anchor: path.clone(),
             path,
-            identity: identity(&retained),
+            identity,
+            witnesses: std::sync::Arc::new(grant.witnesses.clone()),
+            recursive: false,
         },
     ))
 }
+fn observation_grant(
+    context: &Context,
+    site: &Site,
+    root: &Handle,
+) -> Result<(File, Directory), Fault> {
+    let path = clean(&context.files.base.join(root.string()));
+    let recursive = context
+        .files
+        .observe_trees
+        .iter()
+        .any(|grant| grant.path == path);
+    let roots = if recursive {
+        &context.files.observe_trees
+    } else {
+        &context.files.lists
+    };
+    let (file, mut observed) = exact_grant(
+        roots,
+        &context.files.base,
+        &site.operation,
+        root.string(),
+        site,
+        root,
+    )?;
+    observed.recursive = recursive;
+    Ok((file, observed))
+}
+
 struct DirectoryStream {
     pointer: *mut libc::DIR,
 }
+struct DirectoryOpenFailure {
+    primary: io::Error,
+    cleanup: Option<io::Error>,
+}
+impl DirectoryOpenFailure {
+    fn fault(self, primary: Fault) -> Fault {
+        match self.cleanup {
+            Some(error) => cleanup_failure(primary, error),
+            None => primary,
+        }
+    }
+}
 impl DirectoryStream {
-    fn open(directory: &File) -> io::Result<Self> {
+    fn open(directory: &File) -> Result<Self, DirectoryOpenFailure> {
         let name = CString::new(".").unwrap();
         let fd = unsafe { openat(directory.as_raw_fd(), name.as_ptr(), FLAGS[1] | FLAGS[2]) };
         if fd < 0 {
-            return Err(io::Error::last_os_error());
+            return Err(DirectoryOpenFailure {
+                primary: io::Error::last_os_error(),
+                cleanup: None,
+            });
         }
         let pointer = unsafe { libc::fdopendir(fd) };
         if pointer.is_null() {
-            let error = io::Error::last_os_error();
-            unsafe { close(fd) };
-            return Err(error);
+            let primary = io::Error::last_os_error();
+            let cleanup = close_file(unsafe { File::from_raw_fd(fd) }).err();
+            return Err(DirectoryOpenFailure { primary, cleanup });
         }
         Ok(Self { pointer })
     }
@@ -586,7 +624,7 @@ fn metadata_times(info: &FileInfo) -> Result<(i64, i64, i64), String> {
 fn entry_value(
     context: &mut Context,
     site: &Site,
-    observation: &Directory,
+    observation: &std::sync::Arc<Directory>,
     lease: u64,
     name: &str,
     info: &FileInfo,
@@ -636,8 +674,7 @@ fn entry_value(
         ),
     ];
     let weight = 16
-        + 128
-        + observation.path.as_os_str().len() as u64
+        + observation.weight()
         + 16
         + fields
             .iter()
@@ -662,19 +699,33 @@ fn directory_value(
     site: &Site,
     root: &Handle,
     directory: &File,
-    observation: &Directory,
+    observation: &std::sync::Arc<Directory>,
     lease: u64,
     prior_weight: u64,
 ) -> Outcome {
     context.reserve_file(1, prior_weight)?;
-    let failure_kind = if site.operation == "File.directory" {
+    let failure_kind = if matches!(
+        site.operation.as_str(),
+        "File.directory" | "File.Directory.refresh" | "File.Directory.child"
+    ) {
         "File.DirectoryFailed"
     } else {
         "File.ListFailed"
     };
+    descendants::recheck(context, site, root, observation, lease)?;
     let info = observed_at(context, directory, &observation.path, ".", 1)
-        .map_err(|error| observation_failure(error, site, root, failure_kind, &observation.path))?;
+        .map_err(|error| observation_failure(error, site, root, failure_kind, &observation.path));
+    let info = postcheck(
+        info,
+        descendants::recheck(context, site, root, observation, lease),
+    )?;
     if !info.is_dir() || info.identity != observation.identity {
+        if matches!(
+            site.operation.as_str(),
+            "File.Directory.child" | "File.Directory.refresh" | "File.Directory.scan"
+        ) {
+            return Err(descendants::changed(site, root, &observation.path));
+        }
         return Err(denied(&site.operation, &observation.path));
     }
     let (accessed, modified, changed) = metadata_times(&info)
@@ -711,8 +762,7 @@ fn directory_value(
         ),
     ];
     let weight = 16
-        + 128
-        + observation.path.as_os_str().len() as u64
+        + observation.weight()
         + 16
         + fields
             .iter()
@@ -732,9 +782,55 @@ fn directory_value(
         },
     ))
 }
+fn postcheck<T>(observed: Result<T, Fault>, checked: Result<(), Fault>) -> Result<T, Fault> {
+    match (observed, checked) {
+        (result, Ok(())) => result,
+        (Ok(_), Err(fault)) => Err(fault),
+        (Err(primary), Err(fault)) if matches!(primary.primary(), Fault::Recoverable(_)) => {
+            Err(preserve_cleanup(fault, &primary))
+        }
+        (Err(primary), Err(fault)) => {
+            Err(combine_cleanup(Some(primary), Some(fault)).expect("observation fault"))
+        }
+    }
+}
+fn preserve_cleanup(selected: Fault, prior: &Fault) -> Fault {
+    let mut messages = vec![];
+    fn collect(fault: &Fault, messages: &mut Vec<String>) {
+        match fault {
+            Fault::Recoverable(value) => {
+                if let Data::Error(error) = &value.data {
+                    if let Some(errors) = error.input.fields().get("cleanup_errors") {
+                        messages.extend(errors.items().iter().map(|value| value.string().to_owned()));
+                    }
+                }
+            }
+            Fault::Boundary { primary, details } => {
+                collect(primary, messages);
+                messages.extend(details.cleanup_errors.iter().cloned());
+            }
+            _ => (),
+        }
+    }
+    collect(prior, &mut messages);
+    if messages.is_empty() { return selected; }
+    match selected {
+        Fault::Recoverable(value) => {
+            let Data::Error(error) = &value.data else { return host("invalid observation failure"); };
+            let mut error = error.clone();
+            let mut fields = error.input.fields().clone();
+            let mut errors: Vec<_> = messages.into_iter().map(text).collect();
+            if let Some(existing) = fields.get("cleanup_errors") { errors.extend(existing.items().iter().cloned()); }
+            fields.insert("cleanup_errors".into(), new(Type::List(Box::new(atom("String"))), Data::List(errors)));
+            error.input = view(&record(fields));
+            Fault::Recoverable(new(atom("Error"), Data::Error(error)))
+        }
+        other => other.with_details(BoundaryDetails { cleanup_errors: messages, ..Default::default() }),
+    }
+}
 fn finish_observation(
     context: &mut Context,
-    observation: Directory,
+    observation: std::sync::Arc<Directory>,
     directory: File,
     retained: File,
     fresh: bool,
@@ -750,7 +846,7 @@ fn finish_observation(
     if result.is_ok() && fresh {
         context
             .files
-            .retain_observation(observation, lease, retained);
+            .retain_observation(observation.as_ref().clone(), lease, retained);
     } else if let Err(cleanup) = close_file(retained) {
         result = Err(match result {
             Err(primary) => cleanup_failure(primary, cleanup),
@@ -769,8 +865,8 @@ pub(super) fn usage(context: &mut Context, site: &Site, root: &Handle) -> Outcom
         site,
         root,
     )?;
-    let result = (|| {
-        let value = crate::host_observations::usage(context, site, root, &directory)?;
+    let result = crate::host_observations::usage(context, site, root, &directory);
+    let checked = (|| {
         let (checked, current) = exact_grant(
             &context.files.lists,
             &context.files.base,
@@ -783,8 +879,9 @@ pub(super) fn usage(context: &mut Context, site: &Site, root: &Handle) -> Outcom
         if current != observed {
             return Err(denied(crate::host_observations::USAGE, &observed.path));
         }
-        Ok(value)
+        Ok(())
     })();
+    let result = postcheck(result, checked);
     match (result, close_file(directory)) {
         (Err(primary), Err(cleanup)) => Err(cleanup_failure(primary, cleanup)),
         (Err(primary), Ok(())) => Err(primary),
@@ -794,48 +891,11 @@ pub(super) fn usage(context: &mut Context, site: &Site, root: &Handle) -> Outcom
 }
 
 pub(super) fn directory(context: &mut Context, site: &Site, root: &Handle) -> Outcome {
-    context.check_cancel()?;
-    let (directory, observation) = exact_grant(
-        &context.files.lists,
-        &context.files.base,
-        "File.directory",
-        root.string(),
-        site,
-        root,
-    )?;
-    let fresh = !context.files.observed.contains_key(&observation);
-    if fresh
-        && context.values.limits.file_directories != 0
-        && context.files.observed.len() as u64 >= context.values.limits.file_directories
-    {
-        return Err(limit("retained file directories"));
-    }
-    let lease = if fresh {
-        let lease = context.files.next_observation_lease;
-        context.files.next_observation_lease += 1;
-        lease
-    } else {
-        context.files.observed_leases[&observation]
-    };
+    let (directory, observation, fresh, lease) = descendants::acquire(context, site, root)?;
     let retained = directory
         .try_clone()
         .map_err(|error| host(error.to_string()))?;
-    let result = (|| {
-        let value = directory_value(context, site, root, &directory, &observation, lease, 16)?;
-        let (check, current) = exact_grant(
-            &context.files.lists,
-            &context.files.base,
-            "File.directory",
-            root.string(),
-            site,
-            root,
-        )?;
-        close_file(check).map_err(|error| host(system_error(&error)))?;
-        if current != observation {
-            return Err(denied("File.directory", &observation.path));
-        }
-        Ok(value)
-    })();
+    let result = directory_value(context, site, root, &directory, &observation, lease, 16);
     finish_observation(
         context,
         observation,
@@ -858,46 +918,32 @@ pub(super) fn scan(context: &mut Context, site: &Site, root: &Handle) -> Outcome
     discover(context, site, root, Discovery::ReportVanished)
 }
 fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) -> Outcome {
-    context.check_cancel()?;
-    let operation = if mode == Discovery::Strict {
-        "File.list"
-    } else {
-        "File.scan"
-    };
-    let (directory, observation) = exact_grant(
-        &context.files.lists,
-        &context.files.base,
-        operation,
-        root.string(),
-        site,
-        root,
-    )?;
-    let fresh = !context.files.observed.contains_key(&observation);
-    if fresh
-        && context.values.limits.file_directories != 0
-        && context.files.observed.len() as u64 >= context.values.limits.file_directories
-    {
-        return Err(limit("retained file directories"));
-    }
-    let lease = if fresh {
-        let lease = context.files.next_observation_lease;
-        context.files.next_observation_lease += 1;
-        lease
-    } else {
-        context.files.observed_leases[&observation]
-    };
+    let (directory, observation, fresh, lease) = descendants::acquire(context, site, root)?;
     let retained = directory
         .try_clone()
         .map_err(|error| host(error.to_string()))?;
-    let mut stream = DirectoryStream::open(&directory).map_err(|error| {
-        list_failure(
-            site,
-            root,
-            "File.ListFailed",
-            &observation.path,
-            &error.to_string(),
-        )
-    })?;
+    let mut stream = match DirectoryStream::open(&directory) {
+        Ok(stream) => stream,
+        Err(error) => {
+            let fault = list_failure(
+                site,
+                root,
+                "File.ListFailed",
+                &observation.path,
+                &error.primary.to_string(),
+            );
+            let fault = error.fault(fault);
+            return finish_observation(
+                context,
+                observation,
+                directory,
+                retained,
+                fresh,
+                lease,
+                Err(fault),
+            );
+        }
+    };
     let result = (|| {
         let directory_observation = if mode == Discovery::ReportVanished {
             Some(directory_value(
@@ -956,27 +1002,33 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
                     "duplicate directory entry",
                 ));
             }
+            descendants::recheck(context, site, root, &observation, lease)?;
             let info = match observed_at(context, &directory, &observation.path, name, 2) {
-                Ok(info) => info,
+                Ok(info) => Ok(Some(info)),
                 Err(super::observer::Failure::IO(error))
                     if mode == Discovery::ReportVanished
                         && error.kind() == io::ErrorKind::NotFound =>
                 {
-                    context.reserve_file(0, weight + 16 + name.len() as u64)?;
-                    let value = text(name);
-                    weight += value.weight;
-                    vanished.push(value);
-                    continue;
+                    Ok(None)
                 }
-                Err(error) => {
-                    return Err(observation_failure(
-                        error,
-                        site,
-                        root,
-                        "File.ListFailed",
-                        &observation.path.join(name),
-                    ))
-                }
+                Err(error) => Err(observation_failure(
+                    error,
+                    site,
+                    root,
+                    "File.ListFailed",
+                    &observation.path.join(name),
+                )),
+            };
+            let info = postcheck(
+                info,
+                descendants::recheck(context, site, root, &observation, lease),
+            )?;
+            let Some(info) = info else {
+                context.reserve_file(0, weight + 16 + name.len() as u64)?;
+                let value = text(name);
+                weight += value.weight;
+                vanished.push(value);
+                continue;
             };
             let entry = entry_value(
                 context,
@@ -1002,18 +1054,6 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
         let entries = new(Type::List(Box::new(atom("File.Entry"))), Data::List(items));
         if let Some(directory_observation) = directory_observation {
             vanished.sort_by(|a, b| a.string().cmp(b.string()));
-            let (check, current) = exact_grant(
-                &context.files.lists,
-                &context.files.base,
-                operation,
-                root.string(),
-                site,
-                root,
-            )?;
-            close_file(check).map_err(|error| host(system_error(&error)))?;
-            if current != observation {
-                return Err(denied(operation, &observation.path));
-            }
             Ok(adapter(
                 "File.Scan",
                 Value::Scan {
@@ -1031,6 +1071,10 @@ fn discover(context: &mut Context, site: &Site, root: &Handle, mode: Discovery) 
             Ok(entries)
         }
     })();
+    let result = postcheck(
+        result,
+        descendants::recheck(context, site, root, &observation, lease),
+    );
     let result = match (result, stream.close()) {
         (Err(primary), Err(cleanup)) => Err(cleanup_failure(primary, cleanup)),
         (Err(primary), Ok(())) => Err(primary),
@@ -1357,6 +1401,32 @@ fn record_removal(
         progress(total, completed, bytes, index, stage),
     ));
 }
+fn removal_parent(
+    context: &mut Context,
+    site: &Site,
+    observed: &Observation,
+    entries: &Handle,
+) -> Result<File, RevalidationFailure> {
+    descendants::retained(context, site, observed, entries).map_err(|fault| match fault {
+        Fault::Recoverable(value) => {
+            let Data::Error(error) = &value.data else {
+                return RevalidationFailure::Host(host("invalid parent observation error"));
+            };
+            RevalidationFailure::File(
+                if error.kind == "File.DirectoryChanged" {
+                    "File.EntryChanged"
+                } else {
+                    "File.RemoveFailed"
+                },
+                error.message.clone(),
+            )
+        }
+        Fault::Host("runtime.capability-denied", message) => {
+            RevalidationFailure::File("File.InvalidSelection", message)
+        }
+        other => RevalidationFailure::Host(other),
+    })
+}
 fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
     let Value::Remove {
         entries,
@@ -1403,46 +1473,14 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
         else {
             return Err(host("invalid observed file selection"));
         };
-        let root = new(
-            atom("File.Path"),
-            Data::Text(first.directory.path.to_string_lossy().into_owned()),
-        );
-        let (granted, current) = exact_grant(
-            &context.files.removes,
-            &context.files.base,
-            "File.remove",
-            root.string(),
-            site,
-            &root,
-        )?;
-        close_file(granted).map_err(|error| host(error.to_string()))?;
-        if current != first.directory {
-            return Err(fail(
-                0,
-                &bytes,
-                -1,
-                "preflight",
-                "File.EntryChanged",
-                "observed directory identity changed",
-            ));
-        }
-        let retained = context
-            .files
-            .observed
-            .get(&first.directory)
-            .filter(|_| context.files.observed_leases.get(&first.directory) == Some(&first.lease))
-            .ok_or_else(|| {
-                fail(
-                    0,
-                    &bytes,
-                    -1,
-                    "preflight",
-                    "File.InvalidSelection",
-                    "observed directory is not retained by this session",
-                )
-            })?
-            .try_clone()
-            .map_err(|error| host(error.to_string()))?;
+        descendants::removal_authority(context, site, first, entries)?;
+        let retained = match removal_parent(context, site, first, entries) {
+            Ok(file) => file,
+            Err(RevalidationFailure::File(kind, message)) => {
+                return Err(fail(0, &bytes, -1, "preflight", kind, &message))
+            }
+            Err(RevalidationFailure::Host(fault)) => return Err(fault),
+        };
         let mutation = (|| {
             let diagnostic_weight = entries.weight + 2048;
             context.reserve_file((3 * total) as u64, diagnostic_weight)?;
@@ -1504,25 +1542,7 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                     "remove",
                 );
                 context.check_cancel()?;
-                let (granted, current) = exact_grant(
-                    &context.files.removes,
-                    &context.files.base,
-                    "File.remove",
-                    root.string(),
-                    site,
-                    &root,
-                )?;
-                close_file(granted).map_err(|error| host(error.to_string()))?;
-                if current != first.directory {
-                    return Err(fail(
-                        completed,
-                        &bytes,
-                        index as i64,
-                        "remove",
-                        "File.EntryChanged",
-                        "observed directory identity changed",
-                    ));
-                }
+                descendants::removal_authority(context, site, first, entries)?;
                 let info = match revalidate(context, &retained, entry, 4) {
                     Ok(info) => info,
                     Err(RevalidationFailure::File(kind, message)) => {
@@ -1558,6 +1578,22 @@ fn remove_inner(context: &mut Context, site: &Site, target: &Value) -> Outcome {
                         Err(fault) => return Err(fault),
                     }
                 }
+                let checked = match removal_parent(context, site, first, entries) {
+                    Ok(file) => file,
+                    Err(RevalidationFailure::File(kind, message)) => {
+                        return Err(fail(
+                            completed,
+                            &bytes,
+                            index as i64,
+                            "remove",
+                            kind,
+                            &message,
+                        ))
+                    }
+                    Err(RevalidationFailure::Host(fault)) => return Err(fault),
+                };
+                close_file(checked).map_err(|error| host(system_error(&error)))?;
+                descendants::removal_authority(context, site, first, entries)?;
                 let name = entry.fields()["name"].string();
                 let name_c = CString::new(name).unwrap();
                 context.session.console.protect_removal(&retained, name)?;

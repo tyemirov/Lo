@@ -8,5 +8,6 @@ typedef struct {
     __UINT64_TYPE__ list_items;
     __UINT64_TYPE__ file_entries;
     __UINT64_TYPE__ file_directories;
+    __UINT64_TYPE__ json_depth;
 } ContextOptions;
 #endif

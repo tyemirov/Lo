@@ -214,6 +214,34 @@ return File.Remove.new(EmptyEntries())
 
 [Contract](../../specification.md#91-file-adapter)
 
+## File.System.usage
+
+```text
+File.System.usage(root: File.Path) -> File.System.Usage!
+```
+
+Measure the volume that contains the selected directory through its authorized descriptor.
+The immutable result exposes `total_bytes`, `used_bytes`, and `free_bytes` as Int fields.
+Available space can exclude reserved blocks. Each call supplies a fresh measurement.
+
+Observed free-space changes can include concurrent host activity and filesystem effects.
+They do not measure the space reclaimed by one cleanup operation.
+
+**Failures:** `File.DirectoryAbsent` for an absent directory. `File.System.UsageFailed` for a volume measurement failure.
+Missing authority, invalid identity, cancellation, resource exhaustion, and descriptor close failures remain terminal.
+
+**Authority:** Host observation with an exact `--list-root` grant for `root`. Recursive authority does not supply this exact grant.
+
+```lo
+flow Available(root: File.Path) -> Int! {
+    usage = File.System.usage(root)
+    return usage.free_bytes
+}
+return Available(File.Path.new("fixture"))
+```
+
+[Contract](../file-system-observations.md#volume-usage)
+
 ## File.Write.new
 
 ```text
@@ -248,7 +276,7 @@ Observe metadata for the exact root directory. The result exposes its path, owne
 
 **Failures:** `File.DirectoryAbsent` or `File.DirectoryFailed`. An authority failure remains a terminal host diagnostic.
 
-**Authority:** Host observation. Execution requires an exact `--list-root` grant. A directory observation cannot become a removal selection.
+**Authority:** Host observation. Execution requires `--list-root` or `--observe-tree-root` at that exact root. A directory observation cannot become a removal selection.
 
 **Example:**
 
@@ -270,7 +298,7 @@ Each entry has a path, name, kind, logical size, link count, owner UID, and acce
 
 **Failures:** `File.DirectoryAbsent`, `File.ListFailed`, or `File.InvalidName`. A child that disappears during observation makes this strict operation fail.
 
-**Authority:** Host observation. Execution requires an exact `--list-root` grant. Entries retain session and directory provenance.
+**Authority:** Host observation. Execution requires `--list-root` or `--observe-tree-root` at that exact root. Entries retain session and directory provenance.
 
 **Example:**
 
@@ -336,7 +364,7 @@ A vanished name records only a child that disappears before metadata lookup. Ent
 
 **Failures:** `File.DirectoryAbsent`, `File.ListFailed`, or `File.InvalidName`. Other discovery errors stop the scan without a partial result.
 
-**Authority:** Host observation. Execution requires an exact `--list-root` grant. The observation does not describe an atomic filesystem snapshot.
+**Authority:** Host observation. Execution requires `--list-root` or `--observe-tree-root` at that exact root. The observation does not describe an atomic filesystem snapshot.
 
 **Example:**
 
@@ -345,3 +373,209 @@ return File.scan(File.Path.new("examples"))
 ```
 
 [Contract](../../specification.md#91-file-adapter)
+
+## File.Directory.refresh
+
+```text
+File.Directory.refresh(directory: File.Directory) -> File.Directory!
+```
+
+Return current directory metadata after retained root and ancestor identity checks.
+The result retains the input authority and root lease.
+
+**Failures:** `File.DirectoryChanged` or `File.DirectoryFailed`.
+
+**Authority:** Host observation through a live retained directory in the current session.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Directory! {
+    directory = File.directory(File.Path.new("examples"))
+    return File.Directory.refresh(directory)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Tree.snapshot
+
+```text
+File.Tree.snapshot(parent: File.Directory, root: File.Entry, context..., Descend) -> File.Tree!
+```
+
+Observe a tree through a retained parent and its observed directory entry.
+The pure, total callback has signature `Descend(context..., entry: File.Entry) -> Bool`.
+It runs only for directories, including the root.
+A rejected directory remains a row and makes `complete` false.
+
+The result exposes `entries: List<Record{relative: String, entry: File.Entry}>` and `complete: Bool`.
+Rows use preorder with ascending siblings and root relative name `.`.
+Rows contain metadata without host authority.
+The private tree shares one root lease and uses bounded temporary descriptors.
+Traversal never follows a symlink.
+
+**Failures:** `File.DirectoryChanged`, `File.DirectoryAbsent`, `File.DirectoryFailed`, `File.ListFailed`, or `File.InvalidName`.
+
+**Authority:** Host observation through the parent's retained recursive observation grant.
+Exact listing authority cannot authorize this operation.
+
+**Example:**
+
+```lo
+flow Descend(entry: File.Entry) -> Bool { return true }
+flow Observe(parent: File.Directory, root: File.Entry) -> File.Tree! {
+    return File.Tree.snapshot(parent, root, Descend)
+}
+return 0
+```
+
+[Contract](../file-tree-removal.md)
+
+## File.Tree.Remove.checked
+
+```text
+File.Tree.Remove.checked(expected: File.Tree, context..., Eligible) -> File.Tree.Remove!
+```
+
+Construct an inert target from a complete, privately observed tree.
+The pure, total callback has signature `Eligible(context..., row: Record{relative: String, entry: File.Entry}) -> Bool`.
+Construction performs no observation, callback invocation, or mutation.
+
+Commit compares the complete tree and checks eligibility before any mutation.
+It removes rows in postorder, with ascending siblings and the root last.
+Each step checks identities and the approved remaining names.
+The callback runs during preflight only.
+Successful activation returns `File.RemoveReceipt` with original logical bytes, including directory and symlink rows.
+
+**Failures:** Construction can produce `File.InvalidSelection`.
+Commit can produce `File.EntryChanged` or `File.RemoveFailed`.
+Failure evidence retains confirmed progress and the failed row when known.
+Recoverable messages also report the confirmed prefix and stage.
+Authority, lifetime, cancellation, resource, and lone close failures remain terminal.
+
+**Authority:** Pure construction. Activation requires a covering recursive removal grant with matching private identity witnesses.
+An exact removal grant cannot authorize this target.
+The operation preserves the program entry, active lock identities, and protected namespace resources.
+
+**Example:**
+
+```lo
+flow Owned(uid: Int, row: Record{relative: String, entry: File.Entry}) -> Bool {
+    return Math.eq(row.entry.owner_uid, uid)
+}
+flow Prepare(tree: File.Tree, uid: Int) -> File.Tree.Remove! {
+    return File.Tree.Remove.checked(tree, uid, Owned)
+}
+return 0
+```
+
+[Contract](../file-tree-removal.md)
+
+## File.Directory.scan
+
+```text
+File.Directory.scan(directory: File.Directory) -> File.Scan!
+```
+
+Observe sorted direct entries through a retained directory.
+The result separates entries from names that vanish during metadata lookup.
+Other discovery failures stop the operation without a partial result.
+
+**Failures:** `File.DirectoryChanged`, `File.ListFailed`, or `File.InvalidName`.
+
+**Authority:** Host observation through a live retained directory in the current session.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Scan! {
+    directory = File.directory(File.Path.new("examples"))
+    return File.Directory.scan(directory)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Directory.entry
+
+```text
+File.Directory.entry(directory: File.Directory, name: String) -> File.Entry!
+```
+
+Observe one direct entry without following its final symlink.
+The basename cannot be empty, `.`, `..`, or contain `/` or NUL.
+
+**Failures:** `File.DirectoryChanged`, `File.EntryAbsent`, `File.InvalidName`, or `File.ListFailed`.
+
+**Authority:** Host observation through a live retained directory in the current session.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Entry! {
+    directory = File.directory(File.Path.new("examples"))
+    return File.Directory.entry(directory, "list_sum.lo")
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Directory.child
+
+```text
+File.Directory.child(directory: File.Directory, entry: File.Entry) -> File.Directory!
+```
+
+Retain an observed child directory after parent, entry, and ancestor identity checks.
+A symlink cannot supply child directory authority.
+All descendants share the retained acquisition root lease.
+
+**Failures:** `File.DirectoryChanged`, `File.DirectoryFailed`, or `File.DirectoryAbsent`.
+
+**Authority:** Host observation under the parent's retained `--observe-tree-root` grant.
+An exact grant does not authorize descent.
+
+**Example:**
+
+```lo
+flow Observe() -> File.Directory! {
+    directory = File.directory(File.Path.new("."))
+    entry = File.Directory.entry(directory, "examples")
+    return File.Directory.child(directory, entry)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)
+
+## File.Entry.observe
+
+```text
+File.Entry.observe(entry: File.Entry) -> List<File.Entry>!
+```
+
+Observe the entry's current metadata through its retained parent.
+Return an empty list only when that entry is absent.
+A replacement entry receives a new observation with its current identity.
+
+**Failures:** `File.DirectoryChanged` or `File.ListFailed`.
+
+**Authority:** Host observation through a live retained entry in the current session.
+Snapshot rows have no retained authority.
+
+**Example:**
+
+```lo
+flow Observe() -> List<File.Entry>! {
+    directory = File.directory(File.Path.new("examples"))
+    entry = File.Directory.entry(directory, "list_sum.lo")
+    return File.Entry.observe(entry)
+}
+return Observe()
+```
+
+[Contract](../file-descendant-observations.md)

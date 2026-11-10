@@ -16,6 +16,7 @@ from prepare import ROOT, DEPENDENCIES, local, digest, verified, tree_digest, va
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'nativeruntime'))
 from metal_assets import BRIDGE_SOURCES, KERNEL_SOURCES, LIBRARY, MANIFEST, validate_assets
+from process_sdk import validate_receipt as validate_process_sdk_receipt
 
 HOSTS = ('darwin/arm64', 'linux/arm64')
 VARIANTS = ('software', 'metal')
@@ -94,6 +95,8 @@ def validate_source_archive(path: Path, receipt: dict, variant: str, snapshot: d
         if hasher.hexdigest() != receipt['runtime_source_sha256']:
             raise ValueError('packaged runtime source differs from build receipt')
         records = list(receipt['process_sources'].values())
+        if receipt['process_sdk'] is not None:
+            records.extend(item['source'] for item in receipt['process_sdk']['objects'].values())
         if variant == 'metal':
             records.extend(receipt['metal']['sources'].values())
         for record in records:
@@ -157,7 +160,7 @@ def notices(output: Path, prepared: dict, host: str) -> list[dict]:
     return components
 
 
-PROCESS_SOURCES = {'launcher.c', 'normalization.c', 'protocol.h'}
+PROCESS_SOURCES = {'launcher.c', 'normalization.c', 'protocol.h', 'execution_token.c'}
 METAL_SOURCES = KERNEL_SOURCES | BRIDGE_SOURCES | {LIBRARY}
 
 
@@ -173,6 +176,11 @@ def validate_runtime(runtime: Path, variant: str) -> dict:
         if record['path'] != 'runtime/native/host/process/' + name:
             raise ValueError(f'runtime process source path differs: {name}')
         verified(record)
+    target_manifest = json.loads(local(runtime / 'toolchain.json').read_text())
+    if 'darwin/arm64' in target_manifest['targets']:
+        validate_process_sdk_receipt(receipt['process_sdk'], lambda name: digest(local(ROOT / name)))
+    elif receipt['process_sdk'] is not None:
+        raise ValueError('Linux-only runtime has unexpected Process SDK inputs')
     if variant == 'metal':
         metal = receipt['metal']
         if set(metal) != {'manifest', 'sources'}:

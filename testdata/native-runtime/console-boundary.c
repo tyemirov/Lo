@@ -22,7 +22,7 @@ static int output(void *user,U32 destination,const unsigned char *bytes,__SIZE_T
 }
 static int flush(void *user,U32 destination){if(user!=(void *)42 || (destination!=1 && destination!=2))invalid=5;++flushes;if(LO_CASE>=17 && destination==(LO_CASE%2==1?1:2))lo_context_cancel(active);return LO_CASE==2||LO_CASE==10||LO_CASE==15||LO_CASE==16?LO_CONSOLE_FAILED:LO_CONSOLE_OK;}
 int main(void) {
- const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128};
+ const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128,256};
  active=lo_context_new(&options);if(!active)return 1;
  U64 quota=LO_CASE==4?2:LO_CASE==12?5:1048576;
  if(!lo_context_set_console(active,LO_CASE==5?2:LO_CASE==13?1:3,(void *)42,output,flush,quota))return 2;

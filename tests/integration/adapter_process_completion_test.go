@@ -9,7 +9,7 @@ import (
 
 func TestAdapterProcessActivationContract(t *testing.T) {
 	operation, ok := catalog.Lookup(catalog.ProcessCommandNew)
-	if !ok || operation.Capability() != catalog.ProcessRun || !reflect.DeepEqual(operation.ActivationKinds(), []string{"Process.ExecutionFailed"}) {
-		t.Fatal("Process command does not declare its recoverable activation error")
+	if !ok || operation.Capability() != catalog.ProcessRun || !reflect.DeepEqual(operation.ActivationKinds(), []string{"Process.ExecutionFailed", "Process.Timeout"}) {
+		t.Fatal("Process command does not declare its recoverable activation errors")
 	}
 }

@@ -145,17 +145,20 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 			r.Method = &method
 		}
 		if op.Name() == catalog.ProcessCommandNew {
-			r.Process = a.processInputs(values)
+			r.Process = a.processInputs(values, node)
 		}
-		if op.Name() == catalog.FileRemove || op.Name() == catalog.FileRemoveChecked {
+		if op.Name() == catalog.FileRemove || op.Name() == catalog.FileRemoveChecked || op.Name() == catalog.FileTreeRemoveChecked {
 			r.Target.Kind = "calculated"
 		}
-		if op.Name() == catalog.FileRemoveChecked {
+		if op.Name() == catalog.FileRemoveChecked || op.Name() == catalog.FileTreeRemoveChecked {
 			contexts := make([]description, 0, len(values)-2)
 			for _, argument := range values[1 : len(values)-1] {
 				contexts = append(contexts, a.describe(argument))
 			}
 			r.Guard = &removalGuardData{Flow: flows[len(values)-1], Phase: "activation", Contexts: contexts}
+			if op.Name() == catalog.FileTreeRemoveChecked {
+				r.Guard.Phase = "preflight"
+			}
 		}
 		r.Origin = "construction"
 		r.ID = nextID("t", len(a.data.Targets))
@@ -254,6 +257,8 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		out.targets = values[0].targets
 	}
 	switch op.Name() {
+	case catalog.ProcessCommandWithTimeout, catalog.ProcessCommandWithOutput:
+		out.targets = a.transformCommand(c, node, op.Name(), values[0], values[1])
 	case catalog.ProcessContextCurrent:
 		out.processContext = &processContextDescription{Origin: "inherited"}
 	case catalog.ProcessContextNew:
@@ -273,14 +278,36 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 	case catalog.FileList:
 		out.fileRoot = values[0].known
 	case catalog.FileDirectory:
+		out.fileRoot = values[0].known
 		out.fields = map[string]abstract{"path": values[0]}
-	case catalog.FileScan:
+	case catalog.FileDirectoryRefresh:
+		out.fileRoot = values[0].fileRoot
+		out.fields = values[0].fields
+	case catalog.FileDirectoryChild, catalog.FileDirectoryEntry, catalog.FileEntryObserve:
+		out.fileRoot = values[0].fileRoot
+	case catalog.FileTreeSnapshot:
+		out.fileRoot = values[0].fileRoot
+		entryType, _ := types.FieldType(types.FileTree(), "entries")
+		out.fields = map[string]abstract{"entries": a.unknown(node, entryType), "complete": a.unknown(node, types.Bool())}
+		arguments := append([]abstract{}, values[2:len(values)-1]...)
+		arguments = append(arguments, a.unknown(node, types.FileEntry()))
+		child := branchContext(c, condition{Kind: iterationCondition, Node: node, Context: c.id})
+		predicate := a.invoke(child, flows[len(values)-1], "tree-predicate", c.entry, node, arguments, child.conditions)
+		out.dependencies = append(out.dependencies, predicate.dependencies...)
+	case catalog.FileScan, catalog.FileDirectoryScan:
 		entryType, _ := types.FieldType(types.FileScan(), "entries")
 		vanishedType, _ := types.FieldType(types.FileScan(), "vanished_names")
 		entries := a.unknown(node, entryType)
-		entries.fileRoot = values[0].known
 		directory := a.unknown(node, types.FileDirectory())
-		directory.fields = map[string]abstract{"path": values[0]}
+		if op.Name() == catalog.FileScan {
+			entries.fileRoot = values[0].known
+			directory.fileRoot = values[0].known
+			directory.fields = map[string]abstract{"path": values[0]}
+		} else {
+			entries.fileRoot = values[0].fileRoot
+			directory.fileRoot = values[0].fileRoot
+			directory.fields = values[0].fields
+		}
 		out.fields = map[string]abstract{"entries": entries, "directory": directory, "vanished_names": a.unknown(node, vanishedType)}
 	case catalog.IntNew, catalog.StringNew, catalog.BoolNew, catalog.FloatNew, catalog.ScalarNew, catalog.PathNew, catalog.URLNew, catalog.MethodNew, catalog.ProcessExecutableNew:
 		out = values[0]

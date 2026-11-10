@@ -8,6 +8,7 @@ exports:
   - targets: [ arm64-macos ]
     symbols:
       - _CCRandomGenerateBytes
+      - __NSConcreteStackBlock
       - __NSGetArgc
       - __NSGetArgv
       - __NSGetEnviron
@@ -26,6 +27,7 @@ exports:
       - __Unwind_SetGR
       - __Unwind_SetIP
       - ___assert_rtn
+      - ___chkstk_darwin
       - ___error
       - ___stack_chk_fail
       - ___stack_chk_guard
@@ -64,6 +66,8 @@ exports:
       - _dispatch_semaphore_signal
       - _dispatch_semaphore_wait
       - _dispatch_time
+      - _dlclose
+      - _dlopen
       - _dlsym
       - _dup2
       - _execve
@@ -98,6 +102,7 @@ exports:
       - _getpid
       - _getppid
       - _getpwuid_r
+      - _getrlimit
       - _getsockname
       - _getsockopt
       - _getuid
@@ -106,12 +111,14 @@ exports:
       - _kill
       - _kqueue
       - _lchown
+      - _link
       - _linkat
       - _listen
       - _log
       - _log2
       - _lseek
       - _lstat
+      - _mach_absolute_time
       - _mach_host_self
       - _mach_port_deallocate
       - _mach_port_get_refs
@@ -120,15 +127,23 @@ exports:
       - _mach_ports_register
       - _mach_task_self_
       - _mach_thread_self
+      - _mach_timebase_info
       - _malloc
+      - _malloc_default_zone
+      - _malloc_zone_calloc
+      - _malloc_zone_free
+      - _malloc_zone_malloc
+      - _malloc_zone_memalign
+      - _malloc_zone_realloc
       - _memcmp
       - _memcpy
       - _memmove
       - _memset
       - _memset_pattern16
       - _mkdir
-      - _mkfifo
       - _mkdtemp
+      - _mkfifo
+      - _mkstemp
       - _mmap
       - _mprotect
       - _munmap
@@ -137,7 +152,6 @@ exports:
       - _openat
       - _opendir
       - _pipe
-      - _proc_pidinfo
       - _poll
       - _posix_memalign
       - _posix_spawn
@@ -150,15 +164,19 @@ exports:
       - _posix_spawnattr_setflags
       - _posix_spawnattr_setpgroup
       - _posix_spawnattr_setsigdefault
+      - _posix_spawnattr_setsigmask
       - _posix_spawnp
       - _pread
+      - _proc_pidinfo
       - _pthread_attr_destroy
       - _pthread_attr_init
       - _pthread_attr_setstacksize
       - _pthread_cond_broadcast
       - _pthread_cond_destroy
+      - _pthread_cond_init
       - _pthread_cond_signal
       - _pthread_cond_timedwait
+      - _pthread_cond_timedwait_relative_np
       - _pthread_cond_wait
       - _pthread_create
       - _pthread_detach
@@ -186,12 +204,14 @@ exports:
       - _realpath$DARWIN_EXTSN
       - _recv
       - _recvfrom
+      - _recvmsg
       - _rename
       - _rmdir
       - _sandbox_free_error
       - _sandbox_init
       - _sched_yield
       - _send
+      - _sendmsg
       - _sendto
       - _setenv
       - _setgid
@@ -222,6 +242,7 @@ exports:
       - _sysctlbyname
       - _task_get_exception_ports
       - _task_get_special_port
+      - _task_info
       - _task_set_exception_ports
       - _task_set_special_port
       - _thread_get_exception_ports

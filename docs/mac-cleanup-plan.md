@@ -1,9 +1,9 @@
 # mac-cleanup Application Plan
 
-Status: the full current workflow is written as a Lo application design.
-The [source](examples/mac-cleanup.lo) uses implemented operations and explicit proposals for missing generic capabilities.
-The [application design](mac-cleanup-script-design.md) records source identity, behavior, proposed interfaces, and validation limits.
-The source is not executable with the current compiler and native runtime.
+Status: the complete application passes type checking and focused native acceptance.
+The Metal-linked application CLI passed without GPU operations. Final shared stack CI passed.
+The [source](examples/mac-cleanup.lo) uses implemented generic operations.
+The [application design](mac-cleanup-script-design.md) records source identity, behavior, fixture results, and validation limits.
 
 ## Language Boundary
 
@@ -74,7 +74,7 @@ The [application design](mac-cleanup-script-design.md#behavior-in-the-applicatio
 ## Implemented Foundation
 
 F030 adds [pure value processors](value-processors.md) and executable direct-file and exact-probe examples.
-The complete application remains I013 work.
+I013 composes these operations into the complete application.
 
 F024 supplies inherited Process contexts, executable discovery, bounded transport, and scoped cleanup execution fixtures.
 The [F024 evidence](evidence/process-context-cleanup/checkpoint.json) records its validation boundary.
@@ -87,36 +87,33 @@ The existing [direct log example](examples/gateway-log-cleanup.lo) remains a foc
 The [package example](examples/package-cache-cleanup.lo) remains a focused Process fixture.
 Neither focused example establishes full script parity.
 
-## Work Derived From the Script
+## Implementation Derived From the Script
 
-The [implementation roadmap](mac-cleanup-implementation-plan.md) defines the next work packages, dependencies, source targets, and executable milestones.
-F029 supplies program identity and exclusive file leases for the next application milestone.
-P007 and F036 separately own the stronger descendant Process profile.
-I013 owns the complete application and its confined fixture acceptance.
+The [implementation roadmap](mac-cleanup-implementation-plan.md) records dependencies, source targets, and executable milestones.
+F029 supplies program identity and exclusive file leases.
+P007 selected the descendant ownership design. F036 implements its separate host profile.
+I013 composes the generic contracts and owns the confined application fixtures.
 
-The full source now supplies the application intent before further language implementation.
-The application design identifies each proposed operation outside the implemented reference.
-Further work follows this sequence:
+The implementation followed these milestones:
 
-1. Review the proposed generic operations against other application uses.
-2. Reuse current Match, self-handling flows, and sequential folds for branch effects and category recovery.
-3. Select small contracts for value helpers and descendant resource lifetime.
-4. Specify retained descendant observations, metadata additions, and descriptor-safe tree removal with explicit grants and resource limits.
-5. Specify program identity, locks, process output, and timeouts.
-6. Add public fixture failures before implementation of each selected contract.
-7. Implement each selected contract in the compiler and Rust runtime.
-8. Validate the full application with repository-contained command and filesystem fixtures.
+1. Convert application helpers to current Match, self-handling flows, and sequential folds.
+2. Add coherent file observations through F032 and command policy through F035.
+3. Validate direct-file cleanup, then add retained descendant observations through F033 and recursive cache flows.
+4. Add checked tree snapshots and removal through F034, then convert whole-tree flows.
+5. Add strict JSON extraction and numeric formatting through F031 and descendant ownership through F036.
+6. Validate the complete application with repository-contained commands, files, and controlled host observations.
 
 Do not add a language operation for a named application or workflow step.
 Keep the implemented Match effect rules and flow-cycle rules unchanged unless a separate language contract explicitly changes them.
 The source now uses current `Match.new`, `onError`, and `Flow.fold` contracts for its conditional effects and recovery.
-All 47 selections and nine captures now use named application flows.
+Selections and captures use named application flows.
 The [control example](examples/cleanup-control-flow.lo) has compiled-program software coverage.
+
 `Flow.worklist` now supplies dynamic traversal with host resource quotas and resource release when scopes close.
 The [resource contract](../specification.md#89-dynamic-worklists-and-host-resource-quotas) separates cumulative work from retained values and observations.
-Proposed descendant operations still need explicit authority contracts.
-The other proposed APIs still prevent execution of the full source.
-The [control evidence](evidence/cleanup-control-composition.json) records the validation scope.
+Retained descendant operations and checked removal use explicit observation and removal authority.
+The complete source has no proposed operation dependency.
+The [earlier control evidence](evidence/cleanup-control-composition.json) records its historical validation scope.
 
 ## Acceptance Boundary
 

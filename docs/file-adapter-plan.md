@@ -2,7 +2,7 @@
 
 The File adapter and Gateway log category are implemented in Lo.
 The [design](file-adapter-design.md) defines their current contracts.
-The [mac-cleanup plan](mac-cleanup-plan.md) covers the remaining complete-script work.
+The [mac-cleanup plan](mac-cleanup-plan.md) records the complete application and its acceptance.
 The [shared adapter plan](adapter-plan.md) controls future adapter changes.
 The completed stages below record the earlier File workflow acceptance.
 The nominal target and receipt update passed final stack CI.
@@ -127,12 +127,15 @@ The [implementation review](evidence/adapter-implementation-review.json) records
 Final stack CI passed.
 HTTP client activation and the selected native Process profile passed public acceptance.
 
-## Remaining Scope
+## Application Scope
 
 The Gateway log category is the first complete File workflow.
-The complete mac-cleanup script still needs typed host inputs, category continuation, cleanup locking, and additional file metadata.
-Typed Process results are implemented. The selected native profile prohibits child writes and cannot run cache-cleanup commands.
-Implement shared adapter semantics before further application-specific extensions.
+The complete application now has typed host inputs, category continuation, cleanup locking, and additional file metadata.
+Typed Process results and scoped cleanup execution are implemented.
+The [descendant profile](process-descendant-ownership.md) supplies explicit authority for bounded descendant execution.
+Focused application acceptance passed. Final shared stack CI passed.
+
+Further application changes use the shared adapter contracts.
 The [File stage](adapter-plan.md#2-bound-activation-and-file-targets) adds nominal actions and typed receipts.
 Its implementation uses `File.Write.new`, `File.Append.new`, and `File.Remove.new`.
 Bound commits publish operation-specific receipts after activation success.

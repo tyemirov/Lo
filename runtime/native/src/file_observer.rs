@@ -31,7 +31,15 @@ pub(super) fn apply(
     phase: u32,
     metadata: &mut Metadata,
 ) -> Result<(), Failure> {
-    let result = if let Some(observer) = context.files.observer {
+    let observer = {
+        context
+            .session
+            .files
+            .lock()
+            .map_err(|_| Failure::Host(host("file observer registration state failed")))?
+            .observer
+    };
+    let result = if let Some(observer) = observer {
         let root = root.as_os_str().as_bytes();
         unsafe {
             (observer.callback)(
@@ -80,16 +88,9 @@ pub unsafe extern "C" fn lo_context_file_metadata_observer(
     let Some(context) = context.as_mut() else {
         return 0;
     };
-    if context.owner != std::thread::current().id()
-        || context.scopes != 0
-        || context.depth != 0
-        || context.remaining != context.session.steps
-        || context.weight != 0
-        || context.fault.is_some()
-        || context.files.observer.is_some()
-    {
+    let Some(registration) = crate::host_observations::registration(context) else {
         return 0;
-    }
+    };
     let Some(callback) = callback else {
         return 0;
     };
@@ -101,6 +102,7 @@ pub unsafe extern "C" fn lo_context_file_metadata_observer(
     }
     let observer = Observer { callback, userdata };
     files.observer = Some(observer);
-    context.files.observer = Some(observer);
+    drop(files);
+    drop(registration);
     1
 }

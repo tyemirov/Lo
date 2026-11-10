@@ -665,13 +665,16 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 	count := len(args)
 	variadic := op.Rule() == catalog.StringConcat || op.Rule() == catalog.ListConstructor || op.Rule() == catalog.MapConstructor || op.Rule() == catalog.RecordConstructor
 	processor := op.Rule() == catalog.ListProcessor || op.Rule() == catalog.FlowProcessor || op.Rule() == catalog.ListSortProcessor
-	guarded := op.Rule() == catalog.CheckedRemovalConstructor
+	guarded := op.Rule() == catalog.FilePredicateOperation
 	if !variadic && !processor && !guarded && count != len(op.Parameters()) {
 		return fmt.Errorf("native lowering: %s requires %d arguments, got %d", op.Name(), len(op.Parameters()), count)
 	}
 	minimum := 2
 	if op.Name() == catalog.ListFold || op.Name() == catalog.ListUnfold || op.Rule() == catalog.FlowProcessor {
 		minimum = 3
+	}
+	if guarded {
+		minimum = len(op.Parameters()) + 1
 	}
 	if (processor || guarded) && count < minimum {
 		return fmt.Errorf("native lowering: incomplete callback arguments for %s", op.Name())
@@ -690,9 +693,17 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 			if op.Rule() == catalog.Fixed && op.Parameters()[arg.Position()].Type != nil && !types.Equal(op.Parameters()[arg.Position()].Type, arg.Value().Type()) {
 				return fmt.Errorf("native lowering: inconsistent argument type for %s", op.Name())
 			}
+			if guarded && arg.Position() < len(op.Parameters()) && !types.Equal(op.Parameters()[arg.Position()].Type, arg.Value().Type()) {
+				return fmt.Errorf("native lowering: inconsistent observation input for %s", op.Name())
+			}
 			if op.Rule() == catalog.ListAccess {
 				if arg.Position() == 0 && arg.Value().Type().Kind() != types.ListKind || arg.Position() > 0 && !types.Equal(arg.Value().Type(), types.Int()) {
 					return fmt.Errorf("native lowering: inconsistent list access argument for %s", op.Name())
+				}
+			}
+			if op.Rule() == catalog.StringFormatOperation {
+				if arg.Position() == 0 && !types.Equal(arg.Value().Type(), types.String()) || arg.Position() == 1 && !catalog.AcceptsFormatFields(arg.Value().Type()) {
+					return fmt.Errorf("native lowering: inconsistent formatting argument for %s", op.Name())
 				}
 			}
 		case ir.FlowArgument:
@@ -724,22 +735,25 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 					}
 				}
 			} else if guarded {
-				if arg.Position() != count-1 || len(flow.Parameters()) != count || !types.Equal(flow.Signature().Output(), types.Bool()) || flow.Effects().Reads || flow.Effects().Commits {
-					return fmt.Errorf("native lowering: invalid removal predicate for %s", op.Name())
+				inputs := len(op.Parameters())
+				elements := catalog.FilePredicateElements(op.Name())
+				contexts := count - inputs - 1
+				if arg.Position() != count-1 || len(flow.Parameters()) != contexts+len(elements) || !types.Equal(flow.Signature().Output(), types.Bool()) || flow.Effects().Reads || flow.Effects().Commits {
+					return fmt.Errorf("native lowering: invalid file predicate for %s", op.Name())
 				}
 				for index, parameter := range flow.Parameters() {
-					if index >= count-2 && !types.Equal(parameter.Type, types.FileEntry()) {
-						return fmt.Errorf("native lowering: invalid removal predicate entry type")
+					if index >= contexts && !types.Equal(parameter.Type, elements[index-contexts]) {
+						return fmt.Errorf("native lowering: invalid file predicate observation type for %s", op.Name())
 					}
-					if index < count-2 {
+					if index < contexts {
 						matched := false
 						for _, candidate := range args {
-							if value, ok := candidate.(ir.ValueArgument); ok && value.Position() == index+1 {
+							if value, ok := candidate.(ir.ValueArgument); ok && value.Position() == index+inputs {
 								matched = types.Equal(parameter.Type, value.Value().Type())
 							}
 						}
 						if !matched {
-							return fmt.Errorf("native lowering: invalid removal predicate context type")
+							return fmt.Errorf("native lowering: invalid file predicate context type for %s", op.Name())
 						}
 					}
 				}
