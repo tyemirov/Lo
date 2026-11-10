@@ -83,6 +83,8 @@ exports:
       - _SecCodeCopyGuestWithAttributes
       - _SecCodeCopyPath
       - _SecCodeCopySelf
+      - _SecCodeCopySigningInformation
+      - _SecCodeCopyStaticCode
       - _SecCopyErrorMessageString
       - _SecDecryptTransformCreate
       - _SecDigestTransformCreate
@@ -179,6 +181,7 @@ exports:
       - _kSecClassGenericPassword
       - _kSecClassInternetPassword
       - _kSecClassKey
+      - _kSecCodeInfoUnique
       - _kSecDigestHMACKeyAttribute
       - _kSecDigestSHA2
       - _kSecEncryptionMode

@@ -1,9 +1,9 @@
 # Cleanup Script in Lo
 
-Status: application design source with proposed generic operations.
+Status: the complete application passes type checking and focused native acceptance under I013. Final shared stack CI passed.
 The [Lo source](examples/mac-cleanup.lo) describes the cleanup workflow observed on October 28, 2026.
-It is not executable with the current compiler and native runtime.
-This document keeps proposed interfaces outside the implemented language reference.
+Its named flows now use implemented language operations.
+The [implementation roadmap](mac-cleanup-implementation-plan.md) records the completed implementation and software acceptance.
 
 ## Source and Scope
 
@@ -12,17 +12,19 @@ Its source has 553 lines and SHA-256 `a47a9d29b943ba6a8b481ec8809e1202e2860fefb0
 The tool source was read without execution or modification.
 The earlier [application plan](mac-cleanup-plan.md) did not include its current preview, inventory, recursive-cache, or whole-tree behavior.
 
+The converted Lo source has SHA-256 `61c981884c05e6c5afdc1daab1e00b1156be648d113c392075a48bf0b6f26976`.
+The full workflow fixtures preserve the definitions from that source.
+
 Lo is a general-purpose language.
 Application names, paths, commands, retention periods, reports, and exit decisions belong in this program.
-The proposed namespaces contain generic operations for values, control flow, files, processes, and host interaction.
+The language namespaces contain generic operations for values, control flow, files, processes, and host interaction.
 They contain no cleanup-specific operation or application-specific policy.
 Labels such as `Gateway logs` remain application data and output text.
 
 The source uses existing Lo declarations, exact records, named flows, projections, and calls.
 It adds no import syntax, type aliases, anonymous functions, statement loops, or exception syntax.
-Proposed nominal types and operations are identified below.
 The Python version check is an implementation requirement of the original tool, rather than a requirement for a Lo program.
-The proposed recursive removal operation requires descriptor-safe removal as part of its generic contract.
+Recursive removal requires retained descriptors and checked observations under its generic contract.
 
 ## Behavior in the Application
 
@@ -41,7 +43,7 @@ The proposed recursive removal operation requires descriptor-safe removal as par
 | Cache allocation, confirmed deletion, skips, and partial-error reports | `CacheState`, `CacheSummary` |
 | Selected Xcode shared trees and project `Build` trees | `XcodeTargets`, `XcodeDirectoryTarget` |
 | Whole-tree eligibility and before/after equality, never partial age-based eviction | `TreeSupported`, `SameTree`, `StaleBuildTree` |
-| Both validated temporary roots, `.tmp` and `.temp`, with a 7-day cutoff | `TempRoots`, `TemporaryFiles` |
+| Validated temporary roots, `.tmp` and `.temp`, with a 7-day cutoff | `TempRoots`, `TemporaryFiles` |
 | Explicit Docker context, builder, endpoint checks, and ordered commands | `RejectAmbient`, `DockerApply`, `BuilderField` |
 | Strict direct log discovery, ASCII digits, 30-day modification age, and distinct probe framing | `GatewayName`, `GatewayPresent`, `GatewayOpened` |
 | Continue after ordinary task failure and retain its label | `Attempt`, `AddFailure`, `Xcode` |
@@ -51,11 +53,17 @@ The cache root list includes Homebrew downloads with the current recursive 7-day
 It does not use the earlier suffix-restricted 30-day proposal.
 Xcode selection preserves `SourcePackages` and unrelated project content.
 The storage inventory is allocated size, not a reclaim estimate.
+
 Preview totals remain upper bounds because preview does not probe open files.
+Preview defers per-user temporary-root discovery because that discovery requires a process.
+It reports this omission and scans the configured shared temporary root.
 
 Every candidate probe accepts exit status 0 or 1.
 Ordinary files and caches reject any stderr bytes and use NUL-framed exact-path batches of 100.
-Cache probes also reject names outside the current batch.
+Ordinary-file and cache probes reject names outside the current batch.
+They reject incomplete NUL fields, embedded line breaks, invalid process identifiers, and unknown field tags.
+Nonempty output must contain a file name.
+The [lsof field contract](https://lsof.readthedocs.io/en/latest/manpage/#output-for-other-programs) defines NUL terminators and newline set boundaries.
 The direct log probe uses newline framing and rejects nonempty stripped stderr.
 Whole-tree eviction rejects any probe stdout because an observed directory handle also prevents eviction.
 
@@ -74,11 +82,57 @@ The [executable CLI example](examples/cli-cleanup-preview.lo) verifies those ope
 The application does not require another Process namespace or a command for each named tool.
 
 The current reference remains authoritative for these implemented interfaces.
-Proposed additions below do not change that reference or the catalog.
 The existing exact File grants remain exact.
 Recursive observation and removal require separate explicit authority.
 
-## Value Operations And Draft Helpers
+## Direct-file Milestone
+
+The direct-file flows now use `File.scan`, `File.list`, and checked singleton removal.
+They contain no proposed path observations.
+An absent directory produces a skip. Other observation failures stop the category.
+The host requires exact observation and removal grants.
+Filesystem observations reject symlink traversal.
+
+`File.Remove.checked` supplies both removal checks and the application guard.
+The application counts only a successful commit.
+A changed or vanished entry produces a skip.
+The application resolves `lsof` through the declared Process context.
+Probe failures retain their category label through `RecordOutcome`.
+Later independent categories continue after ordinary failures.
+
+The integration fixtures extract these application flows and their dependencies without changes.
+A controlled executable supplies probe output and changes fixture files inside Lo.
+Dry run and empty selection need no Process or removal grants.
+Direct-file summaries use decimal integers.
+F031 supplies numeric conversion and report formatting.
+
+## Recursive-cache Milestone
+
+`StaleCache` now uses one retained root and the F033 descendant operations.
+Only `File.DirectoryAbsent` produces an absent-root skip.
+Each scan validates its returned directory owner, device, and retained identity.
+Child selection excludes foreign owners and different devices.
+The application preserves every directory and skips symlink descent.
+
+Candidate probes use exact sorted batches and recheck directory ownership after execution.
+Checked singleton removal supplies entry revalidation and the application guard.
+The application counts only confirmed deletions.
+An ordinary failure stops the category and preserves its preceding progress.
+A terminal failure stops execution and retains worklist progress.
+
+The eligible count and allocation include unsafe names that the application excludes from probes.
+Those exclusions increase the skipped count.
+For a completed cleanup scan, deleted and skipped counts equal the eligible count.
+Allocation totals use `allocated_bytes`, not logical file sizes or measured reclaimed space.
+Preview performs no probes or removal and can retain unresolved candidates.
+
+The fixtures use the canonical cache flows, local probe executables, and trusted metadata injection.
+They cover pending ancestors beyond 128 directories, foreign subtrees, owner changes, allocation totals, and cancellation after a confirmed deletion.
+Cache summaries retain exact decimal allocation counts.
+Workflow totals and storage rows use the selected F031 formatting operations.
+The complete workflow passed the I013 acceptance checks.
+
+## Value Operations And Typed Helpers
 
 F030 supplies the [implemented value processor contract](value-processors.md).
 It includes exact text and byte boundaries, indexed collections, stable sorting, lexical paths, globs, and command display.
@@ -86,25 +140,29 @@ The [file-policy example](../examples/file_policy.lo) executes direct-file selec
 The [probe-fields example](../examples/probe_fields.lo) executes NUL-framed parsing with exact batch membership.
 These examples have no removal effects.
 
-The full draft still uses helper names that require ordinary application flows.
-Those names do not propose additional builtins.
+The application uses typed helper flows for Boolean operations and collection policies.
+These flows use current processors without additional builtins.
 
-| Draft helper | Current composition |
+| Application helper | Current composition |
 | --- | --- |
-| `Bool.all`, `Bool.any`, `Bool.not` | `Match.new` and `List.fold`. |
-| `List.concat` | `List.flat_map` over the two lists. |
-| `List.contains`, `List.unique`, `List.equal`, `List.equal_by` | Typed predicates and ordered folds. Path comparison uses `File.Path.eq`. |
-| `List.chunks` | A positive-size guard, `List.unfold`, and `List.slice`. |
-| `String.join` | An ordered fold with an explicit separator. |
+| `All`, `Any`, `Not` | `Match.new` and `List.fold`. |
+| `ConcatStrings`, `ConcatPaths`, `ConcatInts`, `ConcatGlobs`, `ConcatTasks`, `ConcatStorageRows` | `List.flat_map` over two typed lists. |
+| `PathMember`, `StringMember`, `ScalarMember`, `IntMember`, `UniquePaths` | Typed predicates and ordered folds. Path comparison uses `File.Path.eq`. |
+| `StringsEqual`, `TreeRowsEqual` | Equal-length selection and indexed comparisons. |
+| `PathChunks` | A positive-size guard, `List.unfold`, and `List.slice`. |
+| `JoinStrings` | An ordered fold with an explicit separator. |
 
-The probe example contains executable Path composition flows for these collection policies.
-The full application draft still requires their integration under I013.
+The public integration fixtures extract current flow definitions and their dependencies from the application AST.
+These fixtures execute application helpers through the native compiler and program commands.
+`ReportPath` declares its fallible result. `StoragePaths` uses an ordered flow fold for those results.
+The complete application remains under I013.
+
 F028 owns `CLI.parse` and does not add public value helper aliases.
 The existing String view as `List<Scalar>` supplies scalar iteration.
 
-F031 owns the remaining JSON and presentation proposals:
+F031 supplies the [JSON and formatting contract](json-values-and-formatting.md).
 
-| Proposed operation | Required behavior |
+| Operation | Application use |
 | --- | --- |
 | `String.format(template, fields) -> String!` | Typed substitutions, decimal groups, and field width. |
 | `Float.format_fixed(value, places) -> String!` | Fixed decimal places with precision and nonfinite failures. |
@@ -139,11 +197,8 @@ This placement matters because an empty fold still evaluates its argument expres
 For example, an unselected branch must not project a failed `captured.result` or index an empty executable list.
 The callbacks keep the original command order and application decisions.
 
-The source now has 100 named branch callbacks for its 47 selections.
-These callbacks use the existing language contract.
-This revision removes the proposed `Flow.select` operation from the application.
+Named branch callbacks implement each selection through the existing language contract.
 The additional folds, lists, and callbacks have their normal logical charges and diagnostic frames.
-The revision does not claim the cost or trace shape of a proposed processor.
 
 ### Recoverable Category Results
 
@@ -156,13 +211,13 @@ Its pure total `CapturedPerformError` handler stores the received error in both 
 The caller retains its context, task label, and accumulator.
 It examines `errors` before a selected callback projects `result`.
 The handler needs only its declared Error argument.
-This pattern uses the existing flow-level `onError` contract and replaces all nine proposed `Flow.capture` calls.
+This pattern uses the existing flow-level `onError` contract.
 Cancellation, host failures, and budget failures remain terminal under the implemented error contract.
 
 The [executable control example](examples/cleanup-control-flow.lo) demonstrates selection, ordered commits, category recovery, and continuation.
 It also demonstrates that a capability denial remains terminal.
 The example uses only implemented operations and writes only its explicitly authorized fixture file.
-The full cleanup source still uses the other proposals in this document.
+The full cleanup source uses the same control and recovery rules.
 
 ### Run the Control Example
 
@@ -171,13 +226,13 @@ The commands create a fresh fixture directory inside Lo.
 
 ```bash
 make build
-cleanup_control_repo="$PWD"
 cleanup_control_work="$(mktemp -d "$PWD/_scratch/cleanup-control-example.XXXXXX")"
 bin/lo check docs/examples/cleanup-control-flow.lo --format json
+bin/lo build docs/examples/cleanup-control-flow.lo --output "$cleanup_control_work/control"
 (
   cd "$cleanup_control_work"
-  "$cleanup_control_repo/bin/lo" run "$cleanup_control_repo/docs/examples/cleanup-control-flow.lo" --format json
-  "$cleanup_control_repo/bin/lo" run "$cleanup_control_repo/docs/examples/cleanup-control-flow.lo" --write-root "$cleanup_control_work" --format json -- --apply
+  ./control run --format json
+  ./control run --write-root "$cleanup_control_work" --format json -- --apply
 )
 cat "$cleanup_control_work/cleanup-control-events.log"
 ```
@@ -201,6 +256,7 @@ Host resource quotas bound retained value weight and simultaneous directory obse
 Completed helpers release unreferenced observations before later visits.
 A long scan can exceed 128 total directory observations while retaining fewer than 128 at once.
 The host can change that live-observation quota.
+
 Value-byte and live-value quotas default to 16 MiB and 64 MiB.
 Cumulative data has no default quota.
 
@@ -208,36 +264,34 @@ Steps and cancellation still stop excessive work.
 
 This processor preserves existing authority boundaries.
 A parent directory grant does not authorize an unopened child.
-The proposed descendant operations below still need their own authority and ownership contracts.
+F033 supplies retained descendant authority and bounded root leases.
 The application opens a child only when its work item is visited.
 Retained state and pending items keep the resources they require.
 Snapshots keep public data without executable authority.
 
-## Proposed Generic File Operations
+## File Operations
 
-`File.Entry` adds `device: Int`, `inode: Int`, and `allocated_bytes: Int` for this design.
+F032 implements `device: Int`, `inode: Int`, and `allocated_bytes: Int` on `File.Entry` and `File.Directory`.
 Allocated bytes equal the native block count multiplied by 512.
-`File.Directory` adds device and inode identity.
 These metadata fields come from the same native observation as the other fields.
 Their projections remain pure.
+The [filesystem observation contract](file-system-observations.md) defines these fields and fresh host measurements.
 
-| Operations | Proposed contract |
-| --- | --- |
-| `File.Path.join`, `File.Path.parent`, `File.Path.name`, `File.Path.to_string` | Implemented lexical path operations under F030. |
-| `File.Path.resolve(path) -> File.Path!` | Resolve links and produce an absolute canonical path. |
-| `File.Path.exists`, `File.Path.is_directory`, `File.Path.is_symlink` | Fallible observations. Only absence gives false. The symlink test examines the final entry without following it. |
-| `File.Directory.open(path) -> File.Directory!` | Require a canonical directory path and retain its descriptor after an identity check. |
-| `File.Directory.refresh(directory) -> File.Directory!` | Compare the named canonical path with the retained identity. Reject ancestor replacement. |
-| `File.Directory.list(directory)` | Strict sorted direct observations through the retained directory. A vanished child fails. |
-| `File.Directory.scan(directory)` | Sorted direct observations with explicit `ENOENT` names. Other metadata errors fail. |
-| `File.Directory.entry(directory, name)` | Observe one basename without following its final link. |
-| `File.Directory.child(directory, entry)` | Open an observed child directory and verify its observed identity. |
-| `File.Entry.observe(entry)` | Return one fresh observation through its retained parent, or an empty list for `ENOENT`. Other failures propagate. |
-| `File.Tree.snapshot(parent, root, context..., Descend) -> File.Tree!` | Observe a root and descendants through retained directories without following symlinks. |
-| `File.Tree.Remove.new(parent, root)` | Construct a descriptor-safe recursive removal target for one observed directory root. Only commit removes it. |
-| `File.System.usage(path)` | Read total, used, and free bytes for the containing volume. |
+F033 implements [retained descendant observations](file-descendant-observations.md) under separate recursive grants.
+Root observations use `File.directory`. Descendant observations use retained directories and the selected scan contract.
+Retained entry observations supply kind and absence results without new path observation operations.
+Storage reports observe each selected path through its retained parent and exclude symlink entries.
+
+F034 supplies `File.Tree.snapshot` and `File.Tree.Remove.checked` under the [tree contract](file-tree-removal.md).
+I013 now constructs the checked target from the original approved snapshot.
+Xcode discovery returns retained parent and root observations for each selected tree.
+Shared roots retain the DerivedData parent. Each project Build root retains its observed project parent.
+Discovery skips foreign owners, other devices, absent Build entries, and symlink Build entries.
+It reports names that vanish during the DerivedData scan.
 
 `File.Tree.entries` has type `List<Record{relative: String, entry: File.Entry}>`.
+Its rows contain metadata without host authority.
+The `complete` field records whether descent included every observed directory.
 The root row uses `.`.
 Other rows use relative names with sorted depth-first traversal.
 Each opened directory must match its preceding observation.
@@ -247,16 +301,24 @@ Any vanished name or unrelated metadata failure fails the snapshot.
 A false result prevents descent but preserves the directory row.
 The application uses this rule to reject a foreign owner or another device without entering that subtree.
 The application separately computes age, allocation, link rules, and whole-tree equality.
-Directory access time is excluded only in that application's tree predicate.
+Mandatory tree comparison excludes directory access time because traversal can change it.
+The application uses the same exclusion for its comparison around the probe.
 
 Removal requires explicit recursive removal authority and the retained parent and root identities.
 It never follows a symlink or substitutes a replacement ancestor.
 The application compares two snapshots around the open-file probe before target construction.
-That comparison and deletion remain separate operations with a race window.
+Both application snapshots must be complete and satisfy the owner, device, age, kind, and link rules.
+The comparison includes allocation and excludes directory access time.
+The checked target retains the original approved snapshot and repeats complete preflight before mutation.
+An absent or replaced root after the probe produces a visible skip before activation.
+An activation failure retains its confirmed removal progress and failed category label.
+The workflow can then attempt the next independent tree.
+These observations and deletion remain separate operations with a race window.
 
 Retained descendant handles do not acquire authority from path text alone.
 Observation and removal grants remain separate.
-Resource admission and handle release require explicit tests before this example can become executable.
+Focused native fixtures verify retained discovery targets, root replacement, partial progress, and later category execution.
+Complete workflow fixtures also verify these flows through the selected descendant controller.
 
 ## Program Entry And Locks
 
@@ -265,19 +327,19 @@ The [lock contract](program-lock-design.md) defines exact host authority, identi
 
 | Operation | Implemented contract |
 | --- | --- |
-| `Program.path()` | Observe the captured source entry or actual native executable. |
+| `Program.path()` | Observe the captured actual native executable. |
 | `Lock.File.new(path)` | Construct a pure target for exclusive acquisition without a wait. Commit returns `Lock.Lease`. |
 
 The application lock remains held through resource cleanup, including failure and cancellation.
 
-## Proposed Generic Host Operations
+## Generic Host Operations
 
-| Operations | Proposed contract |
+| Operation | Contract |
 | --- | --- |
-| `Clock.now_unix_ns()` | Read fresh signed Unix nanoseconds for each application cutoff. |
+| `Clock.now_unix_ns()` | Implemented fresh signed Unix nanoseconds for each application cutoff. |
 | `Process.Arguments.format_shell(arguments)` | Pure shell quoting for display only. Execution continues to use argument lists. |
-| `Process.Command.with_output(command, output)` | Pure command copy with `capture` or inherited stdout/stderr. Stdin remains closed. |
-| `Process.Command.with_timeout(command, seconds)` | Pure command copy with a timeout subject to host admission limits. |
+| `Process.Command.with_output(command, mode)` | Pure command copy with `capture` or `forward`. Forwarding uses owned Console sinks. Stdin remains closed. |
+| `Process.Command.with_timeout(command, timeout_ms)` | Pure command copy with a millisecond deadline subject to host admission limits. Application flows convert seconds to milliseconds. |
 
 `CLI.Options` exposes `flags: Map<String,Bool>`, `help_requested: Bool`, and `help_text: String`.
 All declared flags are present and false until selected.
@@ -290,42 +352,84 @@ A command deadline produces recoverable `Process.Timeout` only after owned-proce
 A self-handling flow can then return error data for category reports and continuation.
 Caller cancellation, session cancellation, budget failures, and uncertain process ownership remain terminal.
 A timeout does not undo confirmed filesystem or daemon effects.
-This proposed command deadline is distinct from the current terminal host lifetime limit.
+The command deadline is distinct from terminal caller cancellation and execution-budget limits.
 
 Process authority remains explicit and scoped per executable.
 The current profile and fixture evidence do not establish support for arbitrary installed command descendants.
 The example describes those commands as application intent.
-Runnable acceptance still requires supported execution profiles and repository-contained fixtures.
+Runnable acceptance uses supported execution profiles and repository-contained fixtures.
+
+## Application Settings And Fixtures
+
+`Main` calls `MainWithSettings` with `DefaultSettings`.
+The settings record selects the shared temporary root, accepted user-temp prefix, `getconf` executable, and `du` executable.
+These values are application policy, not language operations or hidden runtime switches.
+The shared cleanup context retains its four fields: `apply`, `home`, `uid`, and `process`.
+
+Full workflow fixtures preserve every declaration in the canonical source.
+They replace only its final entry call with `MainWithSettings` and explicit repository-owned settings.
+The native entry shim supplies controlled metadata, clock, and volume observations.
+Program entry, CLI parsing, locks, process execution, selection, removal, recovery, and final status remain real.
+
+The command fixture checks exact argument vectors and records their order.
+It implements local protocol responses for the selected tools.
+It does not invoke installed package cleaners, `lsof`, or a Docker daemon.
+Every filesystem change stays inside the fixture directory.
 
 ## Validation Status
 
-On October 29, 2026, the public parser accepted all 301 application flows after the control revision.
-The source has no `Flow.select` or `Flow.capture` calls and retains one `Flow.worklist` call.
-The audit compared all 100 branch bodies with the previous source AST.
-It verified unchanged selection heads, one selector evaluation, callback contexts, branch order, and accumulator chains.
-Static review found no flow-call cycles or commit-bearing Match expressions.
-The earlier catalog comparison identified 66 proposed operation names after the control revision.
-The current catalog also implements `Flow.worklist`, Console, terminal construction, and declared options.
-The draft retains 62 proposed operation names after exclusion of implemented Match behavior.
-This list records draft dependencies and does not establish a minimal language backlog.
+The complete application passes public type checking with the implemented catalog.
+Native workflow fixtures passed preview, report, cleanup, npm-failure continuation, pip absence, and root-UID rejection.
+Argument fixtures passed the established CLI diagnostic contract.
+Focused Docker, temporary-root, inventory, lock, missing-tool, and terminal-failure checks passed after their corrections.
 
-The revised source contains 302 flows after the startup handler correction.
-The public parser accepts the revised source.
-The full application fails type checking at the proposed `Glob` type.
-Parser acceptance and structural review do not establish type correctness or runtime parity for the full application.
-The compiler and runtimes must implement or remove the other selected proposals before executable acceptance.
+The complete workflow passed under the F036 controller with an actual command child and complete per-command cleanup.
+The Metal-linked application CLI passed without GPU operations. Final shared stack CI passed.
 
-The public control example passed `parse`, `check`, and interpreter execution.
-Fresh Darwin artifacts passed native checks.
-Fresh Linux artifacts passed the same checks under QEMU.
-Preview selected no actions, required no write grant, and created no fixture file.
-Apply preserved ordered effects before and after a recoverable category failure.
-It retained existing counters, failure labels, and state.
-Missing write authority remained terminal, and invalid arguments failed explicitly.
-A separate exact outcome probe verified nested fallible result storage and lazy result projection in all three runtimes.
+| Application behavior | Acceptance source |
+| --- | --- |
+| Typed helpers and ordered control composition | `mac_cleanup_test.go` and `examples/cleanup-control-flow.lo`. |
+| Direct files, exact probes, changes, and ordinary failure | `mac_cleanup_direct_test.go` and `mac_cleanup_policy_test.go`. |
+| Retained cache traversal, allocation, foreign subtrees, and terminal progress | `mac_cleanup_cache_test.go` and `mac_cleanup_cache_policy_test.go`. |
+| Whole trees, retained Xcode targets, root replacement, and partial removal | `mac_cleanup_tree_test.go` and `mac_cleanup_xcode_test.go`. |
+| Complete source, arguments, modes, command order, preserved files, and fresh summaries | `mac_cleanup_workflow_test.go`. |
+| Docker and temporary-root responses, inventory validation, locks, and terminal stop | `mac_cleanup_boundaries_test.go`. |
+| Missing host inputs, ordered failures, Docker failure progress, and Metal-linked CLI | `mac_cleanup_completion_test.go`. |
+| Complete workflow with the descendant controller and a real command child | `mac_cleanup_owned_workflow_test.go`. |
+| Portable argument and UID checks under Linux QEMU | `mac_cleanup_linux_workflow_test.go`. |
 
-The [evidence record](evidence/cleanup-control-composition.json) contains source hashes, structural results, public commands, raw output, and native identities.
-These checks use fixtures inside Lo and do not execute the full cleanup program or installed cleaners.
-They do not establish large-tree capacity or complete cleanup parity.
-Future application fixtures must cover preview, report, malformed output, contention, cancellation, partial progress, and final status.
-All fixture paths and process state must remain inside Lo.
+The Go acceptance files are in `tests/integration`.
+The command and observation fixtures are in `testdata/native-runtime`.
+The fixtures compare observable category outcomes with independent expectations.
+They preserve the distinction between observed allocation, confirmed deletion, and net volume change.
+
+The cache ownership, cancellation, and allocation fixtures use controlled access times.
+These fixtures keep the same deletion and progress assertions.
+A separate [access-time fixture](../tests/integration/mac_cleanup_cache_policy_test.go) changes only access time and verifies that the application rejects removal.
+
+Native [collection checks](../tests/integration/llvm_collection_scaling_test.go) passed without increases to their allocation budgets.
+[File removal checks](../tests/integration/llvm_file_scaling_test.go) passed without increases to their limits on allocation growth.
+
+The [signal fixtures](../tests/integration/llvm_signal_lock_lifetime_test.go) send OS signals.
+The Darwin Process fixture executes an admitted local command.
+It holds the reap receipt after the command exits.
+The entry lock stays held until cleanup completes.
+
+With the repository native toolchain prepared, run the application checks through the repository target:
+
+```bash
+make test-native TEST_ARGS='-run TestMacCleanup -count=1'
+```
+
+After preparation of the Metal-linked archive, run its application CLI check:
+
+```bash
+make build-native-runtime-metal
+make test-native TEST_ARGS='-run TestLLVMMacCleanupMetalArguments -count=1'
+```
+
+This check executes help and argument handling without GPU operations.
+
+The [earlier control record](evidence/cleanup-control-composition.json) contains historical source and structural evidence.
+Current acceptance uses compiled artifacts and the single native runtime.
+The fixture evidence does not establish arbitrary installed-tool behavior or entitled Endpoint Security event delivery.

@@ -22,6 +22,8 @@ mod leases;
 mod observer;
 #[path = "file_probe.rs"]
 mod probe;
+#[path = "file_witnesses.rs"]
+mod witnesses;
 pub use entries::Value;
 pub(crate) use entries::{validate_namespace, MutationAccess};
 pub const SUPPORTED: &[&str] = &[
@@ -31,9 +33,17 @@ pub const SUPPORTED: &[&str] = &[
     "File.list",
     "File.directory",
     "File.scan",
+    "File.Directory.scan",
+    "File.Directory.refresh",
+    "File.Directory.child",
+    "File.Directory.entry",
+    "File.Entry.observe",
+    "File.System.usage",
     "File.open_paths",
     "File.Remove.new",
     "File.Remove.checked",
+    "File.Tree.snapshot",
+    "File.Tree.Remove.checked",
 ];
 static SESSION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 pub fn admit(site: &Site) -> Result<(), String> {
@@ -69,11 +79,48 @@ pub fn admit(site: &Site) -> Result<(), String> {
                         "File.Scan"
                     })))
         }
+        "File.System.usage" => {
+            args == [atom("File.Path")]
+                && site.typ == Type::Fallible(Box::new(atom("File.System.Usage")))
+        }
+        "File.Directory.scan" | "File.Directory.refresh" => {
+            args == [atom("File.Directory")]
+                && site.typ
+                    == Type::Fallible(Box::new(atom(if site.operation == "File.Directory.scan" {
+                        "File.Scan"
+                    } else {
+                        "File.Directory"
+                    })))
+        }
+        "File.Directory.child" => {
+            args == [atom("File.Directory"), atom("File.Entry")]
+                && site.typ == Type::Fallible(Box::new(atom("File.Directory")))
+        }
+        "File.Directory.entry" => {
+            args == [atom("File.Directory"), atom("String")]
+                && site.typ == Type::Fallible(Box::new(atom("File.Entry")))
+        }
+        "File.Entry.observe" => {
+            args == [atom("File.Entry")]
+                && site.typ == Type::Fallible(Box::new(Type::List(Box::new(atom("File.Entry")))))
+        }
         "File.Remove.checked" => {
             args.first() == Some(&Type::List(Box::new(atom("File.Entry"))))
                 && matches!(site.arguments.last(), Some(Argument::Flow(_)))
                 && site.arguments.len() == args.len() + 1
                 && site.typ == Type::Fallible(Box::new(atom("File.Remove")))
+        }
+        "File.Tree.snapshot" => {
+            args.starts_with(&[atom("File.Directory"), atom("File.Entry")])
+                && matches!(site.arguments.last(), Some(Argument::Flow(_)))
+                && site.arguments.len() == args.len() + 1
+                && site.typ == Type::Fallible(Box::new(atom("File.Tree")))
+        }
+        "File.Tree.Remove.checked" => {
+            args.first() == Some(&atom("File.Tree"))
+                && matches!(site.arguments.last(), Some(Argument::Flow(_)))
+                && site.arguments.len() == args.len() + 1
+                && site.typ == Type::Fallible(Box::new(atom("File.Tree.Remove")))
         }
         "File.open_paths" => {
             args == [atom("File.Path")]
@@ -85,7 +132,7 @@ pub fn admit(site: &Site) -> Result<(), String> {
         }
         _ => false,
     };
-    if valid && (args.len() == site.arguments.len() || site.operation == "File.Remove.checked") {
+    if valid && (args.len() == site.arguments.len() || matches!(site.operation.as_str(), "File.Remove.checked" | "File.Tree.snapshot" | "File.Tree.Remove.checked")) {
         Ok(())
     } else {
         Err("file operation metadata type mismatch".into())
@@ -98,14 +145,19 @@ pub fn admit_guard(site: &Site, flows: &[Flow]) -> Result<(), String> {
     };
     let flow = flows.get(*callback).ok_or_else(invalid)?;
     let mut parameters = Vec::new();
-    for argument in &site.arguments[1..site.arguments.len() - 1] {
+    let fixed = if site.operation == "File.Tree.snapshot" { 2 } else { 1 };
+    for argument in &site.arguments[fixed..site.arguments.len() - 1] {
         let Argument::Value(typ) = argument else {
             return Err(invalid());
         };
         parameters.push(typ.clone());
     }
-    parameters.push(atom("File.Entry"));
-    parameters.push(atom("File.Entry"));
+    if site.operation == "File.Tree.Remove.checked" {
+        parameters.push(entries::tree::row_type());
+    } else {
+        parameters.push(atom("File.Entry"));
+        if site.operation == "File.Remove.checked" { parameters.push(atom("File.Entry")); }
+    }
     if parameters.len() != flow.parameters.len()
         || parameters
             .iter()
@@ -184,6 +236,7 @@ struct Grant {
     path: PathBuf,
     directory: File,
     inert: bool,
+    witnesses: Vec<witnesses::Witness>,
 }
 pub struct Files {
     base: PathBuf,
@@ -191,6 +244,8 @@ pub struct Files {
     writes: Vec<Grant>,
     lists: Vec<Grant>,
     removes: Vec<Grant>,
+    observe_trees: Vec<Grant>,
+    remove_trees: Vec<Grant>,
     open_files: Vec<Grant>,
     observed: BTreeMap<entries::Directory, File>,
     observed_leases: BTreeMap<entries::Directory, u64>,
@@ -211,6 +266,8 @@ pub struct Options {
     pub writes: Vec<String>,
     pub lists: Vec<String>,
     pub removes: Vec<String>,
+    pub observe_trees: Vec<String>,
+    pub remove_trees: Vec<String>,
     pub open_files: Vec<String>,
 }
 pub fn empty() -> Files {
@@ -220,6 +277,8 @@ pub fn empty() -> Files {
         writes: vec![],
         lists: vec![],
         removes: vec![],
+        observe_trees: vec![],
+        remove_trees: vec![],
         open_files: vec![],
         observed: BTreeMap::new(),
         observed_leases: BTreeMap::new(),
@@ -292,11 +351,13 @@ fn cleanup_failure(primary: Fault, cleanup: io::Error) -> Fault {
             };
             let mut cause = cause.clone();
             let mut fields = cause.input.fields().clone();
+            let mut errors = fields.get("cleanup_errors").map_or_else(Vec::new, |value| value.items().to_vec());
+            errors.push(text(&message));
             fields.insert(
                 "cleanup_errors".into(),
                 new(
                     Type::List(Box::new(atom("String"))),
-                    Data::List(vec![text(&message)]),
+                    Data::List(errors),
                 ),
             );
             cause.input = view(&record(fields));
@@ -331,6 +392,7 @@ fn open_roots(base: &Path, roots: &[String]) -> Result<Vec<Grant>, String> {
             path,
             directory,
             inert: false,
+            witnesses: vec![],
         });
     }
     grants.sort_by_key(|grant| std::cmp::Reverse(grant.path.as_os_str().len()));
@@ -345,6 +407,8 @@ pub fn configure_options(options: &Options) -> Result<Files, String> {
         files.writes = open_roots(&files.base, &options.writes)?;
         files.lists = entries::open_exact_roots(&files.base, &options.lists)?;
         files.removes = entries::open_exact_roots(&files.base, &options.removes)?;
+        files.observe_trees = entries::open_exact_roots(&files.base, &options.observe_trees)?;
+        files.remove_trees = entries::open_exact_roots(&files.base, &options.remove_trees)?;
         files.open_files = entries::open_exact_roots(&files.base, &options.open_files)?;
         if !files.open_files.is_empty() {
             files.probe = Some(probe::Probe::bind());
@@ -374,6 +438,7 @@ impl Files {
                         path: grant.path.clone(),
                         directory,
                         inert: grant.inert,
+                        witnesses: grant.witnesses.clone(),
                     }),
                     Err(error) => {
                         let mut message = error.to_string();
@@ -391,12 +456,13 @@ impl Files {
         }
         let mut fork = empty();
         fork.base = self.base.clone();
-        fork.observer = self.observer;
         let result = (|| {
             fork.reads = roots(&self.reads)?;
             fork.writes = roots(&self.writes)?;
             fork.lists = roots(&self.lists)?;
             fork.removes = roots(&self.removes)?;
+            fork.observe_trees = roots(&self.observe_trees)?;
+            fork.remove_trees = roots(&self.remove_trees)?;
             fork.open_files = roots(&self.open_files)?;
             fork.probe = self.probe.as_ref().map(probe::Probe::fork).transpose()?;
             Ok::<_, String>(())
@@ -441,6 +507,8 @@ impl Files {
             .chain(self.writes.drain(..))
             .chain(self.lists.drain(..))
             .chain(self.removes.drain(..))
+            .chain(self.observe_trees.drain(..))
+            .chain(self.remove_trees.drain(..))
             .chain(self.open_files.drain(..))
         {
             if let Err(error) = close_file(grant.directory) {
@@ -580,9 +648,17 @@ pub fn execute(context: &mut Context, site: &Site, args: &[Handle]) -> Outcome {
             ))
         }
         "File.list" => return entries::list(context, site, &args[0]),
-        "File.directory" => return entries::directory(context, site, &args[0]),
-        "File.scan" => return entries::scan(context, site, &args[0]),
+        "File.directory" | "File.Directory.refresh" => {
+            return entries::directory(context, site, &args[0])
+        }
+        "File.scan" | "File.Directory.scan" => return entries::scan(context, site, &args[0]),
+        "File.Directory.child" => return entries::child(context, site, &args[0], &args[1]),
+        "File.Directory.entry" => return entries::named_entry(context, site, &args[0], &args[1]),
+        "File.Entry.observe" => return entries::observe(context, site, &args[0]),
+        "File.System.usage" => return entries::usage(context, site, &args[0]),
         "File.Remove.checked" => return entries::selection_checked(context, site, args),
+        "File.Tree.snapshot" => return entries::tree::snapshot(context, site, args),
+        "File.Tree.Remove.checked" => return entries::tree::checked(context, site, args),
         "File.open_paths" => return probe::open_paths(context, site, &args[0]),
         "File.Remove.new" => return entries::selection(context, site, &args[0]),
         _ => (),
@@ -738,7 +814,7 @@ fn mutation_failure(fault: Fault, operation: &str, path: &Path) -> Fault {
 pub fn commit(context: &mut Context, site: &Site, target: &Handle) -> Outcome {
     let removal = matches!(
         &target.data,
-        Data::Adapter(crate::adapters::AdapterValue::File(Value::Remove { .. }))
+        Data::Adapter(crate::adapters::AdapterValue::File(Value::Remove { .. } | Value::TreeRemove { .. }))
     );
     if !removal {
         *context.files.write_progress.borrow_mut() = Some(record([
@@ -768,6 +844,9 @@ fn commit_inner(context: &mut Context, site: &Site, target: &Handle) -> Outcome 
     };
     if let Value::Remove { .. } = target {
         return entries::remove(context, site, target);
+    }
+    if let Value::TreeRemove { .. } = target {
+        return entries::tree::remove(context, site, target);
     }
     let Value::Content {
         path,

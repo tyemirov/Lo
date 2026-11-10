@@ -34,7 +34,7 @@ func TestLLVMProcessConstructors(t *testing.T) {
 			case 0:
 				nativeValueCheck("Process.Executable", `{"path":{"type":"File.Path","value":"/absolute/command"}}`)(t, actual)
 			case 2:
-				nativeValueCheck("Process.Command", `{"context":{"type":"Process.Context","value":{"origin":"explicit","redacted":true}},"executable":{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":"/command"}}},"arguments":{"type":"List<String>","value":[{"type":"String","value":"arg"}]},"stdin":{"type":"Bytes","value":"aW5wdXQ="}}`)(t, actual)
+				nativeValueCheck("Process.Command", `{"context":{"type":"Process.Context","value":{"origin":"explicit","redacted":true}},"executable":{"type":"Process.Executable","value":{"path":{"type":"File.Path","value":"/command"}}},"arguments":{"type":"List<String>","value":[{"type":"String","value":"arg"}]},"stdin":{"type":"Bytes","value":"aW5wdXQ="},"timeout_ms":{"type":"Int","value":"0"},"output":{"type":"String","value":"capture"}}`)(t, actual)
 			case 3:
 				nativeFailure(t, actual, 2, "runtime.process-unavailable", "")
 			default:
@@ -83,8 +83,14 @@ func TestLLVMProcessExecution(t *testing.T) {
 			t.Fatalf("process result type: %+v", value)
 		}
 		fields := processFields(t, value)
+		if len(fields) != 6 || fields["output"].Type != "String" || fields["stdout_bytes"].Type != "Int" || fields["stderr_bytes"].Type != "Int" {
+			t.Fatalf("process result fields: %+v", fields)
+		}
 		valueJSON(t, fields["stdout"], `"aW5wdXQ="`)
 		valueJSON(t, fields["stderr"], `"ZGlhZ25vc3RpYw=="`)
+		valueJSON(t, fields["output"], `"capture"`)
+		valueJSON(t, fields["stdout_bytes"], `"5"`)
+		valueJSON(t, fields["stderr_bytes"], `"10"`)
 		termination := processFields(t, fields["termination"])
 		valueJSON(t, termination["kind"], `"exited"`)
 		valueJSON(t, termination["exit_code"], `"7"`)

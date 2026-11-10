@@ -24,6 +24,10 @@ class DynamicSymbol(ctypes.Structure):
 
 BUILD_AND_FIXTURE_SYMBOLS = frozenset({
     '__Unwind_DeleteException', '__Unwind_RaiseException', '_alarm', '_mkfifo',
+    # Native acceptance and allocation probes also use these system imports.
+    '_link', '_mkdtemp', '_mkstemp', '_snprintf',
+    '_malloc_default_zone', '_malloc_zone_calloc', '_malloc_zone_free',
+    '_malloc_zone_malloc', '_malloc_zone_memalign', '_malloc_zone_realloc',
 })
 
 PROGRAM_SYMBOLS = frozenset({'_lo_entry', '_lo_program_flow_count', '_lo_program_flows',
@@ -73,7 +77,7 @@ def discover(nm: Path, archive: Path) -> dict[str, object]:
             if image == path or name == 'objc' and image == '/usr/lib/objc/libobjcMsgSend.dylib':
                 dynamic_libraries[name].append(symbol)
                 break
-    return {'method': 'LLVM native archive externals (--no-llvm-bc for both undefined and defined scans), verified by host dynamic symbol lookup',
+    return {'method': 'LLVM native archive externals (--no-llvm-bc for both undefined and defined scans) and declared build and fixture imports, verified by host dynamic symbol lookup',
             'rust': '1.85.1', 'llvm': '21.1.8', 'archive_sha256': digest(archive),
             'metal': {'_lo_metal_open', '_lo_native_metal_library'} <= defined,
             'symbols': sorted(system - {symbol for values in (*frameworks.values(), *dynamic_libraries.values()) for symbol in values}),

@@ -28,9 +28,10 @@ const (
 	TensorBundleOperation
 	OptimizerOperation
 	CheckpointOperation
-	CheckedRemovalConstructor
+	FilePredicateOperation
 	ListAccess
 	ListSortProcessor
+	StringFormatOperation
 )
 
 type Boundary uint8
@@ -169,10 +170,13 @@ const (
 	ProcessDiscoveryFailed         = "Process.DiscoveryFailed"
 	ProcessExecutableNew           = "Process.Executable.new"
 	ProcessCommandNew              = "Process.Command.new"
+	ProcessCommandWithTimeout      = "Process.Command.with_timeout"
+	ProcessCommandWithOutput       = "Process.Command.with_output"
 	ProcessRun                     = "Process.run"
 	ProcessInvalidExecutable       = "Process.InvalidExecutable"
 	ProcessInvalidCommand          = "Process.InvalidCommand"
 	ProcessExecutionFailed         = "Process.ExecutionFailed"
+	ProcessTimeout                 = "Process.Timeout"
 	ProcessTerminationExitCode     = "Process.Termination.exit_code"
 	ProcessTerminationSignal       = "Process.Termination.signal"
 	ProcessTerminationKind         = "Process.TerminationKind"
@@ -235,8 +239,12 @@ func (o operation) Capability() string {
 		return FileAppendCapability
 	case FileRemove, FileRemoveChecked:
 		return FileRemoveCapability
-	case FileDirectory, FileScan:
+	case FileTreeRemoveChecked:
+		return FileRemoveTree
+	case FileDirectory, FileScan, FileSystemUsage, FileDirectoryScan, FileDirectoryRefresh, FileDirectoryEntry, FileEntryObserve:
 		return FileList
+	case FileDirectoryChild, FileTreeSnapshot:
+		return FileObserveTree
 	}
 	switch o.boundary {
 	case Read, Effect:
@@ -278,6 +286,7 @@ func build() map[string]Operation {
 	fixed(ProcessExecutableNew, []types.Parameter{{Name: "path", Type: types.Path()}}, must(types.NewFallible(types.ProcessExecutable())))
 	fixed(ProcessCommandNew, []types.Parameter{{Name: "context", Type: types.ProcessContext()}, {Name: "executable", Type: types.ProcessExecutable()}, {Name: "arguments", Type: must(types.NewList(types.String()))}, {Name: "stdin", Type: types.Bytes()}}, must(types.NewFallible(types.ProcessCommand())))
 	addProcessContexts(m, fixed)
+	addProcessCommands(m, fixed)
 	addApplications(m, fixed)
 	addProcessors(m, fixed)
 	executable := m[ProcessExecutableNew].(operation)
@@ -287,7 +296,7 @@ func build() map[string]Operation {
 	command.boundary = Effect
 	command.targetPosition = 1
 	command.errors = []string{ProcessInvalidCommand}
-	command.activation = []string{ProcessExecutionFailed}
+	command.activation = []string{ProcessExecutionFailed, ProcessTimeout}
 	m[ProcessCommandNew] = command
 	for _, name := range []string{ProcessTerminationExitCode, ProcessTerminationSignal} {
 		one(name, types.ProcessTermination(), must(types.NewFallible(types.Int())))
@@ -438,6 +447,8 @@ func build() map[string]Operation {
 	addCheckpoints(m)
 	addComputeFailures(m)
 	addObservations(m, fixed)
+	addJSON(m, fixed)
+	addFormatting(m, fixed)
 	return m
 }
 func Lookup(name string) (Operation, bool) { o, ok := operations[name]; return o, ok }
@@ -454,7 +465,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "Lock", "CLI", "UTF8", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
+	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "Lock", "CLI", "UTF8", "JSON", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
 		return true
 	}
 	return false
@@ -499,6 +510,7 @@ var activationTargets = map[types.Kind]activationTarget{
 	types.FileWriteKind:      {FileWrite, types.FileWriteReceipt()},
 	types.FileAppendKind:     {FileAppend, types.FileAppendReceipt()},
 	types.FileRemoveKind:     {FileRemove, types.FileRemoveReceipt()},
+	types.FileTreeRemoveKind: {FileTreeRemoveChecked, types.FileRemoveReceipt()},
 	types.ServerKind:         {ServerNew, types.ServerReceipt()},
 	types.ClientRequestKind:  {ClientRequestNew, types.Response()},
 }

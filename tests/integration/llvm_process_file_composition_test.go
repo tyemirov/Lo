@@ -39,8 +39,10 @@ func TestLLVMProcessBinaryFileComposition(t *testing.T) {
 func TestLLVMProcessResultChargeCompletion(t *testing.T) {
 	fixture := newCleanupFixtureSource(t, "process-file-command.c")
 	later := filepath.Join(fixture.writes, "later")
-	text := fmt.Sprintf(`flow Main()->Int!{context=Process.Context.new(Map.new(),File.Path.new(%q));executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(context,executable,List.new("large"),Bytes.new(""));result=commit target;write=File.Write.new(File.Path.new(%q),Bytes.new("wrong"));commit write;return 0};return Main()`, fixture.root, fixture.executable, later)
-	arguments := append(fixture.flags(), "--write-root", fixture.writes, "--max-value-bytes", "4096", "--format", "json")
+	// Streaming output reserves enough weight for its result. Exceed the value
+	// limit when the caller expands that completed result into a larger value.
+	text := fmt.Sprintf(`flow Main()->Int!{context=Process.Context.new(Map.new(),File.Path.new(%q));executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(context,executable,List.new("large"),Bytes.new(""));result=commit target;copies=List.new(result,result);write=File.Write.new(File.Path.new(%q),Bytes.new("wrong"));commit write;return List.length(copies)};return Main()`, fixture.root, fixture.executable, later)
+	arguments := append(fixture.flags(), "--write-root", fixture.writes, "--max-value-bytes", "12288", "--format", "json")
 	got := runProgram(t, sourceFile(t, text), "run", arguments...)
 	if got.status != 2 || got.stdout != "" {
 		t.Fatalf("Process result quota: %+v", got)

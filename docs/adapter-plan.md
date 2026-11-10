@@ -148,23 +148,10 @@ All added sources, fixtures, caches, and output remain inside Lo.
 6. Confirm no surviving descendants and successful resource release before result publication.
 7. Obtain independent review before native launch acceptance.
 
-The [registry phase](adapter-design.md#executable-registry-phase) is implemented, with focused public checks passed in 0.804 seconds.
-Post-correction Process, File, and Gateway fixture race checks passed in 13.547 seconds.
-Independent source/test review closed the nested-ownership and quarantine-test findings.
-Final current-stack CI passed: interpreter integration 49.549 seconds and generated native integration 574.835 seconds.
-Runtime bundle verification, formatting, Go vet, all Go tests, native integration, and build passed.
-Independent final review approved the registry checkpoint with both findings closed.
-Validation uses byte fixtures, real Lo File operations, and injected lifecycle drivers without native Process execution.
-The registry checks an exact digest and path and protects against participating Lo File writes, including aliases.
-Selected native child filesystem protection passed the separate profile qualification.
-Immutable registered protection and admission/ownership leases cover the full operation and verified release.
-No coordinator lock remains held through child execution or injected callbacks.
-Registry temporary-file creation requires a stable namespace and matching parent pathname/retained-parent device and inode before creation.
-Root-relative link publication and cleanup follow that check.
-This registry-only rule does not weaken standalone File behavior or claim hostile host concurrency protection.
-Any identity mismatch must fail closed.
-Descriptor execution was unavailable through both tested SDK compile interfaces.
-This result establishes no OS impossibility.
+The [native registry](adapter-design.md#executable-registry) checks exact executable identities and protects their names against participating Lo File changes.
+Its lifetime covers admission, command execution, and complete cleanup.
+Unknown cleanup retains the registry and prevents successful release.
+This protection does not exclude arbitrary concurrent namespace changes by external host processes.
 
 Registry integration requires exact grants, continuous path/inode/ancestor protection, shared File adapters, and whole-execution ownership.
 The public registry tests passed after expected missing-API reds.
@@ -183,127 +170,27 @@ The selected native driver is implemented. Canonical public activation acceptanc
 The plan now permits pure construction, inspection, and unavailable rejection before qualification.
 This dependency rule keeps pure construction independent from native qualification.
 
-### Pure Process Phase
+### Command Values And Lifecycle
 
-This approved phase is implemented, and focused interpreter validation passed.
-It can proceed before execution profile qualification.
-It adds pure constructors, inspection, and host rejection without child execution.
+The single native runtime supplies Process values and activation.
+The [Process contract](adapter-design.md#pure-process-values) defines pure construction and immutable command options.
+The [lifecycle contract](adapter-design.md#native-results-and-lifecycle) defines ownership and cleanup.
+The [command policy](process-command-policy.md) defines host limits and output delivery.
 
-| Operation | Result |
-| --- | --- |
-| `Process.Executable.new(path: File.Path)` | `Process.Executable!` |
-| `Process.Command.new(context: Process.Context, executable: Process.Executable, arguments: List<String>, stdin: Bytes)` | `Process.Command!` |
+The compiler checks command types, purity, and declared activation failures.
+Inspection retains each command variant's context, executable, arguments, stdin, duration, and output mode.
+Only commit requests execution authority.
 
-Executable and directory paths must be absolute and contain no NUL.
-Arguments and environment values must contain no NUL.
-Environment names must be nonempty and contain neither NUL nor `=`.
-Construction keeps exact lexical data without access, path resolution, or shell expansion.
-The context supplies the environment and directory. Construction does not observe additional host inputs.
+The native driver ABI supplies admitted requests and confirmed completion evidence.
+The runtime invokes Console callbacks on the context owner thread.
+Capture and forwarding share Process quotas and cleanup requirements.
+Forwarding also uses Console authority and accounting.
 
-Command activation declares metadata capability `Process.run` and nominal success type `Process.Result`.
-`Process.run` is not a callable builtin.
-The earlier pure checkpoint provided no result runtime values or accessors.
-The implemented host-independent core now provides results and termination accessors through trusted Go injection.
-Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
-Configured Process policy on an unsupported backend fails session open before program evaluation.
-Lo `onError` cannot handle this host diagnostic.
-Constructor diagnostics and nominal command snapshots omit argument, environment, and stdin payloads.
-Automatic context output and nested snapshots omit environment and directory payloads.
-Explicit lookup and output of selected environment values remain available.
-Inspection adds no access or launch authority.
-
-The inspector adds an optional `process` object to command targets and capabilities.
-It contains `context`, `executable`, `arguments`, and `stdin` input descriptions.
-The context records source, origin, explicit inputs, base context, overrides, and removals when present.
-Origins are `inherited`, `explicit`, `derived`, or `dynamic`.
-Each description uses ordinary `kind`, `type`, `node`, `span`, and `dependencies` fields, with `value` or `expression`.
-It also contains `execution_profile: {required: true, status: "unavailable"}`.
-
-Without host configuration, source inspection reports this unavailable profile status. It does not establish runtime enforcement.
-Explicit executable descriptions trace the supplied `File.Path`.
-Discovery descriptions keep the context, name, and dynamic dependencies.
-Dynamic command descriptions retain whole-command dependencies.
-Text inspection shows `execution_profile=required/unavailable` and the named inputs.
-Source literals remain inspection data, while runtime snapshots omit sensitive payloads.
-
-The standard runner opens one canonical `processhost.Session` for `run`, `serve`, and server callbacks.
-The session owns native policy, the executable registry, participating File adapters, and retained shutdown.
-`Close(ctx)` closes admission and starts one shutdown owner. Its context bounds only the caller wait.
-`WaitRetained()` joins that same owner without a cleanup retry. A caller timeout does not release ownership.
-Custom Go boundaries are trusted host implementations and must enforce qualification.
-Generic commit execution validates the result type without a universal host qualification gate.
-HTTP request handlers can commit Process commands under the same configured session. Host failures stop the server.
-HTTP `onError` remains pure, so a Process commit there fails with `check.effectful-callback` before execution.
-
-Qualification remains mandatory before standard-host native Process activation acceptance.
-Bounded repository-contained qualification probes have a separate review gate.
-This phase authorizes no new probe launch.
-This earlier pure checkpoint did not establish native execution. Current canonical public acceptance passed. Final stack CI and independent completion review passed.
-The earlier File/HTTP CI remains valid for its recorded scope.
-Final focused interpreter validation passed in 2.934 seconds.
-Final focused native Process validation passed in 14.086 seconds.
-Current-stack CI passed, including the pure Process phase.
-Independent review approved the implemented pure Process checkpoint.
-
-### Host-Independent Results and Lifecycle Core
-
-Status: the host-independent result and lifecycle core is implemented.
-The [lifecycle evidence](evidence/process-start-lifecycle.json) records focused checks, race checks, and current-stack CI.
-Current-stack CI passed with interpreter integration in 39.879 seconds and generated-native integration in 462.176 seconds.
-Independent final review approved the pending-start correction without a remaining finding.
-This core can precede native execution profile qualification.
-It uses an injected OS boundary without an OS launcher or CLI execution opt-in.
-`NewProcessLifecycle` and `WithProcessLifecycle` are trusted Go embedding APIs only.
-Without Process grants, ordinary execution remains available. Only attempted Process activation returns `runtime.process-unavailable`.
-Configured Process policy on an unsupported backend fails session open before program evaluation.
-
-The selected result shape is `{termination: Process.Termination, stdout: Bytes, stderr: Bytes}`.
-`Process.Termination.kind` is `exited` or `signaled`.
-Fallible `Process.Termination.exit_code` and `Process.Termination.signal` accessors select the matching variant.
-Neither type has a Lo constructor.
-The core derives an immutable invocation from the exact executable, `argv[0]`, environment, directory, and stdin.
-Every nonnil child returned by `Start` transfers ownership, including a child returned with an error.
-An owned launch can still wait for OS process creation.
-The mandatory `StartConfirmed()` query and `start_confirmed` progress field separate creation evidence from ownership.
-The [lifecycle contract](adapter-design.md#host-independent-results-and-lifecycle-core) defines the query and settled-release guarantees.
-The core closes each pipe exactly once.
-Pipe `Close` must return promptly and unblock I/O even when it reports an error.
-One `Wait` continues after request cancellation through a fresh bounded cleanup context.
-`Stop` covers descendants.
-Successful `Release` means creation is finished and no owned primary, descendant, or private resource is left.
-With successful release and no creation evidence, cancellation does not require a termination value.
-Unresolved creation keeps ownership and registry quarantine.
-Returned progress does not change after a later creation observation.
-
-Success requires complete stdin delivery, stdout and stderr EOF, known termination, joined I/O, and successful `Release`.
-Early stdin closure produces ordinary `Process.ExecutionFailed`.
-Nonzero exit and signal termination remain completed-process data.
-Cancellation and limits remain host failures.
-Missing termination after known creation, or unresolved containment, produces host cleanup failure and overrides an ordinary failure.
-Safe evidence preserves the original failure class and stage.
-
-Trusted Go `ProcessFailure` keeps bounded partial stdout and stderr bytes.
-Lo errors and automatic diagnostics keep counts and status only, without raw partial bytes.
-Before result charging, a completion summary keeps termination and byte counts without payloads.
-`MaxProcessOutputBytes` is 1 MiB per stream.
-`DefaultProcessLimits` uses a five-second execution timeout and a one-second cleanup timeout.
-Configured durations must be positive, and each stream limit must be from one byte through 1 MiB.
-
-Pipe-close cleanup errors remain host failures with `cleanup_complete: false`.
-A failed `Release` followed by successful `Stop` and a second successful `Release` remains a host failure.
-That recovered cleanup records `cleanup_complete: true`, without an unresolved-containment claim.
-Execution timeout and cancellation produce host cancellation.
-Output overflow produces a host limit failure.
-Ordinary activation errors use catalog kind `Process.ExecutionFailed`.
-
-1. Add public integration fixtures for the approved result and lifecycle contract.
-2. Confirm the expected failures before production changes.
-3. Implement the host-independent core through an injected OS boundary.
-4. Verify the core and unchanged standard-host rejection in interpreter and native paths.
-5. Run final stack CI and obtain independent checkpoint review.
-
-These checks do not qualify a native launcher or its confinement.
-Native launch remains dependent on qualification.
+Public integration tests cover immutable transformations, host admission, output, deadlines, and cleanup.
+Injected drivers exercise native behavior on Darwin and Linux QEMU.
+Real command fixtures exercise the selected Darwin profile.
+Linux command activation remains explicitly unavailable.
+The [embedding contract](native-embedding.md) owns retained callback and context lifetime.
 
 ### Qualified Native Execution Phase
 
@@ -487,7 +374,8 @@ Automatic output and nested snapshots redact context payloads. Explicit lookup o
 Inspection records context origins, overrides, dynamic dependencies, and required execution authority.
 
 Cleanup policy selects mutation roots and exact Unix endpoints for each initial executable.
-Registered exec chains retain that initial scope. Forked and spawned descendants remain denied.
+Registered exec chains retain that initial scope.
+Forked and spawned descendants remain denied without explicit [descendant profile](process-descendant-ownership.md) selection.
 Data-write admission checks bounded root inventories, directory identity, and hardlink ownership across write and prune roots.
 The [adapter design](adapter-design.md#cleanup-execution-profile) owns complete scope restrictions and native admission limits.
 
@@ -501,10 +389,15 @@ The [checkpoint](evidence/process-context-cleanup/checkpoint.json) preserves exa
 
 ## Deferred Work
 
-The current contract does not include cleanup locks, extra file metadata, file watching, HTTP retry policy, or live command pipelines.
+The current contract does not include file watching, HTTP retry policy, or live command pipelines.
 Before implementation, specify each addition through the shared operation contract.
 Higher-order adapter functions remain available for justified domain semantics.
-The full mac-cleanup workflow also depends on the other inputs and policies in its application plan.
+
+F029 supplies cleanup locks, and F032 supplies additional file metadata.
+The complete application composes these contracts with its own inputs and policies.
+Focused application acceptance passed. Final shared stack CI passed.
+
+## Earlier Adapter Checkpoints
 
 The earlier pure Process checkpoint passed `CI=1 make ci </dev/null` with exit status `0`.
 Full interpreter integration took 43.391 seconds, and full native integration took 522.053 seconds.

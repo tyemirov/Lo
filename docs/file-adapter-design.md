@@ -4,7 +4,8 @@ The File adapter supports observations, file replacement, append, and removal.
 The [Gateway log example](examples/gateway-log-cleanup.lo) combines these operations into a complete log category.
 The [language reference](../specification.md#91-file-adapter) specifies the public language contract.
 The [implementation plan](file-adapter-plan.md) records acceptance.
-The [mac-cleanup plan](mac-cleanup-plan.md) defines the remaining complete-script requirements.
+
+The [mac-cleanup plan](mac-cleanup-plan.md) records complete application requirements and acceptance.
 This document describes the current implementation.
 The [shared adapter design](adapter-design.md#file) defines nominal File actions and typed receipts.
 The [shared implementation plan](adapter-plan.md) records HTTP client and qualified native Process support.
@@ -381,7 +382,8 @@ No source project, installed script, or real application cache is an acceptance 
 
 This slice includes nonrecursive entry discovery, regular-file removal, and a fixed recursive open-file probe.
 It excludes arbitrary subprocesses, directory removal, file watchers, persistent journals, and effect replay.
-The complete mac-cleanup script still needs cleanup locking, candidate-path probes, and category orchestration.
+The complete application now includes cleanup locking, candidate-path probes, and category orchestration.
+Focused application acceptance passed. Final shared stack CI passed.
 F024 supplies the current process contexts and results.
 
 ## Observation Implementation Contract

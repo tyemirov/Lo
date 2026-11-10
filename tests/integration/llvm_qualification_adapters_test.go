@@ -113,8 +113,8 @@ static int release_on_close(Context *context) {
 }
 #define lo_context_close(context) release_on_close(context)`
 			text = strings.Replace(text, declaration, gate, 1)
-			completed := `memcpy(out,"partial",7);`
-			text = strings.Replace(text, completed, completed+`
+			cancelled := `__atomic_store_n(&cancellation_seen,1,__ATOMIC_SEQ_CST);`
+			text = strings.Replace(text, cancelled, cancelled+`
   while(!__atomic_load_n(&allow_finish,__ATOMIC_SEQ_CST))nanosleep(&pause,0);`, 1)
 			if !strings.Contains(text, gate) || !strings.Contains(text, "while(!__atomic_load_n(&allow_finish") {
 				t.Fatal("retained cancellation injection did not bind the driver and checked close")

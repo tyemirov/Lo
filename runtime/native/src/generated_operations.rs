@@ -5,6 +5,11 @@ use crate::{
 };
 
 #[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2ECommand_2Ewith_5Ftimeout(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Process.Command.with_timeout")) }
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Process_2ECommand_2Ewith_5Foutput(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Process.Command.with_output")) }
+
+#[no_mangle]
 pub unsafe extern "C" fn lo_op_Console_2ELine_2Enew(
     c: *mut Context,
     a: *const *const Value,
@@ -1852,3 +1857,81 @@ pub unsafe extern "C" fn lo_op_Process_2EArguments_2Eformat_5Fshell(
 ) {
     call(c, a, n, s, o, Some("Process.Arguments.format_shell"))
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Clock_2Enow_5Funix_5Fns(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Clock.now_unix_ns"))
+}
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ESystem_2Eusage(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("File.System.usage"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Escan(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.scan")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Erefresh(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.refresh")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Echild(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.child")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EDirectory_2Eentry(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Directory.entry")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2EEntry_2Eobserve(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Entry.observe")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ETree_2Esnapshot(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Tree.snapshot")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_File_2ETree_2ERemove_2Echecked(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("File.Tree.Remove.checked")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Edecode(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.decode")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Eget(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.get")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Eat(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.at")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Estring(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.string")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Ebool(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.bool")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Eint(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.int")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Efloat(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.float")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Ekind(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.kind")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_JSON_2Elength(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("JSON.length")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Int_2Eparse(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Int.parse")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Float_2Eformat_5Ffixed(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Float.format_fixed")) }
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_String_2Eformat(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("String.format")) }

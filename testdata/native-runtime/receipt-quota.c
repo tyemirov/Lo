@@ -15,7 +15,7 @@ static int number(U64 value) {
 }
 static int invalid;
 static int succeeds(const Program *program, U64 limit, unsigned cumulative) {
-    ContextOptions policy = {1000000, 0, cumulative ? 0 : limit, cumulative ? limit : 0, 0, 0, 0};
+    ContextOptions policy = {1000000, 0, cumulative ? 0 : limit, cumulative ? limit : 0, 0, 0, 0,256};
     Context *context = lo_context_from_program(program, &policy);
     if (!context) { invalid = 1; return 0; }
     ResultSlot result = {99, 99, 0};

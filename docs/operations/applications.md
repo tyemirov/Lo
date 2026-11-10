@@ -35,6 +35,25 @@ return CLI.parse(
 
 [Contract](../../specification.md#97-console-output-terminal-results-and-declared-options)
 
+## Clock.now_unix_ns
+
+```text
+Clock.now_unix_ns() -> Int!
+```
+
+Observe fresh Unix time in nanoseconds. Negative timestamps are valid. The result must fit a signed 64-bit integer.
+This operation does not change the timestamp captured in `Host.Invocation.current()`.
+
+**Failures:** `Clock.Failed` for a clock error or an out-of-range timestamp.
+
+**Authority:** Host observation. No explicit clock grant or commit is necessary. Pure callbacks cannot call this operation.
+
+```lo
+return Clock.now_unix_ns()
+```
+
+[Contract](../file-system-observations.md#fresh-time)
+
 ## Console.Line.new
 
 ```text

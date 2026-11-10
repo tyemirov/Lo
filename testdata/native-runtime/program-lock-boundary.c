@@ -1,4 +1,5 @@
 #include "lo_runtime.h"
+#include "lo_process.h"
 #include "lo_program_lock.h"
 #include "lo_console.h"
 typedef __UINT64_TYPE__ U64;
@@ -6,7 +7,6 @@ typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
 extern int lo_cli_main(int,const char *const *,const char *const *);
 extern int lo_boolean_value(const Value *);
-extern Context *lo_context_process_peer(Context *);
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int open(const char *,int,...),close(int),fcntl(int,int,...),fork(void),execve(const char *,char *const *,char *const *),waitpid(int,int *,int),rename(const char *,const char *),symlink(const char *,const char *),linkat(int,const char *,int,const char *,int);
 extern char *getcwd(char *,Size);
@@ -37,17 +37,13 @@ int close(int fd){
  return result;
 }
 typedef __UINTPTR_TYPE__ Thread;
-typedef struct {int stage,class_id,started,cleanup_complete,termination_kind,termination_value;Size stdin_written,stdout_size,stderr_size;unsigned cleanup_failures;Size ownership;} NativeResult;
-typedef int (*Cancel)(const void *);
-typedef void (*Driver)(Size,const unsigned char *,Size,const unsigned char *,Size,unsigned char *,unsigned char *,Size,Cancel,const void *,U64,NativeResult *);
-extern int lo_context_process_driver(Context *,Driver,Size),lo_context_process_driver_limits(Context *,U64,U64,Size);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *),pthread_join(Thread,void **),poll(void *,unsigned long,int);
 extern unsigned alarm(unsigned);
 static int released,settled,finished,observer_failed;
 static const char *observer_path;
 static int probe(const char *,int);
-static void delayed(Size token,const unsigned char *frame,Size frame_size,const unsigned char *input,Size input_size,unsigned char *out,unsigned char *err,Size capacity,Cancel cancelled,const void *cancel,U64 timeout,NativeResult *result){
- (void)token;(void)frame;(void)frame_size;(void)input;(void)input_size;(void)out;(void)err;(void)capacity;(void)cancelled;(void)cancel;(void)timeout;
+static void delayed(Size token,const LoProcessRequest *request,LoProcessResult *result){
+ (void)token;(void)request;
  if(LO_CASE==14)return;
  while(!__atomic_load_n(&released,__ATOMIC_SEQ_CST))poll(0,0,1);
  result->started=1;result->termination_kind=1;result->termination_value=0;result->cleanup_complete=1;
@@ -86,7 +82,7 @@ int main(int argc,const char **argv){
 #endif
  if(linkat(at_current,image,at_current,path,0))return 3;
  if(LO_CASE==19){const char *arguments[]={"forged-entry","run","--lock-entry","--format","json"};int status=lo_cli_main(5,arguments,0);return status!=2||injections!=1?79:0;}
- const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128};
+ const ContextOptions options={100000,16ULL<<20,64ULL<<20,0,0,0,128,256};
  Context *context=lo_context_new(&options);if(!context)return 4;
  if(LO_CASE==16){Context *peer=lo_context_process_peer(context);if(!peer)return 70;if(lo_context_set_program_entry(context,(const unsigned char *)path,length(path))||lo_context_set_lock_files(context,0,0,0)||lo_context_set_program_entry(peer,(const unsigned char *)path,length(path)))return 71;lo_context_free(peer);}
  const char *injected=path;char alias[4112];
@@ -108,7 +104,7 @@ int main(int argc,const char **argv){
   if(lo_context_set_lock_files(context,0,0,1))return 8;
  }
  if(LO_CASE==5 && !lo_context_set_console(context,3,0,output,flush,1048576))return 9;
- if(LO_CASE==13||LO_CASE==14){alarm(5);if(!lo_context_process_driver(context,delayed,0)||!lo_context_process_driver_limits(context,20,20,1024))return 60;}
+ if(LO_CASE==13||LO_CASE==14){alarm(5);if(!lo_context_process_driver(context,delayed,0)||!lo_context_process_driver_limits(context,&(LoProcessLimits){20,20,1024,0}))return 60;}
  ResultSlot result={99,99,0};lo_context_run(context,&result);
  if(LO_CASE==13||LO_CASE==14){
   if(result.status!=2||result.value||lease_fd<0||probe(path,1))return 61;

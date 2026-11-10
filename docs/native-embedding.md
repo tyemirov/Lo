@@ -59,6 +59,29 @@ Console registration does not grant File, Process, HTTP, device, or lock authori
 
 The [entry and lock header](../runtime/native/include/lo_program_lock.h) declares explicit identity and lock registration.
 The [lock contract](program-lock-design.md) owns retained identity and cleanup guarantees.
+
 Device and Process test drivers remain explicit trusted injection boundaries.
+The [Process header](../runtime/native/include/lo_process.h) owns the test-driver request and response contract.
+Forwarded output callbacks run on the context owner thread through the registered Console sinks.
+Keep Process driver state alive until its owned work and cleanup finish.
+
+The [ownership provider header](../runtime/native/include/lo_process_ownership.h) defines the separate trusted boundary for descendant lifecycle events.
+This provider supplies events to the real supervisor and ownership controller.
+It does not replace command execution or its resource checks.
+The compiled host registers its factory before CLI dispatch and repeats registration after supervisor re-exec.
+The [descendant profile](process-descendant-ownership.md) defines finite host limits, registration lifetime, platform availability, and release proof.
+
 General File, HTTP, and real Process grant configuration is outside this retained embedding API.
 Compiled program commands supply those explicit application grants.
+
+The [host observation header](../runtime/native/include/lo_host_observer.h) declares synchronous clock and volume providers.
+Install each provider on the owner thread before session evaluation.
+Keep callback code and userdata valid until all session requests finish.
+Providers can cancel their context but cannot reenter or destroy it.
+Volume providers run after native measurement under exact directory authority.
+
+A provider returns zero for success, positive errno for an observation failure, or a negative value for terminal failure.
+Invalid provider metadata produces a terminal host failure.
+The [file observation header](../runtime/native/include/lo_file_observer.h) includes the signed allocation block count.
+That provider cannot replace native device or inode identity.
+The [observation contract](file-system-observations.md) defines these values and their failure behavior.

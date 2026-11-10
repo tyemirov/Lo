@@ -409,14 +409,19 @@ func TestProcessCleanupResourceLimitsKeepConfirmedMutation(t *testing.T) {
 			flags := append(fixture.flags(), "--process-write-root", cleanupScope(t, fixture.executable, "root", fixture.writes), "--write-root", fixture.root)
 			got := runProgram(t, sourceFile(t, source), "run", append([]string{"--format", "json"}, flags...)...)
 			diagnostic := receiptHostDiagnostic(t, got)
-			code := "runtime.limit"
+			var progress map[string]runtimeValue
 			if operation == "wait" {
-				code = "runtime.cancelled"
+				if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != "Process.Timeout" || diagnostic.Error.Input == nil {
+					t.Fatalf("cleanup timeout: %+v", got)
+				}
+				input := processFields(t, *diagnostic.Error.Input)
+				progress = processFields(t, input["progress"])
+			} else {
+				if got.status != 2 || diagnostic.Code != "runtime.limit" || diagnostic.ProcessProgress == nil {
+					t.Fatalf("cleanup resource limit: %+v", got)
+				}
+				progress = processFields(t, *diagnostic.ProcessProgress)
 			}
-			if got.status != 2 || diagnostic.Code != code || diagnostic.ProcessProgress == nil {
-				t.Fatalf("cleanup resource limit: %+v", got)
-			}
-			progress := processFields(t, *diagnostic.ProcessProgress)
 			valueJSON(t, progress["start_confirmed"], `true`)
 			valueJSON(t, progress["cleanup_complete"], `true`)
 			data, err := os.ReadFile(path)

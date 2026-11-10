@@ -73,6 +73,10 @@ Optimizer configuration keeps its validated FP32-rounded Float values.
 SGD state includes Parameters, configuration, and a nonnegative step count.
 AdamW state also includes both moments and both beta powers.
 
+The decoder shares the [strict JSON parser](json-values-and-formatting.md#strict-decoding).
+It rejects invalid UTF-8, unpaired surrogate escapes, and duplicate decoded keys.
+Schema field lookup uses exact keys.
+
 The decoder checks exact types, exact fields, dimensions, element counts, and finite values.
 It rejects unknown fields, duplicate keys, missing fields, extra values, trailing content, and noncanonical encodings.
 It rejects invalid configuration, negative steps, negative second moments, and beta powers outside `[0,1]`.
@@ -87,6 +91,8 @@ It keeps current data without a promise to read future or obsolete schemas.
 
 The encoded checkpoint cannot exceed the existing 16 MiB byte limit.
 Decoding obeys the existing tensor shape, value weight, allocation, and evaluation limits.
+The `json_depth` limit also applies, with a default of 256 nested containers and zero for no depth maximum.
+JSON array lengths and object member counts obey `list_items`.
 Checkpoint work consumes the execution budget.
 Cancellation is a host diagnostic and bypasses Lo handlers.
 Device denial also is a host diagnostic.

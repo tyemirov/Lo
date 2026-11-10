@@ -56,10 +56,10 @@ int main(void) {
     const Program *program = lo_program_new();
     if (!program) return 10;
     ContextOptions policies[] = {
-        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, 0, 64, 0, 0},
-        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, LO_CASE >= 3 ? 2000000 : LO_CASE ? 80000 : 20000, 64, 0, 0},
-        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, 1, 64, 0, 0},
-        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, 0, 64, 0, 0},
+        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, 0, 64, 0, 0, 256},
+        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, LO_CASE >= 3 ? 2000000 : LO_CASE ? 80000 : 20000, 64, 0, 0, 256},
+        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, 1, 64, 0, 0, 256},
+        {1000000, 0, LO_CASE >= 3 ? 512000 : LO_CASE ? 48000 : 12000, 0, 64, 0, 0, 256},
     };
     for (unsigned index = 0; index < 4; ++index) {
         Context *context = lo_context_from_program(program, &policies[index]);

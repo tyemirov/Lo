@@ -209,6 +209,8 @@ pub unsafe fn call(
             {
                 return Err(host("operation arguments disagree with admitted metadata"));
             }
+            if crate::json_values::SUPPORTED.contains(&op) { return crate::json_values::execute(&mut *c,&s,&a); }
+            if crate::text_format::SUPPORTED.contains(&op) { return crate::text_format::execute(&mut *c,&s,&a); }
             if crate::tensor::SUPPORTED.contains(&op) {
                 return crate::tensor::execute(&mut *c, &s, &a);
             }
@@ -229,6 +231,9 @@ pub unsafe fn call(
             }
             if op == crate::cli_options::OPERATION {
                 return crate::cli_options::execute(&mut *c, &s, &a);
+            }
+            if op == crate::host_observations::CLOCK {
+                return crate::host_observations::clock(&mut *c, &s);
             }
             if op == crate::host_invocation::OPERATION {
                 return crate::host_invocation::execute(&mut *c, &s);
@@ -885,12 +890,13 @@ pub unsafe extern "C" fn lo_context_diagnostic(
     };
     let Some(fault) = fault else { return NONE };
     let (diagnostic, _) = crate::cli::fault_diagnostic(fault, context, None);
-    let document = serde_json::json!({"diagnostics": [diagnostic]});
+
     let mut buffer = DiagnosticBuffer {
         bytes: Vec::new(),
         exceeded: false,
     };
-    if serde_json::to_writer(&mut buffer, &document).is_err() {
+    use std::io::Write;
+    if buffer.write_all(b"{\"diagnostics\":[").and_then(|()| diagnostic.write(&mut buffer)).and_then(|()|buffer.write_all(b"]}")).is_err() {
         return if buffer.exceeded { TOO_LARGE } else { INVALID };
     }
     *required = buffer.bytes.len();

@@ -219,6 +219,7 @@ impl GraphCache {
                     continue;
                 }
             }
+            if let Data::JSON(document) = &value.data { graph.max_list_items=graph.max_list_items.max(document.max_items); }
             if let Data::List(values) = &value.data {
                 graph.max_list_items = graph.max_list_items.max(values.len());
             }
@@ -274,6 +275,12 @@ fn for_each_child<'a>(value: &'a Handle, mut push: impl FnMut(&'a Handle)) {
             if let Some(guard) = guard {
                 guard.contexts.iter().for_each(&mut push);
             }
+        }
+        Data::Adapter(crate::adapters::AdapterValue::File(crate::files::Value::TreeRemove {
+            expected, guard,
+        })) => {
+            push(expected);
+            guard.contexts.iter().for_each(&mut push);
         }
         Data::Adapter(value) => {
             if let Some(fields) = value.fields() {

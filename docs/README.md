@@ -27,6 +27,7 @@ Each operation has a signature, behavior, failure contract, authority requiremen
 | --- | --- |
 | Atomic values and arithmetic | [Values](operations/values.md) |
 | Unicode text, bytes, and globs | [Text](operations/text.md) |
+| Immutable JSON values and exact extraction | [JSON](operations/json.md) |
 | Lists, maps, records, ranges, and sequential flows | [Collections](operations/collections.md) |
 | File paths, observations, and activation targets | [Files](operations/files.md) |
 | Process contexts, executables, commands, and results | [Processes](operations/process.md) |
@@ -75,7 +76,8 @@ The [reference audit](language-reference-audit.md) connects language rules with 
 
 The [planned features](../specification.md#planned-features) are separate from implemented behavior.
 Application designs can contain proposed calls and need not be executable.
-For example, the [mac-cleanup roadmap](mac-cleanup-implementation-plan.md) records work that remains outside the implemented contract.
+The [mac-cleanup source](examples/mac-cleanup.lo) now uses implemented operations and passes type checking.
+Its [roadmap](mac-cleanup-implementation-plan.md) records the completed implementation and software acceptance.
 
 ## Documentation Changes
 

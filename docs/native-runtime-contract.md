@@ -143,8 +143,14 @@ The CLI uses these defaults:
 | `live_bytes` | `--max-live-bytes` | 67,108,864 |
 | `data_bytes` | `--max-data-bytes` | 0 |
 | `list_items` | `--max-list-items` | 0 |
+| `json_depth` | `--max-json-depth` | 256 |
 | `file_entries` | `--max-file-entries` | 0 |
 | `file_directories` | `--max-file-directories` | 128 |
+
+`json_depth` bounds nested containers in JSON and checkpoint input. Zero disables that depth bound.
+`list_items` also bounds each JSON array and object.
+JSON values retain exact number tokens and account for all extracted data.
+The [JSON contract](json-values-and-formatting.md) defines weights and iterative output, snapshots, and release.
 
 The `live_bytes` limit counts the value weight of each retained value once.
 Charges can count a container and its child separately.
@@ -158,6 +164,23 @@ Resource scopes keep the current state, pending work, and callback context.
 Each pending item keeps its values, tensor storage, and directory observations until its release.
 Scope cleanup releases resources that cannot escape through the result.
 The runtime checks new work without a separate worklist item limit.
+
+Retained File descendants share one acquisition root lease.
+The `file_directories` quota counts retained acquisition roots, not cumulative visited directories.
+Ancestor witnesses permit bounded descriptor use with deep pending work.
+Separate `--observe-tree-root` and `--remove-tree-root` grants control recursive authority.
+The [retained observation contract](file-descendant-observations.md) defines the exact authority rules.
+
+File tree snapshots retain one private acquisition lease and rows without host authority.
+Checked tree targets retain that snapshot and their callback contexts across flow returns.
+Traversal uses bounded temporary descriptors and charges pending names, private rows, and operation work.
+Diagnostic snapshots cannot restore this authority.
+The [tree contract](file-tree-removal.md) defines preflight, postorder removal, metadata updates, and confirmed progress.
+
+Trusted file metadata observers belong to the shared execution session.
+Registration must finish before any peer starts evaluation.
+All peers use the same installed observer.
+An evaluated peer permanently seals registration, including after that peer is released.
 
 ### Console Registration And Completion
 

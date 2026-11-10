@@ -16,9 +16,15 @@ pub struct Policy {
     pub(super) launcher: String,
     pub(super) roots: Vec<String>,
     pub(super) scopes: BTreeMap<String, Scope>,
+    pub(super) descendants: Option<DescendantLimits>,
 }
 
 impl Policy {
+    pub fn with_descendants(mut self, limits: Option<DescendantLimits>) -> Result<Self, String> {
+        if let Some(limits) = limits { limits.storage().map_err(str::to_owned)?; }
+        self.descendants = limits;
+        Ok(self)
+    }
     pub fn protect_images(&self, paths: &[String]) -> Result<(), String> {
         for scope in self.scopes.values() {
             for root in scope.writes.iter().chain(&scope.prunes) {
@@ -122,6 +128,7 @@ impl Policy {
             launcher,
             roots,
             scopes,
+            descendants: None,
         })
     }
 }
@@ -209,9 +216,14 @@ pub(super) fn configuration(
         "(deny default (with no-log))".into(),
         "(allow file-read* (subpath \"/usr/lib\") (subpath \"/System/Library\"))".into(),
         "(allow file-read* file-test-existence (literal \"/\"))".into(),
-        "(deny process-fork (with no-log))".into(),
         "(allow signal (target self))".into(),
     ];
+    if processes.descendants.is_some() {
+        lines.push("(allow process-fork)".into());
+        lines.push("(deny syscall-unix (syscall-number SYS_setuid SYS_seteuid SYS_setreuid SYS_setgid SYS_setegid SYS_setregid SYS_setgroups SYS_initgroups SYS_settid SYS_settid_with_pid SYS_setsgroups SYS_setwgroups SYS_persona SYS_setrlimit SYS_proc_rlimit_control))".into());
+    } else {
+        lines.push("(deny process-fork (with no-log))".into());
+    }
     for image in commands {
         lines.push(format!("(allow process-exec (literal {}))", quote(image)));
         lines.push(format!("(allow file-read* (literal {}))", quote(image)));

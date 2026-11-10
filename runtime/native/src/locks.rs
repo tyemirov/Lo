@@ -105,6 +105,20 @@ enum AttemptFailure {
     Cleanup(String),
 }
 impl Grant {
+    pub(crate) fn visit_retained_witnesses(
+        &self,
+        mut visit: impl FnMut(&Path, Identity, &File) -> Result<(), Fault>,
+    ) -> Result<(), Fault> {
+        let parent = self.parent.as_ref().ok_or_else(|| host("retained entry parent is closed"))?;
+        let leaf = self.file.as_ref().ok_or_else(|| host("retained entry file is closed"))?;
+        let mut path = PathBuf::from("/");
+        for (file, name) in &self.anchors {
+            visit(&path, identity(file).map_err(host)?, file)?;
+            path.push(name.to_str().map_err(|_| host("retained entry ancestor is not UTF-8"))?);
+        }
+        visit(&path, self.parent_id, parent)?;
+        visit(&self.path, self.id, leaf)
+    }
     pub fn bind(input: &Path) -> Result<Self, String> {
         Self::bind_attempt(input).map_err(|failure| match failure {
             AttemptFailure::Access => "lock file admission failed".into(),
@@ -254,11 +268,64 @@ struct State {
     closing: bool,
     closed: bool,
     error: Option<String>,
+    remote_owner: Option<u64>,
+}
+pub(crate) struct RemoteLease {
+    pub identity: Identity,
+    pub file: File,
+}
+pub(crate) struct RemoteFreeze {
+    generation: u64,
 }
 pub struct Locks {
     state: Mutex<State>,
 }
 impl Locks {
+    pub(crate) fn freeze_remote(&self, generation: u64) -> Result<(RemoteFreeze, Vec<RemoteLease>), String> {
+        let mut state = self.state.lock().map_err(|_| "lock ownership poisoned")?;
+        if generation == 0 || state.closing || state.closed || state.remote_owner.is_some() {
+            return Err("lock session cannot transfer ownership to a remote owner".into());
+        }
+        let mut leases: Vec<RemoteLease> = Vec::with_capacity(state.leases.len());
+        for (expected, retained) in &state.leases {
+            let duplicate = unsafe { libc::fcntl(retained.as_raw_fd(), libc::F_DUPFD_CLOEXEC, 16) };
+            if duplicate < 0 {
+                let mut message = format!("duplicate remote lock lease: {}", io::Error::last_os_error());
+                let mut cleanup_failed = false;
+                for lease in leases.drain(..) {
+                    if let Err(error) = close_file(lease.file) {
+                        cleanup_failed = true;
+                        message.push_str(&format!("; close duplicate lock lease: {error}"));
+                    }
+                }
+                if cleanup_failed {
+                    // No release token escapes this failure. Unknown duplicate
+                    // ownership must keep every later acquisition frozen.
+                    state.remote_owner = Some(generation);
+                }
+                return Err(message);
+            }
+            leases.push(RemoteLease { identity: *expected, file: unsafe { File::from_raw_fd(duplicate) } });
+        }
+        // The same mutex excludes every acquisition through snapshot and freeze.
+        state.remote_owner = Some(generation);
+        Ok((RemoteFreeze { generation }, leases))
+    }
+    pub(crate) fn release_remote(&self, freeze: RemoteFreeze) -> Result<(), String> {
+        let mut state = self.state.lock().map_err(|_| "lock ownership poisoned")?;
+        if state.remote_owner != Some(freeze.generation) {
+            return Err("remote lock ownership proof has a different generation".into());
+        }
+        state.remote_owner = None;
+        Ok(())
+    }
+    pub(crate) fn protect_tree_identity(&self, identity: Identity) -> Result<(), Fault> {
+        let state = self.state.lock().map_err(|_| host("lock ownership poisoned"))?;
+        if state.leases.iter().any(|(active, _)| *active == identity) {
+            return Err(Fault::Host("runtime.capability-denied", "File.remove_tree cannot remove an active lock identity".into()));
+        }
+        Ok(())
+    }
     pub fn empty() -> Self {
         Self {
             state: Mutex::new(State::default()),
@@ -328,6 +395,9 @@ impl Locks {
             return state.error.clone().map_or(Ok(()), Err);
         }
         state.closing = true;
+        if state.remote_owner.is_some() {
+            return Err("lock leases are retained by an active remote owner".into());
+        }
         let mut errors = vec![];
         for (_, file) in state.leases.drain(..) {
             if let Err(error) = close_file(file) {
@@ -367,6 +437,10 @@ impl Locks {
                     "Lock.acquire requires exact lock authority".into(),
                 )
             })?;
+        if let Some(generation) = state.remote_owner {
+            return Err(Fault::Recoverable(error(site, "Lock.Failed",
+                &format!("file lock acquisition is frozen by active remote owner {generation}"), record([]))));
+        }
         if state.leases.len() >= MAX_LOCKS {
             return Err(limit("lock leases"));
         }

@@ -1,6 +1,68 @@
-// Application design source. Proposed generic APIs are listed in
-// ../mac-cleanup-script-design.md. This file is not executable yet.
+// Cleanup application. The host supplies explicit file and process authority.
 // Names, paths, command arguments, retention rules, and reports belong here.
+
+flow And(previous: Bool, value: Bool) -> Bool { return Match.new(previous, true: value, _: false) }
+flow Or(previous: Bool, value: Bool) -> Bool { return Match.new(previous, true: true, _: value) }
+flow All(values: List<Bool>) -> Bool { return List.fold(values, true, And) }
+flow Any(values: List<Bool>) -> Bool { return List.fold(values, false, Or) }
+flow Not(value: Bool) -> Bool { return Match.new(value, true: false, _: true) }
+
+flow StringGroup(values: List<String>) -> List<String> { return values }
+flow ConcatStrings(left: List<String>, right: List<String>) -> List<String> { return List.flat_map(List.new(left, right), StringGroup) }
+flow PathGroup(values: List<File.Path>) -> List<File.Path> { return values }
+flow ConcatPaths(left: List<File.Path>, right: List<File.Path>) -> List<File.Path> { return List.flat_map(List.new(left, right), PathGroup) }
+flow IntGroup(values: List<Int>) -> List<Int> { return values }
+flow ConcatInts(left: List<Int>, right: List<Int>) -> List<Int> { return List.flat_map(List.new(left, right), IntGroup) }
+flow GlobGroup(values: List<Glob>) -> List<Glob> { return values }
+flow ConcatGlobs(left: List<Glob>, right: List<Glob>) -> List<Glob> { return List.flat_map(List.new(left, right), GlobGroup) }
+flow TaskGroup(values: List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}>) -> List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}> { return values }
+flow ConcatTasks(left: List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}>, right: List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}>) -> List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}> { return List.flat_map(List.new(left, right), TaskGroup) }
+flow StorageRowGroup(values: List<Record{bytes: Int, path: String}>) -> List<Record{bytes: Int, path: String}> { return values }
+flow ConcatStorageRows(left: List<Record{bytes: Int, path: String}>, right: List<Record{bytes: Int, path: String}>) -> List<Record{bytes: Int, path: String}> { return List.flat_map(List.new(left, right), StorageRowGroup) }
+
+flow PathMemberStep(path: File.Path, found: Bool, candidate: File.Path) -> Bool { return Match.new(found, true: true, _: File.Path.eq(path, candidate)) }
+flow PathMember(paths: List<File.Path>, path: File.Path) -> Bool { return List.fold(paths, false, path, PathMemberStep) }
+flow StringMemberStep(text: String, found: Bool, candidate: String) -> Bool { return Match.new(found, true: true, _: String.eq(text, candidate)) }
+flow StringMember(values: List<String>, text: String) -> Bool { return List.fold(values, false, text, StringMemberStep) }
+flow ScalarMemberStep(character: Scalar, found: Bool, candidate: Scalar) -> Bool { return Match.new(found, true: true, _: Scalar.eq(character, candidate)) }
+flow ScalarMember(values: List<Scalar>, character: Scalar) -> Bool { return List.fold(values, false, character, ScalarMemberStep) }
+flow IntMemberStep(number: Int, found: Bool, candidate: Int) -> Bool { return Match.new(found, true: true, _: Math.eq(number, candidate)) }
+flow IntMember(values: List<Int>, number: Int) -> Bool { return List.fold(values, false, number, IntMemberStep) }
+flow UniquePathStep(paths: List<File.Path>, path: File.Path) -> List<File.Path> { return Match.new(PathMember(paths, path), true: paths, _: ConcatPaths(paths, List.new(path))) }
+flow UniquePaths(paths: List<File.Path>) -> List<File.Path> { return List.fold(paths, List.new(), UniquePathStep) }
+
+flow PathChunk(paths: List<File.Path>, size: Int, start: Int) -> Record{next_state: Int, value: List<File.Path>}! {
+    proposed = Math.add(start, size)
+    end = Match.new(Math.gt(proposed, List.length(paths)), true: List.length(paths), _: proposed)
+    return Record.new(next_state: end, value: List.slice(paths, start, end))
+}
+flow PathChunks(paths: List<File.Path>, size: Int) -> List<List<File.Path>>! {
+    valid = Require(Math.gt(size, 0), "Probe batch size must be positive")
+    count = Math.div(Math.add(List.length(paths), Math.sub(size, 1)), size)
+    return List.unfold(0, count, paths, size, PathChunk)
+}
+flow StringEqualAt(left: List<String>, right: List<String>, index: Int) -> Record{next_state: Int, value: Bool}! {
+    return Record.new(next_state: Math.add(index, 1), value: String.eq(List.at(left, index), List.at(right, index)))
+}
+flow EqualLengthStrings(left: List<String>, right: List<String>) -> Bool! { return All(List.unfold(0, List.length(left), left, right, StringEqualAt)) }
+flow StringsEqual(left: List<String>, right: List<String>) -> Bool! {
+    return Match.new(Math.eq(List.length(left), List.length(right)), true: EqualLengthStrings(left, right), _: false)
+}
+flow TreeRowEqualAt(left: List<Record{relative: String, entry: File.Entry}>, right: List<Record{relative: String, entry: File.Entry}>, index: Int) -> Record{next_state: Int, value: Bool}! {
+    return Record.new(next_state: Math.add(index, 1), value: SameTreeRow(List.at(left, index), List.at(right, index)))
+}
+flow EqualLengthTreeRows(left: List<Record{relative: String, entry: File.Entry}>, right: List<Record{relative: String, entry: File.Entry}>) -> Bool! { return All(List.unfold(0, List.length(left), left, right, TreeRowEqualAt)) }
+flow TreeRowsEqual(left: List<Record{relative: String, entry: File.Entry}>, right: List<Record{relative: String, entry: File.Entry}>) -> Bool! {
+    return Match.new(Math.eq(List.length(left), List.length(right)), true: EqualLengthTreeRows(left, right), _: false)
+}
+flow JoinStringStep(separator: String, state: Record{first: Bool, text: String}, text: String) -> Record{first: Bool, text: String} {
+    boundary = Match.new(state.first, true: "", _: separator)
+    return Record.new(first: false, text: String.concat(state.text, boundary, text))
+}
+flow JoinStrings(values: List<String>, separator: String) -> String {
+    joined = List.fold(values, Record.new(first: true, text: ""), separator, JoinStringStep)
+    return joined.text
+}
 
 flow Print(text: String) -> Bool! {
     line = Console.Line.new("stdout", text, true)
@@ -34,7 +96,7 @@ flow HumanSize(value: Int) -> String! {
 
 flow Run(context: Process.Context, executable: Process.Executable, arguments: List<String>, output: String, timeout_seconds: Int) -> Process.Result! {
     command = Process.Command.new(context, executable, arguments, Bytes.new(""))
-    timed = Process.Command.with_timeout(command, timeout_seconds)
+    timed = Process.Command.with_timeout(command, Math.mul(timeout_seconds, 1000))
     configured = Process.Command.with_output(timed, output)
     result = commit configured
     return result
@@ -61,12 +123,7 @@ flow OptionalExecutable(context: Process.Context, name: String) -> Record{execut
 }
 
 flow Lsof(context: Process.Context) -> Process.Executable! {
-    discovered = OptionalExecutable(context, "lsof")
-    executables = discovered.executables
-    return Match.new(List.length(executables),
-        0: Process.Executable.new(File.Path.new("/usr/sbin/lsof")),
-        _: List.at(executables, 0)
-    )
+    return Process.Executable.resolve(context, "lsof")
 }
 
 flow Task(label: String, operation: String, path: File.Path, arguments: List<String>) -> Record{label: String, operation: String, path: File.Path, arguments: List<String>} {
@@ -85,9 +142,7 @@ flow CacheTask(path: File.Path) -> Record{label: String, operation: String, path
     return PathTask("cache", path)
 }
 
-flow TreeTask(path: File.Path) -> Record{label: String, operation: String, path: File.Path, arguments: List<String>} {
-    return PathTask("tree", path)
-}
+
 
 flow CommandTasks() -> List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}> {
     return List.new(
@@ -115,7 +170,7 @@ flow Action(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pro
 }
 
 flow ApplyAction(context: Process.Context, executable: Process.Executable, arguments: List<String>) -> Int! {
-    result = Run(context, executable, arguments, "inherit", 1800) |> RequireSuccess()
+    result = Run(context, executable, arguments, "forward", 1800) |> RequireSuccess()
     return 0
 }
 
@@ -195,7 +250,7 @@ flow AbsentEnvironment(state: Bool, error: Error) -> Bool! {
 }
 
 flow DockerCommand(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, executable: Process.Executable, arguments: List<String>, output: String) -> Process.Result! {
-    return Run(context.process, executable, List.concat(List.new("--context", "desktop-linux"), arguments), output, 1800) |> RequireSuccess()
+    return Run(context.process, executable, ConcatStrings(List.new("--context", "desktop-linux"), arguments), output, 1800) |> RequireSuccess()
 }
 
 flow BuilderFirst(tokens: List<String>) -> List<String>! {
@@ -220,27 +275,43 @@ flow BuilderField(key: String, state: Record{pending: Bool, values: List<String>
     prefix = BuilderValue(key, line)
     continued = String.split_whitespace(line)
     return Match.new(state.pending,
-        true: Record.new(pending: Math.eq(List.length(continued), 0), values: List.concat(state.values, BuilderFirst(continued))),
-        _: Record.new(pending: prefix.pending, values: List.concat(state.values, prefix.values)))
+        true: Record.new(pending: Math.eq(List.length(continued), 0), values: ConcatStrings(state.values, BuilderFirst(continued))),
+        _: Record.new(pending: prefix.pending, values: ConcatStrings(state.values, prefix.values)))
+}
+
+flow StrictBuilderField(key: String, state: Record{pending: Bool, values: List<String>}, line: String) -> Record{pending: Bool, values: List<String>}! {
+    continued = String.split_whitespace(line)
+    key_line = String.starts_with(line, String.concat(key, ":"))
+    suffix = Match.new(key_line, true: String.slice(line, Math.add(String.length(key), 1), String.length(line)), _: "")
+    spaced = Match.new(String.length(suffix), 0: true, _: String.is_whitespace(String.slice(suffix, 0, 1)))
+    valid = Match.new(state.pending,
+        true: Math.lte(List.length(continued), 1),
+        _: Match.new(key_line, true: All(List.new(spaced, Math.lte(List.length(String.split_whitespace(suffix)), 1))), _: true))
+    checked = Require(valid, String.concat("Malformed Docker builder field: ", key))
+    return BuilderField(key, state, line)
 }
 
 flow DockerApply(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, executable: Process.Executable) -> Int! {
     inspected = DockerCommand(context, executable, List.new("context", "inspect", "desktop-linux"), "capture")
+    context_output = Require(Math.eq(Bytes.length(inspected.stderr), 0), "Docker context inspection wrote to stderr")
     contexts = JSON.decode(inspected.stdout)
+    context_count = Require(Math.eq(JSON.length(contexts), 1), "Expected one selected Docker context")
     selected = JSON.at(contexts, 0)
+    context_name = Require(String.eq(JSON.get(selected, "Name") |> JSON.string(), "desktop-linux"), "Expected the desktop-linux Docker context")
     endpoint = JSON.get(selected, "Endpoints") |> JSON.get("docker") |> JSON.get("Host") |> JSON.string()
-    local = Require(String.starts_with(endpoint, "unix://"), String.concat("Refusing nonlocal Docker endpoint: ", endpoint))
+    local = Require(All(List.new(String.starts_with(endpoint, "unix:///"), Math.gt(String.length(endpoint), 8), All(List.map(endpoint, UnambiguousCharacter)))), String.concat("Refusing invalid or nonlocal Docker endpoint: ", endpoint))
     inspected_builder = DockerCommand(context, executable, List.new("buildx", "inspect", "desktop-linux"), "capture")
+    builder_output = Require(Math.eq(Bytes.length(inspected_builder.stderr), 0), "Docker builder inspection wrote to stderr")
     builder_text = String.replace_all(String.replace_all(UTF8.String.new(inspected_builder.stdout), "\r\n", "\n"), "\r", "\n")
     lines = String.split(builder_text, "\n")
-    drivers_found = List.fold(lines, Record.new(pending: false, values: List.new()), "Driver", BuilderField)
-    endpoints_found = List.fold(lines, Record.new(pending: false, values: List.new()), "Endpoint", BuilderField)
+    drivers_found = Flow.fold(lines, Record.new(pending: false, values: List.new()), "Driver", StrictBuilderField)
+    endpoints_found = Flow.fold(lines, Record.new(pending: false, values: List.new()), "Endpoint", StrictBuilderField)
     drivers = drivers_found.values
     endpoints = endpoints_found.values
-    driver = Require(List.equal(drivers, List.new("docker")), "Expected one Docker-driver builder on the selected local context")
-    builder_endpoint = Require(List.equal(endpoints, List.new("desktop-linux")), "Expected one Docker-driver builder on the selected local context")
+    driver = Require(All(List.new(Not(drivers_found.pending), StringsEqual(drivers, List.new("docker")))), "Expected one Docker-driver builder on the selected local context")
+    builder_endpoint = Require(All(List.new(Not(endpoints_found.pending), StringsEqual(endpoints, List.new("desktop-linux")))), "Expected one Docker-driver builder on the selected local context")
     printed = Print(String.concat("Docker target: desktop-linux (", endpoint, ")"))
-    usage = DockerCommand(context, executable, List.new("system", "df"), "inherit")
+    usage = DockerCommand(context, executable, List.new("system", "df"), "forward")
     build = Action(context, executable, List.new("--context", "desktop-linux", "buildx", "prune", "--builder", "desktop-linux", "--all", "--force"), List.new("docker", "--context", "desktop-linux", "buildx", "prune", "--builder", "desktop-linux", "--all", "--force"))
     images = Action(context, executable, List.new("--context", "desktop-linux", "image", "prune", "--all", "--force"), List.new("docker", "--context", "desktop-linux", "image", "prune", "--all", "--force"))
     return 0
@@ -286,9 +357,18 @@ flow CleanTempRoot(context: Record{apply: Bool, home: File.Path, uid: Int, proce
     return Math.add(count, cleaned)
 }
 
-flow TemporaryFiles(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Int! {
-    roots = TempRoots(context)
+flow PreviewTemporary(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, previous: Int, selected: Int) -> Int! {
+    printed = Print("PLAN per-user temporary files: discovery deferred until cleanup")
+    return CleanTempRoot(context, 0, shared)
+}
+flow ApplyTemporary(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path, previous: Int, selected: Int) -> Int! {
+    roots = TempRoots(context, shared, prefix, getconf)
     return Flow.fold(roots, 0, context, CleanTempRoot)
+}
+flow TemporaryFiles(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path) -> Int! {
+    choice = Match.new(context.apply, true: 1, _: 2)
+    applied = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context, shared, prefix, getconf, ApplyTemporary)
+    return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), applied, context, shared, PreviewTemporary)
 }
 
 flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}) -> Int! {
@@ -297,7 +377,6 @@ flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
         "command": 1,
         "files": 2,
         "cache": 3,
-        "tree": 4,
         "temp": 5,
         "docker": 6,
         "logs": 7,
@@ -305,8 +384,7 @@ flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, context, task, PerformChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, task, PerformChoice1Branch2)
     choice_1_result_3 = Flow.fold(List.filter(List.new(choice_1), 3, SelectedChoice), choice_1_result_2, context, task, PerformChoice1Branch3)
-    choice_1_result_4 = Flow.fold(List.filter(List.new(choice_1), 4, SelectedChoice), choice_1_result_3, context, task, PerformChoice1Branch4)
-    choice_1_result_5 = Flow.fold(List.filter(List.new(choice_1), 5, SelectedChoice), choice_1_result_4, context, PerformChoice1Branch5)
+    choice_1_result_5 = Flow.fold(List.filter(List.new(choice_1), 5, SelectedChoice), choice_1_result_3, context, task, PerformChoice1Branch5)
     choice_1_result_6 = Flow.fold(List.filter(List.new(choice_1), 6, SelectedChoice), choice_1_result_5, context, PerformChoice1Branch6)
     choice_1_result_7 = Flow.fold(List.filter(List.new(choice_1), 7, SelectedChoice), choice_1_result_6, context, PerformChoice1Branch7)
     choice_1_result_8 = Flow.fold(List.filter(List.new(choice_1), 8, SelectedChoice), choice_1_result_7, PerformChoice1Branch8)
@@ -315,17 +393,21 @@ flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
 
 flow AddFailure(state: Record{failures: List<String>, estimates: List<Int>}, label: String, error: Error) -> Record{failures: List<String>, estimates: List<Int>}! {
     printed = PrintError(String.concat("FAILED ", label, ": ", error.message))
-    return Record.new(failures: List.concat(state.failures, List.new(label)), estimates: state.estimates)
+    return Record.new(failures: ConcatStrings(state.failures, List.new(label)), estimates: state.estimates)
 }
 
 flow Attempt(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}) -> Record{failures: List<String>, estimates: List<Int>}! {
     captured = TryPerform(context, task)
+    return RecordOutcome(state, task.label, captured)
+}
+
+flow RecordOutcome(state: Record{failures: List<String>, estimates: List<Int>}, label: String, captured: Record{result: Int!, errors: List<Error>}) -> Record{failures: List<String>, estimates: List<Int>}! {
     selector_1 = List.length(captured.errors)
     choice_1 = Match.new(selector_1,
         0: 1,
         _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), state, captured, state, AttemptChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, captured, state, task, AttemptChoice1Branch2)
+    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), state, captured, state, RecordSuccess)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, captured, state, label, RecordFailure)
     return choice_1_result_2
 }
 
@@ -341,12 +423,14 @@ flow Xcode(context: Record{apply: Bool, home: File.Path, uid: Int, process: Proc
 }
 
 flow SamePath(target: File.Path, found: Bool, path: File.Path) -> Bool {
-    return Bool.any(List.new(found, File.Path.eq(target, path)))
+    return Any(List.new(found, File.Path.eq(target, path)))
 }
 
-flow ReportPath(home: File.Path, relative: String) -> File.Path { return File.Path.join(home, relative) }
+flow ReportPath(home: File.Path, relative: String) -> File.Path! { return File.Path.join(home, relative) }
 
-flow StoragePaths(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path> {
+flow ReportPathStep(home: File.Path, paths: List<File.Path>, relative: String) -> List<File.Path>! { return ConcatPaths(paths, List.new(ReportPath(home, relative))) }
+
+flow StoragePaths(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path>! {
     additional = List.new(
         "Library/Caches/go-build", "Library/Caches/Google", "Library/Caches/Firefox",
         "Library/Caches/Codex", "Library/Caches/com.openai.codex", "Library/Caches/Codex-codexw",
@@ -357,15 +441,23 @@ flow StoragePaths(context: Record{apply: Bool, home: File.Path, uid: Int, proces
         ".cache/puppeteer", ".cache/codex-runtimes", ".cache/mprlab-gateway",
         "Library/Containers/com.docker.docker/Data/vms"
     )
-    return List.concat(CacheTargets(context), List.map(additional, context.home, ReportPath))
+    return ConcatPaths(CacheTargets(context), Flow.fold(additional, List.new(), context.home, ReportPathStep))
 }
 
+flow OptionalReportEntry(parent: File.Directory, name: String) -> Record{entries: List<File.Entry>!} onError AbsentBuildEntry {
+    entry = File.Directory.entry(parent, name)
+    return Record.new(entries: List.new(entry))
+}
+flow ReportEntryPath(paths: List<File.Path>, entry: File.Entry) -> List<File.Path> {
+    return Match.new(StringMember(List.new("regular", "directory"), entry.kind), true: ConcatPaths(paths, List.new(entry.path)), _: paths)
+}
+flow ReportParentPath(path: File.Path, paths: List<File.Path>, parent: File.Directory) -> List<File.Path>! {
+    observed = OptionalReportEntry(parent, File.Path.name(path))
+    return List.fold(observed.entries, paths, ReportEntryPath)
+}
 flow ExistingReportPath(paths: List<File.Path>, path: File.Path) -> List<File.Path>! {
-    exists = File.Path.exists(path)
-    return Match.new(exists,
-        true: Match.new(File.Path.is_symlink(path), true: paths, _: List.concat(paths, List.new(path))),
-        _: paths
-    )
+    observed = OptionalDirectory(File.Path.parent(path))
+    return Flow.fold(observed.directories, paths, path, ReportParentPath)
 }
 
 flow ParseStorageLine(line: String) -> Record{bytes: Int, path: String}! {
@@ -394,42 +486,51 @@ flow StorageLabel(targets: List<File.Path>, row: Record{bytes: Int, path: String
     )
 }
 
+flow StorageRowText(size: String, label: String, path: String) -> String! {
+    return String.format("{size:>12}  [{label}] {path}", Record.new(size: size, label: label, path: path))
+}
+
 flow PrintStorageRow(targets: List<File.Path>, count: Int, row: Record{bytes: Int, path: String}) -> Int! {
-    text = String.format("{size:>12}  [{label}] {path}", Record.new(size: HumanSize(row.bytes), label: StorageLabel(targets, row), path: row.path))
+    text = StorageRowText(HumanSize(row.bytes), StorageLabel(targets, row), row.path)
     printed = Print(text)
     return Math.add(count, 1)
 }
 
-flow StorageInventory(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>) -> Int! {
-    executable = Process.Executable.new(File.Path.new("/usr/bin/du"))
-    result = Run(context.process, executable, List.concat(List.new("-k", "-s"), List.map(paths, PathText)), "capture", 180)
+flow StorageRowPath(row: Record{bytes: Int, path: String}) -> File.Path { return File.Path.new(row.path) }
+flow StorageRowValid(paths: List<String>, row: Record{bytes: Int, path: String}) -> Bool {
+    return All(List.new(Math.gte(row.bytes, 0), StringMember(paths, row.path)))
+}
+
+flow StorageInventory(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>, du: File.Path) -> Int! {
+    executable = Process.Executable.new(du)
+    result = RequireSuccess(Run(context.process, executable, ConcatStrings(List.new("-k", "-s"), List.map(paths, PathText)), "capture", 180))
+    complete = Require(Math.eq(Bytes.length(result.stderr), 0), String.concat("Storage inventory incomplete: ", String.trim(UTF8.String.new(result.stderr))))
     lines = String.lines(UTF8.String.new(result.stdout))
     rows = Flow.fold(lines, List.new(), ParseStorageRows)
+    valid = Require(All(List.new(Math.eq(List.length(rows), List.length(paths)), Math.eq(List.length(UniquePaths(List.map(rows, StorageRowPath))), List.length(paths)), All(List.map(rows, List.map(paths, PathText), StorageRowValid)))), "Storage inventory does not contain one nonnegative row for each selected path")
     printed = Print("Storage inventory (allocated size; NOT an estimate of reclaimable space):")
     count = Flow.fold(List.sort(rows, CompareStorageRows), 0, CacheTargets(context), PrintStorageRow)
-    code = Process.Termination.exit_code(result.termination)
-    valid = Require(Bool.all(List.new(Math.eq(code, 0), Math.eq(Bytes.length(result.stderr), 0))), String.concat("Storage inventory incomplete: ", String.trim(UTF8.String.new(result.stderr))))
     return 0
 }
 
 flow ParseStorageRows(rows: List<Record{bytes: Int, path: String}>, line: String) -> List<Record{bytes: Int, path: String}>! {
     row = ParseStorageLine(line)
-    return List.concat(rows, List.new(row))
+    return ConcatStorageRows(rows, List.new(row))
 }
 
-flow StorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Int! {
+flow StorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Int! {
     paths = Flow.fold(StoragePaths(context), List.new(), ExistingReportPath)
     selector_1 = List.length(paths)
     choice_1 = Match.new(selector_1,
         0: 1,
         _: 2)
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, StorageReportChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, paths, StorageReportChoice1Branch2)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, paths, du, StorageReportChoice1Branch2)
     return choice_1_result_2
 }
 
 flow SummaryFailure(state: Record{failures: List<String>, estimates: List<Int>}) -> Program.Exit! {
-    printed = PrintError(String.concat("Failed categories: ", String.join(state.failures, ", ")))
+    printed = PrintError(String.concat("Failed categories: ", JoinStrings(state.failures, ", ")))
     return Program.Exit.new(1, Bytes.new(""), Bytes.new(""))
 }
 
@@ -471,7 +572,7 @@ flow UnknownEstimate(apply: Bool) -> Bool! {
     return choice_1_result_2
 }
 
-flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, before: Int) -> Program.Exit! {
+flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, before: Int, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
     notice = PlanNotice(context.apply)
     pip = TryPreparePip(context)
     initial = InitialWorkflow()
@@ -482,16 +583,16 @@ flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: P
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), initial, initial, WorkflowChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, initial, pip, WorkflowChoice1Branch2)
     pip_state = choice_1_result_2
-    pip_tasks = Match.new(List.length(pip.errors), 0: pip.result, _: List.new())
-    commands = Flow.fold(List.concat(CommandTasks(), pip_tasks), pip_state, context, Attempt)
+    pip_tasks = TaskGroup(Match.new(List.length(pip.errors), 0: pip.result, _: List.new()))
+    commands = Flow.fold(ConcatTasks(CommandTasks(), pip_tasks), pip_state, context, Attempt)
     logs = Task("npm logs", "files", File.Path.join(context.home, ".npm/_logs"), List.new())
     with_logs = Attempt(context, commands, logs)
     caches = Flow.fold(List.map(CacheTargets(context), CacheTask), with_logs, context, Attempt)
     trees = Xcode(context, caches)
-    printed = Print(String.concat("Stale-cache file allocation across completed scans: ", HumanSize(Math.sum(trees.estimates))))
+    printed = Print(String.concat("Observed allocation across completed cache scans and build trees: ", HumanSize(Math.sum(trees.estimates))))
     unknown = UnknownEstimate(context.apply)
     remaining = List.new(
-        Task("Temporary files", "temp", File.Path.new("."), List.new()),
+        Task("Temporary files", "temp", settings.shared_temp, List.new(settings.user_temp_prefix, PathText(settings.getconf))),
         Task("Docker", "docker", File.Path.new("."), List.new()),
         Task("Gateway logs", "logs", File.Path.new("."), List.new())
     )
@@ -509,8 +610,8 @@ flow PreparePip(context: Record{apply: Bool, home: File.Path, uid: Int, process:
     return choice_1_result_2
 }
 
-flow Report(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Program.Exit! {
-    captured = TryStorageReport(context)
+flow Report(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Program.Exit! {
+    captured = TryStorageReport(context, du)
     selector_1 = List.length(captured.errors)
     choice_1 = Match.new(selector_1,
         0: 1,
@@ -526,7 +627,7 @@ flow ReportFailure(error: Error) -> Bool! {
     return true
 }
 
-flow Started(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit! {
+flow Started(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
     printed = Print("Starting mac-cleanup")
     before = File.System.usage(invocation.home)
     free_bytes = before.free_bytes
@@ -542,17 +643,17 @@ flow Started(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit!
     ))
     report = Map.get(options.flags, "--report")
     dry_run = Map.get(options.flags, "--dry-run")
-    context = Record.new(apply: Bool.not(Bool.any(List.new(report, dry_run))), home: invocation.home, uid: invocation.real_uid, process: process)
+    context = Record.new(apply: Not(Any(List.new(report, dry_run))), home: invocation.home, uid: invocation.real_uid, process: process)
     selector_1 = report
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), context, StartedChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, free_bytes, context, StartedChoice1Branch2)
+    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), context, settings.du, StartedChoice1Branch1)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, free_bytes, context, settings, StartedChoice1Branch2)
     return choice_1_result_2
 }
 
-flow Locked(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit! {
+flow Locked(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
     lock = Lock.File.new(Program.path())
     lease = commit lock
     selector_1 = invocation.effective_uid
@@ -560,7 +661,7 @@ flow Locked(invocation: Host.Invocation, options: CLI.Options) -> Program.Exit! 
         0: 1,
         _: 2)
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), LockedChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, LockedChoice1Branch2)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, settings, LockedChoice1Branch2)
     return choice_1_result_2
 }
 
@@ -577,7 +678,7 @@ flow ArgumentFlags() -> List<Record{name: String, aliases: List<String>, group: 
     )
 }
 
-flow Startup() -> Record{results: List<Program.Exit>, code: Int, message: String} onError StartupFailure {
+flow Startup(settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Record{results: List<Program.Exit>, code: Int, message: String} onError StartupFailure {
     invocation = Host.Invocation.current()
     flags = ArgumentFlags()
     options = CLI.parse(invocation.arguments, flags, "mac-cleanup", "Clean known macOS development caches; optional read-only preview/report.", true)
@@ -586,12 +687,12 @@ flow Startup() -> Record{results: List<Program.Exit>, code: Int, message: String
         true: 1,
         _: 2)
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), options, MainChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, MainChoice1Branch2)
+    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, settings, MainChoice1Branch2)
     return Record.new(results: List.new(choice_1_result_2), code: 0, message: "")
 }
 
-flow Main() -> Program.Exit! {
-    startup = Startup()
+flow MainWithSettings(settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
+    startup = Startup(settings)
     return Match.new(List.length(startup.results),
         0: Program.Exit.new(startup.code, Bytes.new(""), UTF8.Bytes.new(String.concat(startup.message, "\n"))),
         _: List.at(startup.results, 0)
@@ -601,36 +702,35 @@ flow Main() -> Program.Exit! {
 // File-selection, retained-directory, recursive-cache, and whole-tree flows
 // follow below. All application policy stays in these named Lo flows.
 
-// Proposed generic operations are specified in ../mac-cleanup-script-design.md.
 flow EntryPath(entry: File.Entry) -> File.Path { return entry.path }
 flow EntryBytes(entry: File.Entry) -> Int { return entry.size_bytes }
 flow EntryAllocation(entry: File.Entry) -> Int { return entry.allocated_bytes }
 flow PathString(path: File.Path) -> String { return File.Path.to_string(path) }
 flow Cutoff(days: Int) -> Int! { return Math.sub(Clock.now_unix_ns(), Math.mul(days, 86400000000000)) }
 flow SameDirectory(before: File.Directory, after: File.Directory) -> Bool {
-    return Bool.all(List.new(File.Path.eq(before.path, after.path), Math.eq(before.device, after.device), Math.eq(before.inode, after.inode)))
+    return All(List.new(File.Path.eq(before.path, after.path), Math.eq(before.device, after.device), Math.eq(before.inode, after.inode)))
 }
 flow SameFile(before: File.Entry, after: File.Entry) -> Bool {
-    return Bool.all(List.new(Math.eq(before.device, after.device), Math.eq(before.inode, after.inode), String.eq(before.kind, after.kind), Math.eq(before.owner_uid, after.owner_uid), Math.eq(before.link_count, after.link_count), Math.eq(before.size_bytes, after.size_bytes), Math.eq(before.accessed_unix_ns, after.accessed_unix_ns), Math.eq(before.modified_unix_ns, after.modified_unix_ns), Math.eq(before.changed_unix_ns, after.changed_unix_ns)))
+    return All(List.new(Math.eq(before.device, after.device), Math.eq(before.inode, after.inode), String.eq(before.kind, after.kind), Math.eq(before.owner_uid, after.owner_uid), Math.eq(before.link_count, after.link_count), Math.eq(before.size_bytes, after.size_bytes), Math.eq(before.accessed_unix_ns, after.accessed_unix_ns), Math.eq(before.modified_unix_ns, after.modified_unix_ns), Math.eq(before.changed_unix_ns, after.changed_unix_ns)))
 }
 flow OldFile(cutoff: Int, entry: File.Entry) -> Bool {
-    return Bool.all(List.new(Math.lt(entry.accessed_unix_ns, cutoff), Math.lt(entry.modified_unix_ns, cutoff), Math.lt(entry.changed_unix_ns, cutoff)))
+    return All(List.new(Math.lt(entry.accessed_unix_ns, cutoff), Math.lt(entry.modified_unix_ns, cutoff), Math.lt(entry.changed_unix_ns, cutoff)))
 }
 flow SafeCharacter(character: Scalar) -> Bool {
-    return Bool.any(List.new(Range.contains(Range.new(Scalar.new("A"), Scalar.new("Z"), true, true), character), Range.contains(Range.new(Scalar.new("a"), Scalar.new("z"), true, true), character), Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), character), List.contains(List.new(Scalar.new("/"), Scalar.new("."), Scalar.new("_"), Scalar.new(" "), Scalar.new("-")), character)))
+    return Any(List.new(Range.contains(Range.new(Scalar.new("A"), Scalar.new("Z"), true, true), character), Range.contains(Range.new(Scalar.new("a"), Scalar.new("z"), true, true), character), Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), character), ScalarMember(List.new(Scalar.new("/"), Scalar.new("."), Scalar.new("_"), Scalar.new(" "), Scalar.new("-")), character)))
 }
-flow SafePath(path: File.Path) -> Bool { return Bool.all(List.map(File.Path.to_string(path), SafeCharacter)) }
+flow SafePath(path: File.Path) -> Bool { return All(List.map(File.Path.to_string(path), SafeCharacter)) }
 flow UnambiguousCharacter(character: Scalar) -> Bool {
-    return Bool.all(List.new(Bool.not(Range.contains(Range.new(Scalar.new("\u0000"), Scalar.new("\u001f"), true, true), character)), Bool.not(Scalar.eq(character, Scalar.new("\u007f"))), Bool.not(Scalar.eq(character, Scalar.new("\\")))))
+    return All(List.new(Not(Range.contains(Range.new(Scalar.new("\u0000"), Scalar.new("\u001f"), true, true), character)), Not(Scalar.eq(character, Scalar.new("\u007f"))), Not(Scalar.eq(character, Scalar.new("\\")))))
 }
-flow UnambiguousPath(entry: File.Entry) -> Bool { return Bool.all(List.map(File.Path.to_string(entry.path), UnambiguousCharacter)) }
+flow UnambiguousPath(entry: File.Entry) -> Bool { return All(List.map(File.Path.to_string(entry.path), UnambiguousCharacter)) }
 flow MaskMatches(name: String, mask: Glob) -> Bool { return Glob.matches(mask, name) }
-flow CompileMasks(previous: List<Glob>, mask: String) -> List<Glob>! { return List.concat(previous, List.new(Glob.new(mask))) }
+flow CompileMasks(previous: List<Glob>, mask: String) -> List<Glob>! { return ConcatGlobs(previous, List.new(Glob.new(mask))) }
 flow StaleCandidate(uid: Int, cutoff: Int, masks: List<Glob>, entry: File.Entry) -> Bool {
-    return Bool.all(List.new(SafePath(entry.path), Bool.not(String.starts_with(entry.name, ".")), Bool.any(List.map(masks, entry.name, MaskMatches)), String.eq(entry.kind, "regular"), Math.eq(entry.owner_uid, uid), Math.eq(entry.link_count, 1), OldFile(cutoff, entry)))
+    return All(List.new(SafePath(entry.path), Not(String.starts_with(entry.name, ".")), Any(List.map(masks, entry.name, MaskMatches)), String.eq(entry.kind, "regular"), Math.eq(entry.owner_uid, uid), Math.eq(entry.link_count, 1), OldFile(cutoff, entry)))
 }
 flow StaleGuard(uid: Int, cutoff: Int, masks: List<Glob>, before: File.Entry, now: File.Entry) -> Bool {
-    return Bool.all(List.new(SameFile(before, now), StaleCandidate(uid, cutoff, masks, now)))
+    return All(List.new(SameFile(before, now), StaleCandidate(uid, cutoff, masks, now)))
 }
 flow GatewayDigit(valid: Bool, character: Scalar) -> Bool {
     return Match.new(valid, true: Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), character), _: false)
@@ -643,15 +743,14 @@ flow GatewayName(name: String) -> Bool! {
     return Match.new(Math.gte(String.length(name), 16), true: GatewayDigits(name), _: false)
 }
 flow GatewayCandidate(cutoff: Int, mask: Glob, entry: File.Entry) -> Bool! {
-    return Bool.all(List.new(Glob.matches(mask, entry.name), GatewayName(entry.name), String.eq(entry.kind, "regular"), Math.lt(entry.modified_unix_ns, cutoff)))
+    return All(List.new(Glob.matches(mask, entry.name), GatewayName(entry.name), String.eq(entry.kind, "regular"), Math.lt(entry.modified_unix_ns, cutoff)))
 }
 flow GatewayGuard(before: File.Entry, now: File.Entry) -> Bool {
-    return Bool.all(List.new(Math.eq(before.device, now.device), Math.eq(before.inode, now.inode), String.eq(before.kind, now.kind), Math.eq(before.size_bytes, now.size_bytes), Math.eq(before.modified_unix_ns, now.modified_unix_ns)))
+    return All(List.new(Math.eq(before.device, now.device), Math.eq(before.inode, now.inode), String.eq(before.kind, now.kind), Math.eq(before.size_bytes, now.size_bytes), Math.eq(before.modified_unix_ns, now.modified_unix_ns)))
 }
 flow FileChanged(error: Error) -> Record{removed: Bool!} {
     return Record.new(removed: Match.new(error.kind, "File.EntryChanged": false, _: error))
 }
-flow NotRemoved() -> Record{removed: Bool!} { return Record.new(removed: false) }
 flow CommitStale(uid: Int, cutoff: Int, masks: List<Glob>, entry: File.Entry) -> Record{removed: Bool!} onError FileChanged {
     target = File.Remove.checked(List.new(entry), uid, cutoff, masks, StaleGuard)
     commit target
@@ -663,34 +762,55 @@ flow CommitGateway(entry: File.Entry) -> Record{removed: Bool!} onError FileChan
     return Record.new(removed: true)
 }
 flow PrintCandidate(previous: Bool, entry: File.Entry) -> Bool! { return Print(String.concat("CANDIDATE ", File.Path.to_string(entry.path))) }
+flow RequireOpenFiles(condition: Bool, message: String) -> Bool! {
+    return Match.new(condition, true: true, _: Error.new("Cleanup.OpenFiles", message, Record.new()))
+}
+flow RemovalSkipped(removed: Bool, entry: File.Entry) -> Bool { return Not(removed) }
 flow LsofStatus(result: Process.Result) -> Bool! {
     code = Process.Termination.exit_code(result.termination)
-    return Match.new(List.contains(List.new(0, 1), code), true: true, _: Error.new("Cleanup.OpenFiles", "Cannot verify open files; stopping category", Record.new()))
+    return Match.new(IntMember(List.new(0, 1), code), true: true, _: Error.new("Cleanup.OpenFiles", "Cannot verify open files; stopping category", Record.new()))
+}
+flow ProbeFieldText(field: Bytes) -> String! {
+    clean = Match.new(Bytes.starts_with(field, Bytes.new("\n")), true: Bytes.slice(field, 1, Bytes.length(field)), _: field)
+    text = UTF8.String.new(clean)
+    valid = All(List.new(Math.gt(String.length(text), 1), Math.eq(List.length(String.split(text, "\n")), 1), Math.eq(List.length(String.split(text, "\r")), 1), Any(List.new(String.starts_with(text, "p"), String.starts_with(text, "f"), String.starts_with(text, "n")))))
+    checked = RequireOpenFiles(valid, "Malformed open-file field; stopping category")
+    return text
+}
+flow ProbePIDValid(field: String) -> Bool! {
+    return Match.new(String.starts_with(field, "p"), true: List.fold(String.slice(field, 1, String.length(field)), true, GatewayDigit), _: true)
 }
 flow FieldName(field: Bytes) -> List<File.Path>! {
-    clean = Bytes.trim_start(field, Bytes.new("\n"))
-    return Match.new(Bytes.starts_with(clean, Bytes.new("n")), true: List.new(File.Path.new(UTF8.String.new(Bytes.slice(clean, 1, Bytes.length(clean))))), _: List.new())
+    text = ProbeFieldText(field)
+    checked = RequireOpenFiles(ProbePIDValid(text), "Malformed open-file process identifier; stopping category")
+    return Match.new(String.starts_with(text, "n"), true: List.new(File.Path.new(String.slice(text, 1, String.length(text)))), _: List.new())
 }
-flow ParseNames(previous: List<File.Path>, field: Bytes) -> List<File.Path>! { return List.concat(previous, FieldName(field)) }
+flow ParseNames(previous: List<File.Path>, field: Bytes) -> List<File.Path>! { return ConcatPaths(previous, FieldName(field)) }
 flow BatchNames(result: Process.Result) -> List<File.Path>! {
     accepted = LsofStatus(result)
-    checked = Match.new(Math.eq(Bytes.length(result.stderr), 0), true: true, _: Error.new("Cleanup.OpenFiles", "Cannot verify open files; stopping category", Record.new()))
-    return Flow.fold(Bytes.split(result.stdout, Bytes.new("\u0000")), List.new(), ParseNames)
+    checked = RequireOpenFiles(Math.eq(Bytes.length(result.stderr), 0), "Cannot verify open files; stopping category")
+    fields = Bytes.split(result.stdout, Bytes.new("\u0000"))
+    last = Math.sub(List.length(fields), 1)
+    trailer = UTF8.String.new(List.at(fields, last))
+    framed = RequireOpenFiles(Any(List.new(String.eq(trailer, ""), String.eq(trailer, "\n"))), "Malformed open-file framing; stopping category")
+    names = Flow.fold(List.slice(fields, 0, last), List.new(), ParseNames)
+    named = RequireOpenFiles(Any(List.new(Math.eq(Bytes.length(result.stdout), 0), Math.gt(List.length(names), 0))), "Open-file output has no file names; stopping category")
+    return names
 }
-flow KnownOpen(batch: List<File.Path>, path: File.Path) -> Bool { return List.contains(batch, path) }
-flow ProbeBatch(context: Process.Context, strict: Bool, opened: List<File.Path>, batch: List<File.Path>) -> List<File.Path>! {
+flow KnownOpen(batch: List<File.Path>, path: File.Path) -> Bool { return PathMember(batch, path) }
+flow ProbeBatch(context: Process.Context, opened: List<File.Path>, batch: List<File.Path>) -> List<File.Path>! {
     executable = Lsof(context)
-    result = Run(context, executable, List.concat(List.new("-F0n", "--"), List.map(batch, PathString)), "capture", 30)
+    result = Run(context, executable, ConcatStrings(List.new("-F0n", "--"), List.map(batch, PathString)), "capture", 30)
     names = BatchNames(result)
-    valid = Match.new(strict, true: Bool.all(List.map(names, batch, KnownOpen)), _: true)
-    checked = Match.new(valid, true: true, _: Error.new("Cleanup.OpenFiles", "Ambiguous open-file result; stopping category", Record.new()))
-    return List.unique(List.concat(opened, names))
+    valid = All(List.map(names, batch, KnownOpen))
+    checked = RequireOpenFiles(valid, "Ambiguous open-file result; stopping category")
+    return UniquePaths(ConcatPaths(opened, names))
 }
-flow OpenedPaths(context: Process.Context, strict: Bool, paths: List<File.Path>) -> List<File.Path>! {
-    return Flow.fold(List.chunks(paths, 100), List.new(), context, strict, ProbeBatch)
+flow OpenedPaths(context: Process.Context, paths: List<File.Path>) -> List<File.Path>! {
+    return Flow.fold(PathChunks(paths, 100), List.new(), context, ProbeBatch)
 }
 flow RemoveStaleStep(uid: Int, cutoff: Int, masks: List<Glob>, opened: List<File.Path>, deleted: Int, entry: File.Entry) -> Int! {
-    selector_1 = List.contains(opened, entry.path)
+    selector_1 = PathMember(opened, entry.path)
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
@@ -703,52 +823,31 @@ flow SkipStaleOpen(deleted: Int, entry: File.Entry) -> Int! {
     return deleted
 }
 flow RemoveStaleClosed(uid: Int, cutoff: Int, masks: List<Glob>, deleted: Int, entry: File.Entry) -> Int! {
-    current = File.Entry.observe(entry)
-    selector_1 = List.length(current)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, deleted, RemoveStaleClosedChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, current, cutoff, deleted, entry, masks, uid, RemoveStaleClosedChoice1Branch2)
-    return choice_1_result_2
-}
-flow RemoveStalePresent(uid: Int, cutoff: Int, masks: List<Glob>, deleted: Int, entry: File.Entry, current: File.Entry) -> Int! {
-    selector_1 = StaleGuard(uid, cutoff, masks, entry, current)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), NotRemoved(), cutoff, entry, masks, uid, RemoveStalePresentChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, RemoveStalePresentChoice1Branch2)
-    outcome = choice_1_result_2
+    outcome = CommitStale(uid, cutoff, masks, entry)
     removed = outcome.removed
-    selector_2 = removed
-    choice_2 = Match.new(selector_2,
-        true: 1,
-        _: 2)
-    choice_2_result_1 = Flow.fold(List.filter(List.new(choice_2), 1, SelectedChoice), 0, deleted, RemoveStalePresentChoice2Branch1)
-    choice_2_result_2 = Flow.fold(List.filter(List.new(choice_2), 2, SelectedChoice), choice_2_result_1, deleted, entry, RemoveStalePresentChoice2Branch2)
-    return choice_2_result_2
+    count = Match.new(removed, true: Math.add(deleted, 1), _: deleted)
+    return Flow.fold(List.filter(List.new(entry), removed, RemovalSkipped), count, ChangedStale)
 }
+
+
+
 flow ChangedStale(deleted: Int, entry: File.Entry) -> Int! {
     printed = Print(String.concat("SKIP changed file: ", File.Path.to_string(entry.path)))
     return deleted
 }
 flow ApplyStale(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, cutoff: Int, masks: List<Glob>, candidates: List<File.Entry>) -> Int! {
-    opened = OpenedPaths(context.process, false, List.map(candidates, EntryPath))
+    opened = OpenedPaths(context.process, List.map(candidates, EntryPath))
     deleted = Flow.fold(candidates, 0, context.uid, cutoff, masks, opened, RemoveStaleStep)
-    printed = Print(String.format("Deleted {deleted} files from {folder}", Record.new(deleted: deleted, folder: File.Path.to_string(folder))))
+    printed = Print(String.concat("Deleted ", Int.to_string(deleted), " files from ", PathText(folder)))
     return 0
 }
-flow StaleFilesPresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, mask_text: List<String>, days: Int) -> Int! {
-    canonical = Require(File.Path.eq(File.Path.resolve(folder), folder), String.concat("Refusing symlinked cleanup directory: ", PathText(folder)))
-    directory = File.Directory.open(folder)
+flow StaleFilesPresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, mask_text: List<String>, days: Int, previous: Int, scan: File.Scan) -> Int! {
     cutoff = Cutoff(days)
     masks = Flow.fold(mask_text, List.new(), CompileMasks)
-    scan = File.Directory.scan(directory)
     candidates = List.filter(scan.entries, context.uid, cutoff, masks, StaleCandidate)
-    printed = Print(String.format("{folder}: {count} eligible files, {bytes:,} bytes; age > {days} days", Record.new(folder: File.Path.to_string(folder), count: List.length(candidates), bytes: Math.sum(List.map(candidates, EntryBytes)), days: days)))
+    printed = Print(String.concat(PathText(folder), ": ", Int.to_string(List.length(candidates)), " eligible files, ", Int.to_string(Math.sum(List.map(candidates, EntryBytes))), " bytes; age > ", Int.to_string(days), " days"))
     listed = Flow.fold(candidates, true, PrintCandidate)
-    selector_1 = Bool.all(List.new(context.apply, Math.gt(List.length(candidates), 0)))
+    selector_1 = All(List.new(context.apply, Math.gt(List.length(candidates), 0)))
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
@@ -756,15 +855,21 @@ flow StaleFilesPresent(context: Record{apply: Bool, home: File.Path, uid: Int, p
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, StaleFilesPresentChoice1Branch2)
     return choice_1_result_2
 }
-flow StaleFiles(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, masks: List<String>, days: Int) -> Int! {
-    selector_1 = File.Path.exists(folder)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, context, days, folder, masks, StaleFilesChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, folder, StaleFilesChoice1Branch2)
-    return choice_1_result_2
+flow AbsentScan(error: Error) -> Record{scans: List<File.Scan>!} {
+    return Record.new(scans: Match.new(error.kind, "File.DirectoryAbsent": List.new(), _: error))
 }
+flow OptionalScan(folder: File.Path) -> Record{scans: List<File.Scan>!} onError AbsentScan {
+    scan = File.scan(folder)
+    return Record.new(scans: List.new(scan))
+}
+flow SkipAbsentScan(folder: File.Path, previous: Int, selected: Int) -> Int! { return SkipAbsentDirectory(folder) }
+flow StaleFiles(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, masks: List<String>, days: Int) -> Int! {
+    observation = OptionalScan(folder)
+    scans = observation.scans
+    absent = Flow.fold(List.filter(List.new(List.length(scans)), 0, SelectedChoice), 0, folder, SkipAbsentScan)
+    return Flow.fold(scans, absent, context, folder, masks, days, StaleFilesPresent)
+}
+
 flow SkipAbsentDirectory(folder: File.Path) -> Int! {
     printed = Print(String.concat("SKIP absent directory: ", File.Path.to_string(folder)))
     return 0
@@ -772,15 +877,15 @@ flow SkipAbsentDirectory(folder: File.Path) -> Int! {
 flow GatewayLine(line: String) -> List<File.Path>! {
     return Match.new(String.starts_with(line, "n"), true: List.new(File.Path.new(String.slice(line, 1, String.length(line)))), _: List.new())
 }
-flow GatewayLineStep(paths: List<File.Path>, line: String) -> List<File.Path>! { return List.concat(paths, GatewayLine(line)) }
+flow GatewayLineStep(paths: List<File.Path>, line: String) -> List<File.Path>! { return ConcatPaths(paths, GatewayLine(line)) }
 flow GatewayOpened(context: Process.Context, folder: File.Path) -> List<File.Path>! {
     result = Run(context, Lsof(context), List.new("-Fn", "+D", File.Path.to_string(folder)), "capture", 30)
     accepted = LsofStatus(result)
-    checked = Match.new(String.eq(String.trim(UTF8.String.new(result.stderr)), ""), true: true, _: Error.new("Cleanup.OpenFiles", String.concat("Cannot verify open Gateway logs: ", String.trim(UTF8.String.new(result.stderr))), Record.new()))
+    checked = RequireOpenFiles(String.eq(String.trim(UTF8.String.new(result.stderr)), ""), String.concat("Cannot verify open Gateway logs: ", String.trim(UTF8.String.new(result.stderr))))
     return Flow.fold(String.lines(UTF8.String.new(result.stdout)), List.new(), GatewayLineStep)
 }
 flow GatewayRemove(opened: List<File.Path>, deleted: Int, entry: File.Entry) -> Int! {
-    selector_1 = List.contains(opened, entry.path)
+    selector_1 = PathMember(opened, entry.path)
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
@@ -793,32 +898,14 @@ flow GatewaySkipOpen(deleted: Int, entry: File.Entry) -> Int! {
     return deleted
 }
 flow GatewayRemoveClosed(deleted: Int, entry: File.Entry) -> Int! {
-    current = File.Entry.observe(entry)
-    selector_1 = List.length(current)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, deleted, GatewayRemoveClosedChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, current, deleted, entry, GatewayRemoveClosedChoice1Branch2)
-    return choice_1_result_2
-}
-flow GatewayRemovePresent(deleted: Int, entry: File.Entry, current: File.Entry) -> Int! {
-    selector_1 = GatewayGuard(entry, current)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), NotRemoved(), entry, GatewayRemovePresentChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, GatewayRemovePresentChoice1Branch2)
-    outcome = choice_1_result_2
+    outcome = CommitGateway(entry)
     removed = outcome.removed
-    selector_2 = removed
-    choice_2 = Match.new(selector_2,
-        true: 1,
-        _: 2)
-    choice_2_result_1 = Flow.fold(List.filter(List.new(choice_2), 1, SelectedChoice), 0, deleted, GatewayRemovePresentChoice2Branch1)
-    choice_2_result_2 = Flow.fold(List.filter(List.new(choice_2), 2, SelectedChoice), choice_2_result_1, deleted, entry, GatewayRemovePresentChoice2Branch2)
-    return choice_2_result_2
+    count = Match.new(removed, true: Math.add(deleted, 1), _: deleted)
+    return Flow.fold(List.filter(List.new(entry), removed, RemovalSkipped), count, GatewayChanged)
 }
+
+
+
 flow GatewayChanged(deleted: Int, entry: File.Entry) -> Int! {
     printed = Print(String.concat("SKIP changed log: ", File.Path.to_string(entry.path)))
     return deleted
@@ -826,17 +913,15 @@ flow GatewayChanged(deleted: Int, entry: File.Entry) -> Int! {
 flow GatewayApply(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, candidates: List<File.Entry>) -> Int! {
     opened = GatewayOpened(context.process, folder)
     deleted = Flow.fold(candidates, 0, opened, GatewayRemove)
-    printed = Print(String.format("Deleted {deleted} old Gateway logs", Record.new(deleted: deleted)))
+    printed = Print(String.concat("Deleted ", Int.to_string(deleted), " old Gateway logs"))
     return 0
 }
-flow GatewayPresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
-    valid = Require(Bool.all(List.new(File.Path.eq(File.Path.resolve(folder), folder), File.Path.is_directory(folder))), String.concat("Refusing symlinked Gateway log path: ", PathText(folder)))
-    directory = File.Directory.open(folder)
+flow GatewayListed(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int, entries: List<File.Entry>, previous: Int, selected: Int) -> Int! {
     cutoff = Cutoff(days)
     mask = Glob.new("deployment-*.log")
-    candidates = List.filter(File.Directory.list(directory), cutoff, mask, GatewayCandidate)
-    printed = Print(String.format("Gateway: {count} logs older than {days} days; {bytes:,} bytes; directory {folder}", Record.new(count: List.length(candidates), days: days, bytes: Math.sum(List.map(candidates, EntryBytes)), folder: File.Path.to_string(folder))))
-    selector_1 = Bool.all(List.new(context.apply, Math.gt(List.length(candidates), 0)))
+    candidates = List.filter(entries, cutoff, mask, GatewayCandidate)
+    printed = Print(String.concat("Gateway: ", Int.to_string(List.length(candidates)), " logs older than ", Int.to_string(days), " days; ", Int.to_string(Math.sum(List.map(candidates, EntryBytes))), " bytes; directory ", PathText(folder)))
+    selector_1 = All(List.new(context.apply, Math.gt(List.length(candidates), 0)))
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
@@ -844,28 +929,45 @@ flow GatewayPresent(context: Record{apply: Bool, home: File.Path, uid: Int, proc
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, GatewayPresentChoice1Branch2)
     return choice_1_result_2
 }
+flow AbsentListing(error: Error) -> Record{present: Bool, entries: List<File.Entry>!} {
+    return Record.new(present: false, entries: Match.new(error.kind, "File.DirectoryAbsent": List.new(), _: error))
+}
+flow OptionalListing(folder: File.Path) -> Record{present: Bool, entries: List<File.Entry>!} onError AbsentListing {
+    entries = File.list(folder)
+    return Record.new(present: true, entries: entries)
+}
+flow GatewaySkipAbsent(previous: Int, selected: Int) -> Int! { return GatewayAbsent() }
+flow GatewayPresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
+    observation = OptionalListing(folder)
+    entries = observation.entries
+    choice = Match.new(observation.present, true: 1, _: 2)
+    listed = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context, folder, days, entries, GatewayListed)
+    return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), listed, GatewaySkipAbsent)
+}
 flow GatewayLogs(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, days: Int) -> Int! {
     folder = File.Path.join(context.home, "Library/Caches/mprlab-gateway/deployments")
-    selector_1 = File.Path.exists(folder)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, context, days, folder, GatewayLogsChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, GatewayLogsChoice1Branch2)
-    return choice_1_result_2
+    return GatewayPresent(context, folder, days)
 }
+
 flow GatewayAbsent() -> Int! { printed = Print("SKIP Gateway logs: directory absent"); return 0 }
-flow CacheTarget(home: File.Path, relative: String) -> File.Path { return File.Path.join(home, relative) }
-flow CacheTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path> {
-    return List.map(List.new("Library/Caches/staticcheck", "Library/Caches/gopls", "Library/Caches/goimports", "Library/Caches/Homebrew/downloads", ".cache/gh"), context.home, CacheTarget)
+flow CacheTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path>! {
+    return Flow.fold(List.new("Library/Caches/staticcheck", "Library/Caches/gopls", "Library/Caches/goimports", "Library/Caches/Homebrew/downloads", ".cache/gh"), List.new(), context.home, ReportPathStep)
 }
-flow TempRoots(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path>! {
-    executable = Process.Executable.resolve(context.process, "/usr/bin/getconf")
+flow TemporaryPath(text: String, prefix: String) -> File.Path! {
+    canonical = Match.new(String.starts_with(text, "/var/folders/"), true: String.concat("/private", text), _: text)
+    path = File.Path.new(canonical)
+    normalized = PathText(path)
+    checked = Require(All(List.new(Math.eq(List.length(String.lines(text)), 1), String.starts_with(normalized, prefix), String.eq(File.Path.name(path), "T"))), "Cannot validate macOS per-user temporary directory")
+    return path
+}
+flow TempRoots(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path) -> List<File.Path>! {
+    executable = Process.Executable.new(getconf)
     result = RequireSuccess(Run(context.process, executable, List.new("DARWIN_USER_TEMP_DIR"), "capture", 1800))
-    user_temp = File.Path.resolve(File.Path.new(String.trim(UTF8.String.new(result.stdout))))
-    directory = File.Directory.open(user_temp)
-    valid = Bool.all(List.new(String.starts_with(File.Path.to_string(user_temp), "/private/var/folders/"), String.eq(File.Path.name(user_temp), "T"), Math.eq(directory.owner_uid, context.uid)))
-    return Match.new(valid, true: List.new(File.Path.new("/private/tmp"), user_temp), _: Error.new("Cleanup.TemporaryRoot", "Cannot validate macOS per-user temporary directory", Record.new()))
+    checked = Require(Math.eq(Bytes.length(result.stderr), 0), "Temporary directory discovery wrote to stderr")
+    user_temp = TemporaryPath(String.trim(UTF8.String.new(result.stdout)), prefix)
+    directory = File.directory(user_temp)
+    owned = Require(Math.eq(directory.owner_uid, context.uid), "Cannot validate macOS per-user temporary directory owner")
+    return UniquePaths(List.new(shared, user_temp))
 }
 
 flow CacheState(count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>} {
@@ -875,24 +977,31 @@ flow CacheErrors(state: Record{count: Int, eligible_bytes: Int, deleted: Int, de
     return CacheState(state.count, state.eligible_bytes, state.deleted, state.deleted_bytes, state.skipped, errors)
 }
 flow CacheCandidate(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Bool {
-    return Bool.all(List.new(String.eq(entry.kind, "regular"), Math.eq(entry.owner_uid, uid), Math.eq(entry.link_count, 1), Math.eq(entry.device, device), OldFile(cutoff, entry)))
+    return All(List.new(String.eq(entry.kind, "regular"), Math.eq(entry.owner_uid, uid), Math.eq(entry.link_count, 1), Math.eq(entry.device, device), OldFile(cutoff, entry)))
 }
 flow CacheChild(uid: Int, device: Int, entry: File.Entry) -> Bool {
-    return Bool.all(List.new(String.eq(entry.kind, "directory"), Math.eq(entry.owner_uid, uid), Math.eq(entry.device, device)))
+    return All(List.new(String.eq(entry.kind, "directory"), Math.eq(entry.owner_uid, uid), Math.eq(entry.device, device)))
 }
 flow CacheGuard(uid: Int, device: Int, cutoff: Int, original: File.Entry, current: File.Entry) -> Bool {
-    return Bool.all(List.new(SameFile(original, current), CacheCandidate(uid, device, cutoff, current)))
+    return All(List.new(SameFile(original, current), CacheCandidate(uid, device, cutoff, current)))
+}
+flow RequireCacheDirectory(condition: Bool, directory: File.Directory) -> Bool! {
+    return Match.new(condition, true: true, _: Error.new("Cleanup.CacheDirectory", String.concat("Cache directory owner/device changed: ", File.Path.to_string(directory.path)), Record.new()))
+}
+flow RequireCacheOwner(directory: File.Directory, uid: Int) -> Bool! {
+    return Match.new(Math.eq(directory.owner_uid, uid), true: true, _: Error.new("Cleanup.CacheOwner", String.concat("Refusing cache owned by another user: ", File.Path.to_string(directory.path)), Record.new()))
 }
 flow CacheObserve(uid: Int, device: Int, directory: File.Directory) -> File.Scan! {
-    current = File.Directory.refresh(directory)
-    valid = Bool.all(List.new(SameDirectory(directory, current), Math.eq(current.owner_uid, uid), Math.eq(current.device, device)))
-    checked = Match.new(valid, true: true, _: Error.new("Cleanup.CacheDirectory", String.concat("Cache directory owner/device changed: ", File.Path.to_string(directory.path)), Record.new()))
-    return File.Directory.scan(current)
+    scan = File.Directory.scan(directory)
+    current = scan.directory
+    valid = All(List.new(SameDirectory(directory, current), Math.eq(current.owner_uid, uid), Math.eq(current.device, device)))
+    checked = RequireCacheDirectory(valid, directory)
+    return scan
 }
 flow CacheProbe(context: Process.Context, directory: File.Directory, paths: List<File.Path>) -> List<File.Path>! {
-    opened = OpenedPaths(context, true, paths)
+    opened = OpenedPaths(context, paths)
     current = File.Directory.refresh(directory)
-    checked = Match.new(SameDirectory(directory, current), true: true, _: Error.new("Cleanup.CacheDirectory", String.concat("Cache directory changed: ", File.Path.to_string(directory.path)), Record.new()))
+    checked = RequireCacheDirectory(All(List.new(SameDirectory(directory, current), Math.eq(directory.owner_uid, current.owner_uid))), directory)
     return opened
 }
 flow CacheCommit(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Record{removed: Bool!} onError FileChanged {
@@ -901,23 +1010,7 @@ flow CacheCommit(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Recor
     return Record.new(removed: true)
 }
 flow CacheRemove(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Bool! {
-    current = File.Entry.observe(entry)
-    selector_1 = List.length(current)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, CacheRemoveChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, current, cutoff, device, entry, uid, CacheRemoveChoice1Branch2)
-    return choice_1_result_2
-}
-flow CacheRemovePresent(uid: Int, device: Int, cutoff: Int, entry: File.Entry, current: File.Entry) -> Bool! {
-    selector_1 = CacheGuard(uid, device, cutoff, entry, current)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), NotRemoved(), cutoff, device, entry, uid, CacheRemovePresentChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, CacheRemovePresentChoice1Branch2)
-    result = choice_1_result_2
+    result = CacheCommit(uid, device, cutoff, entry)
     return result.removed
 }
 flow CacheRemoveStep(uid: Int, device: Int, cutoff: Int, opened: List<File.Path>, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
@@ -930,7 +1023,7 @@ flow CacheRemoveStep(uid: Int, device: Int, cutoff: Int, opened: List<File.Path>
     return choice_1_result_2
 }
 flow CacheRemoveActive(uid: Int, device: Int, cutoff: Int, opened: List<File.Path>, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
-    selector_1 = List.contains(opened, entry.path)
+    selector_1 = PathMember(opened, entry.path)
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
@@ -945,15 +1038,15 @@ flow CacheRemoveClosed(uid: Int, device: Int, cutoff: Int, state: Record{count: 
 flow CacheRemoved(state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry, removed: Bool) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>} {
     return Match.new(removed, true: CacheState(state.count, state.eligible_bytes, Math.add(state.deleted, 1), Math.add(state.deleted_bytes, entry.allocated_bytes), state.skipped, state.errors), _: CacheState(state.count, state.eligible_bytes, state.deleted, state.deleted_bytes, Math.add(state.skipped, 1), state.errors))
 }
-flow ChildAbsent(error: Error) -> Record{directories: List<File.Directory>!} {
+flow AbsentDirectory(error: Error) -> Record{directories: List<File.Directory>!} {
     return Record.new(directories: Match.new(error.kind, "File.DirectoryAbsent": List.new(), _: error))
 }
-flow CacheOpenChild(directory: File.Directory, entry: File.Entry) -> Record{directories: List<File.Directory>!} onError ChildAbsent {
+flow OptionalChild(directory: File.Directory, entry: File.Entry) -> Record{directories: List<File.Directory>!} onError AbsentDirectory {
     child = File.Directory.child(directory, entry)
     return Record.new(directories: List.new(child))
 }
 flow CacheChildDirectories(directory: File.Directory, entry: File.Entry) -> List<File.Directory>! {
-    result = CacheOpenChild(directory, entry)
+    result = OptionalChild(directory, entry)
     return result.directories
 }
 flow CacheProbeAndRemove(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, directory: File.Directory, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, candidates: List<File.Entry>) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
@@ -967,7 +1060,7 @@ flow CacheProbeAndRemove(context: Record{apply: Bool, home: File.Path, uid: Int,
     return choice_1_result_2
 }
 flow CacheSummary(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}) -> Int! {
-    printed = Print(String.format("{folder}: {count:,} stale files / {eligible} allocated; deleted {deleted:,} / {deleted_size}; skipped {skipped:,}", Record.new(folder: File.Path.to_string(folder), count: state.count, eligible: HumanSize(state.eligible_bytes), deleted: state.deleted, deleted_size: HumanSize(state.deleted_bytes), skipped: state.skipped)))
+    printed = Print(String.concat(File.Path.to_string(folder), ": ", Int.to_string(state.count), " stale files / ", Int.to_string(state.eligible_bytes), " allocated bytes; deleted ", Int.to_string(state.deleted), " / ", Int.to_string(state.deleted_bytes), " allocated bytes; skipped ", Int.to_string(state.skipped)))
     selector_1 = context.apply
     choice_1 = Match.new(selector_1,
         true: 1,
@@ -975,54 +1068,53 @@ flow CacheSummary(context: Record{apply: Bool, home: File.Path, uid: Int, proces
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, CacheSummaryChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, CacheSummaryChoice1Branch2)
     preview = choice_1_result_2
-    return Match.new(List.length(state.errors), 0: state.eligible_bytes, _: List.at(state.errors, 0))
+    return Match.new(List.length(state.errors), 0: state.eligible_bytes, _: CacheFailure(List.at(state.errors, 0)))
 }
-flow StaleCachePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
-    valid = Require(Bool.all(List.new(File.Path.eq(File.Path.resolve(folder), folder), File.Path.is_directory(folder))), String.concat("Refusing symlinked/non-directory cache: ", PathText(folder)))
-    directory = File.Directory.open(folder)
-    checked = Match.new(Math.eq(directory.owner_uid, context.uid), true: true, _: Error.new("Cleanup.CacheOwner", String.concat("Refusing cache owned by another user: ", File.Path.to_string(folder)), Record.new()))
+flow CacheFailure(error: Error) -> Int! { return error }
+flow StaleCachePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int, previous: Int, directory: File.Directory) -> Int! {
+    checked = RequireCacheOwner(directory, context.uid)
     cutoff = Cutoff(days)
     initial = CacheState(0, 0, 0, 0, 0, List.new())
     result = CacheWalk(context, directory.device, cutoff, directory, initial)
     return CacheSummary(context, folder, result)
 }
 flow StaleCache(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
-    absent = Bool.all(List.new(Bool.not(File.Path.exists(folder)), Bool.not(File.Path.is_symlink(folder))))
-    selector_1 = absent
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, folder, StaleCacheChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, days, folder, StaleCacheChoice1Branch2)
-    return choice_1_result_2
+    observation = OptionalDirectory(folder)
+    directories = observation.directories
+    absent = Flow.fold(List.filter(List.new(List.length(directories)), 0, SelectedChoice), 0, folder, StaleCacheChoice1Branch1)
+    return Flow.fold(directories, absent, context, folder, days, StaleCachePresent)
+}
+flow OptionalDirectory(folder: File.Path) -> Record{directories: List<File.Directory>!} onError AbsentDirectory {
+    directory = File.directory(folder)
+    return Record.new(directories: List.new(directory))
 }
 flow SkipAbsentCache(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP absent cache: ", File.Path.to_string(folder))); return 0 }
 flow TreeDescend(uid: Int, device: Int, entry: File.Entry) -> Bool {
-    return Bool.all(List.new(String.eq(entry.kind, "directory"), Math.eq(entry.owner_uid, uid), Math.eq(entry.device, device)))
+    return All(List.new(String.eq(entry.kind, "directory"), Math.eq(entry.owner_uid, uid), Math.eq(entry.device, device)))
 }
 flow TreeSupported(uid: Int, device: Int, cutoff: Int, row: Record{relative: String, entry: File.Entry}) -> Bool {
     entry = row.entry
-    supported = List.contains(List.new("directory", "regular", "symlink"), entry.kind)
+    supported = StringMember(List.new("directory", "regular", "symlink"), entry.kind)
     links = Match.new(entry.kind, "directory": true, _: Math.eq(entry.link_count, 1))
-    old = Match.new(entry.kind, "directory": Bool.all(List.new(Math.lt(entry.modified_unix_ns, cutoff), Math.lt(entry.changed_unix_ns, cutoff))), _: OldFile(cutoff, entry))
-    return Bool.all(List.new(supported, Math.eq(entry.owner_uid, uid), Math.eq(entry.device, device), links, old))
+    old = Match.new(entry.kind, "directory": All(List.new(Math.lt(entry.modified_unix_ns, cutoff), Math.lt(entry.changed_unix_ns, cutoff))), _: OldFile(cutoff, entry))
+    return All(List.new(supported, Math.eq(entry.owner_uid, uid), Math.eq(entry.device, device), links, old))
 }
 flow TreeAllocation(row: Record{relative: String, entry: File.Entry}) -> Int { return row.entry.allocated_bytes }
 flow SameTreeRow(before: Record{relative: String, entry: File.Entry}, after: Record{relative: String, entry: File.Entry}) -> Bool {
     original = before.entry
     current = after.entry
     accessed = Match.new(original.kind, "directory": true, _: Math.eq(original.accessed_unix_ns, current.accessed_unix_ns))
-    return Bool.all(List.new(String.eq(before.relative, after.relative), Math.eq(original.device, current.device), Math.eq(original.inode, current.inode), String.eq(original.kind, current.kind), Math.eq(original.owner_uid, current.owner_uid), Math.eq(original.link_count, current.link_count), Math.eq(original.size_bytes, current.size_bytes), Math.eq(original.modified_unix_ns, current.modified_unix_ns), Math.eq(original.changed_unix_ns, current.changed_unix_ns), accessed))
+    return All(List.new(String.eq(before.relative, after.relative), Math.eq(original.device, current.device), Math.eq(original.inode, current.inode), String.eq(original.kind, current.kind), Math.eq(original.owner_uid, current.owner_uid), Math.eq(original.link_count, current.link_count), Math.eq(original.size_bytes, current.size_bytes), Math.eq(original.allocated_bytes, current.allocated_bytes), Math.eq(original.modified_unix_ns, current.modified_unix_ns), Math.eq(original.changed_unix_ns, current.changed_unix_ns), accessed))
 }
-flow SameTree(before: File.Tree, after: File.Tree) -> Bool {
-    return Bool.all(List.new(Math.eq(List.length(before.entries), List.length(after.entries)), List.equal_by(before.entries, after.entries, SameTreeRow)))
+flow SameTree(before: File.Tree, after: File.Tree) -> Bool! {
+    return All(List.new(before.complete, after.complete, Math.eq(List.length(before.entries), List.length(after.entries)), TreeRowsEqual(before.entries, after.entries)))
 }
 flow BuildParent(uid: Int, parent: File.Directory) -> File.Directory! {
     current = File.Directory.refresh(parent)
-    return Match.new(Bool.all(List.new(SameDirectory(parent, current), Math.eq(current.owner_uid, uid))), true: current, _: Error.new("Cleanup.BuildParent", String.concat("Build parent changed: ", File.Path.to_string(parent.path)), Record.new()))
+    return Match.new(All(List.new(SameDirectory(parent, current), Math.eq(current.owner_uid, uid))), true: current, _: Error.new("Cleanup.BuildParent", String.concat("Build parent changed: ", File.Path.to_string(parent.path)), Record.new()))
 }
 flow BuildParentChanged(error: Error) -> Record{valid: Bool!} {
-    return Record.new(valid: Match.new(error.kind, "File.DirectoryChanged": false, "Cleanup.BuildParent": false, _: error))
+    return Record.new(valid: Match.new(error.kind, "File.DirectoryChanged": false, "File.DirectoryAbsent": false, "Cleanup.BuildParent": false, _: error))
 }
 flow TryBuildParent(uid: Int, parent: File.Directory) -> Record{valid: Bool!} onError BuildParentChanged {
     checked = BuildParent(uid, parent)
@@ -1031,31 +1123,42 @@ flow TryBuildParent(uid: Int, parent: File.Directory) -> Record{valid: Bool!} on
 flow BuildOpen(context: Process.Context, folder: File.Path) -> Bool! {
     result = Run(context, Lsof(context), List.new("-F0n", "+D", File.Path.to_string(folder)), "capture", 30)
     accepted = LsofStatus(result)
-    checked = Match.new(Math.eq(Bytes.length(result.stderr), 0), true: true, _: Error.new("Cleanup.OpenFiles", String.concat("Cannot verify open build tree: ", File.Path.to_string(folder)), Record.new()))
+    checked = RequireOpenFiles(Math.eq(Bytes.length(result.stderr), 0), String.concat("Cannot verify open build tree: ", File.Path.to_string(folder)))
     return Math.gt(Bytes.length(result.stdout), 0)
 }
 flow BuildSkipOpen(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP open build tree: ", File.Path.to_string(folder))); return 0 }
 flow BuildSkipChanged(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP changed build tree: ", File.Path.to_string(folder))); return 0 }
+flow BuildSnapshotChanged(error: Error) -> Record{trees: List<File.Tree>!} {
+    return Record.new(trees: Match.new(error.kind, "File.DirectoryChanged": List.new(), "File.DirectoryAbsent": List.new(), _: error))
+}
+flow TryBuildSnapshot(uid: Int, device: Int, parent: File.Directory, root: File.Entry) -> Record{trees: List<File.Tree>!} onError BuildSnapshotChanged {
+    tree = File.Tree.snapshot(parent, root, uid, device, TreeDescend)
+    return Record.new(trees: List.new(tree))
+}
 flow BuildRemove(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
-    after = File.Tree.snapshot(parent, root, context.uid, parent.device, TreeDescend)
+    observed = TryBuildSnapshot(context.uid, parent.device, parent, root)
+    trees = observed.trees
+    skipped = Flow.fold(List.filter(List.new(0), Math.eq(List.length(trees), 0), SelectedWhen), 0, folder, BuildRemoveChoice1Branch2)
+    return Flow.fold(trees, skipped, context, folder, parent, cutoff, before, size, BuildReobserved)
+}
+flow BuildReobserved(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, cutoff: Int, before: File.Tree, size: Int, previous: Int, after: File.Tree) -> Int! {
     parent_result = TryBuildParent(context.uid, parent)
     parent_valid = parent_result.valid
-    eligible = Bool.all(List.map(after.entries, context.uid, parent.device, cutoff, TreeSupported))
-    unchanged = Bool.all(List.new(parent_valid, eligible, SameTree(before, after)))
-    selector_1 = unchanged
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, folder, parent, root, size, BuildRemoveChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, folder, BuildRemoveChoice1Branch2)
-    return choice_1_result_2
+    eligible = All(List.map(after.entries, context.uid, parent.device, cutoff, TreeSupported))
+    unchanged = All(List.new(parent_valid, eligible, SameTree(before, after)))
+    choice = Match.new(unchanged, true: 1, _: 2)
+    removed = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context.uid, parent.device, cutoff, folder, before, size, BuildRemoveChoice1Branch1)
+    return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), removed, folder, BuildRemoveChoice1Branch2)
 }
-flow BuildCommit(folder: File.Path, parent: File.Directory, root: File.Entry, size: Int) -> Int! {
-    target = File.Tree.Remove.new(parent, root)
+flow SelectedWhen(selected: Bool, value: Int) -> Bool { return selected }
+
+flow BuildCommit(uid: Int, device: Int, cutoff: Int, folder: File.Path, before: File.Tree, size: Int) -> Int! {
+    target = File.Tree.Remove.checked(before, uid, device, cutoff, TreeSupported)
     commit target
-    printed = Print(String.format("Deleted whole build tree: {folder}; {size} observed allocation", Record.new(folder: File.Path.to_string(folder), size: HumanSize(size))))
+    printed = Print(String.concat("Deleted whole build tree: ", File.Path.to_string(folder), "; ", Int.to_string(size), " bytes observed allocation"))
     return size
 }
+
 flow BuildProbe(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
     selector_1 = BuildOpen(context.process, folder)
     choice_1 = Match.new(selector_1,
@@ -1066,7 +1169,7 @@ flow BuildProbe(context: Record{apply: Bool, home: File.Path, uid: Int, process:
     return choice_1_result_2
 }
 flow BuildEligible(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
-    printed = Print(String.format("{action} whole stale build tree: {folder}; {size} allocated", Record.new(action: Match.new(context.apply, true: "RUN", _: "PLAN"), folder: File.Path.to_string(folder), size: HumanSize(size))))
+    printed = Print(String.concat(Match.new(context.apply, true: "RUN", _: "PLAN"), " whole stale build tree: ", File.Path.to_string(folder), "; ", Int.to_string(size), " bytes allocated"))
     selector_1 = context.apply
     choice_1 = Match.new(selector_1,
         true: 1,
@@ -1076,49 +1179,77 @@ flow BuildEligible(context: Record{apply: Bool, home: File.Path, uid: Int, proce
     return choice_1_result_2
 }
 flow BuildSkipRecent(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP active/recent/unsupported build tree: ", File.Path.to_string(folder))); return 0 }
-flow StaleBuildTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
-    canonical = File.Path.resolve(folder)
-    checked = Match.new(File.Path.eq(folder, canonical), true: true, _: Error.new("Cleanup.BuildTree", String.concat("Refusing symlinked build tree: ", File.Path.to_string(folder)), Record.new()))
+flow StaleBuildTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, parent: File.Directory, root: File.Entry, days: Int) -> Int! {
+    folder = root.path
     cutoff = Cutoff(days)
-    parent = File.Directory.open(File.Path.parent(folder))
-    owned = Match.new(Math.eq(parent.owner_uid, context.uid), true: true, _: Error.new("Cleanup.BuildParent", String.concat("Foreign-owned build parent: ", File.Path.to_string(parent.path)), Record.new()))
     current_parent = BuildParent(context.uid, parent)
-    root = File.Directory.entry(parent, File.Path.name(folder))
-    before = File.Tree.snapshot(parent, root, context.uid, parent.device, TreeDescend)
-    eligible = Bool.all(List.map(before.entries, context.uid, parent.device, cutoff, TreeSupported))
+    before = File.Tree.snapshot(current_parent, root, context.uid, parent.device, TreeDescend)
+    eligible = All(List.new(before.complete, All(List.map(before.entries, context.uid, parent.device, cutoff, TreeSupported))))
     size = Math.sum(List.map(before.entries, TreeAllocation))
-    selector_1 = eligible
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
-    choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, before, context, cutoff, folder, parent, root, size, StaleBuildTreeChoice1Branch1)
-    choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, folder, StaleBuildTreeChoice1Branch2)
-    return choice_1_result_2
+    choice = Match.new(eligible, true: 1, _: 2)
+    eligible_result = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, before, context, cutoff, folder, current_parent, root, size, StaleBuildTreeChoice1Branch1)
+    return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), eligible_result, folder, StaleBuildTreeChoice1Branch2)
 }
-flow XcodeTarget(entry: File.Entry) -> List<File.Path>! {
-    return Match.new(String.eq(entry.kind, "directory"), true: XcodeDirectoryTarget(entry), _: List.new())
+flow TreeTargetGroup(values: List<Record{parent: File.Directory, root: File.Entry}>) -> List<Record{parent: File.Directory, root: File.Entry}> { return values }
+flow ConcatTreeTargets(left: List<Record{parent: File.Directory, root: File.Entry}>, right: List<Record{parent: File.Directory, root: File.Entry}>) -> List<Record{parent: File.Directory, root: File.Entry}> { return List.flat_map(List.new(left, right), TreeTargetGroup) }
+flow XcodeTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    valid = All(List.new(String.eq(entry.kind, "directory"), Math.eq(entry.owner_uid, uid), Math.eq(entry.device, parent.device)))
+    return Match.new(valid, true: XcodeDirectoryTarget(uid, parent, entry), _: List.new())
 }
-flow XcodeDirectoryTarget(entry: File.Entry) -> List<File.Path>! {
+flow XcodeDirectoryTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
     shared = List.new("ModuleCache.noindex", "SDKStatCaches.noindex", "SDKExplicitPrecompiledModules", "CompilationCache.noindex")
-    return Match.new(List.contains(shared, entry.name), true: List.new(entry.path), _: XcodeProjectTarget(entry))
+    return Match.new(StringMember(shared, entry.name), true: List.new(Record.new(parent: parent, root: entry)), _: XcodeProjectTarget(uid, parent, entry))
 }
-flow XcodeProjectTarget(entry: File.Entry) -> List<File.Path>! {
-    build = File.Path.join(entry.path, "Build")
-    usable = Bool.all(List.new(File.Path.is_directory(build), Bool.not(File.Path.is_symlink(build))))
-    return Match.new(usable, true: List.new(build), _: List.new())
+flow AbsentBuildEntry(error: Error) -> Record{entries: List<File.Entry>!} {
+    return Record.new(entries: Match.new(error.kind, "File.EntryAbsent": List.new(), _: error))
 }
-flow XcodeTargetStep(targets: List<File.Path>, entry: File.Entry) -> List<File.Path>! { return List.concat(targets, XcodeTarget(entry)) }
-flow XcodePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, root: File.Path) -> List<File.Path>! {
-    directory = File.Directory.open(root)
-    checked = Match.new(Math.eq(directory.owner_uid, context.uid), true: true, _: Error.new("Cleanup.DerivedData", String.concat("Refusing untrusted DerivedData root: ", File.Path.to_string(root)), Record.new()))
+flow OptionalBuildEntry(parent: File.Directory) -> Record{entries: List<File.Entry>!} onError AbsentBuildEntry {
+    entry = File.Directory.entry(parent, "Build")
+    return Record.new(entries: List.new(entry))
+}
+flow XcodeBuildTarget(parent: File.Directory, targets: List<Record{parent: File.Directory, root: File.Entry}>, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}> {
+    return Match.new(String.eq(entry.kind, "directory"), true: ConcatTreeTargets(targets, List.new(Record.new(parent: parent, root: entry))), _: targets)
+}
+flow RequireXcodeDirectory(condition: Bool, directory: File.Directory) -> Bool! {
+    return Match.new(condition, true: true, _: Error.new("Cleanup.DerivedData", String.concat("Refusing changed or foreign-owned Xcode directory: ", File.Path.to_string(directory.path)), Record.new()))
+}
+flow XcodeProjectPresent(uid: Int, entry: File.Entry, targets: List<Record{parent: File.Directory, root: File.Entry}>, directory: File.Directory) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    valid = All(List.new(Math.eq(directory.owner_uid, uid), Math.eq(directory.device, entry.device), Math.eq(directory.inode, entry.inode)))
+    checked = RequireXcodeDirectory(valid, directory)
+    observed = OptionalBuildEntry(directory)
+    return List.fold(observed.entries, targets, directory, XcodeBuildTarget)
+}
+flow XcodeProjectTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    opened = OptionalChild(parent, entry)
+    return Flow.fold(opened.directories, List.new(), uid, entry, XcodeProjectPresent)
+}
+flow XcodeTargetStep(uid: Int, parent: File.Directory, targets: List<Record{parent: File.Directory, root: File.Entry}>, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    return ConcatTreeTargets(targets, XcodeTarget(uid, parent, entry))
+}
+flow XcodeVanished(root: File.Path, previous: Bool, name: String) -> Bool! {
+    return Print(String.concat("SKIP vanished Xcode entry: ", File.Path.to_string(File.Path.join(root, name))))
+}
+flow XcodePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, targets: List<Record{parent: File.Directory, root: File.Entry}>, directory: File.Directory) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+    owned = RequireXcodeDirectory(Math.eq(directory.owner_uid, context.uid), directory)
     scan = File.Directory.scan(directory)
-    return Flow.fold(scan.entries, List.new(), XcodeTargetStep)
+    current = scan.directory
+    checked = RequireXcodeDirectory(All(List.new(SameDirectory(directory, current), Math.eq(current.owner_uid, context.uid))), current)
+    skipped = Flow.fold(scan.vanished_names, true, current.path, XcodeVanished)
+    return Flow.fold(scan.entries, targets, context.uid, current, XcodeTargetStep)
 }
-flow XcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<File.Path>! {
+flow XcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<Record{parent: File.Directory, root: File.Entry}>! {
     root = File.Path.join(context.home, "Library/Developer/Xcode/DerivedData")
-    return Match.new(File.Path.exists(root), true: XcodePresent(context, root), _: List.new())
+    opened = OptionalDirectory(root)
+    return Flow.fold(opened.directories, List.new(), context, XcodePresent)
 }
-
+flow TryStaleBuildTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, target: Record{parent: File.Directory, root: File.Entry}) -> Record{result: Int!, errors: List<Error>} onError CapturedPerformError {
+    result = StaleBuildTree(context, target.parent, target.root, 7)
+    return Record.new(result: result, errors: List.new())
+}
+flow AttemptTree(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}, target: Record{parent: File.Directory, root: File.Entry}) -> Record{failures: List<String>, estimates: List<Int>}! {
+    captured = TryStaleBuildTree(context, target)
+    return RecordOutcome(state, File.Path.to_string(target.root.path), captured)
+}
 
 // A bounded worklist visits retained directories in depth-first order.
 flow CacheWorkItem(parent: File.Directory, entry: File.Entry) -> Record{parent: File.Directory, entries: List<File.Entry>} {
@@ -1178,8 +1309,8 @@ flow CacheWorkObserved(context: Record{apply: Bool, home: File.Path, uid: Int, p
     eligible = List.filter(scan.entries, context.uid, device, cutoff, CacheCandidate)
     candidates = List.filter(eligible, UnambiguousPath)
     children = List.filter(scan.entries, context.uid, device, CacheChild)
-    counted = CacheState(Math.add(state.count, List.length(candidates)), Math.add(state.eligible_bytes, Math.sum(List.map(candidates, EntryAllocation))), state.deleted, state.deleted_bytes, Math.add(state.skipped, Math.sub(List.length(eligible), List.length(candidates))), state.errors)
-    selector_1 = Bool.all(List.new(context.apply, Math.gt(List.length(candidates), 0)))
+    counted = CacheState(Math.add(state.count, List.length(eligible)), Math.add(state.eligible_bytes, Math.sum(List.map(eligible, EntryAllocation))), state.deleted, state.deleted_bytes, Math.add(state.skipped, Math.sub(List.length(eligible), List.length(candidates))), state.errors)
+    selector_1 = All(List.new(context.apply, Math.gt(List.length(candidates), 0)))
     choice_1 = Match.new(selector_1,
         true: 1,
         _: 2)
@@ -1214,10 +1345,10 @@ flow TryPerform(context: Record{apply: Bool, home: File.Path, uid: Int, process:
     return Record.new(result: result, errors: List.new())
 }
 
-flow CapturedXcodeTargetsError(error: Error) -> Record{result: List<File.Path>!, errors: List<Error>} {
+flow CapturedXcodeTargetsError(error: Error) -> Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>} {
     return Record.new(result: error, errors: List.new(error))
 }
-flow TryXcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Record{result: List<File.Path>!, errors: List<Error>} onError CapturedXcodeTargetsError {
+flow TryXcodeTargets(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>} onError CapturedXcodeTargetsError {
     result = XcodeTargets(context)
     return Record.new(result: result, errors: List.new())
 }
@@ -1233,8 +1364,8 @@ flow TryPreparePip(context: Record{apply: Bool, home: File.Path, uid: Int, proce
 flow CapturedStorageReportError(error: Error) -> Record{result: Int!, errors: List<Error>} {
     return Record.new(result: error, errors: List.new(error))
 }
-flow TryStorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> Record{result: Int!, errors: List<Error>} onError CapturedStorageReportError {
-    result = StorageReport(context)
+flow TryStorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Record{result: Int!, errors: List<Error>} onError CapturedStorageReportError {
+    result = StorageReport(context, du)
     return Record.new(result: result, errors: List.new())
 }
 
@@ -1325,12 +1456,10 @@ flow PerformChoice1Branch3(context: Record{apply: Bool, home: File.Path, uid: In
     return StaleCache(context, task.path, 7)
 }
 
-flow PerformChoice1Branch4(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}, previous: Int, selected: Int) -> Int! {
-    return StaleBuildTree(context, task.path, 7)
-}
 
-flow PerformChoice1Branch5(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Int, selected: Int) -> Int! {
-    return TemporaryFiles(context)
+
+flow PerformChoice1Branch5(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}, previous: Int, selected: Int) -> Int! {
+    return TemporaryFiles(context, task.path, List.at(task.arguments, 0), File.Path.new(List.at(task.arguments, 1)))
 }
 
 flow PerformChoice1Branch6(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Int, selected: Int) -> Int! {
@@ -1345,19 +1474,19 @@ flow PerformChoice1Branch8(previous: Int, selected: Int) -> Int! {
     return Fail("Unknown application task")
 }
 
-flow AttemptChoice1Branch1(captured: Record{result: Int!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
-    return Record.new(failures: state.failures, estimates: List.concat(state.estimates, List.new(captured.result)))
+flow RecordSuccess(captured: Record{result: Int!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
+    return Record.new(failures: state.failures, estimates: ConcatInts(state.estimates, List.new(captured.result)))
 }
 
-flow AttemptChoice1Branch2(captured: Record{result: Int!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
-    return AddFailure(state, task.label, List.at(captured.errors, 0))
+flow RecordFailure(captured: Record{result: Int!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, label: String, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
+    return AddFailure(state, label, List.at(captured.errors, 0))
 }
 
-flow XcodeChoice1Branch1(captured: Record{result: List<File.Path>!, errors: List<Error>}, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
-    return Flow.fold(List.map(captured.result, TreeTask), state, context, Attempt)
+flow XcodeChoice1Branch1(captured: Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>}, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
+    return Flow.fold(captured.result, state, context, AttemptTree)
 }
 
-flow XcodeChoice1Branch2(captured: Record{result: List<File.Path>!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
+flow XcodeChoice1Branch2(captured: Record{result: List<Record{parent: File.Directory, root: File.Entry}>!, errors: List<Error>}, state: Record{failures: List<String>, estimates: List<Int>}, previous: Record{failures: List<String>, estimates: List<Int>}, selected: Int) -> Record{failures: List<String>, estimates: List<Int>}! {
     return AddFailure(state, "Xcode build trees", List.at(captured.errors, 0))
 }
 
@@ -1365,8 +1494,8 @@ flow StorageReportChoice1Branch1(previous: Int, selected: Int) -> Int! {
     return 0
 }
 
-flow StorageReportChoice1Branch2(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>, previous: Int, selected: Int) -> Int! {
-    return StorageInventory(context, paths)
+flow StorageReportChoice1Branch2(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>, du: File.Path, previous: Int, selected: Int) -> Int! {
+    return StorageInventory(context, paths, du)
 }
 
 flow FinishChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Program.Exit, selected: Int) -> Program.Exit! {
@@ -1417,28 +1546,28 @@ flow ReportChoice1Branch2(captured: Record{result: Int!, errors: List<Error>}, p
     return ReportFailure(List.at(captured.errors, 0))
 }
 
-flow StartedChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Report(context)
+flow StartedChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Report(context, du)
 }
 
-flow StartedChoice1Branch2(free_bytes: Int, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Workflow(context, free_bytes)
+flow StartedChoice1Branch2(free_bytes: Int, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Workflow(context, free_bytes, settings)
 }
 
 flow LockedChoice1Branch1(previous: Program.Exit, selected: Int) -> Program.Exit! {
     return Program.Exit.new(2, Bytes.new(""), UTF8.Bytes.new("Run mac-cleanup as your normal user, without sudo\n"))
 }
 
-flow LockedChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Started(invocation, options)
+flow LockedChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Started(invocation, options, settings)
 }
 
 flow MainChoice1Branch1(options: CLI.Options, previous: Program.Exit, selected: Int) -> Program.Exit! {
     return Program.Exit.new(0, UTF8.Bytes.new(options.help_text), Bytes.new(""))
 }
 
-flow MainChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Locked(invocation, options)
+flow MainChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {
+    return Locked(invocation, options, settings)
 }
 
 flow RemoveStaleStepChoice1Branch1(deleted: Int, entry: File.Entry, previous: Int, selected: Int) -> Int! {
@@ -1449,29 +1578,9 @@ flow RemoveStaleStepChoice1Branch2(cutoff: Int, deleted: Int, entry: File.Entry,
     return RemoveStaleClosed(uid, cutoff, masks, deleted, entry)
 }
 
-flow RemoveStaleClosedChoice1Branch1(deleted: Int, previous: Int, selected: Int) -> Int! {
-    return deleted
-}
 
-flow RemoveStaleClosedChoice1Branch2(current: List<File.Entry>, cutoff: Int, deleted: Int, entry: File.Entry, masks: List<Glob>, uid: Int, previous: Int, selected: Int) -> Int! {
-    return RemoveStalePresent(uid, cutoff, masks, deleted, entry, List.at(current, 0))
-}
 
-flow RemoveStalePresentChoice1Branch1(cutoff: Int, entry: File.Entry, masks: List<Glob>, uid: Int, previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return CommitStale(uid, cutoff, masks, entry)
-}
 
-flow RemoveStalePresentChoice1Branch2(previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return NotRemoved()
-}
-
-flow RemoveStalePresentChoice2Branch1(deleted: Int, previous: Int, selected: Int) -> Int! {
-    return Math.add(deleted, 1)
-}
-
-flow RemoveStalePresentChoice2Branch2(deleted: Int, entry: File.Entry, previous: Int, selected: Int) -> Int! {
-    return ChangedStale(deleted, entry)
-}
 
 flow StaleFilesPresentChoice1Branch1(candidates: List<File.Entry>, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, cutoff: Int, folder: File.Path, masks: List<Glob>, previous: Int, selected: Int) -> Int! {
     return ApplyStale(context, folder, cutoff, masks, candidates)
@@ -1481,13 +1590,9 @@ flow StaleFilesPresentChoice1Branch2(previous: Int, selected: Int) -> Int! {
     return 0
 }
 
-flow StaleFilesChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, days: Int, folder: File.Path, masks: List<String>, previous: Int, selected: Int) -> Int! {
-    return StaleFilesPresent(context, folder, masks, days)
-}
 
-flow StaleFilesChoice1Branch2(folder: File.Path, previous: Int, selected: Int) -> Int! {
-    return SkipAbsentDirectory(folder)
-}
+
+
 
 flow GatewayRemoveChoice1Branch1(deleted: Int, entry: File.Entry, previous: Int, selected: Int) -> Int! {
     return GatewaySkipOpen(deleted, entry)
@@ -1497,29 +1602,9 @@ flow GatewayRemoveChoice1Branch2(deleted: Int, entry: File.Entry, previous: Int,
     return GatewayRemoveClosed(deleted, entry)
 }
 
-flow GatewayRemoveClosedChoice1Branch1(deleted: Int, previous: Int, selected: Int) -> Int! {
-    return deleted
-}
 
-flow GatewayRemoveClosedChoice1Branch2(current: List<File.Entry>, deleted: Int, entry: File.Entry, previous: Int, selected: Int) -> Int! {
-    return GatewayRemovePresent(deleted, entry, List.at(current, 0))
-}
 
-flow GatewayRemovePresentChoice1Branch1(entry: File.Entry, previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return CommitGateway(entry)
-}
 
-flow GatewayRemovePresentChoice1Branch2(previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return NotRemoved()
-}
-
-flow GatewayRemovePresentChoice2Branch1(deleted: Int, previous: Int, selected: Int) -> Int! {
-    return Math.add(deleted, 1)
-}
-
-flow GatewayRemovePresentChoice2Branch2(deleted: Int, entry: File.Entry, previous: Int, selected: Int) -> Int! {
-    return GatewayChanged(deleted, entry)
-}
 
 flow GatewayPresentChoice1Branch1(candidates: List<File.Entry>, context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, previous: Int, selected: Int) -> Int! {
     return GatewayApply(context, folder, candidates)
@@ -1529,29 +1614,9 @@ flow GatewayPresentChoice1Branch2(previous: Int, selected: Int) -> Int! {
     return 0
 }
 
-flow GatewayLogsChoice1Branch1(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, days: Int, folder: File.Path, previous: Int, selected: Int) -> Int! {
-    return GatewayPresent(context, folder, days)
-}
 
-flow GatewayLogsChoice1Branch2(previous: Int, selected: Int) -> Int! {
-    return GatewayAbsent()
-}
 
-flow CacheRemoveChoice1Branch1(previous: Bool, selected: Int) -> Bool! {
-    return false
-}
 
-flow CacheRemoveChoice1Branch2(current: List<File.Entry>, cutoff: Int, device: Int, entry: File.Entry, uid: Int, previous: Bool, selected: Int) -> Bool! {
-    return CacheRemovePresent(uid, device, cutoff, entry, List.at(current, 0))
-}
-
-flow CacheRemovePresentChoice1Branch1(cutoff: Int, device: Int, entry: File.Entry, uid: Int, previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return CacheCommit(uid, device, cutoff, entry)
-}
-
-flow CacheRemovePresentChoice1Branch2(previous: Record{removed: Bool!}, selected: Int) -> Record{removed: Bool!}! {
-    return NotRemoved()
-}
 
 flow CacheRemoveStepChoice1Branch1(cutoff: Int, device: Int, entry: File.Entry, opened: List<File.Path>, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, uid: Int, previous: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, selected: Int) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     return CacheRemoveActive(uid, device, cutoff, opened, state, entry)
@@ -1589,12 +1654,8 @@ flow StaleCacheChoice1Branch1(folder: File.Path, previous: Int, selected: Int) -
     return SkipAbsentCache(folder)
 }
 
-flow StaleCacheChoice1Branch2(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, days: Int, folder: File.Path, previous: Int, selected: Int) -> Int! {
-    return StaleCachePresent(context, folder, days)
-}
-
-flow BuildRemoveChoice1Branch1(folder: File.Path, parent: File.Directory, root: File.Entry, size: Int, previous: Int, selected: Int) -> Int! {
-    return BuildCommit(folder, parent, root, size)
+flow BuildRemoveChoice1Branch1(uid: Int, device: Int, cutoff: Int, folder: File.Path, before: File.Tree, size: Int, previous: Int, selected: Int) -> Int! {
+    return BuildCommit(uid, device, cutoff, folder, before, size)
 }
 
 flow BuildRemoveChoice1Branch2(folder: File.Path, previous: Int, selected: Int) -> Int! {
@@ -1672,6 +1733,11 @@ flow CacheWorkObservedChoice1Branch1(candidates: List<File.Entry>, context: Reco
 flow CacheWorkObservedChoice1Branch2(counted: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, previous: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, selected: Int) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     return counted
 }
+
+flow DefaultSettings() -> Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path} {
+    return Record.new(shared_temp: File.Path.new("/private/tmp"), user_temp_prefix: "/private/var/folders/", getconf: File.Path.new("/usr/bin/getconf"), du: File.Path.new("/usr/bin/du"))
+}
+flow Main() -> Program.Exit! { return MainWithSettings(DefaultSettings()) }
 
 return Main()
 
