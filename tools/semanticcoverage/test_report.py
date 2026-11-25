@@ -14,10 +14,36 @@ SCRIPT = ROOT / "tools/semanticcoverage/report.py"
 TARGETS = ("darwin/arm64", "linux/arm64")
 
 
+def workspace_root() -> Path:
+    selected = os.environ.get("TMPDIR", "")
+    if not selected or not Path(selected).is_absolute():
+        raise ValueError("TMPDIR must name an absolute directory inside Lo/_scratch")
+    base = Path(selected).resolve(strict=True)
+    if not base.is_relative_to(ROOT / "_scratch") or not base.is_dir():
+        raise ValueError("TMPDIR must name a directory inside Lo/_scratch")
+    return base
+
+
 class ReportCLI(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        selected = os.environ.get("LO_TEST_COMPILER")
+        if selected:
+            cls.frontend = Path(selected).resolve(strict=True)
+            if not cls.frontend.is_relative_to(ROOT) or not cls.frontend.is_file():
+                raise ValueError("LO_TEST_COMPILER must name a file inside Lo")
+            return
+        base = workspace_root()
+        workspace = tempfile.TemporaryDirectory(prefix="report-frontend-", dir=base)
+        cls.addClassCleanup(workspace.cleanup)
+        cls.frontend = Path(workspace.name) / "frontend"
+        built = subprocess.run(["go", "build", "-o", str(cls.frontend), "./cmd/lo"], cwd=ROOT,
+                               stdin=subprocess.DEVNULL, text=True, capture_output=True)
+        if built.returncode:
+            raise RuntimeError(f"build report frontend: {built.returncode}: {built.stderr}")
+
     def setUp(self):
-        base = ROOT / "_scratch/build-state/tmp"
-        base.mkdir(parents=True, exist_ok=True)
+        base = workspace_root()
         self.workspace = tempfile.TemporaryDirectory(prefix="native-report-", dir=base)
         self.addCleanup(self.workspace.cleanup)
         self.directory = Path(self.workspace.name)
@@ -307,11 +333,7 @@ class ReportCLI(unittest.TestCase):
         data["gaps"] = []
         path = self.directory / "selected-matrix.json"
         path.write_text(json.dumps(data))
-        compiler = self.directory / "frontend"
-        built = subprocess.run(["go", "build", "-o", str(compiler), "./cmd/lo"], cwd=ROOT,
-                               stdin=subprocess.DEVNULL, text=True, capture_output=True)
-        self.assertEqual(built.returncode, 0, built.stderr)
-        return path, compiler
+        return path, self.frontend
 
     def invoke_runner(self, matrix, compiler):
         output = self.directory / "selected-run"
@@ -355,6 +377,67 @@ class ReportCLI(unittest.TestCase):
         self.assertIn("TestDarwinOnly", run.select_tests(self.matrix, TARGETS[0]))
         with self.assertRaises(ValueError):
             run.select_tests(self.matrix, "other/target")
+
+    def test_actual_matrix_uses_portable_linux_process_evidence_without_skips(self):
+        sys.path.insert(0, str(ROOT / "tools/semanticcoverage"))
+        import run
+        actual_path = ROOT / "testdata/semantic-migration/matrix.json"
+        actual = json.loads(actual_path.read_text())
+        linux_pattern = run.select_tests(actual_path, "linux/arm64")
+        darwin_pattern = run.select_tests(actual_path, "darwin/arm64")
+        darwin_only = {"TestLLVMConsoleSpawnQueuedDeadline", "TestF035TimeoutRecoveryPreservesOriginal"}
+        for name in darwin_only:
+            self.assertNotIn(name, linux_pattern)
+            self.assertIn(name, darwin_pattern)
+        portable = ["TestLLVMConsoleCompletionCleanupPrecedence", "TestLLVMConsoleCompletionFlushCancellation",
+                    "TestLLVMConsoleEmbeddingBoundary", "TestLLVMConsoleReadinessCancellation"]
+        rows = {row["id"]: row for row in actual["contracts"]}
+        for identity in ("operation:Console.Line.new:runtime-negative:2", "operation:Program.Exit.new:positive:2"):
+            self.assertEqual(rows[identity]["targets"], ["darwin/arm64"])
+            self.assertEqual(rows[identity]["tests"], [*portable, "TestLLVMConsoleSpawnQueuedDeadline"])
+            linux = rows[identity + ":linux"]
+            self.assertEqual(linux["targets"], ["linux/arm64"])
+            self.assertEqual(linux["tests"], portable)
+            self.assertEqual(linux["boundary"], "native-abi")
+        timeout = rows["operation:Process.Command.with_timeout:runtime-negative"]
+        self.assertEqual(timeout["targets"], ["darwin/arm64"])
+        self.assertEqual(timeout["tests"], ["TestF035InvalidCommandOptions", "TestF035TimeoutRecoveryPreservesOriginal"])
+        command = rows[timeout["id"] + ":linux-command"]
+        driver = rows[timeout["id"] + ":linux-abi"]
+        self.assertEqual(command["tests"], ["TestF035InvalidCommandOptions"])
+        self.assertEqual(command["targets"], ["linux/arm64"])
+        self.assertEqual(command["boundary"], "program-command")
+        self.assertEqual(driver["tests"], ["TestF035LinuxDriverLifecycle/timeout-after-cleanup-permits-next"])
+        self.assertEqual(driver["targets"], ["linux/arm64"])
+        self.assertEqual(driver["boundary"], "native-abi")
+        for name in (*portable, "TestF035InvalidCommandOptions", "TestF035LinuxDriverLifecycle",
+                     "TestSemanticCoverageInventory", "TestSemanticCoverageRunIdentity"):
+            self.assertIn(name, linux_pattern)
+        union = subprocess.run([sys.executable, "-B", str(ROOT / "tools/semanticcoverage/run.py"),
+                                "select", "--matrix", str(actual_path)], cwd=ROOT,
+                               stdin=subprocess.DEVNULL, capture_output=True, text=True)
+        self.assertEqual(union.returncode, 0, union.stderr)
+        for name in (*darwin_only, "TestSemanticCoverageInventory", "TestSemanticCoverageRunIdentity"):
+            self.assertIn(name, union.stdout)
+        self.data = actual
+        manifest = json.loads(self.manifest.read_text())
+        manifest["metal"] = {"runtime": {"path": "runtime.a", "sha256": self.digest(self.runtime)}}
+        self.manifest.write_text(json.dumps(manifest))
+        self.write_matrix()
+        for target, path in self.logs.items():
+            references = {reference for row in actual["contracts"] if target in row["targets"] for reference in row["tests"]}
+            self.events(path, target, {reference: "pass" for reference in references})
+            if target == "darwin/arm64":
+                records = [json.loads(line) for line in path.read_text().splitlines()]
+                identity = json.loads(records[1]["Output"].split("=", 1)[1])
+                identity["metal_runtime_sha256"] = self.digest(self.runtime)
+                records[1]["Output"] = "LO_SEMANTIC_IDENTITY=" + json.dumps(identity)
+                path.write_text("".join(json.dumps(event) + "\n" for event in records))
+        result = self.run_report()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        record = json.loads((self.directory / "_scratch/report.json").read_text())
+        self.assertEqual(record["contract_count"], len(actual["contracts"]))
+        self.assertEqual(record["execution_status"], "passed")
 
     def test_runner_preserves_every_consumed_input_before_execution(self):
         host = {"Darwin": "darwin", "Linux": "linux"}[platform.system()] + "/arm64"

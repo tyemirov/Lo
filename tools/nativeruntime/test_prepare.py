@@ -9,6 +9,8 @@ import sys
 
 import pytest
 
+from tools.testsession import shared_runtime
+
 ROOT = Path(__file__).resolve().parents[2]
 CLI = ROOT / 'tools/nativeruntime/prepare.py'
 
@@ -69,20 +71,27 @@ def test_runtime_build_uses_prepared_host_linker(tmp_path: Path) -> None:
     assert tmp_path.resolve().is_relative_to(ROOT / '_scratch')
     canonical = [state / 'distribution' / name for name in ('toolchain.json', 'build-receipt.json')]
     original = {path: path.read_bytes() if path.is_file() else None for path in canonical}
-    output = tmp_path / 'runtime-distribution'
-    result = subprocess.run([sys.executable, '-B', str(CLI.with_name('build.py')),
-                             '--preparation', str(state), '--output', str(output)],
+    output, shared = shared_runtime.output(tmp_path / 'runtime-distribution')
+    arguments = [sys.executable, '-B', str(CLI.with_name('build.py')),
+                 '--preparation', str(state), '--output', str(output)]
+    if shared:
+        arguments.append('--metal')
+    result = subprocess.run(arguments,
                             cwd=ROOT, env=dict(os.environ, CI='1'), stdin=subprocess.DEVNULL,
                             capture_output=True, text=True, check=False)
     assert result.returncode == 0, result.stderr
     assert {path: path.read_bytes() if path.is_file() else None for path in canonical} == original
     manifest = json.loads((output / 'toolchain.json').read_text())
     assert set(manifest['targets']) == {'darwin/arm64', 'linux/arm64'}
+    if shared:
+        assert manifest['metal']['target'] == 'darwin/arm64'
     receipt = json.loads((output / 'build-receipt.json').read_text())
     environment = receipt['cargo_environment']
     assert environment['CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER'] == str(state / 'host-linker/linker')
     assert environment['SDKROOT'] == str(state / 'host-linker/sdk')
     assert receipt['host_linker']['source']['path'] == 'tools/nativeruntime/host_linker.c'
+    if shared:
+        assert receipt['metal']['manifest']['path'] == 'runtime/metal/manifest.json'
 
 
 def test_guest_runner_rejects_missing_executable(missing_state: Path) -> None:

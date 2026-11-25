@@ -20,6 +20,29 @@ def work(tmp_path: Path) -> Path:
     return tmp_path
 
 
+@pytest.fixture(scope="session")
+def performance_runner(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    selected = os.environ.get("LO_TEST_PERFORMANCE_RUNNER")
+    if selected:
+        binary = Path(selected).resolve(strict=True)
+        assert binary.is_relative_to(ROOT), "performance runner leaves the repository"
+        assert binary.is_file(), "performance runner must name a file"
+        return binary
+    directory = tmp_path_factory.mktemp("performance-runner")
+    assert directory.resolve().is_relative_to(ROOT / "_scratch")
+    binary = directory / "runner"
+    env = dict(os.environ, CGO_ENABLED="0")
+    env.pop("GOOS", None)
+    env.pop("GOARCH", None)
+    built = subprocess.run(
+        ["go", "build", "-o", str(binary), str(SCRIPT.parent / "performance-runner")],
+        cwd=ROOT, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+        check=False,
+    )
+    assert built.returncode == 0, built.stderr
+    return binary
+
+
 def test_performance_rejects_obsolete_scalar_sample_selection(work: Path) -> None:
     command = [
         sys.executable,
@@ -50,21 +73,13 @@ def test_performance_rejects_obsolete_scalar_sample_selection(work: Path) -> Non
     assert not (work / "run").exists()
 
 
-def test_precompiled_runner_rejects_unknown_configuration_fields(work: Path) -> None:
-    binary = work / "runner"
+def test_precompiled_runner_rejects_unknown_configuration_fields(
+    work: Path, performance_runner: Path
+) -> None:
+    binary = performance_runner
     env = dict(os.environ, CGO_ENABLED="0")
     env.pop("GOOS", None)
     env.pop("GOARCH", None)
-    built = subprocess.run(
-        ["go", "build", "-o", str(binary), str(SCRIPT.parent / "performance-runner")],
-        cwd=ROOT,
-        env=env,
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert built.returncode == 0, built.stderr
     source = work / "config.json"
     output = work / "report.json"
     source.write_text(
@@ -101,21 +116,12 @@ def test_precompiled_runner_rejects_unknown_configuration_fields(work: Path) -> 
     "mutation", ["duplicate", "empty", "sample_plan", "warmup", "reference"]
 )
 def test_runner_rejects_invalid_measurement_configuration(
-    work: Path, mutation: str
+    work: Path, mutation: str, performance_runner: Path
 ) -> None:
-    binary = work / "runner"
+    binary = performance_runner
     env = dict(os.environ, CGO_ENABLED="0")
     env.pop("GOOS", None)
     env.pop("GOARCH", None)
-    result = subprocess.run(
-        ["go", "build", "-o", str(binary), str(SCRIPT.parent / "performance-runner")],
-        cwd=ROOT,
-        env=env,
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stderr
     fixture = {
         "name": "startup",
         "source": "/input/source.lo",

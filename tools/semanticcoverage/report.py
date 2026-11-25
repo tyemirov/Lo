@@ -17,7 +17,7 @@ PROFILES = {"frontend", "software", "controlled-metal", "metal-artifact"}
 TEST_IDENTITY = re.compile(r"Test[A-Za-z0-9_]+(?:/[^\n]+)?")
 SOURCE_FOLDERS = ("cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "runtime",
                   "tools/metalbuild", "tools/nativeruntime", "tools/lodistribution", "tools/loqualification",
-                  "testdata", "examples", "docs/examples")
+                  "tools/testsession", "testdata", "examples", "docs/examples")
 SOURCE_SUFFIXES = {".go", ".py", ".c", ".h", ".m", ".mm", ".metal", ".lo", ".json", ".txt", ".rs", ".toml", ".lock"}
 SOURCE_FILES = ("go.mod", "go.sum", "Makefile", "docs/evidence/training-reference-results.json")
 

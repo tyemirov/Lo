@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
+import os
 from pathlib import Path
+import socket
 import subprocess
 import sys
 import tarfile
@@ -221,11 +224,36 @@ def transport(template: Path, executable: Path) -> None:
 
 
 def linux_run(preparation: Path, executable: Path, work: Path) -> dict:
+    selected = os.environ.get('LO_TEST_GUEST_SOCKET')
+    if not selected:
+        raise ValueError('Linux acceptance requires LO_TEST_GUEST_SOCKET from make test-session-group')
+    endpoint, executable, work = map(local, (Path(selected), executable, work))
     work.mkdir(parents=True)
-    env = environment(work)
-    # The executable-only guest contains OS libraries and the copied artifact.
-    result = execute([sys.executable, '-B', str(ROOT / 'tools/nativeruntime/run.py'), '--preparation', str(preparation), str(executable), 'run', '--format', 'json'], work, env)
-    return result
+    request = {'executable': str(executable), 'arguments': ['run', '--format', 'json'],
+               'stdin': '', 'timeout_ms': 120000}
+    started = time.monotonic()
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+        connection.settimeout(150)
+        connection.connect(str(endpoint))
+        connection.sendall(json.dumps(request).encode() + b'\n')
+        with connection.makefile('rb') as stream:
+            wire = stream.readline(180 << 20)
+    if not wire.endswith(b'\n'):
+        raise ValueError('Linux acceptance guest response is truncated or exceeds its limit')
+    response = json.loads(wire)
+    if isinstance(response, dict) and set(response) == {'error'} and isinstance(response['error'], str):
+        raise ValueError(f'Linux acceptance guest failed: {response["error"]}')
+    if (not isinstance(response, dict) or set(response) != {'status', 'stdout', 'stderr', 'elapsed_ns'}
+            or type(response['status']) is not int or not 0 <= response['status'] <= 255
+            or type(response['elapsed_ns']) is not int or response['elapsed_ns'] <= 0
+            or not isinstance(response['stdout'], str) or not isinstance(response['stderr'], str)):
+        raise ValueError('Linux acceptance guest response has an invalid shape')
+    try:
+        stdout, stderr = (base64.b64decode(response[name], validate=True).decode() for name in ('stdout', 'stderr'))
+    except (ValueError, UnicodeError) as error:
+        raise ValueError('Linux acceptance guest response has invalid stream encoding') from error
+    return {'status': response['status'], 'stdout': stdout, 'stderr': stderr,
+            'seconds': time.monotonic() - started, 'guest_seconds': response['elapsed_ns'] / 1_000_000_000}
 
 
 def qualify(darwin: Path, linux: Path, metal: Path, preparation: Path, output: Path) -> dict:

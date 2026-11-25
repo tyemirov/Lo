@@ -6,17 +6,19 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-import uuid
 import shutil
 import pytest
+
+from tools.testsession import shared_runtime
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / 'tools/lodistribution/package.py'
 PREPARE = ROOT / 'tools/lodistribution/prepare.py'
 
 @pytest.fixture
-def state() -> Iterator[Path]:
-    path = ROOT / '_scratch/compiler-distribution/tests' / uuid.uuid4().hex
+def state(tmp_path: Path) -> Iterator[Path]:
+    path = tmp_path.resolve() / 'package-case'
+    assert path.is_relative_to(ROOT / '_scratch')
     path.mkdir(parents=True)
     yield path
     shutil.rmtree(path)
@@ -52,14 +54,30 @@ def test_package_rejects_corrupt_prepared_input(state: Path) -> None:
     assert 'digest' in result.stderr
     assert not (state / 'out').exists()
 
-@pytest.fixture
-def prepared_inputs() -> tuple[Path, Path]:
-    prepared = ROOT / '_scratch/compiler-distribution/prepared.json'
-    runtime = (ROOT / os.environ.get('LO_TEST_RUNTIME_DISTRIBUTION', '_scratch/native-runtime/distribution')).resolve()
-    assert runtime.is_relative_to(ROOT / '_scratch')
-    if not prepared.is_file() or not (runtime / 'build-receipt.json').is_file():
+@pytest.fixture(scope='session')
+def prepared_manifest(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    source = ROOT / '_scratch/compiler-distribution/prepared.json'
+    if not source.is_file():
+        if os.environ.get(shared_runtime.OUTPUT_VARIABLE) is not None:
+            raise ValueError('shared runtime package tests require prepared compiler distribution inputs')
         pytest.skip('prepare the pinned compiler and native runtime inputs for package integration tests')
-    return prepared, runtime
+    directory = tmp_path_factory.mktemp('prepared-inputs').resolve()
+    assert directory.is_relative_to(ROOT / '_scratch')
+    prepared = directory / 'prepared.json'
+    shutil.copyfile(source, prepared)
+    return prepared
+
+
+@pytest.fixture
+def prepared_inputs(prepared_manifest: Path) -> Iterator[tuple[Path, Path]]:
+    prepared = prepared_manifest
+    runtime = shared_runtime.input(ROOT / '_scratch/native-runtime/distribution').resolve()
+    assert runtime.is_relative_to(ROOT / '_scratch')
+    if not (runtime / 'build-receipt.json').is_file():
+        pytest.skip('prepare the pinned compiler and native runtime inputs for package integration tests')
+    original = {name: (runtime / name).read_bytes() for name in ('toolchain.json', 'build-receipt.json')}
+    yield prepared, runtime
+    assert {name: (runtime / name).read_bytes() for name in original} == original
 
 
 def package_args(prepared: Path, runtime: Path, output: Path) -> tuple[str, ...]:
@@ -194,10 +212,12 @@ def test_package_archive_relocates_and_ignores_ambient_go_options(state: Path, p
     prepared, runtime = prepared_inputs
     output = state / 'package'
     environment = dict(os.environ, CI='1', PYTHONDONTWRITEBYTECODE='1',
-                       GOFLAGS='-invalid-ambient-option', GOCACHEPROG=str(state / 'absent-cache-program'))
+                       GOFLAGS='-invalid-ambient-option', GOCACHEPROG=str(state / 'absent-cache-program'),
+                       LO_DISTRIBUTION_BUILD_CACHE=str(state / 'shared-go-build'))
     result = subprocess.run([sys.executable, '-B', str(PACKAGE), *package_args(prepared, runtime, output)],
                             cwd=ROOT, env=environment, stdin=subprocess.DEVNULL, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
+    assert any((state / 'shared-go-build').rglob('*')), 'declared producer cache was not used'
     receipt = json.loads(result.stdout)
     assert set(json.loads((output / 'toolchain.json').read_text())['targets']) == {'darwin/arm64', 'linux/arm64'}
     assert 'metal' not in json.loads((output / 'toolchain.json').read_text())
@@ -351,3 +371,19 @@ print('native Metal provenance accepted')
                     'kernel-drift': 'input digest differs', 'bridge-drift': 'input digest differs',
                     'compiled-drift': 'compiled translation unit differs'}[scenario]
         assert expected in result.stderr
+
+@pytest.mark.parametrize('selection', ['empty', 'scratch-root'])
+def test_package_rejects_cache_outside_owned_scratch(
+    state: Path, prepared_inputs: tuple[Path, Path], selection: str,
+) -> None:
+    prepared, runtime = prepared_inputs
+    output = state / 'invalid-cache-package'
+    selected = '' if selection == 'empty' else str(ROOT / '_scratch')
+    result = subprocess.run([sys.executable, '-B', str(PACKAGE),
+                             *package_args(prepared, runtime, output)], cwd=ROOT,
+                            env=dict(os.environ, LO_DISTRIBUTION_BUILD_CACHE=selected),
+                            stdin=subprocess.DEVNULL, capture_output=True, text=True)
+    assert result.returncode == 1
+    assert 'strictly inside Lo' in result.stderr
+    assert not output.exists()
+    assert not output.with_name(output.name + '.building').exists()

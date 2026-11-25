@@ -7,8 +7,15 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 )
+
+var sharedTools struct {
+	sync.Once
+	directory, compiler, filebench string
+	err                            error
+}
 
 func TestMain(tests *testing.M) {
 	if mode := os.Getenv("LO_FILEBENCH_INJECTION"); mode != "" && len(os.Args) > 1 {
@@ -40,23 +47,75 @@ func TestMain(tests *testing.M) {
 			os.Exit(0)
 		}
 	}
-	os.Exit(tests.Run())
+	status := tests.Run()
+	if sharedTools.directory != "" {
+		if err := os.RemoveAll(sharedTools.directory); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			status = 1
+		}
+	}
+	os.Exit(status)
 }
 
-func compiler(t *testing.T) string {
+func fixtureTools(t *testing.T) (string, string) {
 	t.Helper()
-	repository, err := filepath.Abs("../..")
-	if err != nil {
-		t.Fatal(err)
+	sharedTools.Do(func() {
+		repository, err := filepath.Abs("../..")
+		if err != nil {
+			sharedTools.err = err
+			return
+		}
+		root, err := filepath.EvalSymlinks(os.Getenv("TMPDIR"))
+		if err != nil {
+			sharedTools.err = err
+			return
+		}
+		if relative, err := filepath.Rel(repository, root); err != nil || !filepath.IsLocal(relative) {
+			sharedTools.err = fmt.Errorf("filebench TMPDIR must stay inside Lo")
+			return
+		}
+		for _, tool := range []struct {
+			variable, name, packagePath string
+			destination                 *string
+		}{
+			{"LO_TEST_COMPILER", "lo", "./cmd/lo", &sharedTools.compiler},
+			{"LO_TEST_FILEBENCH", "filebench", "./tools/filebench", &sharedTools.filebench},
+		} {
+			if selected := os.Getenv(tool.variable); selected != "" {
+				resolved, err := filepath.EvalSymlinks(selected)
+				if err != nil {
+					sharedTools.err = fmt.Errorf("resolve %s: %w", tool.variable, err)
+					return
+				}
+				if relative, err := filepath.Rel(repository, resolved); err != nil || !filepath.IsLocal(relative) {
+					sharedTools.err = fmt.Errorf("%s must stay inside Lo", tool.variable)
+					return
+				}
+				*tool.destination = resolved
+				continue
+			}
+			if sharedTools.directory == "" {
+				sharedTools.directory, err = os.MkdirTemp(root, "filebench-tools-")
+				if err != nil {
+					sharedTools.err = err
+					return
+				}
+			}
+			*tool.destination = filepath.Join(sharedTools.directory, tool.name)
+			command := exec.Command("go", "build", "-o", *tool.destination, tool.packagePath)
+			command.Dir = repository
+			if output, err := command.CombinedOutput(); err != nil {
+				sharedTools.err = fmt.Errorf("build %s: %w\n%s", tool.name, err, output)
+				return
+			}
+		}
+	})
+	if sharedTools.err != nil {
+		t.Fatal(sharedTools.err)
 	}
-	output := filepath.Join(t.TempDir(), "lo")
-	command := exec.Command("go", "build", "-o", output, "./cmd/lo")
-	command.Dir = repository
-	if result, err := command.CombinedOutput(); err != nil {
-		t.Fatalf("build compiler: %v\n%s", err, result)
-	}
-	return output
+	return sharedTools.compiler, sharedTools.filebench
 }
+
 func toolchain(t *testing.T) string {
 	t.Helper()
 	path := os.Getenv("LO_LLVM_TOOLCHAIN")
@@ -67,9 +126,10 @@ func toolchain(t *testing.T) string {
 }
 func invoke(t *testing.T, cases string, extra ...string) []byte {
 	t.Helper()
-	args := []string{"run", ".", "-work", t.TempDir(), "-compiler", compiler(t), "-toolchain", toolchain(t), "-cases", cases, "-samples", "1"}
+	frontend, executable := fixtureTools(t)
+	args := []string{"-work", t.TempDir(), "-compiler", frontend, "-toolchain", toolchain(t), "-cases", cases, "-samples", "1"}
 	args = append(args, extra...)
-	output, err := exec.Command("go", args...).CombinedOutput()
+	output, err := exec.Command(executable, args...).CombinedOutput()
 	if err != nil {
 		t.Fatalf("native filebench: %v\n%s", err, output)
 	}
@@ -161,8 +221,9 @@ func TestFilebenchNearLimitPipelinesCLI(t *testing.T) {
 	}
 }
 func TestFilebenchRejectsRemovedCommands(t *testing.T) {
+	_, executable := fixtureTools(t)
 	for _, args := range [][]string{{"-backend", "native"}, {"worker", "source.lo", "metrics.json"}, {"-work", "/"}} {
-		output, err := exec.Command("go", append([]string{"run", "."}, args...)...).CombinedOutput()
+		output, err := exec.Command(executable, args...).CombinedOutput()
 		if err == nil {
 			t.Fatalf("obsolete/outside command accepted: %v", args)
 		}
@@ -172,13 +233,14 @@ func TestFilebenchRejectsRemovedCommands(t *testing.T) {
 	}
 }
 func TestFilebenchPreservesFailureAndOutputBound(t *testing.T) {
+	_, executable := fixtureTools(t)
 	self, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, mode := range []string{"wrong-result", "overflow"} {
 		t.Run(mode, func(t *testing.T) {
-			command := exec.Command("go", "run", ".", "-work", t.TempDir(), "-compiler", self, "-toolchain", toolchain(t), "-cases", "startup", "-samples", "1", "-timeout", "5s")
+			command := exec.Command(executable, "-work", t.TempDir(), "-compiler", self, "-toolchain", toolchain(t), "-cases", "startup", "-samples", "1", "-timeout", "5s")
 			command.Env = append(os.Environ(), "LO_FILEBENCH_INJECTION="+mode)
 			output, err := command.CombinedOutput()
 			if err == nil {
