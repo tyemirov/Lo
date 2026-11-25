@@ -5,7 +5,6 @@ import base64
 import json
 import os
 from pathlib import Path
-import platform
 import socket
 import struct
 import subprocess
@@ -121,8 +120,8 @@ int main(int argc,char **argv){
     ]:
         result = subprocess.run(command, cwd=ROOT, stdin=subprocess.DEVNULL, capture_output=True, check=False)
         assert result.returncode == 0, result.stderr
-    accelerator = "hvf" if sys.platform == "darwin" and platform.machine() == "arm64" else "tcg"
-    with session.GuestPool(preparation, tmp_path / "pool", 1, accelerator=accelerator) as pool:
+    accelerator = os.environ.get("LO_TEST_GUEST_ACCELERATOR") or session.DEFAULT_ACCELERATOR
+    with session.GuestPool(preparation, tmp_path / "pool", 1) as pool:
         command = pool.guests[0].process.args
         assert command[command.index("-accel") + 1] == accelerator
         assert command[command.index("-cpu") + 1] == ("host" if accelerator == "hvf" else "cortex-a72")

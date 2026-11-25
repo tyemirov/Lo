@@ -8,12 +8,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
 func TestSessionStartsIndependentLinuxAcceptanceWithoutArchiveDependency(t *testing.T) {
-	command := exec.Command(runner(t), "--describe", "--group", "^(acceptance/|python/tools/lodistribution)")
+	command := exec.Command(runner(t), "--describe", "--group", "^(acceptance/|python/tools/lodistribution)", "--linux-semantic-timeout=900")
 	command.Dir = "../.."
+	command.Env = append(os.Environ(), "LO_TEST_GUEST_ACCELERATOR=tcg")
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
 	if err := command.Run(); err != nil {
@@ -23,6 +25,7 @@ func TestSessionStartsIndependentLinuxAcceptanceWithoutArchiveDependency(t *test
 		Groups []struct {
 			ID    string
 			After []string
+			Argv  []string
 		}
 	}
 	if err := json.Unmarshal(stdout.Bytes(), &descriptor); err != nil {
@@ -33,6 +36,14 @@ func TestSessionStartsIndependentLinuxAcceptanceWithoutArchiveDependency(t *test
 		switch entry.ID {
 		case "acceptance/linux-semantic":
 			foundLinux = true
+			accelerator := slices.Index(entry.Argv, "--accelerator")
+			if accelerator < 0 || accelerator+1 >= len(entry.Argv) || entry.Argv[accelerator+1] != "tcg" {
+				t.Fatalf("Linux acceptance ignored the selected guest accelerator: %v", entry.Argv)
+			}
+			timeout := slices.Index(entry.Argv, "--timeout")
+			if timeout < 0 || timeout+1 >= len(entry.Argv) || entry.Argv[timeout+1] != "900" {
+				t.Fatalf("Linux acceptance ignored the selected guest timeout: %v", entry.Argv)
+			}
 			if len(entry.After) != 0 {
 				t.Fatalf("independent expanded Linux package waits for archive consumers: %v", entry.After)
 			}

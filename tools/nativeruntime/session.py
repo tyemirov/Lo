@@ -28,7 +28,9 @@ ARGUMENT_LIMIT = 1 << 20
 READY = b"LOG_READY\n"
 HEADER = struct.Struct("!8I")
 ACCELERATORS = ("tcg", "hvf")
-DEFAULT_ACCELERATOR = "hvf" if sys.platform == "darwin" and platform.machine() == "arm64" else "tcg"
+DEFAULT_ACCELERATOR = os.environ.get("LO_TEST_GUEST_ACCELERATOR") or (
+    "hvf" if sys.platform == "darwin" and platform.machine() == "arm64" else "tcg"
+)
 MAX_WORKERS = 4
 
 

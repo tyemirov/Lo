@@ -98,6 +98,9 @@ jobs:
           make package-compiler-distributions
 
       - name: Run CI
+        env:
+          # Hosted macOS requires software emulation for the Linux guest.
+          LO_TEST_GUEST_ACCELERATOR: tcg
         run: |
           exec </dev/null
-          make ci
+          make ci SESSION_ARGS='--budget=150m --linux-semantic-timeout=7200'

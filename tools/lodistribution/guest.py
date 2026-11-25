@@ -18,7 +18,9 @@ from prepare import ROOT, local, verified
 GUEST_PACKAGE = '/relocated compiler package'
 TARGETS = ('linux/arm64', 'darwin/arm64')
 ACCELERATORS = ('tcg', 'hvf')
-DEFAULT_ACCELERATOR = 'hvf' if sys.platform == 'darwin' and platform.machine() == 'arm64' else 'tcg'
+DEFAULT_ACCELERATOR = os.environ.get('LO_TEST_GUEST_ACCELERATOR') or (
+    'hvf' if sys.platform == 'darwin' and platform.machine() == 'arm64' else 'tcg'
+)
 
 
 @dataclass(frozen=True)

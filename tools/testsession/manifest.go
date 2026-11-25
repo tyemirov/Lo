@@ -174,7 +174,7 @@ func discover(root string) (sourceInventory, error) {
 	return result, nil
 }
 
-func canonicalManifest(ctx context.Context, root, work string, base []string, ci bool, selection *regexp.Regexp, goRun, scope string) (manifest, error) {
+func canonicalManifest(ctx context.Context, root, work string, base []string, ci bool, selection *regexp.Regexp, goRun, scope string, linuxSemanticTimeout int) (manifest, error) {
 	var result manifest
 	inventory, err := discover(root)
 	if err != nil {
@@ -315,6 +315,10 @@ func canonicalManifest(ctx context.Context, root, work string, base []string, ci
 			result.Groups = append(result.Groups, jobSpec{ID: "acceptance/distributions", Argv: []string{"python3", "-B", "tools/lodistribution/acceptance.py", "--darwin", filepath.Join(packages, "lo-darwin-arm64-software"), "--linux", filepath.Join(packages, "lo-linux-arm64-software"), "--metal", filepath.Join(packages, "lo-darwin-arm64-metal"), "--preparation", preparation, "--output", filepath.Join(work, "distribution-acceptance")}})
 		}
 		if selection.MatchString("acceptance/linux-semantic") {
+			accelerator := os.Getenv("LO_TEST_GUEST_ACCELERATOR")
+			if accelerator == "" {
+				accelerator = "hvf"
+			}
 			linuxEnvironment := map[string]string{"GOOS": "linux", "GOARCH": "arm64", "CGO_ENABLED": "0"}
 			for _, entry := range []struct{ name, pkg string }{{"integration.test", "./tests/integration"}, {"fileprobe", "./testdata/fileprobe"}, {"lo-development", "./cmd/lo"}} {
 				argv := []string{"go", "build", "-o", filepath.Join(work, "bin/linux-"+entry.name), entry.pkg}
@@ -323,7 +327,7 @@ func canonicalManifest(ctx context.Context, root, work string, base []string, ci
 				}
 				result.Prepare = append(result.Prepare, jobSpec{ID: "prepare/linux/" + entry.name, Argv: argv, Environment: linuxEnvironment})
 			}
-			result.Groups = append(result.Groups, jobSpec{ID: "acceptance/linux-semantic", Argv: []string{"python3", "-B", "tools/loqualification/suite.py", "--preparation", preparation, "--package", filepath.Join(packages, "lo-linux-arm64-software"), "--matrix", "testdata/semantic-migration/matrix.json", "--work", filepath.Join(work, "linux-suite"), "--timeout", "240", "--accelerator", "hvf"}, Environment: map[string]string{"LO_TEST_LINUX_INTEGRATION_BINARY": filepath.Join(work, "bin/linux-integration.test"), "LO_TEST_LINUX_FILEPROBE": filepath.Join(work, "bin/linux-fileprobe"), "LO_TEST_LINUX_COMPILER": filepath.Join(work, "bin/linux-lo-development")}})
+			result.Groups = append(result.Groups, jobSpec{ID: "acceptance/linux-semantic", Argv: []string{"python3", "-B", "tools/loqualification/suite.py", "--preparation", preparation, "--package", filepath.Join(packages, "lo-linux-arm64-software"), "--matrix", "testdata/semantic-migration/matrix.json", "--work", filepath.Join(work, "linux-suite"), "--timeout", strconv.Itoa(linuxSemanticTimeout), "--accelerator", accelerator}, Environment: map[string]string{"LO_TEST_LINUX_INTEGRATION_BINARY": filepath.Join(work, "bin/linux-integration.test"), "LO_TEST_LINUX_FILEPROBE": filepath.Join(work, "bin/linux-fileprobe"), "LO_TEST_LINUX_COMPILER": filepath.Join(work, "bin/linux-lo-development")}})
 		}
 		if selection.MatchString("acceptance/semantic-report") {
 			result.Finalize = append(result.Finalize, jobSpec{ID: "acceptance/semantic-report", Argv: []string{"python3", "-B", "tools/semanticcoverage/report.py", "--matrix", "testdata/semantic-migration/matrix.json", "--native", "darwin/arm64=" + filepath.Join(work, "semantic-host.jsonl"), "--native", "linux/arm64=" + filepath.Join(work, "linux-suite/semantic-linux-arm64.jsonl"), "--output", filepath.Join(work, "semantic-coverage.json")}})

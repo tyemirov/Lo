@@ -22,6 +22,7 @@ type options struct {
 	count                                int
 	verbose                              bool
 	workers, builds, guests              int
+	linuxSemanticTimeout                 int
 	budget                               time.Duration
 	maxBytes                             int64
 	json, inventory, describe, ci        bool
@@ -39,6 +40,7 @@ func main() {
 	flag.IntVar(&settings.workers, "workers", min(16, runtime.NumCPU()), "Concurrent isolated test workers")
 	flag.IntVar(&settings.builds, "build-slots", min(8, runtime.NumCPU()), "Concurrent backend builds")
 	flag.IntVar(&settings.guests, "guest-workers", min(4, max(1, runtime.NumCPU()/4)), "Concurrent guest-consuming test groups")
+	flag.IntVar(&settings.linuxSemanticTimeout, "linux-semantic-timeout", 240, "Linux semantic guest test deadline in seconds")
 	flag.DurationVar(&settings.budget, "budget", 270*time.Second, "Whole-session deadline")
 	flag.Int64Var(&settings.maxBytes, "max-bytes", 10<<30, "Maximum session storage bytes")
 	flag.BoolVar(&settings.json, "json", false, "Emit structured progress and results")
@@ -62,6 +64,9 @@ func execute(parent context.Context, settings options, stdout, stderr io.Writer)
 	started := time.Now()
 	if settings.workers < 1 || settings.builds < 1 || settings.guests < 1 || settings.budget <= 0 || settings.maxBytes <= 0 {
 		return errors.New("session resource limits must be positive")
+	}
+	if settings.linuxSemanticTimeout < 1 || settings.linuxSemanticTimeout > 7200 {
+		return errors.New("Linux semantic timeout must be 1..7200 seconds")
 	}
 	if settings.count != 1 {
 		return errors.New("session tests execute exactly once with fresh results")
@@ -188,7 +193,7 @@ func execute(parent context.Context, settings options, stdout, stderr io.Writer)
 		return err
 	}
 	if settings.manifest == "" {
-		spec, err = canonicalManifest(ctx, root, work, base, settings.ci, selected, settings.goRun, settings.group)
+		spec, err = canonicalManifest(ctx, root, work, base, settings.ci, selected, settings.goRun, settings.group, settings.linuxSemanticTimeout)
 		if err != nil {
 			return err
 		}

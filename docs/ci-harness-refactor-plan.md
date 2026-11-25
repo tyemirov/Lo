@@ -7,6 +7,9 @@ The complete local `make ci` run passed in 263.16 seconds, or 4 minutes 23 secon
 The session reported 1,463 successful results.
 Formatting, static analysis, the compiler build, coverage validation, and cleanup are included.
 The measured source and full job durations are in [the acceptance evidence](evidence/ci-harness-results.json).
+The performance target and timing estimates in this plan apply to the local HVF run.
+The [hosted workflow](../.github/workflows/ci.yml) selects TCG and separate deadlines because the hosted macOS VM cannot start HVF.
+The same test inventory and assertions apply in both environments.
 
 Do not run `make ci` during the refactor.
 Complete all test migrations before the first final CI run.
@@ -196,7 +199,7 @@ Remove the old single-execution bridge after migration.
 
 Prepare immutable guest libraries once per session.
 Boot one guest per assigned batch, rather than one guest per assertion or argument variant.
-Use QEMU HVF on Darwin ARM64 and QEMU TCG on other supported hosts.
+Default to QEMU HVF on Darwin ARM64 and QEMU TCG on other supported hosts.
 Both are software acceptance environments.
 
 Reject an unsupported explicit accelerator selection.
