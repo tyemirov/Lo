@@ -360,6 +360,11 @@ func canonicalManifest(ctx context.Context, root, work string, base []string, ci
 		result.Groups = append(result.Groups, jobSpec{ID: "static/go-vet", Argv: []string{"go", "vet", "./..."}})
 		result.Finalize = append(result.Finalize, jobSpec{ID: "finalize/compiler", Argv: []string{"go", "build", "-o", filepath.Join(root, "bin/lo"), "./cmd/lo"}})
 	}
+	// The standalone ABI experiment supplies its own tool and archive fixtures.
+	if !ci && len(result.Finalize) == 0 && len(result.Groups) == 1 &&
+		result.Groups[0].ID == "python/experiments/native-runtime-abi" {
+		result.Prepare = []jobSpec{}
+	}
 	// Serialize additional package producers behind installed-package checks.
 	// Linux semantics consume the separate retained expansion, not acceptance archives.
 	if selection.MatchString("acceptance/distributions") {

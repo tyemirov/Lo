@@ -680,6 +680,9 @@ func TestSessionCanonicalPythonFixturesRunWithOwnedTemporaryState(t *testing.T) 
 	if err := command.Run(); err != nil {
 		t.Fatalf("canonical Python fixture session: %v\nstdout=%s\nstderr=%s", err, &stdout, &stderr)
 	}
+	if strings.Contains(stdout.String(), `"id":"prepare/`) {
+		t.Fatalf("standalone Python ABI fixture started unrelated preparation: %s", &stdout)
+	}
 	data, err := os.ReadFile(report)
 	if err != nil {
 		t.Fatal(err)
