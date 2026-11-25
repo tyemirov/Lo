@@ -27,6 +27,7 @@ override PYTHONPYCACHEPREFIX := $(LO_BUILD_ROOT)/python-cache
 override CI := 1
 export LO_BUILD_ROOT HOME TMPDIR TMP TEMP GOCACHE GOMODCACHE GOPATH GOTOOLCHAIN GOENV GOWORK GOTELEMETRY XDG_CACHE_HOME XDG_CONFIG_HOME XDG_DATA_HOME XDG_STATE_HOME CLANG_MODULE_CACHE_PATH CCACHE_DIR UV_CACHE_DIR UV_TOOL_DIR UV_TOOL_BIN_DIR UV_PYTHON_INSTALL_DIR PIP_CACHE_DIR PYTHONPYCACHEPREFIX CI
 TEST_ARGS ?=
+SESSION_ARGS ?=
 BENCH_COUNT ?= 10
 BENCH_TIME ?= 300ms
 FILE_BENCH_WORK ?= $(LO_BUILD_ROOT)
@@ -80,7 +81,7 @@ reproduce-metal-kernels: | tool-state
 	python3 -B tools/nativeruntime/metal_assets.py reproduce </dev/null
 
 test-native-metal: | tool-state
-	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test -timeout=120m ./tests/integration -run '^TestLLVM.*Metal' $(TEST_ARGS) </dev/null
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) run ./tools/testsession --group '^go/tests/integration/(metal/|host/TestLLVM.*Metal)' $(SESSION_ARGS) $(TEST_ARGS) </dev/null
 
 fmt: | tool-state
 	$(GO) fmt ./... </dev/null
@@ -89,7 +90,8 @@ lint: | tool-state
 	$(GO) vet ./... </dev/null
 
 .PHONY: test-frontend test-tooling
-test: test-frontend test-native test-tooling
+test: | tool-state
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) run ./tools/testsession $(SESSION_ARGS) $(TEST_ARGS) </dev/null
 
 test-frontend: | tool-state
 	$(GO) test -timeout=120m ./cmd/... ./internal/... ./tests/corpus ./tests/benchmark $(TEST_ARGS) </dev/null
@@ -97,8 +99,15 @@ test-frontend: | tool-state
 test-tooling: | tool-state
 	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test -timeout=120m ./tools/... $(TEST_ARGS) </dev/null
 
-test-native: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
-	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) test -timeout=120m ./tests/integration $(TEST_ARGS) </dev/null
+test-native: | tool-state
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) run ./tools/testsession --group '^go/tests/integration/' $(SESSION_ARGS) $(TEST_ARGS) </dev/null
+
+.PHONY: test-session-tools test-session-group
+test-session-tools: | tool-state
+	$(GO) test ./tools/testsession $(TEST_ARGS) </dev/null
+
+test-session-group: | tool-state
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) run ./tools/testsession $(SESSION_ARGS) </dev/null
 
 .PHONY: prepare-native-runtime build-native-runtime build-native-runtime-metal test-native-runtime-tools
 prepare-native-runtime: | tool-state
@@ -128,8 +137,8 @@ test-compiler-distribution-tools: | tool-state
 test-compiler-distributions: | tool-state
 	python3 -B tools/lodistribution/acceptance.py --darwin "$(COMPILER_DISTRIBUTION_OUTPUT)/lo-darwin-arm64-software" --linux "$(COMPILER_DISTRIBUTION_OUTPUT)/lo-linux-arm64-software" --metal "$(COMPILER_DISTRIBUTION_OUTPUT)/lo-darwin-arm64-metal" --preparation "$(NATIVE_RUNTIME_STATE)" --output "$(COMPILER_DISTRIBUTION_ACCEPTANCE)" </dev/null
 
-test-conformance: $(if $(PROCESS_LAUNCHER),process-launcher) | tool-state
-	$(GO) test ./tests/integration -run TestConformance $(TEST_ARGS) </dev/null
+test-conformance: | tool-state
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) run ./tools/testsession --group '^go/tests/integration/host/TestConformance' $(SESSION_ARGS) $(TEST_ARGS) </dev/null
 
 benchmark-training: | tool-state
 	GOMAXPROCS=1 $(GO) test ./tests/benchmark -run '^$$' -bench BenchmarkTrainingCheck -benchmem -count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) </dev/null
@@ -189,7 +198,8 @@ test-native-linux: | tool-state
 benchmark-native-linux: | tool-state
 	python3 -B tools/loqualification/performance.py --preparation "$(NATIVE_RUNTIME_STATE)" --package "$(NATIVE_LINUX_PACKAGE)" --frontend "$(SEMANTIC_COMPILER)" --work "$(NATIVE_BENCH_WORK)" --go "$(shell command -v $(GO))" --accelerator "$(LINUX_ACCELERATOR)" --lane "$(NATIVE_BENCH_LANE)" $(NATIVE_BENCH_ARGS) </dev/null
 
-ci: fmt lint test build test-semantic-report test-native-runtime-tools test-compiler-distribution-tools test-native-qualification-tools
+ci: | tool-state
+	LO_LLVM_TOOLCHAIN="$(abspath $(LLVM_TOOLCHAIN))" LO_NATIVE_PREPARATION="$(abspath $(NATIVE_RUNTIME_STATE))" $(GO) run ./tools/testsession --ci $(SESSION_ARGS) </dev/null
 
 tool-state:
 	mkdir -p "$(LO_BUILD_ROOT)" "$(HOME)" "$(TMPDIR)" "$(GOCACHE)" "$(GOMODCACHE)" "$(GOPATH)" "$(XDG_CACHE_HOME)" "$(XDG_CONFIG_HOME)" "$(XDG_DATA_HOME)" "$(XDG_STATE_HOME)" "$(CLANG_MODULE_CACHE_PATH)" "$(CCACHE_DIR)" </dev/null
