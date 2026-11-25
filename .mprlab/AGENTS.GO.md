@@ -30,7 +30,7 @@ This file gives backend rules for Go code. Obey root `AGENTS.md` and `.mprlab/PO
 
 ## Testing
 
-- For a behavior change, start with an integration test through the real HTTP, CLI, or public package entry point.
+- Apply the proportional test sequence in `.mprlab/POLICY.md`. Use integration tests for the changed public contract.
 - Use dependency injection for integration scenarios that are difficult to reproduce.
 - Keep the product logic under test real.
 - Prefer black-box integration tests through HTTP, CLI, or public package entry points.
@@ -49,3 +49,11 @@ Use `.mprlab/POLICY.md` for validation.
 During the change, run the smallest Go target that validates the changed contract.
 
 When these tools are part of the repository contract, `make lint` must include `go vet`, `staticcheck`, and `ineffassign`.
+
+## Language Contract
+
+- Use smart constructors returning `(Type, error)` when a type has invariants.
+- Do not export invalid zero-values.
+- Wrap errors with `%w`.
+- Prefer integration tests through real HTTP, CLI, or package entry points.
+- `make lint` must include `go vet`, `staticcheck`, and `ineffassign` when those tools are part of the repo contract.
