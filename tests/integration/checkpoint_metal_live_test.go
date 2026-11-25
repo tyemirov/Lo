@@ -50,7 +50,9 @@ func TestNativeMetalCheckpoints(t *testing.T) {
 			t.Fatalf("checkpoint native build: %+v", built)
 		}
 		return func() result {
-			return runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--read-root", directory, "--write-root", directory, "--format", "json")
+			actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--read-root", directory, "--write-root", directory, "--format", "json")
+			reportUnavailableLiveMetal(t, actual)
+			return actual
 		}
 	})
 }

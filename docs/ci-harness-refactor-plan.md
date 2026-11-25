@@ -9,7 +9,8 @@ Formatting, static analysis, the compiler build, coverage validation, and cleanu
 The measured source and full job durations are in [the acceptance evidence](evidence/ci-harness-results.json).
 The performance target and timing estimates in this plan apply to the local HVF run.
 The [hosted workflow](../.github/workflows/ci.yml) selects TCG and separate deadlines because the hosted macOS VM cannot start HVF.
-The same test inventory and assertions apply in both environments.
+The same software tests and assertions apply in both environments.
+Optional live Metal probes report when the system device is absent or has an unsupported profile.
 
 Do not run `make ci` during the refactor.
 Complete all test migrations before the first final CI run.
@@ -325,6 +326,8 @@ The frozen source inventory rejects removal of original test definitions and par
 The result validator rejects missing cases, unexpected skips, undeclared deselections, and incomplete workers.
 Tagged Metal coverage declares its required CGO configuration.
 Ambient `CGO_ENABLED=0` cannot remove those cases from the manifest.
+The live probes can skip only for a missing system Metal device or an unsupported Metal profile reported during device admission.
+Metal build checks and the independent software Metal executor remain required.
 The CI path includes formatting, static analysis, the final compiler build, and cleanup.
 
 The fixture coordinator shares verified backend inputs and immutable build results across worker processes.

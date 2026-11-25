@@ -19,6 +19,7 @@ func TestMetalLiveXOR(t *testing.T) {
 	}
 	for repeat := 0; repeat < 3; repeat++ {
 		actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--format", "json")
+		reportUnavailableLiveMetal(t, actual)
 		assertXORResult(t, trainingResult(t, actual))
 	}
 }
@@ -33,6 +34,7 @@ func TestNativeMetalLiveXOR(t *testing.T) {
 	}
 	for repeat := 0; repeat < 3; repeat++ {
 		actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--format", "json")
+		reportUnavailableLiveMetal(t, actual)
 		assertXORResult(t, trainingResult(t, actual))
 	}
 }

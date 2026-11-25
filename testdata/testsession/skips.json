@@ -101,6 +101,27 @@
   "./tests/integration/TestMacCleanupOwnedWorkflow": [
     "requires Darwin process ownership fixture"
   ],
+  "./tests/integration/TestMetalLiveXOR": [
+    "system Metal device is unavailable or has an unsupported profile"
+  ],
+  "./tests/integration/TestNativeMetalCheckpoints": [
+    "system Metal device is unavailable or has an unsupported profile"
+  ],
+  "./tests/integration/TestNativeMetalLiveFailurePreventsCommit": [
+    "system Metal device is unavailable or has an unsupported profile"
+  ],
+  "./tests/integration/TestNativeMetalLiveNumericalContracts": [
+    "system Metal device is unavailable or has an unsupported profile"
+  ],
+  "./tests/integration/TestNativeMetalLiveStandalone": [
+    "system Metal device is unavailable or has an unsupported profile"
+  ],
+  "./tests/integration/TestNativeMetalLiveTraining": [
+    "system Metal device is unavailable or has an unsupported profile"
+  ],
+  "./tests/integration/TestNativeMetalLiveXOR": [
+    "system Metal device is unavailable or has an unsupported profile"
+  ],
   "./tests/integration/TestProcessContextInheritedTransport": [
     "requires the selected Darwin Process profile"
   ],
