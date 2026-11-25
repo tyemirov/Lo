@@ -10,7 +10,7 @@ import (
 func minimumLLVMWorkSteps(t *testing.T, text string) uint64 {
 	t.Helper()
 	path := sourceFile(t, text)
-	artifact, built := buildForTest(t, path)
+	artifact, built := runtimeFixture(t, path)
 	if built.status != 0 || built.stderr != "" {
 		t.Fatalf("build LLVM work fixture: %+v", built)
 	}

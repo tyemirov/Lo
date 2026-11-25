@@ -101,7 +101,7 @@ flow Eligible(row: Record{relative: String, entry: File.Entry}) -> Bool { items 
 			if number == 4 && !strings.Contains(got.stdout, `"cleanup_errors"`) {
 				t.Fatalf("recoverable primary lost cleanup failure: %s", got.stdout)
 			}
-			if number == 34 && targetOS == "linux" {
+			if number == 34 {
 				const marker = "F034 descriptor measurement: "
 				_, evidence, found := strings.Cut(got.stdout, marker)
 				if !found || strings.Count(got.stdout, marker) != 1 || len(strings.Fields(evidence)) != 7 {

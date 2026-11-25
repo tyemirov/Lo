@@ -40,7 +40,7 @@ func startServer(t *testing.T, source string, extra ...string) *serverProcess {
 }
 func startServerFile(t *testing.T, path string, extra ...string) *serverProcess {
 	t.Helper()
-	artifact, built := buildForTest(t, path)
+	artifact, built := runtimeFixture(t, path)
 	if built.status != 0 {
 		t.Fatalf("build server fixture: %+v", built)
 	}

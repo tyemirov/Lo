@@ -93,7 +93,7 @@ return restored
 };return Main()`, typ, setup, data, path)
 	input := sourceFile(t, text)
 	arguments := []string{"run", input, "--format", "json", "--write-root", directory, "--max-steps", "100000000"}
-	artifact, built := buildForTest(t, input)
+	artifact, built := runtimeFixture(t, input)
 	if built.status != 0 {
 		t.Fatalf("build checkpoint rejection fixture: %+v", built)
 	}
@@ -289,7 +289,7 @@ func TestLLVMCheckpointNumericStringParity(t *testing.T) {
 			if component == "config" {
 				setup, typ = checkpointSetup("SGD")
 				input := sourceFile(t, fmt.Sprintf(`flow Main()->Bytes!{%s return Checkpoint.encode(original)};return Main()`, setup))
-				artifact, built := buildForTest(t, input)
+				artifact, built := runtimeFixture(t, input)
 				if built.status != 0 {
 					t.Fatalf("build numeric checkpoint fixture: %+v", built)
 				}
@@ -346,7 +346,7 @@ func TestLLVMCheckpointIntegerStringParity(t *testing.T) {
 	llvmCheckpointLane(t)
 	setup, typ := checkpointSetup("SGD")
 	input := sourceFile(t, fmt.Sprintf(`flow Main()->Bytes!{%s return Checkpoint.encode(original)};return Main()`, setup))
-	artifact, built := buildForTest(t, input)
+	artifact, built := runtimeFixture(t, input)
 	if built.status != 0 {
 		t.Fatalf("build integer checkpoint fixture: %+v", built)
 	}

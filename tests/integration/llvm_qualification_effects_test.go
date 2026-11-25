@@ -36,7 +36,7 @@ func TestLLVMFailureStopsCommit(t *testing.T) {
 			directory := t.TempDir()
 			output := filepath.Join(directory, "never")
 			path := sourceFile(t, strings.ReplaceAll(fixture.source, `"never"`, strconv.Quote(output)))
-			artifact, built := buildForTest(t, path)
+			artifact, built := runtimeFixture(t, path)
 			if built.status != 0 {
 				t.Fatalf("build: %+v", built)
 			}
@@ -56,7 +56,7 @@ func TestLLVMPartialServerStartupCleanup(t *testing.T) {
 	receipt := filepath.Join(directory, "started-port")
 	text := fmt.Sprintf(`flow H(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,"ok")};flow E(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,"bad")};first=HTTP.Server.new(0,H,E);started=commit first;record=File.Write.new(File.Path.new(%q),UTF8.Bytes.new(Int.to_string(started.port)));commit record;second=HTTP.Server.new(-1,H,E);commit second`, receipt)
 	path := sourceFile(t, text)
-	artifact, built := buildForTest(t, path)
+	artifact, built := runtimeFixture(t, path)
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}

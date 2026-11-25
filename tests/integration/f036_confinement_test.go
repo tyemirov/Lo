@@ -20,6 +20,11 @@ func f036ConfinementCommand(t *testing.T, fixture f036Fixture, path string) stri
 	t.Helper()
 	compiler, flags := llvmDarwinSDKHarness(t, fixture.work)
 	flags = append(flags, fmt.Sprintf("-DLO_TEST_PROCESS_KERNEL_LIMIT=%du", fixture.kernelLimit))
+	if path == fixture.command {
+		if err := os.Remove(path); err != nil {
+			t.Fatalf("release private command before replacement: %v", err)
+		}
+	}
 	command := exec.Command(compiler, append(flags, filepath.Join(repository, "testdata/native-runtime/process-confinement-command.c"), "-o", path)...)
 	command.Dir, command.Env = fixture.work, fixture.environment()
 	if output, err := command.CombinedOutput(); err != nil {
@@ -48,12 +53,7 @@ func f036ConfinementComplete(t *testing.T, fixture f036Fixture, actual result) {
 	nativeValueCheck("Int", `"0"`)(t, actual)
 	fixture.wait(t, "confined activation owner release", func() bool { return fixture.logged("C\n") && !fixture.lockBusy(t) })
 	fixture.wait(t, "confined child exits", func() bool {
-		for _, token := range fixture.tokenRecords(t) {
-			if fixture.alive(token[1]) {
-				return false
-			}
-		}
-		return true
+		return !fixture.anyAlive(t)
 	})
 }
 

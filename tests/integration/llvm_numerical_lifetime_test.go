@@ -14,9 +14,6 @@ func TestLLVMNumericalLifetime(t *testing.T) {
 }
 
 func TestLLVMNumericalLifetimeLinux(t *testing.T) {
-	if runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
-		t.Skip("covered by host lane")
-	}
 	runLLVMRuntimeTargetScenarios(t, "linux/arm64", llvmNumericalLifetimeScenarios())
 }
 
@@ -44,9 +41,6 @@ func TestLLVMRejectsForeignTensorStorage(t *testing.T) {
 	runLLVMRuntimeScenarios(t, llvmForeignTensorStorageScenarios())
 }
 func TestLLVMRejectsForeignTensorStorageLinux(t *testing.T) {
-	if runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
-		t.Skip("covered by host lane")
-	}
 	runLLVMRuntimeTargetScenarios(t, "linux/arm64", llvmForeignTensorStorageScenarios())
 }
 func llvmForeignTensorStorageScenarios() []llvmRuntimeScenario {
@@ -110,7 +104,7 @@ func llvmTapeBudgetSource() string {
 
 func TestLLVMNumericalTapeBudgetBoundary(t *testing.T) {
 	source := sourceFile(t, llvmTapeBudgetSource())
-	artifact, built := buildForTest(t, source)
+	artifact, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}

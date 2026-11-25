@@ -111,7 +111,7 @@ func TestF035CommandOptionInspection(t *testing.T) {
 }
 
 func TestF035HostLimitArguments(t *testing.T) {
-	artifact, built := buildForTest(t, sourceFile(t, "return 1"))
+	artifact, built := runtimeFixture(t, sourceFile(t, "return 1"))
 	if built.status != 0 {
 		t.Fatalf("build host-limit fixture: %+v", built)
 	}

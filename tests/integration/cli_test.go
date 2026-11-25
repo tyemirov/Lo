@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/testsession"
 )
 
 var binary string
@@ -66,7 +69,39 @@ func TestMain(m *testing.M) {
 			os.Exit(1)
 		}
 	}
+	var localSession *testsession.Server
+	if os.Getenv("LO_TEST_SESSION_LOCAL") == "1" {
+		if os.Getenv("LO_TEST_SESSION") != "" {
+			fmt.Fprintln(os.Stderr, "select one local or external test session")
+			_ = os.RemoveAll(dir)
+			os.Exit(1)
+		}
+		localSession, err = testsession.Start(context.Background(), testsession.Config{
+			Directory:  filepath.Join(fixtureDirectory, "session"),
+			Toolchain:  os.Getenv("LO_LLVM_TOOLCHAIN"),
+			Compiler:   binary,
+			BuildSlots: 2,
+			MaxBytes:   1536 << 20,
+		})
+		if err == nil {
+			err = os.Setenv("LO_TEST_SESSION", localSession.Address())
+		}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "start local fixture session: %v\n", err)
+			if localSession != nil {
+				_ = localSession.Close()
+			}
+			_ = os.RemoveAll(dir)
+			os.Exit(1)
+		}
+	}
 	status := m.Run()
+	if localSession != nil {
+		if err := localSession.Close(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			status = 1
+		}
+	}
 	if err := os.RemoveAll(dir); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		status = 1
@@ -91,7 +126,7 @@ func runExecutable(t *testing.T, executable string, args ...string) result {
 
 func runExecutableAt(t *testing.T, directory, executable string, args ...string) result {
 	t.Helper()
-	if executable == binary && os.Getenv("LO_TEST_COMPILER") == "" && len(args) > 0 && args[0] == "build" {
+	if executable == binary && developmentCompilerSelected() && len(args) > 0 && args[0] == "build" {
 		selected := false
 		for _, argument := range args {
 			if argument == "--toolchain" || argument == "--emit" {
@@ -115,6 +150,10 @@ func runExecutableAt(t *testing.T, directory, executable string, args ...string)
 		}
 	}
 	return result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}
+}
+
+func developmentCompilerSelected() bool {
+	return os.Getenv("LO_TEST_COMPILER") == "" || os.Getenv("LO_TEST_COMPILER_KIND") == "development"
 }
 
 func sourceFile(t *testing.T, source string) string {

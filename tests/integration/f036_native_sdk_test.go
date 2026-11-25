@@ -122,12 +122,7 @@ func TestF036NativeSDKAdapter(t *testing.T) {
 					}
 					if scenario.number == 0 {
 						fixture.wait(t, "all observed processes exit", func() bool {
-							for _, record := range fixture.tokenRecords(t) {
-								if fixture.alive(record[1]) {
-									return false
-								}
-							}
-							return true
+							return !fixture.anyAlive(t)
 						})
 					}
 				}}})

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -13,7 +14,7 @@ import (
 )
 
 func TestF036HostLimitArguments(t *testing.T) {
-	artifact, built := buildForTest(t, sourceFile(t, "return 0"))
+	artifact, built := runtimeFixture(t, sourceFile(t, "return 0"))
 	if built.status != 0 {
 		t.Fatalf("build descendant policy fixture: %+v", built)
 	}
@@ -147,6 +148,40 @@ func TestF036FixtureUsesInheritedKernelLimit(t *testing.T) {
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires Darwin process and audit-token fixtures")
 	}
+	t.Run("batch-token-control", func(t *testing.T) {
+		fixture := newF036Fixture(t)
+		unknown := []string{strings.Repeat("0", 64), strings.Repeat("f", 64)}
+		command := exec.Command(fixture.command, append([]string{"--host-alive"}, unknown...)...)
+		command.Dir, command.Env = fixture.work, fixture.environment()
+		output, err := command.CombinedOutput()
+		if err != nil || string(output) != "0\n0\n" {
+			t.Fatalf("batched unknown audit-token observations: %v: %q", err, output)
+		}
+		command = exec.Command(fixture.command, "--host-alive", unknown[0], "invalid-token")
+		command.Dir, command.Env = fixture.work, fixture.environment()
+		if output, err := command.CombinedOutput(); err == nil || command.ProcessState.ExitCode() != 64 {
+			t.Fatalf("malformed token did not fail the batch: %v: %q", err, output)
+		}
+	})
+	t.Run("helper-replacement-isolation", func(t *testing.T) {
+		first, second := newF036Fixture(t), newF036Fixture(t)
+		before, err := os.ReadFile(second.command)
+		if err != nil {
+			t.Fatal(err)
+		}
+		f036ConfinementCommand(t, first, first.command)
+		replacement, err := os.ReadFile(first.command)
+		if err != nil || bytes.Equal(before, replacement) {
+			t.Fatalf("private command replacement did not occur: %v", err)
+		}
+		after, err := os.ReadFile(second.command)
+		if err != nil || !bytes.Equal(before, after) {
+			t.Fatalf("private replacement changed another admitted command: %v", err)
+		}
+		if actual := second.hostProcessLimit(t); actual != second.kernelLimit {
+			t.Fatalf("unmodified command limits changed: got %d, want %d", actual, second.kernelLimit)
+		}
+	})
 	fixture := newF036Fixture(t)
 	parentLimit := fixture.kernelLimit
 	bounded := min(fixture.kernelLimit, uint32(2048))

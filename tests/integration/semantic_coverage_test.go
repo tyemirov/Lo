@@ -22,7 +22,7 @@ import (
 
 func TestSemanticCoverageRunIdentity(t *testing.T) {
 	var paths []string
-	for _, directory := range []string{"cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "runtime", "tools/metalbuild", "tools/nativeruntime", "tools/lodistribution", "tools/loqualification", "testdata", "examples", "docs/examples"} {
+	for _, directory := range []string{"cmd/lo", "internal", "tests/integration", "tools/semanticcoverage", "runtime", "tools/metalbuild", "tools/nativeruntime", "tools/lodistribution", "tools/loqualification", "tools/testsession", "testdata", "examples", "docs/examples"} {
 		err := filepath.WalkDir(filepath.Join(repository, directory), func(path string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				return err

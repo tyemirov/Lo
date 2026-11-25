@@ -10,7 +10,7 @@ func TestLLVMProcessDescendantAdmissionDoesNotLaunchWithoutProvider(t *testing.T
 	fixture := newCleanupFixture(t)
 	marker := fileFixture(t, fixture.writes, "admission-marker", "preserved")
 	source := sourceFile(t, fixture.source(t, "write", marker))
-	artifact, built := buildForTest(t, source)
+	artifact, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build descendant admission fixture: %+v", built)
 	}
@@ -51,7 +51,7 @@ func TestLLVMProcessWithoutDescendantAuthorityRejectsCreation(t *testing.T) {
 				arguments = []string{operation, fixture.executable, marker}
 			}
 			source := sourceFile(t, fixture.source(t, arguments...))
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build default profile fixture: %+v", built)
 			}

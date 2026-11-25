@@ -34,7 +34,7 @@ func TestLLVMAdmittedLiteralFailureOrder(t *testing.T) {
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			path := sourceFile(t, fixture.source)
-			artifact, built := buildForTest(t, path)
+			artifact, built := runtimeFixture(t, path)
 			if built.status != 0 {
 				t.Fatalf("literal fixture build: %+v", built)
 			}

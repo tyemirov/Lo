@@ -57,7 +57,7 @@ func TestLLVMProcessCleanupAdmissionParity(t *testing.T) {
 				program = "return 1"
 			}
 			source := sourceFile(t, program)
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build admission fixture: %+v", built)
 			}

@@ -10,7 +10,7 @@ import (
 
 func TestLLVMMetalTransferOnlyArithmetic(t *testing.T) {
 	input := sourceFile(t, `flow Handle(e:Error)->String{return e.kind};flow Main()->String onError Handle {a=Tensor.to(Tensor.new(List.new(1.0),List.new()),Device.new("cuda-sim:0"));b=Tensor.add(a,a);return "unexpected"};return Main()`)
-	artifact, built := buildForTest(t, input)
+	artifact, built := runtimeFixture(t, input)
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}

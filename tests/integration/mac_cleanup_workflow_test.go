@@ -1,9 +1,11 @@
 package integration_test
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -45,7 +47,7 @@ func TestMacCleanupCompleteArgumentBoundary(t *testing.T) {
 		{"literal-shell-input", []string{"$(touch should-not-exist)"}, 2, "declared option parsing failed"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			source := sourceFile(t, cleanupApplication(t, "Main()"))
+			source := runtimeImmutableSource(t, cleanupApplication(t, "Main()"))
 			arguments := append([]string{"--"}, test.args...)
 			got := runProgram(t, source, "run", arguments...)
 			if got.status != test.code || !strings.Contains(strings.ToLower(got.stdout+got.stderr), strings.ToLower(test.text)) {
@@ -145,11 +147,27 @@ func newCleanupWorkflowFixture(t *testing.T) cleanupWorkflowFixture {
 	return fixture
 }
 
+const (
+	cleanupSharedTempKey = "LO_TEST_CLEANUP_SHARED_TEMP"
+	cleanupUserTempKey   = "LO_TEST_CLEANUP_USER_TEMP_PREFIX"
+	cleanupGetconfKey    = "LO_TEST_CLEANUP_GETCONF"
+	cleanupDuKey         = "LO_TEST_CLEANUP_DU"
+)
+
 func (fixture cleanupWorkflowFixture) source(t *testing.T) string {
 	t.Helper()
-	entry := fmt.Sprintf(`MainWithSettings(Record.new(shared_temp: File.Path.new(%q), user_temp_prefix: %q, getconf: File.Path.new(%q), du: File.Path.new(%q)))`,
-		fixture.shared, fixture.temporaryPrefix+"/", fixture.tools["getconf"], fixture.tools["du"])
-	return cleanupApplication(t, entry)
+	const terminal = "return FixtureDispatch()\n"
+	application := cleanupApplication(t, "FixtureDispatch()")
+	bindings := fmt.Sprintf(`
+flow FixtureEntry(shared:String,prefix:String,getconf:String,du:String)->Program.Exit! {
+    return MainWithSettings(Record.new(shared_temp: File.Path.new(shared), user_temp_prefix: prefix, getconf: File.Path.new(getconf), du: File.Path.new(du)))
+}
+flow FixtureDispatch()->Program.Exit! {
+    context = Process.Context.current()
+    return FixtureEntry(Process.Context.environment_value(context,%q), Process.Context.environment_value(context,%q), Process.Context.environment_value(context,%q), Process.Context.environment_value(context,%q))
+}
+`, cleanupSharedTempKey, cleanupUserTempKey, cleanupGetconfKey, cleanupDuKey)
+	return strings.TrimSuffix(application, terminal) + bindings + terminal
 }
 
 func (fixture cleanupWorkflowFixture) flags(t *testing.T, mode string) []string {
@@ -222,6 +240,8 @@ func (fixture cleanupWorkflowFixture) scenario(t *testing.T, mode, behavior stri
 		{"FIXTURE_BEHAVIOR", behavior}, {"FIXTURE_USER_TEMP", fixture.temporary + "/"},
 		{"FIXTURE_DOCKER_JSON", `[{"Name":"desktop-linux","Endpoints":{"docker":{"Host":"unix:///fixture/docker.sock"}}}]`},
 		{"FIXTURE_DOCKER_BUILDER", "Name: desktop-linux\nDriver: docker\nEndpoint: desktop-linux\n"},
+		{cleanupSharedTempKey, fixture.shared}, {cleanupUserTempKey, fixture.temporaryPrefix + "/"},
+		{cleanupGetconfKey, fixture.tools["getconf"]}, {cleanupDuKey, fixture.tools["du"]},
 	}
 	for _, override := range fixture.overrides {
 		replaced := false
@@ -274,6 +294,57 @@ func (fixture cleanupWorkflowFixture) scenario(t *testing.T, mode, behavior stri
 }
 
 func TestMacCleanupCompleteWorkflow(t *testing.T) {
+	t.Run("shared-module-private-settings", func(t *testing.T) {
+		first, second := newCleanupWorkflowFixture(t), newCleanupWorkflowFixture(t)
+		if first.root == second.root || first.source(t) != second.source(t) {
+			t.Fatal("private workflow roots require one immutable application source")
+		}
+		var object []byte
+		for index, fixture := range []cleanupWorkflowFixture{first, second} {
+			verify := func(t *testing.T, actual result) {
+				if actual.status != 0 || actual.stderr != "" || !strings.Contains(actual.stdout, "Cleanup complete") || !strings.Contains(actual.stdout, "net volume change: 2.00 GiB") {
+					t.Fatalf("private settings workflow: %+v", actual)
+				}
+				for _, paths := range [][]string{fixture.direct, fixture.recursive, fixture.removedTrees} {
+					for _, path := range paths {
+						macCleanupPresent(t, path, false)
+					}
+				}
+				if index == 0 {
+					for _, paths := range [][]string{second.direct, second.recursive, second.removedTrees} {
+						for _, path := range paths {
+							macCleanupPresent(t, path, true)
+						}
+					}
+				}
+			}
+			scenario := fixture.scenario(t, "apply", "success", false, verify)
+			scenario.name = fmt.Sprintf("private-settings-%d", index)
+			scenario.run = func(t *testing.T, artifact, work string) {
+				compiled, err := os.ReadFile(filepath.Join(work, "program.o"))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if index == 0 {
+					object = compiled
+				} else if !bytes.Equal(object, compiled) {
+					t.Fatal("private settings changed the immutable compiled application object")
+				}
+				command := exec.Command(artifact)
+				command.Dir = work
+				command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work, "TMP=" + work, "TEMP=" + work, "LC_ALL=C", "LANG=C"}
+				var stdout, stderr bytes.Buffer
+				command.Stdout, command.Stderr = &stdout, &stderr
+				if err := command.Run(); err != nil {
+					if _, exited := err.(*exec.ExitError); !exited {
+						t.Fatal(err)
+					}
+				}
+				verify(t, result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()})
+			}
+			runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{scenario})
+		}
+	})
 	for _, test := range []struct{ mode, behavior string }{
 		{"preview", "success"}, {"report", "success"}, {"apply", "success"},
 		{"apply", "npm-failure"}, {"apply", "pip-absent"}, {"apply", "builder-multiline"},

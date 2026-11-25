@@ -251,7 +251,7 @@ func literalSequenceScenario(items []string, number int) llvmRuntimeScenario {
 func TestLLVMLiteralSequenceFailureLocations(t *testing.T) {
 	source := "return List.new(\n  11,\n  22,\n  33\n)\n"
 	path := sourceFile(t, source)
-	artifact, built := buildForTest(t, path)
+	artifact, built := runtimeFixture(t, path)
 	if built.status != 0 {
 		t.Fatalf("build literal step boundaries: %+v", built)
 	}
@@ -268,7 +268,7 @@ func TestLLVMLiteralSequenceFailureLocations(t *testing.T) {
 			items[index] = large
 			source := "return List.new(\n  " + strings.Join(items, ",\n  ") + "\n)\n"
 			path := sourceFile(t, source)
-			artifact, built := buildForTest(t, path)
+			artifact, built := runtimeFixture(t, path)
 			if built.status != 0 {
 				t.Fatalf("build admitted literal limit: %+v", built)
 			}

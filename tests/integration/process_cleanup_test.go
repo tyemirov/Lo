@@ -444,7 +444,7 @@ func TestProcessContextInheritedWorkingDirectoryIgnoresPWD(t *testing.T) {
 	path := fileFixture(t, fixture.writes, "data", "before")
 	body := fmt.Sprintf(`context = Process.Context.current(); pwd = Process.Context.environment_value(context, "PWD"); executable = Process.Executable.new(File.Path.new(%q)); command = Process.Command.new(context, executable, List.new("write", %q), Bytes.new("")); result = commit command; return Record.new(code: Process.Termination.exit_code(result.termination), pwd: pwd)`, fixture.executable, path)
 	source := sourceFile(t, processContextProgram("Record{code: Int, pwd: String}", body))
-	artifact, built := buildForTest(t, source)
+	artifact, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build inherited directory fixture: %+v", built)
 	}
