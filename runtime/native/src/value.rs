@@ -807,7 +807,7 @@ mod http_storage_flags_tests {
     }
 
     fn context() -> Context {
-        let metadata = br#"{"abi":"lo-native-3","has_result":false,"source":{"path":"http-storage-flags.lo","sha256":"0000000000000000000000000000000000000000000000000000000000000000"},"types":[],"files":[],"spans":[],"locations":[],"flows":[],"derivatives":[]}"#;
+        let metadata = br#"{"abi":"lo-native-3","has_result":false,"result_type":null,"source":{"path":"http-storage-flags.lo","sha256":"0000000000000000000000000000000000000000000000000000000000000000"},"types":[],"files":[],"spans":[],"locations":[],"flows":[],"derivatives":[]}"#;
         Context::new(Arc::new(Program::parse(metadata, 0).unwrap()), 1000)
     }
 
