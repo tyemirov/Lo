@@ -1,6 +1,6 @@
 {
   "host": "aarch64-apple-darwin",
-  "provenance": "HTTPS upstream URLs; exact package version archives retrieved 2026-10-20; SHA-256 binds downloaded bytes.",
+  "provenance": "Exact package archives from upstream HTTPS URLs, pinned by SHA-256 and byte count.",
   "artifacts": [
     {
       "archive": "libc6.deb",
@@ -22,9 +22,9 @@
     },
     {
       "archive": "qemu.tbz2",
-      "url": "https://packages.macports.org/qemu/qemu-11.1.3_0+cocoa+curses+spice+spice_protocol+target_arm+target_i386+target_x86_64+usb+vnc.darwin_25.arm64.tbz2",
-      "sha256": "93f05f904a30d1c29e41e390520f05506fff83100c0676b9ac1d4ef982cc340a",
-      "bytes": 50053580
+      "url": "https://packages.macports.org/qemu/qemu-11.1.3_1+cocoa+curses+spice+spice_protocol+target_arm+target_i386+target_x86_64+usb+vnc.darwin_25.arm64.tbz2",
+      "sha256": "5c84bfc6802c846f8f331cc27ea3b9cda6ef005ae26800585eccac10950d1a1e",
+      "bytes": 50047526
     },
     {
       "archive": "glib2.tbz2",
@@ -40,9 +40,9 @@
     },
     {
       "archive": "libpixman.tbz2",
-      "url": "https://packages.macports.org/libpixman/libpixman-0.46.0_0.darwin_20.arm64.tbz2",
-      "sha256": "dbb3e4ce1c68a1400550d5791d33a89248151d633581a41498781528881e9752",
-      "bytes": 225026
+      "url": "https://packages.macports.org/libpixman/libpixman-0.46.4_0.darwin_25.arm64.tbz2",
+      "sha256": "1ed80589c01ca0406d2f6103806aeaa0db997ab598e6759f42bf20bb3e51c8dd",
+      "bytes": 224017
     },
     {
       "archive": "bzip2.tbz2",
@@ -154,9 +154,9 @@
     },
     {
       "archive": "libffi.tbz2",
-      "url": "https://packages.macports.org/libffi/libffi-3.4.8_0.darwin_20.arm64.tbz2",
-      "sha256": "db877cbef74f4ff0cc7df421c0fedbd589ec76d4541797c559147f624d61269b",
-      "bytes": 33651
+      "url": "https://packages.macports.org/libffi/libffi-3.6.0_0.darwin_25.arm64.tbz2",
+      "sha256": "cad5f26443d79a1d9ef77af7590dffa4e0739ff3865e3c951fc27c37c5343f0b",
+      "bytes": 35893
     },
     {
       "archive": "pcre2.tbz2",
