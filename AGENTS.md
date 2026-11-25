@@ -55,17 +55,21 @@ Root `AGENTS.md` is the agent entrypoint. Shared rules live under `.mprlab/`.
 
 Read `.mprlab/POLICY.md` for every task.
 Read the following files only when their condition applies.
-Read each selected guide in full before its first applicable action.
+Open each selected guide and read its full contents before acting. If the output is truncated, read the remaining chunks.
+Follow required references at every depth, including Markdown links and named files in prose or tables. Apply the conditions in each document. A scoped reference selects the named section or record.
+Resolve relative links from the document that contains them and explicit repository paths from the repository root. Reuse content already read in this context, including when a link leads back to it.
+Before the dependent action, apply the requirements you found. If a required reference is unavailable, identify it and the affected action, and continue independent work.
 
 - Before edits: `.mprlab/PLANNING.md`.
-- For technical prose: `.mprlab/AGENTS.DOCS.md` and `.mprlab/TERMINOLOGY.md`.
+- Before editing repository technical prose: `.mprlab/AGENTS.DOCS.md` and `.mprlab/TERMINOLOGY.md`.
+- For explicitly required ASD-STE100 compliance: `.mprlab/AGENTS.STE.md`.
+- For application onboarding or user-interface behavior: `.mprlab/AGENTS.PRODUCT.md`.
+- For deployment manifests, release, publication, deployment, or native preparation: `.mprlab/AGENTS.DEPLOYMENT.md`.
 - For issue work: the selected issue and its dependencies in `ISSUES.md`.
 - For tracker edits: `.mprlab/issues-md-format.md`.
 - For Git operations: `.mprlab/AGENTS.GIT.md`.
-- For HTTP or gRPC API changes: `.mprlab/AGENTS.API.md`.
 - For Go changes: `.mprlab/AGENTS.GO.md`.
 - For Python changes: `.mprlab/AGENTS.PY.md`.
-- For container changes: `.mprlab/AGENTS.DOCKER.md`.
 
 File permission modes are outside agent scope.
 Never examine, validate, compare, require, change, or record a file permission mode.
