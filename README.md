@@ -285,6 +285,82 @@ return Match.new(score,
 
 The range includes both endpoints. A score of `95` meets both tests and returns `"distinction"` because the range comes first. A score of `75` returns `"pass"`, and `50` returns `"try again"`.
 
+### Call A Different Flow In Each Branch
+
+Put a flow call on the right side of each case. Lo calls only the flow in the matching branch. All three flows return `Console.Line!`, which means they can produce a line to write or report an error. The `commit` after `Match.new` writes the selected line.
+
+```lo
+flow ShowHelp() -> Console.Line! {
+    return Console.Line.new("stdout", "Available modes: help, version", true)
+}
+
+flow ShowVersion() -> Console.Line! {
+    return Console.Line.new("stdout", "Example version 1.0", true)
+}
+
+flow ReportUnknownMode(mode: String) -> Console.Line! {
+    return Console.Line.new("stderr", String.concat("Unknown mode: ", mode), true)
+}
+
+flow Run(mode: String) -> Program.Exit! {
+    action = Match.new(mode,
+        "help": ShowHelp(),
+        "version": ShowVersion(),
+        _: ReportUnknownMode(mode)
+    )
+    commit action
+    return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
+}
+
+return Run("help")
+```
+
+`Run("help")` prints the available modes to standard output. Try `Run("version")` to print the version, or `Run("print")` to write `Unknown mode: print` to standard error.
+
+### Choose Between A File Write And Console Output
+
+`File.Write` and `Console.Line` are different target types. `Match.new` requires a common result type, and its branches cannot commit. Here, the match returns the same kind of record in both branches, with one message in the selected list and an empty list for the other action. After the match, `Flow.fold` calls the appropriate flow once for each message. An empty list skips its flow. Each flow commits its own target.
+
+```lo
+flow NoMessages() -> List<String> {
+    return List.new()
+}
+
+flow WriteMessage(count: Int, message: String) -> Int! {
+    path = File.Path.new("_scratch/match-output/message.txt")
+    action = File.Write.new(path, UTF8.Bytes.new(message))
+    commit action
+    return Math.add(count, 1)
+}
+
+flow PrintMessage(count: Int, message: String) -> Int! {
+    action = Console.Line.new("stdout", message, true)
+    commit action
+    return Math.add(count, 1)
+}
+
+flow Deliver(save_to_file: Bool, message: String) -> Program.Exit! {
+    selected = Match.new(save_to_file,
+        true: Record.new(file_messages: List.new(message), console_messages: NoMessages()),
+        _: Record.new(file_messages: NoMessages(), console_messages: List.new(message))
+    )
+    written = Flow.fold(selected.file_messages, 0, WriteMessage)
+    delivered = Flow.fold(selected.console_messages, written, PrintMessage)
+    return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
+}
+
+return Deliver(false, "Hello from Lo")
+```
+
+[Build and run the example](#build-and-run-the-examples) with `false` to print `Hello from Lo`. To create or replace `_scratch/match-output/message.txt` with that text, change `false` to `true`, rebuild, and run with a write grant scoped to the example directory.
+
+```bash
+mkdir -p _scratch/match-output
+./selection run --write-root _scratch/match-output
+```
+
+### Build And Run The Examples
+
 To try an example with an installed Lo compiler, save one block as `selection.lo`, then build and run it. Use the [developer build instructions](#build-and-validate) if you built the compiler from source.
 
 ```bash
