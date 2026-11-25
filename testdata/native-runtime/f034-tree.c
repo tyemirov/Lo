@@ -1,7 +1,8 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 #include "lo_file_observer.h"
 
-extern int lo_cli_main(int, const char **, const char **);
+
 extern uint64_t lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int rename(const char *, const char *), link(const char *, const char *);
 extern int fcntl(int, int, ...), dup2(int, int), close(int), access(const char *, int);
@@ -12,6 +13,10 @@ extern long write(int, const void *, size_t);
 extern void *dlsym(void *, const char *);
 #if defined(__APPLE__)
 extern int *__error(void);
+extern int getpid(void);
+extern int proc_pidinfo(int, int, uint64_t, void *, int);
+struct FixtureDescriptor { int32_t descriptor; uint32_t type; };
+_Static_assert(sizeof(struct FixtureDescriptor) == 8, "Darwin proc_fdinfo size");
 #define ERROR_ADDRESS __error
 #else
 extern int *__errno_location(void);
@@ -29,10 +34,10 @@ _Static_assert(offsetof(struct FixtureDirectoryEntry, name) == 19, "Linux dirent
 extern FixtureDirectory *opendir(const char *);
 extern struct FixtureDirectoryEntry *readdir(FixtureDirectory *);
 extern int dirfd(FixtureDirectory *), closedir(FixtureDirectory *);
-static unsigned descriptor_measurements, descriptor_entries, reference_probes;
-static unsigned metadata_observations, reference_matches, sparse_checks;
 #define ERROR_ADDRESS __errno_location
 #endif
+static unsigned descriptor_measurements, descriptor_entries, reference_probes;
+static unsigned metadata_observations, reference_matches, sparse_checks;
 
 #define DECLARE(name) extern void name(Context *, const Value **, uint64_t, uint64_t, ResultSlot *)
 DECLARE(lo_f034_entry);
@@ -67,9 +72,7 @@ static unsigned descriptor_reference(void) {
     int saved_error = *ERROR_ADDRESS();
     unsigned count = 0;
     for (int descriptor = 0; descriptor < 512; ++descriptor) {
-#if !defined(__APPLE__)
         ++reference_probes;
-#endif
         if (fcntl(descriptor, 1) >= 0) ++count;
     }
     *ERROR_ADDRESS() = saved_error;
@@ -78,7 +81,21 @@ static unsigned descriptor_reference(void) {
 
 static unsigned descriptors(void) {
 #if defined(__APPLE__)
-    return descriptor_reference();
+    int saved_error = *ERROR_ADDRESS();
+    struct FixtureDescriptor entries[513];
+    unsigned char seen[512] = {0};
+    ++descriptor_measurements;
+    int bytes = proc_pidinfo(getpid(), 1, 0, entries, sizeof(entries));
+    unsigned count = bytes > 0 ? (unsigned)bytes / sizeof(entries[0]) : 0;
+    if (bytes <= 0 || bytes % sizeof(entries[0]) || count > 512) invalid = 10;
+    else for (unsigned index = 0; index < count; ++index) {
+        int descriptor = entries[index].descriptor;
+        if (descriptor < 0 || descriptor >= 512 || seen[descriptor]) { invalid = 10; break; }
+        seen[descriptor] = 1;
+        ++descriptor_entries;
+    }
+    *ERROR_ADDRESS() = saved_error;
+    return count;
 #else
     int saved_error = *ERROR_ADDRESS();
     unsigned count = 0, own_seen = 0;
@@ -157,9 +174,16 @@ static int descriptor_parent(int descriptor, const char *suffix) {
     return path_length >= suffix_length && same(path + path_length - suffix_length, suffix);
 }
 
+static int (*close_delegate)(int);
+static int (*unlink_delegate)(int, const char *, int);
+
 int close(int descriptor) {
-    int (*native_close)(int) = (int (*)(int))dlsym((void *)-1, "close");
-    if (!native_close) { *ERROR_ADDRESS() = 5; return -1; }
+    int (*native_close)(int) = __atomic_load_n(&close_delegate, __ATOMIC_ACQUIRE);
+    if (!native_close) {
+        native_close = (int (*)(int))dlsym((void *)-1, "close");
+        if (!native_close) { *ERROR_ADDRESS() = 5; return -1; }
+        __atomic_store_n(&close_delegate, native_close, __ATOMIC_RELEASE);
+    }
     int selected = fail_close && (cleanup_descriptor < 0 || descriptor == cleanup_descriptor);
     int result = native_close(descriptor);
     if (selected && result == 0) {
@@ -173,8 +197,12 @@ int close(int descriptor) {
 }
 
 int unlinkat(int parent, const char *name, int flags) {
-    int (*native_unlink)(int, const char *, int) = (int (*)(int, const char *, int))dlsym((void *)-1, "unlinkat");
-    if (!native_unlink) { *ERROR_ADDRESS() = 5; return -1; }
+    int (*native_unlink)(int, const char *, int) = __atomic_load_n(&unlink_delegate, __ATOMIC_ACQUIRE);
+    if (!native_unlink) {
+        native_unlink = (int (*)(int, const char *, int))dlsym((void *)-1, "unlinkat");
+        if (!native_unlink) { *ERROR_ADDRESS() = 5; return -1; }
+        __atomic_store_n(&unlink_delegate, native_unlink, __ATOMIC_RELEASE);
+    }
     static const char *names[] = {"a", "b", "a-dir", "b-file", "a", "c-dir", "tree"};
     static const char *parents[] = {"/parent/tree/a-dir", "/parent/tree/a-dir", "/parent/tree", "/parent/tree", "/parent/tree/c-dir", "/parent/tree", "/parent"};
     unsigned total = LO_CASE == 33 ? 161 : LO_CASE == 34 ? 321 : 7;
@@ -203,9 +231,7 @@ static int observer(uintptr_t user, uint32_t phase, const unsigned char *root, u
     const unsigned char *name, uint64_t name_length, LoFileMetadata *metadata) {
     (void)phase;
     if (user != 34 || !root || !root_length || !metadata) { invalid = 3; return -1; }
-#if !defined(__APPLE__)
     ++metadata_observations;
-#endif
     unsigned current = descriptors();
     if (current > peak) peak = current;
     int alias = bytes_equal(name, name_length, "b");
@@ -333,7 +359,6 @@ int main(void) {
     if (setup_status) return 10 + setup_status;
     int saved = fcntl(2, 0, 3);
     if (saved < 0 || dup2(1, 2) < 0) return 20;
-#if !defined(__APPLE__)
     unsigned before_sparse = descriptors();
     int sparse = fcntl(saved, 0, 384);
     if (sparse < 384 || sparse >= 512) {
@@ -342,12 +367,9 @@ int main(void) {
     }
     *ERROR_ADDRESS() = 0;
     if (fcntl(sparse - 1, 1) >= 0 || *ERROR_ADDRESS() != 9) invalid = 10;
-#endif
     unsigned baseline = descriptors();
-#if !defined(__APPLE__)
     if (baseline == before_sparse + 1) ++sparse_checks; else invalid = 10;
     if (baseline == descriptor_reference()) ++reference_matches; else invalid = 10;
-#endif
     char working_directory[4096], lock_path[4096];
     if (!getcwd(working_directory, sizeof(working_directory))) return 22;
     int lock_length = snprintf(lock_path, sizeof(lock_path), "%s%slock", working_directory, same(working_directory, "/") ? "" : "/");
@@ -362,7 +384,6 @@ int main(void) {
     lo_value_release(retained);
     lo_value_release(diagnostic);
     unsigned after = descriptors();
-#if !defined(__APPLE__)
     if (after == descriptor_reference()) ++reference_matches; else invalid = 10;
     if (close(sparse)) invalid = 10;
     if (descriptors() + 1 == after) ++sparse_checks; else invalid = 10;
@@ -373,7 +394,6 @@ int main(void) {
         if (length <= 0 || (size_t)length >= sizeof(evidence)
             || write(1, evidence, (size_t)length) != length) invalid = 10;
     }
-#endif
     if (dup2(saved, 2) < 0 || close(saved)) return 21;
     int expected = LO_CASE == 0 || LO_CASE == 10 || LO_CASE == 27 || LO_CASE == 28 || LO_CASE >= 32 ? 0
         : LO_CASE == 2 || LO_CASE == 3 || LO_CASE == 16 || LO_CASE == 21 || LO_CASE == 22

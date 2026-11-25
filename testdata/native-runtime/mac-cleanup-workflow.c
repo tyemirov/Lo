@@ -1,9 +1,10 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 #include "lo_file_observer.h"
 #include "lo_host_observer.h"
 
 extern void lo_cleanup_workflow_entry(Context *, const Value **, uint64_t, uint64_t, ResultSlot *);
-extern int lo_cli_main(int, const char *const *, const char *const *);
+
 extern uint64_t lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int setenv(const char *, const char *, int);
 extern int unsetenv(const char *);

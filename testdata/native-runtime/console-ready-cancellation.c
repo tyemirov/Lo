@@ -1,7 +1,8 @@
+#include "cli-entry.h"
 #include "capture.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINTPTR_TYPE__ Thread;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern void *dlsym(void *,const char *);
 extern int getpid(void),getppid(void),kill(int,int),poll(void *,unsigned long,int);

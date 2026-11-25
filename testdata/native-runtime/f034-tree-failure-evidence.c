@@ -1,7 +1,8 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 #include "lo_file_observer.h"
 
-extern int lo_cli_main(int, const char **, const char **);
+
 extern uint64_t lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int rename(const char *, const char *), fcntl(int, int, ...), dup2(int, int), close(int), access(const char *, int);
 extern int mkstemp(char *), snprintf(char *, size_t, const char *, ...);

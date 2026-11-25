@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 #include "capture.h"
 #include "../../runtime/native/include/lo_device_driver.h"
 typedef __SIZE_TYPE__ Size;
@@ -6,7 +7,7 @@ extern void free(void *);
 extern void *memcpy(void *,const void *,Size);
 extern int fcntl(int,int,...),dup2(int,int),close(int),kill(int,int),getpid(void),open(const char *,int,...),unlink(const char *);
 extern long read(int,void *,Size),write(int,const void *,Size);
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern uint64_t lo_runtime_live_storages(void),lo_runtime_live_storage_bytes(void);
 struct Buffer {uint64_t bytes;unsigned char *values;};
 static unsigned opens,closes,allocations,releases,uploads,downloads,live_buffers,events,alloc_events,release_events,transfer_events,open_events,close_events;

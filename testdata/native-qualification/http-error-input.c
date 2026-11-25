@@ -1,10 +1,11 @@
+#include "../native-runtime/cli-entry.h"
 #include "lo_runtime.h"
 /* Trusted ABI fixture: retain a real OnError argument, then publish it by CLI. */
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __SIZE_TYPE__ Size;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern void lo_http_original_entry(Context *,const Value *const *,U64,U64,ResultSlot *);
 extern void lo_http_original_onerror(Context *,const Value *const *,U64,U64,ResultSlot *);
 

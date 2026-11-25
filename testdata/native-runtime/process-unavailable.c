@@ -1,5 +1,6 @@
+#include "cli-entry.h"
 typedef __SIZE_TYPE__ Size;
-extern int open(const char*,int,...);extern int dup2(int,int);extern int close(int);extern long lseek(int,long,int);extern long read(int,void*,Size);extern int lo_cli_main(int,const char**,const char**);
+extern int open(const char*,int,...);extern int dup2(int,int);extern int close(int);extern long lseek(int,long,int);extern long read(int,void*,Size);
 static int contains(const char *text,const char *needle){for(;*text;++text){Size i=0;while(needle[i]&&text[i]==needle[i])++i;if(!needle[i])return 1;}return 0;}
 int main(void){
  int diagnostic=open("diagnostic.json",2|0x40|0x200,0666);if(diagnostic<0||dup2(diagnostic,2)<0)return 10;

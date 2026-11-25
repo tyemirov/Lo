@@ -1,10 +1,11 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 
 extern U64 lo_context_scope_count(const Context *), lo_context_depth(const Context *);
 extern U64 lo_runtime_live_values(void), lo_runtime_live_contexts(void), lo_runtime_live_programs(void);
-extern int lo_cli_main(int, const char **, const char **);
+
 extern long write(int, const void *, __SIZE_TYPE__);
 static int number(U64 value) {
     char digits[32], text[32];

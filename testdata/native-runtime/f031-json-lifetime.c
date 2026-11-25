@@ -1,6 +1,7 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 
-extern int lo_cli_main(int, const char **, const char **);
+
 extern uint64_t lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int fcntl(int, int, ...), dup2(int, int), close(int);
 extern void lo_op_JSON_2Edecode(Context *, const Value **, uint64_t, uint64_t, ResultSlot *);

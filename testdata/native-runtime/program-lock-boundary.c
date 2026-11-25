@@ -1,3 +1,5 @@
+#include "cli-entry.h"
+#include "self-image.h"
 #include "lo_runtime.h"
 #include "lo_process.h"
 #include "lo_program_lock.h"
@@ -5,11 +7,13 @@
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern int lo_boolean_value(const Value *);
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int open(const char *,int,...),close(int),fcntl(int,int,...),fork(void),execve(const char *,char *const *,char *const *),waitpid(int,int *,int),rename(const char *,const char *),symlink(const char *,const char *),linkat(int,const char *,int,const char *,int);
 extern char *getcwd(char *,Size);
+extern int mkstemp(char *);
+extern long write(int,const void *,Size);
 extern void *dlsym(void *,const char *);
 extern void _exit(int);
 #ifdef __APPLE__
@@ -75,10 +79,13 @@ int main(int argc,const char **argv){
  unsigned count=length(path);if(count+6>=sizeof(path))return 2;if(count>1)path[count++]='/';
  for(unsigned index=0;index<5;++index)path[count++]= "lock"[index];
  
+ char image_path[LO_TEST_SELF_IMAGE_CAPACITY];
+ const char *image=lo_test_self_image(argv[0],image_path);
+ if(!image)return 3;
 #ifdef __APPLE__
- const int at_current=-2;const char *image=argv[0],*replacement="program.ll";
+ const int at_current=-2;
 #else
- const int at_current=-100;const char *image="/probe",*replacement="/arguments";
+ const int at_current=-100;
 #endif
  if(linkat(at_current,image,at_current,path,0))return 3;
  if(LO_CASE==19){const char *arguments[]={"forged-entry","run","--lock-entry","--format","json"};int status=lo_cli_main(5,arguments,0);return status!=2||injections!=1?79:0;}
@@ -92,6 +99,12 @@ int main(int argc,const char **argv){
   if(lo_context_set_program_entry(context,(const unsigned char *)path,length(path)))return 6;
  }
  if(LO_CASE==11||LO_CASE==12||LO_CASE==15){
+  char replacement[]="replacement-image-XXXXXX";
+  int descriptor=mkstemp(replacement);if(descriptor<0)return 55;
+  const char bytes[]="distinct replacement image";
+  int written=write(descriptor,bytes,sizeof(bytes)-1)==(long)sizeof(bytes)-1;
+  int closed=close(descriptor);
+  if(!written||closed)return 55;
   unsigned i=0;for(;path[i];++i)alias[i]=path[i];const char *tail="-original";for(unsigned j=0;j<10;++j)alias[i+j]=tail[j];
   if(rename(path,alias))return 54;if(linkat(at_current,replacement,at_current,path,0))return 55;
   const char *paths[]={path};
@@ -135,11 +148,7 @@ int main(int argc,const char **argv){
  if(LO_CASE==7){
   char digits[16],number[16];unsigned n=0,i=0,value=(unsigned)lease_fd;
   do{digits[n++]=(char)('0'+value%10);value/=10;}while(value);while(n)number[i++]=digits[--n];number[i]=0;
-#ifdef __APPLE__
-  const char *executable=argv[0];
-#else
-  const char *executable="/probe";
-#endif
+  const char *executable=image;
   char *arguments[]={(char *)executable,"--probe-lock-fd",number,0};
   int child=fork();if(child<0)return 14;if(!child){char *environment[]={0};execve(executable,arguments,environment);_exit(52);}
   int status=0;if(waitpid(child,&status,0)!=child || status!=0)return 15;

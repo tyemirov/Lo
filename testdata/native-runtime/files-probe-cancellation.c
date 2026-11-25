@@ -1,9 +1,11 @@
+#include "cli-entry.h"
+#include "self-image.h"
 #include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __INT64_TYPE__ Offset;
-extern int lo_cli_main(int,const char *const*,const char *const*);
+
 extern void lo_op_File_2Eopen_5Fpaths(Context*,const Value**,U64,U64,ResultSlot*);
 extern void lo_context_cancel_after_polls(Context*,U64);
 extern U64 lo_runtime_live_contexts(void);
@@ -46,12 +48,9 @@ void lo_files_probe_bridge(Context *context,const Value **args,U64 count,U64 sit
 }
 int main(int argc,const char **argv,const char **environment){
  (void)argc;
-#ifdef __APPLE__
- const char *executable=argv[0];
-#else
- (void)argv;
- const char *executable="/probe";
-#endif
+ char image_path[LO_TEST_SELF_IMAGE_CAPACITY];
+ const char *executable=lo_test_self_image(argv[0],image_path);
+ if(!executable)return 10;
  /* A hard link retains an actual executable without an installation step. */
  if(linkat(CURRENT_DIRECTORY,executable,CURRENT_DIRECTORY,"lsof",0)||setenv("PATH",".",1))return 10;
  int output=open("probe-cancellation-output",CREATE,0666),saved=fcntl(2,0,3);

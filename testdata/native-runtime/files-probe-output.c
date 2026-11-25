@@ -1,6 +1,8 @@
+#include "cli-entry.h"
+#include "self-image.h"
 typedef __SIZE_TYPE__ Size;
 typedef __INT64_TYPE__ Offset;
-extern int lo_cli_main(int,const char**,const char**);
+
 extern unsigned long long lo_runtime_live_contexts(void);
 extern unsigned long long lo_runtime_live_values(void);
 extern int open(const char*,int,...);
@@ -38,11 +40,9 @@ int main(int argc,const char **argv){
   if(LO_CASE==2||LO_CASE==3||LO_CASE==4){int status=emit(2,STREAM_LIMIT+(LO_CASE==3));if(status)return status;}
   return 0;
  }
-#ifdef __APPLE__
- const char *executable=argv[0];
-#else
- const char *executable="/probe";
-#endif
+ char image_path[LO_TEST_SELF_IMAGE_CAPACITY];
+ const char *executable=lo_test_self_image(argv[0],image_path);
+ if(!executable)return 10;
  if(linkat(CURRENT_DIRECTORY,executable,CURRENT_DIRECTORY,"lsof",0)||setenv("PATH",".",1))return 10;
  int output=open("probe-output",CREATE,0666),saved_out=fcntl(1,0,3),saved_err=fcntl(2,0,3);
  if(output<0||saved_out<0||saved_err<0||dup2(output,1)<0||dup2(output,2)<0)return 11;

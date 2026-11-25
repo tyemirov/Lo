@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 typedef __SIZE_TYPE__ Size;
 typedef __INT64_TYPE__ Offset;
 typedef __UINTPTR_TYPE__ Thread;
@@ -15,7 +16,7 @@ extern int setsockopt(int,int,int,const void *,unsigned int);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *);
 extern int pthread_join(Thread,void **);
 extern void *dlsym(void *,const char *);
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 #if defined(__APPLE__)
 extern int *__error(void);
 #define ERROR_ADDRESS __error

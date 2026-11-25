@@ -1,7 +1,9 @@
+#include "cli-entry.h"
+#include "self-image.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __SIZE_TYPE__ Size;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *);
 extern int pthread_join(Thread,void **);
@@ -69,11 +71,12 @@ int main(int argc,const char **argv) {
  int null=open("/dev/null",1);
  if(null<0 || dup2(null,1)<0)return 35;
  close(null);
+ char image_path[LO_TEST_SELF_IMAGE_CAPACITY];
+ const char *executable=lo_test_self_image(argv[0],image_path);
+ if(!executable)return 36;
 #ifdef __APPLE__
- const char *executable=argv[0];
  const int current_directory=-2;
 #else
- const char *executable="/probe";
  const int current_directory=-100;
 #endif
  if(linkat(current_directory,executable,current_directory,"lsof",0) || setenv("PATH",".",1))return 36;

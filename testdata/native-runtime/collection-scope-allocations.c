@@ -1,8 +1,9 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
-extern int lo_cli_main(int, const char **, const char **);
+
 extern void lo_op_List_2Efold(Context *, const Value **, U64, U64, ResultSlot *);
 extern U64 lo_runtime_live_values(void), lo_runtime_live_contexts(void);
 extern long write(int, const void *, Size);

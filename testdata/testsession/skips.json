@@ -1,0 +1,113 @@
+{
+  "./internal/nativebuild/TestLLVMExecutableGenerationDiagnostics": [
+    "LLVM input admission requires a Darwin host"
+  ],
+  "./internal/nativebuild/TestLLVMLinuxHostLibrarySnapshots": [
+    "requires Linux arm64 host"
+  ],
+  "./internal/nativebuild/TestLLVMSnapshotPreservesConsumedExecutable": [
+    "the prepared LLVM distribution requires a Darwin host"
+  ],
+  "./internal/nativebuild/TestLLVMSnapshotRejectsUnpinnedBytes": [
+    "the prepared LLVM distribution requires a Darwin host"
+  ],
+  "./tests/integration/FuzzCompilerSource": [
+    "fuzz input exceeds test bound"
+  ],
+  "./tests/integration/FuzzInspectionSource": [
+    "fuzz input exceeds test bound"
+  ],
+  "./tests/integration/TestF036AdmittedHostLimits": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036CleanupBoundaryOwnership": [
+    "requires Darwin process and descriptor fixtures"
+  ],
+  "./tests/integration/TestF036DescendantOutputFailure": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036FinalReceiptStartsCleanupDeadline": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036FixtureUsesInheritedKernelLimit": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036InjectedDescendantOwnership": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036KernelLimitAboveInheritedHardLimit": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036LaunchEvidenceOrder": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036LockCaptureCleanupFreeze": [
+    "requires Darwin descriptor and process fixtures"
+  ],
+  "./tests/integration/TestF036NativeConfinement": [
+    "requires the Darwin descendant profile and audit-token fixture"
+  ],
+  "./tests/integration/TestF036NativeSDKAdapter": [
+    "requires the Darwin SDK and audit-token process fixture"
+  ],
+  "./tests/integration/TestF036RegisteredExecRetainsInitialScope": [
+    "requires the Darwin descendant profile and audit-token fixture"
+  ],
+  "./tests/integration/TestF036ResourceTransferBackpressure": [
+    "requires Darwin descriptor transfer and audit-token process fixtures"
+  ],
+  "./tests/integration/TestF036SharedSessionLockFreeze": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestF036StorageAdmissionPrecedesLaunch": [
+    "requires Darwin process and audit-token fixtures"
+  ],
+  "./tests/integration/TestFileOpenPathsHighDescriptorHostProbe": [
+    "host lsof is unavailable; recorded protocol fixtures cover the boundary"
+  ],
+  "./tests/integration/TestFileOpenPathsHostProbe": [
+    "host lsof is unavailable; fixed protocol fixtures cover the boundary"
+  ],
+  "./tests/integration/TestInstalledCompilerExecutionCleanup": [
+    "controlled compiler fixture uses the Darwin executable snapshot lane"
+  ],
+  "./tests/integration/TestLLVMConsoleSpawnQueuedDeadline": [
+    "the selected native Process backend is Darwin"
+  ],
+  "./tests/integration/TestLLVMProcessConfigurationDiagnostics": [
+    "requires qualified Darwin process host"
+  ],
+  "./tests/integration/TestLLVMProcessExecution": [
+    "requires qualified Darwin arm64 process host"
+  ],
+  "./tests/integration/TestLLVMProcessMetalArtifact": [
+    "requires an explicit Metal runtime bundle"
+  ],
+  "./tests/integration/TestLLVMProcessProtectedFileComposition": [
+    "requires qualified Darwin process host"
+  ],
+  "./tests/integration/TestLLVMProcessTransportCancellation": [
+    "requires the Darwin process transport"
+  ],
+  "./tests/integration/TestLLVMProcessTransportCompleted": [
+    "requires the Darwin process transport"
+  ],
+  "./tests/integration/TestLLVMProcessTransportOutputLimits": [
+    "requires the Darwin process transport"
+  ],
+  "./tests/integration/TestLLVMProgramEntryReplacementBeforeCapture": [
+    "checks the Darwin running-image witness"
+  ],
+  "./tests/integration/TestMacCleanupOwnedWorkflow": [
+    "requires Darwin process ownership fixture"
+  ],
+  "./tests/integration/TestProcessContextInheritedTransport": [
+    "requires the selected Darwin Process profile"
+  ],
+  "./tests/integration/TestProcessContextTransportBounds": [
+    "requires the selected Darwin Process profile"
+  ],
+  "./tests/integration/TestProcessExecutableDiscoveryUnauthorizedFirst": [
+    "requires the selected Darwin Process profile"
+  ]
+}

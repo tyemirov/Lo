@@ -1,8 +1,9 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 #include "lo_file_observer.h"
 #include "lo_host_observer.h"
 
-extern int lo_cli_main(int, const char **, const char **);
+
 extern uint64_t lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int rename(const char *, const char *), close(int), fcntl(int, int, ...), dup2(int, int);
 extern int symlink(const char *, const char *);

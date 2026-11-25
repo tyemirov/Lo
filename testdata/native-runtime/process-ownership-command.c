@@ -33,17 +33,27 @@ int main(int argc,char **argv) {
            ||actual.rlim_cur!=limits.rlim_cur||actual.rlim_max!=limits.rlim_max)return 78;
         execv(argv[3],argv+3);return 79;
     }
-    if(argc==4&&!strcmp(argv[1],"--host-signal")) {
-        audit_token_t token;if(fixture_parse_token(argv[2],&token))return 64;
-        int signal_number=atoi(argv[3]);
+    if(argc>=4&&!strcmp(argv[1],"--host-signal")) {
+        int signal_number=atoi(argv[2]);
         if(signal_number!=SIGKILL&&signal_number!=SIGTERM&&signal_number!=SIGUSR1)return 65;
-        int result=proc_signal_with_audittoken(&token,signal_number);
-        return result==0||result==ESRCH?0:66;
+        int failure=0;
+        for(int index=3;index<argc;++index) {
+            audit_token_t token;
+            if(fixture_parse_token(argv[index],&token)){if(!failure)failure=64;continue;}
+            int result=proc_signal_with_audittoken(&token,signal_number);
+            if(result!=0&&result!=ESRCH&&!failure)failure=66;
+        }
+        return failure;
     }
-    if(argc==3&&!strcmp(argv[1],"--host-alive")) {
-        audit_token_t token;if(fixture_parse_token(argv[2],&token))return 64;
-        char path[4096];int result=proc_pidpath_audittoken(&token,path,sizeof(path));
-        return result>0?0:1;
+    if(argc>=3&&!strcmp(argv[1],"--host-alive")) {
+        int failure=0;
+        for(int index=2;index<argc;++index) {
+            audit_token_t token;
+            if(fixture_parse_token(argv[index],&token)){if(!failure)failure=64;continue;}
+            char path[4096];int result=proc_pidpath_audittoken(&token,path,sizeof(path));
+            if(printf("%d\n",result>0?1:0)<0&&!failure)failure=78;
+        }
+        return failure;
     }
     if(argc<6)return 64;
     const char *socket_path=argv[1],*operation=argv[2],*ready=argv[3],*gate=argv[4];

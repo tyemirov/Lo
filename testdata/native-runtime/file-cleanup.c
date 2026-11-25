@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 typedef __SIZE_TYPE__ Size;
 typedef __INT64_TYPE__ Offset;
 extern int open(const char *, int, ...);
@@ -12,7 +13,7 @@ extern void *dlsym(void *, const char *);
 #ifndef __APPLE__
 extern long readlink(const char *, char *, Size);
 #endif
-extern int lo_cli_main(int, const char **, const char **);
+
 #ifdef __APPLE__
 extern int *__error(void);
 #define ERROR_ADDRESS __error

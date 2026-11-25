@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 #include @READY_PROTOCOL@
 #include <bsm/libbsm.h>
 #include <dlfcn.h>
@@ -11,7 +12,7 @@
 #include <unistd.h>
 
 #define READY_EVIDENCE @READY_EVIDENCE@
-extern int lo_cli_main(int, const char *const *, const char *const *);
+
 static int launcher_mode, ready_seen;
 static ssize_t (*original_write)(int, const void *, size_t);
 

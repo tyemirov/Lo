@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 #include "capture.h"
 #include "../../runtime/native/include/lo_device_driver.h"
 #include "metal-executor.h"
@@ -9,7 +10,7 @@ extern int strcmp(const char *,const char *);
 extern int open(const char *,int,...),close(int),unlink(const char *);
 extern int fcntl(int,int,...),dup2(int,int),kill(int,int),getpid(void);
 extern long read(int,void *,size_t),write(int,const void *,size_t);
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern uint64_t lo_runtime_live_contexts(void);
 extern uint64_t lo_runtime_live_values(void);
 extern uint64_t lo_runtime_live_storages(void);
