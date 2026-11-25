@@ -237,6 +237,65 @@ These limits apply to v0.4.
 The [planned features](specification.md#planned-features) identify later extensions.
 The core stays small for AI generation, verification, and inspection.
 
+## Choosing Between Scenarios
+
+Use `Match.new` when you would reach for `if` / `else` in another language. The first argument is the value to match, called the selector. Each case has a test on the left of `:` and a result on the right. Lo checks cases from top to bottom and evaluates only the result of the first match. Put the required `_` case last to cover everything else. The branch results must have a common type.
+
+### Choose Between Two Outcomes
+
+Use a Boolean selector for a yes-or-no decision. This example returns `"eligible"` because `20` is at least `18`. Set `age` to `17` to get `"too young"`.
+
+```lo
+age = 20
+return Match.new(Math.gte(age, 18),
+    true: "eligible",
+    _: "too young"
+)
+```
+
+### Choose By Exact Value
+
+List each recognized value as a case. This example returns `"export report"`. Set `mode` to `"preview"` to get `"show preview"`, or to `"print"` to get `"unknown mode"`.
+
+```lo
+mode = "export"
+return Match.new(mode,
+    "preview": "show preview",
+    "export": "export report",
+    _: "unknown mode"
+)
+```
+
+### Choose By Range Or Condition
+
+A case can match a range or use `when` with a named flow. Lo passes the selector to that flow and selects the case if it returns `true`. The flow must be pure, take one argument of the selector's type, and return a plain `Bool`.
+
+```lo
+flow IsPassing(score: Int) -> Bool {
+    return Math.gte(score, 60)
+}
+
+score = 95
+return Match.new(score,
+    Range.new(90, 100, true, true): "distinction",
+    when IsPassing: "pass",
+    _: "try again"
+)
+```
+
+The range includes both endpoints. A score of `95` meets both tests and returns `"distinction"` because the range comes first. A score of `75` returns `"pass"`, and `50` returns `"try again"`.
+
+To try an example with an installed Lo compiler, save one block as `selection.lo`, then build and run it. Use the [developer build instructions](#build-and-validate) if you built the compiler from source.
+
+```bash
+lo check selection.lo
+mkdir -p _scratch/build-state
+LO_BUILD_ROOT="$PWD/_scratch/build-state" lo build selection.lo --output ./selection
+./selection run
+```
+
+See the [Match rules](specification.md#11-match) for the full contract and the [side effects example](#example-explicit-side-effects) for how to choose an action and then activate it with `commit`.
+
 ## Example: HTTP Handler With Typed Failure
 
 ```lo
