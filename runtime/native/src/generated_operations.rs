@@ -143,24 +143,14 @@ pub unsafe extern "C" fn lo_op_Bytes_2Enew(
     call(c, a, n, s, o, Some("Bytes.new"))
 }
 #[no_mangle]
-pub unsafe extern "C" fn lo_op_UTF8_2EBytes_2Enew(
+pub unsafe extern "C" fn lo_op_String_2EFromBytes_2Enew(
     c: *mut Context,
     a: *const *const Value,
     n: u64,
     s: u64,
     o: *mut ResultSlot,
 ) {
-    call(c, a, n, s, o, Some("UTF8.Bytes.new"))
-}
-#[no_mangle]
-pub unsafe extern "C" fn lo_op_UTF8_2EString_2Enew(
-    c: *mut Context,
-    a: *const *const Value,
-    n: u64,
-    s: u64,
-    o: *mut ResultSlot,
-) {
-    call(c, a, n, s, o, Some("UTF8.String.new"))
+    call(c, a, n, s, o, Some("String.FromBytes.new"))
 }
 #[no_mangle]
 pub unsafe extern "C" fn lo_op_String_2EFromScalars_2Enew(
