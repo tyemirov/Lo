@@ -69,6 +69,7 @@ pub const SUPPORTED: &[&str] = &[
 ];
 pub fn arity(op: &str) -> (usize, Option<usize>) {
     match op {
+        "Match.Case.new" | "Match.new" | "Match.apply" => (2, Some(2)),
         "List.new" | "Map.new" | "Record.new" | "String.concat" => (0, None),
         "Range.new" => (4, Some(4)),
         "Error.new" => (3, Some(3)),
@@ -83,6 +84,12 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
     }
 }
 pub fn admit(s: &Site) -> Result<(), String> {
+    if crate::matcher::SUPPORTED.contains(&s.operation.as_str()) {
+        if s.arguments.len() != 2 {
+            return Err(format!("{}: metadata argument count mismatch", s.operation));
+        }
+        return Ok(());
+    }
     if crate::json_values::SUPPORTED.contains(&s.operation.as_str()) { return crate::json_values::admit(s); }
     if crate::text_format::SUPPORTED.contains(&s.operation.as_str()) { return crate::text_format::admit(s); }
     if crate::processors::SUPPORTED.contains(&s.operation.as_str()) {
@@ -335,6 +342,9 @@ pub fn parameter_names(op: &str) -> Vec<&'static str> {
         return crate::processors::parameter_names(op);
     }
     match op {
+        "Match.Case.new" => vec!["predicate", "handler"],
+        "Match.new" => vec!["cases", "default"],
+        "Match.apply" => vec!["request", "matcher"],
         "Parameters.new" => vec!["values"],
         "Parameters.values" | "Gradients.zero" => vec!["parameters"],
         "Gradients.new" => vec!["parameters", "values"],

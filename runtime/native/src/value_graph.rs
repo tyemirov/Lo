@@ -239,6 +239,8 @@ pub(crate) fn is_leaf(value: &Handle) -> bool {
             | Data::Null
             | Data::Glob(_)
             | Data::Tensor(_)
+            | Data::MatchCase(_)
+            | Data::Matcher(_)
     )
 }
 

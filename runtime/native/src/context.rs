@@ -651,7 +651,6 @@ impl Program {
                 | Action::ScopeEnter
                 | Action::FlowEnter
                 | Action::FlowRef => site.typ == atom("Null"),
-                Action::Match | Action::Predicate => site.typ == atom("Bool"),
                 Action::ConvertSuccess | Action::ConvertFailure => {
                     matches!(site.typ, Type::Fallible(_))
                 }
@@ -659,6 +658,9 @@ impl Program {
                 Action::ConvertScalarListView => site.typ == Type::List(Box::new(atom("Scalar"))),
                 Action::ConvertFallibleRecordView => {
                     site.typ == Type::Fallible(Box::new(atom("Record")))
+                }
+                Action::ConvertMatcherReadView => {
+                    matches!(&site.typ, Type::Matcher(_, signature) if signature.reads)
                 }
                 Action::Literal => matches!(
                     site.typ.kind(),
@@ -722,6 +724,9 @@ impl Program {
             }
             if site.action == Action::Operation {
                 crate::operations::admit(site)?;
+                if crate::matcher::SUPPORTED.contains(&site.operation.as_str()) {
+                    crate::matcher::admit(site, &flows)?;
+                }
                 if site.operation == "HTTP.Server.new" {
                     crate::http::admit_callbacks(site, &flows)?;
                 }

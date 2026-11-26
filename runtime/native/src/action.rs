@@ -28,16 +28,13 @@ pub enum Action {
     Project,
     Cause,
     Commit,
-    Match,
-    Predicate,
-    Case,
-    MatchResult,
     ConvertSuccess,
     ConvertFailure,
     ConvertPropagate,
     ConvertRecordView,
     ConvertScalarListView,
     ConvertFallibleRecordView,
+    ConvertMatcherReadView,
 }
 impl Action {
     pub fn is_derivative(&self) -> bool {
@@ -87,16 +84,13 @@ impl Action {
             Self::Project => "project",
             Self::Cause => "cause",
             Self::Commit => "commit",
-            Self::Match => "match",
-            Self::Predicate => "predicate",
-            Self::Case => "case",
-            Self::MatchResult => "match_result",
             Self::ConvertSuccess => "convert_success",
             Self::ConvertFailure => "convert_failure",
             Self::ConvertPropagate => "convert_propagate",
             Self::ConvertRecordView => "convert_record_view",
             Self::ConvertScalarListView => "convert_scalar_list_view",
             Self::ConvertFallibleRecordView => "convert_fallible_record_view",
+            Self::ConvertMatcherReadView => "convert_matcher_read_view",
         }
     }
     pub fn parse(s: &str) -> Result<Self, String> {
@@ -129,16 +123,13 @@ impl Action {
             "project" => Self::Project,
             "cause" => Self::Cause,
             "commit" => Self::Commit,
-            "match" => Self::Match,
-            "predicate" => Self::Predicate,
-            "case" => Self::Case,
-            "match_result" => Self::MatchResult,
             "convert_success" => Self::ConvertSuccess,
             "convert_failure" => Self::ConvertFailure,
             "convert_propagate" => Self::ConvertPropagate,
             "convert_record_view" => Self::ConvertRecordView,
             "convert_scalar_list_view" => Self::ConvertScalarListView,
             "convert_fallible_record_view" => Self::ConvertFallibleRecordView,
+            "convert_matcher_read_view" => Self::ConvertMatcherReadView,
             _ => return Err(format!("unknown native action {s}")),
         })
     }

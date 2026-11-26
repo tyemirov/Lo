@@ -205,6 +205,8 @@ pub fn write(value: &Value, output: &mut impl Write) -> io::Result<()> {
                             Data::Flow(_) => {
                                 return Err(io::Error::other("flow has no value representation"))
                             }
+                            Data::MatchCase(case) => case.write_json(output)?,
+                            Data::Matcher(matcher) => matcher.write_json(output)?,
                             Data::Success(_) | Data::Failure(_) | Data::Error(_) => unreachable!(),
                         }
                     }

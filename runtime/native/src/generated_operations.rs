@@ -5,6 +5,39 @@ use crate::{
 };
 
 #[no_mangle]
+pub unsafe extern "C" fn lo_op_Match_2ECase_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Match.Case.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Match_2Enew(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Match.new"))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn lo_op_Match_2Eapply(
+    c: *mut Context,
+    a: *const *const Value,
+    n: u64,
+    s: u64,
+    o: *mut ResultSlot,
+) {
+    call(c, a, n, s, o, Some("Match.apply"))
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn lo_op_Process_2ECommand_2Ewith_5Ftimeout(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Process.Command.with_timeout")) }
 #[no_mangle]
 pub unsafe extern "C" fn lo_op_Process_2ECommand_2Ewith_5Foutput(c: *mut Context, a: *const *const Value, n: u64, s: u64, o: *mut ResultSlot) { call(c, a, n, s, o, Some("Process.Command.with_output")) }

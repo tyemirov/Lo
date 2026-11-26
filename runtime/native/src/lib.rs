@@ -21,6 +21,7 @@ mod json;
 mod json_values;
 mod text_format;
 mod locks;
+mod matcher;
 mod metadata;
 mod operations;
 mod process;
