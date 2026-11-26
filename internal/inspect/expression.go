@@ -72,24 +72,6 @@ func (a *analyzer) expression(c *context, expr ir.Expression) abstract {
 		out = a.invoke(c, e.Flow(), "call", c.entry, node, values, c.conditions)
 	case ir.BuiltinCall:
 		out = a.builtin(c, e)
-	case ir.Match:
-		selector := a.expression(c, e.Selector())
-		values := []abstract{}
-		for i, arm := range e.Cases() {
-			test := branchContext(c, condition{Kind: testCondition, Node: node, Case: &i, Context: c.id})
-			branch := branchContext(c, condition{Kind: matchCondition, Node: node, Case: &i, Context: c.id})
-			switch head := arm.(type) {
-			case ir.ExactCase:
-				a.expression(test, head.Head())
-			case ir.PredicateCase:
-				a.invoke(test, head.Flow(), "predicate", c.entry, node, []abstract{selector}, test.conditions)
-			}
-			values = append(values, withConditions(a.expression(branch, arm.Body()), branch.conditions))
-		}
-		out = a.join(values, node, e.Type())
-		if mayPropagate(e) {
-			c.conditions = mergeConditions(c.conditions, []condition{{Kind: successCondition, Node: node, Context: c.id}})
-		}
 	default:
 		panic("unknown checked expression")
 	}
@@ -110,6 +92,12 @@ func (a *analyzer) builtin(c *context, e ir.BuiltinCall) abstract {
 		case ir.FlowArgument:
 			flows[value.Position()] = value.Flow()
 		}
+	}
+	switch op.Name() {
+	case catalog.MatchCaseNew, catalog.MatchNew:
+		return a.constructMatcher(c, e, values, flows)
+	case catalog.MatchApply:
+		return a.applyMatcher(c, e, values[0], values[1])
 	}
 	out := a.unknown(node, e.Type())
 	for _, value := range values {
@@ -427,32 +415,49 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 	name := e.Operation().Name()
 	flow := a.graph.flows[callback]
 	args := make([]abstract, len(flow.Parameters()))
+	unfold := name == catalog.ListUnfold
+	worklist := name == catalog.FlowWorklist
+	fold := name == catalog.ListFold || e.Operation().Rule() == catalog.FlowProcessor
+	itemPosition := len(args) - 1
+	statePosition := itemPosition - 1
+	var stateField string
+	if unfold {
+		statePosition, stateField = itemPosition, "next_state"
+	} else if worklist {
+		stateField = "state"
+	}
 	contextStart := 1
-	if name == catalog.ListFold || e.Operation().Rule() == catalog.FlowProcessor || name == catalog.ListUnfold {
+	if fold || unfold {
 		contextStart = 2
 	}
 	for i := contextStart; i < len(values)-1; i++ {
 		args[i-contextStart] = values[i]
 	}
-	if name == catalog.ListUnfold {
+	if unfold {
 		// Later iterations can change the state, so the symbolic state is dynamic.
-		args[len(args)-1] = a.unknown(values[0].node, flow.Parameters()[len(args)-1].Type)
-		args[len(args)-1].targets = values[0].targets
+		seed := values[0]
+		state := a.unknown(seed.node, flow.Parameters()[statePosition].Type)
+		if containsMatcher(state.typ) {
+			state = a.loopMatcherState(c, seed.node, seed)
+		}
+		state.targets = appendTargets(state.targets, seed.targets...)
+		args[statePosition] = state
 	} else {
-		elementType := flow.Parameters()[len(args)-1].Type
+		elementType := flow.Parameters()[itemPosition].Type
 		if len(values[0].items) > 0 {
-			args[len(args)-1] = a.join(values[0].items, values[0].node, elementType)
+			args[itemPosition] = a.join(values[0].items, values[0].node, elementType)
 		} else {
-			args[len(args)-1] = a.unknown(values[0].node, elementType)
-			args[len(args)-1].targets = values[0].targets
+			args[itemPosition] = a.unknown(values[0].node, elementType)
+			args[itemPosition].targets = values[0].targets
 		}
-		if name == catalog.FlowWorklist {
-			args[len(args)-1] = a.join([]abstract{args[len(args)-1], a.loopState(c, values[0].node, elementType)}, values[0].node, elementType)
+		if worklist {
+			item := args[itemPosition]
+			args[itemPosition] = a.join([]abstract{item, a.loopMatcherState(c, item.node, item)}, item.node, elementType)
 		}
-		if name == catalog.ListFold || e.Operation().Rule() == catalog.FlowProcessor {
-			stateType := flow.Parameters()[len(args)-2].Type
-			state := a.join([]abstract{values[1], a.loopState(c, values[1].node, stateType)}, values[1].node, stateType)
-			args[len(args)-2] = state
+		if fold {
+			seed := values[1]
+			stateType := flow.Parameters()[statePosition].Type
+			args[statePosition] = a.join([]abstract{seed, a.loopMatcherState(c, seed.node, seed)}, seed.node, stateType)
 		}
 	}
 	iteration, invocation := iterationCondition, "list-callback"
@@ -461,6 +466,29 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 	}
 	child := branchContext(c, condition{Kind: iteration, Node: node, Context: c.id})
 	result := a.invoke(child, callback, invocation, c.entry, node, args, child.conditions)
+	matcherState := (fold || unfold) && containsMatcher(args[statePosition].typ)
+	matcherItem := worklist && containsMatcher(args[itemPosition].typ)
+	for a.err == nil && (matcherState || matcherItem) {
+		changed := false
+		if matcherState {
+			next := result
+			if stateField != "" {
+				next = result.fields[stateField]
+			}
+			changed = a.refineMatcherState(&args[statePosition], node, []abstract{next})
+		}
+		if matcherItem {
+			items := result.fields["items"].items
+			if items == nil {
+				items = []abstract{a.unknown(node, args[itemPosition].typ)}
+			}
+			changed = a.refineMatcherState(&args[itemPosition], node, items) || changed
+		}
+		if !changed {
+			break
+		}
+		result = a.invoke(child, callback, invocation, c.entry, node, args, child.conditions)
+	}
 	out := a.unknown(node, e.Type())
 	out.dependencies = append(out.dependencies, result.dependencies...)
 	for _, value := range values {
@@ -498,38 +526,4 @@ func (a *analyzer) list(c *context, e ir.BuiltinCall, values []abstract, callbac
 	}
 	return out
 }
-func mayPropagate(e ir.Expression) bool {
-	switch n := e.(type) {
-	case ir.Conversion:
-		return n.Conversion() == ir.Propagate || mayPropagate(n.Input())
-	case ir.Projection:
-		return mayPropagate(n.Input())
-	case ir.BuiltinCall:
-		for _, a := range n.Arguments() {
-			if v, ok := a.(ir.ValueArgument); ok && mayPropagate(v.Value()) {
-				return true
-			}
-		}
-	case ir.FlowCall:
-		for _, a := range n.Arguments() {
-			if mayPropagate(a.Value()) {
-				return true
-			}
-		}
-	case ir.Match:
-		if mayPropagate(n.Selector()) {
-			return true
-		}
-		for _, c := range n.Cases() {
-			if mayPropagate(c.Body()) {
-				return true
-			}
-			if x, ok := c.(ir.ExactCase); ok && mayPropagate(x.Head()) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func nextID(prefix string, prior int) string { return fmt.Sprintf("%s%d", prefix, prior+1) }

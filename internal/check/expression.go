@@ -67,8 +67,6 @@ func (c *checker) rawExpression(expr syntax.Expression, expected types.Type) (ex
 	case syntax.Pipe:
 		args := append([]syntax.Argument{{Value: e.Left(), Span: e.Left().Span()}}, e.Arguments()...)
 		return c.call(e.Name(), args, baseType(expected), e.Span())
-	case syntax.Match:
-		return c.match(e, expected)
 	default:
 		panic("unknown expression syntax")
 	}

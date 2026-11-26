@@ -32,6 +32,7 @@ const (
 	ListAccess
 	ListSortProcessor
 	StringFormatOperation
+	MatcherOperation
 )
 
 type Boundary uint8
@@ -66,6 +67,9 @@ const (
 	MapNew               = "Map.new"
 	RecordNew            = "Record.new"
 	RangeNew             = "Range.new"
+	MatchCaseNew         = "Match.Case.new"
+	MatchNew             = "Match.new"
+	MatchApply           = "Match.apply"
 	ErrorNew             = "Error.new"
 	PathNew              = "File.Path.new"
 	ServerNew            = "HTTP.Server.new"
@@ -377,6 +381,9 @@ func build() map[string]Operation {
 		{ScalarNew, ScalarConstructor, []string{ParamValue}}, {Concat, StringConcat, nil}, {ListNew, ListConstructor, nil},
 		{MapNew, MapConstructor, nil}, {RecordNew, RecordConstructor, nil},
 		{RangeNew, RangeConstructor, []string{"start", "end", "include_start", "include_end"}},
+		{MatchCaseNew, MatcherOperation, []string{"predicate", "handler"}},
+		{MatchNew, MatcherOperation, []string{"cases", "default"}},
+		{MatchApply, MatcherOperation, []string{"request", "matcher"}},
 		{Merge, RecordMerge, []string{"left_record", "right_record"}},
 		{HasKey, MapLookup, []string{"target_map", "target_key"}}, {Get, MapLookup, []string{"target_map", "target_key"}},
 		{Contains, RangeProcessor, []string{"target_range", "target_value"}}, {IsEmpty, RangeProcessor, []string{"target_range"}},

@@ -316,8 +316,6 @@ func (b *builder) expression(expr ir.Expression, env map[ir.BindingID]symbol) sy
 			args[a.Position()] = b.expression(a.Value(), env)
 		}
 		return b.invoke(b.flows[e.Flow()], args, e.Span())
-	case ir.Match:
-		b.fail("Match.new is not differentiable", e.Span())
 	case ir.BuiltinCall:
 		op := e.Operation().Name()
 		if !allowed(op) {

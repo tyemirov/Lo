@@ -40,21 +40,26 @@ type abstract struct {
 	items          []abstract
 	targets        []targetReference
 	carried        []targetReference
+	matcherRules   []matcherRule
+	matcherKnown   bool
 }
 type context struct {
 	id         contextID
+	parent     *context
+	flow       identity.FlowID
 	entry      string
 	handler    identity.FlowID
 	conditions []condition
 	values     map[ir.BindingID]abstract
 }
 type analyzer struct {
-	program ir.Program
-	data    reportData
-	graph   *graphIndex
-	targets map[targetID]resourceData
-	uses    map[identity.FlowID]map[string]bool
-	err     diagnostic.Diagnostic
+	program       ir.Program
+	data          reportData
+	graph         *graphIndex
+	targets       map[targetID]resourceData
+	uses          map[identity.FlowID]map[string]bool
+	err           diagnostic.Diagnostic
+	matcherActive map[identity.FlowID]bool
 }
 
 func Program(program ir.Program) (Report, diagnostic.Diagnostic) {
@@ -111,7 +116,7 @@ func (a *analyzer) newContext(parent *context, kind, entry string, flow identity
 		a.err = diagnostic.New(diagnostic.InspectionLimit, diagnostic.Inspection, "inspection exceeds 4096 invocation contexts", span)
 		return nil
 	}
-	c := &context{id: contextID(fmt.Sprintf("c%d", len(a.data.Contexts)+1)), entry: entry, conditions: mergeConditions(nil, conditions), values: map[ir.BindingID]abstract{}}
+	c := &context{id: contextID(fmt.Sprintf("c%d", len(a.data.Contexts)+1)), parent: parent, flow: flow, entry: entry, conditions: mergeConditions(nil, conditions), values: map[ir.BindingID]abstract{}}
 	var parentID contextID
 	if parent != nil {
 		parentID = parent.id
@@ -223,10 +228,13 @@ func (a *analyzer) describe(value abstract) description {
 }
 func (a *analyzer) join(values []abstract, node nodeID, t types.Type) abstract {
 	result := a.unknown(node, t)
+	result.matcherKnown = len(values) > 0
 	for _, value := range values {
 		result.dependencies = append(result.dependencies, value.dependencies...)
 		result.targets = appendTargets(result.targets, value.targets...)
 		result.carried = appendTargets(result.carried, value.carried...)
+		result.matcherRules = appendMatcherRules(result.matcherRules, value.matcherRules...)
+		result.matcherKnown = result.matcherKnown && value.matcherKnown
 	}
 	result.dependencies = uniqueNodes(result.dependencies)
 	if len(values) == 0 {
@@ -279,9 +287,37 @@ func (a *analyzer) join(values []abstract, node nodeID, t types.Type) abstract {
 			result.fields[field.Name] = a.join(children, node, field.Type)
 		}
 	}
+	var element types.Type
+	switch collection := shape.(type) {
+	case types.List:
+		element = collection.Element()
+	case types.Map:
+		element, _ = types.NewRecord([]types.Field{{Name: "key", Type: collection.Key()}, {Name: "value", Type: collection.Value()}})
+	}
+	if containsMatcher(element) {
+		children := []abstract{}
+		for _, value := range values {
+			if value.items == nil {
+				child := a.unknown(value.node, element)
+				child.targets = value.targets
+				child.carried = value.carried
+				children = append(children, child)
+			} else {
+				children = append(children, value.items...)
+			}
+		}
+		result.items = []abstract{}
+		if len(children) > 0 {
+			result.items = append(result.items, a.join(children, node, element))
+		}
+	}
 	return result
 }
 func withConditions(value abstract, conditions []condition) abstract {
+	value.matcherRules = slices.Clone(value.matcherRules)
+	for index := range value.matcherRules {
+		value.matcherRules[index].conditions = mergeConditions(value.matcherRules[index].conditions, conditions)
+	}
 	value.carried = slices.Clone(value.carried)
 	for i, target := range value.carried {
 		value.carried[i].Conditions = mergeConditions(target.Conditions, conditions)

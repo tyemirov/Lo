@@ -78,28 +78,6 @@ type Pipe interface {
 	Name() string
 	Arguments() []Argument
 }
-type Match interface {
-	Expression
-	Selector() Expression
-	Cases() []Case
-}
-type Case interface {
-	Node
-	Body() Expression
-	caseNode()
-}
-type ExactCase interface {
-	Case
-	Head() Expression
-}
-type PredicateCase interface {
-	Case
-	Flow() string
-}
-type DefaultCase interface {
-	Case
-	defaultCase()
-}
 type NamedType interface {
 	TypeExpression
 	Name() string
@@ -146,14 +124,6 @@ func (expressionBase) expression() {}
 type typeBase struct{ base }
 
 func (typeBase) typeExpression() {}
-
-type caseBase struct {
-	base
-	body Expression
-}
-
-func (caseBase) caseNode()          {}
-func (c caseBase) Body() Expression { return c.body }
 
 type header struct {
 	Kind string      `json:"kind"`
@@ -333,60 +303,6 @@ func (p pipe) MarshalJSON() ([]byte, error) {
 		Name      string     `json:"name"`
 		Arguments []Argument `json:"arguments"`
 	}{header{"pipe", p.span}, p.left, p.name, p.arguments})
-}
-
-type match struct {
-	expressionBase
-	selector Expression
-	cases    []Case
-}
-
-func (m match) Selector() Expression { return m.selector }
-func (m match) Cases() []Case        { return slices.Clone(m.cases) }
-func (m match) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		header
-		Selector Expression `json:"selector"`
-		Cases    []Case     `json:"cases"`
-	}{header{"match", m.span}, m.selector, m.cases})
-}
-
-type exactCase struct {
-	caseBase
-	head Expression
-}
-
-func (c exactCase) Head() Expression { return c.head }
-func (c exactCase) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		header
-		Head Expression `json:"head"`
-		Body Expression `json:"body"`
-	}{header{"exact", c.span}, c.head, c.body})
-}
-
-type predicateCase struct {
-	caseBase
-	flow string
-}
-
-func (c predicateCase) Flow() string { return c.flow }
-func (c predicateCase) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		header
-		Flow string     `json:"flow"`
-		Body Expression `json:"body"`
-	}{header{"predicate", c.span}, c.flow, c.body})
-}
-
-type defaultCase struct{ caseBase }
-
-func (defaultCase) defaultCase() {}
-func (c defaultCase) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		header
-		Body Expression `json:"body"`
-	}{header{"default", c.span}, c.body})
 }
 
 type namedType struct {

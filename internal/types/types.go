@@ -62,6 +62,8 @@ const (
 	ListKind               Kind = "List"
 	MapKind                Kind = "Map"
 	RangeKind              Kind = "Range"
+	MatchKind              Kind = "Match"
+	MatchCaseKind          Kind = "Match.Case"
 	FallibleKind           Kind = "Fallible"
 )
 
@@ -84,6 +86,14 @@ type Range interface {
 	Type
 	Element() Type
 	rangeType()
+}
+
+// Matcher is the signature shared by a matcher value and its cases.
+type Matcher interface {
+	Type
+	Input() Type
+	Output() Type
+	Reads() bool
 }
 type Fallible interface {
 	Type
@@ -302,6 +312,9 @@ func Equal(a, b Type) bool {
 		return Equal(x.Key(), y.Key()) && Equal(x.Value(), y.Value())
 	case RangeKind:
 		return Equal(a.(Range).Element(), b.(Range).Element())
+	case MatchKind, MatchCaseKind:
+		left, right := a.(Matcher), b.(Matcher)
+		return left.Reads() == right.Reads() && Equal(left.Input(), right.Input()) && Equal(left.Output(), right.Output())
 	case FallibleKind:
 		return Equal(a.(Fallible).Base(), b.(Fallible).Base())
 	case RecordKind:

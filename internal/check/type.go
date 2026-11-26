@@ -32,6 +32,9 @@ func typeExpression(expression syntax.TypeExpression) (types.Type, diagnostic.Di
 		}
 		return must(types.NewRecord(fields)), nil
 	case syntax.NamedType:
+		if e.Name() == string(types.MatchKind) || e.Name() == string(types.MatchCaseKind) {
+			return matcherTypeExpression(e)
+		}
 		if e.Name() == "Tensor" {
 			if len(e.Arguments()) == 1 {
 				if a, ok := e.Arguments()[0].(syntax.NamedType); ok && a.Name() == "FP32" && len(a.Arguments()) == 0 {
@@ -85,4 +88,27 @@ func typeExpression(expression syntax.TypeExpression) (types.Type, diagnostic.Di
 	default:
 		panic("unknown type syntax")
 	}
+}
+
+func matcherTypeExpression(expression syntax.NamedType) (types.Type, diagnostic.Diagnostic) {
+	arguments := expression.Arguments()
+	if len(arguments) < 2 || len(arguments) > 3 {
+		return nil, problem(diagnostic.TypeConstraint, "matcher type requires input, result, and an optional Read qualifier", expression.Span())
+	}
+	reads := len(arguments) == 3
+	if reads {
+		qualifier, ok := arguments[2].(syntax.NamedType)
+		if !ok || qualifier.Name() != "Read" || len(qualifier.Arguments()) != 0 {
+			return nil, problem(diagnostic.TypeConstraint, "matcher effect qualifier must be Read", arguments[2].Span())
+		}
+	}
+	input, failure := typeExpression(arguments[0])
+	if failure != nil {
+		return nil, failure
+	}
+	output, failure := typeExpression(arguments[1])
+	if failure != nil {
+		return nil, failure
+	}
+	return must(types.NewMatcher(types.Kind(expression.Name()), input, output, reads)), nil
 }

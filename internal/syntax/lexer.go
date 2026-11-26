@@ -26,7 +26,6 @@ const (
 	tReturn
 	tCommit
 	tOnError
-	tWhen
 	tUnderscore
 	tNewline
 	tSemicolon
@@ -47,7 +46,7 @@ const (
 
 var keywords = map[string]tokenKind{
 	"flow": tFlow, "return": tReturn, "commit": tCommit, "onError": tOnError,
-	"when": tWhen, "true": tTrue, "false": tFalse, "null": tNull, "_": tUnderscore,
+	"true": tTrue, "false": tFalse, "null": tNull, "_": tUnderscore,
 }
 var punctuation = map[byte]tokenKind{
 	';': tSemicolon, '(': tLParen, ')': tRParen, '{': tLBrace, '}': tRBrace,

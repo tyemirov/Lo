@@ -20,11 +20,37 @@ import (
 	"github.com/MarcoPoloResearchLab/Lo/internal/types"
 )
 
-// These fingerprints are frozen from the ABI1 producer before metadata compaction.
-// A wire-schema change must not replace them with new producer observations.
-const metadataProjectionLocationsSHA256 = "414590974e125c985537e4726308d1918107b1e36a3e0f267e027e8ac8a63a18"
-const metadataProjectionTablesSHA256 = "4d0c5528af7b6df9d6716ad13a9b1697e2181e0cbea2807163a73745f0ac9c14"
+// These fingerprints cover the canonical source fixtures and exact metadata projection.
+// A public syntax migration requires reviewed fixture and fingerprint updates.
+const metadataProjectionLocationsSHA256 = "34bde86146ffb9aad4380a8380b84e20a2beec4eba4e7c1669007d3900c2ff9e"
+const metadataProjectionTablesSHA256 = "c366a9e753bdd5500d77721b8a155d2881f923e03bbc13ae9d9d577fe29efd3f"
 const metadataProjectionArtifact = `{"arbitrary":{"nested":[null,true,18446744073709551615,1.25]},"source":{"path":"exact/λ.lo"},"unknown":"retained"}`
+const metadataProjectionMatcher = `flow Later(item:Int)->Bool{return Math.eq(item,1)};
+flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Math.eq(value, 1)
+}
+
+flow ProgramChoiceResult1(value: Int) -> Int {
+    return 7
+}
+
+flow ProgramChoiceTest2(value: Int) -> Bool {
+    return Math.eq(value, Math.add(2,3))
+}
+
+flow ProgramChoiceResult2(value: Int) -> Int {
+    return 8
+}
+
+flow ProgramChoiceResult3(value: Int) -> Int {
+    return 9
+}
+
+flow ProgramChoiceDefault(value: Int) -> Int {
+    return 10
+}
+
+return 1 |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1), Match.Case.new(ProgramChoiceTest2, ProgramChoiceResult2), Match.Case.new(Later, ProgramChoiceResult3)), ProgramChoiceDefault))`
 
 type metadataProjectionPosition struct {
 	Offset int `json:"offset"`
@@ -69,7 +95,7 @@ func metadataProjectionFixtures(t *testing.T) []metadataProjectionFixture {
 	t.Helper()
 	texts := []string{
 		"return 1\n", "value=1\n",
-		`flow Later(item:Int)->Bool{return Math.eq(item,1)}; return Match.new(1,1:7,Math.add(2,3):8,when Later:9,_:10)`,
+		metadataProjectionMatcher,
 		`flow Difference(left:Int,right:Int)->Int{return Math.sub(left,right)}; return Difference(right:Math.mul(2,3),left:Math.add(10,1))`,
 		`flow Double(item:Int)->Int{return Math.mul(item,2)}; return List.map(List.new(1,2),Double)`,
 		`flow Add(total:Int,item:Int)->Int{return Math.add(total,item)}; return Flow.fold(List.new(1,2),0,Add)`,
@@ -95,6 +121,10 @@ func metadataProjectionFixtures(t *testing.T) []metadataProjectionFixture {
 	if err != nil {
 		t.Fatal(err)
 	}
+	readingMatcher, err := types.NewMatcher(types.MatchKind, types.Int(), types.Int(), true)
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, conversion := range []struct {
 		name, text string
 		kind       ir.ConversionKind
@@ -106,6 +136,7 @@ func metadataProjectionFixtures(t *testing.T) []metadataProjectionFixture {
 		{"record_view", "return Record.new(x:1)", ir.RecordView, types.AnyRecord()},
 		{"scalar_list_view", `return "hello"`, ir.ScalarListView, scalarList},
 		{"fallible_record_view", `flow RecordFlow()->Record{x:Int}!{return Record.new(x:1)};return RecordFlow()`, ir.FallibleRecordView, fallibleRecord},
+		{"matcher_read_view", `flow Keep(value: Int) -> Int { return value }; return Match.new(List.new(), Keep)`, ir.MatcherReadView, readingMatcher},
 	} {
 		fixtures = append(fixtures, metadataProjectionFixture{name: "conversion-" + conversion.name, text: conversion.text, conversion: &struct {
 			kind   ir.ConversionKind
@@ -191,6 +222,7 @@ func metadataProjectionTables(t *testing.T, root map[string]json.RawMessage) jso
 	}
 	return metadataProjectionNormalize(t, metadataProjectionJSON(t, tables))
 }
+
 func TestMetadataProjectionBeforeCompaction(t *testing.T) {
 	type rowFixture struct {
 		Name string
@@ -241,8 +273,6 @@ func TestMetadataProjectionBeforeCompaction(t *testing.T) {
 				t.Fatal(err)
 			}
 			tables := metadataProjectionTables(t, originalRoot)
-			allRows = append(allRows, rowFixture{fixture.name, rows})
-			allTables = append(allTables, tableFixture{fixture.name, tables})
 			for _, row := range rows {
 				actions[row.Action] = true
 				if row.Action == "body" && row.Owner == "<derivative>" && row.DerivativePlan == 1 {
@@ -291,10 +321,12 @@ func TestMetadataProjectionBeforeCompaction(t *testing.T) {
 					t.Fatal("artifact emission changed original tables")
 				}
 			}
+			allRows = append(allRows, rowFixture{fixture.name, rows})
+			allTables = append(allTables, tableFixture{fixture.name, tables})
 			t.Logf("locations=%d", len(rows))
 		})
 	}
-	expected := strings.Fields("body case cause charge_value commit convert_failure convert_fallible_record_view convert_propagate convert_record_view convert_scalar_list_view convert_success derivative_call derivative_enter derivative_failure derivative_finish derivative_host_failure derivative_loss derivative_node derivative_retain derivative_reverse derivative_seed derivative_snapshot derivative_zero expression_step flow flow_call flow_enter flow_ref literal match match_result operation parameter predicate project reference scope_enter statement_step")
+	expected := strings.Fields("body cause charge_value commit convert_failure convert_fallible_record_view convert_matcher_read_view convert_propagate convert_record_view convert_scalar_list_view convert_success derivative_call derivative_enter derivative_failure derivative_finish derivative_host_failure derivative_loss derivative_node derivative_retain derivative_reverse derivative_seed derivative_snapshot derivative_zero expression_step flow flow_call flow_enter flow_ref literal operation parameter project reference scope_enter statement_step")
 	actual := []string{}
 	for action := range actions {
 		actual = append(actual, action)
@@ -315,7 +347,7 @@ func TestMetadataProjectionBeforeCompaction(t *testing.T) {
 	} {
 		observed := fmt.Sprintf("%x", sha256.Sum256(metadataProjectionJSON(t, projection.value)))
 		if observed != projection.expected {
-			t.Errorf("frozen %s SHA256=%s; want %s", projection.name, observed, projection.expected)
+			t.Errorf("canonical fixture %s SHA256=%s; want %s", projection.name, observed, projection.expected)
 		}
 	}
 }

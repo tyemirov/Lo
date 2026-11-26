@@ -154,7 +154,7 @@ func emit(ctx context.Context, plan nativeplan.Plan, target string, artifact jso
 			out.write("declare void @%s(ptr, ptr, i64, i64, ptr)\n", symbol)
 		}
 	}
-	out.write("declare void @lo_value_retain(ptr)\ndeclare void @lo_value_release(ptr)\ndeclare void @lo_scope_leave(ptr, ptr, i64)\ndeclare void @lo_flow_leave(ptr)\ndeclare i32 @lo_boolean_value(ptr)\n\n")
+	out.write("declare void @lo_value_retain(ptr)\ndeclare void @lo_value_release(ptr)\ndeclare void @lo_scope_leave(ptr, ptr, i64)\ndeclare void @lo_flow_leave(ptr)\n\n")
 	out.write("declare void @lo_derivative_leave(ptr)\n\n")
 	out.write("declare void @llvm.memset.p0.i64(ptr nocapture writeonly, i8, i64, i1 immarg)\n\n")
 	out.write(`define internal void @lo_result_copy_value(ptr %%out, ptr %%result) #0 {
@@ -367,7 +367,7 @@ func failureTransfers(f nativeplan.Function) (map[nativeplan.BlockID]failureTran
 			targets = block.End.Targets[:1]
 		case nativeplan.Status:
 			targets = block.End.Targets[:]
-		case nativeplan.Boolean, nativeplan.Arity:
+		case nativeplan.Arity:
 			targets = block.End.Targets[:2]
 		}
 		for _, target := range targets {
@@ -612,13 +612,6 @@ func (e *functionEmitter) terminator(t nativeplan.Terminator) {
 	case nativeplan.Arity:
 		condition := e.fresh()
 		e.line(t.Site, "%s = icmp eq i64 %%argc, %d", condition, e.f.Arity)
-		e.line(t.Site, "br i1 %s, label %%b%d, label %%b%d", condition, t.Targets[0], t.Targets[1])
-	case nativeplan.Boolean:
-		value := e.value(t.Value)
-		boolean := e.fresh()
-		e.line(t.Site, "%s = call i32 @lo_boolean_value(ptr %s)", boolean, value)
-		condition := e.fresh()
-		e.line(t.Site, "%s = icmp ne i32 %s, 0", condition, boolean)
 		e.line(t.Site, "br i1 %s, label %%b%d, label %%b%d", condition, t.Targets[0], t.Targets[1])
 	case nativeplan.Status:
 		pointer := e.field(t.Result, 0)

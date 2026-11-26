@@ -212,6 +212,7 @@ const (
 	RecordView
 	ScalarListView
 	FallibleRecordView
+	MatcherReadView
 )
 
 type Conversion interface {
@@ -257,112 +258,13 @@ func NewConversion(t types.Type, input Expression, kind ConversionKind) (Convers
 		from, fromOK := input.Type().(types.Fallible)
 		to, toOK := t.(types.Fallible)
 		valid = fromOK && toOK && from.Base().Kind() == types.RecordKind && to.Base().Kind() == types.AnyRecordKind
+	case MatcherReadView:
+		valid = types.MatcherReadWidening(input.Type(), t)
 	}
 	if !valid {
 		return nil, fmt.Errorf("invalid graph conversion from %s to %s", input.Type(), t)
 	}
 	return &conversion{b, input, kind}, nil
-}
-
-type Case interface {
-	Body() Expression
-	Span() source.Span
-	caseNode()
-}
-type caseBase struct {
-	body Expression
-	span source.Span
-}
-
-func (caseBase) caseNode()           {}
-func (c caseBase) Body() Expression  { return c.body }
-func (c caseBase) Span() source.Span { return c.span }
-
-type ExactCase interface {
-	Case
-	Head() Expression
-}
-type exactCase struct {
-	caseBase
-	head Expression
-}
-
-func (c exactCase) Head() Expression { return c.head }
-func NewExactCase(head, body Expression, s source.Span) (ExactCase, error) {
-	if head == nil || body == nil || s == nil {
-		return nil, fmt.Errorf("incomplete exact case")
-	}
-	return exactCase{caseBase{body, s}, head}, nil
-}
-
-type PredicateCase interface {
-	Case
-	Flow() identity.FlowID
-}
-type predicateCase struct {
-	caseBase
-	flow identity.FlowID
-}
-
-func (c predicateCase) Flow() identity.FlowID { return c.flow }
-func NewPredicateCase(id identity.FlowID, body Expression, s source.Span) (PredicateCase, error) {
-	if id == "" || body == nil || s == nil {
-		return nil, fmt.Errorf("incomplete predicate case")
-	}
-	return predicateCase{caseBase{body, s}, id}, nil
-}
-
-type DefaultCase interface {
-	Case
-	defaultCase()
-}
-type defaultCase struct{ caseBase }
-
-func (defaultCase) defaultCase() {}
-func NewDefaultCase(body Expression, s source.Span) (DefaultCase, error) {
-	if body == nil || s == nil {
-		return nil, fmt.Errorf("incomplete default case")
-	}
-	return defaultCase{caseBase{body, s}}, nil
-}
-
-type Match interface {
-	Expression
-	Selector() Expression
-	Cases() []Case
-}
-type match struct {
-	base
-	selector Expression
-	cases    []Case
-}
-
-func (m *match) Selector() Expression { return m.selector }
-func (m *match) Cases() []Case        { return slices.Clone(m.cases) }
-func NewMatch(t types.Type, selector Expression, cases []Case, s source.Span) (Match, error) {
-	b, e := newBase(t, s)
-	if e != nil {
-		return nil, e
-	}
-	if selector == nil || len(cases) == 0 {
-		return nil, fmt.Errorf("incomplete checked match")
-	}
-	defaults := 0
-	for i, arm := range cases {
-		if arm == nil || !types.Equal(arm.Body().Type(), t) {
-			return nil, fmt.Errorf("inconsistent checked match branch")
-		}
-		if _, ok := arm.(DefaultCase); ok {
-			defaults++
-			if i != len(cases)-1 {
-				return nil, fmt.Errorf("nonfinal checked default")
-			}
-		}
-	}
-	if defaults != 1 {
-		return nil, fmt.Errorf("checked match requires one default")
-	}
-	return &match{b, selector, slices.Clone(cases)}, nil
 }
 
 type Statement interface {
