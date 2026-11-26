@@ -25,7 +25,7 @@ func TestLLVMLinuxHTTPErrorInputs(t *testing.T) {
 
 func testLLVMHTTPErrorInputs(t *testing.T, target string) {
 	t.Helper()
-	const headers = `HTTP.Headers.new(List.new(Record.new(name:"X-Probe",value:UTF8.Bytes.new("one")),Record.new(name:"X-Probe",value:UTF8.Bytes.new("two"))))`
+	const headers = `HTTP.Headers.new(List.new(Record.new(name:"X-Probe",value:Bytes.new("one")),Record.new(name:"X-Probe",value:Bytes.new("two"))))`
 	tests := []struct {
 		name, kind, message, method string
 		path                        []byte
@@ -48,7 +48,7 @@ func testLLVMHTTPErrorInputs(t *testing.T, target string) {
 		if status == 0 {
 			status = 200
 		}
-		source := `flow Handle(r:HTTP.Request)->HTTP.Response!{headers=` + headers + `;return HTTP.Response.new(` + fmt.Sprint(status) + `,headers,UTF8.Bytes.new("payloadé"))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,"handled")};server=HTTP.Server.new(34447,Handle,OnError);commit server;return Error.new("fixture.Marker","marker",Record.new())`
+		source := `flow Handle(r:HTTP.Request)->HTTP.Response!{headers=` + headers + `;return HTTP.Response.new(` + fmt.Sprint(status) + `,headers,Bytes.new("payloadé"))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,"handled")};server=HTTP.Server.new(34447,Handle,OnError);commit server;return Error.new("fixture.Marker","marker",Record.new())`
 		var expected any
 		if test.method != "" {
 			expected = map[string]any{"method": map[string]any{"type": "Bytes", "value": base64.StdEncoding.EncodeToString([]byte(test.method))}, "path": map[string]any{"type": "Bytes", "value": base64.StdEncoding.EncodeToString(test.path)}}

@@ -1,5 +1,20 @@
 flow PolicyAnd(previous: Bool, value: Bool) -> Bool {
-    return Match.new(previous, true: value, _: false)
+    flow PolicyAndChoiceTest1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow PolicyAndChoiceResult1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.value
+    }
+
+    flow PolicyAndChoiceDefault(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: previous, value: value) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PolicyAndChoiceTest1, PolicyAndChoiceResult1)),
+        default: PolicyAndChoiceDefault
+    ))
 }
 
 flow PolicyAll(values: List<Bool>) -> Bool {
@@ -8,12 +23,72 @@ flow PolicyAll(values: List<Bool>) -> Bool {
 
 flow PolicyCharacter(character: Scalar) -> Bool {
     control = Range.contains(Range.new(Scalar.new("\u0000"), Scalar.new("\u001f"), true, true), character)
-    return PolicyAll(List.new(Match.new(control, true: false, _: true), Match.new(Scalar.eq(character, Scalar.new("\u007f")), true: false, _: true), Match.new(Scalar.eq(character, Scalar.new("\\")), true: false, _: true)))
+    flow PolicyCharacterChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow PolicyCharacterChoiceResult1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow PolicyCharacterChoiceDefault(value: Bool) -> Bool {
+        return true
+    }
+
+    flow PolicyCharacterChoice2Test1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow PolicyCharacterChoice2Result1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow PolicyCharacterChoice2Default(value: Bool) -> Bool {
+        return true
+    }
+
+    flow PolicyCharacterChoice3Test1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow PolicyCharacterChoice3Result1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow PolicyCharacterChoice3Default(value: Bool) -> Bool {
+        return true
+    }
+
+    return PolicyAll(List.new(control |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PolicyCharacterChoiceTest1, PolicyCharacterChoiceResult1)),
+        default: PolicyCharacterChoiceDefault
+    )), Scalar.eq(character, Scalar.new("\u007f")) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PolicyCharacterChoice2Test1, PolicyCharacterChoice2Result1)),
+        default: PolicyCharacterChoice2Default
+    )), Scalar.eq(character, Scalar.new("\\")) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PolicyCharacterChoice3Test1, PolicyCharacterChoice3Result1)),
+        default: PolicyCharacterChoice3Default
+    ))))
 }
 
 flow PolicyCandidate(uid: Int, cutoff: Int, mask: Glob, entry: File.Entry) -> Bool {
-    visible = Match.new(String.starts_with(entry.name, "."), true: false, _: true)
+    visible = String.starts_with(entry.name, ".") |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PolicyCandidateVisibleChoiceTest1, PolicyCandidateVisibleChoiceResult1)),
+        default: PolicyCandidateVisibleChoiceDefault
+    ))
     unambiguous = PolicyAll(List.map(File.Path.to_string(entry.path), PolicyCharacter))
+    flow PolicyCandidateVisibleChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow PolicyCandidateVisibleChoiceResult1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow PolicyCandidateVisibleChoiceDefault(value: Bool) -> Bool {
+        return true
+    }
+
     return PolicyAll(List.new(visible, unambiguous, Glob.matches(mask, entry.name), String.eq(entry.kind, "regular"), Math.eq(entry.owner_uid, uid), Math.eq(entry.link_count, 1), Math.lt(entry.accessed_unix_ns, cutoff), Math.lt(entry.modified_unix_ns, cutoff), Math.lt(entry.changed_unix_ns, cutoff)))
 }
 

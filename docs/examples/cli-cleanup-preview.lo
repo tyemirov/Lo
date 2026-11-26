@@ -1,8 +1,23 @@
 // Executable CLI selection example. This source does not remove files.
 
 flow StartupFailure(error: Error) -> Record{code: Int, stdout: Bytes, stderr: Bytes, lines: List<String>} {
-    code = Match.new(error.kind, "CLI.InvalidArguments": 2, _: 1)
-    return Record.new(code: code, stdout: Bytes.new(""), stderr: UTF8.Bytes.new(error.message), lines: List.new())
+    code = error.kind |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StartupFailureCodeChoiceTest1, StartupFailureCodeChoiceResult1)),
+        default: StartupFailureCodeChoiceDefault
+    ))
+    flow StartupFailureCodeChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "CLI.InvalidArguments")
+    }
+
+    flow StartupFailureCodeChoiceResult1(value: String) -> Int {
+        return 2
+    }
+
+    flow StartupFailureCodeChoiceDefault(value: String) -> Int {
+        return 1
+    }
+
+    return Record.new(code: code, stdout: Bytes.new(""), stderr: Bytes.new(error.message), lines: List.new())
 }
 
 flow Startup() -> Record{code: Int, stdout: Bytes, stderr: Bytes, lines: List<String>} onError StartupFailure {
@@ -14,11 +29,53 @@ flow Startup() -> Record{code: Int, stdout: Bytes, stderr: Bytes, lines: List<St
     options = CLI.parse(invocation.arguments, flags, "cleanup-preview", "Select an application mode.", true)
     dry_run = Map.get(options.flags, "--dry-run")
     report = Map.get(options.flags, "--report")
-    mode = Match.new(dry_run, true: "dry-run selected", _: Match.new(report, true: "report selected", _: "default selected"))
-    return Match.new(options.help_requested,
-        true: Record.new(code: 0, stdout: UTF8.Bytes.new(options.help_text), stderr: Bytes.new(""), lines: List.new()),
-        _: Record.new(code: 0, stdout: Bytes.new(""), stderr: Bytes.new(""), lines: List.new(mode))
-    )
+    mode = Record.new(selector: dry_run, report: report) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StartupModeChoiceTest1, StartupModeChoiceResult1)),
+        default: StartupModeChoiceDefault
+    ))
+    flow StartupModeChoiceTest1(request: Record{report: Bool, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow StartupModeChoiceResult1(request: Record{report: Bool, selector: Bool}) -> String {
+        return "dry-run selected"
+    }
+
+    flow StartupModeChoice2Test1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow StartupModeChoice2Result1(value: Bool) -> String {
+        return "report selected"
+    }
+
+    flow StartupModeChoice2Default(value: Bool) -> String {
+        return "default selected"
+    }
+
+    flow StartupModeChoiceDefault(request: Record{report: Bool, selector: Bool}) -> String {
+        return request.report |> Match.apply(Match.new(
+            cases: List.new(Match.Case.new(StartupModeChoice2Test1, StartupModeChoice2Result1)),
+            default: StartupModeChoice2Default
+        ))
+    }
+
+    flow StartupChoiceTest1(request: Record{mode: String, options: CLI.Options, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow StartupChoiceResult1(request: Record{mode: String, options: CLI.Options, selector: Bool}) -> Record{code: Int, lines: List<String>, stderr: Bytes, stdout: Bytes} {
+        return Record.new(code: 0, stdout: Bytes.new(request.options.help_text), stderr: Bytes.new(""), lines: List.new())
+    }
+
+    flow StartupChoiceDefault(request: Record{mode: String, options: CLI.Options, selector: Bool}) -> Record{code: Int, lines: List<String>, stderr: Bytes, stdout: Bytes} {
+        return Record.new(code: 0, stdout: Bytes.new(""), stderr: Bytes.new(""), lines: List.new(request.mode))
+    }
+
+    return Record.new(selector: options.help_requested, mode: mode, options: options) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StartupChoiceTest1, StartupChoiceResult1)),
+        default: StartupChoiceDefault
+    ))
 }
 
 flow Print(count: Int, text: String) -> Int! {

@@ -10,8 +10,7 @@ pub const SUPPORTED: &[&str] = &[
     "Scalar.new",
     "File.Path.new",
     "Bytes.new",
-    "UTF8.Bytes.new",
-    "UTF8.String.new",
+    "String.FromBytes.new",
     "String.FromScalars.new",
     "List.new",
     "Record.new",
@@ -69,6 +68,7 @@ pub const SUPPORTED: &[&str] = &[
 ];
 pub fn arity(op: &str) -> (usize, Option<usize>) {
     match op {
+        "Match.Case.new" | "Match.new" | "Match.apply" => (2, Some(2)),
         "List.new" | "Map.new" | "Record.new" | "String.concat" => (0, None),
         "Range.new" => (4, Some(4)),
         "Error.new" => (3, Some(3)),
@@ -83,6 +83,12 @@ pub fn arity(op: &str) -> (usize, Option<usize>) {
     }
 }
 pub fn admit(s: &Site) -> Result<(), String> {
+    if crate::matcher::SUPPORTED.contains(&s.operation.as_str()) {
+        if s.arguments.len() != 2 {
+            return Err(format!("{}: metadata argument count mismatch", s.operation));
+        }
+        return Ok(());
+    }
     if crate::json_values::SUPPORTED.contains(&s.operation.as_str()) { return crate::json_values::admit(s); }
     if crate::text_format::SUPPORTED.contains(&s.operation.as_str()) { return crate::text_format::admit(s); }
     if crate::processors::SUPPORTED.contains(&s.operation.as_str()) {
@@ -157,7 +163,7 @@ pub fn admit(s: &Site) -> Result<(), String> {
     let fixed = match op {
         "Int.new" | "Int.to_string" | "Int.to_float" => Some(vec![atom("Int")]),
         "String.new" | "String.upper" | "String.lower" | "String.length" | "Bytes.new"
-        | "UTF8.Bytes.new" | "File.Path.new" => Some(vec![atom("String")]),
+        | "File.Path.new" => Some(vec![atom("String")]),
         "Scalar.new" => {
             if args[0].kind() != "Scalar" && args[0].kind() != "String" {
                 return Err("invalid Scalar constructor metadata".into());
@@ -178,7 +184,7 @@ pub fn admit(s: &Site) -> Result<(), String> {
         "String.eq" => Some(vec![atom("String"), atom("String")]),
         "Scalar.eq" => Some(vec![atom("Scalar"), atom("Scalar")]),
         "File.Path.eq" => Some(vec![atom("File.Path"), atom("File.Path")]),
-        "UTF8.String.new" => Some(vec![atom("Bytes")]),
+        "String.FromBytes.new" => Some(vec![atom("Bytes")]),
         "String.FromScalars.new" => Some(vec![Type::List(Box::new(atom("Scalar")))]),
         "Error.new" => Some(vec![atom("String"), atom("String"), atom("Record")]),
         _ => None,
@@ -291,7 +297,7 @@ pub fn admit(s: &Site) -> Result<(), String> {
         }
         "Scalar.new" => Some(atom("Scalar")),
         "File.Path.new" => Some(atom("File.Path")),
-        "Bytes.new" | "UTF8.Bytes.new" => Some(atom("Bytes")),
+        "Bytes.new" => Some(atom("Bytes")),
         "Float.new" => Some(atom("Float")),
         "Float.add" | "Float.sub" | "Float.mul" | "Float.div" | "Float.sqrt" | "Int.to_float" => {
             Some(Type::Fallible(Box::new(atom("Float"))))
@@ -299,7 +305,7 @@ pub fn admit(s: &Site) -> Result<(), String> {
         "Math.div" | "Math.mod" | "Math.min" | "Math.max" => {
             Some(Type::Fallible(Box::new(atom("Int"))))
         }
-        "UTF8.String.new" => Some(Type::Fallible(Box::new(atom("String")))),
+        "String.FromBytes.new" => Some(Type::Fallible(Box::new(atom("String")))),
         "Error.new" => Some(atom("Error")),
         "Map.get" => {
             let Type::Map(_, v) = args[0] else {
@@ -335,6 +341,9 @@ pub fn parameter_names(op: &str) -> Vec<&'static str> {
         return crate::processors::parameter_names(op);
     }
     match op {
+        "Match.Case.new" => vec!["predicate", "handler"],
+        "Match.new" => vec!["cases", "default"],
+        "Match.apply" => vec!["request", "matcher"],
         "Parameters.new" => vec!["values"],
         "Parameters.values" | "Gradients.zero" => vec!["parameters"],
         "Gradients.new" => vec!["parameters", "values"],
@@ -367,7 +376,7 @@ pub fn parameter_names(op: &str) -> Vec<&'static str> {
             vec!["left_value", "right_value"]
         }
         "Math.sum" | "Math.product" | "Math.min" | "Math.max" => vec!["number_list"],
-        "UTF8.String.new" => vec!["bytes"],
+        "String.FromBytes.new" => vec!["bytes"],
         "Map.get" | "Map.has_key" => vec!["target_map", "target_key"],
         _ => vec!["value"],
     }
@@ -411,13 +420,13 @@ pub fn execute(c: &mut Context, s: &Site, a: &[Handle]) -> Outcome {
             }
             Ok(new(s.typ.clone(), Data::Text(a[0].string().into())))
         }
-        "Bytes.new" | "UTF8.Bytes.new" => Ok(new(
+        "Bytes.new" => Ok(new(
             atom("Bytes"),
             Data::Bytes(a[0].string().as_bytes().to_vec()),
         )),
-        "UTF8.String.new" => {
+        "String.FromBytes.new" => {
             let Data::Bytes(b) = &a[0].data else {
-                return Err(host("UTF8 input type"));
+                return Err(host("String.FromBytes.new input type"));
             };
             match String::from_utf8(b.clone()) {
                 Ok(s) => Ok(text(s)),

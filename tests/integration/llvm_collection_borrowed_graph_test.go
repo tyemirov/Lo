@@ -21,9 +21,61 @@ func borrowedGraphResourcePolicy(t *testing.T, target string) {
 	t.Helper()
 	const shared = `flow Next(state: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: state, next_state: Math.add(state, 1)) }; flow Same(state: List<Int>, item: Int) -> List<Int> { unused = Math.add(item, 1); return state }; flow Warm(state: Host.Invocation) -> Host.Invocation { unused = Math.add(0, 1); return state }; flow Borrow(state: Host.Invocation, item: Int) -> Host.Invocation { count = List.length(state.arguments); unused = Math.add(count, item); return state }; flow Failed(error: Error) -> Bool { return false }; `
 	const fold = shared + `flow Run() -> Bool onError Failed { initial = Warm(Host.Invocation.current()); numbers = List.unfold(0, 64, Next); kept = List.fold(numbers, numbers, Same); result = List.fold(kept, initial, Borrow); return Math.eq(List.length(result.arguments), 16) }; return Run()`
-	const pins = shared + `flow Children(count: Int, item: Host.Invocation) -> List<Host.Invocation> { return Match.new(count, 0: List.new(item, item), _: List.new()) }; flow Step(state: Record{count: Int, host: Host.Invocation}, item: Host.Invocation) -> Record{state: Record{count: Int, host: Host.Invocation}, items: List<Host.Invocation>, stop: Bool} { count = List.length(item.arguments); children = Children(state.count, item); return Record.new(state: Record.new(count: Math.add(state.count, 1), host: item), items: children, stop: Math.eq(state.count, 2)) }; flow Run() -> Bool onError Failed { initial = Warm(Host.Invocation.current()); result = Flow.worklist(List.new(initial), Record.new(count: 0, host: initial), Step); return Match.new(result.count, 3: Math.eq(List.length(result.host.arguments), 16), _: false) }; return Run()`
+	const pins = shared + `flow Children(count: Int, item: Host.Invocation) -> List<Host.Invocation> {
+    flow ChildrenChoiceTest1(request: Record{item: Host.Invocation, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow ChildrenChoiceResult1(request: Record{item: Host.Invocation, selector: Int}) -> List<Host.Invocation> {
+        return List.new(request.item, request.item)
+    }
+
+    flow ChildrenChoiceDefault(request: Record{item: Host.Invocation, selector: Int}) -> List<Host.Invocation> {
+        return List.new()
+    }
+
+    return Record.new(selector: count, item: item) |> Match.apply(Match.new(List.new(Match.Case.new(ChildrenChoiceTest1, ChildrenChoiceResult1)), ChildrenChoiceDefault)) }; flow Step(state: Record{count: Int, host: Host.Invocation}, item: Host.Invocation) -> Record{state: Record{count: Int, host: Host.Invocation}, items: List<Host.Invocation>, stop: Bool} { count = List.length(item.arguments); children = Children(state.count, item); return Record.new(state: Record.new(count: Math.add(state.count, 1), host: item), items: children, stop: Math.eq(state.count, 2)) }; flow Run() -> Bool onError Failed { initial = Warm(Host.Invocation.current()); result = Flow.worklist(List.new(initial), Record.new(count: 0, host: initial), Step);
+    flow RunChoiceTest1(request: Record{result: Record{count: Int, host: Host.Invocation}, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 3)
+    }
+
+    flow RunChoiceResult1(request: Record{result: Record{count: Int, host: Host.Invocation}, selector: Int}) -> Bool {
+        return Math.eq(List.length(request.result.host.arguments), 16)
+    }
+
+    flow RunChoiceDefault(request: Record{result: Record{count: Int, host: Host.Invocation}, selector: Int}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: result.count, result: result) |> Match.apply(Match.new(List.new(Match.Case.new(RunChoiceTest1, RunChoiceResult1)), RunChoiceDefault)) }; return Run()`
 	const eviction = shared + `flow Run() -> Bool onError Failed { initial = Host.Invocation.current(); a = List.unfold(0, 16, Next); b = List.unfold(0, 17, Next); c = List.unfold(0, 18, Next); d = List.unfold(0, 19, Next); e = List.unfold(0, 20, Next); aa = List.fold(a, a, Same); bb = List.fold(b, b, Same); cc = List.fold(c, c, Same); dd = List.fold(d, d, Same); ee = List.fold(e, e, Same); again = List.fold(a, a, Same); lengths = List.new(List.length(aa), List.length(bb), List.length(cc), List.length(dd), List.length(ee), List.length(again)); return Math.eq(Math.sum(lengths), 106) }; return Run()`
-	const queued = shared + `flow Item(host: Host.Invocation, state: Int) -> Record{value: Record{host: Host.Invocation, index: Int}, next_state: Int} { return Record.new(value: Record.new(host: host, index: state), next_state: Math.add(state, 1)) }; flow Children(host: Host.Invocation, count: Int) -> List<Record{host: Host.Invocation, index: Int}> { return Match.new(count, 0: List.unfold(1, 32, host, Item), _: List.new()) }; flow Step(state: Record{count: Int, host: Host.Invocation}, item: Record{host: Host.Invocation, index: Int}) -> Record{state: Record{count: Int, host: Host.Invocation}, items: List<Record{host: Host.Invocation, index: Int}>, stop: Bool} { observed = List.length(item.host.arguments); children = Children(item.host, state.count); return Record.new(state: Record.new(count: Math.add(state.count, 1), host: item.host), items: children, stop: false) }; flow Run() -> Bool onError Failed { initial = Warm(Host.Invocation.current()); result = Flow.worklist(List.new(Record.new(host: initial, index: 0)), Record.new(count: 0, host: initial), Step); return Match.new(result.count, 33: Math.eq(List.length(result.host.arguments), 16), _: false) }; return Run()`
+	const queued = shared + `flow Item(host: Host.Invocation, state: Int) -> Record{value: Record{host: Host.Invocation, index: Int}, next_state: Int} { return Record.new(value: Record.new(host: host, index: state), next_state: Math.add(state, 1)) }; flow Children(host: Host.Invocation, count: Int) -> List<Record{host: Host.Invocation, index: Int}> {
+    flow ChildrenChoiceTest1(request: Record{host: Host.Invocation, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow ChildrenChoiceResult1(request: Record{host: Host.Invocation, selector: Int}) -> List<Record{host: Host.Invocation, index: Int}> {
+        return List.unfold(1, 32, request.host, Item)
+    }
+
+    flow ChildrenChoiceDefault(request: Record{host: Host.Invocation, selector: Int}) -> List<Record{host: Host.Invocation, index: Int}> {
+        return List.new()
+    }
+
+    return Record.new(selector: count, host: host) |> Match.apply(Match.new(List.new(Match.Case.new(ChildrenChoiceTest1, ChildrenChoiceResult1)), ChildrenChoiceDefault)) }; flow Step(state: Record{count: Int, host: Host.Invocation}, item: Record{host: Host.Invocation, index: Int}) -> Record{state: Record{count: Int, host: Host.Invocation}, items: List<Record{host: Host.Invocation, index: Int}>, stop: Bool} { observed = List.length(item.host.arguments); children = Children(item.host, state.count); return Record.new(state: Record.new(count: Math.add(state.count, 1), host: item.host), items: children, stop: false) }; flow Run() -> Bool onError Failed { initial = Warm(Host.Invocation.current()); result = Flow.worklist(List.new(Record.new(host: initial, index: 0)), Record.new(count: 0, host: initial), Step);
+    flow RunChoiceTest1(request: Record{result: Record{count: Int, host: Host.Invocation}, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 33)
+    }
+
+    flow RunChoiceResult1(request: Record{result: Record{count: Int, host: Host.Invocation}, selector: Int}) -> Bool {
+        return Math.eq(List.length(request.result.host.arguments), 16)
+    }
+
+    flow RunChoiceDefault(request: Record{result: Record{count: Int, host: Host.Invocation}, selector: Int}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: result.count, result: result) |> Match.apply(Match.new(List.new(Match.Case.new(RunChoiceTest1, RunChoiceResult1)), RunChoiceDefault)) }; return Run()`
 	encode := func(count int) string {
 		body := encodingbinary.BigEndian.AppendUint32(nil, uint32(count))
 		for index := 0; index < count; index++ {

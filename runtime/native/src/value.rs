@@ -15,11 +15,19 @@ pub type Handle = Arc<Value>;
 pub enum Type {
     Atom(&'static str),
     Nominal(String, Box<Type>),
+    // Keep the matcher signature out of the inline type storage shared by every value.
+    Matcher(&'static str, Box<MatcherSignature>),
     List(Box<Type>),
     Map(Box<Type>, Box<Type>),
     Range(Box<Type>),
     Fallible(Box<Type>),
     Record(Vec<(String, Type)>),
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MatcherSignature {
+    pub input: Type,
+    pub output: Type,
+    pub reads: bool,
 }
 impl Type {
     pub fn parse(s: &str) -> Result<Self, String> {
@@ -89,6 +97,26 @@ impl Type {
                 return Ok(Self::Nominal(kind.into(), Box::new(schema)));
             }
         }
+        for (kind, prefix) in [("Match", "Match<"), ("Match.Case", "Match.Case<")] {
+            if let Some(body) = s.strip_prefix(prefix).and_then(|body| body.strip_suffix('>')) {
+                let parts = split(body);
+                let (input, output, reads) = match parts.as_slice() {
+                    [input, output] => (*input, *output, false),
+                    [input, output, "Read"] => (*input, *output, true),
+                    _ => {
+                        return Err("matcher requires input and output types and optional Read".into())
+                    }
+                };
+                return Ok(Self::Matcher(
+                    kind,
+                    Box::new(MatcherSignature {
+                        input: Self::parse_depth(input, depth + 1)?,
+                        output: Self::parse_depth(output, depth + 1)?,
+                        reads,
+                    }),
+                ));
+            }
+        }
         for p in ["List<", "Range<", "Map<"] {
             if s.starts_with(p) && s.ends_with('>') {
                 let parts = split(&s[p.len()..s.len() - 1]);
@@ -125,6 +153,14 @@ impl Type {
         match self {
             Self::Atom(a) => (*a).to_owned(),
             Self::Nominal(kind, schema) => format!("{kind}<{}>", schema.name()),
+            Self::Matcher(kind, signature) => {
+                let qualifier = if signature.reads { ", Read" } else { "" };
+                format!(
+                    "{kind}<{}, {}{qualifier}>",
+                    signature.input.name(),
+                    signature.output.name()
+                )
+            }
             Self::List(a) => format!("List<{}>", a.name()),
             Self::Range(a) => format!("Range<{}>", a.name()),
             Self::Map(a, b) => format!("Map<{}, {}>", a.name(), b.name()),
@@ -142,6 +178,7 @@ impl Type {
         match self {
             Self::Atom(a) => a,
             Self::Nominal(kind, _) => kind,
+            Self::Matcher(kind, _) => kind,
             Self::List(_) => "List",
             Self::Map(_, _) => "Map",
             Self::Range(_) => "Range",
@@ -182,6 +219,8 @@ pub enum Data {
     Failure(Handle),
     Error(Error),
     Flow(usize),
+    MatchCase(crate::matcher::Case),
+    Matcher(crate::matcher::Matcher),
 }
 #[derive(Clone)]
 pub struct Error {
@@ -282,6 +321,8 @@ pub fn new(typ: Type, data: Data) -> Handle {
             Data::Text(s) => s.len() as u64,
             Data::Bool(_) => 1,
             Data::Null | Data::Flow(_) => 0,
+            Data::MatchCase(case) => case.weight(),
+            Data::Matcher(matcher) => matcher.weight(),
             Data::Bytes(b) => b.len() as u64,
             Data::Glob(pattern) => pattern.weight(),
             Data::JSON(document) => document.weight()-16,
@@ -339,6 +380,8 @@ pub fn new(typ: Type, data: Data) -> Handle {
         | Data::JSON(_)
         | Data::Glob(_)
         | Data::Flow(_)
+        | Data::MatchCase(_)
+        | Data::Matcher(_)
         | Data::Device(_) => false,
     };
     LIVE_VALUES.fetch_add(1, AtomicOrder::Relaxed);
@@ -471,6 +514,8 @@ impl Value {
                 return out;
             }
             Data::Flow(_) => std::process::abort(),
+            Data::MatchCase(case) => case.json(),
+            Data::Matcher(matcher) => matcher.json(),
         };
         json!({"type":self.typ.name(),"value":data})
     }

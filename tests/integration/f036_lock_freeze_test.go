@@ -28,7 +28,52 @@ flow Run()->HTTP.Response!{context=Process.Context.new(Map.new(),File.Path.new(%
 flow Acquire(path:File.Path)->HTTP.Response!{target=Lock.File.new(path);lease=commit target;return HTTP.Response.Text.new(200,"acquired")}
 flow NoRuns()->List<Int>{return List.new()}
 flow NoPaths()->List<File.Path>{return List.new()}
-flow Handle(request:HTTP.Request)->HTTP.Response!{runs=Match.new(request.path,"/run":List.new(0),_:NoRuns());flow RunStep(total:Int,item:Int)->Int!{response=Run();return 0};started=Flow.fold(runs,0,RunStep);paths=Match.new(request.path,"/run":NoPaths(),"/same":List.new(File.Path.new(%q)),_:List.new(File.Path.new(%q)));flow LockStep(total:Int,path:File.Path)->Int!{response=Acquire(path);return 0};finished=Flow.fold(paths,started,LockStep);return HTTP.Response.Text.new(200,Match.new(request.path,"/run":"finished",_:"acquired"))}
+flow Handle(request:HTTP.Request)->HTTP.Response!{runs=request.path |> Match.apply(Match.new(List.new(Match.Case.new(HandleRunsChoiceTest1, HandleRunsChoiceResult1)), HandleRunsChoiceDefault));flow RunStep(total:Int,item:Int)->Int!{response=Run();return 0};started=Flow.fold(runs,0,RunStep);paths=request.path |> Match.apply(Match.new(List.new(Match.Case.new(HandlePathsChoiceTest1, HandlePathsChoiceResult1), Match.Case.new(HandlePathsChoiceTest2, HandlePathsChoiceResult2)), HandlePathsChoiceDefault));flow LockStep(total:Int,path:File.Path)->Int!{response=Acquire(path);return 0};finished=Flow.fold(paths,started,LockStep);
+    flow HandleRunsChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "/run")
+    }
+
+    flow HandleRunsChoiceResult1(value: String) -> List<Int> {
+        return List.new(0)
+    }
+
+    flow HandleRunsChoiceDefault(value: String) -> List<Int> {
+        return NoRuns()
+    }
+
+    flow HandlePathsChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "/run")
+    }
+
+    flow HandlePathsChoiceResult1(value: String) -> List<File.Path> {
+        return NoPaths()
+    }
+
+    flow HandlePathsChoiceTest2(value: String) -> Bool {
+        return String.eq(value, "/same")
+    }
+
+    flow HandlePathsChoiceResult2(value: String) -> List<File.Path> {
+        return List.new(File.Path.new(%q))
+    }
+
+    flow HandlePathsChoiceDefault(value: String) -> List<File.Path> {
+        return List.new(File.Path.new(%q))
+    }
+
+    flow HandleChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "/run")
+    }
+
+    flow HandleChoiceResult1(value: String) -> String {
+        return "finished"
+    }
+
+    flow HandleChoiceDefault(value: String) -> String {
+        return "acquired"
+    }
+
+    return HTTP.Response.Text.new(200,request.path |> Match.apply(Match.new(List.new(Match.Case.new(HandleChoiceTest1, HandleChoiceResult1)), HandleChoiceDefault)))}
 flow Failed(error:Error)->HTTP.Response{return HTTP.Response.Text.new(409,String.concat(error.kind,":",error.message))}
 flow Main()->Int!{target=Lock.File.new(File.Path.new(%q));lease=commit target;server=HTTP.Server.new(0,Handle,Failed);commit server;return 0};return Main()
 `, fixture.work, fixture.command, fixture.socket, fixture.ready, fixture.release, fixture.lock, later, fixture.lock)

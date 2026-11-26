@@ -151,7 +151,7 @@ An ordinary returned Int remains a result value. Serve rejects a terminal entry 
 **Example:**
 
 ```lo
-return Program.Exit.new(0, UTF8.Bytes.new("done\n"), Bytes.new(""))
+return Program.Exit.new(0, Bytes.new("done\n"), Bytes.new(""))
 ```
 
 [Contract](../../specification.md#97-console-output-terminal-results-and-declared-options)

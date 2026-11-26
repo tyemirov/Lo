@@ -95,8 +95,29 @@ func TestRunValues(t *testing.T) {
 		{"map-duplicate", `flow Get() -> Int! { m = Map.new(Record.new(key: "x", value: 1), Record.new(key: "x", value: 2)); return Map.get(m, "x") }; flow Unwrap(error: Error) -> Int { return 0 }; flow Total() -> Int onError Unwrap { return Get() }; return Total()`, "Int", `"2"`},
 		{"range-empty", `return Range.is_empty(Range.new(1, 2, false, false))`, "Bool", `true`},
 		{"range-includes", `return Range.contains(Range.new("a", "z", true, false), "m")`, "Bool", `true`},
-		{"match-lazy", `return Match.new(1, 1: 7, _: Math.div(1, 0))`, "Int!", `{"type":"Int","value":"7"}`},
-		{"match-predicate", `flow Positive(x: Int) -> Bool { return Math.gt(x, 0) }; return Match.new(2, when Positive: "yes", _: "no")`, "String", `"yes"`},
+		{"match-lazy", `flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Math.eq(value, 1)
+}
+
+flow ProgramChoiceResult1(value: Int) -> Int! {
+    return 7
+}
+
+flow ProgramChoiceDefault(value: Int) -> Int! {
+    return Math.div(1, 0)
+}
+
+return 1 |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1)), ProgramChoiceDefault))`, "Int!", `{"type":"Int","value":"7"}`},
+		{"match-predicate", `flow Positive(x: Int) -> Bool { return Math.gt(x, 0) };
+flow ProgramChoiceResult1(value: Int) -> String {
+    return "yes"
+}
+
+flow ProgramChoiceDefault(value: Int) -> String {
+    return "no"
+}
+
+return 2 |> Match.apply(Match.new(List.new(Match.Case.new(Positive, ProgramChoiceResult1)), ProgramChoiceDefault))`, "String", `"yes"`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
@@ -212,14 +233,26 @@ func TestRunFileReads(t *testing.T) {
 	if err := file.Close(); err != nil {
 		t.Fatal(err)
 	}
-	source := fmt.Sprintf(`flow Read() -> String! { bytes = File.read(File.Path.new(%q)); return UTF8.String.new(bytes) }; return Read()`, file.Name())
+	source := fmt.Sprintf(`flow Read() -> String! { bytes = File.read(File.Path.new(%q)); return String.FromBytes.new(bytes) }; return Read()`, file.Name())
 	v := runValue(t, source, "--read-root", dir)
 	valueJSON(t, v, `{"type":"String","value":"aé😀"}`)
 	denied := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("authorization: %+v", denied)
 	}
-	lazy := fmt.Sprintf(`return Match.new(true, true: Bytes.new("safe"), _: File.read(File.Path.new(%q)))`, file.Name())
+	lazy := fmt.Sprintf(`flow ProgramChoiceTest1(value: Bool) -> Bool {
+    return value
+}
+
+flow ProgramChoiceResult1(value: Bool) -> Bytes! {
+    return Bytes.new("safe")
+}
+
+flow ProgramChoiceDefault(value: Bool) -> Bytes! {
+    return File.read(File.Path.new(%q))
+}
+
+return true |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1)), ProgramChoiceDefault))`, file.Name())
 	v = runValue(t, lazy)
 	valueJSON(t, v, `{"type":"Bytes","value":"c2FmZQ=="}`)
 	missing := fmt.Sprintf(`return File.read(File.Path.new(%q))`, filepath.Join(dir, "missing"))
@@ -237,11 +270,17 @@ func TestRunFileReads(t *testing.T) {
 	if err := invalid.Close(); err != nil {
 		t.Fatal(err)
 	}
-	bad := fmt.Sprintf(`flow Decode() -> String! { bytes = File.read(File.Path.new(%q)); return UTF8.String.new(bytes) }; return Decode()`, invalid.Name())
+	bad := fmt.Sprintf(`flow Decode() -> String! { bytes = File.read(File.Path.new(%q)); return String.FromBytes.new(bytes) }; return Decode()`, invalid.Name())
 	got = runProgram(t, sourceFile(t, bad), "run", "--read-root", dir, "--format", "json")
-	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"UTF8.InvalidBytes"`) {
+	failure := receiptHostDiagnostic(t, got)
+	if got.status != 1 || got.stdout != "" || failure.Code != "runtime.unhandled-error" || failure.Error == nil || failure.Error.Kind != "UTF8.InvalidBytes" {
 		t.Fatalf("UTF8 boundary: %+v", got)
 	}
+	if failure.Error.Input == nil || len(failure.Error.Trace) != 1 {
+		t.Fatalf("missing UTF-8 decoder context: %+v", failure.Error)
+	}
+	valueJSON(t, *failure.Error.Input, `{"bytes":{"type":"Bytes","value":"/w=="}}`)
+	valueJSON(t, traceFields(t, failure.Error.Trace[0])["operation"], `"String.FromBytes.new"`)
 }
 
 func TestRunStoredFallibility(t *testing.T) {

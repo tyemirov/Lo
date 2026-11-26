@@ -188,7 +188,15 @@ func TestTensorAnalysisSharedJoins(t *testing.T) {
 			fmt.Fprintf(&source, "%s%d=List.new(%s%d,%s%d)\n", name, i, name, i-1, name, i-1)
 		}
 	}
-	source.WriteString("joined=Match.new(1,1:Record.new(data:a30),_:Record.new(data:b30))\nreturn 0")
+	listType := "Int"
+	for depth := 0; depth <= 30; depth++ {
+		listType = "List<" + listType + ">"
+	}
+	fmt.Fprintf(&source, `flow First(request: Record{first: %s, second: %s}) -> Bool { return true }
+flow Left(request: Record{first: %s, second: %s}) -> Record{data: %s} { return Record.new(data: request.first) }
+flow Right(request: Record{first: %s, second: %s}) -> Record{data: %s} { return Record.new(data: request.second) }
+joined = Record.new(first: a30, second: b30) |> Match.apply(Match.new(List.new(Match.Case.new(First, Left)), Right))
+return 0`, listType, listType, listType, listType, listType, listType, listType, listType)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, binary, "check", sourceFile(t, source.String()), "--format", "json")

@@ -57,18 +57,11 @@ type nodeData struct {
 	Value      *string               `json:"value,omitempty"`
 	Field      string                `json:"field,omitempty"`
 	Arguments  []argumentData        `json:"arguments,omitempty"`
-	Cases      []caseData            `json:"cases,omitempty"`
 }
 type argumentData struct {
 	Position int             `json:"position"`
 	Node     nodeID          `json:"node,omitempty"`
 	Flow     identity.FlowID `json:"flow,omitempty"`
-}
-type caseData struct {
-	Kind string          `json:"kind"`
-	Head nodeID          `json:"head,omitempty"`
-	Flow identity.FlowID `json:"flow,omitempty"`
-	Body nodeID          `json:"body"`
 }
 type bindingData struct {
 	ID     ir.BindingID `json:"id"`

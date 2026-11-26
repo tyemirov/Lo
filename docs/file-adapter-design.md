@@ -70,8 +70,8 @@ flowchart LR
 `File.Entry` has no public constructor, equality, ordering, or checkpoint encoding.
 
 Write and append require Bytes.
-`UTF8.Bytes.new(text: String) -> Bytes` explicitly encodes text as UTF-8.
-`UTF8.String.new(bytes)` remains the fallible decoder.
+`Bytes.new(value: String) -> Bytes` explicitly encodes text as UTF-8.
+`String.FromBytes.new(bytes)` decodes UTF-8 and returns a fallible String.
 
 ### Activation Results
 

@@ -115,7 +115,7 @@ The shared Make cache remains available for later repository tasks.
 ### Current Adapter Update
 
 The current update adds the shared purity contract and nominal File targets.
-`UTF8.Bytes.new` explicitly encodes text for write and append.
+`Bytes.new` explicitly encodes text for write and append.
 Bound commits return `File.WriteReceipt`, `File.AppendReceipt`, or `File.RemoveReceipt` after activation success.
 Server startup returns `HTTP.ServerReceipt` with the actual listener address and port.
 

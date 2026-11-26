@@ -67,7 +67,10 @@ func f034NativeScenarios(targetOS string) []llvmRuntimeScenario {
 			source = f034Predicates + f034Program("parent", "File.Tree.Remove", "", `wrapped = Record.new(tree: tree); error = Error.new("Fixture.Snapshot", "snapshot", wrapped); diagnostic = error.input; return File.Tree.Remove.checked(wrapped.tree, Eligible)`)
 		} else if number == 24 {
 			source = strings.Replace(source, `return true }
-flow Main`, `return Match.new(String.eq(row.relative, "c-dir/a"), true: false, _: true) }
+flow Main`, `flow Rejected(value: String) -> Bool { return String.eq(value, "c-dir/a") }
+flow Reject(value: String) -> Bool { return false }
+flow Accept(value: String) -> Bool { return true }
+return row.relative |> Match.apply(Match.new(List.new(Match.Case.new(Rejected, Reject)), Accept)) }
 flow Main`, 1)
 		} else if number == 27 || number == 28 {
 			source = f034Predicates + f034Program("parent", "Int", "", "return List.length(tree.entries)")

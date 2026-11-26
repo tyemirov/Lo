@@ -68,8 +68,8 @@ func newWorkload(parent, name string, size, appendBytes int) (*workload, error) 
 	case "read", "write", "append":
 		readGrant()
 		w.payload = bytes.Repeat([]byte("x"), size)
-		operation := "data = File.read(" + path("input") + "); text = UTF8.String.new(data); return String.length(text)"
-		w.pipeline = "File.read followed by UTF8.String.new and String.length; scalar output; includes UTF-8 validation/conversion"
+		operation := "data = File.read(" + path("input") + "); text = String.FromBytes.new(data); return String.length(text)"
+		w.pipeline = "File.read followed by String.FromBytes.new and String.length; scalar output; includes UTF-8 validation/conversion"
 		if name != "read" {
 			writeGrant()
 			constructor := "File.Write.new"

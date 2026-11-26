@@ -11,7 +11,7 @@ import (
 func TestDiagnosticTraceArguments(t *testing.T) {
 	const secret = "trace-raw-header-secret"
 	const entriesType = "List<Record{name: String, value: Bytes}>"
-	entries := `List.new(Record.new(name: "authorization", value: UTF8.Bytes.new("` + secret + `")))`
+	entries := `List.new(Record.new(name: "authorization", value: Bytes.new("` + secret + `")))`
 	for _, test := range []struct {
 		name, source string
 		inputs       []map[string]string

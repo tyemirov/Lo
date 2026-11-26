@@ -111,7 +111,7 @@ func TestAdapterProcessConstructorValidation(t *testing.T) {
 	}
 	validArguments := `List.new("` + processArgumentSecret + `")`
 	validEnvironment := `Map.new(Record.new(key: "TOKEN", value: "` + processEnvironmentSecret + `"))`
-	validStdin := `UTF8.Bytes.new("` + processStdinSecret + `")`
+	validStdin := `Bytes.new("` + processStdinSecret + `")`
 	cases := []struct{ name, arguments, environment, directory string }{
 		{"relative-directory", validArguments, validEnvironment, "relative"},
 		{"nul-directory", validArguments, validEnvironment, root + "/bad\x00directory"},
@@ -170,7 +170,7 @@ func TestAdapterProcessCommandDiagnosticSnapshot(t *testing.T) {
 	root := fileFixtureRoot(t)
 	arguments := `List.new("` + processArgumentSecret + `")`
 	environment := `Map.new(Record.new(key: "TOKEN", value: "` + processEnvironmentSecret + `"))`
-	stdin := `UTF8.Bytes.new("` + processStdinSecret + `")`
+	stdin := `Bytes.new("` + processStdinSecret + `")`
 	source := fmt.Sprintf(`flow Main() -> Error! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: %s, context: Process.Context.new(%s, File.Path.new(%s)), stdin: %s); return Error.new("Probe", "safe", Record.new(command: command, nested: List.new(command))) }; return Main()`, processLiteral(t, root+"/missing"), arguments, environment, processLiteral(t, root), stdin)
 	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	if got.status != 0 {
@@ -196,7 +196,7 @@ func TestAdapterProcessCommandDiagnosticSnapshot(t *testing.T) {
 
 func TestAdapterProcessFailureTraceRedaction(t *testing.T) {
 	root := fileFixtureRoot(t)
-	source := fmt.Sprintf(`flow Fail(command: Process.Command) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: List.new("%s"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN", value: "%s")), File.Path.new(%s)), stdin: UTF8.Bytes.new("%s")); return Fail(command) }; return Main()`, processLiteral(t, root+"/missing"), processArgumentSecret, processEnvironmentSecret, processLiteral(t, root), processStdinSecret)
+	source := fmt.Sprintf(`flow Fail(command: Process.Command) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { executable = Process.Executable.new(File.Path.new(%s)); command = Process.Command.new(executable: executable, arguments: List.new("%s"), context: Process.Context.new(Map.new(Record.new(key: "TOKEN", value: "%s")), File.Path.new(%s)), stdin: Bytes.new("%s")); return Fail(command) }; return Main()`, processLiteral(t, root+"/missing"), processArgumentSecret, processEnvironmentSecret, processLiteral(t, root), processStdinSecret)
 	got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 	diagnostic := receiptHostDiagnostic(t, got)
 	if got.status != 1 || diagnostic.Error == nil || diagnostic.Error.Kind != "Math.DivideByZero" {

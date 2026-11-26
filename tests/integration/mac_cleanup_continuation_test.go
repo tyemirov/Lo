@@ -30,7 +30,10 @@ flow DirectSequence() -> Program.Exit! {
     recorded = RecordOutcome(initial, "first category", first)
     second = TryDirect(context, File.Path.new(%q))
     final = RecordOutcome(recorded, "later category", second)
-    return Program.Exit.new(Match.new(List.length(final.failures), 0: 0, _: 1), UTF8.Bytes.new(String.concat("FAILURES ", JoinStrings(final.failures, ","), "\n")), Bytes.new(""))
+    flow Successful(count: Int) -> Bool { return Math.eq(count, 0) }
+    flow SuccessStatus(count: Int) -> Int { return 0 }
+    flow FailureStatus(count: Int) -> Int { return 1 }
+    return Program.Exit.new(List.length(final.failures) |> Match.apply(Match.new(List.new(Match.Case.new(Successful, SuccessStatus)), FailureStatus)), Bytes.new(String.concat("FAILURES ", JoinStrings(final.failures, ","), "\n")), Bytes.new(""))
 }
 return DirectSequence()`, fixture.root, fixture.calls, fixture.root, fixture.root, os.Getuid(), fixture.writes, fixture.prunes)
 			flags := fixture.directFlags(t, true)

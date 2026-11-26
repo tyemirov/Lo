@@ -369,7 +369,7 @@ def process(config: Config) -> list[dict]:
     corpus.append(
         {
             "name": "file",
-            "source": 'flow F() -> Int! { text=UTF8.String.new(File.read(File.Path.new("input.txt"))); effect=File.Write.new(File.Path.new("output.txt"),Bytes.new(text)); commit effect; return String.length(text) }; return F()',
+            "source": 'flow F() -> Int! { text=String.FromBytes.new(File.read(File.Path.new("input.txt"))); effect=File.Write.new(File.Path.new("output.txt"),Bytes.new(text)); commit effect; return String.length(text) }; return F()',
             "expected": "30000",
         }
     )

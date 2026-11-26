@@ -9,7 +9,6 @@ import (
 )
 
 const MaxNesting = 256
-const matchConstructor = "Match.new"
 
 type parser struct {
 	file               source.File
@@ -233,9 +232,6 @@ func (p *parser) primary() Expression {
 	}
 	name, parts := p.qualifiedName()
 	if p.peek().kind == tLParen {
-		if name == matchConstructor {
-			return p.match(t.start)
-		}
 		args := p.arguments()
 		return call{expressionBase{base{p.span(t.start)}}, name, args}
 	}
@@ -277,42 +273,6 @@ func (p *parser) arguments() []Argument {
 	}
 	p.expect(tRParen, ")")
 	return args
-}
-func (p *parser) match(start int) Expression {
-	p.expect(tLParen, "(")
-	p.soft++
-	defer func() { p.soft-- }()
-	selector := p.expression()
-	p.expect(tComma, ",")
-	cases := make([]Case, 0)
-	for p.err == nil {
-		t := p.peek()
-		var head Expression
-		predicate := ""
-		if t.kind == tUnderscore {
-			p.take()
-		} else if t.kind == tWhen {
-			p.take()
-			predicate = p.expect(tIdentifier, "predicate flow name").text
-		} else {
-			head = p.expression()
-		}
-		p.expect(tColon, ":")
-		body := p.expression()
-		b := caseBase{base{p.span(t.start)}, body}
-		if t.kind == tUnderscore {
-			cases = append(cases, defaultCase{b})
-		} else if t.kind == tWhen {
-			cases = append(cases, predicateCase{b, predicate})
-		} else {
-			cases = append(cases, exactCase{b, head})
-		}
-		if !p.accept(tComma) || p.peek().kind == tRParen {
-			break
-		}
-	}
-	p.expect(tRParen, ")")
-	return match{expressionBase{base{p.span(start)}}, selector, cases}
 }
 func (p *parser) typeExpression() TypeExpression {
 	if p.err != nil || !p.enter() {
@@ -359,7 +319,7 @@ func (p *parser) typeExpression() TypeExpression {
 }
 
 func isLabel(kind tokenKind) bool {
-	return kind == tIdentifier || kind >= tTrue && kind <= tWhen
+	return kind == tIdentifier || kind >= tTrue && kind <= tOnError
 }
 func (p *parser) expectLabel(description string) token {
 	if isLabel(p.peek().kind) {

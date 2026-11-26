@@ -182,7 +182,7 @@ The table identifies their compiler consequences without a second normative defi
 | Boundary reads | Section 22.2 | Record boundary reads and commit activation as different behaviors. |
 | Fallible values and errors | Section 22.3 | Represent stored fallible values, success, failure, and propagation as different graph operations. |
 | Constructors and arguments | Section 22.4 | Keep source evaluation order when you apply expected types and operation constraints. |
-| Match cases | Section 22.5 | Validate each case and keep case tests in different evaluation regions from branch bodies. |
+| Matcher operations | Section 22.5 | Validate each named callback and preserve ordered predicate evaluation at application. |
 
 ## Compiler Pipeline
 
@@ -369,8 +369,8 @@ Boundary reads have different summary data because external data can change betw
 
 Pure named callbacks must have neither `reads` nor `commits`.
 This rule applies to List callbacks, Match predicates, flow self-handlers, and adapter `onError` flows.
-Match case heads must be pure and total.
-Match selectors and selected branches can read external state but cannot activate commits.
+A matcher can store a reading handler. The matcher type records that effect.
+`Match.apply` adds the possible read to the caller. Handler commits belong in the calling flow.
 `Flow.fold` and HTTP request callbacks retain observations and commits under their declared fallibility rules.
 Stored handler requirements belong to later callback execution.
 Server construction does not execute those handlers.
@@ -387,7 +387,7 @@ Private constructors enforce these guarantees before the interpreter receives th
 | Constructor or processor call | A resolved operation with explicit arguments. |
 | Flow invocation | A resolved flow with its arguments and invocation region. |
 | Field projection | Access to a field accepted by the type checker. |
-| Match region | Ordered case tests and different branch regions. |
+| Matcher application | Ordered predicate calls and invocation of the selected handler. |
 | Propagation boundary | Transfer of a recoverable error to the specified handler boundary. |
 | Target description | A nominal committable value that has no activation by itself. |
 | Commit activation | An ordered operation that activates its target and can bind its typed result. |
@@ -401,7 +401,7 @@ Graph requirements:
 
 - Lower pipes into explicit first-argument calls.
 - Keep the original pipe span for diagnostics.
-- Evaluate only the selected match branch.
+- Invoke only the selected matcher handler.
 - Keep source order for commit activation in each evaluated region.
 - Stop dependent evaluation when an unresolved error propagates.
 - Keep different activations for repeated explicit commits of the same target.
@@ -428,6 +428,7 @@ Publication requirements:
 - Keep argument evaluation order independent of parameter positions.
 - Give each flow its checked body, signature, handler relation, and effect summary.
 - Keep each match branch in a different evaluation region.
+- Represent reusable matcher construction as immutable callback data. Invoke predicates and handlers only from `Match.apply`.
 - Preserve the order and identity of each commit statement.
 - Prevent publication after any source diagnostic or internal construction failure.
 
@@ -877,6 +878,7 @@ Inspection requirements:
 - Generate deterministic output for the same source and compiler contract.
 - Keep different commit sites even when they use the same bound target.
 - Include effects from each possible branch if runtime input controls branch selection.
+- Preserve stored matcher callbacks through values and analyze their possible results when a request reaches `Match.apply`.
 - Distinguish an uncommitted target from an activated target.
 - Show failure handling without removing possible effects from handler analysis.
 - Generate capability summaries without external reads or adapter activation.
@@ -1181,7 +1183,7 @@ Acceptance:
 
 - Evaluate the list-sum example to `10`.
 - Verify integer results outside the signed 64-bit range.
-- Evaluate only the selected match branch.
+- Invoke only the selected matcher handler.
 - Reject unauthorized boundary reads before resource access.
 - Verify read order and repeated-read behavior against the resolved specification.
 - Verify required error kinds and handler trace contents.
@@ -1644,7 +1646,13 @@ A zero exit saves exact stdout bytes, while a nonzero exit selects no write.
 Signals make the exit-code accessor fail before any File activation.
 
 ```lo
-flow EmptyResults() -> List<Process.Result> {
+flow Succeeded(output: Record{code: Int, result: Process.Result}) -> Bool {
+    return Math.eq(output.code, 0)
+}
+flow KeepResult(output: Record{code: Int, result: Process.Result}) -> List<Process.Result> {
+    return List.new(output.result)
+}
+flow EmptyResults(output: Record{code: Int, result: Process.Result}) -> List<Process.Result> {
     return List.new()
 }
 flow SaveOutput(path: File.Path, total: Int, result: Process.Result) -> Int! {
@@ -1655,7 +1663,8 @@ flow SaveOutput(path: File.Path, total: Int, result: Process.Result) -> Int! {
 flow Capture(command: Process.Command, path: File.Path) -> Int! {
     result = commit command
     code = Process.Termination.exit_code(result.termination)
-    selected = Match.new(code, 0: List.new(result), _: EmptyResults())
+    paths = Match.new(List.new(Match.Case.new(Succeeded, KeepResult)), EmptyResults)
+    selected = Record.new(code: code, result: result) |> Match.apply(paths)
     return Flow.fold(selected, 0, path, SaveOutput)
 }
 ```

@@ -53,6 +53,9 @@ func builtinExamples() []builtinExample {
 		{"Map.new", `return Map.new(Record.new(key: true, value: 1))`, "Map<Bool, Int>"},
 		{"Record.new", `return Record.new(x: 1, y: "a")`, "Record{x: Int, y: String}"},
 		{"Range.new", `return Range.new("a", "z", true, false)`, "Range<String>"},
+		{catalog.MatchCaseNew, `flow P(x: Int) -> Bool { return true }; flow H(x: Int) -> Int { return x }; return Match.Case.new(P, H)`, "Match.Case<Int, Int>"},
+		{catalog.MatchNew, `flow H(x: Int) -> Int { return x }; return Match.new(cases: List.new(), default: H)`, "Match<Int, Int>"},
+		{catalog.MatchApply, `flow H(x: Int) -> Int { return x }; return 1 |> Match.apply(Match.new(cases: List.new(), default: H))`, "Int"},
 		{"Error.new", `return Error.new("Custom", "message", Record.new())`, "Error"},
 		{"File.Path.new", `return File.Path.new("unread")`, "File.Path"},
 		{"File.Path.eq", `return File.Path.eq(File.Path.new("a"), File.Path.new("a"))`, "Bool"},
@@ -71,8 +74,7 @@ func builtinExamples() []builtinExample {
 		{"HTTP.Response.new", `flow Main() -> HTTP.Response! { headers = HTTP.Headers.new(List.new()); return HTTP.Response.new(200, headers, Bytes.new("ok")) }; return Main()`, "HTTP.Response!"},
 		{"HTTP.Response.Text.new", `return HTTP.Response.Text.new(200, "ok")`, "HTTP.Response"},
 		{"HTTP.Response.Bytes.new", `return HTTP.Response.Bytes.new(200, Bytes.new("ok"))`, "HTTP.Response"},
-		{"UTF8.Bytes.new", `return UTF8.Bytes.new("ok")`, "Bytes"},
-		{"UTF8.String.new", `return UTF8.String.new(Bytes.new("ok"))`, "String!"},
+		{"String.FromBytes.new", `return String.FromBytes.new(bytes: Bytes.new(value: "Grüße 世界🌍"))`, "String!"},
 		{"String.FromScalars.new", `return String.FromScalars.new(List.new(Scalar.new("a")))`, "String"},
 		{"String.concat", `return String.concat("a", "b")`, "String"},
 		{"String.upper", `return String.upper("a")`, "String"},
@@ -115,7 +117,7 @@ func builtinExamples() []builtinExample {
 		{"File.open_paths", `return File.open_paths(File.Path.new("fixtures"))`, "List<File.Path>!"},
 		{"File.Remove.new", `flow Empty() -> List<File.Entry> { return List.new() }; return File.Remove.new(Empty())`, "File.Remove!"},
 		{"File.Remove.checked", `flow Eligible(original: File.Entry, current: File.Entry) -> Bool { return true }; flow Main() -> Int! { pending = File.Remove.checked(List.new(), Eligible); receipt = commit pending; return receipt.completed_count }; return Main()`, "Int!"},
-		{"File.Append.new", `return File.Append.new(File.Path.new("unwritten"), UTF8.Bytes.new("data"))`, "File.Append"},
+		{"File.Append.new", `return File.Append.new(File.Path.new("unwritten"), Bytes.new("data"))`, "File.Append"},
 		{"File.Write.new", `return File.Write.new(File.Path.new("unwritten"), Bytes.new("data"))`, "File.Write"},
 	}
 	examples = append(examples, parameterBuiltinExamples()...)

@@ -228,19 +228,6 @@ func (a *analyzer) expression(e ir.Expression, env map[ir.BindingID]fact) (resul
 		if a.err != nil {
 			a.err = diagnostic.WithRelated(a.err, x.Span())
 		}
-	case ir.Match:
-		a.expression(x.Selector(), env)
-		for i, c := range x.Cases() {
-			if exact, ok := c.(ir.ExactCase); ok {
-				a.expression(exact.Head(), env)
-			}
-			f := a.expression(c.Body(), env)
-			if i == 0 {
-				result = f
-			} else {
-				result = a.join(result, f)
-			}
-		}
 	case ir.BuiltinCall:
 		args := make([]fact, len(x.Arguments()))
 		for _, arg := range x.Arguments() {

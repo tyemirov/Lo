@@ -40,7 +40,7 @@ func TestAutodiffRejectsUnsupportedGraphs(t *testing.T) {
 	for _, body := range []string{
 		`unused = Tensor.values(p.x); return Tensor.sum(p.x,List.new(0))`,
 		`unused = Tensor.new(List.new(1.0),List.new()); return Tensor.sum(p.x,List.new(0))`,
-		`return Match.new(true, true: Tensor.sum(p.x,List.new(0)), _: Tensor.sum(p.x,List.new(0)))`,
+		`flow Sum(request: Record{x: Tensor<FP32>}) -> Tensor<FP32>! { return Tensor.sum(request.x, List.new(0)) }; return p |> Match.apply(Match.new(List.new(), Sum))`,
 		`unused = File.read(File.Path.new("never-read")); return Tensor.sum(p.x,List.new(0))`,
 		`unused = Float.add(1.0,2.0); return Tensor.sum(p.x,List.new(0))`,
 	} {

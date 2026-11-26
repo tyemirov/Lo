@@ -182,7 +182,6 @@ pub unsafe fn call(
                     "lo_cause" => (s.action == Action::Cause, 1),
                     "lo_commit" => (s.action == Action::Commit, 1),
                     "lo_project" => (s.action == Action::Project, 1),
-                    "lo_match" => (s.action == Action::Match, 2),
                     "lo_convert_success" => (s.action == Action::ConvertSuccess, 1),
                     "lo_convert_failure" => (s.action == Action::ConvertFailure, 1),
                     "lo_convert_record_view" => (s.action == Action::ConvertRecordView, 1),
@@ -190,6 +189,7 @@ pub unsafe fn call(
                     "lo_convert_fallible_record_view" => {
                         (s.action == Action::ConvertFallibleRecordView, 1)
                     }
+                    "lo_convert_matcher_read_view" => (s.action == Action::ConvertMatcherReadView, 1),
                     _ => (false, 1),
                 };
                 if !expected || count != argc {
@@ -210,6 +210,9 @@ pub unsafe fn call(
                 return Err(host("operation arguments disagree with admitted metadata"));
             }
             if crate::json_values::SUPPORTED.contains(&op) { return crate::json_values::execute(&mut *c,&s,&a); }
+            if crate::matcher::SUPPORTED.contains(&op) {
+                return crate::matcher::execute(c, &s, &a);
+            }
             if crate::text_format::SUPPORTED.contains(&op) { return crate::text_format::execute(&mut *c,&s,&a); }
             if crate::tensor::SUPPORTED.contains(&op) {
                 return crate::tensor::execute(&mut *c, &s, &a);
@@ -299,6 +302,10 @@ fn validate_helper(symbol: &str, s: &Site, a: &[Handle]) -> Result<(), Fault> {
             matches!(&a[0].typ,Type::Fallible(t) if matches!(t.as_ref(),Type::Record(_)))
                 && s.typ == Type::Fallible(Box::new(atom("Record")))
         }
+        "lo_convert_matcher_read_view" => {
+            crate::matcher::read_view_allowed(&a[0].typ, &s.typ)
+                && matches!(a[0].data, Data::MatchCase(_) | Data::Matcher(_))
+        }
         "lo_project" => {
             let field = s.project_field();
             let typ = match &a[0].data {
@@ -322,19 +329,6 @@ fn validate_helper(symbol: &str, s: &Site, a: &[Handle]) -> Result<(), Fault> {
                 _ => None,
             };
             typ.as_ref() == Some(&s.typ)
-        }
-        "lo_match" => {
-            s.typ == atom("Bool")
-                && match &a[1].typ {
-                    Type::Range(t) => t.as_ref() == &a[0].typ,
-                    _ => {
-                        a[0].typ == a[1].typ
-                            && matches!(
-                                a[0].typ.kind(),
-                                "Int" | "String" | "Scalar" | "Bool" | "Null"
-                            )
-                    }
-                }
         }
         "lo_commit" => true,
         _ => false,
@@ -423,6 +417,7 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
             }
         }
         Action::ConvertRecordView => Ok(view(&a[0])),
+        Action::ConvertMatcherReadView => Ok(new(s.typ.clone(), a[0].data.clone())),
         Action::ConvertFallibleRecordView => match &a[0].data {
             Data::Success(v) => Ok(success(&s.typ, view(v))),
             Data::Failure(e) => Ok(failure(&s.typ, e.clone())),
@@ -462,11 +457,6 @@ fn helper(c: &mut Context, s: &Site, a: &[Handle], symbol: &str) -> Outcome {
                 .cloned()
                 .ok_or_else(|| host("unknown record field"))
         }
-        Action::Match => Ok(boolean(if matches!(a[1].data, Data::Range(..)) {
-            contains(&a[1], &a[0])
-        } else {
-            equal(&a[0], &a[1])
-        })),
         Action::Commit => crate::adapters::commit(c, s, &a[0]),
         _ => Err(host(format!(
             "invalid runtime action {}",
@@ -484,14 +474,14 @@ helper!(
     lo_cause,
     lo_commit,
     lo_project,
-    lo_match,
     lo_flow_ref,
     lo_convert_success,
     lo_convert_failure,
     lo_convert_propagate,
     lo_convert_record_view,
     lo_convert_scalar_list_view,
-    lo_convert_fallible_record_view
+    lo_convert_fallible_record_view,
+    lo_convert_matcher_read_view
 );
 #[no_mangle]
 pub unsafe extern "C" fn lo_invalid_status(

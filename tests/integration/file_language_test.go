@@ -43,7 +43,7 @@ func TestFileLanguageNominalAndCheckpointRejections(t *testing.T) {
 		`flow F(entry: File.Entry) -> String { return entry.name }; return F(Record.new(path: File.Path.new("x"), name: "x", kind: "regular", size_bytes: 0, modified_unix_ns: 0, link_count: 1, owner_uid: 0, accessed_unix_ns: 0, changed_unix_ns: 0))`,
 		`flow Main() -> Bytes! { entries = File.list(File.Path.new("/fixture")); return Checkpoint.encode(entries) }; return Main()`,
 		`flow Main() -> Bytes! { entries = File.list(File.Path.new("/fixture")); return Checkpoint.encode(File.Remove.new(entries)) }; return Main()`,
-		`flow F(entry: File.Entry) -> Bool { return Match.new(entry, entry: true, _: false) }; return 0`,
+		`flow P(entry: File.Entry) -> Bool { return Map.has_key(Map.new(Record.new(key: entry, value: true)), entry) }; flow H(entry: File.Entry) -> Bool { return true }; return Match.Case.new(P, H)`,
 	}
 	for _, source := range cases {
 		t.Run(source[:20], func(t *testing.T) {

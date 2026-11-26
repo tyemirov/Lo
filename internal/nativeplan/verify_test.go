@@ -44,22 +44,13 @@ func TestVerifierRejectsInvalidOwnershipAndABI(t *testing.T) {
 				}
 			}
 		}},
-		{"body cleanup boolean", "body cleanup terminator uses released value", func(m *Module) {
+		{"body cleanup arity", "body cleanup terminator uses released value", func(m *Module) {
 			f := &m.Functions[0]
-			available := ValueID(0)
-			for _, block := range f.Blocks {
-				for _, instruction := range block.Instructions {
-					if instruction.Kind == Call && instruction.Symbol == ScopeEnterSymbol {
-						available = instruction.Value
-					}
-				}
-			}
 			for bi := range f.Blocks {
 				b := &f.Blocks[bi]
-				for _, i := range b.Instructions {
-					if i.Kind == ScopeLeave {
-						b.End.Kind = Boolean
-						b.End.Value = available
+				for _, instruction := range b.Instructions {
+					if instruction.Kind == ScopeLeave {
+						b.End.Kind = Arity
 						b.End.Targets[1] = b.End.Targets[0]
 						return
 					}

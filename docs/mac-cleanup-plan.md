@@ -105,7 +105,7 @@ The implementation followed these milestones:
 
 Do not add a language operation for a named application or workflow step.
 Keep the implemented Match effect rules and flow-cycle rules unchanged unless a separate language contract explicitly changes them.
-The source now uses current `Match.new`, `onError`, and `Flow.fold` contracts for its conditional effects and recovery.
+The source now uses current `Match.apply`, `onError`, and `Flow.fold` contracts for its conditional effects and recovery.
 Selections and captures use named application flows.
 The [control example](examples/cleanup-control-flow.lo) has compiled-program software coverage.
 

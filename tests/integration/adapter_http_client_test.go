@@ -20,7 +20,7 @@ import (
 )
 
 func httpClientSource(url, method, headers, body, tail string) string {
-	return fmt.Sprintf(`flow Main() -> HTTP.Response! { method = HTTP.Method.new(%q); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(%s); target = HTTP.Client.Request.new(method, url, headers, UTF8.Bytes.new(%q)); %s }; return Main()`, method, url, headers, body, tail)
+	return fmt.Sprintf(`flow Main() -> HTTP.Response! { method = HTTP.Method.new(%q); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(%s); target = HTTP.Client.Request.new(method, url, headers, Bytes.new(%q)); %s }; return Main()`, method, url, headers, body, tail)
 }
 func httpGrant(method, origin string) string { return method + "," + origin + ",127.0.0.1" }
 func httpResultFields(t *testing.T, got result) map[string]runtimeValue {
@@ -53,7 +53,7 @@ func TestAdapterHTTPClientExchange(t *testing.T) {
 		_, _ = io.WriteString(w, "result")
 	}))
 	defer server.Close()
-	headers := `List.new(Record.new(name: "X-Probe", value: UTF8.Bytes.new("one")), Record.new(name: "x-probe", value: UTF8.Bytes.new("two")))`
+	headers := `List.new(Record.new(name: "X-Probe", value: Bytes.new("one")), Record.new(name: "x-probe", value: Bytes.new("two")))`
 	source := sourceFile(t, httpClientSource(server.URL+"/resource?private=query", "POST", headers, "payload", `response = commit target; return response`))
 	fields := httpResultFields(t, runProgram(t, source, "run", "--http-allow", httpGrant("POST", server.URL), "--format", "json"))
 	valueJSON(t, fields["status"], `"418"`)
@@ -76,7 +76,7 @@ func TestAdapterHTTPClientConstruction(t *testing.T) {
 		`return HTTP.URL.new("/relative")`, `return HTTP.URL.new("ftp://localhost/")`, `return HTTP.URL.new("http://user:password@localhost/")`,
 		`return HTTP.Method.new("bad method")`,
 		httpClientSource(server.URL, "CONNECT", `List.new()`, "", `response = commit target; return response`),
-		httpClientSource(server.URL, "GET", `List.new(Record.new(name: "host", value: UTF8.Bytes.new("other")))`, "", `response = commit target; return response`),
+		httpClientSource(server.URL, "GET", `List.new(Record.new(name: "host", value: Bytes.new("other")))`, "", `response = commit target; return response`),
 	} {
 		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		if got.status != 1 || calls.Load() != 0 {
@@ -152,7 +152,7 @@ func TestAdapterHTTPClientNoReplay(t *testing.T) {
 	}()
 	const secret = "http-client-secret-sentinel"
 	origin := "http://" + listener.Addr().String()
-	source := sourceFile(t, httpClientSource(origin+"/drop?"+secret, "POST", `List.new(Record.new(name: "authorization", value: UTF8.Bytes.new("`+secret+`")))`, secret, `response = commit target; return response`))
+	source := sourceFile(t, httpClientSource(origin+"/drop?"+secret, "POST", `List.new(Record.new(name: "authorization", value: Bytes.new("`+secret+`")))`, secret, `response = commit target; return response`))
 	got := runProgram(t, source, "run", "--http-allow", httpGrant("POST", origin), "--format", "json")
 	_ = listener.Close()
 	<-done

@@ -2,34 +2,160 @@
 // The acceptance tests use fixtures inside the Lo repository.
 
 flow NameCharacter(total: Int, index: Int, character: Scalar) -> Bool {
-    return Match.new(index,
-        0: Scalar.eq(character, Scalar.new("d")),
-        1: Scalar.eq(character, Scalar.new("e")),
-        2: Scalar.eq(character, Scalar.new("p")),
-        3: Scalar.eq(character, Scalar.new("l")),
-        4: Scalar.eq(character, Scalar.new("o")),
-        5: Scalar.eq(character, Scalar.new("y")),
-        6: Scalar.eq(character, Scalar.new("m")),
-        7: Scalar.eq(character, Scalar.new("e")),
-        8: Scalar.eq(character, Scalar.new("n")),
-        9: Scalar.eq(character, Scalar.new("t")),
-        10: Scalar.eq(character, Scalar.new("-")),
-        Math.sub(total, 4): Scalar.eq(character, Scalar.new(".")),
-        Math.sub(total, 3): Scalar.eq(character, Scalar.new("l")),
-        Math.sub(total, 2): Scalar.eq(character, Scalar.new("o")),
-        Math.sub(total, 1): Scalar.eq(character, Scalar.new("g")),
-        _: Range.contains(
-            Range.new(Scalar.new("0"), Scalar.new("9"), true, true),
-            character
-        )
-    )
+    flow NameCharacterChoiceTest1(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow NameCharacterChoiceResult1(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("d"))
+    }
+
+    flow NameCharacterChoiceTest2(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 1)
+    }
+
+    flow NameCharacterChoiceResult2(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("e"))
+    }
+
+    flow NameCharacterChoiceTest3(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 2)
+    }
+
+    flow NameCharacterChoiceResult3(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("p"))
+    }
+
+    flow NameCharacterChoiceTest4(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 3)
+    }
+
+    flow NameCharacterChoiceResult4(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("l"))
+    }
+
+    flow NameCharacterChoiceTest5(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 4)
+    }
+
+    flow NameCharacterChoiceResult5(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("o"))
+    }
+
+    flow NameCharacterChoiceTest6(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 5)
+    }
+
+    flow NameCharacterChoiceResult6(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("y"))
+    }
+
+    flow NameCharacterChoiceTest7(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 6)
+    }
+
+    flow NameCharacterChoiceResult7(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("m"))
+    }
+
+    flow NameCharacterChoiceTest8(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 7)
+    }
+
+    flow NameCharacterChoiceTest9(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 8)
+    }
+
+    flow NameCharacterChoiceResult9(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("n"))
+    }
+
+    flow NameCharacterChoiceTest10(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 9)
+    }
+
+    flow NameCharacterChoiceResult10(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("t"))
+    }
+
+    flow NameCharacterChoiceTest11(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, 10)
+    }
+
+    flow NameCharacterChoiceResult11(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("-"))
+    }
+
+    flow NameCharacterChoiceTest12(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, Math.sub(request.total, 4))
+    }
+
+    flow NameCharacterChoiceResult12(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("."))
+    }
+
+    flow NameCharacterChoiceTest13(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, Math.sub(request.total, 3))
+    }
+
+    flow NameCharacterChoiceTest14(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, Math.sub(request.total, 2))
+    }
+
+    flow NameCharacterChoiceTest15(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Math.eq(request.selector, Math.sub(request.total, 1))
+    }
+
+    flow NameCharacterChoiceResult15(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Scalar.eq(request.character, Scalar.new("g"))
+    }
+
+    flow NameCharacterChoiceDefault(request: Record{character: Scalar, selector: Int, total: Int}) -> Bool {
+        return Range.contains(
+                Range.new(Scalar.new("0"), Scalar.new("9"), true, true),
+                request.character
+            )
+    }
+
+    return Record.new(selector: index, character: character, total: total) |> Match.apply(Match.new(
+        cases: List.new(
+            Match.Case.new(NameCharacterChoiceTest1, NameCharacterChoiceResult1),
+            Match.Case.new(NameCharacterChoiceTest2, NameCharacterChoiceResult2),
+            Match.Case.new(NameCharacterChoiceTest3, NameCharacterChoiceResult3),
+            Match.Case.new(NameCharacterChoiceTest4, NameCharacterChoiceResult4),
+            Match.Case.new(NameCharacterChoiceTest5, NameCharacterChoiceResult5),
+            Match.Case.new(NameCharacterChoiceTest6, NameCharacterChoiceResult6),
+            Match.Case.new(NameCharacterChoiceTest7, NameCharacterChoiceResult7),
+            Match.Case.new(NameCharacterChoiceTest8, NameCharacterChoiceResult2),
+            Match.Case.new(NameCharacterChoiceTest9, NameCharacterChoiceResult9),
+            Match.Case.new(NameCharacterChoiceTest10, NameCharacterChoiceResult10),
+            Match.Case.new(NameCharacterChoiceTest11, NameCharacterChoiceResult11),
+            Match.Case.new(NameCharacterChoiceTest12, NameCharacterChoiceResult12),
+            Match.Case.new(NameCharacterChoiceTest13, NameCharacterChoiceResult4),
+            Match.Case.new(NameCharacterChoiceTest14, NameCharacterChoiceResult5),
+            Match.Case.new(NameCharacterChoiceTest15, NameCharacterChoiceResult15),
+        ),
+        default: NameCharacterChoiceDefault
+    ))
 }
 
 flow NameStep(total: Int, state: Record{index: Int, valid: Bool}, character: Scalar) -> Record{index: Int, valid: Bool} {
-    valid = Match.new(state.valid,
-        true: NameCharacter(total, state.index, character),
-        _: false
-    )
+    valid = Record.new(selector: state.valid, character: character, state: state, total: total) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(NameStepValidChoiceTest1, NameStepValidChoiceResult1)),
+        default: NameStepValidChoiceDefault
+    ))
+    flow NameStepValidChoiceTest1(request: Record{character: Scalar, selector: Bool, state: Record{index: Int, valid: Bool}, total: Int}) -> Bool {
+        return request.selector
+    }
+
+    flow NameStepValidChoiceResult1(request: Record{character: Scalar, selector: Bool, state: Record{index: Int, valid: Bool}, total: Int}) -> Bool {
+        return NameCharacter(request.total, request.state.index, request.character)
+    }
+
+    flow NameStepValidChoiceDefault(request: Record{character: Scalar, selector: Bool, state: Record{index: Int, valid: Bool}, total: Int}) -> Bool {
+        return false
+    }
+
     return Record.new(index: Math.add(state.index, 1), valid: valid)
 }
 
@@ -41,29 +167,78 @@ flow FullName(name: String, total: Int) -> Bool {
 
 flow IsGatewayLogName(name: String) -> Bool {
     total = String.length(name)
-    return Match.new(Math.gte(total, 16),
-        true: FullName(name, total),
-        _: false
-    )
+    flow IsGatewayLogNameChoiceTest1(request: Record{name: String, selector: Bool, total: Int}) -> Bool {
+        return request.selector
+    }
+
+    flow IsGatewayLogNameChoiceResult1(request: Record{name: String, selector: Bool, total: Int}) -> Bool {
+        return FullName(request.name, request.total)
+    }
+
+    flow IsGatewayLogNameChoiceDefault(request: Record{name: String, selector: Bool, total: Int}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: Math.gte(total, 16), name: name, total: total) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(IsGatewayLogNameChoiceTest1, IsGatewayLogNameChoiceResult1)),
+        default: IsGatewayLogNameChoiceDefault
+    ))
 }
 
 flow IsCandidate(cutoff_unix_ns: Int, entry: File.Entry) -> Bool {
-    return Match.new(entry.kind,
-        "regular": Match.new(IsGatewayLogName(entry.name),
-            true: Math.lt(entry.modified_unix_ns, cutoff_unix_ns),
-            _: false
-        ),
-        _: false
-    )
+    flow IsCandidateChoiceTest1(request: Record{cutoff_unix_ns: Int, entry: File.Entry, selector: String}) -> Bool {
+        return String.eq(request.selector, "regular")
+    }
+
+    flow IsCandidateChoice2Test1(request: Record{cutoff_unix_ns: Int, entry: File.Entry, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow IsCandidateChoice2Result1(request: Record{cutoff_unix_ns: Int, entry: File.Entry, selector: Bool}) -> Bool {
+        return Math.lt(request.entry.modified_unix_ns, request.cutoff_unix_ns)
+    }
+
+    flow IsCandidateChoice2Default(request: Record{cutoff_unix_ns: Int, entry: File.Entry, selector: Bool}) -> Bool {
+        return false
+    }
+
+    flow IsCandidateChoiceResult1(request: Record{cutoff_unix_ns: Int, entry: File.Entry, selector: String}) -> Bool {
+        return Record.new(selector: IsGatewayLogName(request.entry.name), cutoff_unix_ns: request.cutoff_unix_ns, entry: request.entry) |> Match.apply(Match.new(
+            cases: List.new(Match.Case.new(IsCandidateChoice2Test1, IsCandidateChoice2Result1)),
+            default: IsCandidateChoice2Default
+        ))
+    }
+
+    flow IsCandidateChoiceDefault(request: Record{cutoff_unix_ns: Int, entry: File.Entry, selector: String}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: entry.kind, cutoff_unix_ns: cutoff_unix_ns, entry: entry) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(IsCandidateChoiceTest1, IsCandidateChoiceResult1)),
+        default: IsCandidateChoiceDefault
+    ))
 }
 
 flow EmptyEntries() -> List<File.Entry> { return List.new() }
 
 flow ListingError(error: Error) -> Record{directory_status: String, entries: List<File.Entry>!} {
-    return Record.new(directory_status: "absent", entries: Match.new(error.kind,
-        "File.DirectoryAbsent": EmptyEntries(),
-        _: error
-    ))
+    flow ListingErrorChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryAbsent")
+    }
+
+    flow ListingErrorChoiceResult1(request: Record{error: Error, selector: String}) -> List<File.Entry>! {
+        return EmptyEntries()
+    }
+
+    flow ListingErrorChoiceDefault(request: Record{error: Error, selector: String}) -> List<File.Entry>! {
+        return request.error
+
+    }
+
+    return Record.new(directory_status: "absent", entries: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ListingErrorChoiceTest1, ListingErrorChoiceResult1)),
+        default: ListingErrorChoiceDefault
+    )))
 }
 
 flow Observe(root: File.Path) -> Record{directory_status: String, entries: List<File.Entry>!} onError ListingError {
@@ -78,12 +253,42 @@ flow Select(root: File.Path, cutoff_unix_ns: Int) -> Record{directory_status: St
 }
 
 flow SeenPath(target: File.Path, found: Bool, path: File.Path) -> Bool {
-    return Match.new(found, true: true, _: File.Path.eq(path, target))
+    flow SeenPathChoiceTest1(request: Record{path: File.Path, selector: Bool, target: File.Path}) -> Bool {
+        return request.selector
+    }
+
+    flow SeenPathChoiceResult1(request: Record{path: File.Path, selector: Bool, target: File.Path}) -> Bool {
+        return true
+    }
+
+    flow SeenPathChoiceDefault(request: Record{path: File.Path, selector: Bool, target: File.Path}) -> Bool {
+        return File.Path.eq(request.path, request.target)
+    }
+
+    return Record.new(selector: found, path: path, target: target) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(SeenPathChoiceTest1, SeenPathChoiceResult1)),
+        default: SeenPathChoiceDefault
+    ))
 }
 
 flow Closed(open_paths: List<File.Path>, entry: File.Entry) -> Bool {
     opened = List.fold(open_paths, false, entry.path, SeenPath)
-    return Match.new(opened, true: false, _: true)
+    flow ClosedChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow ClosedChoiceResult1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow ClosedChoiceDefault(value: Bool) -> Bool {
+        return true
+    }
+
+    return opened |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ClosedChoiceTest1, ClosedChoiceResult1)),
+        default: ClosedChoiceDefault
+    ))
 }
 
 flow ProbeSelection(root: File.Path, candidates: List<File.Entry>) -> List<File.Entry>! {
@@ -92,10 +297,22 @@ flow ProbeSelection(root: File.Path, candidates: List<File.Entry>) -> List<File.
 }
 
 flow Available(root: File.Path, candidates: List<File.Entry>) -> List<File.Entry>! {
-    return Match.new(List.length(candidates),
-        0: candidates,
-        _: ProbeSelection(root, candidates)
-    )
+    flow AvailableChoiceTest1(request: Record{candidates: List<File.Entry>, root: File.Path, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow AvailableChoiceResult1(request: Record{candidates: List<File.Entry>, root: File.Path, selector: Int}) -> List<File.Entry>! {
+        return request.candidates
+    }
+
+    flow AvailableChoiceDefault(request: Record{candidates: List<File.Entry>, root: File.Path, selector: Int}) -> List<File.Entry>! {
+        return ProbeSelection(request.root, request.candidates)
+    }
+
+    return Record.new(selector: List.length(candidates), candidates: candidates, root: root) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(AvailableChoiceTest1, AvailableChoiceResult1)),
+        default: AvailableChoiceDefault
+    ))
 }
 
 flow ObservedBytes(entry: File.Entry) -> Int { return entry.size_bytes }
@@ -114,10 +331,23 @@ flow Preview(root: File.Path, cutoff_unix_ns: Int) -> Record{directory_status: S
 }
 
 flow RemovalError(error: Error) -> Record{removed: Bool!} {
-    return Record.new(removed: Match.new(error.kind,
-        "File.EntryChanged": false,
-        _: error
-    ))
+    flow RemovalErrorChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.EntryChanged")
+    }
+
+    flow RemovalErrorChoiceResult1(request: Record{error: Error, selector: String}) -> Bool! {
+        return false
+    }
+
+    flow RemovalErrorChoiceDefault(request: Record{error: Error, selector: String}) -> Bool! {
+        return request.error
+
+    }
+
+    return Record.new(removed: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RemovalErrorChoiceTest1, RemovalErrorChoiceResult1)),
+        default: RemovalErrorChoiceDefault
+    )))
 }
 
 flow RemoveOne(entry: File.Entry) -> Record{removed: Bool!} onError RemovalError {
@@ -129,10 +359,22 @@ flow RemoveOne(entry: File.Entry) -> Record{removed: Bool!} onError RemovalError
 flow RemoveStep(state: Record{directory_status: String, removed_count: Int, observed_bytes: Int, skipped_count: Int}, entry: File.Entry) -> Record{directory_status: String, removed_count: Int, observed_bytes: Int, skipped_count: Int}! {
     outcome = RemoveOne(entry)
     removed = outcome.removed
-    return Match.new(removed,
-        true: Record.new(directory_status: state.directory_status, removed_count: Math.add(state.removed_count, 1), observed_bytes: Math.add(state.observed_bytes, entry.size_bytes), skipped_count: state.skipped_count),
-        _: Record.new(directory_status: state.directory_status, removed_count: state.removed_count, observed_bytes: state.observed_bytes, skipped_count: Math.add(state.skipped_count, 1))
-    )
+    flow RemoveStepChoiceTest1(request: Record{entry: File.Entry, selector: Bool, state: Record{directory_status: String, observed_bytes: Int, removed_count: Int, skipped_count: Int}}) -> Bool {
+        return request.selector
+    }
+
+    flow RemoveStepChoiceResult1(request: Record{entry: File.Entry, selector: Bool, state: Record{directory_status: String, observed_bytes: Int, removed_count: Int, skipped_count: Int}}) -> Record{directory_status: String, observed_bytes: Int, removed_count: Int, skipped_count: Int}! {
+        return Record.new(directory_status: request.state.directory_status, removed_count: Math.add(request.state.removed_count, 1), observed_bytes: Math.add(request.state.observed_bytes, request.entry.size_bytes), skipped_count: request.state.skipped_count)
+    }
+
+    flow RemoveStepChoiceDefault(request: Record{entry: File.Entry, selector: Bool, state: Record{directory_status: String, observed_bytes: Int, removed_count: Int, skipped_count: Int}}) -> Record{directory_status: String, observed_bytes: Int, removed_count: Int, skipped_count: Int}! {
+        return Record.new(directory_status: request.state.directory_status, removed_count: request.state.removed_count, observed_bytes: request.state.observed_bytes, skipped_count: Math.add(request.state.skipped_count, 1))
+    }
+
+    return Record.new(selector: removed, entry: entry, state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RemoveStepChoiceTest1, RemoveStepChoiceResult1)),
+        default: RemoveStepChoiceDefault
+    ))
 }
 
 flow Cleanup(root: File.Path, cutoff_unix_ns: Int) -> Record{directory_status: String, removed_count: Int, observed_bytes: Int, skipped_count: Int}! {

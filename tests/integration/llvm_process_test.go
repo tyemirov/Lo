@@ -243,7 +243,7 @@ func TestLLVMProcessConfigurationDiagnostics(t *testing.T) {
 }
 
 func TestLLVMProcessAdmissionHashCancellation(t *testing.T) {
-	runLLVMRuntimeTargetScenarios(t, "darwin/arm64", []llvmRuntimeScenario{{name: "cancel-between-admission-hash-chunks", source: `flow Main()->Process.Result!{raw=File.read(File.Path.new("command-path"));path=UTF8.String.new(raw);directoryBytes=File.read(File.Path.new("directory-path"));directory=UTF8.String.new(directoryBytes);executable=Process.Executable.new(File.Path.new(path));target=Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"DECLARED",value:"value")), File.Path.new(directory)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, number: 0, harness: "testdata/native-runtime/process-hash-cancel.c"}})
+	runLLVMRuntimeTargetScenarios(t, "darwin/arm64", []llvmRuntimeScenario{{name: "cancel-between-admission-hash-chunks", source: `flow Main()->Process.Result!{raw=File.read(File.Path.new("command-path"));path=String.FromBytes.new(raw);directoryBytes=File.read(File.Path.new("directory-path"));directory=String.FromBytes.new(directoryBytes);executable=Process.Executable.new(File.Path.new(path));target=Process.Command.new(executable: executable, arguments: List.new("arg"), context: Process.Context.new(Map.new(Record.new(key:"DECLARED",value:"value")), File.Path.new(directory)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, number: 0, harness: "testdata/native-runtime/process-hash-cancel.c"}})
 }
 
 func TestLLVMProcessProtectedFileComposition(t *testing.T) {

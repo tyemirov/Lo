@@ -85,18 +85,6 @@ func tensorExpression(e ir.Expression) bool {
 				return true
 			}
 		}
-	case ir.Match:
-		if tensorExpression(x.Selector()) {
-			return true
-		}
-		for _, arm := range x.Cases() {
-			if tensorExpression(arm.Body()) {
-				return true
-			}
-			if exact, ok := arm.(ir.ExactCase); ok && tensorExpression(exact.Head()) {
-				return true
-			}
-		}
 	}
 	return false
 }

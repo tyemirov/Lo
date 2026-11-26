@@ -61,7 +61,20 @@ func TestFlowFoldRecoverableErrorProgress(t *testing.T) {
 
 func TestFlowFoldErrorProgressHandlers(t *testing.T) {
 	t.Run("handler-inspects-and-preserves", func(t *testing.T) {
-		source := recoverableFoldStep + `flow Keep(error: Error) -> Error { return Match.new(List.length(error.flow_progress), 1: error, _: Error.new("MissingProgress", "", Record.new())) }; flow Run() -> Error onError Keep { unused = Flow.fold(List.new(2, 0, 5), 0, Step); return Error.new("MissedFailure", "", Record.new()) }; return Run()`
+		source := recoverableFoldStep + `flow Keep(error: Error) -> Error {
+    flow KeepChoiceTest1(request: Record{error: Error, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 1)
+    }
+
+    flow KeepChoiceResult1(request: Record{error: Error, selector: Int}) -> Error {
+        return request.error
+    }
+
+    flow KeepChoiceDefault(request: Record{error: Error, selector: Int}) -> Error {
+        return Error.new("MissingProgress", "", Record.new())
+    }
+
+    return Record.new(selector: List.length(error.flow_progress), error: error) |> Match.apply(Match.new(List.new(Match.Case.new(KeepChoiceTest1, KeepChoiceResult1)), KeepChoiceDefault)) }; flow Run() -> Error onError Keep { unused = Flow.fold(List.new(2, 0, 5), 0, Step); return Error.new("MissedFailure", "", Record.new()) }; return Run()`
 		actual := returnedFoldErrorProgress(t, source)
 		if actual.Kind != "Math.DivideByZero" {
 			t.Fatalf("handler did not inspect original progress: %+v", actual)

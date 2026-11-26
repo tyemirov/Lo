@@ -90,7 +90,7 @@ func TestCLIStackConsoleInertAndRedacted(t *testing.T) {
 func TestCLIStackTerminalStatus(t *testing.T) {
 	for _, status := range []int{0, 1, 2} {
 		t.Run(fmt.Sprint(status), func(t *testing.T) {
-			source := cliStackProgram("Program.Exit", fmt.Sprintf(`return Program.Exit.new(%d, UTF8.Bytes.new("out\n"), UTF8.Bytes.new("err\n"))`, status))
+			source := cliStackProgram("Program.Exit", fmt.Sprintf(`return Program.Exit.new(%d, Bytes.new("out\n"), Bytes.new("err\n"))`, status))
 			got := runProgram(t, sourceFile(t, source), "run")
 			if got.status != status || got.stdout != "out\n" || got.stderr != "err\n" {
 				t.Fatalf("terminal result: %+v", got)
@@ -253,15 +253,39 @@ func TestCLIStackHelpPrecedesHostActions(t *testing.T) {
     return Math.add(count, 1)
 };
 flow WorkItems(help: Bool) -> List<Bool> {
-    return Match.new(help, true: List.new(), _: List.new(true))
+    flow WorkItemsChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow WorkItemsChoiceResult1(value: Bool) -> List<Bool> {
+        return List.new()
+    }
+
+    flow WorkItemsChoiceDefault(value: Bool) -> List<Bool> {
+        return List.new(true)
+    }
+
+    return help |> Match.apply(Match.new(List.new(Match.Case.new(WorkItemsChoiceTest1, WorkItemsChoiceResult1)), WorkItemsChoiceDefault))
 };
 flow Main() -> Program.Exit! {
     initial = Host.Invocation.current()
     options = CLI.parse(initial.arguments, List.new(), "example", "", true)
     work = WorkItems(options.help_requested)
     count = Flow.fold(work, 0, Work)
-    output = Match.new(options.help_requested, true: options.help_text, _: "")
-    return Program.Exit.new(0, UTF8.Bytes.new(output), Bytes.new(""))
+    output = Record.new(selector: options.help_requested, options: options) |> Match.apply(Match.new(List.new(Match.Case.new(MainOutputChoiceTest1, MainOutputChoiceResult1)), MainOutputChoiceDefault))
+    flow MainOutputChoiceTest1(request: Record{options: CLI.Options, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow MainOutputChoiceResult1(request: Record{options: CLI.Options, selector: Bool}) -> String {
+        return request.options.help_text
+    }
+
+    flow MainOutputChoiceDefault(request: Record{options: CLI.Options, selector: Bool}) -> String {
+        return ""
+    }
+
+    return Program.Exit.new(0, Bytes.new(output), Bytes.new(""))
 }; return Main()`
 	path := sourceFile(t, source)
 	help := runProgram(t, path, "run", "--", "--help")
@@ -278,7 +302,7 @@ func TestCLIStackRecordSizeBoundaries(t *testing.T) {
 	const maximum = 1048576
 	for _, test := range []struct{ name, output, body, kind string }{
 		{"line-over-limit", "Console.Line", fmt.Sprintf(`return Console.Line.new("stdout", %q, true)`, strings.Repeat("x", maximum)), "Console.InvalidLine"},
-		{"terminal-over-limit", "Program.Exit", fmt.Sprintf(`return Program.Exit.new(0, UTF8.Bytes.new(%q), Bytes.new("x"))`, strings.Repeat("x", maximum)), "Program.InvalidExit"},
+		{"terminal-over-limit", "Program.Exit", fmt.Sprintf(`return Program.Exit.new(0, Bytes.new(%q), Bytes.new("x"))`, strings.Repeat("x", maximum)), "Program.InvalidExit"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := runProgram(t, sourceFile(t, cliStackProgram(test.output, test.body)), "run", "--format", "json")

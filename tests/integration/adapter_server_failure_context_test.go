@@ -45,7 +45,7 @@ func TestAdapterServerFailureContext(t *testing.T) {
 			path := filepath.Join(root, "completed")
 			prefix, operation := "", ""
 			if completedWrite {
-				prefix = fmt.Sprintf(`write = File.Write.new(File.Path.new(%q),UTF8.Bytes.new("done")); commit write; `, path)
+				prefix = fmt.Sprintf(`write = File.Write.new(File.Path.new(%q),Bytes.new("done")); commit write; `, path)
 				operation = "File.write"
 			}
 			program := `flow Handle(request:HTTP.Request)->HTTP.Response!{` + prefix + processGateSource(root) + `commit target; return HTTP.Response.Text.new(200,"unexpected")}; flow OnError(error:Error)->HTTP.Response{return HTTP.Response.Text.new(200,"caught")}` + serveSuffix
@@ -84,7 +84,7 @@ func TestLLVMServerCallbackIndependentCleanup(t *testing.T) {
 	for _, completedWrite := range []bool{false, true} {
 		prefix := ""
 		if completedWrite {
-			prefix = `write=File.Write.new(File.Path.new("completed"),UTF8.Bytes.new("done"));commit write; `
+			prefix = `write=File.Write.new(File.Path.new("completed"),Bytes.new("done"));commit write; `
 		}
 		program := `flow Handle(request:HTTP.Request)->HTTP.Response!{` + prefix + processGateSource(repository) + `commit target;return HTTP.Response.Text.new(200,"unexpected")};flow OnError(error:Error)->HTTP.Response{return HTTP.Response.Text.new(200,"caught")};server=HTTP.Server.new(34521,Handle,OnError);commit server`
 		scenarios = append(scenarios, llvmRuntimeScenario{name: fmt.Sprintf("callback-write-%t-and-session-cleanup", completedWrite), source: program, harness: "testdata/native-qualification/server-process-cleanup.c", verify: func(t *testing.T, got result) {

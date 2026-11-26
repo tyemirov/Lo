@@ -31,7 +31,7 @@ The [update record](evidence/v04-reference-update.json) records local checks and
 The audit included the built-in catalog, core syntax and semantics, tensors, autodiff, gradients, optimizers, and device support.
 The validated catalog contained 101 operations.
 All 101 names occur in the revised reference.
-`Match.new` is a syntax construct and is separate from this catalog count.
+The inline `Match.new` syntax was separate from this catalog count at the validated revision.
 
 | Finding | Classification | Correction |
 | --- | --- | --- |
@@ -64,7 +64,7 @@ Update date: October 17, 2026.
 The working tree contains 111 built-in operations, as counted by `catalog.All()`.
 Five checkpoint and container-transfer operations extend the original inventory.
 Five File and flow operations add `File.Path.eq`, `File.list`, `File.open_paths`, `File.remove`, and `Flow.fold`.
-`Match.new` remains a separate syntax construct.
+The inline `Match.new` syntax remained separate from this catalog count at this revision.
 
 The reference now specifies entry metadata, provenance, exact grants, absent directories, open-file observations, removal progress, and sequential activation.
 The [File design](file-adapter-design.md) defines the host probe and concurrency limits.
@@ -90,6 +90,67 @@ The Governor check reports five intentional guide differences that enforce the L
 Independent review approved the final contracts and corrections.
 All implementation, fixtures, tool state, and generated artifacts stay inside Lo.
 
+## Reusable Matcher Update
+
+`Match.Case.new`, `Match.new`, and `Match.apply` are ordinary catalog operations.
+They add immutable rule construction and later application to a request value.
+Construction stores callback references and invokes zero predicates or handlers.
+All conditional selection uses `Match.apply`.
+The dated catalog counts above describe their original revisions.
+
+The [matcher contract](../specification.md#111-reusable-matchers) defines the signatures and execution order.
+The [public matcher tests](../tests/integration/matcher_test.go) cover deferred construction, repeated application, default selection, and static validation.
+The [inspection tests](../tests/integration/matcher_inspect_test.go) cover stored callbacks and returned targets.
+
+## Operation Overlaps
+
+Audit date: November 25, 2026.
+Updated November 26, 2026.
+The audit covers the 190 operations in the current [built-in catalog](../internal/catalog) and their call syntax.
+
+### Selection And Host Reads
+
+`Match.new` stores the rules. `Match.apply` runs the reached predicates and the winning handler.
+The optional `Read` qualifier carries a possible host read through flow parameters, records, and lists.
+The compiler records the effect at application. A grant is needed when the selected handler executes its read.
+See the [host-read rules](../specification.md#112-host-reads) and [native tests](../tests/integration/matcher_test.go).
+
+### UTF-8 Encoding
+
+`Bytes.new(value: String)` is the text encoder. `String.FromBytes.new(bytes: Bytes)` decodes UTF-8 and returns `UTF8.InvalidBytes` for malformed input. See the [text operation reference](operations/text.md#stringfrombytesnew).
+
+### Equivalent Results And Convenience Operations
+
+| Forms | Shared behavior and contract details |
+| --- | --- |
+| `Int.new(x)`, `Float.new(x)`, `String.new(x)`, `Bool.new(x)`, and using `x` directly | The four constructors return the already-typed argument. Literals already create those values. See the [constructor contract](../specification.md#71-built-in-constructors) and [identity implementation](../runtime/native/src/operations.rs#L417). |
+| `Scalar.new(scalar)` and using `scalar` directly | The constructor returns its existing Scalar input. It can also construct a Scalar from a statically known one-scalar String. See the [Scalar constructor](operations/text.md#scalarnew). |
+| `String.length(text)` and `List.length(text)` | Both count Unicode scalars. The list operation uses a String-to-list view with its own evaluation cost. See [String length](operations/text.md#stringlength) and [List length](operations/collections.md#listlength). |
+| `HTTP.Response.Text.new(status, text)` and `HTTP.Response.Bytes.new(status, Bytes.new(text))` | Both produce a response with empty headers and the same body bytes. `HTTP.Response.new` produces that response when it receives empty headers. Explicitly building the headers with `HTTP.Headers.new(List.new())` introduces a fallible expression. See the [response constructors](operations/http.md#httpresponsebytesnew). |
+| `Tensor.rank(tensor)` and `List.length(Tensor.shape(tensor))` | Both return the number of dimensions. The composition creates a list of dimensions. See [tensor shape and rank](operations/tensors.md#tensorshape). |
+| `Math.gt(a, b)` and `Math.lt(b, a)`, plus `Math.gte(a, b)` and `Math.lte(b, a)` | Reversing the operands preserves the comparison result for bound values. The same identities hold for `Float`. Swapping argument expressions can change evaluation and failure order. See [integer comparisons](operations/values.md#mathgt) and [Float comparisons](operations/values.md#floatgt). |
+| `String.eq(a, b)` and `Math.eq(String.compare(a, b), 0)` | Both return the same Boolean. `String.compare` also exposes order. See [String comparison](operations/text.md#stringcompare). |
+| `File.Path.eq(a, b)` and `String.eq(File.Path.to_string(a), File.Path.to_string(b))` | Both compare the stored path text. See [path equality](operations/files.md#filepatheq) and [path text](operations/files.md#filepathto_string). |
+| `Math.sum` or `Math.product` and `List.fold` with addition or multiplication | The same integer reductions use initial values of zero and one respectively, including for empty lists. A fold adds callback execution. See [sum](operations/values.md#mathsum), [product](operations/values.md#mathproduct), and [List fold](operations/collections.md#listfold). |
+| `String.concat` and `String.format` with adjacent named fields | The same text can be produced by either form. Formatting is fallible and also supports templates and padding. Bare numeric placeholders also overlap with `Int.to_string` and `Float.to_string`. See [text formatting](json-values-and-formatting.md). |
+| `String.slice(text, start, end)` and a `List.slice` followed by `String.FromScalars.new` | For valid scalar bounds both return the same text after reconstruction. Invalid bounds produce `String.InvalidBounds` and `List.InvalidBounds` respectively. See [String slice](operations/text.md#stringslice) and [List slice](operations/collections.md#listslice). |
+| `List.fold` and `Flow.fold` | A pure step computes the same accumulator on success. `Flow.fold` also admits observations and commits, and reports completed-state and index information on failure. See [List fold](operations/collections.md#listfold) and [Flow fold](operations/collections.md#flowfold). |
+| `Flow.fold` and `Flow.worklist` | A worklist can perform the same fixed traversal with an empty list of new items and `stop: false`. Its callback returns a different record, and its progress can include newly queued work. See [Flow worklist](operations/collections.md#flowworklist). |
+
+`x |> Operation(y)` and `Operation(x, y)` invoke the same operation with the same argument bindings. This spelling also works for named flows. See the [pipe contract](../specification.md#14-pipe-operator).
+
+### Related Operations With Different Behavior
+
+| Forms | Contract difference |
+| --- | --- |
+| `File.list(root)` and the entries from `File.scan(root)` | A child that vanishes during observation makes `File.list` fail. `File.scan` can return the remaining entries and report the vanished names. See [list](operations/files.md#filelist) and [scan](operations/files.md#filescan). |
+| `File.scan(path)` and `File.Directory.scan(directory)`, or `File.directory(path)` and `File.Directory.refresh(directory)` | A path obtains an observation. Retained directory operations verify identity and use the existing lease. See [retained scan](operations/files.md#filedirectoryscan) and [refresh](operations/files.md#filedirectoryrefresh). |
+| `File.Remove.new` and `File.Remove.checked` | Both plan removal. The checked form calls a supplied guard during commit and can reject removal when the guard returns false. See [removal targets](operations/files.md#fileremovechecked). |
+| `Process.Executable.new` and `Process.Executable.resolve` | The constructor validates an explicit path as data. Resolution searches the host through the supplied Process context and can fail during discovery. See [executable operations](operations/process.md#processexecutablenew). |
+| `Console.Line.new` and `Program.Exit.new` | A console line writes on `commit` during execution. A terminal result publishes bytes and a status after final cleanup. See [console lines](operations/applications.md#consolelinenew) and [terminal results](operations/applications.md#programexitnew). |
+| `Tensor.to_float` and taking element zero from `Tensor.values` | The former requires a CPU rank-zero tensor. Indexing also accepts nonempty higher-rank tensors and has different failure rules. See [scalar extraction](operations/tensors.md#tensorto_float). |
+| Arithmetic in `Math`, `Float`, and `Tensor` | Exact integers, finite binary64 values, and shaped FP32 tensors have distinct precision, failure, and device rules. See the [numeric operation contracts](../specification.md#8-processors). |
+
 ## Operation Coverage
 
 Each row identifies the contract, catalog source, and public integration evidence for its operations.
@@ -100,12 +161,13 @@ Runtime tests supply additional behavioral evidence.
 | Family and exact operation names | Reference | Catalog | Tests |
 | --- | --- | --- | --- |
 | **Core values**: `Bool.new`, `Bytes.new`, `Error.new`, `Int.new` | [Contract](../specification.md#71-built-in-constructors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
-| **Strings and scalars**: `Scalar.eq`, `Scalar.new`, `String.FromScalars.new`, `String.concat`, `String.eq`, `String.length`, `String.lower`, `String.new`, `String.upper`, `UTF8.String.new` | [Contract](../specification.md#8-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
+| **Strings and scalars**: `Scalar.eq`, `Scalar.new`, `String.FromBytes.new`, `String.FromScalars.new`, `String.concat`, `String.eq`, `String.length`, `String.lower`, `String.new`, `String.upper` | [Contract](../specification.md#8-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
 | **Integer arithmetic**: `Int.to_string`, `Math.add`, `Math.div`, `Math.eq`, `Math.gt`, `Math.gte`, `Math.lt`, `Math.lte`, `Math.max`, `Math.min`, `Math.mod`, `Math.mul`, `Math.product`, `Math.sub`, `Math.sum` | [Contract](../specification.md#84-math-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
 | **Float arithmetic**: `Float.add`, `Float.div`, `Float.eq`, `Float.gt`, `Float.gte`, `Float.lt`, `Float.lte`, `Float.mul`, `Float.new`, `Float.sqrt`, `Float.sub`, `Float.to_int`, `Float.to_string`, `Int.to_float` | [Contract](../specification.md#241-binary64-arithmetic) | [catalog.go](../internal/catalog/catalog.go) | [float](../tests/integration/float_test.go) |
 | **Lists**: `List.filter`, `List.flat_map`, `List.fold`, `List.length`, `List.map`, `List.new`, `List.unfold` | [Contract](../specification.md#87-list-processors) | [catalog.go](../internal/catalog/catalog.go) | [run](../tests/integration/run_test.go) |
 | **Records and maps**: `Map.get`, `Map.has_key`, `Map.new`, `Record.merge`, `Record.new` | [Contract](../specification.md#86-record-and-map-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
 | **Ranges**: `Range.contains`, `Range.is_empty`, `Range.new` | [Contract](../specification.md#85-range-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
+| **Reusable matchers**: `Match.Case.new`, `Match.new`, `Match.apply` | [Contract](../specification.md#111-reusable-matchers) | [catalog.go](../internal/catalog/catalog.go) | [Matcher](../tests/integration/matcher_test.go), [inspection](../tests/integration/matcher_inspect_test.go) |
 | **Files**: `File.Path.new`, `File.Path.eq`, `File.read`, `File.list`, `File.directory`, `File.scan`, `File.open_paths`, `File.Write.new`, `File.Append.new`, `File.Remove.new`, `File.Remove.checked` | [Contract](../specification.md#91-file-adapter) | [catalog.go](../internal/catalog/catalog.go), [observations.go](../internal/catalog/observations.go) | [activation](../tests/integration/activation_test.go), [File](../tests/integration/file_language_test.go), [F025](../tests/integration/f025_acceptance_test.go) |
 | **Host invocation**: `Host.Invocation.current` | [Contract](../specification.md#96-host-invocation) | [observations.go](../internal/catalog/observations.go) | [Host](../tests/integration/host_invocation_test.go), [F025](../tests/integration/f025_acceptance_test.go) |
 | **Sequential activation**: `Flow.fold` | [Contract](../specification.md#88-sequential-flow-processor) | [catalog.go](../internal/catalog/catalog.go) | [Flow](../tests/integration/flow_fold_test.go) |
@@ -127,7 +189,7 @@ The earlier validation records below describe their original revisions.
 | Contract | Implementation | Integration evidence |
 | --- | --- | --- |
 | Lexical rules and grammar | [Lexer](../internal/syntax/lexer.go), [parser](../internal/syntax/parser.go) | [Compiler entry point](../tests/integration/cli_test.go), [fixtures](../testdata/conformance/manifest.json) |
-| Types, named flows, fallibility, and Match | [Checker](../internal/check/check.go), [Match](../internal/check/match.go) | [Verifier tests](../tests/integration/verifier_test.go) |
+| Types, named flows, fallibility, and Match | [Checker](../internal/check/check.go), [Match](../internal/check/matcher.go) | [Verifier tests](../tests/integration/verifier_test.go) |
 | Eager bindings, branch selection, and first failure | [LLVM emission](../internal/llvmemit), [native operations](../runtime/native/src/operations.rs) | [Core runtime tests](../tests/integration/llvm_runtime_test.go), [native fixtures](../tests/integration/llvm_fixed_corpus_test.go) |
 | File and HTTP activation | [Files](../runtime/native/src/files.rs), [HTTP](../runtime/native/src/http.rs) | [File tests](../tests/integration/llvm_file_adapters_test.go), [HTTP tests](../tests/integration/llvm_http_test.go) |
 | Tensor shapes and numeric limits | [Tensor operations](../runtime/native/src/tensor.rs), [shape analysis](../internal/tensorfacts/analyze.go) | [Numerical tests](../tests/integration/llvm_numerical_lifetime_test.go), [work limits](../tests/integration/llvm_work_budget_test.go) |

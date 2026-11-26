@@ -1,19 +1,27 @@
-flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
-    success_log = File.Path.new(String.new("/logs/success.log"))
-    error_log = File.Path.new(String.new("/logs/error.log"))
-    target_effect = Match.new(status_code,
-        Int.new(200): File.Append.new(success_log, UTF8.Bytes.new(request_data)),
-        _: File.Append.new(error_log, UTF8.Bytes.new(request_data))
-    )
-    commit target_effect
-    return HTTP.Response.Text.new(
-        status: status_code,
-        body: String.new("Status processed")
-    )
+flow IsSuccess(status: Int) -> Bool {
+    return Math.eq(status, 200)
 }
-flow StatusError(error: Error) -> HTTP.Response {
-    return HTTP.Response.Text.new(
-        status: Int.new(500),
-        body: String.new("status handling failed")
+
+flow SuccessLog(status: Int) -> File.Path {
+    return File.Path.new("/logs/success.log")
+}
+
+flow ErrorLog(status: Int) -> File.Path {
+    return File.Path.new("/logs/error.log")
+}
+
+flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
+    destinations = Match.new(
+        cases: List.new(Match.Case.new(IsSuccess, SuccessLog)),
+        default: ErrorLog
     )
+    path = status_code |> Match.apply(destinations)
+    target_action = File.Append.new(path, Bytes.new(request_data))
+    commit target_action
+
+    return HTTP.Response.Text.new(status: status_code, body: "Status processed")
+}
+
+flow StatusError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 500, body: "status handling failed")
 }

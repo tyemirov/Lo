@@ -77,7 +77,7 @@ func successors(t Terminator) []BlockID {
 		return t.Targets[:1]
 	case Status:
 		return t.Targets[:]
-	case Boolean, Arity:
+	case Arity:
 		return t.Targets[:2]
 	default:
 		return nil
@@ -158,7 +158,7 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 		storage += count * 8
 		return nil
 	}
-	helperArity := map[string]int{LiteralSymbol: 0, StepSymbol: 0, ChargeSymbol: 1, ScopeEnterSymbol: 0, FlowEnterSymbol: 0, CauseSymbol: 1, InvalidStatusSymbol: 0, CommitSymbol: 1, "lo_project": 1, "lo_match": 2, "lo_flow_ref": 0, "lo_convert_success": 1, "lo_convert_failure": 1, "lo_convert_propagate": 1, "lo_convert_record_view": 1, "lo_convert_scalar_list_view": 1, "lo_convert_fallible_record_view": 1}
+	helperArity := map[string]int{LiteralSymbol: 0, StepSymbol: 0, ChargeSymbol: 1, ScopeEnterSymbol: 0, FlowEnterSymbol: 0, CauseSymbol: 1, InvalidStatusSymbol: 0, CommitSymbol: 1, "lo_project": 1, "lo_flow_ref": 0, "lo_convert_success": 1, "lo_convert_failure": 1, "lo_convert_propagate": 1, "lo_convert_record_view": 1, "lo_convert_scalar_list_view": 1, "lo_convert_fallible_record_view": 1, "lo_convert_matcher_read_view": 1}
 	for symbol, arity := range map[string]int{"lo_derivative_enter": 0, "lo_derivative_snapshot": -1, "lo_derivative_retain": 1, "lo_derivative_loss": -1, "lo_derivative_zero": 1, "lo_derivative_seed": 1, "lo_derivative_reverse": -1, "lo_derivative_finish": 1, "lo_derivative_failure": 1, "lo_derivative_host_failure": 0} {
 		helperArity[symbol] = arity
 	}
@@ -473,11 +473,6 @@ func verifyFunction(ctx context.Context, f Function, sites []Location, functions
 		}
 		if block.End.Kind == Status {
 			if err := checkResult(block.End.Result, block.ID, len(block.Instructions)); err != nil {
-				return err
-			}
-		}
-		if block.End.Kind == Boolean {
-			if err := checkValue(block.End.Value, block.ID, len(block.Instructions)); err != nil {
 				return err
 			}
 		}

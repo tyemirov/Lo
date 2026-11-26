@@ -87,8 +87,17 @@ stdout_empty = Math.eq(Bytes.length(result.stdout), 0)
 stderr_empty = Math.eq(Bytes.length(result.stderr), 0)
 stdout_count = Math.eq(result.stdout_bytes, 6)
 stderr_count = Math.eq(result.stderr_bytes, 5)
-valid = Match.new(stdout_empty, true: Match.new(stderr_empty, true: Match.new(stdout_count, true: stderr_count, _: false), _: false), _: false)
-return Program.Exit.new(Match.new(valid, true: 0, _: 1), Bytes.new(""), Bytes.new(""))`
+flow PriorTrue(request: Record{prior: Bool, item: Bool}) -> Bool { return request.prior }
+flow Item(request: Record{prior: Bool, item: Bool}) -> Bool { return request.item }
+flow False(request: Record{prior: Bool, item: Bool}) -> Bool { return false }
+flow Both(prior: Bool, item: Bool) -> Bool {
+    return Record.new(prior: prior, item: item) |> Match.apply(Match.new(List.new(Match.Case.new(PriorTrue, Item)), False))
+}
+flow Valid(value: Bool) -> Bool { return value }
+flow Success(value: Bool) -> Int { return 0 }
+flow Failure(value: Bool) -> Int { return 1 }
+valid = List.fold(List.new(stdout_empty, stderr_empty, stdout_count, stderr_count), true, Both)
+return Program.Exit.new(valid |> Match.apply(Match.new(List.new(Match.Case.new(Valid, Success)), Failure)), Bytes.new(""), Bytes.new(""))`
 	return processContextProgram("Program.Exit", body)
 }
 

@@ -157,16 +157,14 @@ type TerminatorKind uint8
 const (
 	Jump TerminatorKind = iota + 1
 	Status
-	Boolean
 	Arity
 	Return
 )
 
 type Terminator struct {
 	Kind    TerminatorKind
-	Result  ResultID // zero denotes the externally supplied output result.
-	Value   ValueID
-	Targets [4]BlockID // status 0,1,2,unknown; or true,false.
+	Result  ResultID   // zero denotes the externally supplied output result.
+	Targets [4]BlockID // status 0,1,2,unknown; or arity valid,invalid.
 	Site    uint64
 }
 

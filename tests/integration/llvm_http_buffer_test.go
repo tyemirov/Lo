@@ -13,7 +13,7 @@ import (
 )
 
 func TestLLVMHTTPBodyPipeline(t *testing.T) {
-	server := startServer(t, `flow Handle(r:HTTP.Request)->HTTP.Response!{body=UTF8.String.new(r.body);return HTTP.Response.Text.new(200,String.concat(r.method,"|",r.path,"|",body))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
+	server := startServer(t, `flow Handle(r:HTTP.Request)->HTTP.Response!{body=String.FromBytes.new(r.body);return HTTP.Response.Text.new(200,String.concat(r.method,"|",r.path,"|",body))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	defer stopServer(t, server)
 	boundaryBody := strings.Repeat("0123456789abcdef", 512) + "boundary-tail"
 	for _, scenario := range []struct {

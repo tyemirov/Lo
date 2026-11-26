@@ -12,7 +12,7 @@ import (
 )
 
 const headerSecret = "header-secret-sentinel"
-const headerEntriesSource = `List.new(Record.new(name: "X-Z", value: UTF8.Bytes.new("z")), Record.new(name: "X-A", value: UTF8.Bytes.new("first")), Record.new(name: "x-a", value: UTF8.Bytes.new("second")))`
+const headerEntriesSource = `List.new(Record.new(name: "X-Z", value: Bytes.new("z")), Record.new(name: "X-A", value: Bytes.new("first")), Record.new(name: "x-a", value: Bytes.new("second")))`
 
 func TestAdapterHTTPHeaderValues(t *testing.T) {
 	source := `flow Main() -> List<Record{name: String, value: Bytes}>! { headers = HTTP.Headers.new(` + headerEntriesSource + `); return headers.entries }; return Main()`
@@ -27,7 +27,7 @@ func TestAdapterHTTPHeaderValues(t *testing.T) {
 
 func TestAdapterHTTPHeaderValidation(t *testing.T) {
 	for _, name := range []string{"", "bad name", "bad:name", "héader", "x\r\ny"} {
-		source := fmt.Sprintf(`return HTTP.Headers.new(List.new(Record.new(name: %q, value: UTF8.Bytes.new("ok"))))`, name)
+		source := fmt.Sprintf(`return HTTP.Headers.new(List.new(Record.new(name: %q, value: Bytes.new("ok"))))`, name)
 		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		v := receiptHostDiagnostic(t, got)
 		if got.status != 1 || v.Error == nil || v.Error.Kind != "HTTP.InvalidHeaders" {
@@ -39,7 +39,7 @@ func TestAdapterHTTPHeaderValidation(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		source := fmt.Sprintf(`return HTTP.Headers.new(List.new(Record.new(name: "x", value: UTF8.Bytes.new(%s))))`, strings.ReplaceAll(string(literal), "\x7f", `\u007f`))
+		source := fmt.Sprintf(`return HTTP.Headers.new(List.new(Record.new(name: "x", value: Bytes.new(%s))))`, strings.ReplaceAll(string(literal), "\x7f", `\u007f`))
 		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")
 		v := receiptHostDiagnostic(t, got)
 		if got.status != 1 || v.Error == nil || v.Error.Kind != "HTTP.InvalidHeaders" {
@@ -61,7 +61,7 @@ func TestAdapterHTTPHeaderValidation(t *testing.T) {
 }
 
 func TestAdapterHTTPGeneralResponse(t *testing.T) {
-	source := `flow Main() -> HTTP.Response! { headers = HTTP.Headers.new(List.new()); return HTTP.Response.new(200, headers, UTF8.Bytes.new("body")) }; return Main()`
+	source := `flow Main() -> HTTP.Response! { headers = HTTP.Headers.new(List.new()); return HTTP.Response.new(200, headers, Bytes.new("body")) }; return Main()`
 	got := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--format", "json"))
 	if got.Type != "HTTP.Response" {
 		t.Fatalf("response type %s", got.Type)
@@ -105,9 +105,9 @@ func TestAdapterHTTPRepeatedByteHeaders(t *testing.T) {
 
 func TestAdapterHTTPHeaderDiagnosticRedaction(t *testing.T) {
 	sources := []string{
-		`flow Make(entries: List<Record{name: String, value: Bytes}>) -> HTTP.Headers! { return HTTP.Headers.new(entries) }; return Make(List.new(Record.new(name: "bad name", value: UTF8.Bytes.new("` + headerSecret + `"))))`,
-		`flow Fail(headers: HTTP.Headers) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { headers = HTTP.Headers.new(List.new(Record.new(name: "authorization", value: UTF8.Bytes.new("` + headerSecret + `")))); return Fail(headers) }; return Main()`,
-		`flow Fail(response: HTTP.Response) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { headers = HTTP.Headers.new(List.new(Record.new(name: "authorization", value: UTF8.Bytes.new("` + headerSecret + `")))); response = HTTP.Response.new(200, headers, Bytes.new("")); return Fail(response) }; return Main()`,
+		`flow Make(entries: List<Record{name: String, value: Bytes}>) -> HTTP.Headers! { return HTTP.Headers.new(entries) }; return Make(List.new(Record.new(name: "bad name", value: Bytes.new("` + headerSecret + `"))))`,
+		`flow Fail(headers: HTTP.Headers) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { headers = HTTP.Headers.new(List.new(Record.new(name: "authorization", value: Bytes.new("` + headerSecret + `")))); return Fail(headers) }; return Main()`,
+		`flow Fail(response: HTTP.Response) -> Int! { return Math.div(1, 0) }; flow Main() -> Int! { headers = HTTP.Headers.new(List.new(Record.new(name: "authorization", value: Bytes.new("` + headerSecret + `")))); response = HTTP.Response.new(200, headers, Bytes.new("")); return Fail(response) }; return Main()`,
 	}
 	for _, source := range sources {
 		got := runProgram(t, sourceFile(t, source), "run", "--format", "json")

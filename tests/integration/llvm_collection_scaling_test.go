@@ -138,7 +138,18 @@ func worklistPinAllocationBudget(t *testing.T, target string) {
 	t.Helper()
 	var scenarios []llvmRuntimeScenario
 	for _, count := range []int{128, 512, 2048} {
-		source := fmt.Sprintf(`flow Next(state: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: state, next_state: Math.add(state, 1)) }; flow Children(item: Int) -> List<Int> { return Match.new(item, 0: List.unfold(1, %d, Next), _: List.new()) }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, 1), items: Children(item), stop: false) }; return Flow.worklist(List.new(0), 0, Step)`, count)
+		// The positive root schedules distinct negative children. Negative unfold
+		// counts produce empty lists, so each discovered child schedules no work.
+		source := fmt.Sprintf(`
+flow Next(state: Int) -> Record{value: Int, next_state: Int} {
+    return Record.new(value: state, next_state: Math.sub(state, 1))
+}
+flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} {
+    children = List.unfold(-1, item, Next)
+    return Record.new(state: Math.add(state, 1), items: children, stop: false)
+}
+return Flow.worklist(List.new(%d), 0, Step)
+`, count)
 		scenarios = append(scenarios, llvmRuntimeScenario{
 			name: strconv.Itoa(count), source: source, number: count,
 			harness: "testdata/native-runtime/collection-scope-allocations.c",

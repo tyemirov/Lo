@@ -477,7 +477,7 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 		result = b.checked("lo_project", []ValueID{input}, site, false, false)
 	case ir.Conversion:
 		input := b.expression(expr.Input())
-		names := map[ir.ConversionKind]string{ir.Success: "success", ir.Failure: "failure", ir.Propagate: "propagate", ir.RecordView: "record_view", ir.ScalarListView: "scalar_list_view", ir.FallibleRecordView: "fallible_record_view"}
+		names := map[ir.ConversionKind]string{ir.Success: "success", ir.Failure: "failure", ir.Propagate: "propagate", ir.RecordView: "record_view", ir.ScalarListView: "scalar_list_view", ir.FallibleRecordView: "fallible_record_view", ir.MatcherReadView: "matcher_read_view"}
 		name, ok := names[expr.Conversion()]
 		if !ok {
 			b.l.err = fmt.Errorf("%w: conversion %d", ErrUnsupported, expr.Conversion())
@@ -510,7 +510,7 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 			b.l.err = fmt.Errorf("native lowering: unknown catalog operation")
 			return 0
 		}
-		if err := validateArguments(op, expr.Arguments(), b.l.flows); err != nil {
+		if err := validateArguments(op, expr.Arguments(), expr.Type(), b.l.flows); err != nil {
 			b.l.err = err
 			return 0
 		}
@@ -539,49 +539,6 @@ func (b *functionBuilder) expression(expression ir.Expression) ValueID {
 		b.l.metadata.Locations[site].Labels = append([]string{}, expr.Labels()...)
 		b.l.metadata.Locations[site].Arguments = metadata
 		result = b.call(OperationSymbol(op.Name()), args, span, expr.Type(), site)
-	case ir.Match:
-		selector := b.expression(expr.Selector())
-		join := b.block()
-		inputs := []ValueID{}
-		preds := []BlockID{}
-		for _, arm := range expr.Cases() {
-			if _, ok := arm.(ir.DefaultCase); !ok {
-				var condition ValueID
-				switch arm := arm.(type) {
-				case ir.ExactCase:
-					head := b.expression(arm.Head())
-					condition = b.checked("lo_match", []ValueID{selector, head}, b.site(arm.Span(), "match", types.Bool()), false, false)
-				case ir.PredicateCase:
-					flow, ok := b.l.flows[arm.Flow()]
-					if !ok || len(flow.Parameters()) != 1 || !types.Equal(flow.Parameters()[0].Type, expr.Selector().Type()) || flow.Signature().Output().Kind() != types.BoolKind {
-						b.l.err = fmt.Errorf("native lowering: inconsistent predicate")
-						return 0
-					}
-					site := b.site(arm.Span(), "predicate", types.Bool())
-					b.l.metadata.Locations[site].Flow = b.l.flowIDs[arm.Flow()]
-					condition = b.checked(fmt.Sprintf("lo_flow_%d", b.l.flowIDs[arm.Flow()]), []ValueID{selector}, site, false, false)
-				default:
-					b.l.err = fmt.Errorf("%w: case %T", ErrUnsupported, arm)
-					return 0
-				}
-				yes, no := b.block(), b.block()
-				b.end(Terminator{Kind: Boolean, Value: condition, Targets: [4]BlockID{yes, no}, Site: b.site(arm.Span(), "case", expr.Type())})
-				b.current = yes
-				value := b.expression(arm.Body())
-				inputs = append(inputs, value)
-				preds = append(preds, b.current)
-				b.jump(join)
-				b.current = no
-			} else {
-				value := b.expression(arm.Body())
-				inputs = append(inputs, value)
-				preds = append(preds, b.current)
-				b.jump(join)
-			}
-		}
-		b.current = join
-		result = b.value(true)
-		b.instruction(Instruction{Kind: Phi, Value: result, Inputs: inputs, Predecessors: preds, Site: b.site(span, "match_result", expr.Type())})
 	default:
 		b.l.err = fmt.Errorf("%w: expression %T", ErrUnsupported, expr)
 		return 0
@@ -661,7 +618,7 @@ func (b *functionBuilder) literalSequence(call ir.BuiltinCall, literals []ir.Lit
 	return b.checkedResult(result, value, site, false)
 }
 
-func validateArguments(op catalog.Operation, args []ir.Argument, flows map[identity.FlowID]ir.Flow) error {
+func validateArguments(op catalog.Operation, args []ir.Argument, output types.Type, flows map[identity.FlowID]ir.Flow) error {
 	count := len(args)
 	variadic := op.Rule() == catalog.StringConcat || op.Rule() == catalog.ListConstructor || op.Rule() == catalog.MapConstructor || op.Rule() == catalog.RecordConstructor
 	processor := op.Rule() == catalog.ListProcessor || op.Rule() == catalog.FlowProcessor || op.Rule() == catalog.ListSortProcessor
@@ -765,12 +722,15 @@ func validateArguments(op catalog.Operation, args []ir.Argument, flows map[ident
 				if arg.Position() != count-1 || len(flow.Parameters()) != arity {
 					return fmt.Errorf("native lowering: inconsistent callback arity for %s", op.Name())
 				}
-			} else if op.Rule() != catalog.ServerConstructor {
+			} else if op.Rule() != catalog.ServerConstructor && op.Rule() != catalog.MatcherOperation {
 				return fmt.Errorf("native lowering: unexpected callback for %s", op.Name())
 			}
 		default:
 			return fmt.Errorf("%w: argument %T", ErrUnsupported, arg)
 		}
+	}
+	if op.Rule() == catalog.MatcherOperation {
+		return validateMatcher(op.Name(), args, output, flows)
 	}
 	return nil
 }

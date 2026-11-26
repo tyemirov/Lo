@@ -12,14 +12,15 @@ import (
 )
 
 type graphIndex struct {
-	metadata   map[ir.Expression]*tensorfacts.Metadata
-	report     *reportData
-	nodes      map[ir.Expression]nodeID
-	nodeData   map[nodeID]nodeData
-	parameters map[ir.BindingID]nodeID
-	statements map[int]nodeID
-	flows      map[identity.FlowID]ir.Flow
-	order      []ir.Flow
+	metadata     map[ir.Expression]*tensorfacts.Metadata
+	report       *reportData
+	nodes        map[ir.Expression]nodeID
+	nodeData     map[nodeID]nodeData
+	parameters   map[ir.BindingID]nodeID
+	statements   map[int]nodeID
+	flows        map[identity.FlowID]ir.Flow
+	order        []ir.Flow
+	matcherRules map[matcherSignature][]matcherRule
 }
 
 func index(program ir.Program, data *reportData, metadata map[ir.Expression]*tensorfacts.Metadata) *graphIndex {
@@ -106,6 +107,7 @@ func (g *graphIndex) expression(expr ir.Expression, region string) nodeID {
 			n.Arguments = append(n.Arguments, argumentData{Position: arg.Position(), Node: id})
 		}
 	case ir.BuiltinCall:
+		g.registerMatcher(e)
 		n.Kind = "builtin"
 		n.Operation = e.Operation().Name()
 		if call, ok := e.(autodiff.Call); ok {
@@ -121,25 +123,6 @@ func (g *graphIndex) expression(expr ir.Expression, region string) nodeID {
 			default:
 				panic("unknown checked argument")
 			}
-		}
-	case ir.Match:
-		n.Kind = "match"
-		input(e.Selector())
-		for i, arm := range e.Cases() {
-			armRegion := fmt.Sprintf("%s/match:%d/case:%d", region, e.Span().Start().Offset, i)
-			a := caseData{Body: g.expression(arm.Body(), armRegion)}
-			switch c := arm.(type) {
-			case ir.ExactCase:
-				a.Kind = "exact"
-				a.Head = input(c.Head())
-			case ir.PredicateCase:
-				a.Kind = "predicate"
-				a.Flow = c.Flow()
-			case ir.DefaultCase:
-				a.Kind = "default"
-			}
-			n.Cases = append(n.Cases, a)
-			n.Inputs = append(n.Inputs, a.Body)
 		}
 	default:
 		panic("unknown checked expression")
@@ -162,6 +145,8 @@ func conversionName(kind ir.ConversionKind) string {
 		return "scalar-list-view"
 	case ir.FallibleRecordView:
 		return "fallible-record-view"
+	case ir.MatcherReadView:
+		return "matcher-read-view"
 	}
 	panic("unknown graph conversion")
 }

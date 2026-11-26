@@ -67,7 +67,20 @@ func TestCheckedGraphContracts(t *testing.T) {
 		}
 	})
 	t.Run("propagation-and-stored-fallibility", func(t *testing.T) {
-		p := checked(t, `flow F() -> Int! { x = Math.div(1, 0); return x }; flow G() -> List<Int!> { return List.new(Match.new(1, 1: Math.div(1, 0), _: 2)) }`)
+		p := checked(t, `flow F() -> Int! { x = Math.div(1, 0); return x }; flow G() -> List<Int!> {
+    flow GChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 1)
+    }
+
+    flow GChoiceResult1(value: Int) -> Int! {
+        return Math.div(1, 0)
+    }
+
+    flow GChoiceDefault(value: Int) -> Int! {
+        return 2
+    }
+
+    return List.new(1 |> Match.apply(Match.new(List.new(Match.Case.new(GChoiceTest1, GChoiceResult1)), GChoiceDefault))) }`)
 		f := flowNamed(t, p, "F")
 		propagation := f.Body()[0].(ir.Binding).Value().(ir.Conversion)
 		if propagation.Conversion() != ir.Propagate || propagation.Type().String() != "Int" || propagation.Input().Type().String() != "Int!" {
@@ -79,19 +92,21 @@ func TestCheckedGraphContracts(t *testing.T) {
 		}
 		g := flowNamed(t, p, "G")
 		list := g.Body()[0].(ir.Return).Value().(ir.BuiltinCall)
-		match := list.Arguments()[0].(ir.ValueArgument).Value().(ir.Match)
-		if match.Type().String() != "Int!" || len(match.Cases()) != 2 {
-			t.Fatal("match did not retain fallibility")
+		application := list.Arguments()[0].(ir.ValueArgument).Value().(ir.BuiltinCall)
+		if application.Type().String() != "Int!" || application.Operation().Name() != catalog.MatchApply {
+			t.Fatal("matcher application did not retain fallibility")
 		}
-		if match.Cases()[0].Body().(ir.BuiltinCall).Operation().Name() != catalog.MathDiv {
-			t.Fatal("branch failure was moved outside its region")
+		selected := flowNamed(t, p, "GChoiceResult1").Body()[0].(ir.Return).Value().(ir.BuiltinCall)
+		if selected.Operation().Name() != catalog.MathDiv {
+			t.Fatal("handler failure was moved outside its invocation")
 		}
-		if match.Cases()[1].Body().(ir.Conversion).Conversion() != ir.Success {
-			t.Fatal("total branch lacks success tag")
+		fallback := flowNamed(t, p, "GChoiceDefault").Body()[0].(ir.Return).Value().(ir.Conversion)
+		if fallback.Conversion() != ir.Success {
+			t.Fatal("total default lacks success tag")
 		}
 	})
 	t.Run("commit-sites", func(t *testing.T) {
-		p := checked(t, `e = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit e; commit e`)
+		p := checked(t, `e = File.Append.new(File.Path.new("unused"), Bytes.new("x")); commit e; commit e`)
 		first := p.Body()[1].(ir.Commit)
 		second := p.Body()[2].(ir.Commit)
 		if first.Target().(ir.Reference).Binding() != second.Target().(ir.Reference).Binding() {
@@ -102,7 +117,7 @@ func TestCheckedGraphContracts(t *testing.T) {
 		}
 	})
 	t.Run("effect-summaries-and-adapter-construction", func(t *testing.T) {
-		p := checked(t, `flow F(p: File.Path) -> Bytes! { return File.read(p) }; flow G(p: File.Path) -> Bytes! { return F(p) }; flow H(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; flow W(r: HTTP.Request) -> HTTP.Response onError H { e = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit e; return HTTP.Response.Text.new(200, "ok") }; flow S() -> HTTP.Server { return HTTP.Server.new(8080, W, H) }`)
+		p := checked(t, `flow F(p: File.Path) -> Bytes! { return File.read(p) }; flow G(p: File.Path) -> Bytes! { return F(p) }; flow H(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; flow W(r: HTTP.Request) -> HTTP.Response onError H { e = File.Append.new(File.Path.new("unused"), Bytes.new("x")); commit e; return HTTP.Response.Text.new(200, "ok") }; flow S() -> HTTP.Server { return HTTP.Server.new(8080, W, H) }`)
 		g := flowNamed(t, p, "G")
 		if !g.Effects().Reads || g.Effects().Commits {
 			t.Fatal("read summary was lost or became activation")
@@ -170,7 +185,19 @@ func FuzzCompilerSource(f *testing.F) {
 	for _, seed := range []string{
 		`return Math.add(1, 2)`,
 		`flow F(x: Int) -> Int! { return Math.div(1, x) }; return F(0)`,
-		`return Match.new(1, 1: "a", _: "b")`,
+		`flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Math.eq(value, 1)
+}
+
+flow ProgramChoiceResult1(value: Int) -> String {
+    return "a"
+}
+
+flow ProgramChoiceDefault(value: Int) -> String {
+    return "b"
+}
+
+return 1 |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1)), ProgramChoiceDefault))`,
 		`flow F(x: Map<String, List<Int!>>) -> Int { return 1 }`,
 		`flow F(x: Record{flow: Int}) -> Int { return x.flow }; return F(Record.new(flow: 1))`,
 		`flow F(x: Int) -> Int { return F(x) }`,
@@ -197,9 +224,21 @@ func FuzzCompilerSource(f *testing.F) {
 func FuzzInspectionSource(f *testing.F) {
 	for _, seed := range []string{
 		`return 1`,
-		`flow F(x: String) -> File.Append { return File.Append.new(File.Path.new(x), UTF8.Bytes.new("data")) }; e = F("output"); commit e`,
+		`flow F(x: String) -> File.Append { return File.Append.new(File.Path.new(x), Bytes.new("data")) }; e = F("output"); commit e`,
 		`flow H(e: Error) -> Int { return 0 }; flow F(p: File.Path) -> Int onError H { bytes = File.read(p); return 1 }; return F(File.Path.new("input"))`,
-		`return Match.new(1, 1: "a", _: "b")`,
+		`flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Math.eq(value, 1)
+}
+
+flow ProgramChoiceResult1(value: Int) -> String {
+    return "a"
+}
+
+flow ProgramChoiceDefault(value: Int) -> String {
+    return "b"
+}
+
+return 1 |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1)), ProgramChoiceDefault))`,
 		`flow F(state: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: state, next_state: Math.add(state, 1)) }; return List.unfold(0, 3, F)`,
 		"\xff",
 	} {

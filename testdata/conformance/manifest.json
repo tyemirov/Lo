@@ -432,7 +432,7 @@
     "command": "check",
     "exit": 1,
     "stage": 3,
-    "diagnostic": "check.match-default"
+    "diagnostic": "check.argument-count"
   },
   {
     "id": "wrong-branch",

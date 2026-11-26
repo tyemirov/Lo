@@ -2,10 +2,10 @@
 
 [Documentation home](../README.md) · [Operation index](README.md)
 
-These operations construct collections, transform elements, and execute sequential callbacks.
+These operations construct collections and matchers, transform elements, and execute named callbacks.
 `T`, `U`, `K`, `V`, and `S` are signature notation, not source type aliases.
 `Record` in signatures denotes an exact record shape derived by the compiler.
-`context...` denotes explicit context arguments before the final named callback. Higher-order calls accept positional arguments only.
+`context...` denotes explicit context arguments before the final named callback. List and Flow callback operations accept positional arguments only.
 
 List callbacks are pure. Flow callbacks can observe host state and activate commits.
 List operations that consume an existing list also accept a String as a scalar sequence.
@@ -31,6 +31,9 @@ Host quota failures are terminal.
 - [Map.get](#mapget)
 - [Map.has_key](#maphas_key)
 - [Map.new](#mapnew)
+- [Match.apply](#matchapply)
+- [Match.Case.new](#matchcasenew)
+- [Match.new](#matchnew)
 - [Range.contains](#rangecontains)
 - [Range.is_empty](#rangeis_empty)
 - [Range.new](#rangenew)
@@ -342,6 +345,78 @@ return Map.new(Record.new(key: "name", value: "Lo"))
 ```
 
 [Contract](../../specification.md#72-constructor-rules)
+
+## Match.apply
+
+```text
+Match.apply(request: T, matcher: Match<T, R>) -> R
+```
+
+Pass the request value to the stored predicates in order. The first true result selects its handler.
+Invoke that handler once with the same request. When every predicate returns false, invoke the default handler.
+Each application performs a fresh selection. Later predicates and unselected handlers remain unevaluated.
+
+The result keeps the handler's exact type, including a fallible type.
+Argument expressions follow the ordinary source evaluation order.
+
+`Match.apply` also accepts `Match<T, R, Read>`. The compiler records a possible host read at application for that type.
+The host checks read and device grants when the selected handler uses them.
+Returned targets require a later explicit `commit` for activation.
+
+```lo
+flow Positive(value: Int) -> Bool { return Math.gt(value, 0) }
+flow Double(value: Int) -> Int { return Math.mul(value, 2) }
+flow Keep(value: Int) -> Int { return value }
+matcher = Match.new(List.new(Match.Case.new(Positive, Double)), Keep)
+return 4 |> Match.apply(matcher)
+```
+
+[Contract](../../specification.md#111-reusable-matchers)
+
+## Match.Case.new
+
+```text
+Match.Case.new(predicate: (T) -> Bool, handler: (T) -> R) -> Match.Case<T, R>
+```
+
+Store a pure total named predicate and a named handler as an immutable case.
+The signatures above describe callback parameters. The supplied arguments are named flow references.
+Both callbacks receive one parameter of type `T`. The predicate returns `Bool`, and the handler returns `R`.
+`R` can be fallible. A reading handler produces `Match.Case<T, R, Read>`.
+Construction invokes zero callbacks. Handler commits belong in the calling flow.
+
+```lo
+flow Positive(value: Int) -> Bool { return Math.gt(value, 0) }
+flow Double(value: Int) -> Int { return Math.mul(value, 2) }
+return Match.Case.new(Positive, Double)
+```
+
+[Contract](../../specification.md#111-reusable-matchers)
+
+## Match.new
+
+```text
+Match.new(cases: List<Match.Case<T, R>>, default: (T) -> R) -> Match<T, R>
+```
+
+Store the ordered cases and one required default handler as immutable data.
+The default is a named flow with one parameter of type `T` and result type `R`.
+A reading case or default produces `Match<T, R, Read>`.
+`List.new` gives mixed pure and reading cases the common read-qualified case type.
+Every case and the default share the same input type and exact result type, including fallibility.
+An empty case list derives its type from the default handler.
+Construction invokes zero predicates or handlers. Use `Match.apply` to evaluate a request.
+
+```lo
+flow Keep(value: Int) -> Int { return value }
+matcher = Match.new(cases: List.new(), default: Keep)
+return 4 |> Match.apply(matcher)
+```
+
+Matchers and cases can be stored in records and collections or passed through named flows.
+Their automatic output contains callback names and case order. Diagnostic snapshots preserve the same description.
+
+[Contract](../../specification.md#111-reusable-matchers)
 
 ## Range.contains
 

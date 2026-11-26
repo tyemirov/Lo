@@ -33,7 +33,7 @@ func semanticNativeObservation(source string, number int) llvmRuntimeScenario {
 }
 
 func TestSemanticNativeReadOrder(t *testing.T) {
-	const text = `flow Read(path: String) -> String! { bytes=File.read(File.Path.new(path)); return UTF8.String.new(bytes) }
+	const text = `flow Read(path: String) -> String! { bytes=File.read(File.Path.new(path)); return String.FromBytes.new(bytes) }
 flow Join(a: String,b: String) -> String { return String.concat(a,b) }
 flow Main() -> String! { unused=Read("unused");first=Read("repeat");second=Read("repeat");ordered=Join(b:Read("b"),a:Read("a"));return String.concat(first,second,ordered) };return Main()`
 	scenario := semanticNativeObservation(text, 0)
@@ -43,11 +43,70 @@ flow Main() -> String! { unused=Read("unused");first=Read("repeat");second=Read(
 
 func TestSemanticNativeMatchRegions(t *testing.T) {
 	const text = `flow Handle(error: Error) -> String { return "failed" }
-flow Read(path: String) -> String onError Handle { bytes=File.read(File.Path.new(path)); return UTF8.String.new(bytes) }
-return Match.new(Read("selector"),"miss":Read("unselected"),"selector":Read("selected"),"unreached":Read("unreached-body"),_:Read("default"))`
+flow Read(path: String) -> String onError Handle { bytes=File.read(File.Path.new(path)); return String.FromBytes.new(bytes) }
+flow ProgramChoiceTest1(value: String) -> Bool {
+    return String.eq(value, "miss")
+}
+
+flow ProgramChoiceResult1(value: String) -> String {
+    return Read("unselected")
+}
+
+flow ProgramChoiceTest2(value: String) -> Bool {
+    return String.eq(value, "selector")
+}
+
+flow ProgramChoiceResult2(value: String) -> String {
+    return Read("selected")
+}
+
+flow ProgramChoiceTest3(value: String) -> Bool {
+    return String.eq(value, "unreached")
+}
+
+flow ProgramChoiceResult3(value: String) -> String {
+    return Read("unreached-body")
+}
+
+flow ProgramChoiceDefault(value: String) -> String {
+    return Read("default")
+}
+
+return Read("selector") |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1), Match.Case.new(ProgramChoiceTest2, ProgramChoiceResult2), Match.Case.new(ProgramChoiceTest3, ProgramChoiceResult3)), ProgramChoiceDefault))`
 	scenario := semanticNativeObservation(text, 1)
 	scenario.verify = nativeValueCheck("String", `"selected"`)
 	semanticNativeScenarios(t, []llvmRuntimeScenario{scenario})
+}
+
+func TestLLVMMatcherReadViews(t *testing.T) {
+	matcherReadViews(t, semanticNativeTarget())
+}
+
+func TestLLVMLinuxMatcherReadViews(t *testing.T) {
+	matcherReadViews(t, "linux/arm64")
+}
+
+func matcherReadViews(t *testing.T, target string) {
+	t.Helper()
+	const text = `
+flow Positive(value: Int) -> Bool { return Math.gt(value, 0) }
+flow Keep(value: Int) -> Int { return value }
+flow ReadCase() -> Match.Case<Int, Int, Read> {
+    return Match.Case.new(Positive, Keep)
+}
+flow ReadMatcher() -> Match<Int, Int, Read> {
+    return Match.new(List.new(), Keep)
+}
+matcher = Match.new(List.new(ReadCase()), Keep)
+first = 3 |> Match.apply(matcher)
+second = 4 |> Match.apply(ReadMatcher())
+return Math.add(first, second)
+`
+	runLLVMRuntimeTargetScenarios(t, target, []llvmRuntimeScenario{{
+		name: "matcher-and-case-read-views", source: text,
+		harness: "testdata/native-qualification/metadata-v2.c", number: 1,
+		verify: nativeValueCheck("Int", `"7"`),
+	}})
 }
 
 func TestSemanticNativeRepeatedFrames(t *testing.T) {

@@ -26,7 +26,68 @@ func llvmHostInvocationScenarios(t *testing.T) []llvmRuntimeScenario {
 	body = encodingbinary.BigEndian.AppendUint32(body, 123)
 	body = encodingbinary.BigEndian.AppendUint32(body, 456)
 	body = encodingbinary.BigEndian.AppendUint64(body, ^uint64(16))
-	valid := fmt.Sprintf(`flow Join(state:String,item:String)->String{return String.concat(state,item)};flow Failed(error:Error)->Bool{return false};flow Main()->Bool onError Failed{initial=Host.Invocation.current();again=Host.Invocation.current();return Match.new(initial.real_uid,123:Match.new(initial.effective_uid,456:Match.new(initial.now_unix_ns,-17:Match.new(List.length(initial.arguments),2:Match.new(File.Path.eq(initial.home,File.Path.new(%q)),true:String.eq(List.fold(again.arguments,"",Join),"literal"),_:false),_:false),_:false),_:false),_:false)};return Main()`, repository)
+	valid := fmt.Sprintf(`flow Join(state:String,item:String)->String{return String.concat(state,item)};flow Failed(error:Error)->Bool{return false};flow Main()->Bool onError Failed{initial=Host.Invocation.current();again=Host.Invocation.current();
+    flow MainChoiceTest1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 123)
+    }
+
+    flow MainChoice2Test1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 456)
+    }
+
+    flow MainChoice3Test1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Math.eq(request.selector, -17)
+    }
+
+    flow MainChoice4Test1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 2)
+    }
+
+    flow MainChoice5Test1(request: Record{again: Host.Invocation, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow MainChoice5Result1(request: Record{again: Host.Invocation, selector: Bool}) -> Bool {
+        return String.eq(List.fold(request.again.arguments,"",Join),"literal")
+    }
+
+    flow MainChoice5Default(request: Record{again: Host.Invocation, selector: Bool}) -> Bool {
+        return false
+    }
+
+    flow MainChoice4Result1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Record.new(selector: File.Path.eq(request.initial.home,File.Path.new(%[1]q)), again: request.again) |> Match.apply(Match.new(List.new(Match.Case.new(MainChoice5Test1, MainChoice5Result1)), MainChoice5Default))
+    }
+
+    flow MainChoice4Default(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return false
+    }
+
+    flow MainChoice3Result1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Record.new(selector: List.length(request.initial.arguments), again: request.again, initial: request.initial) |> Match.apply(Match.new(List.new(Match.Case.new(MainChoice4Test1, MainChoice4Result1)), MainChoice4Default))
+    }
+
+    flow MainChoice3Default(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return false
+    }
+
+    flow MainChoice2Result1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Record.new(selector: request.initial.now_unix_ns, again: request.again, initial: request.initial) |> Match.apply(Match.new(List.new(Match.Case.new(MainChoice3Test1, MainChoice3Result1)), MainChoice3Default))
+    }
+
+    flow MainChoice2Default(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return false
+    }
+
+    flow MainChoiceResult1(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return Record.new(selector: request.initial.effective_uid, again: request.again, initial: request.initial) |> Match.apply(Match.new(List.new(Match.Case.new(MainChoice2Test1, MainChoice2Result1)), MainChoice2Default))
+    }
+
+    flow MainChoiceDefault(request: Record{again: Host.Invocation, initial: Host.Invocation, selector: Int}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: initial.real_uid, again: again, initial: initial) |> Match.apply(Match.new(List.new(Match.Case.new(MainChoiceTest1, MainChoiceResult1)), MainChoiceDefault))};return Main()`, repository)
 	failed := `flow Failed(error:Error)->Bool{return String.eq(error.kind,"Host.InvocationFailed")};flow Main()->Bool onError Failed{initial=Host.Invocation.current();return false};return Main()`
 	var scenarios []llvmRuntimeScenario
 	for number, test := range []struct {

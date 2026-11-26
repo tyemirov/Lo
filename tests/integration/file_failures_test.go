@@ -69,7 +69,7 @@ func TestFileRemovalChangedAndRepeated(t *testing.T) {
 		t.Run(fmt.Sprint(repeat), func(t *testing.T) {
 			root := fileFixtureRoot(t)
 			name := fileFixture(t, root, "a", "old")
-			middle := fmt.Sprintf(`change = File.Append.new(File.Path.new(%q), UTF8.Bytes.new("changed")); commit change;`, name)
+			middle := fmt.Sprintf(`change = File.Append.new(File.Path.new(%q), Bytes.new("changed")); commit change;`, name)
 			if repeat {
 				middle = "commit removal;"
 			}

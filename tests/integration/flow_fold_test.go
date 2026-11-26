@@ -15,7 +15,7 @@ func TestFlowFold(t *testing.T) {
 		root := fileFixtureRoot(t)
 		output := filepath.Join(root, "order")
 		source := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: String) -> Int! {
-			target = File.Append.new(path, UTF8.Bytes.new(item)); commit target; return Math.add(state, 1)
+			target = File.Append.new(path, Bytes.new(item)); commit target; return Math.add(state, 1)
 		}; flow Run() -> Int! { return Flow.fold(List.new("a", "b", "c"), 0, File.Path.new(%q), Step) }; return Run()`, output)
 		v := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--write-root", root, "--format", "json"))
 		valueJSON(t, v, `"3"`)
@@ -30,14 +30,14 @@ func TestFlowFold(t *testing.T) {
 		valueJSON(t, v, `"7"`)
 	})
 	t.Run("list-remains-pure", func(t *testing.T) {
-		source := `flow Step(state: Int, item: Int) -> Int! { target = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit target; return state }; flow Run() -> Int! { return List.fold(List.new(1), 0, Step) }; return Run()`
+		source := `flow Step(state: Int, item: Int) -> Int! { target = File.Append.new(File.Path.new("unused"), Bytes.new("x")); commit target; return state }; flow Run() -> Int! { return List.fold(List.new(1), 0, Step) }; return Run()`
 		got := run(t, "check", sourceFile(t, source), "--format", "json")
 		if got.status != 1 || diagnostics(t, got.stderr).Diagnostics[0].Code != "check.effectful-callback" {
 			t.Fatalf("List callback purity: %+v", got)
 		}
 	})
 	t.Run("total-rejects-activation", func(t *testing.T) {
-		source := `flow Step(state: Int, item: Int) -> Int! { target = File.Append.new(File.Path.new("unused"), UTF8.Bytes.new("x")); commit target; return state }; flow Run() -> Int { return Flow.fold(List.new(1), 0, Step) }; return Run()`
+		source := `flow Step(state: Int, item: Int) -> Int! { target = File.Append.new(File.Path.new("unused"), Bytes.new("x")); commit target; return state }; flow Run() -> Int { return Flow.fold(List.new(1), 0, Step) }; return Run()`
 		got := run(t, "check", sourceFile(t, source), "--format", "json")
 		if got.status != 1 {
 			t.Fatalf("total effectful flow accepted: %+v", got)
@@ -46,7 +46,7 @@ func TestFlowFold(t *testing.T) {
 	t.Run("inspection", func(t *testing.T) {
 		root := fileFixtureRoot(t)
 		output := filepath.Join(root, "untouched")
-		source := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: String) -> Int! { target = File.Append.new(path, UTF8.Bytes.new(item)); commit target; return Math.add(state, 1) }; flow Run() -> Int! { return Flow.fold(List.new("a"), 0, File.Path.new(%q), Step) }; return Run()`, output)
+		source := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: String) -> Int! { target = File.Append.new(path, Bytes.new(item)); commit target; return Math.add(state, 1) }; flow Run() -> Int! { return Flow.fold(List.new("a"), 0, File.Path.new(%q), Step) }; return Run()`, output)
 		got := run(t, "inspect", sourceFile(t, source), "--format", "json")
 		if got.status != 0 || !strings.Contains(got.stdout, `"commits":true`) || !strings.Contains(got.stdout, `File.append`) {
 			t.Fatalf("fold activation inspection: %+v", got)
@@ -63,7 +63,7 @@ func TestFlowFold(t *testing.T) {
 		root := fileFixtureRoot(t)
 		output := filepath.Join(root, "attempts")
 		program := fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: Int) -> Int! {
-			target = File.Append.new(path, UTF8.Bytes.new("x")); commit target; return Math.add(state, Math.div(10, item))
+			target = File.Append.new(path, Bytes.new("x")); commit target; return Math.add(state, Math.div(10, item))
 		}; flow Run() -> Int! { return Flow.fold(List.new(2, 0, 5), 0, File.Path.new(%q), Step) }; return Run()`, output)
 		got := runProgram(t, sourceFile(t, program), "run", "--write-root", root, "--format", "json")
 		if got.status != 1 || !strings.Contains(got.stderr, "Math.DivideByZero") || !strings.Contains(got.stderr, `"value":"Flow.fold"`) {
@@ -84,7 +84,19 @@ func TestFlowFoldStepLimitProgress(t *testing.T) {
 	program := fmt.Sprintf(`flow Counter(state: Int) -> Record{value: Int, next_state: Int} {
 		return Record.new(value: state, next_state: Math.add(state, 1))
 	}; flow Delay(entry: File.Entry) -> Int {
-		return Match.new(entry.name, "c": List.length(List.unfold(0, 1000, Counter)), _: 0)
+		flow DelayChoiceTest1(value: String) -> Bool {
+		    return String.eq(value, "c")
+		}
+
+		flow DelayChoiceResult1(value: String) -> Int {
+		    return List.length(List.unfold(0, 1000, Counter))
+		}
+
+		flow DelayChoiceDefault(value: String) -> Int {
+		    return 0
+		}
+
+		return entry.name |> Match.apply(Match.new(List.new(Match.Case.new(DelayChoiceTest1, DelayChoiceResult1)), DelayChoiceDefault))
 	}; flow Step(state: Int, entry: File.Entry) -> Int! {
 		target = File.Remove.new(List.new(entry)); commit target; delay = Delay(entry); return Math.add(state, Math.add(delay, 1))
 	}; flow Outer(entries: List<File.Entry>, state: Int, item: Int) -> Int! {

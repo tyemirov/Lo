@@ -39,10 +39,9 @@ type module struct {
 	stack       []*flowWork
 }
 type checker struct {
-	module      *module
-	scope       resolve.Scope
-	flow        *flowWork
-	failureCode diagnostic.Code
+	module *module
+	scope  resolve.Scope
+	flow   *flowWork
 }
 type expression struct {
 	node       ir.Expression
@@ -319,9 +318,6 @@ func (c *checker) unwrap(e expression) (expression, diagnostic.Diagnostic) {
 	if !ok {
 		return e, nil
 	}
-	if c.failureCode != "" {
-		return expression{}, problem(c.failureCode, "case heads must be total", e.Span())
-	}
 	if !c.canPropagate() {
 		return expression{}, problem(diagnostic.Unhandled, "fallible value needs a fallible flow or a self-handler", e.Span())
 	}
@@ -331,6 +327,10 @@ func (c *checker) unwrap(e expression) (expression, diagnostic.Diagnostic) {
 }
 func (c *checker) coerce(e expression, expected types.Type) (expression, diagnostic.Diagnostic) {
 	if expected == nil || types.Equal(e.Type(), expected) {
+		return e, nil
+	}
+	if types.MatcherReadWidening(e.Type(), expected) {
+		e.node = must(ir.NewConversion(expected, e.node, ir.MatcherReadView))
 		return e, nil
 	}
 	if f, ok := expected.(types.Fallible); ok {

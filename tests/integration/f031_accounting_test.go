@@ -19,7 +19,20 @@ func f031AccountingScenarios() []llvmRuntimeScenario {
 	document := "[" + strings.TrimSuffix(strings.Repeat("0,", 1024), ",") + "]"
 	broken := strings.TrimSuffix(document, "]")
 	success := fmt.Sprintf(`flow Visit(previous:Int,item:Int)->Int!{value=%s;return Math.add(previous,JSON.length(value))};flow Main()->Bool!{return Math.eq(List.fold(List.new(%s),0,Visit),65536)};return Main()`, f031Decode(document), items)
-	failure := fmt.Sprintf(`flow Failed(error:Error)->Int{return Match.new(String.eq(error.kind,"JSON.InvalidData"),true:1,_:0)};flow Parse()->Int onError Failed{value=%s;return 0};flow Visit(previous:Int,item:Int)->Int{return Math.add(previous,Parse())};return Math.eq(List.fold(List.new(%s),0,Visit),64)`, f031Decode(broken), items)
+	failure := fmt.Sprintf(`flow Failed(error:Error)->Int{
+    flow FailedChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow FailedChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow FailedChoiceDefault(value: Bool) -> Int {
+        return 0
+    }
+
+    return String.eq(error.kind,"JSON.InvalidData") |> Match.apply(Match.new(List.new(Match.Case.new(FailedChoiceTest1, FailedChoiceResult1)), FailedChoiceDefault))};flow Parse()->Int onError Failed{value=%s;return 0};flow Visit(previous:Int,item:Int)->Int{return Math.add(previous,Parse())};return Math.eq(List.fold(List.new(%s),0,Visit),64)`, f031Decode(broken), items)
 	large := strings.Repeat("x", 262144)
 	detached := func(document, extraction string) string {
 		return fmt.Sprintf(`flow Select(index:Int)->Record{next_state:Int,value:JSON.Value}!{document=%s;selected=%s;return Record.new(next_state:Math.add(index,1),value:selected)};flow Main()->Bool!{values=List.unfold(0,16,Select);return Math.eq(List.length(values),16)};return Main()`, f031Decode(document), extraction)
@@ -86,6 +99,19 @@ func f031StrictCheckpointSource() string {
 	}
 	flows = append(flows, fmt.Sprintf(`flow Canonical()->%s!{%s return Checkpoint.decode(Bytes.new(%q),original)}`, typ, setup, llvmCheckpointParameters))
 	return strings.Join(flows, "\n") + `
-flow Both(previous:Bool,value:Bool)->Bool{return Match.new(previous,true:value,_:false)}
+flow Both(previous:Bool,value:Bool)->Bool{
+    flow BothChoiceTest1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow BothChoiceResult1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.value
+    }
+
+    flow BothChoiceDefault(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: previous, value: value) |> Match.apply(Match.new(List.new(Match.Case.new(BothChoiceTest1, BothChoiceResult1)), BothChoiceDefault))}
 flow Main()->Bool!{control=Canonical();return List.fold(List.new(` + strings.Join(checks, ",") + `),true,Both)};return Main()`
 }

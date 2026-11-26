@@ -32,7 +32,20 @@ func TestAdapterHTTPClientFileComposition(t *testing.T) {
 		path := filepath.Join(root, "response.txt")
 		program := fmt.Sprintf(`flow Empty() -> List<HTTP.Response> { return List.new() }
 flow Save(response: HTTP.Response, path: File.Path) -> Int! { write = File.Write.new(path, response.body); receipt = commit write; return receipt.bytes_written }
-flow Main() -> Int! { method = HTTP.Method.new("GET"); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(List.new()); target = HTTP.Client.Request.new(method,url,headers,Bytes.new("")); response = commit target; writes = Match.new(response.status, 200: List.new(response), _: Empty()); flow Step(total: Int, response: HTTP.Response) -> Int! { count = Save(response, File.Path.new(%q)); return Math.add(total,count) }; return Flow.fold(writes,0,Step) }; return Main()`, server.URL+test.path, path)
+flow Main() -> Int! { method = HTTP.Method.new("GET"); url = HTTP.URL.new(%q); headers = HTTP.Headers.new(List.new()); target = HTTP.Client.Request.new(method,url,headers,Bytes.new("")); response = commit target; writes = Record.new(selector: response.status, response: response) |> Match.apply(Match.new(List.new(Match.Case.new(MainWritesChoiceTest1, MainWritesChoiceResult1)), MainWritesChoiceDefault)); flow Step(total: Int, response: HTTP.Response) -> Int! { count = Save(response, File.Path.new(%q)); return Math.add(total,count) };
+    flow MainWritesChoiceTest1(request: Record{response: HTTP.Response, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 200)
+    }
+
+    flow MainWritesChoiceResult1(request: Record{response: HTTP.Response, selector: Int}) -> List<HTTP.Response> {
+        return List.new(request.response)
+    }
+
+    flow MainWritesChoiceDefault(request: Record{response: HTTP.Response, selector: Int}) -> List<HTTP.Response> {
+        return Empty()
+    }
+
+    return Flow.fold(writes,0,Step) }; return Main()`, server.URL+test.path, path)
 		got := runProgram(t, sourceFile(t, program), "run", "--http-allow", httpGrant("GET", server.URL), "--write-root", root, "--format", "json")
 		output := fileOutput(t, got)
 		if test.written {
@@ -87,7 +100,7 @@ func TestAdapterHTTPClientInspectionMethod(t *testing.T) {
 
 func TestAdapterHTTPClientDiagnosticTarget(t *testing.T) {
 	const secret = "client-target-private-sentinel"
-	program := fmt.Sprintf(`flow Main() -> Error! {method = HTTP.Method.new("POST"); url = HTTP.URL.new("http://127.0.0.1:1/private?%s"); headers = HTTP.Headers.new(List.new(Record.new(name: "authorization",value: UTF8.Bytes.new("%s")))); target = HTTP.Client.Request.new(method,url,headers,UTF8.Bytes.new("%s")); return Error.new("Example.Failure","failed",Record.new(target:target)) }; return Main()`, secret, secret, secret)
+	program := fmt.Sprintf(`flow Main() -> Error! {method = HTTP.Method.new("POST"); url = HTTP.URL.new("http://127.0.0.1:1/private?%s"); headers = HTTP.Headers.new(List.new(Record.new(name: "authorization",value: Bytes.new("%s")))); target = HTTP.Client.Request.new(method,url,headers,Bytes.new("%s")); return Error.new("Example.Failure","failed",Record.new(target:target)) }; return Main()`, secret, secret, secret)
 	got := runProgram(t, sourceFile(t, program), "run", "--format", "json")
 	if got.status != 0 {
 		t.Fatalf("target snapshot: %+v", got)

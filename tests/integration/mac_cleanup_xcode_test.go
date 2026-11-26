@@ -53,7 +53,10 @@ flow XcodeFixture() -> Program.Exit! {
     process = Process.Context.new(environment, File.Path.new(%q))
     context = Record.new(apply: %t, home: File.Path.new(%q), uid: %d, process: process)
     state = Xcode(context, InitialWorkflow())
-    return Program.Exit.new(Match.new(List.length(state.failures), 0: 0, _: 1), UTF8.Bytes.new(String.concat("FAILURES ", JoinStrings(state.failures, ","), "\n")), Bytes.new(""))
+    flow Successful(count: Int) -> Bool { return Math.eq(count, 0) }
+    flow SuccessStatus(count: Int) -> Int { return 0 }
+    flow FailureStatus(count: Int) -> Int { return 1 }
+    return Program.Exit.new(List.length(state.failures) |> Match.apply(Match.new(List.new(Match.Case.new(Successful, SuccessStatus)), FailureStatus)), Bytes.new(String.concat("FAILURES ", JoinStrings(state.failures, ","), "\n")), Bytes.new(""))
 }
 return XcodeFixture()`, fixture.root, fixture.calls, behavior, fixture.root, apply, fixture.root, os.Getuid())
 			arguments := append([]string{"fixture", "run"}, fixture.treeFlags(t, apply, parent)...)

@@ -23,7 +23,7 @@ Proposed operations and syntax stay outside the implemented contract until the c
 
 | Implemented contract | Reference |
 | --- | --- |
-| Immutable values, exact structural records, named flows, pipes, and `Match.new` | Sections 4 through 17 |
+| Immutable values, exact structural records, named flows, pipes, and reusable matchers | Sections 4 through 17 |
 | Typed failures, transitive effects, explicit commits, and activation result bindings | Sections 5, 12, 13, and 22 |
 | File observations, nominal targets, receipts, and sequential activation | Sections 8.8, 9.1, and 23.6 |
 | HTTP headers, responses, server receipts, and client actions | Sections 9.2 through 9.4 and 23.7 |
@@ -209,7 +209,7 @@ The loss flow uses a restricted set of operations.
 Float arithmetic is also outside this set.
 Construct tensors and optimizer state outside this flow.
 Keep device transfers and host observations outside this flow.
-The checker rejects `Match.new`, list callbacks, nested differentiation, and optimizer operations inside the loss graph.
+The checker rejects matcher operations, list callbacks, nested differentiation, and optimizer operations inside the loss graph.
 [Section 24.5](#245-reverse-mode-autodiff-and-backpropagation) defines the complete restrictions and derivative rules.
 
 ### Complete AdamW Program
@@ -503,9 +503,11 @@ Examples:
 * `Record.new(...)`
 * `List.new(...)`
 * `Range.new(...)`
+* `Match.Case.new(...)`
 * `Match.new(...)`
+* `Match.apply(...)` with a pure matcher
 
-A Match with a possible host observation is not pure.
+Applying a read-qualified matcher has a read effect.
 
 ### 5.2 Commit
 
@@ -524,7 +526,7 @@ A committable target may be:
 Examples:
 
 ```text
-write_action = File.Append.new(file_path, UTF8.Bytes.new(content_string))
+write_action = File.Append.new(file_path, Bytes.new(content_string))
 receipt = commit write_action
 target_server = HTTP.Server.new(port: Int.new(8080), handler: HelloHandler, onError: HelloError)
 commit target_server
@@ -715,6 +717,8 @@ The composite types are:
 * `Map<K, V>`
 * `Record{ field_name: FieldType, ... }`
 * `Range<T>`
+* `Match.Case<T, R>` and `Match.Case<T, R, Read>`
+* `Match<T, R>` and `Match<T, R, Read>`
 * `Tensor<FP32>`
 * `Device`
 * `Parameters<R>`
@@ -743,6 +747,12 @@ Float comparison processors do not make Float a valid map key or range endpoint.
 `Tensor<FP32>` and Device have no equality or ordering operations.
 Parameters, gradients, optimizer configs, and optimizer states also have no equality or ordering operations.
 Their `R` argument requires a nonempty exact record of `Tensor<FP32>` fields.
+
+`Match.Case<T, R>` and `Match<T, R>` are immutable nominal values for reusable selection.
+`T` is the request type and `R` is the handler result type, including an explicit fallible type when required.
+The optional `Read` qualifier records a possible host observation by a handler.
+These types have no equality, ordering, or projected fields.
+Their construction and application rules are in section 11.1.
 
 ### 6.4 Boundary Types
 
@@ -846,7 +856,7 @@ This list contains the core constructors.
 
 * `Scalar.new(value)`
 * `String.new(value)`
-* `Bytes.new(value)`
+* `Bytes.new(value: String) -> Bytes`
 * `Int.new(value)`
 * `Float.new(value)`
 * `Bool.new(value)`
@@ -854,13 +864,14 @@ This list contains the core constructors.
 * `Map.new(entry_one, entry_two, ...)`
 * `Record.new(field_one: value_one, field_two: value_two, ...)`
 * `Range.new(start: ..., end: ..., include_start: ..., include_end: ...)`
+* `Match.Case.new(predicate: ..., handler: ...)`
+* `Match.new(cases: ..., default: ...)`
 * `File.Path.new(path)`
 * `HTTP.Server.new(port: ..., handler: ..., onError: ...)`
 * `HTTP.Response.Text.new(status: ..., body: ...)`
 * `HTTP.Response.Bytes.new(status: ..., body: ...)`
 * `Error.new(kind: ..., message: ..., input: ...)`
-* `UTF8.String.new(bytes) -> String!`
-* `UTF8.Bytes.new(text: String) -> Bytes`
+* `String.FromBytes.new(bytes: Bytes) -> String!`
 * `String.FromScalars.new(scalar_list)`
 
 ### 7.2 Constructor Rules
@@ -1006,7 +1017,7 @@ This callback can read external state and activate commits.
 List callbacks cannot include either behavior.
 Transitive commit activation requires a fallible or self-handling enclosing flow.
 Pure callbacks cannot hide observations or commits inside a fold.
-Match selectors and branches cannot hide commit activation inside a fold.
+Matcher handlers must be free of commit activation, including activation inside a fold.
 
 An unhandled callback failure stops the remaining iterations.
 A self-handler can return an explicit skip state and permit continuation.
@@ -1219,9 +1230,9 @@ Independent source review closed the current findings.
 Boundary reads return values directly.
 Target construction performs no file access.
 Only `commit` activates a target.
-Write and append require Bytes, with explicit `UTF8.Bytes.new` for text.
+Write and append require Bytes, with explicit `Bytes.new` for text.
 Path equality compares text without normalization or access.
-It does not add path ordering or make paths valid Match selectors or map keys.
+A matcher can accept a File.Path request and use `File.Path.eq` in a predicate.
 
 `File.list` returns sorted direct children without recursion or content reads.
 Each immutable `File.Entry` exposes these projections:
@@ -1952,38 +1963,74 @@ In a self-handling flow, the nearest handler boundary is the flow signature’s 
 
 ## 11. Match
 
-Branching is expression-based, not statement-based.
+### 11.1 Reusable Matchers
 
-Lo uses one conditional match constructor:
+`Match.Case.new` stores one predicate and one handler as named flow references.
+`Match.new` stores an ordered list of these cases and one default handler.
+Both constructors are pure and total. They invoke zero predicates or handlers.
 
-```text
-Match.new(selector_value,
-    case_head_one: expression_one,
-    case_head_two: expression_two,
-    _: default_expression
+| Operation | Contract |
+| --- | --- |
+| `Match.Case.new(predicate: (T) -> Bool, handler: (T) -> R) -> Match.Case<T, R>` | Construct one reusable case. |
+| `Match.new(cases: List<Match.Case<T, R>>, default: (T) -> R) -> Match<T, R>` | Construct an ordered matcher with a required default handler. |
+| `Match.apply(request: T, matcher: Match<T, R>) -> R` | Test cases in order and invoke exactly one selected handler. |
+
+The flow signatures in this table describe named callback parameters.
+The table shows the types for pure handlers. Section 11.2 defines read-qualified types.
+Each predicate must be pure and total with one parameter of type `T` and a plain `Bool` result.
+Every handler, including the default, takes one parameter of type `T` and returns exactly the same result type `R`.
+Handlers may read host state. Commit activation belongs in the calling flow.
+`R` can be fallible. For example, fallible handlers produce `Match<T, Int!>`.
+The constructors require an exact common handler result type.
+An empty case list uses the input and result types of the required default handler.
+
+```lo
+flow IsPositive(value: Int) -> Bool { return Math.gt(value, 0) }
+flow DescribePositive(value: Int) -> String { return String.concat("positive: ", Int.to_string(value)) }
+flow DescribeOther(value: Int) -> String { return String.concat("other: ", Int.to_string(value)) }
+
+matcher = Match.new(
+    cases: List.new(Match.Case.new(IsPositive, DescribePositive)),
+    default: DescribeOther
 )
+return 4 |> Match.apply(matcher)
 ```
 
-Each case head is one of:
+This program returns `"positive: 4"`.
+Each application passes its original request to predicates in case order.
+The first predicate that returns `true` selects its handler.
+Later predicates and all other handlers remain unevaluated.
+If every predicate returns `false`, the default handler receives the request.
+Each application performs a new selection and invokes its selected handler once.
+A handler failure becomes the application's fallible result under the ordinary `T!` rules.
 
-* an expression compatible with the selector type for exact matching,
-* an expression of type `Range<T>` compatible with the selector type for range
-  matching,
-* when FlowName for predicate matching, where FlowName is a pure total named
-  flow with signature (T) -> Bool, or
-* _ for the default case.
+Matchers and cases can be passed through parameters, returned from flows, and stored in records or collections.
+Named callbacks receive required context through the request value.
+The compiler checks every callback body, signature, purity requirement, and reference cycle when it verifies the program.
+Construction retains callback identities without invoking their bodies.
+Inspection reports the possible host reads and device requirements at application.
+A handler can construct a committable target, which requires an explicit later `commit`.
 
-Match rules:
+Automatic output identifies a case by its predicate and handler flow names.
+Matcher output identifies its ordered cases and default handler name.
+Diagnostic snapshots preserve these descriptions without invoking callbacks or adding host authority.
 
-1. Cases are checked in source order.
-2. The first matching case wins.
-3. _ is required in v0.4.
-4. All branch expressions must unify to one output type.
-5. Only the selected branch is evaluated.
-6. Case heads and predicates must be pure and total.
-7. Selectors and selected branches can read external state but cannot activate commits.
-8. To select a later activation, construct a target in the chosen branch.
-9. Activate that target with a commit statement in the outer scope.
+### 11.2 Host Reads
+
+A case with a reading handler has type `Match.Case<T, R, Read>`. The compiler uses the handler's transitive effects to infer the qualifier.
+A matcher has type `Match<T, R, Read>` when a case or the default may read.
+Passing a matcher or case through a record, collection, or flow preserves its type and possible read effect.
+
+A pure matcher or case value can widen to its corresponding read-qualified type with the same request and result types.
+`List.new` infers the common read-qualified element type for mixed pure and reading matcher values of the same signature.
+An already constructed collection keeps its exact type.
+An explicitly pure matcher or case type requires pure values.
+
+Constructing a matcher invokes neither predicates nor handlers.
+Argument expressions follow ordinary call evaluation order.
+Applying a read-qualified matcher contributes a read effect to the caller's transitive effect summary.
+The verifier applies this rule even when the program supplies a request that would select a pure handler.
+During execution, the host checks the grants for reads performed by the selected handler.
 
 ---
 
@@ -2138,7 +2185,7 @@ Examples:
 ```text
 file_text = input_path
   |> File.read()
-  |> UTF8.String.new()
+  |> String.FromBytes.new()
 quotient = left
   |> Math.div(right)
 ```
@@ -2177,16 +2224,11 @@ Pipe is surface syntax only. The lowered graph remains explicit and typed.
 
 ### 15.4 Match Rules
 
-* An exact-value case head must be equality-comparable and compatible with the
-  selector type.
-* A range case head must be a `Range<T>` whose ordered-comparable endpoint type is
-  compatible with the selector type.
-* A predicate flow case head must use when FlowName syntax and must reference a
-  pure total flow with signature (T) -> Bool.
-* All branch expressions must unify to one type.
-* Different nominal target types do not unify, even when their success types have the same fields.
-* Case heads must be pure and total.
-* Selectors and selected branches can read external state but cannot activate commits.
+* `Match.Case.new` requires a pure total predicate `(T) -> Bool` and a handler `(T) -> R`.
+* `Match.new` requires cases and a default handler with the same input type and exact handler result type, including fallibility.
+* `Match.apply` requires a request of the matcher's input type and returns its handler result type.
+* A handler may observe host state. The resulting matcher carries the `Read` qualifier.
+* Every stored handler is free of commit activation, including through calls. To select an activation, return a target to the calling flow.
 
 ### 15.5 Commit Rules
 
@@ -2241,7 +2283,6 @@ Reserved lower-case keywords are:
 * return
 * commit
 * onError
-* when
 * true
 * false
 * null
@@ -2270,11 +2311,7 @@ Expression               = PipeExpression ;
 PipeExpression           = PrimaryExpression, ("|>", PipeTarget)* ;
 PipeTarget               = QualifiedName, "(", ArgumentList?, ")" ;
 
-PrimaryExpression        = MatchExpression | CallExpression | ProjectionExpression | ReferenceExpression | LiteralExpression | ParenthesizedExpression ;
-MatchExpression          = "Match", ".", "new", "(", Expression, ",", MatchCaseList, ")" ;
-MatchCaseList            = MatchCase, (",", MatchCase)*, ","? ;
-MatchCase                = MatchCaseHead, ":", Expression ;
-MatchCaseHead            = "_" | "when", Identifier | Expression ;
+PrimaryExpression        = CallExpression | ProjectionExpression | ReferenceExpression | LiteralExpression | ParenthesizedExpression ;
 CallExpression           = QualifiedName, "(", ArgumentList?, ")" ;
 ProjectionExpression     = Identifier, ".", MemberLabel, (".", MemberLabel)* ;
 ReferenceExpression      = Identifier ;
@@ -2298,7 +2335,7 @@ FieldTypeList            = FieldType, (",", FieldType)*, ","? ;
 FieldType                = MemberLabel, ":", TypeExpression ;
 
 QualifiedName            = Identifier, (".", MemberLabel)* ;
-MemberLabel              = Identifier | "flow" | "return" | "commit" | "onError" | "when" | "true" | "false" | "null" ;
+MemberLabel              = Identifier | "flow" | "return" | "commit" | "onError" | "true" | "false" | "null" ;
 Separator                = Newline | ";" ;
 ```
 
@@ -2308,7 +2345,7 @@ A binding with `commit` after `=` is a bound commit statement.
 It is not an expression binding.
 
 1. Pipe expressions are left associative and have lower precedence than calls,
-   projections, references, literals, parenthesized expressions, and Match.new.
+   projections, references, literals, and parenthesized expressions.
 2. An identifier chain followed immediately by "(" is parsed as CallExpression.
 3. An identifier chain containing "." and not followed by "(" is parsed as
    ProjectionExpression.
@@ -2316,10 +2353,7 @@ It is not an expression binding.
    ReferenceExpression.
 5. In an argument list, parse `MemberLabel ":" Expression` as `NamedArgument`.
    Parse all other arguments as positional expressions.
-6. In a Match.new case head, "_" is the default case and "when" Identifier is a
-   predicate-flow case head. All other case heads are expressions and are
-   classified by the type checker as exact-value or range case heads.
-7. A self-handling flow return signature uses NonFallibleTypeExpression on the
+6. A self-handling flow return signature uses NonFallibleTypeExpression on the
    left side of onError. A fallible self-handling return such as T! onError H is
    invalid in v0.4.
 
@@ -2328,7 +2362,7 @@ It is not an expression binding.
 Source files contain UTF-8 text without a byte order mark.
 Identifiers use ASCII letters, ASCII digits, and underscores.
 The first character must be a letter or underscore.
-The single underscore is reserved for a match default.
+The single underscore is reserved.
 Keywords cannot serve as identifiers.
 
 Names are case-sensitive.
@@ -2395,10 +2429,11 @@ Whitespace can occur between the components of a qualified name and before its c
 * `Map.new`
 * `Record.new`
 * `Range.new`
+* `Match.Case.new`
+* `Match.new`
 * `Error.new`
 * `File.Path.new`
-* `UTF8.String.new`
-* `UTF8.Bytes.new`
+* `String.FromBytes.new`
 * `HTTP.Server.new`
 * `HTTP.Headers.new`
 * `HTTP.Headers.values`
@@ -2455,6 +2490,7 @@ Device access has a separate resource summary.
 * `Int.to_string`
 * `Range.contains`
 * `Range.is_empty`
+* `Match.apply`
 * `Math.add`
 * `Math.sub`
 * `Math.mul`
@@ -2495,7 +2531,7 @@ The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
 include additional fields in Error.input when useful.
 
-* `UTF8.String.new(bytes) -> String!`
+* `String.FromBytes.new(bytes: Bytes) -> String!`
   * Failure: bytes are not valid UTF-8.
   * Required Error.kind: String.new("UTF8.InvalidBytes")
 * `Math.div(left_value, right_value) -> Int!`
@@ -2605,15 +2641,16 @@ return filtered_numbers
 
 ```lo
 flow IsVowel(target_scalar: Scalar) -> Bool {
-    return Match.new(target_scalar,
-        Scalar.new("a"): Bool.new(true),
-        Scalar.new("e"): Bool.new(true),
-        Scalar.new("i"): Bool.new(true),
-        Scalar.new("o"): Bool.new(true),
-        Scalar.new("u"): Bool.new(true),
-        _: Bool.new(false)
+    vowels = Map.new(
+        Record.new(key: Scalar.new("a"), value: true),
+        Record.new(key: Scalar.new("e"), value: true),
+        Record.new(key: Scalar.new("i"), value: true),
+        Record.new(key: Scalar.new("o"), value: true),
+        Record.new(key: Scalar.new("u"), value: true)
     )
+    return Map.has_key(vowels, target_scalar)
 }
+
 flow ExtractVowels(input_text: String) -> String {
     vowel_scalars = input_text |> List.filter(IsVowel)
     return vowel_scalars |> String.FromScalars.new()
@@ -2623,24 +2660,32 @@ flow ExtractVowels(input_text: String) -> String {
 ### 19.3 Evaluating Branches to Committable Effects
 
 ```lo
-flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
-    success_log = File.Path.new(String.new("/logs/success.log"))
-    error_log = File.Path.new(String.new("/logs/error.log"))
-    target_action = Match.new(status_code,
-        Int.new(200): File.Append.new(success_log, UTF8.Bytes.new(request_data)),
-        _: File.Append.new(error_log, UTF8.Bytes.new(request_data))
-    )
-    commit target_action
-    return HTTP.Response.Text.new(
-        status: status_code,
-        body: String.new("Status processed")
-    )
+flow IsSuccess(status: Int) -> Bool {
+    return Math.eq(status, 200)
 }
-flow StatusError(error: Error) -> HTTP.Response {
-    return HTTP.Response.Text.new(
-        status: Int.new(500),
-        body: String.new("status handling failed")
+
+flow SuccessLog(status: Int) -> File.Path {
+    return File.Path.new("/logs/success.log")
+}
+
+flow ErrorLog(status: Int) -> File.Path {
+    return File.Path.new("/logs/error.log")
+}
+
+flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
+    destinations = Match.new(
+        cases: List.new(Match.Case.new(IsSuccess, SuccessLog)),
+        default: ErrorLog
     )
+    path = status_code |> Match.apply(destinations)
+    target_action = File.Append.new(path, Bytes.new(request_data))
+    commit target_action
+
+    return HTTP.Response.Text.new(status: status_code, body: "Status processed")
+}
+
+flow StatusError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 500, body: "status handling failed")
 }
 ```
 
@@ -2656,7 +2701,7 @@ flow CountFallback(error: Error) -> Int {
 flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
     file_text = file_path
         |> File.read()
-        |> UTF8.String.new()
+        |> String.FromBytes.new()
     match_count = file_text
         |> List.filter(IsMatchingScalar)
         |> List.length()
@@ -2675,23 +2720,33 @@ flow Calculate(request: HTTP.Request) -> HTTP.Response! {
         body: result_value |> Int.to_string()
     )
 }
-flow CalculatorHttpError(error: Error) -> HTTP.Response {
-    return Match.new(error.kind,
-        String.new("Math.DivideByZero"): HTTP.Response.Text.new(
-            status: Int.new(400),
-            body: String.new("division by zero")
-        ),
-        _: HTTP.Response.Text.new(
-            status: Int.new(500),
-            body: String.new("internal error")
-        )
-    )
+
+flow IsDivideByZero(error: Error) -> Bool {
+    return String.eq(error.kind, "Math.DivideByZero")
 }
+
+flow BadDivisionRequest(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 400, body: "division by zero")
+}
+
+flow InternalError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 500, body: "internal error")
+}
+
+flow CalculatorHttpError(error: Error) -> HTTP.Response {
+    responses = Match.new(
+        cases: List.new(Match.Case.new(IsDivideByZero, BadDivisionRequest)),
+        default: InternalError
+    )
+    return error |> Match.apply(responses)
+}
+
 server = HTTP.Server.new(
     port: Int.new(8080),
     handler: Calculate,
     onError: CalculatorHttpError
 )
+
 commit server
 ```
 
@@ -2722,8 +2777,8 @@ rejection for syntactically valid programs that violate semantic rules.
 | QualifiedName and CallExpression | `HTTP.Response.Text.new(status: Int.new(200), body: String.new("ok"))` | `Unknown.Namespace.call()` when Unknown.Namespace is not predeclared or bound. |
 | ProjectionExpression | `request.body` where request has type HTTP.Request. | `value.missing` where value's type has no field missing. |
 | PipeExpression | `Int.new(10) |> Math.div(Int.new(2))` | `Int.new(10) |> Math.div` without a call argument list. |
-| MatchExpression | `Match.new(value, Int.new(1): String.new("one"), _: String.new("other"))` | A Match.new without `_` or with branches that do not unify to one output type. |
-| Predicate match case | `Match.new(value, when IsPositive: String.new("yes"), _: String.new("no"))` where IsPositive is pure and `(Int) -> Bool`. | `when WriteLog` where WriteLog is effectful or does not return Bool. |
+| Reusable matcher | `Match.new(List.new(Match.Case.new(IsPositive, Describe)), Other)` with pure named callbacks of the required signatures. | A predicate that reads or is fallible, a committing handler, or different handler result types. |
+| Matcher application | `value |> Match.apply(matcher)` where matcher has type `Match<T, R>` and value has type `T`. | A request whose type differs from the matcher's input type. |
 | NamedArgument | `HTTP.Response.Text.new(status: Int.new(200), body: String.new("ok"))` | Duplicate named arguments for the same parameter. |
 | Fallible binding in total flow | A total flow that only uses total expressions. | `flow Bad(path: File.Path) -> Bytes { return File.read(path) }` |
 | Fallible propagation | `flow Read(path: File.Path) -> Bytes! { bytes = File.read(path); return bytes }` | Treating a `T!` expression as `T` outside a fallible or self-handling boundary. |
@@ -2736,7 +2791,7 @@ rejection for syntactically valid programs that violate semantic rules.
 | Comparable domains | `Range.new(start: Int.new(1), end: Int.new(3), include_start: true, include_end: true)` and `Map<String, Int>`. | `Range<Bytes>` or `Map<List<Int>, String>` because those key/endpoint types are not comparable in v0.4. |
 | Map absence | `Map.has_key(values, key)` is total and `Map.get(values, key)` is fallible. | Treating a missing map value as a nullable successful value. |
 | List flow references | `List.filter(numbers, IsPositive)` where IsPositive is pure and `(Int) -> Bool`. | Passing an anonymous function, an effectful flow, or a flow with the wrong parameter order to a list processor. |
-| Commit activation | `action = File.Append.new(path, UTF8.Bytes.new(text))` followed by `receipt = commit action` in a fallible or self-handling flow. | `commit text` where text has type String, or any commit inside a plain total flow. |
+| Commit activation | `action = File.Append.new(path, Bytes.new(text))` followed by `receipt = commit action` in a fallible or self-handling flow. | `commit text` where text has type String, or any commit inside a plain total flow. |
 | Predeclared name shadowing | `flow UserHandler(request: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(status: Int.new(200), body: String.new("ok")) }` | `flow String(value: Int) -> Int { return value }` or `HTTP = String.new("x")`. |
 | Grammar examples | Every example in section 19 parses under section 17 and type-checks under section 15. | Any section 19 example relying on an undeclared non-standard processor or undocumented precedence rule. |
 
@@ -2748,7 +2803,7 @@ Lo v0.4 is a typed declarative dataflow language with:
 2. pure processors,
 3. named flows only,
 4. typed File, HTTP, and Process adapters,
-5. one conditional Match.new(...) construct,
+5. reusable matcher construction and application,
 6. a first-argument threading operator |>,
 7. a pragmatic Math namespace,
 8. general-purpose `List<T>` sequences and dense `Tensor<FP32>` arrays,
@@ -2778,8 +2833,8 @@ Flow bodies cannot capture values from another invocation or from top-level bind
 Flow references are valid only in declared callback and handler positions.
 They are not ordinary values and cannot form aliases through bindings.
 The verifier rejects cycles through calls, callbacks, and handler references.
-This rule includes references stored in adapter construction.
-Adapter construction does not execute a stored callback.
+This rule includes references stored in adapters, matchers, and matcher cases.
+Their construction stores callback references for the declared invocation phase.
 
 Record field names and member names can use reserved keywords.
 Named argument labels can also use reserved keywords.
@@ -2791,7 +2846,7 @@ A pure flow has no host observations or commit activation, directly or through i
 The summaries keep `reads`, `commits`, and `devices` separate.
 Device requirements alone do not make a callback impure.
 
-List callbacks, Flow processor callbacks, and Match predicates participate in the same transitive analysis.
+List callbacks, Flow processor callbacks, and stored matcher callbacks participate in the same transitive analysis.
 An unused nested definition does not change the enclosing flow summary.
 Adapter construction keeps handler requirements without executing the handlers.
 The verifier checks all flow bodies, including unused flows.
@@ -2799,9 +2854,8 @@ The verifier checks all flow bodies, including unused flows.
 | Position | Rule |
 | --- | --- |
 | List callback | Pure named flow. |
-| Match predicate | Pure total named flow. |
-| Match case head | Pure total value calculation. |
-| Match selector or selected branch | Host observations permitted. Commit activation prohibited. |
+| Matcher case predicate | Pure total named flow with one request parameter. |
+| Matcher case or default handler | Named flow with one request parameter and the matcher's exact result type. Host observations are permitted and tracked at application. Commit activation is disallowed. |
 | Flow self-handler or adapter `onError` | Pure total named flow. |
 | `Flow.fold` or `Flow.worklist` callback | Host observations and commits permitted under ordinary fallibility rules. |
 | HTTP request handler | Host observations and commits permitted under its declared signature. |
@@ -2848,6 +2902,7 @@ A return from a self-handling flow permits propagation to its declared handler.
 
 `Int.new`, `String.new`, `Float.new`, and `Bool.new` accept one value of their output type.
 `Bytes.new(value: String)` encodes its input as UTF-8 bytes.
+`String.FromBytes.new(bytes: Bytes)` validates the complete UTF-8 sequence before it returns a String.
 `Scalar.new` accepts a Scalar or a statically known String with exactly one Unicode scalar.
 The verifier rejects a String input whose length it cannot establish.
 `Float` uses finite IEEE 754 binary64 values in the reference implementation.
@@ -2876,13 +2931,19 @@ Bare `Record` accepts an exact record of any shape, but does not expose unknown 
 
 ### 22.5 Match Contracts
 
-A match has exactly one default, which must be its final case.
-Exact case heads must be total and equality-comparable.
-Range heads must be total with endpoints of the selector type.
-A predicate must be a pure total flow with one parameter of the selector type.
-The verifier checks every case, including cases that cannot execute for a constant selector.
-The runtime evaluates heads in source order until the first match.
-It evaluates only the selected branch.
+A reusable matcher stores its ordered cases and one default handler as immutable data.
+Constructor argument expressions follow ordinary call evaluation order.
+The constructors invoke zero predicates and handlers.
+`Match.apply` receives a request and a matcher, tests predicates in case order, and invokes the first matching handler.
+It invokes the default handler when every predicate returns `false`.
+Later predicates and all unselected handlers remain unevaluated.
+Repeated applications perform fresh selection for their supplied requests.
+The verifier validates all stored callback signatures, bodies, effects, and reference cycles, including unused callbacks.
+Case and default handlers have one exact common result type, including fallibility.
+Stored callback references are preserved when a matcher passes through a flow, record, or collection.
+
+A read-qualified matcher contributes the static read effect at `Match.apply`.
+Reads inside a selected handler occur in that handler's evaluation order.
 
 ---
 
@@ -2950,7 +3011,7 @@ Each flow invocation has its own parameter and binding values.
 Call arguments evaluate in source order, independent of their named parameter positions.
 A pipe evaluates its left expression before its explicit arguments.
 Match evaluation follows section 22.5.
-The runtime does not evaluate unselected branches or subsequent case heads after a match.
+Constructing matcher values invokes zero callbacks. Applying a matcher invokes only the reached predicates and selected handler.
 
 Every evaluated `File.read` performs a new boundary read.
 Separate reads of one path can return different contents.
@@ -3026,7 +3087,7 @@ A failed commit stops the current body before later statements execute.
 An applicable self-handler can return a result to the caller, as specified in section 23.4.
 
 `File.Append.new` constructs an append target from Bytes.
-`UTF8.Bytes.new(text)` explicitly encodes text as UTF-8.
+`Bytes.new(text)` explicitly encodes text as UTF-8.
 `File.Write.new` constructs a replacement target from Bytes.
 Activation writes the supplied bytes.
 Both operations create the target file if it does not exist.
@@ -3155,7 +3216,7 @@ The square root of negative zero is negative zero.
 Int and Float operations require explicit conversion between their domains.
 Integer arithmetic remains exact.
 Float construction remains an identity operation on a finite Float input.
-Float comparisons do not extend the comparable domains for maps, ranges, or Match case heads.
+Float comparisons do not extend the comparable domains for maps or ranges.
 
 ## 24.2 Tensor Values and Shape Boundaries
 

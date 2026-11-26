@@ -61,7 +61,20 @@ func TestF036ResourceTransferBackpressure(t *testing.T) {
 				flags = append(flags, "--lock-file", later)
 				source = fmt.Sprintf(`flow ProbeLater()->Bool onError Denied{target=Lock.File.new(File.Path.new(%q));lease=commit target;return false}
 flow ProbeSame()->Bool onError Denied{target=Lock.File.new(File.Path.new(%q));lease=commit target;return false}
-flow Denied(error:Error)->Bool{return Match.new(String.eq(error.kind,"Lock.Failed"),true:String.starts_with(error.message,"file lock acquisition is frozen by active remote owner "),_:false)}
+flow Denied(error:Error)->Bool{
+    flow DeniedChoiceTest1(request: Record{error: Error, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow DeniedChoiceResult1(request: Record{error: Error, selector: Bool}) -> Bool {
+        return String.starts_with(request.error.message,"file lock acquisition is frozen by active remote owner ")
+    }
+
+    flow DeniedChoiceDefault(request: Record{error: Error, selector: Bool}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: String.eq(error.kind,"Lock.Failed"), error: error) |> Match.apply(Match.new(List.new(Match.Case.new(DeniedChoiceTest1, DeniedChoiceResult1)), DeniedChoiceDefault))}
 `, later, fixture.lock) + source
 				data, err := os.ReadFile(filepath.Join(repository, "testdata/native-runtime/process-resource-ack-probes.c"))
 				if err != nil {

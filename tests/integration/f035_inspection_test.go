@@ -130,7 +130,19 @@ func TestF035InspectionPreservesCommandAlternatives(t *testing.T) {
 	root := t.TempDir()
 	source := fmt.Sprintf(`
 flow Select(command: Process.Command, forward: Bool) -> Process.Command! {
-return Match.new(forward, true: Process.Command.with_output(command, "forward"), _: command)
+flow SelectChoiceTest1(request: Record{command: Process.Command, selector: Bool}) -> Bool {
+    return request.selector
+}
+
+flow SelectChoiceResult1(request: Record{command: Process.Command, selector: Bool}) -> Process.Command! {
+    return Process.Command.with_output(request.command, "forward")
+}
+
+flow SelectChoiceDefault(request: Record{command: Process.Command, selector: Bool}) -> Process.Command! {
+    return request.command
+}
+
+return Record.new(selector: forward, command: command) |> Match.apply(Match.new(List.new(Match.Case.new(SelectChoiceTest1, SelectChoiceResult1)), SelectChoiceDefault))
 }
 flow Main() -> Process.Result! {
 context = Process.Context.new(Map.new(), File.Path.new(%q))

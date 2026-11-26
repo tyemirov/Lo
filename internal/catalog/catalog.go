@@ -32,6 +32,7 @@ const (
 	ListAccess
 	ListSortProcessor
 	StringFormatOperation
+	MatcherOperation
 )
 
 type Boundary uint8
@@ -66,6 +67,9 @@ const (
 	MapNew               = "Map.new"
 	RecordNew            = "Record.new"
 	RangeNew             = "Range.new"
+	MatchCaseNew         = "Match.Case.new"
+	MatchNew             = "Match.new"
+	MatchApply           = "Match.apply"
 	ErrorNew             = "Error.new"
 	PathNew              = "File.Path.new"
 	ServerNew            = "HTTP.Server.new"
@@ -75,8 +79,7 @@ const (
 	InvalidHeaders       = "HTTP.InvalidHeaders"
 	ResponseTextNew      = "HTTP.Response.Text.new"
 	ResponseBytesNew     = "HTTP.Response.Bytes.new"
-	UTF8BytesNew         = "UTF8.Bytes.new"
-	UTF8New              = "UTF8.String.new"
+	FromBytesNew         = "String.FromBytes.new"
 	FromScalarsNew       = "String.FromScalars.new"
 	Concat               = "String.concat"
 	Upper                = "String.upper"
@@ -318,7 +321,6 @@ func build() map[string]Operation {
 	client.targetPosition = 1
 	client.activation = []string{HTTPExchangeFailed}
 	m[ClientRequestNew] = client
-	fixed(UTF8BytesNew, []types.Parameter{{Name: "text", Type: types.String()}}, types.Bytes())
 	fixed(PathNew, []types.Parameter{{Name: ParamPath, Type: types.String()}}, types.Path())
 	fixed(FromScalarsNew, []types.Parameter{{Name: "scalar_list", Type: must(types.NewList(types.Scalar()))}}, types.String())
 	for _, name := range []string{Upper, Lower} {
@@ -355,7 +357,7 @@ func build() map[string]Operation {
 		}
 		fixed(name, []types.Parameter{{Name: ParamNumbers, Type: must(types.NewList(types.Int()))}}, out)
 	}
-	fixed(UTF8New, []types.Parameter{{Name: "bytes", Type: types.Bytes()}}, must(types.NewFallible(types.String())))
+	fixed(FromBytesNew, []types.Parameter{{Name: "bytes", Type: types.Bytes()}}, must(types.NewFallible(types.String())))
 	fixed(FileRead, []types.Parameter{{Name: ParamPath, Type: types.Path()}}, must(types.NewFallible(types.Bytes())))
 	fixed(FilePathEqual, []types.Parameter{{Name: ParamLeftOperand, Type: types.Path()}, {Name: ParamRightOperand, Type: types.Path()}}, types.Bool())
 	fixed(FileOpenPaths, []types.Parameter{{Name: ParamRoot, Type: types.Path()}}, must(types.NewFallible(must(types.NewList(types.Path())))))
@@ -377,6 +379,9 @@ func build() map[string]Operation {
 		{ScalarNew, ScalarConstructor, []string{ParamValue}}, {Concat, StringConcat, nil}, {ListNew, ListConstructor, nil},
 		{MapNew, MapConstructor, nil}, {RecordNew, RecordConstructor, nil},
 		{RangeNew, RangeConstructor, []string{"start", "end", "include_start", "include_end"}},
+		{MatchCaseNew, MatcherOperation, []string{"predicate", "handler"}},
+		{MatchNew, MatcherOperation, []string{"cases", "default"}},
+		{MatchApply, MatcherOperation, []string{"request", "matcher"}},
 		{Merge, RecordMerge, []string{"left_record", "right_record"}},
 		{HasKey, MapLookup, []string{"target_map", "target_key"}}, {Get, MapLookup, []string{"target_map", "target_key"}},
 		{Contains, RangeProcessor, []string{"target_range", "target_value"}}, {IsEmpty, RangeProcessor, []string{"target_range"}},
@@ -389,7 +394,7 @@ func build() map[string]Operation {
 		}
 		m[spec.name] = operation{name: spec.name, rule: spec.rule, parameters: params}
 	}
-	for name, kind := range map[string]string{MathDiv: DivideByZero, MathMod: ModuloByZero, MathMin: EmptyList, MathMax: EmptyList, UTF8New: InvalidUTF8, FileRead: ReadFailed, Get: MissingKey} {
+	for name, kind := range map[string]string{MathDiv: DivideByZero, MathMod: ModuloByZero, MathMin: EmptyList, MathMax: EmptyList, FromBytesNew: InvalidUTF8, FileRead: ReadFailed, Get: MissingKey} {
 		o := m[name].(operation)
 		o.errors = []string{kind}
 		m[name] = o
@@ -465,7 +470,7 @@ func Predeclared(name string) bool {
 		return true
 	}
 	switch name {
-	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "Lock", "CLI", "UTF8", "JSON", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
+	case "List", "Map", "Range", "File", "HTTP", "Process", "Host", "Console", "Program", "Lock", "CLI", "JSON", "Math", "Match", "Tensor", "FP32", "Autodiff", "Parameters", "Gradients", "Optimizer", "Checkpoint":
 		return true
 	}
 	return false

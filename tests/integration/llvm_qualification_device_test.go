@@ -130,8 +130,92 @@ func TestLLVMRetainedImmutableValues(t *testing.T) {
 flow Add(item:Int)->Int{return Math.add(item,1)}
 flow Verify(original:Record{n:Int,bytes:Bytes,items:List<Int>,table:Map<String,Int>})->Bool onError Failure {
  derived=Record.merge(original,Record.new(n:Math.add(original.n,1),bytes:Bytes.new("xyz"),items:List.map(original.items,Add),table:Map.new(Record.new(key:"a",value:9))))
- text=UTF8.String.new(original.bytes);entry=Map.get(original.table,"a");newentry=Map.get(derived.table,"a")
- return Match.new(original.n,18446744073709551616:Match.new(derived.n,18446744073709551617:Match.new(text,"abc":Match.new(Math.sum(original.items),3:Match.new(Math.sum(derived.items),5:Match.new(entry,1:Match.new(newentry,9:true,_:false),_:false),_:false),_:false),_:false),_:false),_:false)
+ text=String.FromBytes.new(original.bytes);entry=Map.get(original.table,"a");newentry=Map.get(derived.table,"a")
+ flow VerifyChoiceTest1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: Int, text: String}) -> Bool {
+     return Math.eq(request.selector, 18446744073709551616)
+ }
+
+ flow VerifyChoice2Test1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: Int, text: String}) -> Bool {
+     return Math.eq(request.selector, 18446744073709551617)
+ }
+
+ flow VerifyChoice3Test1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: String}) -> Bool {
+     return String.eq(request.selector, "abc")
+ }
+
+ flow VerifyChoice4Test1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, selector: Int}) -> Bool {
+     return Math.eq(request.selector, 3)
+ }
+
+ flow VerifyChoice5Test1(request: Record{entry: Int, newentry: Int, selector: Int}) -> Bool {
+     return Math.eq(request.selector, 5)
+ }
+
+ flow VerifyChoice6Test1(request: Record{newentry: Int, selector: Int}) -> Bool {
+     return Math.eq(request.selector, 1)
+ }
+
+ flow VerifyChoice7Test1(value: Int) -> Bool {
+     return Math.eq(value, 9)
+ }
+
+ flow VerifyChoice7Result1(value: Int) -> Bool {
+     return true
+ }
+
+ flow VerifyChoice7Default(value: Int) -> Bool {
+     return false
+ }
+
+ flow VerifyChoice6Result1(request: Record{newentry: Int, selector: Int}) -> Bool {
+     return request.newentry |> Match.apply(Match.new(List.new(Match.Case.new(VerifyChoice7Test1, VerifyChoice7Result1)), VerifyChoice7Default))
+ }
+
+ flow VerifyChoice6Default(request: Record{newentry: Int, selector: Int}) -> Bool {
+     return false
+ }
+
+ flow VerifyChoice5Result1(request: Record{entry: Int, newentry: Int, selector: Int}) -> Bool {
+     return Record.new(selector: request.entry, newentry: request.newentry) |> Match.apply(Match.new(List.new(Match.Case.new(VerifyChoice6Test1, VerifyChoice6Result1)), VerifyChoice6Default))
+ }
+
+ flow VerifyChoice5Default(request: Record{entry: Int, newentry: Int, selector: Int}) -> Bool {
+     return false
+ }
+
+ flow VerifyChoice4Result1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, selector: Int}) -> Bool {
+     return Record.new(selector: Math.sum(request.derived.items), entry: request.entry, newentry: request.newentry) |> Match.apply(Match.new(List.new(Match.Case.new(VerifyChoice5Test1, VerifyChoice5Result1)), VerifyChoice5Default))
+ }
+
+ flow VerifyChoice4Default(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, selector: Int}) -> Bool {
+     return false
+ }
+
+ flow VerifyChoice3Result1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: String}) -> Bool {
+     return Record.new(selector: Math.sum(request.original.items), derived: request.derived, entry: request.entry, newentry: request.newentry) |> Match.apply(Match.new(List.new(Match.Case.new(VerifyChoice4Test1, VerifyChoice4Result1)), VerifyChoice4Default))
+ }
+
+ flow VerifyChoice3Default(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: String}) -> Bool {
+     return false
+ }
+
+ flow VerifyChoice2Result1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: Int, text: String}) -> Bool {
+     return Record.new(selector: request.text, derived: request.derived, entry: request.entry, newentry: request.newentry, original: request.original) |> Match.apply(Match.new(List.new(Match.Case.new(VerifyChoice3Test1, VerifyChoice3Result1)), VerifyChoice3Default))
+ }
+
+ flow VerifyChoice2Default(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: Int, text: String}) -> Bool {
+     return false
+ }
+
+ flow VerifyChoiceResult1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: Int, text: String}) -> Bool {
+     return Record.new(selector: request.derived.n, derived: request.derived, entry: request.entry, newentry: request.newentry, original: request.original, text: request.text) |> Match.apply(Match.new(List.new(Match.Case.new(VerifyChoice2Test1, VerifyChoice2Result1)), VerifyChoice2Default))
+ }
+
+ flow VerifyChoiceDefault(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: Int, text: String}) -> Bool {
+     return false
+ }
+
+ return Record.new(selector: original.n, derived: derived, entry: entry, newentry: newentry, original: original, text: text) |> Match.apply(Match.new(List.new(Match.Case.new(VerifyChoiceTest1, VerifyChoiceResult1)), VerifyChoiceDefault))
 }
 return Record.new(n:18446744073709551616,bytes:Bytes.new("abc"),items:List.new(1,2),table:Map.new(Record.new(key:"a",value:1)))`
 	scenario := llvmRuntimeScenario{name: "retained-record-and-derived-values", source: text, harness: "testdata/native-qualification/device-immutable.c", transform: func(t *testing.T, module []byte) []byte {

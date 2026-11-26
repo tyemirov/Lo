@@ -445,7 +445,7 @@ This prevents a shared runtime defect from passing solely because both implement
 - Add native build coverage for complete programs and meaningful build rejections from the static manifest.
 - Keep parse-only fixtures as frontend tests when they do not describe executable programs.
 - Compare text and JSON results, error kinds, traces, source spans, exit statuses, and actual file effects.
-- Cover argument order, reached match heads, unused bindings, repeated reads, and repeated commits.
+- Cover argument order, reached matcher predicates, unused bindings, repeated reads, and repeated commits.
 - Cover nested fallible values, self-handlers, callback errors, and adapter error handlers.
 - Exercise denied capabilities, limits, cancellation, and partial HTTP startup.
 - Exercise malformed requests, disconnected clients, concurrent requests, and graceful and forced shutdown.

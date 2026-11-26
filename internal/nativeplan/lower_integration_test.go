@@ -15,7 +15,32 @@ import (
 
 func TestCheckedProgramsLower(t *testing.T) {
 	for _, text := range []string{"return 1\n", "value = 1\n",
-		`flow Later(item:Int)->Bool{return Math.eq(item,1)}; return Match.new(1,1:7,Math.add(2,3):8,when Later:9,_:10)`,
+		`flow Later(item:Int)->Bool{return Math.eq(item,1)};
+flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Math.eq(value, 1)
+}
+
+flow ProgramChoiceResult1(value: Int) -> Int {
+    return 7
+}
+
+flow ProgramChoiceTest2(value: Int) -> Bool {
+    return Math.eq(value, Math.add(2,3))
+}
+
+flow ProgramChoiceResult2(value: Int) -> Int {
+    return 8
+}
+
+flow ProgramChoiceResult3(value: Int) -> Int {
+    return 9
+}
+
+flow ProgramChoiceDefault(value: Int) -> Int {
+    return 10
+}
+
+return 1 |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1), Match.Case.new(ProgramChoiceTest2, ProgramChoiceResult2), Match.Case.new(Later, ProgramChoiceResult3)), ProgramChoiceDefault))`,
 		`flow Difference(left:Int,right:Int)->Int{return Math.sub(left,right)}; return Difference(right:Math.mul(2,3),left:Math.add(10,1))`,
 		`flow Double(item:Int)->Int{return Math.mul(item,2)}; return List.map(List.new(1,2),Double)`,
 		`flow Add(total:Int,item:Int)->Int{return Math.add(total,item)}; return Flow.fold(List.new(1,2),0,Add)`,

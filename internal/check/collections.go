@@ -15,24 +15,49 @@ func (c *checker) list(op catalog.Operation, args []syntax.Argument, expected ty
 		return expression{}, d
 	}
 	var element types.Type
+	contextual := false
 	if list, ok := expected.(types.List); ok {
 		element = list.Element()
+		contextual = true
 	}
 	values := make([]expression, len(args))
 	nodes := make([]ir.Argument, len(args))
 	for i, arg := range args {
-		v, d := c.expression(arg.Value, element)
+		itemType := element
+		prior, matcherElement := element.(types.Matcher)
+		inferMatcherRead := matcherElement && !contextual
+		if inferMatcherRead {
+			itemType = nil
+		}
+		v, d := c.expression(arg.Value, itemType)
 		if d != nil {
 			return expression{}, d
 		}
 		if element == nil {
 			element = v.Type()
+		} else if inferMatcherRead {
+			v, d = c.unwrap(v)
+			if d != nil {
+				return expression{}, d
+			}
+			actual, ok := v.Type().(types.Matcher)
+			if !ok || prior.Kind() != actual.Kind() || !types.Equal(prior.Input(), actual.Input()) || !types.Equal(prior.Output(), actual.Output()) {
+				return expression{}, diagnostic.Mismatch(element.String(), v.Type().String(), v.Span())
+			}
+			element = must(types.NewMatcher(prior.Kind(), prior.Input(), prior.Output(), prior.Reads() || actual.Reads()))
 		}
 		values[i] = v
-		nodes[i] = must(ir.ValueArg(i, v.node))
 	}
 	if element == nil {
 		return expression{}, problem(diagnostic.MissingType, "empty List.new requires an expected List type", span)
+	}
+	for index, value := range values {
+		coerced, failure := c.coerce(value, element)
+		if failure != nil {
+			return expression{}, failure
+		}
+		values[index] = coerced
+		nodes[index] = must(ir.ValueArg(index, coerced.node))
 	}
 	return builtinResult(op, must(types.NewList(element)), nodes, nil, span, values...), nil
 }

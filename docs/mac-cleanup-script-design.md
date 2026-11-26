@@ -76,7 +76,7 @@ Those rules remain visible Lo code.
 
 The source reuses `Host.Invocation.current`, Process context operations, executable discovery, command construction, and typed termination results.
 It also reuses immutable File entries, `File.Remove.checked`, `Flow.fold`, pure List processors, records, maps, and scalar comparisons.
-UTF-8 conversion uses existing `UTF8.Bytes.new` and `UTF8.String.new`.
+`Bytes.new` encodes UTF-8 and `String.FromBytes.new` decodes it.
 The [CLI contract](cli-runtime-design.md) defines implemented Console, terminal, and declared option operations.
 The [executable CLI example](examples/cli-cleanup-preview.lo) verifies those operations without cleanup effects.
 The application does not require another Process namespace or a command for each named tool.
@@ -145,7 +145,7 @@ These flows use current processors without additional builtins.
 
 | Application helper | Current composition |
 | --- | --- |
-| `All`, `Any`, `Not` | `Match.new` and `List.fold`. |
+| `All`, `Any`, `Not` | `Match.apply` and `List.fold`. |
 | `ConcatStrings`, `ConcatPaths`, `ConcatInts`, `ConcatGlobs`, `ConcatTasks`, `ConcatStorageRows` | `List.flat_map` over two typed lists. |
 | `PathMember`, `StringMember`, `ScalarMember`, `IntMember`, `UniquePaths` | Typed predicates and ordered folds. Path comparison uses `File.Path.eq`. |
 | `StringsEqual`, `TreeRowsEqual` | Equal-length selection and indexed comparisons. |
@@ -178,14 +178,14 @@ Filename digits remain an application predicate over Scalars.
 
 ### Selected Effects
 
-The application uses the implemented `Match.new`, `List.filter`, and `Flow.fold` operations for conditional activation.
-`Match.new` evaluates only its selected branch.
+The application uses the implemented `Match.apply`, `List.filter`, and `Flow.fold` operations for conditional activation.
+`Match.apply` invokes only the selected handler.
 Its selector and branches can read host state, but they cannot activate commits.
 A bound result can supply the selector after an earlier flow completes its commits.
 A direct committing call in the selector remains invalid.
 
 Each selection first binds its selector once.
-A Match expression then produces one integer branch identifier.
+A matcher application then produces one integer branch identifier.
 Each branch filters a list with one item for its own identifier and passes the result to `Flow.fold`.
 The matching callback runs once.
 Other callbacks receive empty input lists and do not run.

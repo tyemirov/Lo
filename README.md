@@ -211,7 +211,8 @@ Lo has a small core:
 ```text
 .new(...)       constructs values and adapters
 |>              threads values through processors and flows
-Match.new(...)  branches as an expression
+Match.new(...)  constructs reusable matching rules
+Match.apply(...)  applies matching rules to a value
 T!              represents fallible output
 Error           represents recoverable failure
 commit          activates side effects
@@ -239,62 +240,102 @@ The core stays small for AI generation, verification, and inspection.
 
 ## Choosing Between Scenarios
 
-Use `Match.new` when you would reach for `if` / `else` in another language. The first argument is the value to match, called the selector. Each case has a test on the left of `:` and a result on the right. Lo checks cases from top to bottom and evaluates only the result of the first match. Put the required `_` case last to cover everything else. The branch results must have a common type.
+Build a matcher with `Match.new`, then pass data to it through `Match.apply`. The matcher stores ordered predicates and handlers. Construction calls zero predicates or handlers. Each application tests the predicates in order and calls only the first matching handler, or the required default handler.
 
-### Choose Between Two Outcomes
+### Build A Matcher And Pass It Data
 
-Use a Boolean selector for a yes-or-no decision. This example returns `"eligible"` because `20` is at least `18`. Set `age` to `17` to get `"too young"`.
-
-```lo
-age = 20
-return Match.new(Math.gte(age, 18),
-    true: "eligible",
-    _: "too young"
-)
-```
-
-### Choose By Exact Value
-
-List each recognized value as a case. This example returns `"export report"`. Set `mode` to `"preview"` to get `"show preview"`, or to `"print"` to get `"unknown mode"`.
+This matcher chooses a delivery plan for a message. Its predicate and handlers receive the complete request record.
 
 ```lo
-mode = "export"
-return Match.new(mode,
-    "preview": "show preview",
-    "export": "export report",
-    _: "unknown mode"
+flow WantsFile(request: Record{destination: String, message: String}) -> Bool {
+    return String.eq(request.destination, "file")
+}
+
+flow PlanFile(request: Record{destination: String, message: String}) -> Record{action: String, body: Bytes} {
+    return Record.new(action: "write-file", body: Bytes.new(request.message))
+}
+
+flow PlanConsole(request: Record{destination: String, message: String}) -> Record{action: String, body: Bytes} {
+    return Record.new(action: "print", body: Bytes.new(String.concat(request.message, "\n")))
+}
+
+delivery = Match.new(
+    cases: List.new(Match.Case.new(WantsFile, PlanFile)),
+    default: PlanConsole
 )
+
+request = Record.new(destination: "console", message: "Hello from Lo")
+return request |> Match.apply(delivery)
 ```
+
+The result is a plan with `action` equal to `"print"`. `Match.apply` calls `PlanConsole` for this request. Set `destination` to `"file"` to call `PlanFile`. Reuse `delivery` for later requests, or return it from a flow with type `Match<Record{destination: String, message: String}, Record{action: String, body: Bytes}>`.
+
+A predicate is a pure flow that returns a plain Bool. All handlers take the same request type and share one result type, which can be fallible. A handler can read host state or construct a target for a later `commit`.
 
 ### Choose By Range Or Condition
 
-A case can match a range or use `when` with a named flow. Lo passes the selector to that flow and selects the case if it returns `true`. The flow must be pure, take one argument of the selector's type, and return a plain `Bool`.
+A predicate can test an exact value, an interval, or any other pure condition. This matcher checks the distinction range before the passing score.
 
 ```lo
-flow IsPassing(score: Int) -> Bool {
-    return Math.gte(score, 60)
+flow InDistinctionRange(score: Int) -> Bool {
+    return Range.contains(Range.new(90, 100, true, true), score)
 }
 
-score = 95
-return Match.new(score,
-    Range.new(90, 100, true, true): "distinction",
-    when IsPassing: "pass",
-    _: "try again"
+flow IsPassing(score: Int) -> Bool { return Math.gte(score, 60) }
+flow Distinction(score: Int) -> String { return "distinction" }
+flow Pass(score: Int) -> String { return "pass" }
+flow TryAgain(score: Int) -> String { return "try again" }
+
+grades = Match.new(
+    cases: List.new(
+        Match.Case.new(InDistinctionRange, Distinction),
+        Match.Case.new(IsPassing, Pass)
+    ),
+    default: TryAgain
 )
+return 95 |> Match.apply(grades)
 ```
 
-The range includes both endpoints. A score of `95` meets both tests and returns `"distinction"` because the range comes first. A score of `75` returns `"pass"`, and `50` returns `"try again"`.
+A score of `95` meets both predicates, so the first case returns `"distinction"`. A score of `75` returns `"pass"`. A score of `50` reaches the default.
+
+### Read A File Only When Requested
+
+The default handler returns empty bytes. The file handler makes a host read only when the request selects it.
+
+```lo
+flow WantsMessage(load: Bool) -> Bool { return load }
+
+flow ReadMessage(load: Bool) -> Bytes! {
+    return File.read(File.Path.new("_scratch/match-output/message.txt"))
+}
+
+flow EmptyMessage(load: Bool) -> Bytes! { return Bytes.new("") }
+
+flow MessageMatcher() -> Match<Bool, Bytes!, Read> {
+    return Match.new(
+        cases: List.new(Match.Case.new(WantsMessage, ReadMessage)),
+        default: EmptyMessage
+    )
+}
+
+return false |> Match.apply(MessageMatcher())
+```
+
+With `false`, the program returns empty bytes with no file grant. Set the request to `true` and supply a read grant for the file directory to read the message. The `Read` qualifier records the possible host read. The compiler counts that effect at `Match.apply`, when the selected handler can run.
 
 ### Call A Different Flow In Each Branch
 
-Put a flow call on the right side of each case. Lo calls only the flow in the matching branch. All three flows return `Console.Line!`, which means they can produce a line to write or report an error. The `commit` after `Match.new` writes the selected line.
+The matcher chooses a console line for the requested mode. The calling flow commits the line.
 
 ```lo
-flow ShowHelp() -> Console.Line! {
+flow IsHelp(mode: String) -> Bool { return String.eq(mode, "help") }
+flow IsVersion(mode: String) -> Bool { return String.eq(mode, "version") }
+
+flow ShowHelp(mode: String) -> Console.Line! {
     return Console.Line.new("stdout", "Available modes: help, version", true)
 }
 
-flow ShowVersion() -> Console.Line! {
+flow ShowVersion(mode: String) -> Console.Line! {
     return Console.Line.new("stdout", "Example version 1.0", true)
 }
 
@@ -303,11 +344,11 @@ flow ReportUnknownMode(mode: String) -> Console.Line! {
 }
 
 flow Run(mode: String) -> Program.Exit! {
-    action = Match.new(mode,
-        "help": ShowHelp(),
-        "version": ShowVersion(),
-        _: ReportUnknownMode(mode)
+    commands = Match.new(
+        cases: List.new(Match.Case.new(IsHelp, ShowHelp), Match.Case.new(IsVersion, ShowVersion)),
+        default: ReportUnknownMode
     )
+    action = mode |> Match.apply(commands)
     commit action
     return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
 }
@@ -315,39 +356,46 @@ flow Run(mode: String) -> Program.Exit! {
 return Run("help")
 ```
 
-`Run("help")` prints the available modes to standard output. Try `Run("version")` to print the version, or `Run("print")` to write `Unknown mode: print` to standard error.
+`Run("help")` prints the available modes. Try `Run("version")` for the version or `Run("print")` for the error message.
 
 ### Choose Between A File Write And Console Output
 
-Use `Match.new` to choose where the message goes. Both branches return a record with the messages to save and the bytes to print. The file branch selects one message to save and leaves standard output empty. The console branch selects no messages to save and supplies the message as standard output.
+The matcher returns one delivery plan. The file handler puts a write target in the plan. The console handler supplies the bytes for standard output.
 
 ```lo
-flow ChooseDelivery(save_to_file: Bool, message: String) -> Record{messages_to_save: List<String>, stdout: Bytes} {
-    return Match.new(save_to_file,
-        true: Record.new(messages_to_save: List.new(message), stdout: Bytes.new("")),
-        _: Record.new(messages_to_save: List.new(), stdout: UTF8.Bytes.new(String.concat(message, "\n")))
-    )
+flow WantsFile(request: Record{save: Bool, message: String}) -> Bool { return request.save }
+
+flow PlanFile(request: Record{save: Bool, message: String}) -> Record{writes: List<File.Write>, stdout: Bytes} {
+    path = File.Path.new("_scratch/match-output/message.txt")
+    target = File.Write.new(path, Bytes.new(request.message))
+    return Record.new(writes: List.new(target), stdout: Bytes.new(""))
 }
 
-flow WriteMessage(count: Int, message: String) -> Int! {
-    path = File.Path.new("_scratch/match-output/message.txt")
-    action = File.Write.new(path, UTF8.Bytes.new(message))
-    commit action
+flow PlanConsole(request: Record{save: Bool, message: String}) -> Record{writes: List<File.Write>, stdout: Bytes} {
+    return Record.new(writes: List.new(), stdout: Bytes.new(String.concat(request.message, "\n")))
+}
+
+flow WriteMessage(count: Int, target: File.Write) -> Int! {
+    commit target
     return Math.add(count, 1)
 }
 
-flow Deliver(save_to_file: Bool, message: String) -> Program.Exit! {
-    delivery = ChooseDelivery(save_to_file, message)
-    written = Flow.fold(delivery.messages_to_save, 0, WriteMessage)
+flow Deliver(save: Bool, message: String) -> Program.Exit! {
+    choices = Match.new(
+        cases: List.new(Match.Case.new(WantsFile, PlanFile)),
+        default: PlanConsole
+    )
+    delivery = Record.new(save: save, message: message) |> Match.apply(choices)
+    written = Flow.fold(delivery.writes, 0, WriteMessage)
     return Program.Exit.new(0, delivery.stdout, Bytes.new(""))
 }
 
 return Deliver(false, "Hello from Lo")
 ```
 
-`Flow.fold` calls `WriteMessage` once when the list has a message and skips it when the list is empty. This keeps the file `commit` outside `Match.new`. The program writes the selected standard output when it exits.
+`Flow.fold` commits a write target when the plan contains one. The program publishes the selected standard output when it exits.
 
-[Build and run the example](#build-and-run-the-examples) with `false` to print `Hello from Lo`. To create or replace `_scratch/match-output/message.txt` with that text, change `false` to `true`, rebuild, and run with a write grant scoped to the example directory.
+Build and run with `false` to print `Hello from Lo`. To write `_scratch/match-output/message.txt`, change `false` to `true`, rebuild, and grant writes to the example directory. [Build and run the example](#build-and-run-the-examples)
 
 ```bash
 mkdir -p _scratch/match-output
@@ -373,24 +421,30 @@ See the [Match rules](specification.md#11-match) for the full contract and the [
 flow Calculate(request: HTTP.Request) -> HTTP.Response! {
     denominator = Int.new(0)
     result_value = Int.new(10) |> Math.div(denominator)
-
     return HTTP.Response.Text.new(
         status: Int.new(200),
         body: result_value |> Int.to_string()
     )
 }
 
+flow IsDivideByZero(error: Error) -> Bool {
+    return String.eq(error.kind, "Math.DivideByZero")
+}
+
+flow BadDivisionRequest(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 400, body: "division by zero")
+}
+
+flow InternalError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 500, body: "internal error")
+}
+
 flow CalculatorHttpError(error: Error) -> HTTP.Response {
-    return Match.new(error.kind,
-        String.new("Math.DivideByZero"): HTTP.Response.Text.new(
-            status: Int.new(400),
-            body: String.new("division by zero")
-        ),
-        _: HTTP.Response.Text.new(
-            status: Int.new(500),
-            body: String.new("internal error")
-        )
+    responses = Match.new(
+        cases: List.new(Match.Case.new(IsDivideByZero, BadDivisionRequest)),
+        default: InternalError
     )
+    return error |> Match.apply(responses)
 }
 
 server = HTTP.Server.new(
@@ -425,7 +479,7 @@ flow CountFallback(error: Error) -> Int {
 flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
     file_text = file_path
         |> File.read()
-        |> UTF8.String.new()
+        |> String.FromBytes.new()
 
     match_count = file_text
         |> List.filter(IsMatchingScalar)
@@ -438,7 +492,7 @@ flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
 This example demonstrates:
 
 - file reads are fallible
-- UTF-8 decoding is fallible
+- `String.FromBytes.new` decodes UTF-8 and returns `UTF8.InvalidBytes` on malformed input
 - fallible values bubble automatically inside a self-handling flow
 - the handler converts failure into a total `Int`
 - list processing uses a named pure flow
@@ -447,32 +501,36 @@ This example demonstrates:
 ## Example: Explicit Side Effects
 
 ```lo
-flow StatusError(error: Error) -> HTTP.Response {
-    return HTTP.Response.Text.new(
-        status: Int.new(500),
-        body: String.new("status handling failed")
-    )
+flow IsSuccess(status: Int) -> Bool {
+    return Math.eq(status, 200)
+}
+
+flow SuccessLog(status: Int) -> File.Path {
+    return File.Path.new("/logs/success.log")
+}
+
+flow ErrorLog(status: Int) -> File.Path {
+    return File.Path.new("/logs/error.log")
 }
 
 flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onError StatusError {
-    success_log = File.Path.new(String.new("/logs/success.log"))
-    error_log = File.Path.new(String.new("/logs/error.log"))
-
-    target_action = Match.new(status_code,
-        Int.new(200): File.Append.new(success_log, UTF8.Bytes.new(request_data)),
-        _: File.Append.new(error_log, UTF8.Bytes.new(request_data))
+    destinations = Match.new(
+        cases: List.new(Match.Case.new(IsSuccess, SuccessLog)),
+        default: ErrorLog
     )
-
+    path = status_code |> Match.apply(destinations)
+    target_action = File.Append.new(path, Bytes.new(request_data))
     commit target_action
 
-    return HTTP.Response.Text.new(
-        status: status_code,
-        body: String.new("Status processed")
-    )
+    return HTTP.Response.Text.new(status: status_code, body: "Status processed")
+}
+
+flow StatusError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 500, body: "status handling failed")
 }
 ```
 
-Each branch constructs an inert `File.Append` target.
+The matcher chooses the log path. The flow constructs an inert `File.Append` target for that path.
 The commit statement writes its Bytes payload.
 `receipt = commit target_action` also binds the `File.AppendReceipt` after activation success.
 
@@ -654,12 +712,12 @@ Initial support:
 - `Bool`
 - `List`
 - `Record`
-- `Match.new`
+- `Match.Case.new`, `Match.new`, and `Match.apply`
 - `Math`
 - `List.filter`
 - `List.map`
 - `File.read`
-- `UTF8.String.new`
+- `String.FromBytes.new`
 - `Error`
 - `T!` bubbling
 - self-handling flows
@@ -682,7 +740,7 @@ Initial support:
 - `File.Remove` and `File.Remove.new`
 - `File.WriteReceipt`, `File.AppendReceipt`, and `File.RemoveReceipt`
 - `HTTP.ServerReceipt`
-- `UTF8.Bytes.new`
+- `Bytes.new`
 - `commit`
 - `HTTP.Server.new`
 - `HTTP.Request`
@@ -751,8 +809,8 @@ The [File adapter](specification.md#91-file-adapter) supports directory observat
 
 List callbacks cannot include host observations or commits, including transitive calls.
 `Flow.fold` can include both under ordinary flow fallibility rules.
-Match selectors and selected branches can include observations, while case heads and predicates must be pure.
-No Match position can activate a commit.
+Matcher predicates are pure. A selected handler can read host state, and `Match.apply` carries that effect.
+Activate a returned target with `commit` in the calling flow.
 Self-handlers and adapter `onError` flows must be pure and total.
 Device requirements have a separate summary.
 

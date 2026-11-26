@@ -898,6 +898,27 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "Match.Case.new",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_and_callback"
+    },
+    {
+      "operation": "Match.apply",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_and_callback"
+    },
+    {
+      "operation": "Match.new",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_and_callback"
+    },
+    {
       "operation": "Math.add",
       "capability": "",
       "errors": [],
@@ -1353,6 +1374,15 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "String.FromBytes.new",
+      "capability": "",
+      "errors": [
+        "UTF8.InvalidBytes"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "String.FromScalars.new",
       "capability": "",
       "errors": [],
@@ -1782,22 +1812,6 @@
       "capability": "",
       "errors": [
         "Tensor.HostObservationRequired"
-      ],
-      "activation_errors": [],
-      "negative_applicability": "catalog_failure_or_activation"
-    },
-    {
-      "operation": "UTF8.Bytes.new",
-      "capability": "",
-      "errors": [],
-      "activation_errors": [],
-      "negative_applicability": "verifier_only_typed_total"
-    },
-    {
-      "operation": "UTF8.String.new",
-      "capability": "",
-      "errors": [
-        "UTF8.InvalidBytes"
       ],
       "activation_errors": [],
       "negative_applicability": "catalog_failure_or_activation"
@@ -7129,6 +7143,48 @@
       ]
     },
     {
+      "id": "operation:String.FromBytes.new:positive",
+      "operation": "String.FromBytes.new",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/String.FromBytes.new"
+      ]
+    },
+    {
+      "id": "operation:String.FromBytes.new:negative",
+      "operation": "String.FromBytes.new",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.FromBytes.new"
+      ]
+    },
+    {
+      "id": "operation:String.FromBytes.new:runtime-negative",
+      "operation": "String.FromBytes.new",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/invalid-utf8"
+      ]
+    },
+    {
       "id": "operation:String.FromScalars.new:positive",
       "operation": "String.FromScalars.new",
       "axis": "positive",
@@ -8547,76 +8603,6 @@
       ]
     },
     {
-      "id": "operation:UTF8.Bytes.new:positive",
-      "operation": "UTF8.Bytes.new",
-      "axis": "positive",
-      "boundary": "program-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "software",
-      "tests": [
-        "TestRunBuiltinCatalog/UTF8.Bytes.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.Bytes.new:negative",
-      "operation": "UTF8.Bytes.new",
-      "axis": "negative",
-      "boundary": "compiler-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "frontend",
-      "tests": [
-        "TestSemanticBuiltinRejections/UTF8.Bytes.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.String.new:positive",
-      "operation": "UTF8.String.new",
-      "axis": "positive",
-      "boundary": "program-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "software",
-      "tests": [
-        "TestRunBuiltinCatalog/UTF8.String.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.String.new:negative",
-      "operation": "UTF8.String.new",
-      "axis": "negative",
-      "boundary": "compiler-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "frontend",
-      "tests": [
-        "TestSemanticBuiltinRejections/UTF8.String.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.String.new:runtime-negative",
-      "operation": "UTF8.String.new",
-      "axis": "runtime-negative",
-      "boundary": "program-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "software",
-      "tests": [
-        "TestRunRecoverableErrors"
-      ]
-    },
-    {
       "id": "cli:parse",
       "operation": "",
       "axis": "contract",
@@ -9459,7 +9445,9 @@
       ],
       "profile": "software",
       "tests": [
-        "TestSemanticNativeRepeatedFrames"
+        "TestSemanticNativeRepeatedFrames",
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
       ]
     },
     {
@@ -9518,7 +9506,9 @@
       "profile": "software",
       "tests": [
         "TestParametersStopAndIdentity",
-        "TestSemanticNativeRepeatedFrames"
+        "TestSemanticNativeRepeatedFrames",
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
       ]
     },
     {
@@ -13598,6 +13588,108 @@
         "TestF031CompilerContracts",
         "TestF031FormattingArgumentBinding",
         "TestF031InspectionPureFailures"
+      ]
+    },
+    {
+      "id": "operation:Match.Case.new:positive",
+      "operation": "Match.Case.new",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
+      ]
+    },
+    {
+      "id": "operation:Match.Case.new:negative",
+      "operation": "Match.Case.new",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestMatcherChecksEveryCallback"
+      ]
+    },
+    {
+      "id": "operation:Match.apply:positive",
+      "operation": "Match.apply",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues",
+        "TestMatcherSelectedHostReads"
+      ]
+    },
+    {
+      "id": "operation:Match.apply:negative",
+      "operation": "Match.apply",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestMatcherChecksEveryCallback"
+      ]
+    },
+    {
+      "id": "operation:Match.new:positive",
+      "operation": "Match.new",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
+      ]
+    },
+    {
+      "id": "operation:Match.new:negative",
+      "operation": "Match.new",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestMatcherChecksEveryCallback"
+      ]
+    },
+    {
+      "id": "operation:Match.apply:runtime-negative",
+      "operation": "Match.apply",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherReusableValues/selected_handler_failure"
       ]
     }
   ],
