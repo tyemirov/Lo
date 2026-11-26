@@ -12,9 +12,39 @@ flow AppendText(path: File.Path, count: Int, content: String) -> Int! {
 flow ProcessFile(input_path: File.Path, log_path: File.Path, empty_path: File.Path) -> Int! {
     file_bytes = File.read(input_path)
     file_text = UTF8.String.new(file_bytes)
-    empty = Match.new(String.length(file_text), 0: List.new("empty input"), _: EmptyTexts())
-    nonempty = Match.new(String.length(file_text), 0: EmptyTexts(), _: List.new(file_text))
+    empty = String.length(file_text) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProcessFileEmptyChoiceTest1, ProcessFileEmptyChoiceResult1)),
+        default: ProcessFileEmptyChoiceDefault
+    ))
+    nonempty = Record.new(selector: String.length(file_text), file_text: file_text) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProcessFileNonemptyChoiceTest1, ProcessFileNonemptyChoiceResult1)),
+        default: ProcessFileNonemptyChoiceDefault
+    ))
     count = Flow.fold(empty, 0, empty_path, WriteEmpty)
+    flow ProcessFileEmptyChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow ProcessFileEmptyChoiceResult1(value: Int) -> List<String> {
+        return List.new("empty input")
+    }
+
+    flow ProcessFileEmptyChoiceDefault(value: Int) -> List<String> {
+        return EmptyTexts()
+    }
+
+    flow ProcessFileNonemptyChoiceTest1(request: Record{file_text: String, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow ProcessFileNonemptyChoiceResult1(request: Record{file_text: String, selector: Int}) -> List<String> {
+        return EmptyTexts()
+    }
+
+    flow ProcessFileNonemptyChoiceDefault(request: Record{file_text: String, selector: Int}) -> List<String> {
+        return List.new(request.file_text)
+    }
+
     return Flow.fold(nonempty, count, log_path, AppendText)
 }
 return ProcessFile(

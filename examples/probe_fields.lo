@@ -1,9 +1,39 @@
 flow ProbeRequire(condition: Bool, reason: String) -> Bool! {
-    return Match.new(condition, true: true, _: Error.new("Probe.InvalidFields", reason, Record.new()))
+    flow ProbeRequireChoiceTest1(request: Record{reason: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ProbeRequireChoiceResult1(request: Record{reason: String, selector: Bool}) -> Bool! {
+        return true
+    }
+
+    flow ProbeRequireChoiceDefault(request: Record{reason: String, selector: Bool}) -> Bool! {
+        return Error.new("Probe.InvalidFields", request.reason, Record.new())
+    }
+
+    return Record.new(selector: condition, reason: reason) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbeRequireChoiceTest1, ProbeRequireChoiceResult1)),
+        default: ProbeRequireChoiceDefault
+    ))
 }
 
 flow ProbeAnd(previous: Bool, value: Bool) -> Bool {
-    return Match.new(previous, true: value, _: false)
+    flow ProbeAndChoiceTest1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ProbeAndChoiceResult1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.value
+    }
+
+    flow ProbeAndChoiceDefault(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: previous, value: value) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbeAndChoiceTest1, ProbeAndChoiceResult1)),
+        default: ProbeAndChoiceDefault
+    ))
 }
 
 flow ProbeDigit(character: Scalar) -> Bool {
@@ -19,7 +49,22 @@ flow ConcatPaths(left: List<File.Path>, right: List<File.Path>) -> List<File.Pat
 }
 
 flow PathMemberStep(path: File.Path, found: Bool, candidate: File.Path) -> Bool {
-    return Match.new(found, true: true, _: File.Path.eq(path, candidate))
+    flow PathMemberStepChoiceTest1(request: Record{candidate: File.Path, path: File.Path, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow PathMemberStepChoiceResult1(request: Record{candidate: File.Path, path: File.Path, selector: Bool}) -> Bool {
+        return true
+    }
+
+    flow PathMemberStepChoiceDefault(request: Record{candidate: File.Path, path: File.Path, selector: Bool}) -> Bool {
+        return File.Path.eq(request.path, request.candidate)
+    }
+
+    return Record.new(selector: found, candidate: candidate, path: path) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PathMemberStepChoiceTest1, PathMemberStepChoiceResult1)),
+        default: PathMemberStepChoiceDefault
+    ))
 }
 
 flow PathMember(paths: List<File.Path>, path: File.Path) -> Bool {
@@ -27,7 +72,22 @@ flow PathMember(paths: List<File.Path>, path: File.Path) -> Bool {
 }
 
 flow UniquePathStep(paths: List<File.Path>, path: File.Path) -> List<File.Path> {
-    return Match.new(PathMember(paths, path), true: paths, _: ConcatPaths(paths, List.new(path)))
+    flow UniquePathStepChoiceTest1(request: Record{path: File.Path, paths: List<File.Path>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow UniquePathStepChoiceResult1(request: Record{path: File.Path, paths: List<File.Path>, selector: Bool}) -> List<File.Path> {
+        return request.paths
+    }
+
+    flow UniquePathStepChoiceDefault(request: Record{path: File.Path, paths: List<File.Path>, selector: Bool}) -> List<File.Path> {
+        return ConcatPaths(request.paths, List.new(request.path))
+    }
+
+    return Record.new(selector: PathMember(paths, path), path: path, paths: paths) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(UniquePathStepChoiceTest1, UniquePathStepChoiceResult1)),
+        default: UniquePathStepChoiceDefault
+    ))
 }
 
 flow UniquePaths(paths: List<File.Path>) -> List<File.Path> {
@@ -35,11 +95,41 @@ flow UniquePaths(paths: List<File.Path>) -> List<File.Path> {
 }
 
 flow ProbeNonemptyName(name: String) -> Bool! {
-    return Match.new(Math.gt(String.length(name), 0), true: true, _: Error.new("Probe.EmptyName", "empty probe name", Record.new()))
+    flow ProbeNonemptyNameChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow ProbeNonemptyNameChoiceResult1(value: Bool) -> Bool! {
+        return true
+    }
+
+    flow ProbeNonemptyNameChoiceDefault(value: Bool) -> Bool! {
+        return Error.new("Probe.EmptyName", "empty probe name", Record.new())
+    }
+
+    return Math.gt(String.length(name), 0) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbeNonemptyNameChoiceTest1, ProbeNonemptyNameChoiceResult1)),
+        default: ProbeNonemptyNameChoiceDefault
+    ))
 }
 
 flow ProbeKnownPath(batch: List<File.Path>, path: File.Path) -> Bool! {
-    return Match.new(PathMember(batch, path), true: true, _: Error.new("Probe.UnexpectedPath", "probe name outside candidate batch", Record.new()))
+    flow ProbeKnownPathChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow ProbeKnownPathChoiceResult1(value: Bool) -> Bool! {
+        return true
+    }
+
+    flow ProbeKnownPathChoiceDefault(value: Bool) -> Bool! {
+        return Error.new("Probe.UnexpectedPath", "probe name outside candidate batch", Record.new())
+    }
+
+    return PathMember(batch, path) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbeKnownPathChoiceTest1, ProbeKnownPathChoiceResult1)),
+        default: ProbeKnownPathChoiceDefault
+    ))
 }
 
 flow ProbeName(batch: List<File.Path>, names: List<File.Path>, field: Bytes) -> List<File.Path>! {
@@ -60,9 +150,37 @@ flow ProbeProcess(names: List<File.Path>, field: Bytes) -> List<File.Path>! {
 flow ProbeField(batch: List<File.Path>, names: List<File.Path>, raw: Bytes) -> List<File.Path>! {
     field = Bytes.trim_start(raw, Bytes.new("\n"))
     nonempty = ProbeRequire(Math.gt(Bytes.length(field), 0), "empty probe field")
-    return Match.new(Bytes.starts_with(field, Bytes.new("n")),
-        true: ProbeName(batch, names, field),
-        _: Match.new(Bytes.starts_with(field, Bytes.new("p")), true: ProbeProcess(names, field), _: Error.new("Probe.InvalidFields", "unknown probe field", Record.new())))
+    flow ProbeFieldChoiceTest1(request: Record{batch: List<File.Path>, field: Bytes, names: List<File.Path>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ProbeFieldChoiceResult1(request: Record{batch: List<File.Path>, field: Bytes, names: List<File.Path>, selector: Bool}) -> List<File.Path>! {
+        return ProbeName(request.batch, request.names, request.field)
+    }
+
+    flow ProbeFieldChoice2Test1(request: Record{field: Bytes, names: List<File.Path>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ProbeFieldChoice2Result1(request: Record{field: Bytes, names: List<File.Path>, selector: Bool}) -> List<File.Path>! {
+        return ProbeProcess(request.names, request.field)
+    }
+
+    flow ProbeFieldChoice2Default(request: Record{field: Bytes, names: List<File.Path>, selector: Bool}) -> List<File.Path>! {
+        return Error.new("Probe.InvalidFields", "unknown probe field", Record.new())
+    }
+
+    flow ProbeFieldChoiceDefault(request: Record{batch: List<File.Path>, field: Bytes, names: List<File.Path>, selector: Bool}) -> List<File.Path>! {
+        return Record.new(selector: Bytes.starts_with(request.field, Bytes.new("p")), field: request.field, names: request.names) |> Match.apply(Match.new(
+            cases: List.new(Match.Case.new(ProbeFieldChoice2Test1, ProbeFieldChoice2Result1)),
+            default: ProbeFieldChoice2Default
+        ))
+    }
+
+    return Record.new(selector: Bytes.starts_with(field, Bytes.new("n")), batch: batch, field: field, names: names) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbeFieldChoiceTest1, ProbeFieldChoiceResult1)),
+        default: ProbeFieldChoiceDefault
+    ))
 }
 
 flow ParseNonemptyProbe(input: Bytes, batch: List<File.Path>) -> List<File.Path>! {
@@ -75,17 +193,62 @@ flow ParseNonemptyProbe(input: Bytes, batch: List<File.Path>) -> List<File.Path>
 }
 
 flow ParseProbe(input: Bytes, batch: List<File.Path>) -> List<File.Path>! {
-    return Match.new(Bytes.length(input), 0: List.new(), _: ParseNonemptyProbe(input, batch))
+    flow ParseProbeChoiceTest1(request: Record{batch: List<File.Path>, input: Bytes, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow ParseProbeChoiceResult1(request: Record{batch: List<File.Path>, input: Bytes, selector: Int}) -> List<File.Path>! {
+        return List.new()
+    }
+
+    flow ParseProbeChoiceDefault(request: Record{batch: List<File.Path>, input: Bytes, selector: Int}) -> List<File.Path>! {
+        return ParseNonemptyProbe(request.input, request.batch)
+    }
+
+    return Record.new(selector: Bytes.length(input), batch: batch, input: input) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ParseProbeChoiceTest1, ParseProbeChoiceResult1)),
+        default: ParseProbeChoiceDefault
+    ))
 }
 
 flow PathChunk(paths: List<File.Path>, size: Int, start: Int) -> Record{next_state: Int, value: List<File.Path>}! {
     proposed = Math.add(start, size)
-    end = Match.new(Math.gt(proposed, List.length(paths)), true: List.length(paths), _: proposed)
+    end = Record.new(selector: Math.gt(proposed, List.length(paths)), paths: paths, proposed: proposed) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PathChunkEndChoiceTest1, PathChunkEndChoiceResult1)),
+        default: PathChunkEndChoiceDefault
+    ))
+    flow PathChunkEndChoiceTest1(request: Record{paths: List<File.Path>, proposed: Int, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow PathChunkEndChoiceResult1(request: Record{paths: List<File.Path>, proposed: Int, selector: Bool}) -> Int {
+        return List.length(request.paths)
+    }
+
+    flow PathChunkEndChoiceDefault(request: Record{paths: List<File.Path>, proposed: Int, selector: Bool}) -> Int {
+        return request.proposed
+    }
+
     return Record.new(next_state: end, value: List.slice(paths, start, end))
 }
 
 flow PositiveBatchSize(size: Int) -> Bool! {
-    return Match.new(Math.gt(size, 0), true: true, _: Error.new("Probe.InvalidBatchSize", "batch size must be positive", Record.new()))
+    flow PositiveBatchSizeChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow PositiveBatchSizeChoiceResult1(value: Bool) -> Bool! {
+        return true
+    }
+
+    flow PositiveBatchSizeChoiceDefault(value: Bool) -> Bool! {
+        return Error.new("Probe.InvalidBatchSize", "batch size must be positive", Record.new())
+    }
+
+    return Math.gt(size, 0) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PositiveBatchSizeChoiceTest1, PositiveBatchSizeChoiceResult1)),
+        default: PositiveBatchSizeChoiceDefault
+    ))
 }
 
 flow PathChunks(paths: List<File.Path>, size: Int) -> List<List<File.Path>>! {
@@ -104,11 +267,41 @@ flow EqualLengthPaths(left: List<File.Path>, right: List<File.Path>) -> Bool! {
 }
 
 flow PathsEqual(left: List<File.Path>, right: List<File.Path>) -> Bool! {
-    return Match.new(Math.eq(List.length(left), List.length(right)), true: EqualLengthPaths(left, right), _: false)
+    flow PathsEqualChoiceTest1(request: Record{left: List<File.Path>, right: List<File.Path>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow PathsEqualChoiceResult1(request: Record{left: List<File.Path>, right: List<File.Path>, selector: Bool}) -> Bool! {
+        return EqualLengthPaths(request.left, request.right)
+    }
+
+    flow PathsEqualChoiceDefault(request: Record{left: List<File.Path>, right: List<File.Path>, selector: Bool}) -> Bool! {
+        return false
+    }
+
+    return Record.new(selector: Math.eq(List.length(left), List.length(right)), left: left, right: right) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PathsEqualChoiceTest1, PathsEqualChoiceResult1)),
+        default: PathsEqualChoiceDefault
+    ))
 }
 
 flow JoinPathStep(separator: String, state: Record{first: Bool, text: String}, path: File.Path) -> Record{first: Bool, text: String} {
-    boundary = Match.new(state.first, true: "", _: separator)
+    boundary = Record.new(selector: state.first, separator: separator) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(JoinPathStepBoundaryChoiceTest1, JoinPathStepBoundaryChoiceResult1)),
+        default: JoinPathStepBoundaryChoiceDefault
+    ))
+    flow JoinPathStepBoundaryChoiceTest1(request: Record{selector: Bool, separator: String}) -> Bool {
+        return request.selector
+    }
+
+    flow JoinPathStepBoundaryChoiceResult1(request: Record{selector: Bool, separator: String}) -> String {
+        return ""
+    }
+
+    flow JoinPathStepBoundaryChoiceDefault(request: Record{selector: Bool, separator: String}) -> String {
+        return request.separator
+    }
+
     return Record.new(first: false, text: String.concat(state.text, boundary, File.Path.to_string(path)))
 }
 

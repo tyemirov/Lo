@@ -6,21 +6,31 @@ flow Calculate(request: HTTP.Request) -> HTTP.Response! {
         body: result_value |> Int.to_string()
     )
 }
-flow CalculatorHttpError(error: Error) -> HTTP.Response {
-    return Match.new(error.kind,
-        String.new("Math.DivideByZero"): HTTP.Response.Text.new(
-            status: Int.new(400),
-            body: String.new("division by zero")
-        ),
-        _: HTTP.Response.Text.new(
-            status: Int.new(500),
-            body: String.new("internal error")
-        )
-    )
+
+flow IsDivideByZero(error: Error) -> Bool {
+    return String.eq(error.kind, "Math.DivideByZero")
 }
+
+flow BadDivisionRequest(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 400, body: "division by zero")
+}
+
+flow InternalError(error: Error) -> HTTP.Response {
+    return HTTP.Response.Text.new(status: 500, body: "internal error")
+}
+
+flow CalculatorHttpError(error: Error) -> HTTP.Response {
+    responses = Match.new(
+        cases: List.new(Match.Case.new(IsDivideByZero, BadDivisionRequest)),
+        default: InternalError
+    )
+    return error |> Match.apply(responses)
+}
+
 server = HTTP.Server.new(
     port: Int.new(8080),
     handler: Calculate,
     onError: CalculatorHttpError
 )
+
 commit server
