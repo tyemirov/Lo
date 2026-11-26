@@ -319,11 +319,14 @@ return Run("help")
 
 ### Choose Between A File Write And Console Output
 
-`File.Write` and `Console.Line` are different target types. `Match.new` requires a common result type, and its branches cannot commit. Here, the match returns the same kind of record in both branches, with one message in the selected list and an empty list for the other action. After the match, `Flow.fold` calls the appropriate flow once for each message. An empty list skips its flow. Each flow commits its own target.
+Use `Match.new` to choose where the message goes. Both branches return a record with the messages to save and the bytes to print. The file branch selects one message to save and leaves standard output empty. The console branch selects no messages to save and supplies the message as standard output.
 
 ```lo
-flow NoMessages() -> List<String> {
-    return List.new()
+flow ChooseDelivery(save_to_file: Bool, message: String) -> Record{messages_to_save: List<String>, stdout: Bytes} {
+    return Match.new(save_to_file,
+        true: Record.new(messages_to_save: List.new(message), stdout: Bytes.new("")),
+        _: Record.new(messages_to_save: List.new(), stdout: UTF8.Bytes.new(String.concat(message, "\n")))
+    )
 }
 
 flow WriteMessage(count: Int, message: String) -> Int! {
@@ -333,24 +336,16 @@ flow WriteMessage(count: Int, message: String) -> Int! {
     return Math.add(count, 1)
 }
 
-flow PrintMessage(count: Int, message: String) -> Int! {
-    action = Console.Line.new("stdout", message, true)
-    commit action
-    return Math.add(count, 1)
-}
-
 flow Deliver(save_to_file: Bool, message: String) -> Program.Exit! {
-    selected = Match.new(save_to_file,
-        true: Record.new(file_messages: List.new(message), console_messages: NoMessages()),
-        _: Record.new(file_messages: NoMessages(), console_messages: List.new(message))
-    )
-    written = Flow.fold(selected.file_messages, 0, WriteMessage)
-    delivered = Flow.fold(selected.console_messages, written, PrintMessage)
-    return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
+    delivery = ChooseDelivery(save_to_file, message)
+    written = Flow.fold(delivery.messages_to_save, 0, WriteMessage)
+    return Program.Exit.new(0, delivery.stdout, Bytes.new(""))
 }
 
 return Deliver(false, "Hello from Lo")
 ```
+
+`Flow.fold` calls `WriteMessage` once when the list has a message and skips it when the list is empty. This keeps the file `commit` outside `Match.new`. The program writes the selected standard output when it exits.
 
 [Build and run the example](#build-and-run-the-examples) with `false` to print `Hello from Lo`. To create or replace `_scratch/match-output/message.txt` with that text, change `false` to `true`, rebuild, and run with a write grant scoped to the example directory.
 
