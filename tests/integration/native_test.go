@@ -408,7 +408,16 @@ func TestNativeRuntimeBudgetContracts(t *testing.T) {
 		`return -0.0`,
 		`flow H(e: Error) -> Error {return e}; flow F(x: Int) -> Int! {return Math.div(8,x)}; flow G() -> Error onError H {unused=F(0);return Error.new("missed","",Record.new())};return G()`,
 		`flow F(x: Int) -> Int {return Math.mul(x,3)};return List.map(List.new(1,2,3),F)`,
-		`flow P(x: Int) -> Bool {return Math.gt(x,2)};return Match.new(3,when P: 7,_: 9)`,
+		`flow P(x: Int) -> Bool {return Math.gt(x,2)};
+flow ProgramChoiceResult1(value: Int) -> Int {
+    return 7
+}
+
+flow ProgramChoiceDefault(value: Int) -> Int {
+    return 9
+}
+
+return 3 |> Match.apply(Match.new(List.new(Match.Case.new(P, ProgramChoiceResult1)), ProgramChoiceDefault))`,
 	}
 	for _, text := range cases {
 		source := sourceFile(t, text)
@@ -480,7 +489,28 @@ flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),s
 `
 	for _, fixture := range []struct{ name, body, output, effects string }{
 		{"named-order", `return Pair(second:Read("b"),first:Read("a"))`, "21\n", "ba"},
-		{"match-heads", `unused=Read("a"); return Match.new(Head("order"),1:Math.add(Head("order"),6),2:Head("absent"),_:9)`, "7\n", "a"},
+		{"match-heads", `unused=Read("a");
+flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Math.eq(value, 1)
+}
+
+flow ProgramChoiceResult1(value: Int) -> Int {
+    return Math.add(Head("order"),6)
+}
+
+flow ProgramChoiceTest2(value: Int) -> Bool {
+    return Math.eq(value, 2)
+}
+
+flow ProgramChoiceResult2(value: Int) -> Int {
+    return Head("absent")
+}
+
+flow ProgramChoiceDefault(value: Int) -> Int {
+    return 9
+}
+
+return Head("order") |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1), Match.Case.new(ProgramChoiceTest2, ProgramChoiceResult2)), ProgramChoiceDefault))`, "7\n", "a"},
 		{"unused-binding", `unused=Read("a"); return 7`, "7\n", "a"},
 	} {
 		t.Run(fixture.name, func(t *testing.T) {

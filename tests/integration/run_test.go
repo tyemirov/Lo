@@ -95,8 +95,29 @@ func TestRunValues(t *testing.T) {
 		{"map-duplicate", `flow Get() -> Int! { m = Map.new(Record.new(key: "x", value: 1), Record.new(key: "x", value: 2)); return Map.get(m, "x") }; flow Unwrap(error: Error) -> Int { return 0 }; flow Total() -> Int onError Unwrap { return Get() }; return Total()`, "Int", `"2"`},
 		{"range-empty", `return Range.is_empty(Range.new(1, 2, false, false))`, "Bool", `true`},
 		{"range-includes", `return Range.contains(Range.new("a", "z", true, false), "m")`, "Bool", `true`},
-		{"match-lazy", `return Match.new(1, 1: 7, _: Math.div(1, 0))`, "Int!", `{"type":"Int","value":"7"}`},
-		{"match-predicate", `flow Positive(x: Int) -> Bool { return Math.gt(x, 0) }; return Match.new(2, when Positive: "yes", _: "no")`, "String", `"yes"`},
+		{"match-lazy", `flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Math.eq(value, 1)
+}
+
+flow ProgramChoiceResult1(value: Int) -> Int! {
+    return 7
+}
+
+flow ProgramChoiceDefault(value: Int) -> Int! {
+    return Math.div(1, 0)
+}
+
+return 1 |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1)), ProgramChoiceDefault))`, "Int!", `{"type":"Int","value":"7"}`},
+		{"match-predicate", `flow Positive(x: Int) -> Bool { return Math.gt(x, 0) };
+flow ProgramChoiceResult1(value: Int) -> String {
+    return "yes"
+}
+
+flow ProgramChoiceDefault(value: Int) -> String {
+    return "no"
+}
+
+return 2 |> Match.apply(Match.new(List.new(Match.Case.new(Positive, ProgramChoiceResult1)), ProgramChoiceDefault))`, "String", `"yes"`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
@@ -219,7 +240,19 @@ func TestRunFileReads(t *testing.T) {
 	if denied.status != 2 || diagnostics(t, denied.stderr).Diagnostics[0].Code != "runtime.capability-denied" {
 		t.Fatalf("authorization: %+v", denied)
 	}
-	lazy := fmt.Sprintf(`return Match.new(true, true: Bytes.new("safe"), _: File.read(File.Path.new(%q)))`, file.Name())
+	lazy := fmt.Sprintf(`flow ProgramChoiceTest1(value: Bool) -> Bool {
+    return value
+}
+
+flow ProgramChoiceResult1(value: Bool) -> Bytes! {
+    return Bytes.new("safe")
+}
+
+flow ProgramChoiceDefault(value: Bool) -> Bytes! {
+    return File.read(File.Path.new(%q))
+}
+
+return true |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1)), ProgramChoiceDefault))`, file.Name())
 	v = runValue(t, lazy)
 	valueJSON(t, v, `{"type":"Bytes","value":"c2FmZQ=="}`)
 	missing := fmt.Sprintf(`return File.read(File.Path.new(%q))`, filepath.Join(dir, "missing"))

@@ -6,7 +6,20 @@ import (
 )
 
 const f035DriverCommand = `context=Process.Context.new(Map.new(),File.Path.new("/work"));executable=Process.Executable.new(File.Path.new("/command"));command=Process.Command.new(context,executable,List.new(),Bytes.new(""));`
-const f035Require = `flow Require(value:Bool)->Int!{return Match.new(value,true:0,_:Error.new("Fixture.Failed","invalid result",Record.new()))};`
+const f035Require = `flow Require(value:Bool)->Int!{
+    flow RequireChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow RequireChoiceResult1(value: Bool) -> Int! {
+        return 0
+    }
+
+    flow RequireChoiceDefault(value: Bool) -> Int! {
+        return Error.new("Fixture.Failed","invalid result",Record.new())
+    }
+
+    return value |> Match.apply(Match.new(List.new(Match.Case.new(RequireChoiceTest1, RequireChoiceResult1)), RequireChoiceDefault))};`
 
 func TestF035DriverLifecycle(t *testing.T) { runLLVMRuntimeScenarios(t, f035DriverScenarios()) }
 func TestF035LinuxDriverLifecycle(t *testing.T) {
@@ -87,7 +100,7 @@ func f035DriverScenarios() []llvmRuntimeScenario {
 		prelude := f035Require + `flow Recover(error:Error)->Bool{return String.eq(error.kind,"Process.Timeout")};flow Attempt(command:Process.Command)->Bool onError Recover{result=commit command;return false};`
 		body := f035DriverCommand + fmt.Sprintf(`timed=Process.Command.with_timeout(command,%d);configured=Process.Command.with_output(timed,%q);`, timeout, output)
 		if test.number == 5 {
-			body += `timed_out=Attempt(configured);result=commit command;exit_ok=Math.eq(Process.Termination.exit_code(result.termination),0);return Require(Match.new(timed_out,true:exit_ok,_:false))`
+			body += `timed_out=Attempt(configured);result=commit command;exit_ok=Math.eq(Process.Termination.exit_code(result.termination),0);flow TimedOut(request: Record{timed_out: Bool, exit_ok: Bool}) -> Bool { return request.timed_out }; flow ExitOk(request: Record{timed_out: Bool, exit_ok: Bool}) -> Bool { return request.exit_ok }; flow Failure(request: Record{timed_out: Bool, exit_ok: Bool}) -> Bool { return false }; return Require(Record.new(timed_out: timed_out, exit_ok: exit_ok) |> Match.apply(Match.new(List.new(Match.Case.new(TimedOut, ExitOk)), Failure)))`
 		} else if test.number == 11 {
 			body += `timed_out=Attempt(configured);result=commit command;return Require(timed_out)`
 		} else if test.number == 8 || test.number == 10 || test.number == 25 {

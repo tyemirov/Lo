@@ -84,7 +84,19 @@ func TestFlowFoldStepLimitProgress(t *testing.T) {
 	program := fmt.Sprintf(`flow Counter(state: Int) -> Record{value: Int, next_state: Int} {
 		return Record.new(value: state, next_state: Math.add(state, 1))
 	}; flow Delay(entry: File.Entry) -> Int {
-		return Match.new(entry.name, "c": List.length(List.unfold(0, 1000, Counter)), _: 0)
+		flow DelayChoiceTest1(value: String) -> Bool {
+		    return String.eq(value, "c")
+		}
+
+		flow DelayChoiceResult1(value: String) -> Int {
+		    return List.length(List.unfold(0, 1000, Counter))
+		}
+
+		flow DelayChoiceDefault(value: String) -> Int {
+		    return 0
+		}
+
+		return entry.name |> Match.apply(Match.new(List.new(Match.Case.new(DelayChoiceTest1, DelayChoiceResult1)), DelayChoiceDefault))
 	}; flow Step(state: Int, entry: File.Entry) -> Int! {
 		target = File.Remove.new(List.new(entry)); commit target; delay = Delay(entry); return Math.add(state, Math.add(delay, 1))
 	}; flow Outer(entries: List<File.Entry>, state: Int, item: Int) -> Int! {

@@ -34,15 +34,40 @@ func TestVerifierContracts(t *testing.T) {
 		{"empty-list-context", `return Math.sum(List.new())`, "Int", ""},
 		{"map-get", `flow F() -> Int! { m = Map.new(Record.new(key: "x", value: 1)); return Map.get(m, "x") }; return F()`, "Int!", ""},
 		{"range", `r = Range.new(start: 1, end: 3, include_start: true, include_end: false); return Range.contains(r, 2)`, "Bool", ""},
-		{"range-match", `return Match.new(2, Range.new(start: 1, end: 3, include_start: true, include_end: true): "yes", _: "no")`, "String", ""},
-		{"match-default-position", `return Match.new(1, _: 2, 1: 3)`, "", "check.match-default"},
-		{"match-fallibility", `flow F(x: Int) -> Int! { return Match.new(x, 1: 3, _: Math.div(1, x)) }; return F(1)`, "Int!", ""},
-		{"match-head-failure", `flow F() -> Int! { return Match.new(1, Math.div(1, 1): 2, _: 3) }`, "", "check.fallible-case"},
+		{"range-match", `flow ProgramChoiceTest1(value: Int) -> Bool {
+    return Range.contains(Range.new(start: 1, end: 3, include_start: true, include_end: true), value)
+}
+
+flow ProgramChoiceResult1(value: Int) -> String {
+    return "yes"
+}
+
+flow ProgramChoiceDefault(value: Int) -> String {
+    return "no"
+}
+
+return 2 |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1, ProgramChoiceResult1)), ProgramChoiceDefault))`, "String", ""},
+		{"match-default-position", `return Match.new(List.new())`, "", "check.argument-count"},
+		{"match-fallibility", `flow F(x: Int) -> Int! {
+    flow FChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 1)
+    }
+
+    flow FChoiceResult1(value: Int) -> Int! {
+        return 3
+    }
+
+    flow FChoiceDefault(value: Int) -> Int! {
+        return Math.div(1, value)
+    }
+
+    return x |> Match.apply(Match.new(List.new(Match.Case.new(FChoiceTest1, FChoiceResult1)), FChoiceDefault)) }; return F(1)`, "Int!", ""},
+		{"match-head-failure", `flow P(x: Int) -> Bool! { return Math.eq(Math.div(1, 1), x) }; flow H(x: Int) -> Int { return x }; return Match.Case.new(P, H)`, "", "check.type-mismatch"},
 		{"fold-context", `flow F(c: Int, acc: Int, x: Int) -> Int { return Math.add(acc, Math.mul(c, x)) }; return List.fold(List.new(1, 2), 0, 3, F)`, "Int", ""},
 		{"unfold", `flow F(x: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: x, next_state: Math.add(x, 1)) }; return List.unfold(0, 3, F)`, "List<Int>", ""},
 		{"flat-map", `flow F(x: Int) -> List<Int> { return List.new(x) }; return List.flat_map(List.new(1), F)`, "List<Int>", ""},
 		{"fallible-list", `flow F(x: Int) -> Int! { return Math.div(1, x) }; return List.map(List.new(1), F)`, "List<Int>!", ""},
-		{"wrong-predicate", `flow F(x: Int) -> Int { return x }; return Match.new(1, when F: 2, _: 3)`, "", "check.type-mismatch"},
+		{"wrong-predicate", `flow F(x: Int) -> Int { return x }; return Match.Case.new(F, F)`, "", "check.type-mismatch"},
 		{"bad-scalar", `return Scalar.new("ab")`, "", "check.invalid-literal"},
 		{"dynamic-scalar", `flow F(x: String) -> Scalar { return Scalar.new(x) }`, "", "check.invalid-literal"},
 		{"float-infinite", `return Float.new(1e9999)`, "", "check.invalid-literal"},
@@ -90,8 +115,34 @@ func TestVerifierContracts(t *testing.T) {
 
 func TestVerifierEdgeContracts(t *testing.T) {
 	cases := []struct{ name, source, kind, code string }{
-		{"match-stored-failure", `flow F() -> List<Int!> { return List.new(Match.new(1, 1: Math.div(1, 0), _: 2)) }; return F()`, "List<Int!>", ""},
-		{"match-error-return", `flow F(x: Int) -> Int! { return Match.new(x, 0: Error.new(kind: "Mine", message: "failed", input: Record.new()), _: x) }; return F(1)`, "Int!", ""},
+		{"match-stored-failure", `flow F() -> List<Int!> {
+    flow FChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 1)
+    }
+
+    flow FChoiceResult1(value: Int) -> Int! {
+        return Math.div(1, 0)
+    }
+
+    flow FChoiceDefault(value: Int) -> Int! {
+        return 2
+    }
+
+    return List.new(1 |> Match.apply(Match.new(List.new(Match.Case.new(FChoiceTest1, FChoiceResult1)), FChoiceDefault))) }; return F()`, "List<Int!>", ""},
+		{"match-error-return", `flow F(x: Int) -> Int! {
+    flow FChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow FChoiceResult1(value: Int) -> Int! {
+        return Error.new(kind: "Mine", message: "failed", input: Record.new())
+    }
+
+    flow FChoiceDefault(value: Int) -> Int! {
+        return value
+    }
+
+    return x |> Match.apply(Match.new(List.new(Match.Case.new(FChoiceTest1, FChoiceResult1)), FChoiceDefault)) }; return F(1)`, "Int!", ""},
 		{"map-fallible-value", `flow M() -> Map<String, Int!> { return Map.new(Record.new(key: "a", value: Math.div(1, 0))) }; return Map.get(M(), "a")`, "Int!", ""},
 		{"fallible-record-view", `flow F() -> Record{a: Int}! { return Record.new(a: 1) }; flow G(x: Record!) -> List<Record!> { return List.new(x) }; return G(F())`, "List<Record!>", ""},
 		{"future-capture", `flow F() -> Int { return x }; x = 1`, "", "resolve.capture"},
@@ -100,8 +151,8 @@ func TestVerifierEdgeContracts(t *testing.T) {
 		{"nested-flow-not-visible", `flow F() -> Int { flow G() -> Int { return 1 }; return G() }; return G()`, "", "resolve.unknown-name"},
 		{"handler-capture", `flow F() -> Int { x = 1; flow H(e: Error) -> Int { return x }; return 1 }`, "", "resolve.capture"},
 		{"adapter-cycle", `flow H(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; flow F(r: HTTP.Request) -> HTTP.Response { s = HTTP.Server.new(8080, F, H); return HTTP.Response.Text.new(200, "ok") }`, "", "check.cycle"},
-		{"match-hidden-head-failure", `flow F() -> Int! { return Match.new(1, Math.add(Math.div(1, 2), 1): 3, _: 4) }`, "", "check.fallible-case"},
-		{"effectful-match-branch", `flow W() -> Int! { e = File.Append.new(File.Path.new("x"), UTF8.Bytes.new("x")); commit e; return 1 }; flow F() -> Int! { return Match.new(1, 1: W(), _: 2) }`, "", "check.effectful-match"},
+		{"match-hidden-head-failure", `flow P(x: Int) -> Bool! { return Math.eq(Math.add(Math.div(1, 2), 1), x) }; flow H(x: Int) -> Int { return x }; return Match.Case.new(P, H)`, "", "check.type-mismatch"},
+		{"effectful-match-branch", `flow W(value: Int) -> Int! { e = File.Append.new(File.Path.new("x"), UTF8.Bytes.new("x")); commit e; return value }; return Match.new(List.new(), W)`, "", "check.effectful-callback"},
 		{"nominal-error", `flow F(e: Error) -> Error { return e }; return F(Record.new(kind: "K", message: "M", input: Record.new(), trace: List.new(1)))`, "", "check.type-mismatch"},
 		{"bare-list-type", `flow F(x: List) -> Int { return 0 }`, "", "check.type-constraint"},
 		{"invalid-type-argument", `flow F(x: Int<String>) -> Int { return 0 }`, "", "check.type-constraint"},
@@ -162,11 +213,11 @@ func TestVerifierRejections(t *testing.T) {
 		{"fallible-self-handler", `flow H(e: Error) -> Int! { return 1 }; flow F() -> Int onError H { return 1 }`, "check.type-mismatch"},
 		{"wrong-http-handler", `flow F(x: Int) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow E(e: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, "error") }; return HTTP.Server.new(8080, F, E)`, "check.type-mismatch"},
 		{"wrong-http-error", `flow F(x: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(200, "ok") }; flow E(e: Error) -> Int { return 1 }; return HTTP.Server.new(8080, F, E)`, "check.type-mismatch"},
-		{"two-defaults", `return Match.new(1, _: 1, _: 2)`, "check.match-default"},
-		{"incomparable-head", `return Match.new(List.new(1), List.new(1): 2, _: 3)`, "check.type-constraint"},
+		{"two-defaults", `flow H(value: Int) -> Int { return value }; return Match.new(cases: List.new(), default: H, default: H)`, "check.duplicate-argument"},
+		{"incomparable-head", `flow P(value: List<Int>) -> Bool { return Map.has_key(Map.new(Record.new(key: value, value: true)), value) }; flow H(value: List<Int>) -> Int { return 1 }; return Match.Case.new(P, H)`, "check.type-constraint"},
 		{"list-as-range", `return Range.contains(List.new(1), 1)`, "check.type-mismatch"},
 		{"range-as-list", `return List.length(Range.new(1, 2, true, true))`, "check.type-mismatch"},
-		{"invalid-unreachable-branch", `return Match.new(1, 1: 2, _: Missing())`, "resolve.unknown-name"},
+		{"invalid-unreachable-branch", `flow P(value: Int) -> Bool { return true }; flow H(value: Int) -> Int { return 2 }; return Match.new(List.new(Match.Case.new(P, H)), Missing)`, "resolve.unknown-name"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

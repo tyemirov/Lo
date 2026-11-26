@@ -168,7 +168,20 @@ func TestF025GuardWorkExhaustion(t *testing.T) {
 	root := fileFixtureRoot(t)
 	selected := fileFixture(t, root, "selected", "payload")
 	numbers := strings.TrimSuffix(strings.Repeat("1,", 300), ",")
-	source := fmt.Sprintf(`flow Add(total: Int, number: Int) -> Int { return Math.add(total, number) }; flow Eligible(expected: Int, name: String, original: File.Entry, current: File.Entry) -> Bool { numbers = List.new(%s); total = List.fold(numbers, 0, Add); return Match.new(String.eq(name, current.name), true: Math.eq(total, expected), _: false) }; flow Failed(error: Error) -> Int { return -1 }; flow Main() -> Int onError Failed { entries = File.list(File.Path.new(%q)); target = File.Remove.checked(entries, 300, "selected", Eligible); receipt = commit target; return receipt.completed_count }; return Main()`, numbers, root)
+	source := fmt.Sprintf(`flow Add(total: Int, number: Int) -> Int { return Math.add(total, number) }; flow Eligible(expected: Int, name: String, original: File.Entry, current: File.Entry) -> Bool { numbers = List.new(%s); total = List.fold(numbers, 0, Add);
+    flow EligibleChoiceTest1(request: Record{expected: Int, selector: Bool, total: Int}) -> Bool {
+        return request.selector
+    }
+
+    flow EligibleChoiceResult1(request: Record{expected: Int, selector: Bool, total: Int}) -> Bool {
+        return Math.eq(request.total, request.expected)
+    }
+
+    flow EligibleChoiceDefault(request: Record{expected: Int, selector: Bool, total: Int}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: String.eq(name, current.name), expected: expected, total: total) |> Match.apply(Match.new(List.new(Match.Case.new(EligibleChoiceTest1, EligibleChoiceResult1)), EligibleChoiceDefault)) }; flow Failed(error: Error) -> Int { return -1 }; flow Main() -> Int onError Failed { entries = File.list(File.Path.new(%q)); target = File.Remove.checked(entries, 300, "selected", Eligible); receipt = commit target; return receipt.completed_count }; return Main()`, numbers, root)
 	path := sourceFile(t, source)
 	limited := runProgram(t, path, "run", "--list-root", root, "--remove-root", root, "--max-steps", "100", "--format", "json")
 	if limited.status != 2 || diagnostics(t, limited.stderr).Diagnostics[0].Code != "runtime.limit" {

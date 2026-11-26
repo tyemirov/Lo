@@ -343,7 +343,20 @@ func (fixture f036Fixture) transform(t *testing.T, source []byte) []byte {
 }
 
 func (fixture f036Fixture) source(operation string) string {
-	return fmt.Sprintf(`flow Recover(error:Error)->Int{return Match.new(String.eq(error.kind,"Process.Timeout"),true:0,_:99)};flow Main()->Int onError Recover{lock=Lock.File.new(File.Path.new(%q));lease=commit lock;context=Process.Context.new(Map.new(),File.Path.new(%q));executable=Process.Executable.new(File.Path.new(%q));command=Process.Command.new(context,executable,List.new(%q,%q,%q,%q,"initial"),Bytes.new(""));result=commit command;return Process.Termination.exit_code(result.termination)};return Main()`, fixture.lock, fixture.work, fixture.command, fixture.socket, operation, fixture.ready, fixture.release)
+	return fmt.Sprintf(`flow Recover(error:Error)->Int{
+    flow RecoverChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow RecoverChoiceResult1(value: Bool) -> Int {
+        return 0
+    }
+
+    flow RecoverChoiceDefault(value: Bool) -> Int {
+        return 99
+    }
+
+    return String.eq(error.kind,"Process.Timeout") |> Match.apply(Match.new(List.new(Match.Case.new(RecoverChoiceTest1, RecoverChoiceResult1)), RecoverChoiceDefault))};flow Main()->Int onError Recover{lock=Lock.File.new(File.Path.new(%q));lease=commit lock;context=Process.Context.new(Map.new(),File.Path.new(%q));executable=Process.Executable.new(File.Path.new(%q));command=Process.Command.new(context,executable,List.new(%q,%q,%q,%q,"initial"),Bytes.new(""));result=commit command;return Process.Termination.exit_code(result.termination)};return Main()`, fixture.lock, fixture.work, fixture.command, fixture.socket, operation, fixture.ready, fixture.release)
 }
 
 type f036InjectedProgram struct {
@@ -351,7 +364,20 @@ type f036InjectedProgram struct {
 	arguments []string
 }
 
-const f036InjectedSource = `flow Recover(error:Error)->Int{return Match.new(String.eq(error.kind,"Process.Timeout"),true:0,_:99)};flow Main()->Int onError Recover{invocation=Host.Invocation.current();arguments=invocation.arguments;lock=Lock.File.new(File.Path.new(List.at(arguments,0)));lease=commit lock;context=Process.Context.new(Map.new(),File.Path.new(List.at(arguments,1)));executable=Process.Executable.new(File.Path.new(List.at(arguments,2)));command=Process.Command.new(context,executable,List.new(List.at(arguments,3),List.at(arguments,4),List.at(arguments,5),List.at(arguments,6),"initial"),Bytes.new(""));result=commit command;return Process.Termination.exit_code(result.termination)};return Main()`
+const f036InjectedSource = `flow Recover(error:Error)->Int{
+    flow RecoverChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow RecoverChoiceResult1(value: Bool) -> Int {
+        return 0
+    }
+
+    flow RecoverChoiceDefault(value: Bool) -> Int {
+        return 99
+    }
+
+    return String.eq(error.kind,"Process.Timeout") |> Match.apply(Match.new(List.new(Match.Case.new(RecoverChoiceTest1, RecoverChoiceResult1)), RecoverChoiceDefault))};flow Main()->Int onError Recover{invocation=Host.Invocation.current();arguments=invocation.arguments;lock=Lock.File.new(File.Path.new(List.at(arguments,0)));lease=commit lock;context=Process.Context.new(Map.new(),File.Path.new(List.at(arguments,1)));executable=Process.Executable.new(File.Path.new(List.at(arguments,2)));command=Process.Command.new(context,executable,List.new(List.at(arguments,3),List.at(arguments,4),List.at(arguments,5),List.at(arguments,6),"initial"),Bytes.new(""));result=commit command;return Process.Termination.exit_code(result.termination)};return Main()`
 
 func (fixture f036Fixture) privateInvocationArguments(operation string) []string {
 	return []string{fixture.lock, fixture.work, fixture.command, fixture.socket, operation, fixture.ready, fixture.release}

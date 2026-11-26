@@ -114,7 +114,20 @@ func TestLLVMLiteralSequenceGradientRelease(t *testing.T) {
 
 func TestLLVMLiteralSequenceGroupedLifetime(t *testing.T) {
 	checkNumbers(t, tensorNumbers(t, successfulValue(t, runValue(t, literalSequenceGradientSource))), []float64{4}, 0, 0)
-	const nested = `flow Run()->Tensor<FP32>!{dims=Match.new(true,true:List.new(1,1),_:List.new(2,2));nested=List.new(List.new(11,22),List.new(33));return Tensor.reshape(Tensor.new(List.new(2.0),List.new()),dims)};return Run()`
+	const nested = `flow Run()->Tensor<FP32>!{dims=true |> Match.apply(Match.new(List.new(Match.Case.new(RunDimsChoiceTest1, RunDimsChoiceResult1)), RunDimsChoiceDefault));nested=List.new(List.new(11,22),List.new(33));
+    flow RunDimsChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow RunDimsChoiceResult1(value: Bool) -> List<Int> {
+        return List.new(1,1)
+    }
+
+    flow RunDimsChoiceDefault(value: Bool) -> List<Int> {
+        return List.new(2,2)
+    }
+
+    return Tensor.reshape(Tensor.new(List.new(2.0),List.new()),dims)};return Run()`
 	checkNumbers(t, tensorNumbers(t, successfulValue(t, runValue(t, nested))), []float64{2}, 0, 0)
 	// Compute a derivative first, then cancel during a later nested group's
 	// literal prefix. The existing numerical harness checks repeated sessions,

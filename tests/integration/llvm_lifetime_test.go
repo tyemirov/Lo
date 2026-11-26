@@ -42,7 +42,20 @@ func TestLLVMRuntimeLifetime(t *testing.T) {
 }
 
 func llvmLifetimeScenarios() []llvmRuntimeScenario {
-	success := `flow Step(state: Int, item: Int) -> Int { return Match.new(item, 2: Math.add(state, 20), _: Math.add(state, item)) }; return Flow.fold(List.new(1, 2, 3), 0, Step)`
+	success := `flow Step(state: Int, item: Int) -> Int {
+    flow StepChoiceTest1(request: Record{item: Int, selector: Int, state: Int}) -> Bool {
+        return Math.eq(request.selector, 2)
+    }
+
+    flow StepChoiceResult1(request: Record{item: Int, selector: Int, state: Int}) -> Int {
+        return Math.add(request.state, 20)
+    }
+
+    flow StepChoiceDefault(request: Record{item: Int, selector: Int, state: Int}) -> Int {
+        return Math.add(request.state, request.item)
+    }
+
+    return Record.new(selector: item, item: item, state: state) |> Match.apply(Match.new(List.new(Match.Case.new(StepChoiceTest1, StepChoiceResult1)), StepChoiceDefault)) }; return Flow.fold(List.new(1, 2, 3), 0, Step)`
 	return []llvmRuntimeScenario{
 		{name: "success", source: success, number: 0},
 		{name: "recoverable", source: `flow Step(item: Int) -> Int! { return Math.div(10, item) }; return List.map(List.new(2, 0, 3), Step)`, number: 1},

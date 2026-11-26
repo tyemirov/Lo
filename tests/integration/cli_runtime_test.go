@@ -253,14 +253,38 @@ func TestCLIStackHelpPrecedesHostActions(t *testing.T) {
     return Math.add(count, 1)
 };
 flow WorkItems(help: Bool) -> List<Bool> {
-    return Match.new(help, true: List.new(), _: List.new(true))
+    flow WorkItemsChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow WorkItemsChoiceResult1(value: Bool) -> List<Bool> {
+        return List.new()
+    }
+
+    flow WorkItemsChoiceDefault(value: Bool) -> List<Bool> {
+        return List.new(true)
+    }
+
+    return help |> Match.apply(Match.new(List.new(Match.Case.new(WorkItemsChoiceTest1, WorkItemsChoiceResult1)), WorkItemsChoiceDefault))
 };
 flow Main() -> Program.Exit! {
     initial = Host.Invocation.current()
     options = CLI.parse(initial.arguments, List.new(), "example", "", true)
     work = WorkItems(options.help_requested)
     count = Flow.fold(work, 0, Work)
-    output = Match.new(options.help_requested, true: options.help_text, _: "")
+    output = Record.new(selector: options.help_requested, options: options) |> Match.apply(Match.new(List.new(Match.Case.new(MainOutputChoiceTest1, MainOutputChoiceResult1)), MainOutputChoiceDefault))
+    flow MainOutputChoiceTest1(request: Record{options: CLI.Options, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow MainOutputChoiceResult1(request: Record{options: CLI.Options, selector: Bool}) -> String {
+        return request.options.help_text
+    }
+
+    flow MainOutputChoiceDefault(request: Record{options: CLI.Options, selector: Bool}) -> String {
+        return ""
+    }
+
     return Program.Exit.new(0, UTF8.Bytes.new(output), Bytes.new(""))
 }; return Main()`
 	path := sourceFile(t, source)

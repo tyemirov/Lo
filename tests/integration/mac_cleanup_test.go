@@ -51,16 +51,19 @@ func cleanupFlows(t *testing.T, roots ...string) string {
 			}
 		case syntax.Reference:
 			visitFlow(value.Name())
-		case syntax.Match:
-			visitExpression(value.Selector())
-			for _, branch := range value.Cases() {
-				switch head := branch.(type) {
-				case syntax.ExactCase:
-					visitExpression(head.Head())
-				case syntax.PredicateCase:
-					visitFlow(head.Flow())
-				}
-				visitExpression(branch.Body())
+		}
+	}
+	var visitDefinition func(syntax.Flow)
+	visitDefinition = func(flow syntax.Flow) {
+		visitFlow(flow.Handler())
+		for _, statement := range flow.Body() {
+			switch value := statement.(type) {
+			case syntax.Binding:
+				visitExpression(value.Value())
+			case syntax.Return:
+				visitExpression(value.Value())
+			case syntax.Flow:
+				visitDefinition(value)
 			}
 		}
 	}
@@ -70,15 +73,7 @@ func cleanupFlows(t *testing.T, roots ...string) string {
 			return
 		}
 		selected[name] = true
-		visitFlow(flow.Handler())
-		for _, statement := range flow.Body() {
-			switch value := statement.(type) {
-			case syntax.Binding:
-				visitExpression(value.Value())
-			case syntax.Return:
-				visitExpression(value.Value())
-			}
-		}
+		visitDefinition(flow)
 	}
 	for _, name := range roots {
 		if _, exists := flows[name]; !exists {

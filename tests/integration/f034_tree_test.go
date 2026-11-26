@@ -55,7 +55,32 @@ func TestF034SnapshotRowsAndDescent(t *testing.T) {
 				t.Fatal(err)
 			}
 			f033Directory(t, tree, "d-empty")
-			source := fmt.Sprintf(`flow Descend(rejected: String, entry: File.Entry) -> Bool { return Match.new(String.eq(entry.kind, "directory"), false: false, _: Match.new(String.eq(entry.name, rejected), true: false, _: true)) }
+			source := fmt.Sprintf(`flow Descend(rejected: String, entry: File.Entry) -> Bool {
+    flow DescendChoiceTest1(request: Record{entry: File.Entry, rejected: String, selector: Bool}) -> Bool {
+        return Map.has_key(Map.new(Record.new(key: false, value: true)), request.selector)
+    }
+
+    flow DescendChoiceResult1(request: Record{entry: File.Entry, rejected: String, selector: Bool}) -> Bool {
+        return false
+    }
+
+    flow DescendChoice2Test1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow DescendChoice2Result1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow DescendChoice2Default(value: Bool) -> Bool {
+        return true
+    }
+
+    flow DescendChoiceDefault(request: Record{entry: File.Entry, rejected: String, selector: Bool}) -> Bool {
+        return String.eq(request.entry.name, request.rejected) |> Match.apply(Match.new(List.new(Match.Case.new(DescendChoice2Test1, DescendChoice2Result1)), DescendChoice2Default))
+    }
+
+    return Record.new(selector: String.eq(entry.kind, "directory"), entry: entry, rejected: rejected) |> Match.apply(Match.new(List.new(Match.Case.new(DescendChoiceTest1, DescendChoiceResult1)), DescendChoiceDefault)) }
 flow Row(row: %s) -> Record{relative: String, kind: String} { return Record.new(relative: row.relative, kind: row.entry.kind) }
 flow Main() -> Record{complete: Bool, rows: List<Record{relative: String, kind: String}>}! {
 parent = File.directory(File.Path.new(%q))
@@ -93,7 +118,20 @@ func TestF034IncompleteAndPureConstruction(t *testing.T) {
 			parent := fileFixtureRoot(t)
 			tree := f033Directory(t, parent, "tree")
 			f033Directory(t, tree, "empty")
-			source := fmt.Sprintf(`flow Descend(entry: File.Entry) -> Bool { return Match.new(String.eq(entry.name, %q), true: false, _: true) }
+			source := fmt.Sprintf(`flow Descend(entry: File.Entry) -> Bool {
+    flow DescendChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow DescendChoiceResult1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow DescendChoiceDefault(value: Bool) -> Bool {
+        return true
+    }
+
+    return String.eq(entry.name, %q) |> Match.apply(Match.new(List.new(Match.Case.new(DescendChoiceTest1, DescendChoiceResult1)), DescendChoiceDefault)) }
 flow Eligible(row: %s) -> Bool { return false }
 `, rejected, f034RowType) + f034Program(parent, "Bool", "", `target = File.Tree.Remove.checked(tree, Eligible); return true`)
 			got := runProgram(t, sourceFile(t, source), "run", "--observe-tree-root", parent, "--format", "json")
@@ -178,7 +216,20 @@ func TestF034CompleteEligibilityPrecedesRemoval(t *testing.T) {
 	first := fileFixture(t, tree, "a", "first")
 	last := fileFixture(t, tree, "z", "last")
 	source := `flow Descend(entry: File.Entry) -> Bool { return true }
-flow Eligible(rejected: String, row: Record{relative: String, entry: File.Entry}) -> Bool { return Match.new(String.eq(row.relative, rejected), true: false, _: true) }
+flow Eligible(rejected: String, row: Record{relative: String, entry: File.Entry}) -> Bool {
+    flow EligibleChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow EligibleChoiceResult1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow EligibleChoiceDefault(value: Bool) -> Bool {
+        return true
+    }
+
+    return String.eq(row.relative, rejected) |> Match.apply(Match.new(List.new(Match.Case.new(EligibleChoiceTest1, EligibleChoiceResult1)), EligibleChoiceDefault)) }
 ` + f034Program(parent, "File.RemoveReceipt", "", `target = File.Tree.Remove.checked(tree, "z", Eligible); receipt = commit target; return receipt`)
 	got := runProgram(t, sourceFile(t, source), "run", "--observe-tree-root", parent, "--remove-tree-root", tree, "--format", "json")
 	f034Failure(t, got, 1, "File.EntryChanged")

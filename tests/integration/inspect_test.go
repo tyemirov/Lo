@@ -141,7 +141,19 @@ func TestInspectionResources(t *testing.T) {
 }
 func TestInspectionBranchesAndCallbacks(t *testing.T) {
 	report, _, _ := inspectSource(t, `flow Build(path: String, flag: Bool) -> File.Append {
-   return Match.new(flag, true: File.Append.new(File.Path.new(path), UTF8.Bytes.new("a")), _: File.Append.new(File.Path.new("other"), Bytes.new("b")))
+   flow BuildChoiceTest1(request: Record{path: String, selector: Bool}) -> Bool {
+       return request.selector
+   }
+
+   flow BuildChoiceResult1(request: Record{path: String, selector: Bool}) -> File.Append {
+       return File.Append.new(File.Path.new(request.path), UTF8.Bytes.new("a"))
+   }
+
+   flow BuildChoiceDefault(request: Record{path: String, selector: Bool}) -> File.Append {
+       return File.Append.new(File.Path.new("other"), Bytes.new("b"))
+   }
+
+   return Record.new(selector: flag, path: path) |> Match.apply(Match.new(List.new(Match.Case.new(BuildChoiceTest1, BuildChoiceResult1)), BuildChoiceDefault))
  }
  flow Handle(request: HTTP.Request) -> HTTP.Response! {
    target = Build(request.path, String.eq(request.method, "POST"))
@@ -391,9 +403,9 @@ func TestInspectionNestedAdapters(t *testing.T) {
 }
 
 func TestInspectionCaseHeadReads(t *testing.T) {
-	source := `flow H(e: Error) -> Int { return 0 }; flow Head() -> Int onError H { data = File.read(File.Path.new("head-input")); return 1 }; return Match.new(0, Head(): "match", _: "default")`
+	source := `flow H(e: Error) -> Bool { return false }; flow Head(value: Int) -> Bool onError H { data = File.read(File.Path.new("head-input")); return true }; flow Selected(value: Int) -> String { return "match" }; return Match.Case.new(Head, Selected)`
 	got := run(t, "inspect", sourceFile(t, source), "--format", "json")
-	if got.status != 1 || diagnostics(t, got.stderr).Diagnostics[0].Code != "check.effectful-match" {
+	if got.status != 1 || diagnostics(t, got.stderr).Diagnostics[0].Code != "check.effectful-callback" {
 		t.Fatalf("observing case head accepted: %+v", got)
 	}
 }

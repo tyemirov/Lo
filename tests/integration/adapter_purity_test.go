@@ -9,15 +9,15 @@ import (
 )
 
 func TestAdapterPurity(t *testing.T) {
-	const read = `flow Recover(e: Error) -> Int { return 0 }; flow Observe() -> Int onError Recover { data = File.read(File.Path.new("not-observed")); return 1 }; `
-	const commit = `flow Recover(e: Error) -> Int { return 0 }; flow Activate() -> Int onError Recover { target = File.Write.new(File.Path.new("not-activated"), Bytes.new("x")); commit target; return 1 }; flow Observe() -> Int onError Recover { return Activate() }; `
+	const read = `flow Keep(x: Int) -> Int { return x }; flow Recover(e: Error) -> Int { return 0 }; flow Observe() -> Int onError Recover { data = File.read(File.Path.new("not-observed")); return 1 }; `
+	const commit = `flow Keep(x: Int) -> Int { return x }; flow Recover(e: Error) -> Int { return 0 }; flow Activate() -> Int onError Recover { target = File.Write.new(File.Path.new("not-activated"), Bytes.new("x")); commit target; return 1 }; flow Observe() -> Int onError Recover { return Activate() }; `
 	for _, tc := range []struct{ name, callback, call string }{
 		{"map", `flow Callback(x: Int) -> Int { return Observe() }`, `List.map(List.new(1), Callback)`},
 		{"filter", `flow Callback(x: Int) -> Bool { return Math.eq(Observe(), x) }`, `List.filter(List.new(1), Callback)`},
 		{"fold", `flow Callback(state: Int, x: Int) -> Int { return Math.add(state, Observe()) }`, `List.fold(List.new(1), 0, Callback)`},
 		{"flat-map", `flow Callback(x: Int) -> List<Int> { return List.new(Observe()) }`, `List.flat_map(List.new(1), Callback)`},
 		{"unfold", `flow Callback(state: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: Observe(), next_state: state) }`, `List.unfold(0, 1, Callback)`},
-		{"predicate", `flow Callback(x: Int) -> Bool { return Math.eq(Observe(), x) }`, `Match.new(1, when Callback: 1, _: 0)`},
+		{"predicate", `flow Callback(x: Int) -> Bool { return Math.eq(Observe(), x) }`, `Match.Case.new(Callback, Keep)`},
 	} {
 		t.Run(tc.name+"-transitive-read", func(t *testing.T) {
 			adapterPurityRejected(t, read+tc.callback+`; return `+tc.call, "check.effectful-callback")
@@ -35,17 +35,17 @@ func TestAdapterPurity(t *testing.T) {
 			adapterPurityRejected(t, commit+recovery+callback+`; return `+tc.call, "check.effectful-callback")
 		})
 	}
-	for _, tc := range []struct{ name, expression string }{
-		{"selector", `Match.new(Observe(), 1: 1, _: 0)`},
-		{"branch", `Match.new(1, 1: Observe(), _: 0)`},
-		{"case-head", `Match.new(1, Observe(): 1, _: 0)`},
+
+	for _, tc := range []struct{ name, source string }{
+		{"branch", `flow Selected(value: Int) -> Int onError Recover { return Observe() }; return Match.new(List.new(), Selected)`},
+		{"case-head", `flow PredicateError(error: Error) -> Bool { return false }; flow Predicate(value: Int) -> Bool onError PredicateError { return Math.eq(Observe(), value) }; return Match.Case.new(Predicate, Keep)`},
 	} {
 		t.Run(tc.name+"-transitive-commit", func(t *testing.T) {
-			adapterPurityRejected(t, commit+`return `+tc.expression, "check.effectful-match")
+			adapterPurityRejected(t, commit+tc.source, "check.effectful-callback")
 		})
 	}
 	t.Run("case-head-transitive-read", func(t *testing.T) {
-		adapterPurityRejected(t, read+`return Match.new(1, Observe(): 1, _: 0)`, "check.effectful-match")
+		adapterPurityRejected(t, read+`flow Predicate(value: Int) -> Bool { return Math.eq(Observe(), value) }; return Match.Case.new(Predicate, Keep)`, "check.effectful-callback")
 	})
 	t.Run("self-handler-transitive-read", func(t *testing.T) {
 		adapterPurityRejected(t, read+`flow Handler(e: Error) -> Int { return Observe() }; flow Main() -> Int onError Handler { return Math.div(1, 0) }; return Main()`, "check.effectful-callback")
@@ -59,11 +59,24 @@ func TestAdapterPurity(t *testing.T) {
 		if err := os.WriteFile(selected, []byte("chosen"), 0600); err != nil {
 			t.Fatal(err)
 		}
-		program := fmt.Sprintf(`flow Read(path: String) -> String! { return UTF8.String.new(File.read(File.Path.new(path))) }; flow Main() -> String! { return Match.new(Read(%q), "chosen": Read(%q), _: Read("not-authorized")) }; return Main()`, selected, selected)
+		program := fmt.Sprintf(`flow Read(path: String) -> String! { return UTF8.String.new(File.read(File.Path.new(path))) }; flow Main() -> String! {
+    flow MainChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "chosen")
+    }
+
+    flow MainChoiceResult1(value: String) -> String! {
+        return Read(%q)
+    }
+
+    flow MainChoiceDefault(value: String) -> String! {
+        return Read("not-authorized")
+    }
+
+    return Read(%q) |> Match.apply(Match.new(List.new(Match.Case.new(MainChoiceTest1, MainChoiceResult1)), MainChoiceDefault)) }; return Main()`, selected, selected)
 		valueJSON(t, fileOutput(t, runProgram(t, sourceFile(t, program), "run", "--read-root", root, "--format", "json")), `"chosen"`)
 	})
 	t.Run("conditional-observation-contaminates-callback", func(t *testing.T) {
-		adapterPurityRejected(t, read+`flow Callback(x: Int) -> Int { return Match.new(x, 1: 1, _: Observe()) }; return List.map(List.new(1), Callback)`, "check.effectful-callback")
+		adapterPurityRejected(t, read+`flow Selected(value: Int) -> Int { return Observe() }; flow Callback(x: Int) -> Int { return x |> Match.apply(Match.new(List.new(), Selected)) }; return List.map(List.new(1), Callback)`, "check.effectful-callback")
 	})
 	t.Run("unused-nested-flow", func(t *testing.T) {
 		valueJSON(t, runValue(t, read+`flow Callback(x: Int) -> Int { flow Unused() -> Int { return Observe() }; return x }; return List.length(List.map(List.new(1), Callback))`), `"1"`)

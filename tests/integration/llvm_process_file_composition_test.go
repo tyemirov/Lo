@@ -17,7 +17,20 @@ func TestLLVMProcessBinaryFileComposition(t *testing.T) {
 	for _, exitCode := range []int{0, 7} {
 		t.Run(strconv.Itoa(exitCode), func(t *testing.T) {
 			path := filepath.Join(fixture.writes, fmt.Sprintf("captured-%d", exitCode))
-			text := fmt.Sprintf(`flow Empty()->List<Process.Result>{return List.new()};flow Save(total:Int,result:Process.Result)->Int!{target=File.Write.new(File.Path.new(%q),result.stdout);receipt=commit target;return Math.add(total,receipt.bytes_written)};flow Main()->Int!{context=Process.Context.new(Map.new(),File.Path.new(%q));executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(context,executable,List.new(%q),Bytes.new(""));result=commit target;code=Process.Termination.exit_code(result.termination);selected=Match.new(code,0:List.new(result),_:Empty());return Flow.fold(selected,0,Save)};return Main()`, path, fixture.root, fixture.executable, strconv.Itoa(exitCode))
+			text := fmt.Sprintf(`flow Empty()->List<Process.Result>{return List.new()};flow Save(total:Int,result:Process.Result)->Int!{target=File.Write.new(File.Path.new(%[1]q),result.stdout);receipt=commit target;return Math.add(total,receipt.bytes_written)};flow Main()->Int!{context=Process.Context.new(Map.new(),File.Path.new(%[2]q));executable=Process.Executable.new(File.Path.new(%[3]q));target=Process.Command.new(context,executable,List.new(%[4]q),Bytes.new(""));result=commit target;code=Process.Termination.exit_code(result.termination);selected=Record.new(selector: code, result: result) |> Match.apply(Match.new(List.new(Match.Case.new(MainSelectedChoiceTest1, MainSelectedChoiceResult1)), MainSelectedChoiceDefault));
+    flow MainSelectedChoiceTest1(request: Record{result: Process.Result, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow MainSelectedChoiceResult1(request: Record{result: Process.Result, selector: Int}) -> List<Process.Result> {
+        return List.new(request.result)
+    }
+
+    flow MainSelectedChoiceDefault(request: Record{result: Process.Result, selector: Int}) -> List<Process.Result> {
+        return Empty()
+    }
+
+    return Flow.fold(selected,0,Save)};return Main()`, path, fixture.root, fixture.executable, strconv.Itoa(exitCode))
 			arguments := append(fixture.flags(), "--write-root", fixture.writes, "--format", "json")
 			value := nativeValue(t, runProgram(t, sourceFile(t, text), "run", arguments...))
 			data, err := os.ReadFile(path)

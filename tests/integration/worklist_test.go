@@ -10,7 +10,28 @@ import (
 	"testing"
 )
 
-const worklistIntegerChildren = `flow Children(item: Int) -> List<Int> { return Match.new(item, 1: List.new(11, 12), 2: List.new(21), _: List.new()) };`
+const worklistIntegerChildren = `flow Children(item: Int) -> List<Int> {
+    flow ChildrenChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 1)
+    }
+
+    flow ChildrenChoiceResult1(value: Int) -> List<Int> {
+        return List.new(11, 12)
+    }
+
+    flow ChildrenChoiceTest2(value: Int) -> Bool {
+        return Math.eq(value, 2)
+    }
+
+    flow ChildrenChoiceResult2(value: Int) -> List<Int> {
+        return List.new(21)
+    }
+
+    flow ChildrenChoiceDefault(value: Int) -> List<Int> {
+        return List.new()
+    }
+
+    return item |> Match.apply(Match.new(List.new(Match.Case.new(ChildrenChoiceTest1, ChildrenChoiceResult1), Match.Case.new(ChildrenChoiceTest2, ChildrenChoiceResult2)), ChildrenChoiceDefault)) };`
 
 func TestWorklistDynamicDiscovery(t *testing.T) {
 	source := worklistIntegerChildren + `flow Step(state: String, item: Int) -> Record{state: String, items: List<Int>, stop: Bool} { return Record.new(state: String.concat(state, Int.to_string(item), ","), items: Children(item), stop: false) }; return Flow.worklist(List.new(1, 2), "", Step)`
@@ -21,20 +42,59 @@ func TestWorklistEmptyAndEarlyStop(t *testing.T) {
 	for _, test := range []struct{ name, source, expected string }{
 		{"empty", `flow Empty() -> List<Int> { return List.new() }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, item), items: Empty(), stop: false) }; return Flow.worklist(Empty(), 7, Step)`, `"7"`},
 		{"fallible-context", `flow Step(number: Int!, state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { captured = List.new(number); return Record.new(state: Math.add(state, List.length(captured)), items: List.new(), stop: false) }; return Flow.worklist(List.new(1), 0, 7, Step)`, `"1"`},
-		{"stop-discards-new-and-pending", `flow Children(item: Int) -> List<Int> { return Match.new(item, 1: List.new(2, 3), _: List.new(4)) }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, item), items: Children(item), stop: Math.eq(item, 2)) }; return Flow.worklist(List.new(1), 0, Step)`, `"3"`},
+		{"stop-discards-new-and-pending", `flow Children(item: Int) -> List<Int> {
+    flow ChildrenChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 1)
+    }
+
+    flow ChildrenChoiceResult1(value: Int) -> List<Int> {
+        return List.new(2, 3)
+    }
+
+    flow ChildrenChoiceDefault(value: Int) -> List<Int> {
+        return List.new(4)
+    }
+
+    return item |> Match.apply(Match.new(List.new(Match.Case.new(ChildrenChoiceTest1, ChildrenChoiceResult1)), ChildrenChoiceDefault)) }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, item), items: Children(item), stop: Math.eq(item, 2)) }; return Flow.worklist(List.new(1), 0, Step)`, `"3"`},
 	} {
 		t.Run(test.name, func(t *testing.T) { valueJSON(t, runValue(t, test.source), test.expected) })
 	}
 }
 
-const worklistGrowableQueueSource = `flow Child(index: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: Math.add(index, 1), next_state: Math.add(index, 1)) }; flow Children(item: Int) -> List<Int> { return Match.new(item, 0: List.unfold(0, 12000, Child), _: List.new()) }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, 1), items: Children(item), stop: false) }; return Flow.worklist(List.new(0), 0, Step)`
+const worklistGrowableQueueSource = `flow Child(index: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: Math.add(index, 1), next_state: Math.add(index, 1)) }; flow Children(item: Int) -> List<Int> {
+    flow ChildrenChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow ChildrenChoiceResult1(value: Int) -> List<Int> {
+        return List.unfold(0, 12000, Child)
+    }
+
+    flow ChildrenChoiceDefault(value: Int) -> List<Int> {
+        return List.new()
+    }
+
+    return item |> Match.apply(Match.new(List.new(Match.Case.new(ChildrenChoiceTest1, ChildrenChoiceResult1)), ChildrenChoiceDefault)) }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, 1), items: Children(item), stop: false) }; return Flow.worklist(List.new(0), 0, Step)`
 
 func TestWorklistGrowableQueue(t *testing.T) {
 	source := worklistGrowableQueueSource
 	valueJSON(t, runValue(t, source), `"12001"`)
 }
 
-const worklistPendingTensorSource = `flow Children(item: Tensor<FP32>) -> List<Tensor<FP32>>! { marker = Tensor.to_float(item); return Match.new(Float.eq(marker, 0.0), true: List.new(Tensor.new(List.new(1.0), List.new()), Tensor.new(List.new(2.0), List.new())), _: List.new()) }; flow Step(context: Tensor<FP32>, state: Float, item: Tensor<FP32>) -> Record{state: Float, items: List<Tensor<FP32>>, stop: Bool}! { next = Float.add(state, Float.add(Tensor.to_float(context), Tensor.to_float(item))); return Record.new(state: next, items: Children(item), stop: false) }; flow Run() -> Float! { return Flow.worklist(List.new(Tensor.new(List.new(0.0), List.new())), 0.0, Tensor.new(List.new(10.0), List.new()), Step) }; return Run()`
+const worklistPendingTensorSource = `flow Children(item: Tensor<FP32>) -> List<Tensor<FP32>>! { marker = Tensor.to_float(item);
+    flow ChildrenChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow ChildrenChoiceResult1(value: Bool) -> List<Tensor<FP32>>! {
+        return List.new(Tensor.new(List.new(1.0), List.new()), Tensor.new(List.new(2.0), List.new()))
+    }
+
+    flow ChildrenChoiceDefault(value: Bool) -> List<Tensor<FP32>>! {
+        return List.new()
+    }
+
+    return Float.eq(marker, 0.0) |> Match.apply(Match.new(List.new(Match.Case.new(ChildrenChoiceTest1, ChildrenChoiceResult1)), ChildrenChoiceDefault)) }; flow Step(context: Tensor<FP32>, state: Float, item: Tensor<FP32>) -> Record{state: Float, items: List<Tensor<FP32>>, stop: Bool}! { next = Float.add(state, Float.add(Tensor.to_float(context), Tensor.to_float(item))); return Record.new(state: next, items: Children(item), stop: false) }; flow Run() -> Float! { return Flow.worklist(List.new(Tensor.new(List.new(0.0), List.new())), 0.0, Tensor.new(List.new(10.0), List.new()), Step) }; return Run()`
 
 func TestWorklistPendingTensorLifetime(t *testing.T) {
 	source := worklistPendingTensorSource
@@ -64,7 +124,7 @@ func TestWorklistStaticContracts(t *testing.T) {
 		{"fallible-state-total-callback", `flow Step(state: Int!, item: Int) -> Record{state: Int!, items: List<Int>, stop: Bool} { return Record.new(state: state, items: List.new(), stop: true) }; return Flow.worklist(List.new(1), 0, Step)`, "check.type-mismatch"},
 		{"fallible-state-fallible-callback", `flow Step(state: Int!, item: Int) -> Record{state: Int!, items: List<Int>, stop: Bool}! { return Record.new(state: state, items: List.new(), stop: true) }; return Flow.worklist(List.new(1), 0, Step)`, "check.type-mismatch"},
 		{"list-stays-pure", `flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { target = File.Append.new(File.Path.new("unused"), Bytes.new("x")); commit target; return Record.new(state: state, items: List.new(), stop: true) }; flow Nested(state: Int, item: Int) -> Int! { return Flow.worklist(List.new(item), state, Step) }; flow Run() -> Int! { return List.fold(List.new(1), 0, Nested) }; return Run()`, "check.effectful-callback"},
-		{"match-stays-pure", `flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { target = File.Append.new(File.Path.new("unused"), Bytes.new("x")); commit target; return Record.new(state: state, items: List.new(), stop: true) }; flow Run() -> Int! { return Match.new(true, true: Flow.worklist(List.new(1), 0, Step), _: 0) }; return Run()`, "check.effectful-match"},
+		{"match-stays-pure", `flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { target = File.Append.new(File.Path.new("unused"), Bytes.new("x")); commit target; return Record.new(state: state, items: List.new(), stop: true) }; flow Run() -> Int! { flow Selected(value: Bool) -> Int! { return Flow.worklist(List.new(1), 0, Step) }; return true |> Match.apply(Match.new(List.new(), Selected)) }; return Run()`, "check.effectful-callback"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := run(t, "check", sourceFile(t, test.source), "--format", "json")
@@ -101,7 +161,20 @@ func TestWorklistFailureProgress(t *testing.T) {
 		pending      string
 		state        string
 	}{
-		{"recoverable", `flow Children(item: Int) -> List<Int> { return Match.new(item, 2: List.new(0, 5), _: List.new()) }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { next = Math.add(state, Math.div(10, item)); return Record.new(state: next, items: Children(item), stop: false) }; return Flow.worklist(List.new(2, 3), 0, Step)`, nil, 1, `"1"`, `"3"`, `"5"`},
+		{"recoverable", `flow Children(item: Int) -> List<Int> {
+    flow ChildrenChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 2)
+    }
+
+    flow ChildrenChoiceResult1(value: Int) -> List<Int> {
+        return List.new(0, 5)
+    }
+
+    flow ChildrenChoiceDefault(value: Int) -> List<Int> {
+        return List.new()
+    }
+
+    return item |> Match.apply(Match.new(List.new(Match.Case.new(ChildrenChoiceTest1, ChildrenChoiceResult1)), ChildrenChoiceDefault)) }; flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { next = Math.add(state, Math.div(10, item)); return Record.new(state: next, items: Children(item), stop: false) }; return Flow.worklist(List.new(2, 3), 0, Step)`, nil, 1, `"1"`, `"3"`, `"5"`},
 		{"terminal-step-limit", `flow Step(state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool} { return Record.new(state: Math.add(state, 1), items: List.new(item), stop: false) }; return Flow.worklist(List.new(1), 0, Step)`, []string{"--max-steps", "150"}, 2, "", `"1"`, ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {

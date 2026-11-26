@@ -15,9 +15,21 @@ flow Probe(previous: Int, item: Int) -> Int! {
 }
 flow Main() -> Program.Exit! {
     invocation = Host.Invocation.current()
-    choice = Match.new(List.length(invocation.arguments), 0: 1, _: 2)
+    choice = List.length(invocation.arguments) |> Match.apply(Match.new(List.new(Match.Case.new(MainChoiceChoiceTest1, MainChoiceChoiceResult1)), MainChoiceChoiceDefault))
     first = Flow.fold(List.filter(List.new(choice), 1, Selected), 0, PrintLine)
     second = Flow.fold(List.filter(List.new(choice), 2, Selected), first, Probe)
+    flow MainChoiceChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow MainChoiceChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow MainChoiceChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
 }
 return Main()`
