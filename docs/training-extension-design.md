@@ -92,7 +92,7 @@ The [complete example](examples/training-mvp.lo) uses expanded source types.
 | `Optimizer.SGD.State<R>` | Read-only `parameters: Parameters<R>` and `step: Int`. The config is private immutable data. |
 | `Optimizer.AdamW.State<R>` | The same public fields, plus private immutable moments, beta powers, and config. |
 
-None of these new value types supports equality, ordering, map keys, or match case heads.
+None of these new value types supports equality, ordering or map keys.
 Existing records can contain them.
 Exact record checking remains unchanged.
 There is no `Parameter.new` API or independent Parameter object.
@@ -257,7 +257,7 @@ The checker rejects tensor construction and transfer inside the differentiated g
 Reject these operations transitively before execution:
 
 - Boundary reads, device transfers, host numeric observation, and commit activation.
-- `Match.new`, list callbacks, nested `Autodiff.grad`, and optimizer operations.
+- matcher operations, list callbacks, nested `Autodiff.grad`, and optimizer operations.
 - Self-handling flows and handler calls inside the differentiated graph.
 - Unknown derivative rules, including binary64 `Float` arithmetic on a differentiated path.
 

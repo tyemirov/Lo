@@ -2,7 +2,7 @@
 
 [Documentation](../README.md) · [Philosophy](../philosophy.md) · [Syntax](../syntax.md)
 
-This reference describes all 188 implemented operations in the built-in catalog.
+This reference describes all 191 implemented operations in the built-in catalog.
 Each operation has an individual entry with a signature, behavior, failures, authority requirements, example, and detailed contract.
 Namespace names group related operations.
 They are not import statements or user-defined modules.
@@ -30,7 +30,7 @@ An empty error list in a constructor does not establish that its later commit su
 | --- | --- |
 | [Values And Arithmetic](values.md) | 34 |
 | [Text, Bytes, And Globs](text.md) | 31 |
-| [Collections And Sequential Flows](collections.md) | 20 |
+| [Collections And Sequential Flows](collections.md) | 23 |
 | [Files](files.md) | 23 |
 | [Processes](process.md) | 14 |
 | [HTTP](http.md) | 9 |
@@ -142,6 +142,9 @@ An empty error list in a constructor does not establish that its later commit su
 | [`Map.get`](collections.md#mapget) | [Collections And Sequential Flows](collections.md) |
 | [`Map.has_key`](collections.md#maphas_key) | [Collections And Sequential Flows](collections.md) |
 | [`Map.new`](collections.md#mapnew) | [Collections And Sequential Flows](collections.md) |
+| [`Match.Case.new`](collections.md#matchcasenew) | [Collections And Sequential Flows](collections.md) |
+| [`Match.apply`](collections.md#matchapply) | [Collections And Sequential Flows](collections.md) |
+| [`Match.new`](collections.md#matchnew) | [Collections And Sequential Flows](collections.md) |
 | [`Math.add`](values.md#mathadd) | [Values And Arithmetic](values.md) |
 | [`Math.div`](values.md#mathdiv) | [Values And Arithmetic](values.md) |
 | [`Math.eq`](values.md#matheq) | [Values And Arithmetic](values.md) |
@@ -234,7 +237,7 @@ An empty error list in a constructor does not establish that its later commit su
 
 ## Language Forms
 
-[Match expressions](../syntax.md#match-expressions), [projections](../syntax.md#types-and-records), and [commit statements](../syntax.md#commit-statements) have language syntax.
+[Projections](../syntax.md#types-and-records) and [commit statements](../syntax.md#commit-statements) have language syntax.
 They are not additional entries in `catalog.All()`.
 The [language reference](../../specification.md) defines their rules.
 

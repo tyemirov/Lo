@@ -80,7 +80,7 @@ Sorting keeps element identity and File-entry provenance.
 The existing String view as `List<Scalar>` applies to lookup, slicing, and sorting.
 The result contains Scalars and does not become a String implicitly.
 Boolean composition, concatenation, chunks, duplicate removal, typed equality, and text joining remain named application flows.
-These flows use existing constructors, scalar predicates, `Match.new`, and List processors.
+These flows use existing constructors, scalar predicates, `Match.apply`, and List processors.
 Duplicate removal keeps the first occurrence under the selected typed predicate.
 Chunk flows reject a nonpositive size and keep the final short chunk.
 

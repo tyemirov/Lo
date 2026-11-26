@@ -134,31 +134,33 @@ Required context must be a parameter.
 Recursive flow cycles and anonymous functions are not supported.
 The [flow rules](../specification.md#10-flow-definitions) define purity and declaration scope.
 
-## Match Expressions
+## Matcher Operations
+
+Construct reusable rules from named predicate and handler flows, then pass a request through `Match.apply`.
 
 ```lo
-flow IsNegative(value: Int) -> Bool {
-    return Math.lt(value, 0)
-}
+flow IsNegative(value: Int) -> Bool { return Math.lt(value, 0) }
+flow Negative(value: Int) -> String { return "negative" }
+flow Other(value: Int) -> String { return "other" }
 
-return Match.new(4,
-    when IsNegative: "negative",
-    0: "zero",
-    Range.new(1, 10, true, false): "small",
-    _: "other"
+matcher = Match.new(
+    cases: List.new(Match.Case.new(IsNegative, Negative)),
+    default: Other
 )
+return -4 |> Match.apply(matcher)
 ```
 
-The result is `"small"`.
-Case heads can be exact values, ranges, or `when` followed by a pure total predicate flow.
-The first matching case wins, and only its branch evaluates.
-A default `_` case is mandatory.
-Branches must have one compatible output type.
+The result is `"negative"`.
+The constructors store the callbacks without invoking them.
+Each application evaluates predicates in order and invokes only the first matching handler or the default.
+Callbacks are named flows with one parameter of the request type.
+Predicates are pure and return total `Bool` values. Handlers share one exact result type, which can be fallible.
+A selected handler may read host state. A case or matcher that may read uses a third type argument, `Read`.
+The compiler attributes the read effect to `Match.apply` after the matcher passes through parameters or stored values.
+A handler can return a target for a `commit` in the calling flow.
 
-Case heads and predicates must be pure and total.
-A selector or selected branch can observe host state but cannot activate a commit.
-An application can select a target and commit it in the outer flow.
-[Match](../specification.md#11-match) defines the complete contract.
+Use a predicate such as `Math.eq(value, 0)` for an exact value or `Range.contains(range, value)` for a range.
+The [Match rules](../specification.md#11-match) define construction, effects, and application.
 
 ## Fallible Flows
 

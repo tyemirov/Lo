@@ -295,14 +295,18 @@ flow AccessStable(original: File.Entry, current: File.Entry) -> Bool {
     return Math.eq(original.accessed_unix_ns, current.accessed_unix_ns)
 }
 
+flow KeepTrue(value: Bool) -> Bool {
+    return value
+}
+
 flow EligibleNow(user_id: Int, cutoff: Int, original: File.Entry, current: File.Entry) -> Bool {
-    return Match.new(OwnedBy(user_id, current),
-        true: Match.new(AccessStable(original, current),
-            true: Math.lt(current.accessed_unix_ns, cutoff),
-            _: false
-        ),
-        _: false
+    checks = List.new(
+        OwnedBy(user_id, current),
+        AccessStable(original, current),
+        Math.lt(current.accessed_unix_ns, cutoff)
     )
+    accepted = checks |> List.filter(KeepTrue)
+    return Math.eq(List.length(accepted), 3)
 }
 
 flow RemoveObserved(root: File.Path, cutoff: Int) -> File.RemoveReceipt! {

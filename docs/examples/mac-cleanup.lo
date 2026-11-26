@@ -1,11 +1,62 @@
 // Cleanup application. The host supplies explicit file and process authority.
 // Names, paths, command arguments, retention rules, and reports belong here.
 
-flow And(previous: Bool, value: Bool) -> Bool { return Match.new(previous, true: value, _: false) }
-flow Or(previous: Bool, value: Bool) -> Bool { return Match.new(previous, true: true, _: value) }
+flow And(previous: Bool, value: Bool) -> Bool {
+    flow AndChoiceTest1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow AndChoiceResult1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.value
+    }
+
+    flow AndChoiceDefault(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: previous, value: value) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(AndChoiceTest1, AndChoiceResult1)),
+        default: AndChoiceDefault
+    ))
+}
+flow Or(previous: Bool, value: Bool) -> Bool {
+    flow OrChoiceTest1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow OrChoiceResult1(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return true
+    }
+
+    flow OrChoiceDefault(request: Record{selector: Bool, value: Bool}) -> Bool {
+        return request.value
+    }
+
+    return Record.new(selector: previous, value: value) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(OrChoiceTest1, OrChoiceResult1)),
+        default: OrChoiceDefault
+    ))
+}
 flow All(values: List<Bool>) -> Bool { return List.fold(values, true, And) }
 flow Any(values: List<Bool>) -> Bool { return List.fold(values, false, Or) }
-flow Not(value: Bool) -> Bool { return Match.new(value, true: false, _: true) }
+flow Not(value: Bool) -> Bool {
+    flow NotChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow NotChoiceResult1(value: Bool) -> Bool {
+        return false
+    }
+
+    flow NotChoiceDefault(value: Bool) -> Bool {
+        return true
+    }
+
+    return value |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(NotChoiceTest1, NotChoiceResult1)),
+        default: NotChoiceDefault
+    ))
+}
 
 flow StringGroup(values: List<String>) -> List<String> { return values }
 flow ConcatStrings(left: List<String>, right: List<String>) -> List<String> { return List.flat_map(List.new(left, right), StringGroup) }
@@ -20,20 +71,120 @@ flow ConcatTasks(left: List<Record{label: String, operation: String, path: File.
 flow StorageRowGroup(values: List<Record{bytes: Int, path: String}>) -> List<Record{bytes: Int, path: String}> { return values }
 flow ConcatStorageRows(left: List<Record{bytes: Int, path: String}>, right: List<Record{bytes: Int, path: String}>) -> List<Record{bytes: Int, path: String}> { return List.flat_map(List.new(left, right), StorageRowGroup) }
 
-flow PathMemberStep(path: File.Path, found: Bool, candidate: File.Path) -> Bool { return Match.new(found, true: true, _: File.Path.eq(path, candidate)) }
+flow PathMemberStep(path: File.Path, found: Bool, candidate: File.Path) -> Bool {
+    flow PathMemberStepChoiceTest1(request: Record{candidate: File.Path, path: File.Path, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow PathMemberStepChoiceResult1(request: Record{candidate: File.Path, path: File.Path, selector: Bool}) -> Bool {
+        return true
+    }
+
+    flow PathMemberStepChoiceDefault(request: Record{candidate: File.Path, path: File.Path, selector: Bool}) -> Bool {
+        return File.Path.eq(request.path, request.candidate)
+    }
+
+    return Record.new(selector: found, candidate: candidate, path: path) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PathMemberStepChoiceTest1, PathMemberStepChoiceResult1)),
+        default: PathMemberStepChoiceDefault
+    ))
+}
 flow PathMember(paths: List<File.Path>, path: File.Path) -> Bool { return List.fold(paths, false, path, PathMemberStep) }
-flow StringMemberStep(text: String, found: Bool, candidate: String) -> Bool { return Match.new(found, true: true, _: String.eq(text, candidate)) }
+flow StringMemberStep(text: String, found: Bool, candidate: String) -> Bool {
+    flow StringMemberStepChoiceTest1(request: Record{candidate: String, selector: Bool, text: String}) -> Bool {
+        return request.selector
+    }
+
+    flow StringMemberStepChoiceResult1(request: Record{candidate: String, selector: Bool, text: String}) -> Bool {
+        return true
+    }
+
+    flow StringMemberStepChoiceDefault(request: Record{candidate: String, selector: Bool, text: String}) -> Bool {
+        return String.eq(request.text, request.candidate)
+    }
+
+    return Record.new(selector: found, candidate: candidate, text: text) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StringMemberStepChoiceTest1, StringMemberStepChoiceResult1)),
+        default: StringMemberStepChoiceDefault
+    ))
+}
 flow StringMember(values: List<String>, text: String) -> Bool { return List.fold(values, false, text, StringMemberStep) }
-flow ScalarMemberStep(character: Scalar, found: Bool, candidate: Scalar) -> Bool { return Match.new(found, true: true, _: Scalar.eq(character, candidate)) }
+flow ScalarMemberStep(character: Scalar, found: Bool, candidate: Scalar) -> Bool {
+    flow ScalarMemberStepChoiceTest1(request: Record{candidate: Scalar, character: Scalar, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ScalarMemberStepChoiceResult1(request: Record{candidate: Scalar, character: Scalar, selector: Bool}) -> Bool {
+        return true
+    }
+
+    flow ScalarMemberStepChoiceDefault(request: Record{candidate: Scalar, character: Scalar, selector: Bool}) -> Bool {
+        return Scalar.eq(request.character, request.candidate)
+    }
+
+    return Record.new(selector: found, candidate: candidate, character: character) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ScalarMemberStepChoiceTest1, ScalarMemberStepChoiceResult1)),
+        default: ScalarMemberStepChoiceDefault
+    ))
+}
 flow ScalarMember(values: List<Scalar>, character: Scalar) -> Bool { return List.fold(values, false, character, ScalarMemberStep) }
-flow IntMemberStep(number: Int, found: Bool, candidate: Int) -> Bool { return Match.new(found, true: true, _: Math.eq(number, candidate)) }
+flow IntMemberStep(number: Int, found: Bool, candidate: Int) -> Bool {
+    flow IntMemberStepChoiceTest1(request: Record{candidate: Int, number: Int, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow IntMemberStepChoiceResult1(request: Record{candidate: Int, number: Int, selector: Bool}) -> Bool {
+        return true
+    }
+
+    flow IntMemberStepChoiceDefault(request: Record{candidate: Int, number: Int, selector: Bool}) -> Bool {
+        return Math.eq(request.number, request.candidate)
+    }
+
+    return Record.new(selector: found, candidate: candidate, number: number) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(IntMemberStepChoiceTest1, IntMemberStepChoiceResult1)),
+        default: IntMemberStepChoiceDefault
+    ))
+}
 flow IntMember(values: List<Int>, number: Int) -> Bool { return List.fold(values, false, number, IntMemberStep) }
-flow UniquePathStep(paths: List<File.Path>, path: File.Path) -> List<File.Path> { return Match.new(PathMember(paths, path), true: paths, _: ConcatPaths(paths, List.new(path))) }
+flow UniquePathStep(paths: List<File.Path>, path: File.Path) -> List<File.Path> {
+    flow UniquePathStepChoiceTest1(request: Record{path: File.Path, paths: List<File.Path>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow UniquePathStepChoiceResult1(request: Record{path: File.Path, paths: List<File.Path>, selector: Bool}) -> List<File.Path> {
+        return request.paths
+    }
+
+    flow UniquePathStepChoiceDefault(request: Record{path: File.Path, paths: List<File.Path>, selector: Bool}) -> List<File.Path> {
+        return ConcatPaths(request.paths, List.new(request.path))
+    }
+
+    return Record.new(selector: PathMember(paths, path), path: path, paths: paths) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(UniquePathStepChoiceTest1, UniquePathStepChoiceResult1)),
+        default: UniquePathStepChoiceDefault
+    ))
+}
 flow UniquePaths(paths: List<File.Path>) -> List<File.Path> { return List.fold(paths, List.new(), UniquePathStep) }
 
 flow PathChunk(paths: List<File.Path>, size: Int, start: Int) -> Record{next_state: Int, value: List<File.Path>}! {
     proposed = Math.add(start, size)
-    end = Match.new(Math.gt(proposed, List.length(paths)), true: List.length(paths), _: proposed)
+    end = Record.new(selector: Math.gt(proposed, List.length(paths)), paths: paths, proposed: proposed) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PathChunkEndChoiceTest1, PathChunkEndChoiceResult1)),
+        default: PathChunkEndChoiceDefault
+    ))
+    flow PathChunkEndChoiceTest1(request: Record{paths: List<File.Path>, proposed: Int, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow PathChunkEndChoiceResult1(request: Record{paths: List<File.Path>, proposed: Int, selector: Bool}) -> Int {
+        return List.length(request.paths)
+    }
+
+    flow PathChunkEndChoiceDefault(request: Record{paths: List<File.Path>, proposed: Int, selector: Bool}) -> Int {
+        return request.proposed
+    }
+
     return Record.new(next_state: end, value: List.slice(paths, start, end))
 }
 flow PathChunks(paths: List<File.Path>, size: Int) -> List<List<File.Path>>! {
@@ -46,17 +197,62 @@ flow StringEqualAt(left: List<String>, right: List<String>, index: Int) -> Recor
 }
 flow EqualLengthStrings(left: List<String>, right: List<String>) -> Bool! { return All(List.unfold(0, List.length(left), left, right, StringEqualAt)) }
 flow StringsEqual(left: List<String>, right: List<String>) -> Bool! {
-    return Match.new(Math.eq(List.length(left), List.length(right)), true: EqualLengthStrings(left, right), _: false)
+    flow StringsEqualChoiceTest1(request: Record{left: List<String>, right: List<String>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow StringsEqualChoiceResult1(request: Record{left: List<String>, right: List<String>, selector: Bool}) -> Bool! {
+        return EqualLengthStrings(request.left, request.right)
+    }
+
+    flow StringsEqualChoiceDefault(request: Record{left: List<String>, right: List<String>, selector: Bool}) -> Bool! {
+        return false
+    }
+
+    return Record.new(selector: Math.eq(List.length(left), List.length(right)), left: left, right: right) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StringsEqualChoiceTest1, StringsEqualChoiceResult1)),
+        default: StringsEqualChoiceDefault
+    ))
 }
 flow TreeRowEqualAt(left: List<Record{relative: String, entry: File.Entry}>, right: List<Record{relative: String, entry: File.Entry}>, index: Int) -> Record{next_state: Int, value: Bool}! {
     return Record.new(next_state: Math.add(index, 1), value: SameTreeRow(List.at(left, index), List.at(right, index)))
 }
 flow EqualLengthTreeRows(left: List<Record{relative: String, entry: File.Entry}>, right: List<Record{relative: String, entry: File.Entry}>) -> Bool! { return All(List.unfold(0, List.length(left), left, right, TreeRowEqualAt)) }
 flow TreeRowsEqual(left: List<Record{relative: String, entry: File.Entry}>, right: List<Record{relative: String, entry: File.Entry}>) -> Bool! {
-    return Match.new(Math.eq(List.length(left), List.length(right)), true: EqualLengthTreeRows(left, right), _: false)
+    flow TreeRowsEqualChoiceTest1(request: Record{left: List<Record{entry: File.Entry, relative: String}>, right: List<Record{entry: File.Entry, relative: String}>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow TreeRowsEqualChoiceResult1(request: Record{left: List<Record{entry: File.Entry, relative: String}>, right: List<Record{entry: File.Entry, relative: String}>, selector: Bool}) -> Bool! {
+        return EqualLengthTreeRows(request.left, request.right)
+    }
+
+    flow TreeRowsEqualChoiceDefault(request: Record{left: List<Record{entry: File.Entry, relative: String}>, right: List<Record{entry: File.Entry, relative: String}>, selector: Bool}) -> Bool! {
+        return false
+    }
+
+    return Record.new(selector: Math.eq(List.length(left), List.length(right)), left: left, right: right) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(TreeRowsEqualChoiceTest1, TreeRowsEqualChoiceResult1)),
+        default: TreeRowsEqualChoiceDefault
+    ))
 }
 flow JoinStringStep(separator: String, state: Record{first: Bool, text: String}, text: String) -> Record{first: Bool, text: String} {
-    boundary = Match.new(state.first, true: "", _: separator)
+    boundary = Record.new(selector: state.first, separator: separator) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(JoinStringStepBoundaryChoiceTest1, JoinStringStepBoundaryChoiceResult1)),
+        default: JoinStringStepBoundaryChoiceDefault
+    ))
+    flow JoinStringStepBoundaryChoiceTest1(request: Record{selector: Bool, separator: String}) -> Bool {
+        return request.selector
+    }
+
+    flow JoinStringStepBoundaryChoiceResult1(request: Record{selector: Bool, separator: String}) -> String {
+        return ""
+    }
+
+    flow JoinStringStepBoundaryChoiceDefault(request: Record{selector: Bool, separator: String}) -> String {
+        return request.separator
+    }
+
     return Record.new(first: false, text: String.concat(state.text, boundary, text))
 }
 flow JoinStrings(values: List<String>, separator: String) -> String {
@@ -81,10 +277,22 @@ flow Fail(message: String) -> Int! {
 }
 
 flow Require(condition: Bool, message: String) -> Bool! {
-    return Match.new(condition,
-        true: true,
-        _: Error.new("Application.InvalidState", message, Record.new())
-    )
+    flow RequireChoiceTest1(request: Record{message: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow RequireChoiceResult1(request: Record{message: String, selector: Bool}) -> Bool! {
+        return true
+    }
+
+    flow RequireChoiceDefault(request: Record{message: String, selector: Bool}) -> Bool! {
+        return Error.new("Application.InvalidState", request.message, Record.new())
+    }
+
+    return Record.new(selector: condition, message: message) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RequireChoiceTest1, RequireChoiceResult1)),
+        default: RequireChoiceDefault
+    ))
 }
 
 flow PathText(path: File.Path) -> String { return File.Path.to_string(path) }
@@ -104,17 +312,42 @@ flow Run(context: Process.Context, executable: Process.Executable, arguments: Li
 
 flow RequireSuccess(result: Process.Result) -> Process.Result! {
     code = Process.Termination.exit_code(result.termination)
-    return Match.new(code,
-        0: result,
-        _: Error.new("Application.CommandFailed", String.concat("Command exited with status ", Int.to_string(code)), Record.new(result: result))
-    )
+    flow RequireSuccessChoiceTest1(request: Record{code: Int, result: Process.Result, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow RequireSuccessChoiceResult1(request: Record{code: Int, result: Process.Result, selector: Int}) -> Process.Result! {
+        return request.result
+    }
+
+    flow RequireSuccessChoiceDefault(request: Record{code: Int, result: Process.Result, selector: Int}) -> Process.Result! {
+        return Error.new("Application.CommandFailed", String.concat("Command exited with status ", Int.to_string(request.code)), Record.new(result: request.result))
+    }
+
+    return Record.new(selector: code, code: code, result: result) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RequireSuccessChoiceTest1, RequireSuccessChoiceResult1)),
+        default: RequireSuccessChoiceDefault
+    ))
 }
 
 flow DiscoveryError(error: Error) -> Record{executables: List<Process.Executable>!} {
-    return Record.new(executables: Match.new(error.kind,
-        "Process.ExecutableAbsent": List.new(),
-        _: error
-    ))
+    flow DiscoveryErrorChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "Process.ExecutableAbsent")
+    }
+
+    flow DiscoveryErrorChoiceResult1(request: Record{error: Error, selector: String}) -> List<Process.Executable>! {
+        return List.new()
+    }
+
+    flow DiscoveryErrorChoiceDefault(request: Record{error: Error, selector: String}) -> List<Process.Executable>! {
+        return request.error
+
+    }
+
+    return Record.new(executables: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(DiscoveryErrorChoiceTest1, DiscoveryErrorChoiceResult1)),
+        default: DiscoveryErrorChoiceDefault
+    )))
 }
 
 flow OptionalExecutable(context: Process.Context, name: String) -> Record{executables: List<Process.Executable>!} onError DiscoveryError {
@@ -158,14 +391,42 @@ flow InitialWorkflow() -> Record{failures: List<String>, estimates: List<Int>} {
 }
 
 flow Action(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, executable: Process.Executable, arguments: List<String>, display_arguments: List<String>) -> Int! {
-    prefix = Match.new(context.apply, true: "RUN  ", _: "PLAN ")
+    prefix = context.apply |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ActionPrefixChoiceTest1, ActionPrefixChoiceResult1)),
+        default: ActionPrefixChoiceDefault
+    ))
     printed = Print(String.concat(prefix, Process.Arguments.format_shell(display_arguments)))
     selector_1 = context.apply
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ActionChoice_1ChoiceTest1, ActionChoice_1ChoiceResult1)),
+        default: ActionChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, arguments, context, executable, ActionChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, ActionChoice1Branch2)
+    flow ActionPrefixChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow ActionPrefixChoiceResult1(value: Bool) -> String {
+        return "RUN  "
+    }
+
+    flow ActionPrefixChoiceDefault(value: Bool) -> String {
+        return "PLAN "
+    }
+
+    flow ActionChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow ActionChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow ActionChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -187,16 +448,44 @@ flow Command(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
     discovered = OptionalExecutable(context.process, List.at(task.arguments, 0))
     executables = discovered.executables
     selector_1 = List.length(executables)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CommandChoice_1ChoiceTest1, CommandChoice_1ChoiceResult1)),
+        default: CommandChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, task, CommandChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, executables, task, CommandChoice1Branch2)
+    flow CommandChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow CommandChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow CommandChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
 flow ProbeTerminationError(error: Error) -> Int! {
-    return Match.new(error.kind, "Process.TerminationKind": -1, _: error)
+    flow ProbeTerminationErrorChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "Process.TerminationKind")
+    }
+
+    flow ProbeTerminationErrorChoiceResult1(request: Record{error: Error, selector: String}) -> Int! {
+        return -1
+    }
+
+    flow ProbeTerminationErrorChoiceDefault(request: Record{error: Error, selector: String}) -> Int! {
+        return request.error
+    }
+
+    return Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbeTerminationErrorChoiceTest1, ProbeTerminationErrorChoiceResult1)),
+        default: ProbeTerminationErrorChoiceDefault
+    ))
 }
 
 flow ProbeExitCode(termination: Process.Termination) -> Record{code: Int!} onError ProbeTerminationWrapped {
@@ -210,21 +499,46 @@ flow ProbeTerminationWrapped(error: Error) -> Record{code: Int!} {
 flow PipWithPython(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, executable: Process.Executable) -> List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}>! {
     result = Run(context.process, executable, List.new("-m", "pip", "--version"), "capture", 60)
     termination = ProbeExitCode(result.termination)
-    return Match.new(termination.code,
-        0: List.new(CommandTask("pip", List.new("python3", "-m", "pip", "cache", "purge"))),
-        _: List.new()
-    )
+    flow PipWithPythonChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow PipWithPythonChoiceResult1(value: Int) -> List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>! {
+        return List.new(CommandTask("pip", List.new("python3", "-m", "pip", "cache", "purge")))
+    }
+
+    flow PipWithPythonChoiceDefault(value: Int) -> List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>! {
+        return List.new()
+    }
+
+    return termination.code |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PipWithPythonChoiceTest1, PipWithPythonChoiceResult1)),
+        default: PipWithPythonChoiceDefault
+    ))
 }
 
 flow DetectPip(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}>! {
     discovered = OptionalExecutable(context.process, "python3")
     executables = discovered.executables
     selector_1 = List.length(executables)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(DetectPipChoice_1ChoiceTest1, DetectPipChoice_1ChoiceResult1)),
+        default: DetectPipChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), List.new(), DetectPipChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, executables, DetectPipChoice1Branch2)
+    flow DetectPipChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow DetectPipChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow DetectPipChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -235,10 +549,22 @@ flow PreviewPip() -> List<Record{label: String, operation: String, path: File.Pa
 
 flow RejectAmbient(context: Process.Context, state: Bool, name: String) -> Bool! {
     captured = TryEnvironmentValue(context, name)
-    return Match.new(List.length(captured.errors),
-        0: Require(String.eq(captured.result, ""), String.concat("Unset ", name, "; mac-cleanup uses desktop-linux")),
-        _: AbsentEnvironment(state, List.at(captured.errors, 0))
-    )
+    flow RejectAmbientChoiceTest1(request: Record{captured: Record{errors: List<Error>, result: String!}, name: String, selector: Int, state: Bool}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow RejectAmbientChoiceResult1(request: Record{captured: Record{errors: List<Error>, result: String!}, name: String, selector: Int, state: Bool}) -> Bool! {
+        return Require(String.eq(request.captured.result, ""), String.concat("Unset ", request.name, "; mac-cleanup uses desktop-linux"))
+    }
+
+    flow RejectAmbientChoiceDefault(request: Record{captured: Record{errors: List<Error>, result: String!}, name: String, selector: Int, state: Bool}) -> Bool! {
+        return AbsentEnvironment(request.state, List.at(request.captured.errors, 0))
+    }
+
+    return Record.new(selector: List.length(captured.errors), captured: captured, name: name, state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RejectAmbientChoiceTest1, RejectAmbientChoiceResult1)),
+        default: RejectAmbientChoiceDefault
+    ))
 }
 
 flow EnvironmentValue(context: Process.Context, name: String) -> String! {
@@ -246,7 +572,22 @@ flow EnvironmentValue(context: Process.Context, name: String) -> String! {
 }
 
 flow AbsentEnvironment(state: Bool, error: Error) -> Bool! {
-    return Match.new(error.kind, "Process.EnvironmentAbsent": state, _: error)
+    flow AbsentEnvironmentChoiceTest1(request: Record{error: Error, selector: String, state: Bool}) -> Bool {
+        return String.eq(request.selector, "Process.EnvironmentAbsent")
+    }
+
+    flow AbsentEnvironmentChoiceResult1(request: Record{error: Error, selector: String, state: Bool}) -> Bool! {
+        return request.state
+    }
+
+    flow AbsentEnvironmentChoiceDefault(request: Record{error: Error, selector: String, state: Bool}) -> Bool! {
+        return request.error
+    }
+
+    return Record.new(selector: error.kind, error: error, state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(AbsentEnvironmentChoiceTest1, AbsentEnvironmentChoiceResult1)),
+        default: AbsentEnvironmentChoiceDefault
+    ))
 }
 
 flow DockerCommand(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, executable: Process.Executable, arguments: List<String>, output: String) -> Process.Result! {
@@ -254,40 +595,172 @@ flow DockerCommand(context: Record{apply: Bool, home: File.Path, uid: Int, proce
 }
 
 flow BuilderFirst(tokens: List<String>) -> List<String>! {
-    return Match.new(List.length(tokens), 0: List.new(), _: List.slice(tokens, 0, 1))
+    flow BuilderFirstChoiceTest1(request: Record{selector: Int, tokens: List<String>}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow BuilderFirstChoiceResult1(request: Record{selector: Int, tokens: List<String>}) -> List<String>! {
+        return List.new()
+    }
+
+    flow BuilderFirstChoiceDefault(request: Record{selector: Int, tokens: List<String>}) -> List<String>! {
+        return List.slice(request.tokens, 0, 1)
+    }
+
+    return Record.new(selector: List.length(tokens), tokens: tokens) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuilderFirstChoiceTest1, BuilderFirstChoiceResult1)),
+        default: BuilderFirstChoiceDefault
+    ))
 }
 
 flow BuilderSuffix(key: String, line: String) -> Record{pending: Bool, values: List<String>}! {
     suffix = String.slice(line, Math.add(String.length(key), 1), String.length(line))
-    spaced = Match.new(String.length(suffix), 0: true, _: String.is_whitespace(String.slice(suffix, 0, 1)))
+    spaced = BuilderSuffixSpacedChoiceValue(Record.new(selector: String.length(suffix), suffix: suffix) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuilderSuffixSpacedChoiceTest1, BuilderSuffixSpacedChoiceResult1)),
+        default: BuilderSuffixSpacedChoiceDefault
+    )))
     tokens = String.split_whitespace(suffix)
-    return Match.new(spaced,
-        true: Record.new(pending: Math.eq(List.length(tokens), 0), values: BuilderFirst(tokens)),
-        _: Record.new(pending: false, values: List.new()))
+    flow BuilderSuffixSpacedChoiceTest1(request: Record{selector: Int, suffix: String}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow BuilderSuffixSpacedChoiceResult1(request: Record{selector: Int, suffix: String}) -> Bool! {
+        return true
+    }
+
+    flow BuilderSuffixSpacedChoiceDefault(request: Record{selector: Int, suffix: String}) -> Bool! {
+        return String.is_whitespace(String.slice(request.suffix, 0, 1))
+    }
+
+    flow BuilderSuffixSpacedChoiceValue(value: Bool) -> Bool { return value }
+
+    flow BuilderSuffixChoiceTest1(request: Record{selector: Bool, tokens: List<String>}) -> Bool {
+        return request.selector
+    }
+
+    flow BuilderSuffixChoiceResult1(request: Record{selector: Bool, tokens: List<String>}) -> Record{pending: Bool, values: List<String>}! {
+        return Record.new(pending: Math.eq(List.length(request.tokens), 0), values: BuilderFirst(request.tokens))
+    }
+
+    flow BuilderSuffixChoiceDefault(request: Record{selector: Bool, tokens: List<String>}) -> Record{pending: Bool, values: List<String>}! {
+        return Record.new(pending: false, values: List.new())
+    }
+
+    return Record.new(selector: spaced, tokens: tokens) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuilderSuffixChoiceTest1, BuilderSuffixChoiceResult1)),
+        default: BuilderSuffixChoiceDefault
+    ))
 }
 
 flow BuilderValue(key: String, line: String) -> Record{pending: Bool, values: List<String>}! {
-    return Match.new(String.starts_with(line, String.concat(key, ":")),
-        true: BuilderSuffix(key, line), _: Record.new(pending: false, values: List.new()))
+    flow BuilderValueChoiceTest1(request: Record{key: String, line: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow BuilderValueChoiceResult1(request: Record{key: String, line: String, selector: Bool}) -> Record{pending: Bool, values: List<String>}! {
+        return BuilderSuffix(request.key, request.line)
+    }
+
+    flow BuilderValueChoiceDefault(request: Record{key: String, line: String, selector: Bool}) -> Record{pending: Bool, values: List<String>}! {
+        return Record.new(pending: false, values: List.new())
+    }
+
+    return Record.new(selector: String.starts_with(line, String.concat(key, ":")), key: key, line: line) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuilderValueChoiceTest1, BuilderValueChoiceResult1)),
+        default: BuilderValueChoiceDefault
+    ))
 }
 
 flow BuilderField(key: String, state: Record{pending: Bool, values: List<String>}, line: String) -> Record{pending: Bool, values: List<String>}! {
     prefix = BuilderValue(key, line)
     continued = String.split_whitespace(line)
-    return Match.new(state.pending,
-        true: Record.new(pending: Math.eq(List.length(continued), 0), values: ConcatStrings(state.values, BuilderFirst(continued))),
-        _: Record.new(pending: prefix.pending, values: ConcatStrings(state.values, prefix.values)))
+    flow BuilderFieldChoiceTest1(request: Record{continued: List<String>, prefix: Record{pending: Bool, values: List<String>}, selector: Bool, state: Record{pending: Bool, values: List<String>}}) -> Bool {
+        return request.selector
+    }
+
+    flow BuilderFieldChoiceResult1(request: Record{continued: List<String>, prefix: Record{pending: Bool, values: List<String>}, selector: Bool, state: Record{pending: Bool, values: List<String>}}) -> Record{pending: Bool, values: List<String>}! {
+        return Record.new(pending: Math.eq(List.length(request.continued), 0), values: ConcatStrings(request.state.values, BuilderFirst(request.continued)))
+    }
+
+    flow BuilderFieldChoiceDefault(request: Record{continued: List<String>, prefix: Record{pending: Bool, values: List<String>}, selector: Bool, state: Record{pending: Bool, values: List<String>}}) -> Record{pending: Bool, values: List<String>}! {
+        return Record.new(pending: request.prefix.pending, values: ConcatStrings(request.state.values, request.prefix.values))
+    }
+
+    return Record.new(selector: state.pending, continued: continued, prefix: prefix, state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuilderFieldChoiceTest1, BuilderFieldChoiceResult1)),
+        default: BuilderFieldChoiceDefault
+    ))
 }
 
 flow StrictBuilderField(key: String, state: Record{pending: Bool, values: List<String>}, line: String) -> Record{pending: Bool, values: List<String>}! {
     continued = String.split_whitespace(line)
     key_line = String.starts_with(line, String.concat(key, ":"))
-    suffix = Match.new(key_line, true: String.slice(line, Math.add(String.length(key), 1), String.length(line)), _: "")
-    spaced = Match.new(String.length(suffix), 0: true, _: String.is_whitespace(String.slice(suffix, 0, 1)))
-    valid = Match.new(state.pending,
-        true: Math.lte(List.length(continued), 1),
-        _: Match.new(key_line, true: All(List.new(spaced, Math.lte(List.length(String.split_whitespace(suffix)), 1))), _: true))
+    suffix = Record.new(selector: key_line, key: key, line: line) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StrictBuilderFieldSuffixChoiceTest1, StrictBuilderFieldSuffixChoiceResult1)),
+        default: StrictBuilderFieldSuffixChoiceDefault
+    ))
+    spaced = StrictBuilderFieldSpacedChoiceValue(Record.new(selector: String.length(suffix), suffix: suffix) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StrictBuilderFieldSpacedChoiceTest1, StrictBuilderFieldSpacedChoiceResult1)),
+        default: StrictBuilderFieldSpacedChoiceDefault
+    )))
+    valid = Record.new(selector: state.pending, continued: continued, key_line: key_line, spaced: spaced, suffix: suffix) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StrictBuilderFieldValidChoiceTest1, StrictBuilderFieldValidChoiceResult1)),
+        default: StrictBuilderFieldValidChoiceDefault
+    ))
     checked = Require(valid, String.concat("Malformed Docker builder field: ", key))
+    flow StrictBuilderFieldSuffixChoiceTest1(request: Record{key: String, line: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow StrictBuilderFieldSuffixChoiceResult1(request: Record{key: String, line: String, selector: Bool}) -> String! {
+        return String.slice(request.line, Math.add(String.length(request.key), 1), String.length(request.line))
+    }
+
+    flow StrictBuilderFieldSuffixChoiceDefault(request: Record{key: String, line: String, selector: Bool}) -> String! {
+        return ""
+    }
+
+    flow StrictBuilderFieldSpacedChoiceTest1(request: Record{selector: Int, suffix: String}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow StrictBuilderFieldSpacedChoiceResult1(request: Record{selector: Int, suffix: String}) -> Bool! {
+        return true
+    }
+
+    flow StrictBuilderFieldSpacedChoiceDefault(request: Record{selector: Int, suffix: String}) -> Bool! {
+        return String.is_whitespace(String.slice(request.suffix, 0, 1))
+    }
+
+    flow StrictBuilderFieldSpacedChoiceValue(value: Bool) -> Bool { return value }
+
+    flow StrictBuilderFieldValidChoiceTest1(request: Record{continued: List<String>, key_line: Bool, selector: Bool, spaced: Bool, suffix: String}) -> Bool {
+        return request.selector
+    }
+
+    flow StrictBuilderFieldValidChoiceResult1(request: Record{continued: List<String>, key_line: Bool, selector: Bool, spaced: Bool, suffix: String}) -> Bool {
+        return Math.lte(List.length(request.continued), 1)
+    }
+
+    flow StrictBuilderFieldValidChoice2Test1(request: Record{selector: Bool, spaced: Bool, suffix: String}) -> Bool {
+        return request.selector
+    }
+
+    flow StrictBuilderFieldValidChoice2Result1(request: Record{selector: Bool, spaced: Bool, suffix: String}) -> Bool {
+        return All(List.new(request.spaced, Math.lte(List.length(String.split_whitespace(request.suffix)), 1)))
+    }
+
+    flow StrictBuilderFieldValidChoice2Default(request: Record{selector: Bool, spaced: Bool, suffix: String}) -> Bool {
+        return true
+    }
+
+    flow StrictBuilderFieldValidChoiceDefault(request: Record{continued: List<String>, key_line: Bool, selector: Bool, spaced: Bool, suffix: String}) -> Bool {
+        return Record.new(selector: request.key_line, spaced: request.spaced, suffix: request.suffix) |> Match.apply(Match.new(
+            cases: List.new(Match.Case.new(StrictBuilderFieldValidChoice2Test1, StrictBuilderFieldValidChoice2Result1)),
+            default: StrictBuilderFieldValidChoice2Default
+        ))
+    }
+
     return BuilderField(key, state, line)
 }
 
@@ -327,11 +800,24 @@ flow DockerPreview(context: Record{apply: Bool, home: File.Path, uid: Int, proce
 flow DockerPresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, executable: Process.Executable) -> Int! {
     clean = Flow.fold(List.new("DOCKER_HOST", "DOCKER_CONTEXT", "BUILDX_BUILDER"), true, context.process, RejectAmbient)
     selector_1 = context.apply
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(DockerPresentChoice_1ChoiceTest1, DockerPresentChoice_1ChoiceResult1)),
+        default: DockerPresentChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, context, executable, DockerPresentChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, executable, DockerPresentChoice1Branch2)
+    flow DockerPresentChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow DockerPresentChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow DockerPresentChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -344,11 +830,24 @@ flow Docker(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pro
     discovered = OptionalExecutable(context.process, "docker")
     executables = discovered.executables
     selector_1 = List.length(executables)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(DockerChoice_1ChoiceTest1, DockerChoice_1ChoiceResult1)),
+        default: DockerChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, DockerChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, executables, DockerChoice1Branch2)
+    flow DockerChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow DockerChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow DockerChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -366,21 +865,39 @@ flow ApplyTemporary(context: Record{apply: Bool, home: File.Path, uid: Int, proc
     return Flow.fold(roots, 0, context, CleanTempRoot)
 }
 flow TemporaryFiles(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path) -> Int! {
-    choice = Match.new(context.apply, true: 1, _: 2)
+    choice = context.apply |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(TemporaryFilesChoiceChoiceTest1, TemporaryFilesChoiceChoiceResult1)),
+        default: TemporaryFilesChoiceChoiceDefault
+    ))
     applied = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context, shared, prefix, getconf, ApplyTemporary)
+    flow TemporaryFilesChoiceChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow TemporaryFilesChoiceChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow TemporaryFilesChoiceChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), applied, context, shared, PreviewTemporary)
 }
 
 flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, task: Record{label: String, operation: String, path: File.Path, arguments: List<String>}) -> Int! {
     selector_1 = task.operation
-    choice_1 = Match.new(selector_1,
-        "command": 1,
-        "files": 2,
-        "cache": 3,
-        "temp": 5,
-        "docker": 6,
-        "logs": 7,
-        _: 8)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(
+            Match.Case.new(PerformChoice_1ChoiceTest1, PerformChoice_1ChoiceResult1),
+            Match.Case.new(PerformChoice_1ChoiceTest2, PerformChoice_1ChoiceResult2),
+            Match.Case.new(PerformChoice_1ChoiceTest3, PerformChoice_1ChoiceResult3),
+            Match.Case.new(PerformChoice_1ChoiceTest4, PerformChoice_1ChoiceResult4),
+            Match.Case.new(PerformChoice_1ChoiceTest5, PerformChoice_1ChoiceResult5),
+            Match.Case.new(PerformChoice_1ChoiceTest6, PerformChoice_1ChoiceResult6),
+        ),
+        default: PerformChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, context, task, PerformChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, task, PerformChoice1Branch2)
     choice_1_result_3 = Flow.fold(List.filter(List.new(choice_1), 3, SelectedChoice), choice_1_result_2, context, task, PerformChoice1Branch3)
@@ -388,6 +905,58 @@ flow Perform(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
     choice_1_result_6 = Flow.fold(List.filter(List.new(choice_1), 6, SelectedChoice), choice_1_result_5, context, PerformChoice1Branch6)
     choice_1_result_7 = Flow.fold(List.filter(List.new(choice_1), 7, SelectedChoice), choice_1_result_6, context, PerformChoice1Branch7)
     choice_1_result_8 = Flow.fold(List.filter(List.new(choice_1), 8, SelectedChoice), choice_1_result_7, PerformChoice1Branch8)
+    flow PerformChoice_1ChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "command")
+    }
+
+    flow PerformChoice_1ChoiceResult1(value: String) -> Int {
+        return 1
+    }
+
+    flow PerformChoice_1ChoiceTest2(value: String) -> Bool {
+        return String.eq(value, "files")
+    }
+
+    flow PerformChoice_1ChoiceResult2(value: String) -> Int {
+        return 2
+    }
+
+    flow PerformChoice_1ChoiceTest3(value: String) -> Bool {
+        return String.eq(value, "cache")
+    }
+
+    flow PerformChoice_1ChoiceResult3(value: String) -> Int {
+        return 3
+    }
+
+    flow PerformChoice_1ChoiceTest4(value: String) -> Bool {
+        return String.eq(value, "temp")
+    }
+
+    flow PerformChoice_1ChoiceResult4(value: String) -> Int {
+        return 5
+    }
+
+    flow PerformChoice_1ChoiceTest5(value: String) -> Bool {
+        return String.eq(value, "docker")
+    }
+
+    flow PerformChoice_1ChoiceResult5(value: String) -> Int {
+        return 6
+    }
+
+    flow PerformChoice_1ChoiceTest6(value: String) -> Bool {
+        return String.eq(value, "logs")
+    }
+
+    flow PerformChoice_1ChoiceResult6(value: String) -> Int {
+        return 7
+    }
+
+    flow PerformChoice_1ChoiceDefault(value: String) -> Int {
+        return 8
+    }
+
     return choice_1_result_8
 }
 
@@ -403,22 +972,48 @@ flow Attempt(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pr
 
 flow RecordOutcome(state: Record{failures: List<String>, estimates: List<Int>}, label: String, captured: Record{result: Int!, errors: List<Error>}) -> Record{failures: List<String>, estimates: List<Int>}! {
     selector_1 = List.length(captured.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RecordOutcomeChoice_1ChoiceTest1, RecordOutcomeChoice_1ChoiceResult1)),
+        default: RecordOutcomeChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), state, captured, state, RecordSuccess)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, captured, state, label, RecordFailure)
+    flow RecordOutcomeChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow RecordOutcomeChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow RecordOutcomeChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
 flow Xcode(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, state: Record{failures: List<String>, estimates: List<Int>}) -> Record{failures: List<String>, estimates: List<Int>}! {
     captured = TryXcodeTargets(context)
     selector_1 = List.length(captured.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(XcodeChoice_1ChoiceTest1, XcodeChoice_1ChoiceResult1)),
+        default: XcodeChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), state, captured, context, state, XcodeChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, captured, state, XcodeChoice1Branch2)
+    flow XcodeChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow XcodeChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow XcodeChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -449,7 +1044,22 @@ flow OptionalReportEntry(parent: File.Directory, name: String) -> Record{entries
     return Record.new(entries: List.new(entry))
 }
 flow ReportEntryPath(paths: List<File.Path>, entry: File.Entry) -> List<File.Path> {
-    return Match.new(StringMember(List.new("regular", "directory"), entry.kind), true: ConcatPaths(paths, List.new(entry.path)), _: paths)
+    flow ReportEntryPathChoiceTest1(request: Record{entry: File.Entry, paths: List<File.Path>, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ReportEntryPathChoiceResult1(request: Record{entry: File.Entry, paths: List<File.Path>, selector: Bool}) -> List<File.Path> {
+        return ConcatPaths(request.paths, List.new(request.entry.path))
+    }
+
+    flow ReportEntryPathChoiceDefault(request: Record{entry: File.Entry, paths: List<File.Path>, selector: Bool}) -> List<File.Path> {
+        return request.paths
+    }
+
+    return Record.new(selector: StringMember(List.new("regular", "directory"), entry.kind), entry: entry, paths: paths) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ReportEntryPathChoiceTest1, ReportEntryPathChoiceResult1)),
+        default: ReportEntryPathChoiceDefault
+    ))
 }
 flow ReportParentPath(path: File.Path, paths: List<File.Path>, parent: File.Directory) -> List<File.Path>! {
     observed = OptionalReportEntry(parent, File.Path.name(path))
@@ -466,24 +1076,103 @@ flow ParseStorageLine(line: String) -> Record{bytes: Int, path: String}! {
 }
 
 flow CompareStorageRows(left: Record{bytes: Int, path: String}, right: Record{bytes: Int, path: String}) -> Int {
-    return Match.new(Math.eq(left.bytes, right.bytes),
-        true: Math.mul(-1, String.compare(left.path, right.path)),
-        _: Match.new(Math.gt(left.bytes, right.bytes), true: -1, _: 1)
-    )
+    flow CompareStorageRowsChoiceTest1(request: Record{left: Record{bytes: Int, path: String}, right: Record{bytes: Int, path: String}, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow CompareStorageRowsChoiceResult1(request: Record{left: Record{bytes: Int, path: String}, right: Record{bytes: Int, path: String}, selector: Bool}) -> Int {
+        return Math.mul(-1, String.compare(request.left.path, request.right.path))
+    }
+
+    flow CompareStorageRowsChoice2Test1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow CompareStorageRowsChoice2Result1(value: Bool) -> Int {
+        return -1
+    }
+
+    flow CompareStorageRowsChoice2Default(value: Bool) -> Int {
+        return 1
+    }
+
+    flow CompareStorageRowsChoiceDefault(request: Record{left: Record{bytes: Int, path: String}, right: Record{bytes: Int, path: String}, selector: Bool}) -> Int {
+        return Math.gt(request.left.bytes, request.right.bytes) |> Match.apply(Match.new(
+            cases: List.new(Match.Case.new(CompareStorageRowsChoice2Test1, CompareStorageRowsChoice2Result1)),
+            default: CompareStorageRowsChoice2Default
+        ))
+    }
+
+    return Record.new(selector: Math.eq(left.bytes, right.bytes), left: left, right: right) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CompareStorageRowsChoiceTest1, CompareStorageRowsChoiceResult1)),
+        default: CompareStorageRowsChoiceDefault
+    ))
 }
 
 flow StorageLabel(targets: List<File.Path>, row: Record{bytes: Int, path: String}) -> String {
-    base = Match.new(List.fold(targets, false, File.Path.new(row.path), SamePath), true: "stale-cache cleanup", _: "report only")
-    return Match.new(String.ends_with(row.path, "/Library/Caches/go-build"),
-        true: "Go command cleanup",
-        _: Match.new(String.ends_with(row.path, "/Xcode/DerivedData"),
-            true: "whole stale build/cache trees only; SourcePackages preserved",
-            _: Match.new(String.ends_with(row.path, "/Data/vms"),
-                true: "Docker image/build cleanup; host disk may not shrink immediately",
-                _: base
-            )
-        )
-    )
+    base = List.fold(targets, false, File.Path.new(row.path), SamePath) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StorageLabelBaseChoiceTest1, StorageLabelBaseChoiceResult1)),
+        default: StorageLabelBaseChoiceDefault
+    ))
+    flow StorageLabelBaseChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow StorageLabelBaseChoiceResult1(value: Bool) -> String {
+        return "stale-cache cleanup"
+    }
+
+    flow StorageLabelBaseChoiceDefault(value: Bool) -> String {
+        return "report only"
+    }
+
+    flow StorageLabelChoiceTest1(request: Record{base: String, row: Record{bytes: Int, path: String}, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow StorageLabelChoiceResult1(request: Record{base: String, row: Record{bytes: Int, path: String}, selector: Bool}) -> String {
+        return "Go command cleanup"
+    }
+
+    flow StorageLabelChoice2Test1(request: Record{base: String, row: Record{bytes: Int, path: String}, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow StorageLabelChoice2Result1(request: Record{base: String, row: Record{bytes: Int, path: String}, selector: Bool}) -> String {
+        return "whole stale build/cache trees only; SourcePackages preserved"
+    }
+
+    flow StorageLabelChoice3Test1(request: Record{base: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow StorageLabelChoice3Result1(request: Record{base: String, selector: Bool}) -> String {
+        return "Docker image/build cleanup; host disk may not shrink immediately"
+    }
+
+    flow StorageLabelChoice3Default(request: Record{base: String, selector: Bool}) -> String {
+        return request.base
+
+    }
+
+    flow StorageLabelChoice2Default(request: Record{base: String, row: Record{bytes: Int, path: String}, selector: Bool}) -> String {
+        return Record.new(selector: String.ends_with(request.row.path, "/Data/vms"), base: request.base) |> Match.apply(Match.new(
+            cases: List.new(Match.Case.new(StorageLabelChoice3Test1, StorageLabelChoice3Result1)),
+            default: StorageLabelChoice3Default
+        ))
+    }
+
+    flow StorageLabelChoiceDefault(request: Record{base: String, row: Record{bytes: Int, path: String}, selector: Bool}) -> String {
+        return Record.new(selector: String.ends_with(request.row.path, "/Xcode/DerivedData"), base: request.base, row: request.row) |> Match.apply(Match.new(
+            cases: List.new(Match.Case.new(StorageLabelChoice2Test1, StorageLabelChoice2Result1)),
+            default: StorageLabelChoice2Default
+        ))
+    }
+
+    return Record.new(selector: String.ends_with(row.path, "/Library/Caches/go-build"), base: base, row: row) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StorageLabelChoiceTest1, StorageLabelChoiceResult1)),
+        default: StorageLabelChoiceDefault
+    ))
 }
 
 flow StorageRowText(size: String, label: String, path: String) -> String! {
@@ -521,11 +1210,24 @@ flow ParseStorageRows(rows: List<Record{bytes: Int, path: String}>, line: String
 flow StorageReport(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Int! {
     paths = Flow.fold(StoragePaths(context), List.new(), ExistingReportPath)
     selector_1 = List.length(paths)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StorageReportChoice_1ChoiceTest1, StorageReportChoice_1ChoiceResult1)),
+        default: StorageReportChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, StorageReportChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, paths, du, StorageReportChoice1Branch2)
+    flow StorageReportChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow StorageReportChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow StorageReportChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -535,7 +1237,22 @@ flow SummaryFailure(state: Record{failures: List<String>, estimates: List<Int>})
 }
 
 flow SummarySuccess(apply: Bool) -> Program.Exit! {
-    printed = Print(Match.new(apply, true: "Cleanup complete", _: "Preview complete; nothing deleted"))
+    printed = Print(apply |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(SummarySuccessPrintedChoiceTest1, SummarySuccessPrintedChoiceResult1)),
+        default: SummarySuccessPrintedChoiceDefault
+    )))
+    flow SummarySuccessPrintedChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow SummarySuccessPrintedChoiceResult1(value: Bool) -> String {
+        return "Cleanup complete"
+    }
+
+    flow SummarySuccessPrintedChoiceDefault(value: Bool) -> String {
+        return "Preview complete; nothing deleted"
+    }
+
     return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
 }
 
@@ -544,31 +1261,70 @@ flow Finish(context: Record{apply: Bool, home: File.Path, uid: Int, process: Pro
     after = File.System.usage(context.home)
     printed = Print(String.concat("Free disk space now: ", HumanSize(after.free_bytes), "; net volume change: ", HumanSize(Math.sub(after.free_bytes, before)), " (includes concurrent activity and APFS effects)"))
     selector_1 = List.length(state.failures)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(FinishChoice_1ChoiceTest1, FinishChoice_1ChoiceResult1)),
+        default: FinishChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), context, FinishChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, state, FinishChoice1Branch2)
+    flow FinishChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow FinishChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow FinishChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
 flow PlanNotice(apply: Bool) -> Bool! {
     selector_1 = apply
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PlanNoticeChoice_1ChoiceTest1, PlanNoticeChoice_1ChoiceResult1)),
+        default: PlanNoticeChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, PlanNoticeChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, PlanNoticeChoice1Branch2)
+    flow PlanNoticeChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow PlanNoticeChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow PlanNoticeChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
 flow UnknownEstimate(apply: Bool) -> Bool! {
     selector_1 = apply
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(UnknownEstimateChoice_1ChoiceTest1, UnknownEstimateChoice_1ChoiceResult1)),
+        default: UnknownEstimateChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, UnknownEstimateChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, UnknownEstimateChoice1Branch2)
+    flow UnknownEstimateChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow UnknownEstimateChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow UnknownEstimateChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -577,13 +1333,17 @@ flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: P
     pip = TryPreparePip(context)
     initial = InitialWorkflow()
     selector_1 = List.length(pip.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(WorkflowChoice_1ChoiceTest1, WorkflowChoice_1ChoiceResult1)),
+        default: WorkflowChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), initial, initial, WorkflowChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, initial, pip, WorkflowChoice1Branch2)
     pip_state = choice_1_result_2
-    pip_tasks = TaskGroup(Match.new(List.length(pip.errors), 0: pip.result, _: List.new()))
+    pip_tasks = TaskGroup(WorkflowPip_tasksChoiceValue(Record.new(selector: List.length(pip.errors), pip: pip) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(WorkflowPip_tasksChoiceTest1, WorkflowPip_tasksChoiceResult1)),
+        default: WorkflowPip_tasksChoiceDefault
+    ))))
     commands = Flow.fold(ConcatTasks(CommandTasks(), pip_tasks), pip_state, context, Attempt)
     logs = Task("npm logs", "files", File.Path.join(context.home, ".npm/_logs"), List.new())
     with_logs = Attempt(context, commands, logs)
@@ -597,29 +1357,96 @@ flow Workflow(context: Record{apply: Bool, home: File.Path, uid: Int, process: P
         Task("Gateway logs", "logs", File.Path.new("."), List.new())
     )
     completed = Flow.fold(remaining, trees, context, Attempt)
+    flow WorkflowChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow WorkflowChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow WorkflowChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
+    flow WorkflowPip_tasksChoiceTest1(request: Record{pip: Record{errors: List<Error>, result: List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>!}, selector: Int}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow WorkflowPip_tasksChoiceResult1(request: Record{pip: Record{errors: List<Error>, result: List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>!}, selector: Int}) -> List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>! {
+        return request.pip.result
+    }
+
+    flow WorkflowPip_tasksChoiceDefault(request: Record{pip: Record{errors: List<Error>, result: List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>!}, selector: Int}) -> List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>! {
+        return List.new()
+    }
+
+    flow WorkflowPip_tasksChoiceValue(value: List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}>) -> List<Record{arguments: List<String>, label: String, operation: String, path: File.Path}> { return value }
+
     return Finish(context, before, completed)
 }
 
 flow PreparePip(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}) -> List<Record{label: String, operation: String, path: File.Path, arguments: List<String>}>! {
     selector_1 = context.apply
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PreparePipChoice_1ChoiceTest1, PreparePipChoice_1ChoiceResult1)),
+        default: PreparePipChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), List.new(), context, PreparePipChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, PreparePipChoice1Branch2)
+    flow PreparePipChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow PreparePipChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow PreparePipChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
 flow Report(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, du: File.Path) -> Program.Exit! {
     captured = TryStorageReport(context, du)
     selector_1 = List.length(captured.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ReportChoice_1ChoiceTest1, ReportChoice_1ChoiceResult1)),
+        default: ReportChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, ReportChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, captured, ReportChoice1Branch2)
     failed = choice_1_result_2
-    return Program.Exit.new(Match.new(failed, true: 1, _: 0), Bytes.new(""), Bytes.new(""))
+    flow ReportChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow ReportChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow ReportChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
+    flow ReportChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow ReportChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow ReportChoiceDefault(value: Bool) -> Int {
+        return 0
+    }
+
+    return Program.Exit.new(failed |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ReportChoiceTest1, ReportChoiceResult1)),
+        default: ReportChoiceDefault
+    )), Bytes.new(""), Bytes.new(""))
 }
 
 flow ReportFailure(error: Error) -> Bool! {
@@ -645,11 +1472,24 @@ flow Started(invocation: Host.Invocation, options: CLI.Options, settings: Record
     dry_run = Map.get(options.flags, "--dry-run")
     context = Record.new(apply: Not(Any(List.new(report, dry_run))), home: invocation.home, uid: invocation.real_uid, process: process)
     selector_1 = report
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StartedChoice_1ChoiceTest1, StartedChoice_1ChoiceResult1)),
+        default: StartedChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), context, settings.du, StartedChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, free_bytes, context, settings, StartedChoice1Branch2)
+    flow StartedChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow StartedChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow StartedChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
@@ -657,17 +1497,60 @@ flow Locked(invocation: Host.Invocation, options: CLI.Options, settings: Record{
     lock = Lock.File.new(Program.path())
     lease = commit lock
     selector_1 = invocation.effective_uid
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(LockedChoice_1ChoiceTest1, LockedChoice_1ChoiceResult1)),
+        default: LockedChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), LockedChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, settings, LockedChoice1Branch2)
+    flow LockedChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow LockedChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow LockedChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 
 flow StartupFailure(error: Error) -> Record{results: List<Program.Exit>, code: Int, message: String} {
-    code = Match.new(error.kind, "CLI.InvalidArguments": 2, _: 1)
-    message = Match.new(error.kind, "Lock.Busy": "Another cleanup instance is running", _: error.message)
+    code = error.kind |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StartupFailureCodeChoiceTest1, StartupFailureCodeChoiceResult1)),
+        default: StartupFailureCodeChoiceDefault
+    ))
+    message = Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StartupFailureMessageChoiceTest1, StartupFailureMessageChoiceResult1)),
+        default: StartupFailureMessageChoiceDefault
+    ))
+    flow StartupFailureCodeChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "CLI.InvalidArguments")
+    }
+
+    flow StartupFailureCodeChoiceResult1(value: String) -> Int {
+        return 2
+    }
+
+    flow StartupFailureCodeChoiceDefault(value: String) -> Int {
+        return 1
+    }
+
+    flow StartupFailureMessageChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "Lock.Busy")
+    }
+
+    flow StartupFailureMessageChoiceResult1(request: Record{error: Error, selector: String}) -> String {
+        return "Another cleanup instance is running"
+    }
+
+    flow StartupFailureMessageChoiceDefault(request: Record{error: Error, selector: String}) -> String {
+        return request.error.message
+    }
+
     return Record.new(results: List.new(), code: code, message: message)
 }
 
@@ -683,20 +1566,45 @@ flow Startup(settings: Record{shared_temp: File.Path, user_temp_prefix: String, 
     flags = ArgumentFlags()
     options = CLI.parse(invocation.arguments, flags, "mac-cleanup", "Clean known macOS development caches; optional read-only preview/report.", true)
     selector_1 = options.help_requested
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StartupChoice_1ChoiceTest1, StartupChoice_1ChoiceResult1)),
+        default: StartupChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), Program.Exit.new(0, Bytes.new(""), Bytes.new("")), options, MainChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, invocation, options, settings, MainChoice1Branch2)
+    flow StartupChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow StartupChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow StartupChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return Record.new(results: List.new(choice_1_result_2), code: 0, message: "")
 }
 
 flow MainWithSettings(settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}) -> Program.Exit! {
     startup = Startup(settings)
-    return Match.new(List.length(startup.results),
-        0: Program.Exit.new(startup.code, Bytes.new(""), UTF8.Bytes.new(String.concat(startup.message, "\n"))),
-        _: List.at(startup.results, 0)
-    )
+    flow MainWithSettingsChoiceTest1(request: Record{selector: Int, startup: Record{code: Int, message: String, results: List<Program.Exit>}}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow MainWithSettingsChoiceResult1(request: Record{selector: Int, startup: Record{code: Int, message: String, results: List<Program.Exit>}}) -> Program.Exit! {
+        return Program.Exit.new(request.startup.code, Bytes.new(""), UTF8.Bytes.new(String.concat(request.startup.message, "\n")))
+    }
+
+    flow MainWithSettingsChoiceDefault(request: Record{selector: Int, startup: Record{code: Int, message: String, results: List<Program.Exit>}}) -> Program.Exit! {
+        return List.at(request.startup.results, 0)
+    }
+
+    return Record.new(selector: List.length(startup.results), startup: startup) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(MainWithSettingsChoiceTest1, MainWithSettingsChoiceResult1)),
+        default: MainWithSettingsChoiceDefault
+    ))
 }
 
 // File-selection, retained-directory, recursive-cache, and whole-tree flows
@@ -733,14 +1641,44 @@ flow StaleGuard(uid: Int, cutoff: Int, masks: List<Glob>, before: File.Entry, no
     return All(List.new(SameFile(before, now), StaleCandidate(uid, cutoff, masks, now)))
 }
 flow GatewayDigit(valid: Bool, character: Scalar) -> Bool {
-    return Match.new(valid, true: Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), character), _: false)
+    flow GatewayDigitChoiceTest1(request: Record{character: Scalar, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow GatewayDigitChoiceResult1(request: Record{character: Scalar, selector: Bool}) -> Bool {
+        return Range.contains(Range.new(Scalar.new("0"), Scalar.new("9"), true, true), request.character)
+    }
+
+    flow GatewayDigitChoiceDefault(request: Record{character: Scalar, selector: Bool}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: valid, character: character) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(GatewayDigitChoiceTest1, GatewayDigitChoiceResult1)),
+        default: GatewayDigitChoiceDefault
+    ))
 }
 flow GatewayDigits(name: String) -> Bool! {
     digits = String.slice(name, 11, Math.sub(String.length(name), 4))
     return List.fold(digits, true, GatewayDigit)
 }
 flow GatewayName(name: String) -> Bool! {
-    return Match.new(Math.gte(String.length(name), 16), true: GatewayDigits(name), _: false)
+    flow GatewayNameChoiceTest1(request: Record{name: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow GatewayNameChoiceResult1(request: Record{name: String, selector: Bool}) -> Bool! {
+        return GatewayDigits(request.name)
+    }
+
+    flow GatewayNameChoiceDefault(request: Record{name: String, selector: Bool}) -> Bool! {
+        return false
+    }
+
+    return Record.new(selector: Math.gte(String.length(name), 16), name: name) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(GatewayNameChoiceTest1, GatewayNameChoiceResult1)),
+        default: GatewayNameChoiceDefault
+    ))
 }
 flow GatewayCandidate(cutoff: Int, mask: Glob, entry: File.Entry) -> Bool! {
     return All(List.new(Glob.matches(mask, entry.name), GatewayName(entry.name), String.eq(entry.kind, "regular"), Math.lt(entry.modified_unix_ns, cutoff)))
@@ -749,7 +1687,22 @@ flow GatewayGuard(before: File.Entry, now: File.Entry) -> Bool {
     return All(List.new(Math.eq(before.device, now.device), Math.eq(before.inode, now.inode), String.eq(before.kind, now.kind), Math.eq(before.size_bytes, now.size_bytes), Math.eq(before.modified_unix_ns, now.modified_unix_ns)))
 }
 flow FileChanged(error: Error) -> Record{removed: Bool!} {
-    return Record.new(removed: Match.new(error.kind, "File.EntryChanged": false, _: error))
+    flow FileChangedChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.EntryChanged")
+    }
+
+    flow FileChangedChoiceResult1(request: Record{error: Error, selector: String}) -> Bool! {
+        return false
+    }
+
+    flow FileChangedChoiceDefault(request: Record{error: Error, selector: String}) -> Bool! {
+        return request.error
+    }
+
+    return Record.new(removed: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(FileChangedChoiceTest1, FileChangedChoiceResult1)),
+        default: FileChangedChoiceDefault
+    )))
 }
 flow CommitStale(uid: Int, cutoff: Int, masks: List<Glob>, entry: File.Entry) -> Record{removed: Bool!} onError FileChanged {
     target = File.Remove.checked(List.new(entry), uid, cutoff, masks, StaleGuard)
@@ -763,27 +1716,102 @@ flow CommitGateway(entry: File.Entry) -> Record{removed: Bool!} onError FileChan
 }
 flow PrintCandidate(previous: Bool, entry: File.Entry) -> Bool! { return Print(String.concat("CANDIDATE ", File.Path.to_string(entry.path))) }
 flow RequireOpenFiles(condition: Bool, message: String) -> Bool! {
-    return Match.new(condition, true: true, _: Error.new("Cleanup.OpenFiles", message, Record.new()))
+    flow RequireOpenFilesChoiceTest1(request: Record{message: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow RequireOpenFilesChoiceResult1(request: Record{message: String, selector: Bool}) -> Bool! {
+        return true
+    }
+
+    flow RequireOpenFilesChoiceDefault(request: Record{message: String, selector: Bool}) -> Bool! {
+        return Error.new("Cleanup.OpenFiles", request.message, Record.new())
+    }
+
+    return Record.new(selector: condition, message: message) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RequireOpenFilesChoiceTest1, RequireOpenFilesChoiceResult1)),
+        default: RequireOpenFilesChoiceDefault
+    ))
 }
 flow RemovalSkipped(removed: Bool, entry: File.Entry) -> Bool { return Not(removed) }
 flow LsofStatus(result: Process.Result) -> Bool! {
     code = Process.Termination.exit_code(result.termination)
-    return Match.new(IntMember(List.new(0, 1), code), true: true, _: Error.new("Cleanup.OpenFiles", "Cannot verify open files; stopping category", Record.new()))
+    flow LsofStatusChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow LsofStatusChoiceResult1(value: Bool) -> Bool! {
+        return true
+    }
+
+    flow LsofStatusChoiceDefault(value: Bool) -> Bool! {
+        return Error.new("Cleanup.OpenFiles", "Cannot verify open files; stopping category", Record.new())
+    }
+
+    return IntMember(List.new(0, 1), code) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(LsofStatusChoiceTest1, LsofStatusChoiceResult1)),
+        default: LsofStatusChoiceDefault
+    ))
 }
 flow ProbeFieldText(field: Bytes) -> String! {
-    clean = Match.new(Bytes.starts_with(field, Bytes.new("\n")), true: Bytes.slice(field, 1, Bytes.length(field)), _: field)
+    clean = Record.new(selector: Bytes.starts_with(field, Bytes.new("\n")), field: field) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbeFieldTextCleanChoiceTest1, ProbeFieldTextCleanChoiceResult1)),
+        default: ProbeFieldTextCleanChoiceDefault
+    ))
     text = UTF8.String.new(clean)
     valid = All(List.new(Math.gt(String.length(text), 1), Math.eq(List.length(String.split(text, "\n")), 1), Math.eq(List.length(String.split(text, "\r")), 1), Any(List.new(String.starts_with(text, "p"), String.starts_with(text, "f"), String.starts_with(text, "n")))))
     checked = RequireOpenFiles(valid, "Malformed open-file field; stopping category")
+    flow ProbeFieldTextCleanChoiceTest1(request: Record{field: Bytes, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ProbeFieldTextCleanChoiceResult1(request: Record{field: Bytes, selector: Bool}) -> Bytes! {
+        return Bytes.slice(request.field, 1, Bytes.length(request.field))
+    }
+
+    flow ProbeFieldTextCleanChoiceDefault(request: Record{field: Bytes, selector: Bool}) -> Bytes! {
+        return request.field
+    }
+
     return text
 }
 flow ProbePIDValid(field: String) -> Bool! {
-    return Match.new(String.starts_with(field, "p"), true: List.fold(String.slice(field, 1, String.length(field)), true, GatewayDigit), _: true)
+    flow ProbePIDValidChoiceTest1(request: Record{field: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow ProbePIDValidChoiceResult1(request: Record{field: String, selector: Bool}) -> Bool! {
+        return List.fold(String.slice(request.field, 1, String.length(request.field)), true, GatewayDigit)
+    }
+
+    flow ProbePIDValidChoiceDefault(request: Record{field: String, selector: Bool}) -> Bool! {
+        return true
+    }
+
+    return Record.new(selector: String.starts_with(field, "p"), field: field) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ProbePIDValidChoiceTest1, ProbePIDValidChoiceResult1)),
+        default: ProbePIDValidChoiceDefault
+    ))
 }
 flow FieldName(field: Bytes) -> List<File.Path>! {
     text = ProbeFieldText(field)
     checked = RequireOpenFiles(ProbePIDValid(text), "Malformed open-file process identifier; stopping category")
-    return Match.new(String.starts_with(text, "n"), true: List.new(File.Path.new(String.slice(text, 1, String.length(text)))), _: List.new())
+    flow FieldNameChoiceTest1(request: Record{selector: Bool, text: String}) -> Bool {
+        return request.selector
+    }
+
+    flow FieldNameChoiceResult1(request: Record{selector: Bool, text: String}) -> List<File.Path>! {
+        return List.new(File.Path.new(String.slice(request.text, 1, String.length(request.text))))
+    }
+
+    flow FieldNameChoiceDefault(request: Record{selector: Bool, text: String}) -> List<File.Path>! {
+        return List.new()
+    }
+
+    return Record.new(selector: String.starts_with(text, "n"), text: text) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(FieldNameChoiceTest1, FieldNameChoiceResult1)),
+        default: FieldNameChoiceDefault
+    ))
 }
 flow ParseNames(previous: List<File.Path>, field: Bytes) -> List<File.Path>! { return ConcatPaths(previous, FieldName(field)) }
 flow BatchNames(result: Process.Result) -> List<File.Path>! {
@@ -811,11 +1839,24 @@ flow OpenedPaths(context: Process.Context, paths: List<File.Path>) -> List<File.
 }
 flow RemoveStaleStep(uid: Int, cutoff: Int, masks: List<Glob>, opened: List<File.Path>, deleted: Int, entry: File.Entry) -> Int! {
     selector_1 = PathMember(opened, entry.path)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RemoveStaleStepChoice_1ChoiceTest1, RemoveStaleStepChoice_1ChoiceResult1)),
+        default: RemoveStaleStepChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, deleted, entry, RemoveStaleStepChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, cutoff, deleted, entry, masks, uid, RemoveStaleStepChoice1Branch2)
+    flow RemoveStaleStepChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow RemoveStaleStepChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow RemoveStaleStepChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow SkipStaleOpen(deleted: Int, entry: File.Entry) -> Int! {
@@ -825,7 +1866,22 @@ flow SkipStaleOpen(deleted: Int, entry: File.Entry) -> Int! {
 flow RemoveStaleClosed(uid: Int, cutoff: Int, masks: List<Glob>, deleted: Int, entry: File.Entry) -> Int! {
     outcome = CommitStale(uid, cutoff, masks, entry)
     removed = outcome.removed
-    count = Match.new(removed, true: Math.add(deleted, 1), _: deleted)
+    count = Record.new(selector: removed, deleted: deleted) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RemoveStaleClosedCountChoiceTest1, RemoveStaleClosedCountChoiceResult1)),
+        default: RemoveStaleClosedCountChoiceDefault
+    ))
+    flow RemoveStaleClosedCountChoiceTest1(request: Record{deleted: Int, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow RemoveStaleClosedCountChoiceResult1(request: Record{deleted: Int, selector: Bool}) -> Int {
+        return Math.add(request.deleted, 1)
+    }
+
+    flow RemoveStaleClosedCountChoiceDefault(request: Record{deleted: Int, selector: Bool}) -> Int {
+        return request.deleted
+    }
+
     return Flow.fold(List.filter(List.new(entry), removed, RemovalSkipped), count, ChangedStale)
 }
 
@@ -848,15 +1904,43 @@ flow StaleFilesPresent(context: Record{apply: Bool, home: File.Path, uid: Int, p
     printed = Print(String.concat(PathText(folder), ": ", Int.to_string(List.length(candidates)), " eligible files, ", Int.to_string(Math.sum(List.map(candidates, EntryBytes))), " bytes; age > ", Int.to_string(days), " days"))
     listed = Flow.fold(candidates, true, PrintCandidate)
     selector_1 = All(List.new(context.apply, Math.gt(List.length(candidates), 0)))
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StaleFilesPresentChoice_1ChoiceTest1, StaleFilesPresentChoice_1ChoiceResult1)),
+        default: StaleFilesPresentChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, candidates, context, cutoff, folder, masks, StaleFilesPresentChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, StaleFilesPresentChoice1Branch2)
+    flow StaleFilesPresentChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow StaleFilesPresentChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow StaleFilesPresentChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow AbsentScan(error: Error) -> Record{scans: List<File.Scan>!} {
-    return Record.new(scans: Match.new(error.kind, "File.DirectoryAbsent": List.new(), _: error))
+    flow AbsentScanChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryAbsent")
+    }
+
+    flow AbsentScanChoiceResult1(request: Record{error: Error, selector: String}) -> List<File.Scan>! {
+        return List.new()
+    }
+
+    flow AbsentScanChoiceDefault(request: Record{error: Error, selector: String}) -> List<File.Scan>! {
+        return request.error
+    }
+
+    return Record.new(scans: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(AbsentScanChoiceTest1, AbsentScanChoiceResult1)),
+        default: AbsentScanChoiceDefault
+    )))
 }
 flow OptionalScan(folder: File.Path) -> Record{scans: List<File.Scan>!} onError AbsentScan {
     scan = File.scan(folder)
@@ -875,7 +1959,22 @@ flow SkipAbsentDirectory(folder: File.Path) -> Int! {
     return 0
 }
 flow GatewayLine(line: String) -> List<File.Path>! {
-    return Match.new(String.starts_with(line, "n"), true: List.new(File.Path.new(String.slice(line, 1, String.length(line)))), _: List.new())
+    flow GatewayLineChoiceTest1(request: Record{line: String, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow GatewayLineChoiceResult1(request: Record{line: String, selector: Bool}) -> List<File.Path>! {
+        return List.new(File.Path.new(String.slice(request.line, 1, String.length(request.line))))
+    }
+
+    flow GatewayLineChoiceDefault(request: Record{line: String, selector: Bool}) -> List<File.Path>! {
+        return List.new()
+    }
+
+    return Record.new(selector: String.starts_with(line, "n"), line: line) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(GatewayLineChoiceTest1, GatewayLineChoiceResult1)),
+        default: GatewayLineChoiceDefault
+    ))
 }
 flow GatewayLineStep(paths: List<File.Path>, line: String) -> List<File.Path>! { return ConcatPaths(paths, GatewayLine(line)) }
 flow GatewayOpened(context: Process.Context, folder: File.Path) -> List<File.Path>! {
@@ -886,11 +1985,24 @@ flow GatewayOpened(context: Process.Context, folder: File.Path) -> List<File.Pat
 }
 flow GatewayRemove(opened: List<File.Path>, deleted: Int, entry: File.Entry) -> Int! {
     selector_1 = PathMember(opened, entry.path)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(GatewayRemoveChoice_1ChoiceTest1, GatewayRemoveChoice_1ChoiceResult1)),
+        default: GatewayRemoveChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, deleted, entry, GatewayRemoveChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, deleted, entry, GatewayRemoveChoice1Branch2)
+    flow GatewayRemoveChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow GatewayRemoveChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow GatewayRemoveChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow GatewaySkipOpen(deleted: Int, entry: File.Entry) -> Int! {
@@ -900,7 +2012,22 @@ flow GatewaySkipOpen(deleted: Int, entry: File.Entry) -> Int! {
 flow GatewayRemoveClosed(deleted: Int, entry: File.Entry) -> Int! {
     outcome = CommitGateway(entry)
     removed = outcome.removed
-    count = Match.new(removed, true: Math.add(deleted, 1), _: deleted)
+    count = Record.new(selector: removed, deleted: deleted) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(GatewayRemoveClosedCountChoiceTest1, GatewayRemoveClosedCountChoiceResult1)),
+        default: GatewayRemoveClosedCountChoiceDefault
+    ))
+    flow GatewayRemoveClosedCountChoiceTest1(request: Record{deleted: Int, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow GatewayRemoveClosedCountChoiceResult1(request: Record{deleted: Int, selector: Bool}) -> Int {
+        return Math.add(request.deleted, 1)
+    }
+
+    flow GatewayRemoveClosedCountChoiceDefault(request: Record{deleted: Int, selector: Bool}) -> Int {
+        return request.deleted
+    }
+
     return Flow.fold(List.filter(List.new(entry), removed, RemovalSkipped), count, GatewayChanged)
 }
 
@@ -922,15 +2049,43 @@ flow GatewayListed(context: Record{apply: Bool, home: File.Path, uid: Int, proce
     candidates = List.filter(entries, cutoff, mask, GatewayCandidate)
     printed = Print(String.concat("Gateway: ", Int.to_string(List.length(candidates)), " logs older than ", Int.to_string(days), " days; ", Int.to_string(Math.sum(List.map(candidates, EntryBytes))), " bytes; directory ", PathText(folder)))
     selector_1 = All(List.new(context.apply, Math.gt(List.length(candidates), 0)))
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(GatewayListedChoice_1ChoiceTest1, GatewayListedChoice_1ChoiceResult1)),
+        default: GatewayListedChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, candidates, context, folder, GatewayPresentChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, GatewayPresentChoice1Branch2)
+    flow GatewayListedChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow GatewayListedChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow GatewayListedChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow AbsentListing(error: Error) -> Record{present: Bool, entries: List<File.Entry>!} {
-    return Record.new(present: false, entries: Match.new(error.kind, "File.DirectoryAbsent": List.new(), _: error))
+    flow AbsentListingChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryAbsent")
+    }
+
+    flow AbsentListingChoiceResult1(request: Record{error: Error, selector: String}) -> List<File.Entry>! {
+        return List.new()
+    }
+
+    flow AbsentListingChoiceDefault(request: Record{error: Error, selector: String}) -> List<File.Entry>! {
+        return request.error
+    }
+
+    return Record.new(present: false, entries: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(AbsentListingChoiceTest1, AbsentListingChoiceResult1)),
+        default: AbsentListingChoiceDefault
+    )))
 }
 flow OptionalListing(folder: File.Path) -> Record{present: Bool, entries: List<File.Entry>!} onError AbsentListing {
     entries = File.list(folder)
@@ -940,8 +2095,23 @@ flow GatewaySkipAbsent(previous: Int, selected: Int) -> Int! { return GatewayAbs
 flow GatewayPresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int) -> Int! {
     observation = OptionalListing(folder)
     entries = observation.entries
-    choice = Match.new(observation.present, true: 1, _: 2)
+    choice = observation.present |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(GatewayPresentChoiceChoiceTest1, GatewayPresentChoiceChoiceResult1)),
+        default: GatewayPresentChoiceChoiceDefault
+    ))
     listed = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context, folder, days, entries, GatewayListed)
+    flow GatewayPresentChoiceChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow GatewayPresentChoiceChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow GatewayPresentChoiceChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), listed, GatewaySkipAbsent)
 }
 flow GatewayLogs(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, days: Int) -> Int! {
@@ -954,10 +2124,25 @@ flow CacheTargets(context: Record{apply: Bool, home: File.Path, uid: Int, proces
     return Flow.fold(List.new("Library/Caches/staticcheck", "Library/Caches/gopls", "Library/Caches/goimports", "Library/Caches/Homebrew/downloads", ".cache/gh"), List.new(), context.home, ReportPathStep)
 }
 flow TemporaryPath(text: String, prefix: String) -> File.Path! {
-    canonical = Match.new(String.starts_with(text, "/var/folders/"), true: String.concat("/private", text), _: text)
+    canonical = Record.new(selector: String.starts_with(text, "/var/folders/"), text: text) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(TemporaryPathCanonicalChoiceTest1, TemporaryPathCanonicalChoiceResult1)),
+        default: TemporaryPathCanonicalChoiceDefault
+    ))
     path = File.Path.new(canonical)
     normalized = PathText(path)
     checked = Require(All(List.new(Math.eq(List.length(String.lines(text)), 1), String.starts_with(normalized, prefix), String.eq(File.Path.name(path), "T"))), "Cannot validate macOS per-user temporary directory")
+    flow TemporaryPathCanonicalChoiceTest1(request: Record{selector: Bool, text: String}) -> Bool {
+        return request.selector
+    }
+
+    flow TemporaryPathCanonicalChoiceResult1(request: Record{selector: Bool, text: String}) -> String {
+        return String.concat("/private", request.text)
+    }
+
+    flow TemporaryPathCanonicalChoiceDefault(request: Record{selector: Bool, text: String}) -> String {
+        return request.text
+    }
+
     return path
 }
 flow TempRoots(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, shared: File.Path, prefix: String, getconf: File.Path) -> List<File.Path>! {
@@ -986,10 +2171,40 @@ flow CacheGuard(uid: Int, device: Int, cutoff: Int, original: File.Entry, curren
     return All(List.new(SameFile(original, current), CacheCandidate(uid, device, cutoff, current)))
 }
 flow RequireCacheDirectory(condition: Bool, directory: File.Directory) -> Bool! {
-    return Match.new(condition, true: true, _: Error.new("Cleanup.CacheDirectory", String.concat("Cache directory owner/device changed: ", File.Path.to_string(directory.path)), Record.new()))
+    flow RequireCacheDirectoryChoiceTest1(request: Record{directory: File.Directory, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow RequireCacheDirectoryChoiceResult1(request: Record{directory: File.Directory, selector: Bool}) -> Bool! {
+        return true
+    }
+
+    flow RequireCacheDirectoryChoiceDefault(request: Record{directory: File.Directory, selector: Bool}) -> Bool! {
+        return Error.new("Cleanup.CacheDirectory", String.concat("Cache directory owner/device changed: ", File.Path.to_string(request.directory.path)), Record.new())
+    }
+
+    return Record.new(selector: condition, directory: directory) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RequireCacheDirectoryChoiceTest1, RequireCacheDirectoryChoiceResult1)),
+        default: RequireCacheDirectoryChoiceDefault
+    ))
 }
 flow RequireCacheOwner(directory: File.Directory, uid: Int) -> Bool! {
-    return Match.new(Math.eq(directory.owner_uid, uid), true: true, _: Error.new("Cleanup.CacheOwner", String.concat("Refusing cache owned by another user: ", File.Path.to_string(directory.path)), Record.new()))
+    flow RequireCacheOwnerChoiceTest1(request: Record{directory: File.Directory, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow RequireCacheOwnerChoiceResult1(request: Record{directory: File.Directory, selector: Bool}) -> Bool! {
+        return true
+    }
+
+    flow RequireCacheOwnerChoiceDefault(request: Record{directory: File.Directory, selector: Bool}) -> Bool! {
+        return Error.new("Cleanup.CacheOwner", String.concat("Refusing cache owned by another user: ", File.Path.to_string(request.directory.path)), Record.new())
+    }
+
+    return Record.new(selector: Math.eq(directory.owner_uid, uid), directory: directory) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RequireCacheOwnerChoiceTest1, RequireCacheOwnerChoiceResult1)),
+        default: RequireCacheOwnerChoiceDefault
+    ))
 }
 flow CacheObserve(uid: Int, device: Int, directory: File.Directory) -> File.Scan! {
     scan = File.Directory.scan(directory)
@@ -1015,31 +2230,102 @@ flow CacheRemove(uid: Int, device: Int, cutoff: Int, entry: File.Entry) -> Bool!
 }
 flow CacheRemoveStep(uid: Int, device: Int, cutoff: Int, opened: List<File.Path>, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     selector_1 = Math.eq(List.length(state.errors), 0)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheRemoveStepChoice_1ChoiceTest1, CacheRemoveStepChoice_1ChoiceResult1)),
+        default: CacheRemoveStepChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), state, cutoff, device, entry, opened, state, uid, CacheRemoveStepChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, state, CacheRemoveStepChoice1Branch2)
+    flow CacheRemoveStepChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow CacheRemoveStepChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow CacheRemoveStepChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheRemoveActive(uid: Int, device: Int, cutoff: Int, opened: List<File.Path>, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     selector_1 = PathMember(opened, entry.path)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheRemoveActiveChoice_1ChoiceTest1, CacheRemoveActiveChoice_1ChoiceResult1)),
+        default: CacheRemoveActiveChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), state, state, CacheRemoveActiveChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, cutoff, device, entry, state, uid, CacheRemoveActiveChoice1Branch2)
+    flow CacheRemoveActiveChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow CacheRemoveActiveChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow CacheRemoveActiveChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheRemoveClosed(uid: Int, device: Int, cutoff: Int, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     attempt = TryCacheRemove(uid, device, cutoff, entry)
-    return Match.new(List.length(attempt.errors), 0: CacheRemoved(state, entry, attempt.result), _: CacheErrors(state, attempt.errors))
+    flow CacheRemoveClosedChoiceTest1(request: Record{attempt: Record{errors: List<Error>, result: Bool!}, entry: File.Entry, selector: Int, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow CacheRemoveClosedChoiceResult1(request: Record{attempt: Record{errors: List<Error>, result: Bool!}, entry: File.Entry, selector: Int, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}! {
+        return CacheRemoved(request.state, request.entry, request.attempt.result)
+    }
+
+    flow CacheRemoveClosedChoiceDefault(request: Record{attempt: Record{errors: List<Error>, result: Bool!}, entry: File.Entry, selector: Int, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}! {
+        return CacheErrors(request.state, request.attempt.errors)
+    }
+
+    return Record.new(selector: List.length(attempt.errors), attempt: attempt, entry: entry, state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheRemoveClosedChoiceTest1, CacheRemoveClosedChoiceResult1)),
+        default: CacheRemoveClosedChoiceDefault
+    ))
 }
 flow CacheRemoved(state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry, removed: Bool) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>} {
-    return Match.new(removed, true: CacheState(state.count, state.eligible_bytes, Math.add(state.deleted, 1), Math.add(state.deleted_bytes, entry.allocated_bytes), state.skipped, state.errors), _: CacheState(state.count, state.eligible_bytes, state.deleted, state.deleted_bytes, Math.add(state.skipped, 1), state.errors))
+    flow CacheRemovedChoiceTest1(request: Record{entry: File.Entry, selector: Bool, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Bool {
+        return request.selector
+    }
+
+    flow CacheRemovedChoiceResult1(request: Record{entry: File.Entry, selector: Bool, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int} {
+        return CacheState(request.state.count, request.state.eligible_bytes, Math.add(request.state.deleted, 1), Math.add(request.state.deleted_bytes, request.entry.allocated_bytes), request.state.skipped, request.state.errors)
+    }
+
+    flow CacheRemovedChoiceDefault(request: Record{entry: File.Entry, selector: Bool, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int} {
+        return CacheState(request.state.count, request.state.eligible_bytes, request.state.deleted, request.state.deleted_bytes, Math.add(request.state.skipped, 1), request.state.errors)
+    }
+
+    return Record.new(selector: removed, entry: entry, state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheRemovedChoiceTest1, CacheRemovedChoiceResult1)),
+        default: CacheRemovedChoiceDefault
+    ))
 }
 flow AbsentDirectory(error: Error) -> Record{directories: List<File.Directory>!} {
-    return Record.new(directories: Match.new(error.kind, "File.DirectoryAbsent": List.new(), _: error))
+    flow AbsentDirectoryChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryAbsent")
+    }
+
+    flow AbsentDirectoryChoiceResult1(request: Record{error: Error, selector: String}) -> List<File.Directory>! {
+        return List.new()
+    }
+
+    flow AbsentDirectoryChoiceDefault(request: Record{error: Error, selector: String}) -> List<File.Directory>! {
+        return request.error
+    }
+
+    return Record.new(directories: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(AbsentDirectoryChoiceTest1, AbsentDirectoryChoiceResult1)),
+        default: AbsentDirectoryChoiceDefault
+    )))
 }
 flow OptionalChild(directory: File.Directory, entry: File.Entry) -> Record{directories: List<File.Directory>!} onError AbsentDirectory {
     child = File.Directory.child(directory, entry)
@@ -1052,23 +2338,64 @@ flow CacheChildDirectories(directory: File.Directory, entry: File.Entry) -> List
 flow CacheProbeAndRemove(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, directory: File.Directory, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, candidates: List<File.Entry>) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {
     attempt = TryCacheProbe(context.process, directory, List.map(candidates, EntryPath))
     selector_1 = List.length(attempt.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheProbeAndRemoveChoice_1ChoiceTest1, CacheProbeAndRemoveChoice_1ChoiceResult1)),
+        default: CacheProbeAndRemoveChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), state, attempt, candidates, context, cutoff, device, state, CacheProbeAndRemoveChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, attempt, state, CacheProbeAndRemoveChoice1Branch2)
+    flow CacheProbeAndRemoveChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow CacheProbeAndRemoveChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow CacheProbeAndRemoveChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheSummary(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}) -> Int! {
     printed = Print(String.concat(File.Path.to_string(folder), ": ", Int.to_string(state.count), " stale files / ", Int.to_string(state.eligible_bytes), " allocated bytes; deleted ", Int.to_string(state.deleted), " / ", Int.to_string(state.deleted_bytes), " allocated bytes; skipped ", Int.to_string(state.skipped)))
     selector_1 = context.apply
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheSummaryChoice_1ChoiceTest1, CacheSummaryChoice_1ChoiceResult1)),
+        default: CacheSummaryChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), false, CacheSummaryChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, CacheSummaryChoice1Branch2)
     preview = choice_1_result_2
-    return Match.new(List.length(state.errors), 0: state.eligible_bytes, _: CacheFailure(List.at(state.errors, 0)))
+    flow CacheSummaryChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow CacheSummaryChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow CacheSummaryChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
+    flow CacheSummaryChoiceTest1(request: Record{selector: Int, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Bool {
+        return Math.eq(request.selector, 0)
+    }
+
+    flow CacheSummaryChoiceResult1(request: Record{selector: Int, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Int! {
+        return request.state.eligible_bytes
+    }
+
+    flow CacheSummaryChoiceDefault(request: Record{selector: Int, state: Record{count: Int, deleted: Int, deleted_bytes: Int, eligible_bytes: Int, errors: List<Error>, skipped: Int}}) -> Int! {
+        return CacheFailure(List.at(request.state.errors, 0))
+    }
+
+    return Record.new(selector: List.length(state.errors), state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheSummaryChoiceTest1, CacheSummaryChoiceResult1)),
+        default: CacheSummaryChoiceDefault
+    ))
 }
 flow CacheFailure(error: Error) -> Int! { return error }
 flow StaleCachePresent(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, days: Int, previous: Int, directory: File.Directory) -> Int! {
@@ -1095,15 +2422,60 @@ flow TreeDescend(uid: Int, device: Int, entry: File.Entry) -> Bool {
 flow TreeSupported(uid: Int, device: Int, cutoff: Int, row: Record{relative: String, entry: File.Entry}) -> Bool {
     entry = row.entry
     supported = StringMember(List.new("directory", "regular", "symlink"), entry.kind)
-    links = Match.new(entry.kind, "directory": true, _: Math.eq(entry.link_count, 1))
-    old = Match.new(entry.kind, "directory": All(List.new(Math.lt(entry.modified_unix_ns, cutoff), Math.lt(entry.changed_unix_ns, cutoff))), _: OldFile(cutoff, entry))
+    links = Record.new(selector: entry.kind, entry: entry) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(TreeSupportedLinksChoiceTest1, TreeSupportedLinksChoiceResult1)),
+        default: TreeSupportedLinksChoiceDefault
+    ))
+    old = Record.new(selector: entry.kind, cutoff: cutoff, entry: entry) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(TreeSupportedOldChoiceTest1, TreeSupportedOldChoiceResult1)),
+        default: TreeSupportedOldChoiceDefault
+    ))
+    flow TreeSupportedLinksChoiceTest1(request: Record{entry: File.Entry, selector: String}) -> Bool {
+        return String.eq(request.selector, "directory")
+    }
+
+    flow TreeSupportedLinksChoiceResult1(request: Record{entry: File.Entry, selector: String}) -> Bool {
+        return true
+    }
+
+    flow TreeSupportedLinksChoiceDefault(request: Record{entry: File.Entry, selector: String}) -> Bool {
+        return Math.eq(request.entry.link_count, 1)
+    }
+
+    flow TreeSupportedOldChoiceTest1(request: Record{cutoff: Int, entry: File.Entry, selector: String}) -> Bool {
+        return String.eq(request.selector, "directory")
+    }
+
+    flow TreeSupportedOldChoiceResult1(request: Record{cutoff: Int, entry: File.Entry, selector: String}) -> Bool {
+        return All(List.new(Math.lt(request.entry.modified_unix_ns, request.cutoff), Math.lt(request.entry.changed_unix_ns, request.cutoff)))
+    }
+
+    flow TreeSupportedOldChoiceDefault(request: Record{cutoff: Int, entry: File.Entry, selector: String}) -> Bool {
+        return OldFile(request.cutoff, request.entry)
+    }
+
     return All(List.new(supported, Math.eq(entry.owner_uid, uid), Math.eq(entry.device, device), links, old))
 }
 flow TreeAllocation(row: Record{relative: String, entry: File.Entry}) -> Int { return row.entry.allocated_bytes }
 flow SameTreeRow(before: Record{relative: String, entry: File.Entry}, after: Record{relative: String, entry: File.Entry}) -> Bool {
     original = before.entry
     current = after.entry
-    accessed = Match.new(original.kind, "directory": true, _: Math.eq(original.accessed_unix_ns, current.accessed_unix_ns))
+    accessed = Record.new(selector: original.kind, current: current, original: original) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(SameTreeRowAccessedChoiceTest1, SameTreeRowAccessedChoiceResult1)),
+        default: SameTreeRowAccessedChoiceDefault
+    ))
+    flow SameTreeRowAccessedChoiceTest1(request: Record{current: File.Entry, original: File.Entry, selector: String}) -> Bool {
+        return String.eq(request.selector, "directory")
+    }
+
+    flow SameTreeRowAccessedChoiceResult1(request: Record{current: File.Entry, original: File.Entry, selector: String}) -> Bool {
+        return true
+    }
+
+    flow SameTreeRowAccessedChoiceDefault(request: Record{current: File.Entry, original: File.Entry, selector: String}) -> Bool {
+        return Math.eq(request.original.accessed_unix_ns, request.current.accessed_unix_ns)
+    }
+
     return All(List.new(String.eq(before.relative, after.relative), Math.eq(original.device, current.device), Math.eq(original.inode, current.inode), String.eq(original.kind, current.kind), Math.eq(original.owner_uid, current.owner_uid), Math.eq(original.link_count, current.link_count), Math.eq(original.size_bytes, current.size_bytes), Math.eq(original.allocated_bytes, current.allocated_bytes), Math.eq(original.modified_unix_ns, current.modified_unix_ns), Math.eq(original.changed_unix_ns, current.changed_unix_ns), accessed))
 }
 flow SameTree(before: File.Tree, after: File.Tree) -> Bool! {
@@ -1111,10 +2483,52 @@ flow SameTree(before: File.Tree, after: File.Tree) -> Bool! {
 }
 flow BuildParent(uid: Int, parent: File.Directory) -> File.Directory! {
     current = File.Directory.refresh(parent)
-    return Match.new(All(List.new(SameDirectory(parent, current), Math.eq(current.owner_uid, uid))), true: current, _: Error.new("Cleanup.BuildParent", String.concat("Build parent changed: ", File.Path.to_string(parent.path)), Record.new()))
+    flow BuildParentChoiceTest1(request: Record{current: File.Directory, parent: File.Directory, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow BuildParentChoiceResult1(request: Record{current: File.Directory, parent: File.Directory, selector: Bool}) -> File.Directory! {
+        return request.current
+    }
+
+    flow BuildParentChoiceDefault(request: Record{current: File.Directory, parent: File.Directory, selector: Bool}) -> File.Directory! {
+        return Error.new("Cleanup.BuildParent", String.concat("Build parent changed: ", File.Path.to_string(request.parent.path)), Record.new())
+    }
+
+    return Record.new(selector: All(List.new(SameDirectory(parent, current), Math.eq(current.owner_uid, uid))), current: current, parent: parent) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuildParentChoiceTest1, BuildParentChoiceResult1)),
+        default: BuildParentChoiceDefault
+    ))
 }
 flow BuildParentChanged(error: Error) -> Record{valid: Bool!} {
-    return Record.new(valid: Match.new(error.kind, "File.DirectoryChanged": false, "File.DirectoryAbsent": false, "Cleanup.BuildParent": false, _: error))
+    flow BuildParentChangedChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryChanged")
+    }
+
+    flow BuildParentChangedChoiceResult1(request: Record{error: Error, selector: String}) -> Bool! {
+        return false
+    }
+
+    flow BuildParentChangedChoiceTest2(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryAbsent")
+    }
+
+    flow BuildParentChangedChoiceTest3(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "Cleanup.BuildParent")
+    }
+
+    flow BuildParentChangedChoiceDefault(request: Record{error: Error, selector: String}) -> Bool! {
+        return request.error
+    }
+
+    return Record.new(valid: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(
+            Match.Case.new(BuildParentChangedChoiceTest1, BuildParentChangedChoiceResult1),
+            Match.Case.new(BuildParentChangedChoiceTest2, BuildParentChangedChoiceResult1),
+            Match.Case.new(BuildParentChangedChoiceTest3, BuildParentChangedChoiceResult1),
+        ),
+        default: BuildParentChangedChoiceDefault
+    )))
 }
 flow TryBuildParent(uid: Int, parent: File.Directory) -> Record{valid: Bool!} onError BuildParentChanged {
     checked = BuildParent(uid, parent)
@@ -1129,7 +2543,29 @@ flow BuildOpen(context: Process.Context, folder: File.Path) -> Bool! {
 flow BuildSkipOpen(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP open build tree: ", File.Path.to_string(folder))); return 0 }
 flow BuildSkipChanged(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP changed build tree: ", File.Path.to_string(folder))); return 0 }
 flow BuildSnapshotChanged(error: Error) -> Record{trees: List<File.Tree>!} {
-    return Record.new(trees: Match.new(error.kind, "File.DirectoryChanged": List.new(), "File.DirectoryAbsent": List.new(), _: error))
+    flow BuildSnapshotChangedChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryChanged")
+    }
+
+    flow BuildSnapshotChangedChoiceResult1(request: Record{error: Error, selector: String}) -> List<File.Tree>! {
+        return List.new()
+    }
+
+    flow BuildSnapshotChangedChoiceTest2(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.DirectoryAbsent")
+    }
+
+    flow BuildSnapshotChangedChoiceDefault(request: Record{error: Error, selector: String}) -> List<File.Tree>! {
+        return request.error
+    }
+
+    return Record.new(trees: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(
+            Match.Case.new(BuildSnapshotChangedChoiceTest1, BuildSnapshotChangedChoiceResult1),
+            Match.Case.new(BuildSnapshotChangedChoiceTest2, BuildSnapshotChangedChoiceResult1),
+        ),
+        default: BuildSnapshotChangedChoiceDefault
+    )))
 }
 flow TryBuildSnapshot(uid: Int, device: Int, parent: File.Directory, root: File.Entry) -> Record{trees: List<File.Tree>!} onError BuildSnapshotChanged {
     tree = File.Tree.snapshot(parent, root, uid, device, TreeDescend)
@@ -1146,8 +2582,23 @@ flow BuildReobserved(context: Record{apply: Bool, home: File.Path, uid: Int, pro
     parent_valid = parent_result.valid
     eligible = All(List.map(after.entries, context.uid, parent.device, cutoff, TreeSupported))
     unchanged = All(List.new(parent_valid, eligible, SameTree(before, after)))
-    choice = Match.new(unchanged, true: 1, _: 2)
+    choice = unchanged |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuildReobservedChoiceChoiceTest1, BuildReobservedChoiceChoiceResult1)),
+        default: BuildReobservedChoiceChoiceDefault
+    ))
     removed = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, context.uid, parent.device, cutoff, folder, before, size, BuildRemoveChoice1Branch1)
+    flow BuildReobservedChoiceChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow BuildReobservedChoiceChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow BuildReobservedChoiceChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), removed, folder, BuildRemoveChoice1Branch2)
 }
 flow SelectedWhen(selected: Bool, value: Int) -> Bool { return selected }
@@ -1161,21 +2612,62 @@ flow BuildCommit(uid: Int, device: Int, cutoff: Int, folder: File.Path, before: 
 
 flow BuildProbe(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
     selector_1 = BuildOpen(context.process, folder)
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuildProbeChoice_1ChoiceTest1, BuildProbeChoice_1ChoiceResult1)),
+        default: BuildProbeChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, folder, BuildProbeChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, before, context, cutoff, folder, parent, root, size, BuildProbeChoice1Branch2)
+    flow BuildProbeChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow BuildProbeChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow BuildProbeChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow BuildEligible(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, folder: File.Path, parent: File.Directory, root: File.Entry, cutoff: Int, before: File.Tree, size: Int) -> Int! {
-    printed = Print(String.concat(Match.new(context.apply, true: "RUN", _: "PLAN"), " whole stale build tree: ", File.Path.to_string(folder), "; ", Int.to_string(size), " bytes allocated"))
+    printed = Print(String.concat(context.apply |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuildEligiblePrintedChoiceTest1, BuildEligiblePrintedChoiceResult1)),
+        default: BuildEligiblePrintedChoiceDefault
+    )), " whole stale build tree: ", File.Path.to_string(folder), "; ", Int.to_string(size), " bytes allocated"))
     selector_1 = context.apply
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(BuildEligibleChoice_1ChoiceTest1, BuildEligibleChoice_1ChoiceResult1)),
+        default: BuildEligibleChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), 0, before, context, cutoff, folder, parent, root, size, BuildEligibleChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, size, BuildEligibleChoice1Branch2)
+    flow BuildEligiblePrintedChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow BuildEligiblePrintedChoiceResult1(value: Bool) -> String {
+        return "RUN"
+    }
+
+    flow BuildEligiblePrintedChoiceDefault(value: Bool) -> String {
+        return "PLAN"
+    }
+
+    flow BuildEligibleChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow BuildEligibleChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow BuildEligibleChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow BuildSkipRecent(folder: File.Path) -> Int! { printed = Print(String.concat("SKIP active/recent/unsupported build tree: ", File.Path.to_string(folder))); return 0 }
@@ -1186,32 +2678,122 @@ flow StaleBuildTree(context: Record{apply: Bool, home: File.Path, uid: Int, proc
     before = File.Tree.snapshot(current_parent, root, context.uid, parent.device, TreeDescend)
     eligible = All(List.new(before.complete, All(List.map(before.entries, context.uid, parent.device, cutoff, TreeSupported))))
     size = Math.sum(List.map(before.entries, TreeAllocation))
-    choice = Match.new(eligible, true: 1, _: 2)
+    choice = eligible |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StaleBuildTreeChoiceChoiceTest1, StaleBuildTreeChoiceChoiceResult1)),
+        default: StaleBuildTreeChoiceChoiceDefault
+    ))
     eligible_result = Flow.fold(List.filter(List.new(choice), 1, SelectedChoice), 0, before, context, cutoff, folder, current_parent, root, size, StaleBuildTreeChoice1Branch1)
+    flow StaleBuildTreeChoiceChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow StaleBuildTreeChoiceChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow StaleBuildTreeChoiceChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return Flow.fold(List.filter(List.new(choice), 2, SelectedChoice), eligible_result, folder, StaleBuildTreeChoice1Branch2)
 }
 flow TreeTargetGroup(values: List<Record{parent: File.Directory, root: File.Entry}>) -> List<Record{parent: File.Directory, root: File.Entry}> { return values }
 flow ConcatTreeTargets(left: List<Record{parent: File.Directory, root: File.Entry}>, right: List<Record{parent: File.Directory, root: File.Entry}>) -> List<Record{parent: File.Directory, root: File.Entry}> { return List.flat_map(List.new(left, right), TreeTargetGroup) }
 flow XcodeTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
     valid = All(List.new(String.eq(entry.kind, "directory"), Math.eq(entry.owner_uid, uid), Math.eq(entry.device, parent.device)))
-    return Match.new(valid, true: XcodeDirectoryTarget(uid, parent, entry), _: List.new())
+    flow XcodeTargetChoiceTest1(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, uid: Int}) -> Bool {
+        return request.selector
+    }
+
+    flow XcodeTargetChoiceResult1(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, uid: Int}) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+        return XcodeDirectoryTarget(request.uid, request.parent, request.entry)
+    }
+
+    flow XcodeTargetChoiceDefault(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, uid: Int}) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+        return List.new()
+    }
+
+    return Record.new(selector: valid, entry: entry, parent: parent, uid: uid) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(XcodeTargetChoiceTest1, XcodeTargetChoiceResult1)),
+        default: XcodeTargetChoiceDefault
+    ))
 }
 flow XcodeDirectoryTarget(uid: Int, parent: File.Directory, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}>! {
     shared = List.new("ModuleCache.noindex", "SDKStatCaches.noindex", "SDKExplicitPrecompiledModules", "CompilationCache.noindex")
-    return Match.new(StringMember(shared, entry.name), true: List.new(Record.new(parent: parent, root: entry)), _: XcodeProjectTarget(uid, parent, entry))
+    flow XcodeDirectoryTargetChoiceTest1(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, uid: Int}) -> Bool {
+        return request.selector
+    }
+
+    flow XcodeDirectoryTargetChoiceResult1(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, uid: Int}) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+        return List.new(Record.new(parent: request.parent, root: request.entry))
+    }
+
+    flow XcodeDirectoryTargetChoiceDefault(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, uid: Int}) -> List<Record{parent: File.Directory, root: File.Entry}>! {
+        return XcodeProjectTarget(request.uid, request.parent, request.entry)
+    }
+
+    return Record.new(selector: StringMember(shared, entry.name), entry: entry, parent: parent, uid: uid) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(XcodeDirectoryTargetChoiceTest1, XcodeDirectoryTargetChoiceResult1)),
+        default: XcodeDirectoryTargetChoiceDefault
+    ))
 }
 flow AbsentBuildEntry(error: Error) -> Record{entries: List<File.Entry>!} {
-    return Record.new(entries: Match.new(error.kind, "File.EntryAbsent": List.new(), _: error))
+    flow AbsentBuildEntryChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "File.EntryAbsent")
+    }
+
+    flow AbsentBuildEntryChoiceResult1(request: Record{error: Error, selector: String}) -> List<File.Entry>! {
+        return List.new()
+    }
+
+    flow AbsentBuildEntryChoiceDefault(request: Record{error: Error, selector: String}) -> List<File.Entry>! {
+        return request.error
+    }
+
+    return Record.new(entries: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(AbsentBuildEntryChoiceTest1, AbsentBuildEntryChoiceResult1)),
+        default: AbsentBuildEntryChoiceDefault
+    )))
 }
 flow OptionalBuildEntry(parent: File.Directory) -> Record{entries: List<File.Entry>!} onError AbsentBuildEntry {
     entry = File.Directory.entry(parent, "Build")
     return Record.new(entries: List.new(entry))
 }
 flow XcodeBuildTarget(parent: File.Directory, targets: List<Record{parent: File.Directory, root: File.Entry}>, entry: File.Entry) -> List<Record{parent: File.Directory, root: File.Entry}> {
-    return Match.new(String.eq(entry.kind, "directory"), true: ConcatTreeTargets(targets, List.new(Record.new(parent: parent, root: entry))), _: targets)
+    flow XcodeBuildTargetChoiceTest1(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, targets: List<Record{parent: File.Directory, root: File.Entry}>}) -> Bool {
+        return request.selector
+    }
+
+    flow XcodeBuildTargetChoiceResult1(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, targets: List<Record{parent: File.Directory, root: File.Entry}>}) -> List<Record{parent: File.Directory, root: File.Entry}> {
+        return ConcatTreeTargets(request.targets, List.new(Record.new(parent: request.parent, root: request.entry)))
+    }
+
+    flow XcodeBuildTargetChoiceDefault(request: Record{entry: File.Entry, parent: File.Directory, selector: Bool, targets: List<Record{parent: File.Directory, root: File.Entry}>}) -> List<Record{parent: File.Directory, root: File.Entry}> {
+        return request.targets
+    }
+
+    return Record.new(selector: String.eq(entry.kind, "directory"), entry: entry, parent: parent, targets: targets) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(XcodeBuildTargetChoiceTest1, XcodeBuildTargetChoiceResult1)),
+        default: XcodeBuildTargetChoiceDefault
+    ))
 }
 flow RequireXcodeDirectory(condition: Bool, directory: File.Directory) -> Bool! {
-    return Match.new(condition, true: true, _: Error.new("Cleanup.DerivedData", String.concat("Refusing changed or foreign-owned Xcode directory: ", File.Path.to_string(directory.path)), Record.new()))
+    flow RequireXcodeDirectoryChoiceTest1(request: Record{directory: File.Directory, selector: Bool}) -> Bool {
+        return request.selector
+    }
+
+    flow RequireXcodeDirectoryChoiceResult1(request: Record{directory: File.Directory, selector: Bool}) -> Bool! {
+        return true
+    }
+
+    flow RequireXcodeDirectoryChoiceDefault(request: Record{directory: File.Directory, selector: Bool}) -> Bool! {
+        return Error.new("Cleanup.DerivedData", String.concat("Refusing changed or foreign-owned Xcode directory: ", File.Path.to_string(request.directory.path)), Record.new())
+    }
+
+    return Record.new(selector: condition, directory: directory) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(RequireXcodeDirectoryChoiceTest1, RequireXcodeDirectoryChoiceResult1)),
+        default: RequireXcodeDirectoryChoiceDefault
+    ))
 }
 flow XcodeProjectPresent(uid: Int, entry: File.Entry, targets: List<Record{parent: File.Directory, root: File.Entry}>, directory: File.Directory) -> List<Record{parent: File.Directory, root: File.Entry}>! {
     valid = All(List.new(Math.eq(directory.owner_uid, uid), Math.eq(directory.device, entry.device), Math.eq(directory.inode, entry.inode)))
@@ -1260,49 +2842,114 @@ flow CacheWorkResult(state: Record{count: Int, eligible_bytes: Int, deleted: Int
 }
 flow CacheWorkStep(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, item: Record{parent: File.Directory, entries: List<File.Entry>}) -> Record{state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, items: List<Record{parent: File.Directory, entries: List<File.Entry>}>, stop: Bool}! {
     selector_1 = List.length(state.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheWorkStepChoice_1ChoiceTest1, CacheWorkStepChoice_1ChoiceResult1)),
+        default: CacheWorkStepChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), CacheWorkResult(state, List.new()), context, cutoff, device, item, state, CacheWorkStepChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, state, CacheWorkStepChoice1Branch2)
+    flow CacheWorkStepChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow CacheWorkStepChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow CacheWorkStepChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheWorkActive(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, item: Record{parent: File.Directory, entries: List<File.Entry>}) -> Record{state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, items: List<Record{parent: File.Directory, entries: List<File.Entry>}>, stop: Bool}! {
     selector_1 = List.length(item.entries)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheWorkActiveChoice_1ChoiceTest1, CacheWorkActiveChoice_1ChoiceResult1)),
+        default: CacheWorkActiveChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), CacheWorkResult(state, List.new()), context, cutoff, device, item, state, CacheWorkActiveChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, cutoff, device, item, state, CacheWorkActiveChoice1Branch2)
+    flow CacheWorkActiveChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow CacheWorkActiveChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow CacheWorkActiveChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheWorkChild(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, parent: File.Directory, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, entry: File.Entry) -> Record{state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, items: List<Record{parent: File.Directory, entries: List<File.Entry>}>, stop: Bool}! {
     attempt = TryCacheChildDirectories(parent, entry)
     selector_1 = List.length(attempt.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheWorkChildChoice_1ChoiceTest1, CacheWorkChildChoice_1ChoiceResult1)),
+        default: CacheWorkChildChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), CacheWorkResult(state, List.new()), attempt, context, cutoff, device, state, CacheWorkChildChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, attempt, state, CacheWorkChildChoice1Branch2)
+    flow CacheWorkChildChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow CacheWorkChildChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow CacheWorkChildChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheWorkOpened(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, directories: List<File.Directory>) -> Record{state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, items: List<Record{parent: File.Directory, entries: List<File.Entry>}>, stop: Bool}! {
     selector_1 = List.length(directories)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheWorkOpenedChoice_1ChoiceTest1, CacheWorkOpenedChoice_1ChoiceResult1)),
+        default: CacheWorkOpenedChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), CacheWorkResult(state, List.new()), state, CacheWorkOpenedChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, context, cutoff, device, directories, state, CacheWorkOpenedChoice1Branch2)
+    flow CacheWorkOpenedChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow CacheWorkOpenedChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow CacheWorkOpenedChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheWorkScan(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, directory: File.Directory, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}) -> Record{state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, items: List<Record{parent: File.Directory, entries: List<File.Entry>}>, stop: Bool}! {
     attempt = TryCacheObserve(context.uid, device, directory)
     selector_1 = List.length(attempt.errors)
-    choice_1 = Match.new(selector_1,
-        0: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheWorkScanChoice_1ChoiceTest1, CacheWorkScanChoice_1ChoiceResult1)),
+        default: CacheWorkScanChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), CacheWorkResult(state, List.new()), attempt, context, cutoff, device, directory, state, CacheWorkScanChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, attempt, state, CacheWorkScanChoice1Branch2)
+    flow CacheWorkScanChoice_1ChoiceTest1(value: Int) -> Bool {
+        return Math.eq(value, 0)
+    }
+
+    flow CacheWorkScanChoice_1ChoiceResult1(value: Int) -> Int {
+        return 1
+    }
+
+    flow CacheWorkScanChoice_1ChoiceDefault(value: Int) -> Int {
+        return 2
+    }
+
     return choice_1_result_2
 }
 flow CacheWorkObserved(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, directory: File.Directory, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, scan: File.Scan) -> Record{state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}, items: List<Record{parent: File.Directory, entries: List<File.Entry>}>, stop: Bool}! {
@@ -1311,12 +2958,25 @@ flow CacheWorkObserved(context: Record{apply: Bool, home: File.Path, uid: Int, p
     children = List.filter(scan.entries, context.uid, device, CacheChild)
     counted = CacheState(Math.add(state.count, List.length(eligible)), Math.add(state.eligible_bytes, Math.sum(List.map(eligible, EntryAllocation))), state.deleted, state.deleted_bytes, Math.add(state.skipped, Math.sub(List.length(eligible), List.length(candidates))), state.errors)
     selector_1 = All(List.new(context.apply, Math.gt(List.length(candidates), 0)))
-    choice_1 = Match.new(selector_1,
-        true: 1,
-        _: 2)
+    choice_1 = selector_1 |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(CacheWorkObservedChoice_1ChoiceTest1, CacheWorkObservedChoice_1ChoiceResult1)),
+        default: CacheWorkObservedChoice_1ChoiceDefault
+    ))
     choice_1_result_1 = Flow.fold(List.filter(List.new(choice_1), 1, SelectedChoice), counted, candidates, context, counted, cutoff, device, directory, CacheWorkObservedChoice1Branch1)
     choice_1_result_2 = Flow.fold(List.filter(List.new(choice_1), 2, SelectedChoice), choice_1_result_1, counted, CacheWorkObservedChoice1Branch2)
     removed = choice_1_result_2
+    flow CacheWorkObservedChoice_1ChoiceTest1(value: Bool) -> Bool {
+        return value
+    }
+
+    flow CacheWorkObservedChoice_1ChoiceResult1(value: Bool) -> Int {
+        return 1
+    }
+
+    flow CacheWorkObservedChoice_1ChoiceDefault(value: Bool) -> Int {
+        return 2
+    }
+
     return CacheWorkResult(removed, List.map(children, directory, CacheWorkItem))
 }
 flow CacheWalk(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, device: Int, cutoff: Int, directory: File.Directory, state: Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}) -> Record{count: Int, eligible_bytes: Int, deleted: Int, deleted_bytes: Int, skipped: Int, errors: List<Error>}! {

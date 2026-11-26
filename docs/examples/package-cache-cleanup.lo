@@ -3,10 +3,23 @@ flow EmptyCommands() -> List<Process.Command> {
 }
 
 flow ExecutableError(error: Error) -> Record{commands: List<Process.Command>!} {
-    return Record.new(commands: Match.new(error.kind,
-        "Process.ExecutableAbsent": EmptyCommands(),
-        _: error
-    ))
+    flow ExecutableErrorChoiceTest1(request: Record{error: Error, selector: String}) -> Bool {
+        return String.eq(request.selector, "Process.ExecutableAbsent")
+    }
+
+    flow ExecutableErrorChoiceResult1(request: Record{error: Error, selector: String}) -> List<Process.Command>! {
+        return EmptyCommands()
+    }
+
+    flow ExecutableErrorChoiceDefault(request: Record{error: Error, selector: String}) -> List<Process.Command>! {
+        return request.error
+
+    }
+
+    return Record.new(commands: Record.new(selector: error.kind, error: error) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ExecutableErrorChoiceTest1, ExecutableErrorChoiceResult1)),
+        default: ExecutableErrorChoiceDefault
+    )))
 }
 
 flow Describe(context: Process.Context, name: String, arguments: List<String>) -> Record{commands: List<Process.Command>!} onError ExecutableError {

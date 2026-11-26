@@ -11,7 +11,22 @@ flow AddLabel(labels: List<String>, label: String) -> List<String> {
 }
 
 flow ApplyArgument(enabled: Bool, argument: String) -> Bool! {
-    return Match.new(argument, "--apply": true, _: Error.new("Control.InvalidArguments", "Expected --apply", Record.new()))
+    flow ApplyArgumentChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "--apply")
+    }
+
+    flow ApplyArgumentChoiceResult1(value: String) -> Bool! {
+        return true
+    }
+
+    flow ApplyArgumentChoiceDefault(value: String) -> Bool! {
+        return Error.new("Control.InvalidArguments", "Expected --apply", Record.new())
+    }
+
+    return argument |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(ApplyArgumentChoiceTest1, ApplyArgumentChoiceResult1)),
+        default: ApplyArgumentChoiceDefault
+    ))
 }
 
 flow Tasks() -> List<Record{kind: String, label: String, enabled: Bool, lines: List<String>}> {
@@ -24,7 +39,22 @@ flow Tasks() -> List<Record{kind: String, label: String, enabled: Bool, lines: L
 }
 
 flow Selected(apply: Bool, task: Record{kind: String, label: String, enabled: Bool, lines: List<String>}) -> Bool {
-    return Match.new(apply, true: task.enabled, _: false)
+    flow SelectedChoiceTest1(request: Record{selector: Bool, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> Bool {
+        return request.selector
+    }
+
+    flow SelectedChoiceResult1(request: Record{selector: Bool, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> Bool {
+        return request.task.enabled
+    }
+
+    flow SelectedChoiceDefault(request: Record{selector: Bool, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> Bool {
+        return false
+    }
+
+    return Record.new(selector: apply, task: task) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(SelectedChoiceTest1, SelectedChoiceResult1)),
+        default: SelectedChoiceDefault
+    ))
 }
 
 flow AppendEvent(path: File.Path, count: Int, line: String) -> Int! {
@@ -34,11 +64,46 @@ flow AppendEvent(path: File.Path, count: Int, line: String) -> Int! {
 }
 
 flow Perform(path: File.Path, task: Record{kind: String, label: String, enabled: Bool, lines: List<String>}) -> Int! {
-    lines = Match.new(task.kind, "write": task.lines, "fail": task.lines, _: EmptyStrings())
+    lines = Record.new(selector: task.kind, task: task) |> Match.apply(Match.new(
+        cases: List.new(
+            Match.Case.new(PerformLinesChoiceTest1, PerformLinesChoiceResult1),
+            Match.Case.new(PerformLinesChoiceTest2, PerformLinesChoiceResult1),
+        ),
+        default: PerformLinesChoiceDefault
+    ))
     written = Flow.fold(lines, 0, path, AppendEvent)
-    return Match.new(task.kind,
-        "fail": Error.new("Control.ExpectedFailure", "Fixture category failed", Record.new()),
-        _: 1)
+    flow PerformLinesChoiceTest1(request: Record{selector: String, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> Bool {
+        return String.eq(request.selector, "write")
+    }
+
+    flow PerformLinesChoiceResult1(request: Record{selector: String, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> List<String> {
+        return request.task.lines
+    }
+
+    flow PerformLinesChoiceTest2(request: Record{selector: String, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> Bool {
+        return String.eq(request.selector, "fail")
+    }
+
+    flow PerformLinesChoiceDefault(request: Record{selector: String, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> List<String> {
+        return EmptyStrings()
+    }
+
+    flow PerformChoiceTest1(value: String) -> Bool {
+        return String.eq(value, "fail")
+    }
+
+    flow PerformChoiceResult1(value: String) -> Int! {
+        return Error.new("Control.ExpectedFailure", "Fixture category failed", Record.new())
+    }
+
+    flow PerformChoiceDefault(value: String) -> Int! {
+        return 1
+    }
+
+    return task.kind |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(PerformChoiceTest1, PerformChoiceResult1)),
+        default: PerformChoiceDefault
+    ))
 }
 
 flow TaskError(error: Error) -> Record{completed: Int, failed: Bool, error_kind: String} {
@@ -52,8 +117,38 @@ flow Attempt(path: File.Path, task: Record{kind: String, label: String, enabled:
 
 flow Step(path: File.Path, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}, task: Record{kind: String, label: String, enabled: Bool, lines: List<String>}) -> Record{completed: Int, failures: List<String>, last_error: String, token: String}! {
     outcome = Attempt(path, task)
-    failures = Match.new(outcome.failed, true: AddLabel(state.failures, task.label), _: state.failures)
-    last_error = Match.new(outcome.failed, true: outcome.error_kind, _: state.last_error)
+    failures = Record.new(selector: outcome.failed, state: state, task: task) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StepFailuresChoiceTest1, StepFailuresChoiceResult1)),
+        default: StepFailuresChoiceDefault
+    ))
+    last_error = Record.new(selector: outcome.failed, outcome: outcome, state: state) |> Match.apply(Match.new(
+        cases: List.new(Match.Case.new(StepLast_errorChoiceTest1, StepLast_errorChoiceResult1)),
+        default: StepLast_errorChoiceDefault
+    ))
+    flow StepFailuresChoiceTest1(request: Record{selector: Bool, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> Bool {
+        return request.selector
+    }
+
+    flow StepFailuresChoiceResult1(request: Record{selector: Bool, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> List<String> {
+        return AddLabel(request.state.failures, request.task.label)
+    }
+
+    flow StepFailuresChoiceDefault(request: Record{selector: Bool, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}, task: Record{enabled: Bool, kind: String, label: String, lines: List<String>}}) -> List<String> {
+        return request.state.failures
+    }
+
+    flow StepLast_errorChoiceTest1(request: Record{outcome: Record{completed: Int, error_kind: String, failed: Bool}, selector: Bool, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}}) -> Bool {
+        return request.selector
+    }
+
+    flow StepLast_errorChoiceResult1(request: Record{outcome: Record{completed: Int, error_kind: String, failed: Bool}, selector: Bool, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}}) -> String {
+        return request.outcome.error_kind
+    }
+
+    flow StepLast_errorChoiceDefault(request: Record{outcome: Record{completed: Int, error_kind: String, failed: Bool}, selector: Bool, state: Record{completed: Int, failures: List<String>, last_error: String, token: String}}) -> String {
+        return request.state.last_error
+    }
+
     return Record.new(completed: Math.add(state.completed, outcome.completed), failures: failures, last_error: last_error, token: state.token)
 }
 

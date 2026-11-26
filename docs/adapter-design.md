@@ -99,17 +99,15 @@ This rule does not remove deterministic tensor operations from List callbacks.
 | --- | --- |
 | List callback | Pure named flow. No host observations or commits. |
 | Match predicate | Pure total named flow. |
-| Match case head | Pure total value calculation. |
-| Match selector or selected branch | Observations can occur. Commit activation is prohibited. |
+| Match case or default handler | May observe host state. `Match.apply` carries the read effect. Commit activation belongs in the caller. |
 | Flow self-handler | Pure total named flow. |
 | Adapter `onError` | Pure total named flow. |
 | `Flow.fold` callback | Observations and commits can occur under ordinary flow fallibility rules. |
 | HTTP request handler | Observations and commits can occur under the declared handler signature. |
 
-Match is a conditional expression.
-A Match expression with an observation is not pure.
-Its summary includes possible observations, but execution enters only the selected branch.
-This distinction supports conditional reads without speculative access.
+`Match.new` stores callback references. `Match.apply` invokes only the selected handler.
+A reading handler makes its matcher read-qualified and adds possible reads to the application summary.
+The host checks the grant when the selected handler executes a read.
 
 The compiler must keep observation order, invocation count, failure order, and evaluated branches.
 It must not combine, repeat, or cache external observations as pure calculations.

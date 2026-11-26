@@ -28,7 +28,7 @@ Each operation has a signature, behavior, failure contract, authority requiremen
 | Atomic values and arithmetic | [Values](operations/values.md) |
 | Unicode text, bytes, and globs | [Text](operations/text.md) |
 | Immutable JSON values and exact extraction | [JSON](operations/json.md) |
-| Lists, maps, records, ranges, and sequential flows | [Collections](operations/collections.md) |
+| Lists, maps, records, ranges, matchers, and sequential flows | [Collections](operations/collections.md) |
 | File paths, observations, and activation targets | [Files](operations/files.md) |
 | Process contexts, executables, commands, and results | [Processes](operations/process.md) |
 | HTTP values, clients, and servers | [HTTP](operations/http.md) |
@@ -36,7 +36,8 @@ Each operation has a signature, behavior, failure contract, authority requiremen
 | FP32 tensors and explicit devices | [Tensors](operations/tensors.md) |
 | Autodiff, Parameters, gradients, optimizers, and checkpoints | [Training](operations/training.md) |
 
-`Match.new` is a [language expression](syntax.md#match-expressions), not an ordinary built-in call.
+`Match.new`, `Match.Case.new`, and `Match.apply` are ordinary [matcher operations](operations/collections.md#matchnew).
+The [matcher guide](syntax.md#matcher-operations) shows how to choose a handler.
 Record projections and `commit` also have language rules rather than operation entries.
 
 ## Tools And Host Integration
