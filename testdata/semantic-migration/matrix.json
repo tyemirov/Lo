@@ -1374,6 +1374,15 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "String.FromBytes.new",
+      "capability": "",
+      "errors": [
+        "UTF8.InvalidBytes"
+      ],
+      "activation_errors": [],
+      "negative_applicability": "catalog_failure_or_activation"
+    },
+    {
       "operation": "String.FromScalars.new",
       "capability": "",
       "errors": [],
@@ -1803,22 +1812,6 @@
       "capability": "",
       "errors": [
         "Tensor.HostObservationRequired"
-      ],
-      "activation_errors": [],
-      "negative_applicability": "catalog_failure_or_activation"
-    },
-    {
-      "operation": "UTF8.Bytes.new",
-      "capability": "",
-      "errors": [],
-      "activation_errors": [],
-      "negative_applicability": "verifier_only_typed_total"
-    },
-    {
-      "operation": "UTF8.String.new",
-      "capability": "",
-      "errors": [
-        "UTF8.InvalidBytes"
       ],
       "activation_errors": [],
       "negative_applicability": "catalog_failure_or_activation"
@@ -7150,6 +7143,48 @@
       ]
     },
     {
+      "id": "operation:String.FromBytes.new:positive",
+      "operation": "String.FromBytes.new",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestRunBuiltinCatalog/String.FromBytes.new"
+      ]
+    },
+    {
+      "id": "operation:String.FromBytes.new:negative",
+      "operation": "String.FromBytes.new",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestSemanticBuiltinRejections/String.FromBytes.new"
+      ]
+    },
+    {
+      "id": "operation:String.FromBytes.new:runtime-negative",
+      "operation": "String.FromBytes.new",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF030Failures/invalid-utf8"
+      ]
+    },
+    {
       "id": "operation:String.FromScalars.new:positive",
       "operation": "String.FromScalars.new",
       "axis": "positive",
@@ -8565,76 +8600,6 @@
       "profile": "software",
       "tests": [
         "TestDeviceAuthorizationAndFailures/observation"
-      ]
-    },
-    {
-      "id": "operation:UTF8.Bytes.new:positive",
-      "operation": "UTF8.Bytes.new",
-      "axis": "positive",
-      "boundary": "program-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "software",
-      "tests": [
-        "TestRunBuiltinCatalog/UTF8.Bytes.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.Bytes.new:negative",
-      "operation": "UTF8.Bytes.new",
-      "axis": "negative",
-      "boundary": "compiler-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "frontend",
-      "tests": [
-        "TestSemanticBuiltinRejections/UTF8.Bytes.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.String.new:positive",
-      "operation": "UTF8.String.new",
-      "axis": "positive",
-      "boundary": "program-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "software",
-      "tests": [
-        "TestRunBuiltinCatalog/UTF8.String.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.String.new:negative",
-      "operation": "UTF8.String.new",
-      "axis": "negative",
-      "boundary": "compiler-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "frontend",
-      "tests": [
-        "TestSemanticBuiltinRejections/UTF8.String.new"
-      ]
-    },
-    {
-      "id": "operation:UTF8.String.new:runtime-negative",
-      "operation": "UTF8.String.new",
-      "axis": "runtime-negative",
-      "boundary": "program-command",
-      "targets": [
-        "darwin/arm64",
-        "linux/arm64"
-      ],
-      "profile": "software",
-      "tests": [
-        "TestRunRecoverableErrors"
       ]
     },
     {
