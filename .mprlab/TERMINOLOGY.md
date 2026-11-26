@@ -26,7 +26,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `browser frontend`: A user interface that operates in a web browser.
 - `build`: A process or output that converts source code into an artifact.
 - `changelog`: A file that records completed changes for releases.
-- `characterization test`: An integration test that records current public behavior before a refactor.
+- `characterization test`: A test that records current observable behavior before a refactor.
 - `CI`: The repository continuous-integration system.
 - `CLI`: A command-line interface.
 - `code path`: A sequence of operations in source code.
@@ -42,6 +42,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `domain type`: A type that represents validated domain data.
 - `EAS`: Expo Application Services for hosted build, submission, and update operations.
 - `endpoint`: One HTTP API address and its operation.
+- `end-to-end test`: A test of a complete user or caller workflow through the application entry point.
 - `end user`: The person who requests or receives the agent work.
 - `environment file`: A private file that contains environment variable assignments.
 - `environment variable`: A named process input.
@@ -52,8 +53,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `GitHub Pages`: The GitHub service that hosts a static website from a repository branch.
 - `issue`: One tracked unit of work.
 - `issue tracker`: A file or system that contains issues.
-- `integration test`: A test of real product logic and component interactions through a public entry point, with controlled dependencies when necessary.
-- `inverted test pyramid`: The MPR Lab test strategy with integration tests as the primary layer and focused unit tests where useful.
+- `integration test`: A test of a contract between real components through the relevant entry point, with other dependencies controlled when necessary.
 - `language checker`: A tool that finds specified language errors.
 - `language review`: An agent-owned examination of text against language rules and terminology.
 - `manifest`: A source-controlled file that declares resources or configuration.
@@ -90,8 +90,11 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `technical noun`: A subject-field noun that the repository approves.
 - `technical prose`: English technical text outside code and source-controlled literals.
 - `technical verb`: A subject-field verb that the repository approves.
-- `test-driven development`: A coding sequence that uses a failing integration test before a production code change.
-- `unit test`: A test that isolates one code unit from its collaborators.
+- `test-driven development`: A coding sequence that uses tests of expected behavior to guide implementation.
+- `test double`: A substitute for a dependency during a test.
+- `test pyramid`: A strategy with many fast unit tests, fewer integration tests, and a small number of end-to-end tests.
+- `test shim`: A test-scoped patch or wrapper that redirects a dependency call.
+- `unit test`: An in-process test of a unit's observable behavior with controlled dependencies.
 - `validation`: Evidence that a change obeys its current contract.
 - `worktree`: A Git checkout that has its own working directory.
 - `website hostname`: The hostname that identifies a public static website.

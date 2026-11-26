@@ -37,34 +37,35 @@ Unknown local sections extend this core policy. The repository source requires u
 - After boundary validation, do not repeat validation in core modules.
 - Keep interfaces narrow. Prefer domain types instead of loose strings, maps, booleans, or `any` values.
 - Centralize reusable literals: paths, operation names, event names, config keys, status values, and shared messages.
-- Tests target public contracts and invariants, not defensive branches.
-- Prefer black-box integration and end-to-end tests through real entry points.
 
 ## Test-Driven Development
 
-- Start with tests. Define the requested behavior and run its relevant tests before implementation or configuration changes.
-- For new behavior, write a test that fails because the behavior is absent. For a defect, write a regression test that reproduces it before the fix.
-- Use integration tests as the primary layer for public behavior and component contracts.
-- For a bug fix, first reproduce the failure through the relevant public entry point and confirm its cause.
-- For a behavior change, add or update coverage that exercises the changed public contract. Choose the smallest meaningful check.
-- For a refactor, run relevant existing coverage first. Add characterization coverage where changed behavior is otherwise unprotected.
-- Use focused unit tests for algorithms, calculations, and isolated logic when they provide useful evidence.
-- Documentation, static configuration, and other low-impact changes can use document, schema, build, or structural checks appropriate to their effect.
-- For prose and static configuration, start with existing document, schema, or contract tests and rerun them after the edit. Add a test when the requested behavior lacks coverage.
-- Use deterministic local infrastructure for repository-owned databases, filesystems, queues, servers, and browsers.
-- At an external provider boundary, use a local protocol implementation with state stored inside Lo.
-- Do not use a provider sandbox or live-provider operation for Lo acceptance.
+- Start with a focused unit test of the requested behavior. If the behavior depends on a real boundary, select a separate check for that boundary. Run the applicable check before implementation or configuration changes.
+- For new business behavior, write a unit test that fails because the behavior is absent. For a defect, write a regression test at the smallest layer that reproduces the failure and confirm its cause before the fix.
+- For a behavior change, add or update tests of the changed contract through the relevant entry point.
+- For a refactor, run relevant existing coverage first. Add characterization tests for behavior that lacks coverage.
+- For prose and static configuration, run applicable document, schema, build, or structural checks before and after the edit.
+
+### Test Pyramid
+
+- Make fast, deterministic, in-process unit tests the base of the test pyramid. Run unit tests as the routine behavior suite during development and CI. Control time, randomness, and external effects.
+- Derive unit test cases from expected business behavior. Name the scenario and assert its observable outcome through the unit's callable interface. Cover expected successes, rejections, edge cases, invariants, and meaningful failures.
+- Aim for 100% code coverage from the unit suite through tests of expected behavior. Use uncovered lines and branches to identify missing scenarios. Add tests for uncovered scenarios with a defined, observable outcome.
+- Select a one-off integration check when the task needs evidence from real component interactions, such as transport, persistence, or dependency wiring. Use deterministic infrastructure and local protocol implementations with their state stored inside Lo.
+- Select a one-off end-to-end check when the task needs evidence for a critical caller workflow through real entry points. Keep integration and end-to-end checks in separately selected validation runs.
+- Apply the Lo repository boundary to every check. Use local provider simulations for acceptance and report actual provider connectivity as unverified.
+
+### Dependency Injection And Test Doubles
+
+- Pass effectful dependencies explicitly through constructors or function parameters with narrow contracts. Supply real implementations when assembling the application.
+- Keep the business logic under test real. Choose a mock, stub, fake, spy, or test shim for a dependency that needs a controlled result, failure, or recorded interaction. Scope shims to the test and restore patched state during cleanup.
+- Assert observable outcomes such as returned values, errors, and state changes. Assert collaborator calls when they are part of the contract, such as committing an effect once.
 
 ## Dependency Injection In Integration Tests
 
-- Use dependency injection for integration scenarios that are difficult to reproduce.
-- Inject the dependency that creates the test condition.
-- Use controlled clocks, dependency failures, or unusual responses when the scenario requires them.
-- Keep the product logic under test and its related internal interactions real.
-- Assert observable results through the public contract.
-- Keep integration coverage with real dependency implementations.
-- Injected scenarios prove behavior under the specified conditions. They do not prove actual provider connectivity.
-- Report actual provider connectivity as unverified. Do not cross the repository boundary to qualify it.
+- In a selected integration check, inject the dependency that creates a hard-to-reproduce condition, such as a timeout or unusual response.
+- Keep the product logic and component interactions under test real. Assert the result through the boundary under test.
+- Model provider behavior with a local protocol implementation and keep its state inside Lo. Report actual provider connectivity as unverified.
 
 ## Prohibited Patterns
 
@@ -115,11 +116,11 @@ Apply the Validation section and complete applicable independent review and auth
 - Keep release, publication, deployment, production DNS/TLS, and live acceptance outside implementation issue acceptance criteria.
 - Do not keep an implementation issue open or blocked because production operations are not completed.
 - Record pending production operations in a runbook or separate operational record.
-- Validate deployment tooling and infrastructure configuration through the required isolated integration tests.
+- Select an isolated boundary check when a deployment tooling or infrastructure change needs evidence from real interactions.
 
 Failed or missing required code validation prevents closure.
 Code validation includes tests for the issue's required behavior and any selected final CI gate.
-Turn a suspected defect or coverage gap into a test, then resolve that test.
+Reproduce suspected defects and cover untested expected behavior before closure.
 
 ## Validation
 
@@ -129,7 +130,7 @@ The repository policy owns CI selection. Global instructions own final-CI timing
 - Use repository-native test targets and the smallest meaningful scope for the changed contract.
 - Preserve the failing test and its passing result after the change.
 - Report test commands, results, and the behavior covered. Keep untested claims explicit.
-- Turn a suspected defect or missing contract into a test.
+- Add a focused test for a suspected defect or an untested contract.
 - Use production observations and diagnostics to inform test design.
 - Keep release, publication, deployment, and benchmark execution separate from implementation validation and issue closure.
 - Reuse passing results while the tested state remains unchanged, regardless of whether they ran locally or in CI.
@@ -141,7 +142,7 @@ The repository policy owns CI selection. Global instructions own final-CI timing
 - Use focused checks to correct failures. Repeat selected full CI only at the next final checkpoint after corrections and all other work are complete.
 - Run `make verify` only when the user explicitly selects the complete qualification lane.
 - For documentation and governance, use the applicable document, schema, and normalizer contract checks and review changed prose.
-- For user-visible frontend behavior, use browser tests. For services and CLIs, use HTTP, CLI, or public API tests.
+- When a change needs real browser, service, or CLI evidence, select a focused boundary check for the task. Record the contract and result separately from routine unit validation.
 - For read-only work, report source facts and existing test evidence and run only checks necessary for the requested analysis.
 - Keep reproduction evidence and any expected failing regression-test result in the task's ignored directory until the task ends.
 
@@ -184,7 +185,7 @@ Before claiming completion:
 - Core modules consume validated domain values.
 - Error paths include operation and subject context.
 - Reusable literals are centralized.
-- Public behavior is covered through public entry points.
+- Tests verify expected behavior at the smallest layer that can exercise the changed contract.
 - Repo-native validation was run or a concrete blocker is documented.
 
 ## Lo Repository Boundary

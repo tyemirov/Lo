@@ -21,7 +21,7 @@ Governance files alone do not complete application onboarding.
 - Keep local start and stop separate from release, publication, and deployment.
 - Reject missing commands, empty targets, placeholder recipes, and deployment wiring that cannot be verified.
 - Preserve command failures through each wrapper and public Make target.
-- Verify start, stop, isolation, and lifecycle routing through headless integration tests.
+- For onboarding acceptance, select a headless integration run to verify start, stop, isolation, and lifecycle routing.
 - Inject external operation boundaries when actual operations require separate authorization.
 - Keep visible applications, desktop input, and production operations outside onboarding validation.
 - Run every applicable policy check and record the command and result.
@@ -47,4 +47,4 @@ This is a binding product principle for every user interface.
 - Serialize writes and retain newer edits when an earlier write completes.
 - Keep explicit controls for user intent, such as creation, deletion, activation, and confirmation of consequential actions.
 - Do not use an explicit action as a substitute for automatic data persistence.
-- Verify automatic updates, persistence, error recovery, and account isolation through public interface tests.
+- Cover automatic updates, persistence, error recovery, and account isolation in unit tests. Select a public interface check when the task needs evidence from the real boundary.

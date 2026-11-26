@@ -30,17 +30,13 @@ This file gives backend rules for Go code. Obey root `AGENTS.md` and `.mprlab/PO
 
 ## Testing
 
-- Apply the proportional test sequence in `.mprlab/POLICY.md`. Use integration tests for the changed public contract.
-- Use dependency injection for integration scenarios that are difficult to reproduce.
-- Keep the product logic under test real.
-- Prefer black-box integration tests through HTTP, CLI, or public package entry points.
-- Use table-driven scenarios where they cover contract permutations.
+- Apply the test pyramid in `.mprlab/POLICY.md`.
+- Use table-driven unit tests for business cases that share setup and differ in inputs or expected outcomes.
+- Select one-off integration tests through HTTP, CLI, or public package entry points when the task needs evidence from real component interactions.
 - Before tests, configure temporary directories and all Go caches inside Lo.
 - Use `t.TempDir()` only when its resolved directory stays inside Lo.
 - Verify that child processes preserve these directories and cannot select an external cache.
 - If a target cannot obey the [repository boundary](POLICY.md#lo-repository-boundary), report the blocker without execution.
-- Use focused unit tests for complex algorithms, calculations, and isolated logic when useful.
-- Require integration coverage of public behavior for product acceptance.
 
 ## Validation
 
@@ -55,5 +51,4 @@ When these tools are part of the repository contract, `make lint` must include `
 - Use smart constructors returning `(Type, error)` when a type has invariants.
 - Do not export invalid zero-values.
 - Wrap errors with `%w`.
-- Prefer integration tests through real HTTP, CLI, or package entry points.
 - `make lint` must include `go vet`, `staticcheck`, and `ineffassign` when those tools are part of the repo contract.
