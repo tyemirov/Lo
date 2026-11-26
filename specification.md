@@ -526,7 +526,7 @@ A committable target may be:
 Examples:
 
 ```text
-write_action = File.Append.new(file_path, UTF8.Bytes.new(content_string))
+write_action = File.Append.new(file_path, Bytes.new(content_string))
 receipt = commit write_action
 target_server = HTTP.Server.new(port: Int.new(8080), handler: HelloHandler, onError: HelloError)
 commit target_server
@@ -856,7 +856,7 @@ This list contains the core constructors.
 
 * `Scalar.new(value)`
 * `String.new(value)`
-* `Bytes.new(value)`
+* `Bytes.new(value: String) -> Bytes`
 * `Int.new(value)`
 * `Float.new(value)`
 * `Bool.new(value)`
@@ -871,8 +871,7 @@ This list contains the core constructors.
 * `HTTP.Response.Text.new(status: ..., body: ...)`
 * `HTTP.Response.Bytes.new(status: ..., body: ...)`
 * `Error.new(kind: ..., message: ..., input: ...)`
-* `UTF8.String.new(bytes) -> String!`
-* `UTF8.Bytes.new(text: String) -> Bytes`
+* `String.FromBytes.new(bytes: Bytes) -> String!`
 * `String.FromScalars.new(scalar_list)`
 
 ### 7.2 Constructor Rules
@@ -1231,7 +1230,7 @@ Independent source review closed the current findings.
 Boundary reads return values directly.
 Target construction performs no file access.
 Only `commit` activates a target.
-Write and append require Bytes, with explicit `UTF8.Bytes.new` for text.
+Write and append require Bytes, with explicit `Bytes.new` for text.
 Path equality compares text without normalization or access.
 A matcher can accept a File.Path request and use `File.Path.eq` in a predicate.
 
@@ -2186,7 +2185,7 @@ Examples:
 ```text
 file_text = input_path
   |> File.read()
-  |> UTF8.String.new()
+  |> String.FromBytes.new()
 quotient = left
   |> Math.div(right)
 ```
@@ -2434,8 +2433,7 @@ Whitespace can occur between the components of a qualified name and before its c
 * `Match.new`
 * `Error.new`
 * `File.Path.new`
-* `UTF8.String.new`
-* `UTF8.Bytes.new`
+* `String.FromBytes.new`
 * `HTTP.Server.new`
 * `HTTP.Headers.new`
 * `HTTP.Headers.values`
@@ -2533,7 +2531,7 @@ The following operations are fallible. Each listed failure is recoverable and
 must produce an Error with at least the listed kind string. Implementations may
 include additional fields in Error.input when useful.
 
-* `UTF8.String.new(bytes) -> String!`
+* `String.FromBytes.new(bytes: Bytes) -> String!`
   * Failure: bytes are not valid UTF-8.
   * Required Error.kind: String.new("UTF8.InvalidBytes")
 * `Math.div(left_value, right_value) -> Int!`
@@ -2680,7 +2678,7 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
         default: ErrorLog
     )
     path = status_code |> Match.apply(destinations)
-    target_action = File.Append.new(path, UTF8.Bytes.new(request_data))
+    target_action = File.Append.new(path, Bytes.new(request_data))
     commit target_action
 
     return HTTP.Response.Text.new(status: status_code, body: "Status processed")
@@ -2703,7 +2701,7 @@ flow CountFallback(error: Error) -> Int {
 flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
     file_text = file_path
         |> File.read()
-        |> UTF8.String.new()
+        |> String.FromBytes.new()
     match_count = file_text
         |> List.filter(IsMatchingScalar)
         |> List.length()
@@ -2793,7 +2791,7 @@ rejection for syntactically valid programs that violate semantic rules.
 | Comparable domains | `Range.new(start: Int.new(1), end: Int.new(3), include_start: true, include_end: true)` and `Map<String, Int>`. | `Range<Bytes>` or `Map<List<Int>, String>` because those key/endpoint types are not comparable in v0.4. |
 | Map absence | `Map.has_key(values, key)` is total and `Map.get(values, key)` is fallible. | Treating a missing map value as a nullable successful value. |
 | List flow references | `List.filter(numbers, IsPositive)` where IsPositive is pure and `(Int) -> Bool`. | Passing an anonymous function, an effectful flow, or a flow with the wrong parameter order to a list processor. |
-| Commit activation | `action = File.Append.new(path, UTF8.Bytes.new(text))` followed by `receipt = commit action` in a fallible or self-handling flow. | `commit text` where text has type String, or any commit inside a plain total flow. |
+| Commit activation | `action = File.Append.new(path, Bytes.new(text))` followed by `receipt = commit action` in a fallible or self-handling flow. | `commit text` where text has type String, or any commit inside a plain total flow. |
 | Predeclared name shadowing | `flow UserHandler(request: HTTP.Request) -> HTTP.Response { return HTTP.Response.Text.new(status: Int.new(200), body: String.new("ok")) }` | `flow String(value: Int) -> Int { return value }` or `HTTP = String.new("x")`. |
 | Grammar examples | Every example in section 19 parses under section 17 and type-checks under section 15. | Any section 19 example relying on an undeclared non-standard processor or undocumented precedence rule. |
 
@@ -2904,6 +2902,7 @@ A return from a self-handling flow permits propagation to its declared handler.
 
 `Int.new`, `String.new`, `Float.new`, and `Bool.new` accept one value of their output type.
 `Bytes.new(value: String)` encodes its input as UTF-8 bytes.
+`String.FromBytes.new(bytes: Bytes)` validates the complete UTF-8 sequence before it returns a String.
 `Scalar.new` accepts a Scalar or a statically known String with exactly one Unicode scalar.
 The verifier rejects a String input whose length it cannot establish.
 `Float` uses finite IEEE 754 binary64 values in the reference implementation.
@@ -3088,7 +3087,7 @@ A failed commit stops the current body before later statements execute.
 An applicable self-handler can return a result to the caller, as specified in section 23.4.
 
 `File.Append.new` constructs an append target from Bytes.
-`UTF8.Bytes.new(text)` explicitly encodes text as UTF-8.
+`Bytes.new(text)` explicitly encodes text as UTF-8.
 `File.Write.new` constructs a replacement target from Bytes.
 Activation writes the supplied bytes.
 Both operations create the target file if it does not exist.
