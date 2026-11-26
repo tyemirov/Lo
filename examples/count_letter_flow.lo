@@ -7,7 +7,7 @@ flow CountFallback(error: Error) -> Int {
 flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
     file_text = file_path
         |> File.read()
-        |> UTF8.String.new()
+        |> String.FromBytes.new()
     match_count = file_text
         |> List.filter(IsMatchingScalar)
         |> List.length()

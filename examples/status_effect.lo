@@ -16,7 +16,7 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
         default: ErrorLog
     )
     path = status_code |> Match.apply(destinations)
-    target_action = File.Append.new(path, UTF8.Bytes.new(request_data))
+    target_action = File.Append.new(path, Bytes.new(request_data))
     commit target_action
 
     return HTTP.Response.Text.new(status: status_code, body: "Status processed")

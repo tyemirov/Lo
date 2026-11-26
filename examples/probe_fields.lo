@@ -133,7 +133,7 @@ flow ProbeKnownPath(batch: List<File.Path>, path: File.Path) -> Bool! {
 }
 
 flow ProbeName(batch: List<File.Path>, names: List<File.Path>, field: Bytes) -> List<File.Path>! {
-    name = UTF8.String.new(Bytes.slice(field, 1, Bytes.length(field)))
+    name = String.FromBytes.new(Bytes.slice(field, 1, Bytes.length(field)))
     nonempty = ProbeNonemptyName(name)
     path = File.Path.new(name)
     known = ProbeKnownPath(batch, path)
@@ -141,7 +141,7 @@ flow ProbeName(batch: List<File.Path>, names: List<File.Path>, field: Bytes) -> 
 }
 
 flow ProbeProcess(names: List<File.Path>, field: Bytes) -> List<File.Path>! {
-    digits = UTF8.String.new(Bytes.slice(field, 1, Bytes.length(field)))
+    digits = String.FromBytes.new(Bytes.slice(field, 1, Bytes.length(field)))
     nonempty = ProbeRequire(Math.gt(String.length(digits), 0), "empty process identifier")
     valid = ProbeRequire(List.fold(List.map(digits, ProbeDigit), true, ProbeAnd), "invalid process identifier")
     return names

@@ -1,17 +1,17 @@
 flow EmptyTexts() -> List<String> { return List.new() }
 flow WriteEmpty(path: File.Path, count: Int, content: String) -> Int! {
-    target = File.Write.new(path, UTF8.Bytes.new(content))
+    target = File.Write.new(path, Bytes.new(content))
     commit target
     return count
 }
 flow AppendText(path: File.Path, count: Int, content: String) -> Int! {
-    target = File.Append.new(path, UTF8.Bytes.new(content))
+    target = File.Append.new(path, Bytes.new(content))
     commit target
     return Math.add(count, String.length(content))
 }
 flow ProcessFile(input_path: File.Path, log_path: File.Path, empty_path: File.Path) -> Int! {
     file_bytes = File.read(input_path)
-    file_text = UTF8.String.new(file_bytes)
+    file_text = String.FromBytes.new(file_bytes)
     empty = String.length(file_text) |> Match.apply(Match.new(
         cases: List.new(Match.Case.new(ProcessFileEmptyChoiceTest1, ProcessFileEmptyChoiceResult1)),
         default: ProcessFileEmptyChoiceDefault
