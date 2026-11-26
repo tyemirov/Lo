@@ -105,7 +105,8 @@ The [inspection tests](../tests/integration/matcher_inspect_test.go) cover store
 ## Operation Overlaps
 
 Audit date: November 25, 2026.
-The audit covers the 191 operations in the current [built-in catalog](../internal/catalog) and their call syntax.
+Updated November 26, 2026.
+The audit covers the 190 operations in the current [built-in catalog](../internal/catalog) and their call syntax.
 
 ### Selection And Host Reads
 
@@ -114,15 +115,18 @@ The optional `Read` qualifier carries a possible host read through flow paramete
 The compiler records the effect at application. A grant is needed when the selected handler executes its read.
 See the [host-read rules](../specification.md#112-host-reads) and [native tests](../tests/integration/matcher_test.go).
 
+### UTF-8 Encoding
+
+`Bytes.new(value: String)` is the text encoder. `String.FromBytes.new(bytes: Bytes)` decodes UTF-8 and returns `UTF8.InvalidBytes` for malformed input. See the [text operation reference](operations/text.md#stringfrombytesnew).
+
 ### Equivalent Results And Convenience Operations
 
 | Forms | Shared behavior and contract details |
 | --- | --- |
-| `Bytes.new(text)` and `UTF8.Bytes.new(text)` | Both encode the same String as UTF-8 and return total Bytes. They share a [runtime implementation](../runtime/native/src/operations.rs#L424) and use different named parameter labels. |
 | `Int.new(x)`, `Float.new(x)`, `String.new(x)`, `Bool.new(x)`, and using `x` directly | The four constructors return the already-typed argument. Literals already create those values. See the [constructor contract](../specification.md#71-built-in-constructors) and [identity implementation](../runtime/native/src/operations.rs#L417). |
 | `Scalar.new(scalar)` and using `scalar` directly | The constructor returns its existing Scalar input. It can also construct a Scalar from a statically known one-scalar String. See the [Scalar constructor](operations/text.md#scalarnew). |
 | `String.length(text)` and `List.length(text)` | Both count Unicode scalars. The list operation uses a String-to-list view with its own evaluation cost. See [String length](operations/text.md#stringlength) and [List length](operations/collections.md#listlength). |
-| `HTTP.Response.Text.new(status, text)` and `HTTP.Response.Bytes.new(status, UTF8.Bytes.new(text))` | Both produce a response with empty headers and the same body bytes. `HTTP.Response.new` produces that response when it receives empty headers. Explicitly building the headers with `HTTP.Headers.new(List.new())` introduces a fallible expression. See the [response constructors](operations/http.md#httpresponsebytesnew). |
+| `HTTP.Response.Text.new(status, text)` and `HTTP.Response.Bytes.new(status, Bytes.new(text))` | Both produce a response with empty headers and the same body bytes. `HTTP.Response.new` produces that response when it receives empty headers. Explicitly building the headers with `HTTP.Headers.new(List.new())` introduces a fallible expression. See the [response constructors](operations/http.md#httpresponsebytesnew). |
 | `Tensor.rank(tensor)` and `List.length(Tensor.shape(tensor))` | Both return the number of dimensions. The composition creates a list of dimensions. See [tensor shape and rank](operations/tensors.md#tensorshape). |
 | `Math.gt(a, b)` and `Math.lt(b, a)`, plus `Math.gte(a, b)` and `Math.lte(b, a)` | Reversing the operands preserves the comparison result for bound values. The same identities hold for `Float`. Swapping argument expressions can change evaluation and failure order. See [integer comparisons](operations/values.md#mathgt) and [Float comparisons](operations/values.md#floatgt). |
 | `String.eq(a, b)` and `Math.eq(String.compare(a, b), 0)` | Both return the same Boolean. `String.compare` also exposes order. See [String comparison](operations/text.md#stringcompare). |
@@ -157,7 +161,7 @@ Runtime tests supply additional behavioral evidence.
 | Family and exact operation names | Reference | Catalog | Tests |
 | --- | --- | --- | --- |
 | **Core values**: `Bool.new`, `Bytes.new`, `Error.new`, `Int.new` | [Contract](../specification.md#71-built-in-constructors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
-| **Strings and scalars**: `Scalar.eq`, `Scalar.new`, `String.FromScalars.new`, `String.concat`, `String.eq`, `String.length`, `String.lower`, `String.new`, `String.upper`, `UTF8.String.new` | [Contract](../specification.md#8-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
+| **Strings and scalars**: `Scalar.eq`, `Scalar.new`, `String.FromBytes.new`, `String.FromScalars.new`, `String.concat`, `String.eq`, `String.length`, `String.lower`, `String.new`, `String.upper` | [Contract](../specification.md#8-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
 | **Integer arithmetic**: `Int.to_string`, `Math.add`, `Math.div`, `Math.eq`, `Math.gt`, `Math.gte`, `Math.lt`, `Math.lte`, `Math.max`, `Math.min`, `Math.mod`, `Math.mul`, `Math.product`, `Math.sub`, `Math.sum` | [Contract](../specification.md#84-math-processors) | [catalog.go](../internal/catalog/catalog.go) | [runtime_catalog](../tests/integration/runtime_catalog_test.go) |
 | **Float arithmetic**: `Float.add`, `Float.div`, `Float.eq`, `Float.gt`, `Float.gte`, `Float.lt`, `Float.lte`, `Float.mul`, `Float.new`, `Float.sqrt`, `Float.sub`, `Float.to_int`, `Float.to_string`, `Int.to_float` | [Contract](../specification.md#241-binary64-arithmetic) | [catalog.go](../internal/catalog/catalog.go) | [float](../tests/integration/float_test.go) |
 | **Lists**: `List.filter`, `List.flat_map`, `List.fold`, `List.length`, `List.map`, `List.new`, `List.unfold` | [Contract](../specification.md#87-list-processors) | [catalog.go](../internal/catalog/catalog.go) | [run](../tests/integration/run_test.go) |

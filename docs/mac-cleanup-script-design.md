@@ -76,7 +76,7 @@ Those rules remain visible Lo code.
 
 The source reuses `Host.Invocation.current`, Process context operations, executable discovery, command construction, and typed termination results.
 It also reuses immutable File entries, `File.Remove.checked`, `Flow.fold`, pure List processors, records, maps, and scalar comparisons.
-UTF-8 conversion uses existing `UTF8.Bytes.new` and `UTF8.String.new`.
+`Bytes.new` encodes UTF-8 and `String.FromBytes.new` decodes it.
 The [CLI contract](cli-runtime-design.md) defines implemented Console, terminal, and declared option operations.
 The [executable CLI example](examples/cli-cleanup-preview.lo) verifies those operations without cleanup effects.
 The application does not require another Process namespace or a command for each named tool.

@@ -17,7 +17,7 @@ flow StartupFailure(error: Error) -> Record{code: Int, stdout: Bytes, stderr: By
         return 1
     }
 
-    return Record.new(code: code, stdout: Bytes.new(""), stderr: UTF8.Bytes.new(error.message), lines: List.new())
+    return Record.new(code: code, stdout: Bytes.new(""), stderr: Bytes.new(error.message), lines: List.new())
 }
 
 flow Startup() -> Record{code: Int, stdout: Bytes, stderr: Bytes, lines: List<String>} onError StartupFailure {
@@ -65,7 +65,7 @@ flow Startup() -> Record{code: Int, stdout: Bytes, stderr: Bytes, lines: List<St
     }
 
     flow StartupChoiceResult1(request: Record{mode: String, options: CLI.Options, selector: Bool}) -> Record{code: Int, lines: List<String>, stderr: Bytes, stdout: Bytes} {
-        return Record.new(code: 0, stdout: UTF8.Bytes.new(request.options.help_text), stderr: Bytes.new(""), lines: List.new())
+        return Record.new(code: 0, stdout: Bytes.new(request.options.help_text), stderr: Bytes.new(""), lines: List.new())
     }
 
     flow StartupChoiceDefault(request: Record{mode: String, options: CLI.Options, selector: Bool}) -> Record{code: Int, lines: List<String>, stderr: Bytes, stdout: Bytes} {

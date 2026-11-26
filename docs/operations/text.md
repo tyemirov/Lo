@@ -20,6 +20,7 @@ Host quota failures are terminal.
 - [Glob.new](#globnew)
 - [Scalar.eq](#scalareq)
 - [Scalar.new](#scalarnew)
+- [String.FromBytes.new](#stringfrombytesnew)
 - [String.FromScalars.new](#stringfromscalarsnew)
 - [String.compare](#stringcompare)
 - [String.concat](#stringconcat)
@@ -39,8 +40,6 @@ Host quota failures are terminal.
 - [String.starts_with](#stringstarts_with)
 - [String.trim](#stringtrim)
 - [String.upper](#stringupper)
-- [UTF8.Bytes.new](#utf8bytesnew)
-- [UTF8.String.new](#utf8stringnew)
 
 ## Bytes.length
 
@@ -74,7 +73,7 @@ This constructor does not interpret the input as Base64.
 **Authority:** Pure. No host grant or commit is necessary.
 
 ```lo
-return Bytes.new("héllo")
+return Bytes.new(value: "héllo")
 ```
 
 [Contract](../../specification.md#71-built-in-constructors)
@@ -232,6 +231,24 @@ return Scalar.new("界")
 ```
 
 [Contract](../../specification.md#72-constructor-rules)
+
+## String.FromBytes.new
+
+```text
+String.FromBytes.new(bytes: Bytes) -> String!
+```
+
+Decode the complete byte sequence as UTF-8. Invalid input returns no partial String.
+
+**Failures:** `UTF8.InvalidBytes` for malformed UTF-8.
+
+**Authority:** Pure. No host grant or commit is necessary.
+
+```lo
+return String.FromBytes.new(bytes: Bytes.new(value: "héllo"))
+```
+
+[Contract](../value-processors.md#text-and-bytes)
 
 ## String.FromScalars.new
 
@@ -591,40 +608,4 @@ return String.upper("hello")
 ```
 
 [Contract](../../specification.md#232-comparison-and-ranges)
-
-## UTF8.Bytes.new
-
-```text
-UTF8.Bytes.new(text: String) -> Bytes
-```
-
-Encode all Unicode scalars in the String as UTF-8 bytes. NUL is valid data.
-
-**Failures:** No recoverable failure from this operation.
-
-**Authority:** Pure. No host grant or commit is necessary.
-
-```lo
-return UTF8.Bytes.new("héllo")
-```
-
-[Contract](../../specification.md#71-built-in-constructors)
-
-## UTF8.String.new
-
-```text
-UTF8.String.new(bytes: Bytes) -> String!
-```
-
-Decode the complete byte sequence as UTF-8. Invalid input returns no partial String.
-
-**Failures:** `UTF8.InvalidBytes` for malformed UTF-8.
-
-**Authority:** Pure. No host grant or commit is necessary.
-
-```lo
-return UTF8.String.new(Bytes.new("héllo"))
-```
-
-[Contract](../value-processors.md#text-and-bytes)
 

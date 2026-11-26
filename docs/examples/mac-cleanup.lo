@@ -775,7 +775,7 @@ flow DockerApply(context: Record{apply: Bool, home: File.Path, uid: Int, process
     local = Require(All(List.new(String.starts_with(endpoint, "unix:///"), Math.gt(String.length(endpoint), 8), All(List.map(endpoint, UnambiguousCharacter)))), String.concat("Refusing invalid or nonlocal Docker endpoint: ", endpoint))
     inspected_builder = DockerCommand(context, executable, List.new("buildx", "inspect", "desktop-linux"), "capture")
     builder_output = Require(Math.eq(Bytes.length(inspected_builder.stderr), 0), "Docker builder inspection wrote to stderr")
-    builder_text = String.replace_all(String.replace_all(UTF8.String.new(inspected_builder.stdout), "\r\n", "\n"), "\r", "\n")
+    builder_text = String.replace_all(String.replace_all(String.FromBytes.new(inspected_builder.stdout), "\r\n", "\n"), "\r", "\n")
     lines = String.split(builder_text, "\n")
     drivers_found = Flow.fold(lines, Record.new(pending: false, values: List.new()), "Driver", StrictBuilderField)
     endpoints_found = Flow.fold(lines, Record.new(pending: false, values: List.new()), "Endpoint", StrictBuilderField)
@@ -1193,8 +1193,8 @@ flow StorageRowValid(paths: List<String>, row: Record{bytes: Int, path: String})
 flow StorageInventory(context: Record{apply: Bool, home: File.Path, uid: Int, process: Process.Context}, paths: List<File.Path>, du: File.Path) -> Int! {
     executable = Process.Executable.new(du)
     result = RequireSuccess(Run(context.process, executable, ConcatStrings(List.new("-k", "-s"), List.map(paths, PathText)), "capture", 180))
-    complete = Require(Math.eq(Bytes.length(result.stderr), 0), String.concat("Storage inventory incomplete: ", String.trim(UTF8.String.new(result.stderr))))
-    lines = String.lines(UTF8.String.new(result.stdout))
+    complete = Require(Math.eq(Bytes.length(result.stderr), 0), String.concat("Storage inventory incomplete: ", String.trim(String.FromBytes.new(result.stderr))))
+    lines = String.lines(String.FromBytes.new(result.stdout))
     rows = Flow.fold(lines, List.new(), ParseStorageRows)
     valid = Require(All(List.new(Math.eq(List.length(rows), List.length(paths)), Math.eq(List.length(UniquePaths(List.map(rows, StorageRowPath))), List.length(paths)), All(List.map(rows, List.map(paths, PathText), StorageRowValid)))), "Storage inventory does not contain one nonnegative row for each selected path")
     printed = Print("Storage inventory (allocated size; NOT an estimate of reclaimable space):")
@@ -1594,7 +1594,7 @@ flow MainWithSettings(settings: Record{shared_temp: File.Path, user_temp_prefix:
     }
 
     flow MainWithSettingsChoiceResult1(request: Record{selector: Int, startup: Record{code: Int, message: String, results: List<Program.Exit>}}) -> Program.Exit! {
-        return Program.Exit.new(request.startup.code, Bytes.new(""), UTF8.Bytes.new(String.concat(request.startup.message, "\n")))
+        return Program.Exit.new(request.startup.code, Bytes.new(""), Bytes.new(String.concat(request.startup.message, "\n")))
     }
 
     flow MainWithSettingsChoiceDefault(request: Record{selector: Int, startup: Record{code: Int, message: String, results: List<Program.Exit>}}) -> Program.Exit! {
@@ -1758,7 +1758,7 @@ flow ProbeFieldText(field: Bytes) -> String! {
         cases: List.new(Match.Case.new(ProbeFieldTextCleanChoiceTest1, ProbeFieldTextCleanChoiceResult1)),
         default: ProbeFieldTextCleanChoiceDefault
     ))
-    text = UTF8.String.new(clean)
+    text = String.FromBytes.new(clean)
     valid = All(List.new(Math.gt(String.length(text), 1), Math.eq(List.length(String.split(text, "\n")), 1), Math.eq(List.length(String.split(text, "\r")), 1), Any(List.new(String.starts_with(text, "p"), String.starts_with(text, "f"), String.starts_with(text, "n")))))
     checked = RequireOpenFiles(valid, "Malformed open-file field; stopping category")
     flow ProbeFieldTextCleanChoiceTest1(request: Record{field: Bytes, selector: Bool}) -> Bool {
@@ -1819,7 +1819,7 @@ flow BatchNames(result: Process.Result) -> List<File.Path>! {
     checked = RequireOpenFiles(Math.eq(Bytes.length(result.stderr), 0), "Cannot verify open files; stopping category")
     fields = Bytes.split(result.stdout, Bytes.new("\u0000"))
     last = Math.sub(List.length(fields), 1)
-    trailer = UTF8.String.new(List.at(fields, last))
+    trailer = String.FromBytes.new(List.at(fields, last))
     framed = RequireOpenFiles(Any(List.new(String.eq(trailer, ""), String.eq(trailer, "\n"))), "Malformed open-file framing; stopping category")
     names = Flow.fold(List.slice(fields, 0, last), List.new(), ParseNames)
     named = RequireOpenFiles(Any(List.new(Math.eq(Bytes.length(result.stdout), 0), Math.gt(List.length(names), 0))), "Open-file output has no file names; stopping category")
@@ -1980,8 +1980,8 @@ flow GatewayLineStep(paths: List<File.Path>, line: String) -> List<File.Path>! {
 flow GatewayOpened(context: Process.Context, folder: File.Path) -> List<File.Path>! {
     result = Run(context, Lsof(context), List.new("-Fn", "+D", File.Path.to_string(folder)), "capture", 30)
     accepted = LsofStatus(result)
-    checked = RequireOpenFiles(String.eq(String.trim(UTF8.String.new(result.stderr)), ""), String.concat("Cannot verify open Gateway logs: ", String.trim(UTF8.String.new(result.stderr))))
-    return Flow.fold(String.lines(UTF8.String.new(result.stdout)), List.new(), GatewayLineStep)
+    checked = RequireOpenFiles(String.eq(String.trim(String.FromBytes.new(result.stderr)), ""), String.concat("Cannot verify open Gateway logs: ", String.trim(String.FromBytes.new(result.stderr))))
+    return Flow.fold(String.lines(String.FromBytes.new(result.stdout)), List.new(), GatewayLineStep)
 }
 flow GatewayRemove(opened: List<File.Path>, deleted: Int, entry: File.Entry) -> Int! {
     selector_1 = PathMember(opened, entry.path)
@@ -2149,7 +2149,7 @@ flow TempRoots(context: Record{apply: Bool, home: File.Path, uid: Int, process: 
     executable = Process.Executable.new(getconf)
     result = RequireSuccess(Run(context.process, executable, List.new("DARWIN_USER_TEMP_DIR"), "capture", 1800))
     checked = Require(Math.eq(Bytes.length(result.stderr), 0), "Temporary directory discovery wrote to stderr")
-    user_temp = TemporaryPath(String.trim(UTF8.String.new(result.stdout)), prefix)
+    user_temp = TemporaryPath(String.trim(String.FromBytes.new(result.stdout)), prefix)
     directory = File.directory(user_temp)
     owned = Require(Math.eq(directory.owner_uid, context.uid), "Cannot validate macOS per-user temporary directory owner")
     return UniquePaths(List.new(shared, user_temp))
@@ -3215,7 +3215,7 @@ flow StartedChoice1Branch2(free_bytes: Int, context: Record{apply: Bool, home: F
 }
 
 flow LockedChoice1Branch1(previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Program.Exit.new(2, Bytes.new(""), UTF8.Bytes.new("Run mac-cleanup as your normal user, without sudo\n"))
+    return Program.Exit.new(2, Bytes.new(""), Bytes.new("Run mac-cleanup as your normal user, without sudo\n"))
 }
 
 flow LockedChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {
@@ -3223,7 +3223,7 @@ flow LockedChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, set
 }
 
 flow MainChoice1Branch1(options: CLI.Options, previous: Program.Exit, selected: Int) -> Program.Exit! {
-    return Program.Exit.new(0, UTF8.Bytes.new(options.help_text), Bytes.new(""))
+    return Program.Exit.new(0, Bytes.new(options.help_text), Bytes.new(""))
 }
 
 flow MainChoice1Branch2(invocation: Host.Invocation, options: CLI.Options, settings: Record{shared_temp: File.Path, user_temp_prefix: String, getconf: File.Path, du: File.Path}, previous: Program.Exit, selected: Int) -> Program.Exit! {

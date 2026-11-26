@@ -249,8 +249,8 @@ The selected File surface is:
 | `File.Tree.Remove.checked(expected, context..., Eligible)` | Pure fallible construction | Nominal `File.Tree.Remove!` with complete preflight and confirmed removal progress. |
 
 Write and append accept `Bytes`.
-An explicit `UTF8.Bytes.new(text: String) -> Bytes` constructor supplies text encoding.
-Decoding remains explicit through `UTF8.String.new`.
+An explicit `Bytes.new(value: String) -> Bytes` constructor supplies text encoding.
+`String.FromBytes.new` decodes UTF-8 and returns a fallible String.
 The nominal File targets and their receipts are implemented.
 Source examples and tests use the canonical constructors without compatibility aliases.
 

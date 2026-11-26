@@ -58,7 +58,7 @@ flow Selected(apply: Bool, task: Record{kind: String, label: String, enabled: Bo
 }
 
 flow AppendEvent(path: File.Path, count: Int, line: String) -> Int! {
-    target = File.Append.new(path, UTF8.Bytes.new(line))
+    target = File.Append.new(path, Bytes.new(line))
     commit target
     return Math.add(count, 1)
 }

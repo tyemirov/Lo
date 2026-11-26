@@ -2,7 +2,7 @@
 
 [Documentation](../README.md) · [Philosophy](../philosophy.md) · [Syntax](../syntax.md)
 
-This reference describes all 191 implemented operations in the built-in catalog.
+This reference describes all 190 implemented operations in the built-in catalog.
 Each operation has an individual entry with a signature, behavior, failures, authority requirements, example, and detailed contract.
 Namespace names group related operations.
 They are not import statements or user-defined modules.
@@ -193,6 +193,7 @@ An empty error list in a constructor does not establish that its later commit su
 | [`Record.new`](collections.md#recordnew) | [Collections And Sequential Flows](collections.md) |
 | [`Scalar.eq`](text.md#scalareq) | [Text, Bytes, And Globs](text.md) |
 | [`Scalar.new`](text.md#scalarnew) | [Text, Bytes, And Globs](text.md) |
+| [`String.FromBytes.new`](text.md#stringfrombytesnew) | [Text, Bytes, And Globs](text.md) |
 | [`String.FromScalars.new`](text.md#stringfromscalarsnew) | [Text, Bytes, And Globs](text.md) |
 | [`String.compare`](text.md#stringcompare) | [Text, Bytes, And Globs](text.md) |
 | [`String.concat`](text.md#stringconcat) | [Text, Bytes, And Globs](text.md) |
@@ -232,8 +233,6 @@ An empty error list in a constructor does not establish that its later commit su
 | [`Tensor.to_float`](tensors.md#tensorto_float) | [Tensors And Devices](tensors.md) |
 | [`Tensor.transpose`](tensors.md#tensortranspose) | [Tensors And Devices](tensors.md) |
 | [`Tensor.values`](tensors.md#tensorvalues) | [Tensors And Devices](tensors.md) |
-| [`UTF8.Bytes.new`](text.md#utf8bytesnew) | [Text, Bytes, And Globs](text.md) |
-| [`UTF8.String.new`](text.md#utf8stringnew) | [Text, Bytes, And Globs](text.md) |
 
 ## Language Forms
 

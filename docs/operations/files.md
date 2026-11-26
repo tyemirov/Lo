@@ -24,7 +24,7 @@ A successful bound commit returns `File.AppendReceipt` with `path` and `bytes_wr
 **Example:**
 
 ```lo
-return File.Append.new(File.Path.new("_scratch/example-output.txt"), UTF8.Bytes.new("next line\n"))
+return File.Append.new(File.Path.new("_scratch/example-output.txt"), Bytes.new("next line\n"))
 ```
 
 [Contract](../../specification.md#91-file-adapter)
@@ -261,7 +261,7 @@ Host denial, cancellation, limits, and unresolved cleanup remain terminal diagno
 **Example:**
 
 ```lo
-return File.Write.new(File.Path.new("_scratch/example-output.txt"), UTF8.Bytes.new("hello"))
+return File.Write.new(File.Path.new("_scratch/example-output.txt"), Bytes.new("hello"))
 ```
 
 [Contract](../../specification.md#91-file-adapter)
@@ -338,7 +338,7 @@ return File.open_paths(File.Path.new("examples"))
 File.read(file_path: File.Path) -> Bytes!
 ```
 
-Read file contents as Bytes. Text decoding is a separate operation with `UTF8.String.new`. Relative paths resolve from the invocation directory.
+Read file contents as Bytes. Text decoding is a separate operation with `String.FromBytes.new`. Relative paths resolve from the invocation directory.
 
 **Failures:** `File.ReadFailed` for an authorized file that cannot supply its contents. Host denial, cancellation, and resource limits remain terminal diagnostics.
 

@@ -28,7 +28,7 @@ Application flows select filenames, retention periods, probe records, and comman
 Text operations are case-sensitive and do not normalize Unicode.
 Text indices count Unicode scalars, including separate combining scalars.
 Byte indices count bytes and can divide a UTF-8 sequence.
-`UTF8.String.new` remains the decoder and rejects malformed UTF-8 with `UTF8.InvalidBytes`.
+`Bytes.new` encodes text as UTF-8. `String.FromBytes.new` decodes UTF-8 and rejects malformed input with `UTF8.InvalidBytes`.
 NUL is valid data for text, byte, and glob operations.
 
 For a negative index, the processor adds the input length once.
