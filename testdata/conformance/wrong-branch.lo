@@ -1,1 +1,4 @@
-return Match.new(1, 1: "yes", _: 2)
+flow One(value: Int) -> Bool { return Math.eq(value, 1) }
+flow Yes(value: Int) -> String { return "yes" }
+flow Otherwise(value: Int) -> Int { return 2 }
+return Match.new(List.new(Match.Case.new(One, Yes)), Otherwise)

@@ -1,1 +1,5 @@
-return Match.new(1, when P: "yes", _: "no",)
+flow Positive(value: Int) -> Bool { return Math.gt(value, 0) }
+flow Yes(value: Int) -> String { return "yes" }
+flow No(value: Int) -> String { return "no" }
+matcher = Match.new(cases: List.new(Match.Case.new(Positive, Yes)), default: No,)
+return 1 |> Match.apply(matcher)

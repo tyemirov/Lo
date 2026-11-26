@@ -1,1 +1,1 @@
-return Match.new(1, 1: "yes")
+return Match.new(cases: List.new())

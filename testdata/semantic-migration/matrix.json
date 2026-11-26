@@ -898,6 +898,27 @@
       "negative_applicability": "verifier_only_typed_total"
     },
     {
+      "operation": "Match.Case.new",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_and_callback"
+    },
+    {
+      "operation": "Match.apply",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_and_callback"
+    },
+    {
+      "operation": "Match.new",
+      "capability": "",
+      "errors": [],
+      "activation_errors": [],
+      "negative_applicability": "verifier_and_callback"
+    },
+    {
       "operation": "Math.add",
       "capability": "",
       "errors": [],
@@ -9459,7 +9480,9 @@
       ],
       "profile": "software",
       "tests": [
-        "TestSemanticNativeRepeatedFrames"
+        "TestSemanticNativeRepeatedFrames",
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
       ]
     },
     {
@@ -9518,7 +9541,9 @@
       "profile": "software",
       "tests": [
         "TestParametersStopAndIdentity",
-        "TestSemanticNativeRepeatedFrames"
+        "TestSemanticNativeRepeatedFrames",
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
       ]
     },
     {
@@ -13598,6 +13623,108 @@
         "TestF031CompilerContracts",
         "TestF031FormattingArgumentBinding",
         "TestF031InspectionPureFailures"
+      ]
+    },
+    {
+      "id": "operation:Match.Case.new:positive",
+      "operation": "Match.Case.new",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
+      ]
+    },
+    {
+      "id": "operation:Match.Case.new:negative",
+      "operation": "Match.Case.new",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestMatcherChecksEveryCallback"
+      ]
+    },
+    {
+      "id": "operation:Match.apply:positive",
+      "operation": "Match.apply",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues",
+        "TestMatcherSelectedHostReads"
+      ]
+    },
+    {
+      "id": "operation:Match.apply:negative",
+      "operation": "Match.apply",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestMatcherChecksEveryCallback"
+      ]
+    },
+    {
+      "id": "operation:Match.new:positive",
+      "operation": "Match.new",
+      "axis": "positive",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherConstructionDefersCallbacks",
+        "TestMatcherReusableValues"
+      ]
+    },
+    {
+      "id": "operation:Match.new:negative",
+      "operation": "Match.new",
+      "axis": "negative",
+      "boundary": "compiler-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "frontend",
+      "tests": [
+        "TestMatcherChecksEveryCallback"
+      ]
+    },
+    {
+      "id": "operation:Match.apply:runtime-negative",
+      "operation": "Match.apply",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "darwin/arm64",
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestMatcherReusableValues/selected_handler_failure"
       ]
     }
   ],
