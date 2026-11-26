@@ -23,7 +23,7 @@ func f030FailureCases() []f030FailureCase {
 		{"bytes-reversed", `Bytes.slice(Bytes.new("a"), 1, 0)`, "Bytes.InvalidBounds"},
 		{"bytes-empty-separator", `Bytes.split(Bytes.new("a"), Bytes.new(""))`, "Bytes.InvalidSeparator"},
 		{"bytes-empty-prefix", `Bytes.trim_start(Bytes.new("a"), Bytes.new(""))`, "Bytes.InvalidSeparator"},
-		{"invalid-utf8", `UTF8.String.new(Bytes.slice(Bytes.new("é"), 0, 1))`, "UTF8.InvalidBytes"},
+		{"invalid-utf8", `String.FromBytes.new(Bytes.slice(Bytes.new("é"), 0, 1))`, "UTF8.InvalidBytes"},
 		{"list-index", `List.at(List.new(1), 1)`, "List.InvalidIndex"},
 		{"list-negative", `List.at(List.new(1), -2)`, "List.InvalidIndex"},
 		{"list-huge", `List.at(List.new(1), -999999999999999999999999999999)`, "List.InvalidIndex"},

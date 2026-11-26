@@ -90,7 +90,7 @@ func TestCLIStackConsoleInertAndRedacted(t *testing.T) {
 func TestCLIStackTerminalStatus(t *testing.T) {
 	for _, status := range []int{0, 1, 2} {
 		t.Run(fmt.Sprint(status), func(t *testing.T) {
-			source := cliStackProgram("Program.Exit", fmt.Sprintf(`return Program.Exit.new(%d, UTF8.Bytes.new("out\n"), UTF8.Bytes.new("err\n"))`, status))
+			source := cliStackProgram("Program.Exit", fmt.Sprintf(`return Program.Exit.new(%d, Bytes.new("out\n"), Bytes.new("err\n"))`, status))
 			got := runProgram(t, sourceFile(t, source), "run")
 			if got.status != status || got.stdout != "out\n" || got.stderr != "err\n" {
 				t.Fatalf("terminal result: %+v", got)
@@ -285,7 +285,7 @@ flow Main() -> Program.Exit! {
         return ""
     }
 
-    return Program.Exit.new(0, UTF8.Bytes.new(output), Bytes.new(""))
+    return Program.Exit.new(0, Bytes.new(output), Bytes.new(""))
 }; return Main()`
 	path := sourceFile(t, source)
 	help := runProgram(t, path, "run", "--", "--help")
@@ -302,7 +302,7 @@ func TestCLIStackRecordSizeBoundaries(t *testing.T) {
 	const maximum = 1048576
 	for _, test := range []struct{ name, output, body, kind string }{
 		{"line-over-limit", "Console.Line", fmt.Sprintf(`return Console.Line.new("stdout", %q, true)`, strings.Repeat("x", maximum)), "Console.InvalidLine"},
-		{"terminal-over-limit", "Program.Exit", fmt.Sprintf(`return Program.Exit.new(0, UTF8.Bytes.new(%q), Bytes.new("x"))`, strings.Repeat("x", maximum)), "Program.InvalidExit"},
+		{"terminal-over-limit", "Program.Exit", fmt.Sprintf(`return Program.Exit.new(0, Bytes.new(%q), Bytes.new("x"))`, strings.Repeat("x", maximum)), "Program.InvalidExit"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := runProgram(t, sourceFile(t, cliStackProgram(test.output, test.body)), "run", "--format", "json")

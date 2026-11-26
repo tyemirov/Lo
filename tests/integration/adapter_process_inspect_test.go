@@ -31,7 +31,7 @@ type processContextInspection struct {
 
 func TestAdapterProcessInspection(t *testing.T) {
 	root := fileFixtureRoot(t)
-	program := fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); arguments = List.new("arg"); environment = Map.new(Record.new(key: "ENV",value: "value")); directory = File.Path.new(%q); context = Process.Context.new(environment, directory); stdin = UTF8.Bytes.new("input"); target = Process.Command.new(context, executable, arguments, stdin); outcome = commit target; return outcome }; return Main()`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
+	program := fmt.Sprintf(`flow Main() -> Process.Result! { executable = Process.Executable.new(File.Path.new(%q)); arguments = List.new("arg"); environment = Map.new(Record.new(key: "ENV",value: "value")); directory = File.Path.new(%q); context = Process.Context.new(environment, directory); stdin = Bytes.new("input"); target = Process.Command.new(context, executable, arguments, stdin); outcome = commit target; return outcome }; return Main()`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
 	report, path, output := inspectSource(t, program)
 	var document struct {
 		Report struct {

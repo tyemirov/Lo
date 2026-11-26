@@ -33,7 +33,7 @@ func TestLLVMHTTPValues(t *testing.T) {
 	for _, fixture := range []struct{ source, typ, payload string }{
 		{`return HTTP.URL.new("HTTP://EXAMPLE.COM/path?q=1")`, "HTTP.URL", `"http://example.com:80/path?q=1"`},
 		{`return HTTP.Method.new("POST")`, "HTTP.Method", `"POST"`},
-		{`flow Main()->HTTP.Headers! { return HTTP.Headers.new(List.new(Record.new(name:"X-Z",value:UTF8.Bytes.new("z")),Record.new(name:"X-a",value:UTF8.Bytes.new("a")))) }; return Main()`, "HTTP.Headers", `{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-a"},"value":{"type":"Bytes","value":"YQ=="}}},{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-z"},"value":{"type":"Bytes","value":"eg=="}}}]}}`},
+		{`flow Main()->HTTP.Headers! { return HTTP.Headers.new(List.new(Record.new(name:"X-Z",value:Bytes.new("z")),Record.new(name:"X-a",value:Bytes.new("a")))) }; return Main()`, "HTTP.Headers", `{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-a"},"value":{"type":"Bytes","value":"YQ=="}}},{"type":"Record{name: String, value: Bytes}","value":{"name":{"type":"String","value":"x-z"},"value":{"type":"Bytes","value":"eg=="}}}]}}`},
 		{`return HTTP.Response.Text.new(200,"ok")`, "HTTP.Response", `{"status":{"type":"Int","value":"200"},"headers":{"type":"HTTP.Headers","value":{"entries":{"type":"List<Record{name: String, value: Bytes}>","value":[]}}},"body":{"type":"Bytes","value":"b2s="}}`},
 	} {
 		actual := runProgram(t, sourceFile(t, fixture.source), "run", "--format", "json")
@@ -139,7 +139,7 @@ func TestLLVMHTTPVerifiedTLS(t *testing.T) {
 }
 
 func TestLLVMHTTPRequestContentLength(t *testing.T) {
-	p := startServer(t, `flow Decode(s:String,b:Bytes)->String!{return UTF8.String.new(b)}; flow Handle(r:HTTP.Request)->HTTP.Response!{values=HTTP.Headers.values(r.headers,"content-length"); value=List.fold(values,"",Decode); return HTTP.Response.Text.new(200,value)}; flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
+	p := startServer(t, `flow Decode(s:String,b:Bytes)->String!{return String.FromBytes.new(b)}; flow Handle(r:HTTP.Request)->HTTP.Response!{values=HTTP.Headers.values(r.headers,"content-length"); value=List.fold(values,"",Decode); return HTTP.Response.Text.new(200,value)}; flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
 	defer stopServer(t, p)
 	status, body := response(t, p, "POST", "/", "ab")
 	if status != 200 || body != "2" {
@@ -522,7 +522,7 @@ type llvmHTTPHeader struct{ name, value string }
 func llvmHTTPHeaderSource(headers []llvmHTTPHeader) string {
 	entries := make([]string, len(headers))
 	for index, header := range headers {
-		entries[index] = fmt.Sprintf(`Record.new(name:%q,value:UTF8.Bytes.new(%q))`, header.name, header.value)
+		entries[index] = fmt.Sprintf(`Record.new(name:%q,value:Bytes.new(%q))`, header.name, header.value)
 	}
 	return "List.new(" + strings.Join(entries, ",") + ")"
 }
@@ -571,7 +571,7 @@ func TestLLVMHTTPResponseFraming(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			source := sourceFile(t, fmt.Sprintf(`flow Handle(r:HTTP.Request)->HTTP.Response!{headers=HTTP.Headers.new(%s);return HTTP.Response.new(%d,headers,UTF8.Bytes.new(%q))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix, llvmHTTPHeaderSource(test.headers), test.status, test.body))
+			source := sourceFile(t, fmt.Sprintf(`flow Handle(r:HTTP.Request)->HTTP.Response!{headers=HTTP.Headers.new(%s);return HTTP.Response.new(%d,headers,Bytes.new(%q))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix, llvmHTTPHeaderSource(test.headers), test.status, test.body))
 			native, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build response framing: %+v", built)

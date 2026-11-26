@@ -16,7 +16,7 @@ func TestFileCommitOrder(t *testing.T) {
 p = File.Path.new(%q)
 unused = File.Write.new(p, Bytes.new("unused"))
 first = File.Write.new(p, Bytes.new("A"))
-again = File.Append.new(p, UTF8.Bytes.new("é"))
+again = File.Append.new(p, Bytes.new("é"))
 commit first
 commit again
 commit again
@@ -31,7 +31,7 @@ return File.read(p)
 	if string(contents) != "Aéé" {
 		t.Fatalf("commit order: %q", contents)
 	}
-	program = fmt.Sprintf(`target = File.Append.new(File.Path.new(%q), UTF8.Bytes.new("new")); commit target`, filepath.Join(dir, "created.txt"))
+	program = fmt.Sprintf(`target = File.Append.new(File.Path.new(%q), Bytes.new("new")); commit target`, filepath.Join(dir, "created.txt"))
 	got := runProgram(t, sourceFile(t, program), "run", "--write-root", dir, "--format", "json")
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("append creates target: %+v", got)
@@ -50,7 +50,7 @@ func TestFileCommitFailure(t *testing.T) {
 			body := `Bytes.new("content")`
 			kind := "File.WriteFailed"
 			if op == "File.Append.new" {
-				body = `UTF8.Bytes.new("content")`
+				body = `Bytes.new("content")`
 				kind = "File.AppendFailed"
 			}
 			program := fmt.Sprintf(`bad = %s(File.Path.new(%q), %s); later = File.Write.new(File.Path.new(%q), Bytes.new("later")); commit bad; commit later`, op, dir, body, later)

@@ -33,7 +33,7 @@ func semanticNativeObservation(source string, number int) llvmRuntimeScenario {
 }
 
 func TestSemanticNativeReadOrder(t *testing.T) {
-	const text = `flow Read(path: String) -> String! { bytes=File.read(File.Path.new(path)); return UTF8.String.new(bytes) }
+	const text = `flow Read(path: String) -> String! { bytes=File.read(File.Path.new(path)); return String.FromBytes.new(bytes) }
 flow Join(a: String,b: String) -> String { return String.concat(a,b) }
 flow Main() -> String! { unused=Read("unused");first=Read("repeat");second=Read("repeat");ordered=Join(b:Read("b"),a:Read("a"));return String.concat(first,second,ordered) };return Main()`
 	scenario := semanticNativeObservation(text, 0)
@@ -43,7 +43,7 @@ flow Main() -> String! { unused=Read("unused");first=Read("repeat");second=Read(
 
 func TestSemanticNativeMatchRegions(t *testing.T) {
 	const text = `flow Handle(error: Error) -> String { return "failed" }
-flow Read(path: String) -> String onError Handle { bytes=File.read(File.Path.new(path)); return UTF8.String.new(bytes) }
+flow Read(path: String) -> String onError Handle { bytes=File.read(File.Path.new(path)); return String.FromBytes.new(bytes) }
 flow ProgramChoiceTest1(value: String) -> Bool {
     return String.eq(value, "miss")
 }

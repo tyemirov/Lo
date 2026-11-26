@@ -100,7 +100,7 @@ func TestAdapterHTTPClientInspectionMethod(t *testing.T) {
 
 func TestAdapterHTTPClientDiagnosticTarget(t *testing.T) {
 	const secret = "client-target-private-sentinel"
-	program := fmt.Sprintf(`flow Main() -> Error! {method = HTTP.Method.new("POST"); url = HTTP.URL.new("http://127.0.0.1:1/private?%s"); headers = HTTP.Headers.new(List.new(Record.new(name: "authorization",value: UTF8.Bytes.new("%s")))); target = HTTP.Client.Request.new(method,url,headers,UTF8.Bytes.new("%s")); return Error.new("Example.Failure","failed",Record.new(target:target)) }; return Main()`, secret, secret, secret)
+	program := fmt.Sprintf(`flow Main() -> Error! {method = HTTP.Method.new("POST"); url = HTTP.URL.new("http://127.0.0.1:1/private?%s"); headers = HTTP.Headers.new(List.new(Record.new(name: "authorization",value: Bytes.new("%s")))); target = HTTP.Client.Request.new(method,url,headers,Bytes.new("%s")); return Error.new("Example.Failure","failed",Record.new(target:target)) }; return Main()`, secret, secret, secret)
 	got := runProgram(t, sourceFile(t, program), "run", "--format", "json")
 	if got.status != 0 {
 		t.Fatalf("target snapshot: %+v", got)

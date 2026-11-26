@@ -14,7 +14,7 @@ import (
 func TestAdapterFileReceipts(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := filepath.Join(root, "receipt.txt")
-	source := sourceFile(t, fmt.Sprintf(`path = File.Path.new(%q); write = File.Write.new(path, UTF8.Bytes.new(text: "hé")); written = commit write; append = File.Append.new(path, UTF8.Bytes.new("!")); appended = commit append; return Record.new(write: written, append: appended)`, path))
+	source := sourceFile(t, fmt.Sprintf(`path = File.Path.new(%q); write = File.Write.new(path, Bytes.new(value: "hé")); written = commit write; append = File.Append.new(path, Bytes.new("!")); appended = commit append; return Record.new(write: written, append: appended)`, path))
 	result := fileOutput(t, runProgram(t, source, "run", "--write-root", root, "--format", "json"))
 	var fields map[string]runtimeValue
 	if err := json.Unmarshal(result.Value, &fields); err != nil {
@@ -56,7 +56,7 @@ func TestAdapterReceiptTypes(t *testing.T) {
 	for _, text := range []string{
 		`flow Bad(value: File.Write) -> File.Append { return value }`,
 		`return File.Append.new(File.Path.new("unused"), "text")`,
-		`return UTF8.Bytes.new(value: "text")`,
+		`return Bytes.new(text: "text")`,
 		`return File.WriteReceipt.new(File.Path.new("unused"), 0)`,
 		`return File.AppendReceipt.new(File.Path.new("unused"), 0)`,
 		`return File.RemoveReceipt.new(0, 0, 0)`,
@@ -78,7 +78,7 @@ func TestAdapterReceiptTypes(t *testing.T) {
 func TestAdapterReceiptProjection(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := filepath.Join(root, "projection")
-	source := sourceFile(t, fmt.Sprintf(`target = File.Write.new(File.Path.new(%q), UTF8.Bytes.new("é")); result = commit target; copied = result; return Record.new(path: copied.path, count: copied.bytes_written)`, path))
+	source := sourceFile(t, fmt.Sprintf(`target = File.Write.new(File.Path.new(%q), Bytes.new("é")); result = commit target; copied = result; return Record.new(path: copied.path, count: copied.bytes_written)`, path))
 	got := fileOutput(t, runProgram(t, source, "run", "--write-root", root, "--format", "json"))
 	var fields map[string]runtimeValue
 	if err := json.Unmarshal(got.Value, &fields); err != nil {

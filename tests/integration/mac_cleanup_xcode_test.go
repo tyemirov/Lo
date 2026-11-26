@@ -56,7 +56,7 @@ flow XcodeFixture() -> Program.Exit! {
     flow Successful(count: Int) -> Bool { return Math.eq(count, 0) }
     flow SuccessStatus(count: Int) -> Int { return 0 }
     flow FailureStatus(count: Int) -> Int { return 1 }
-    return Program.Exit.new(List.length(state.failures) |> Match.apply(Match.new(List.new(Match.Case.new(Successful, SuccessStatus)), FailureStatus)), UTF8.Bytes.new(String.concat("FAILURES ", JoinStrings(state.failures, ","), "\n")), Bytes.new(""))
+    return Program.Exit.new(List.length(state.failures) |> Match.apply(Match.new(List.new(Match.Case.new(Successful, SuccessStatus)), FailureStatus)), Bytes.new(String.concat("FAILURES ", JoinStrings(state.failures, ","), "\n")), Bytes.new(""))
 }
 return XcodeFixture()`, fixture.root, fixture.calls, behavior, fixture.root, apply, fixture.root, os.Getuid())
 			arguments := append([]string{"fixture", "run"}, fixture.treeFlags(t, apply, parent)...)

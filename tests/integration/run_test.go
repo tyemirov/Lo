@@ -233,7 +233,7 @@ func TestRunFileReads(t *testing.T) {
 	if err := file.Close(); err != nil {
 		t.Fatal(err)
 	}
-	source := fmt.Sprintf(`flow Read() -> String! { bytes = File.read(File.Path.new(%q)); return UTF8.String.new(bytes) }; return Read()`, file.Name())
+	source := fmt.Sprintf(`flow Read() -> String! { bytes = File.read(File.Path.new(%q)); return String.FromBytes.new(bytes) }; return Read()`, file.Name())
 	v := runValue(t, source, "--read-root", dir)
 	valueJSON(t, v, `{"type":"String","value":"aé😀"}`)
 	denied := runProgram(t, sourceFile(t, source), "run", "--format", "json")
@@ -270,11 +270,17 @@ return true |> Match.apply(Match.new(List.new(Match.Case.new(ProgramChoiceTest1,
 	if err := invalid.Close(); err != nil {
 		t.Fatal(err)
 	}
-	bad := fmt.Sprintf(`flow Decode() -> String! { bytes = File.read(File.Path.new(%q)); return UTF8.String.new(bytes) }; return Decode()`, invalid.Name())
+	bad := fmt.Sprintf(`flow Decode() -> String! { bytes = File.read(File.Path.new(%q)); return String.FromBytes.new(bytes) }; return Decode()`, invalid.Name())
 	got = runProgram(t, sourceFile(t, bad), "run", "--read-root", dir, "--format", "json")
-	if got.status != 1 || !strings.Contains(got.stderr, `"kind":"UTF8.InvalidBytes"`) {
+	failure := receiptHostDiagnostic(t, got)
+	if got.status != 1 || got.stdout != "" || failure.Code != "runtime.unhandled-error" || failure.Error == nil || failure.Error.Kind != "UTF8.InvalidBytes" {
 		t.Fatalf("UTF8 boundary: %+v", got)
 	}
+	if failure.Error.Input == nil || len(failure.Error.Trace) != 1 {
+		t.Fatalf("missing UTF-8 decoder context: %+v", failure.Error)
+	}
+	valueJSON(t, *failure.Error.Input, `{"bytes":{"type":"Bytes","value":"/w=="}}`)
+	valueJSON(t, traceFields(t, failure.Error.Trace[0])["operation"], `"String.FromBytes.new"`)
 }
 
 func TestRunStoredFallibility(t *testing.T) {

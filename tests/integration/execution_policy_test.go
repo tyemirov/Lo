@@ -24,7 +24,7 @@ func TestExecutionPolicyLiveReads(t *testing.T) {
 func TestExecutionPolicyRetainedData(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := fileFixture(t, root, "data", strings.Repeat("x", 128<<10))
-	program := executionPolicySteps + fmt.Sprintf(`flow Read(path: File.Path, state: String, item: Int) -> String! { bytes = File.read(path); return String.concat(state, UTF8.String.new(bytes)) }; flow Run() -> String! { return Flow.fold(List.unfold(0, 64, Count), "", File.Path.new(%q), Read) }; return Run()`, path)
+	program := executionPolicySteps + fmt.Sprintf(`flow Read(path: File.Path, state: String, item: Int) -> String! { bytes = File.read(path); return String.concat(state, String.FromBytes.new(bytes)) }; flow Run() -> String! { return Flow.fold(List.unfold(0, 64, Count), "", File.Path.new(%q), Read) }; return Run()`, path)
 	got := runProgram(t, sourceFile(t, program), "run", "--read-root", root, "--max-live-bytes", "4194304", "--format", "json")
 	if got.status != 2 || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" || !strings.Contains(got.stderr, "live") {
 		t.Fatalf("retained data escaped live policy: %+v", got)

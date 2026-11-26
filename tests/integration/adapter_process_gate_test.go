@@ -11,7 +11,7 @@ import (
 )
 
 func processGateSource(root string) string {
-	return fmt.Sprintf(`executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable: executable, arguments: List.new("private-argument"), context: Process.Context.new(Map.new(Record.new(key: "PRIVATE", value: "private-environment")), File.Path.new(%q)), stdin: UTF8.Bytes.new("private-stdin"));`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
+	return fmt.Sprintf(`executable = Process.Executable.new(File.Path.new(%q)); target = Process.Command.new(executable: executable, arguments: List.new("private-argument"), context: Process.Context.new(Map.new(Record.new(key: "PRIVATE", value: "private-environment")), File.Path.new(%q)), stdin: Bytes.new("private-stdin"));`, filepath.Join(root, "absent-executable"), filepath.Join(root, "absent-directory"))
 }
 
 func assertProcessUnavailable(t *testing.T, got result) {
@@ -39,7 +39,7 @@ func TestAdapterProcessUnavailable(t *testing.T) {
 			if bound {
 				commit = "outcome = commit target"
 			}
-			program := `flow Main() -> Int! { ` + processGateSource(root) + commit + fmt.Sprintf(`; next = File.Write.new(File.Path.new(%q), UTF8.Bytes.new("unexpected")); commit next; return 0 }; return Main()`, later)
+			program := `flow Main() -> Int! { ` + processGateSource(root) + commit + fmt.Sprintf(`; next = File.Write.new(File.Path.new(%q), Bytes.new("unexpected")); commit next; return 0 }; return Main()`, later)
 			got := runProgram(t, sourceFile(t, program), "run", "--write-root", root, "--format", "json")
 			assertProcessUnavailable(t, got)
 			if _, err := os.ReadFile(later); !os.IsNotExist(err) {

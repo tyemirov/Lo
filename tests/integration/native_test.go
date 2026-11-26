@@ -483,8 +483,8 @@ func TestNativeTensorBudgetContracts(t *testing.T) {
 
 func TestNativeEffectBudgetContracts(t *testing.T) {
 	const prelude = `flow Failed(e: Error) -> Int { return -100 }
-flow Read(label: String) -> Int onError Failed { path=File.Path.new("order"); target=File.Append.new(path, UTF8.Bytes.new(label)); commit target; text=UTF8.String.new(File.read(path)); return String.length(text) }
-flow Head(path: String) -> Int onError Failed { text=UTF8.String.new(File.read(File.Path.new(path))); return String.length(text) }
+flow Read(label: String) -> Int onError Failed { path=File.Path.new("order"); target=File.Append.new(path, Bytes.new(label)); commit target; text=String.FromBytes.new(File.read(path)); return String.length(text) }
+flow Head(path: String) -> Int onError Failed { text=String.FromBytes.new(File.read(File.Path.new(path))); return String.length(text) }
 flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),second) }
 `
 	for _, fixture := range []struct{ name, body, output, effects string }{

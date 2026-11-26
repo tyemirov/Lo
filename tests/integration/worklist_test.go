@@ -104,7 +104,7 @@ func TestWorklistPendingTensorLifetime(t *testing.T) {
 func TestWorklistOrderedActivation(t *testing.T) {
 	root := fileFixtureRoot(t)
 	path := filepath.Join(root, "events")
-	source := worklistIntegerChildren + fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { target = File.Append.new(path, UTF8.Bytes.new(String.concat(Int.to_string(item), ","))); commit target; return Record.new(state: Math.add(state, 1), items: Children(item), stop: false) }; flow Run() -> Int! { return Flow.worklist(List.new(1, 2), 0, File.Path.new(%q), Step) }; return Run()`, path)
+	source := worklistIntegerChildren + fmt.Sprintf(`flow Step(path: File.Path, state: Int, item: Int) -> Record{state: Int, items: List<Int>, stop: Bool}! { target = File.Append.new(path, Bytes.new(String.concat(Int.to_string(item), ","))); commit target; return Record.new(state: Math.add(state, 1), items: Children(item), stop: false) }; flow Run() -> Int! { return Flow.worklist(List.new(1, 2), 0, File.Path.new(%q), Step) }; return Run()`, path)
 	output := fileOutput(t, runProgram(t, sourceFile(t, source), "run", "--write-root", root, "--format", "json"))
 	valueJSON(t, output, `"5"`)
 	contents, err := os.ReadFile(path)

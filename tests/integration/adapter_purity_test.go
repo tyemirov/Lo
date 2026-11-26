@@ -59,7 +59,7 @@ func TestAdapterPurity(t *testing.T) {
 		if err := os.WriteFile(selected, []byte("chosen"), 0600); err != nil {
 			t.Fatal(err)
 		}
-		program := fmt.Sprintf(`flow Read(path: String) -> String! { return UTF8.String.new(File.read(File.Path.new(path))) }; flow Main() -> String! {
+		program := fmt.Sprintf(`flow Read(path: String) -> String! { return String.FromBytes.new(File.read(File.Path.new(path))) }; flow Main() -> String! {
     flow MainChoiceTest1(value: String) -> Bool {
         return String.eq(value, "chosen")
     }

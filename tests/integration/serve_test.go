@@ -181,11 +181,11 @@ func TestServeHTTP(t *testing.T) {
 flow Handle(request: HTTP.Request) -> HTTP.Response! {
   probe_values = HTTP.Headers.values(request.headers, "X-Probe")
   probe = List.fold(probe_values, "", DecodeProbe)
-  body = UTF8.String.new(request.body)
+  body = String.FromBytes.new(request.body)
   message = String.concat(request.method, " ", request.path, " ", probe, " ", body)
   return HTTP.Response.Text.new(201, message)
 }
-flow DecodeProbe(state: String, content: Bytes) -> String! { return UTF8.String.new(content) }
+flow DecodeProbe(state: String, content: Bytes) -> String! { return String.FromBytes.new(content) }
 flow OnError(error: Error) -> HTTP.Response { return HTTP.Response.Text.new(500, error.kind) }
 ` + serveSuffix
 	p := startServer(t, source)

@@ -88,7 +88,7 @@ func TestInspectionResources(t *testing.T) {
 	absent := existing + ".missing"
 	text := fmt.Sprintf(`flow Never() -> Int! { unused = File.read(File.Path.new("unused-resource")); return 1 }
  input = File.read(File.Path.new(%q))
- pending = File.Append.new(File.Path.new("uncommitted"), UTF8.Bytes.new("unused"))
+ pending = File.Append.new(File.Path.new("uncommitted"), Bytes.new("unused"))
  output = File.Write.new(File.Path.new(%q), Bytes.new("changed"))
  commit output
  commit output`, absent, existing)
@@ -146,7 +146,7 @@ func TestInspectionBranchesAndCallbacks(t *testing.T) {
    }
 
    flow BuildChoiceResult1(request: Record{path: String, selector: Bool}) -> File.Append {
-       return File.Append.new(File.Path.new(request.path), UTF8.Bytes.new("a"))
+       return File.Append.new(File.Path.new(request.path), Bytes.new("a"))
    }
 
    flow BuildChoiceDefault(request: Record{path: String, selector: Bool}) -> File.Append {
@@ -196,7 +196,7 @@ func TestInspectionBranchesAndCallbacks(t *testing.T) {
 	}
 }
 func TestInspectionReturnedTargetsAndErrors(t *testing.T) {
-	report, _, _ := inspectSource(t, `flow Make(path: String) -> File.Append { return File.Append.new(File.Path.new(path), UTF8.Bytes.new("x")) }
+	report, _, _ := inspectSource(t, `flow Make(path: String) -> File.Append { return File.Append.new(File.Path.new(path), Bytes.new("x")) }
  flow H(e: Error) -> File.Append { return Make("handled") }
  flow Select(kind: String) -> File.Append onError H { n = Math.div(1, 0); detail = Error.new(kind, "custom", Record.new()); return Make("normal") }
  flow Dynamic(r: HTTP.Request) -> Error { return Error.new(r.path, "custom", Record.new()) }
@@ -319,7 +319,7 @@ func TestInspectionRejectsInvalidSource(t *testing.T) {
 }
 
 func TestInspectionLoopCarriedTargets(t *testing.T) {
-	report, _, _ := inspectSource(t, `flow Step(state: File.Write) -> Record{value: File.Write, next_state: File.Write} { return Record.new(value: state, next_state: File.Write.new(File.Path.new("next"), Bytes.new("x"))) }; flow Last(state: File.Write, value: File.Write) -> File.Write { return value }; first = File.Write.new(File.Path.new("first"), UTF8.Bytes.new("x")); effects = List.unfold(first, 2, Step); last = List.fold(effects, first, Last); commit last`)
+	report, _, _ := inspectSource(t, `flow Step(state: File.Write) -> Record{value: File.Write, next_state: File.Write} { return Record.new(value: state, next_state: File.Write.new(File.Path.new("next"), Bytes.new("x"))) }; flow Last(state: File.Write, value: File.Write) -> File.Write { return value }; first = File.Write.new(File.Path.new("first"), Bytes.new("x")); effects = List.unfold(first, 2, Step); last = List.fold(effects, first, Last); commit last`)
 	found := false
 	for _, cap := range report.Capabilities {
 		if cap.Operation == "File.write" && cap.Target.Value == "next" {
@@ -576,7 +576,7 @@ func TestInspectionContextLimit(t *testing.T) {
 }
 
 func TestInspectionRecordTargetSelection(t *testing.T) {
-	report, _, _ := inspectSource(t, `record = Record.new(active: File.Append.new(File.Path.new("active"), UTF8.Bytes.new("x")), inactive: File.Write.new(File.Path.new("inactive"), Bytes.new("x"))); selected = record.active; commit selected`)
+	report, _, _ := inspectSource(t, `record = Record.new(active: File.Append.new(File.Path.new("active"), Bytes.new("x")), inactive: File.Write.new(File.Path.new("inactive"), Bytes.new("x"))); selected = record.active; commit selected`)
 	if len(report.Targets) != 2 || len(report.Capabilities) != 1 || report.Capabilities[0].Target.Value != "active" {
 		t.Fatalf("uncommitted record field became an activation: %+v", report.Capabilities)
 	}
@@ -584,7 +584,7 @@ func TestInspectionRecordTargetSelection(t *testing.T) {
 
 func TestInspectionCalculatedTextLimit(t *testing.T) {
 	literal := strings.Repeat("x", 66000)
-	program := fmt.Sprintf(`known = File.Append.new(File.Path.new(%q), UTF8.Bytes.new("x")); calculated = File.Append.new(File.Path.new(String.concat(%q, %q)), UTF8.Bytes.new("x")); commit known; commit calculated`, literal, literal[:33000], literal[33000:])
+	program := fmt.Sprintf(`known = File.Append.new(File.Path.new(%q), Bytes.new("x")); calculated = File.Append.new(File.Path.new(String.concat(%q, %q)), Bytes.new("x")); commit known; commit calculated`, literal, literal[:33000], literal[33000:])
 	report, _, _ := inspectSource(t, program)
 	if len(report.Capabilities) != 2 {
 		t.Fatalf("capability count: %d", len(report.Capabilities))

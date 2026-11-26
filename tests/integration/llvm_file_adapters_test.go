@@ -13,7 +13,7 @@ func TestLLVMFileAdapters(t *testing.T) {
 	t.Run("append-create", func(t *testing.T) {
 		root := t.TempDir()
 		path := filepath.Join(root, "output")
-		source := sourceFile(t, fmt.Sprintf(`path=File.Path.new(%q); first=File.Append.new(path,UTF8.Bytes.new("hé")); a=commit first; second=File.Append.new(path,UTF8.Bytes.new("!")); b=commit second; return Record.new(first:a,second:b)`, path))
+		source := sourceFile(t, fmt.Sprintf(`path=File.Path.new(%q); first=File.Append.new(path,Bytes.new("hé")); a=commit first; second=File.Append.new(path,Bytes.new("!")); b=commit second; return Record.new(first:a,second:b)`, path))
 		result := runProgram(t, source, "run", "--write-root", root, "--format", "json")
 		if result.status != 0 {
 			t.Fatalf("append: %+v", result)
@@ -54,7 +54,7 @@ func TestLLVMLinuxFileNoReaderCancellation(t *testing.T) {
 }
 
 func TestLLVMLinuxFileAdapters(t *testing.T) {
-	artifact := linuxLLVMArtifact(t, `flow Keep(entry:File.Entry)->Bool{return String.eq(entry.name,"lo-native-file")};flow Main()->Record{appended:Int,content:Bytes,created:Int,remaining:Int,removed:Int}! {path=File.Path.new("/lo-native-file");first=File.Write.new(path,UTF8.Bytes.new("abc"));a=commit first;second=File.Append.new(path,UTF8.Bytes.new("dé"));b=commit second;content=File.read(path);entries=File.list(File.Path.new("/"));selected=List.filter(entries,Keep);removal=File.Remove.new(selected);r=commit removal;after=File.list(File.Path.new("/"));remaining=List.filter(after,Keep);return Record.new(created:a.bytes_written,appended:b.bytes_written,content:content,removed:r.observed_bytes,remaining:List.length(remaining))};return Main()`)
+	artifact := linuxLLVMArtifact(t, `flow Keep(entry:File.Entry)->Bool{return String.eq(entry.name,"lo-native-file")};flow Main()->Record{appended:Int,content:Bytes,created:Int,remaining:Int,removed:Int}! {path=File.Path.new("/lo-native-file");first=File.Write.new(path,Bytes.new("abc"));a=commit first;second=File.Append.new(path,Bytes.new("dé"));b=commit second;content=File.read(path);entries=File.list(File.Path.new("/"));selected=List.filter(entries,Keep);removal=File.Remove.new(selected);r=commit removal;after=File.list(File.Path.new("/"));remaining=List.filter(after,Keep);return Record.new(created:a.bytes_written,appended:b.bytes_written,content:content,removed:r.observed_bytes,remaining:List.length(remaining))};return Main()`)
 	got := runLinuxLLVMExecutable(t, artifact, "run", "--read-root", "/", "--write-root", "/", "--list-root", "/", "--remove-root", "/", "--format", "json")
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("Linux file execution: %+v", got)

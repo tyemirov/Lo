@@ -130,7 +130,7 @@ func TestLLVMRetainedImmutableValues(t *testing.T) {
 flow Add(item:Int)->Int{return Math.add(item,1)}
 flow Verify(original:Record{n:Int,bytes:Bytes,items:List<Int>,table:Map<String,Int>})->Bool onError Failure {
  derived=Record.merge(original,Record.new(n:Math.add(original.n,1),bytes:Bytes.new("xyz"),items:List.map(original.items,Add),table:Map.new(Record.new(key:"a",value:9))))
- text=UTF8.String.new(original.bytes);entry=Map.get(original.table,"a");newentry=Map.get(derived.table,"a")
+ text=String.FromBytes.new(original.bytes);entry=Map.get(original.table,"a");newentry=Map.get(derived.table,"a")
  flow VerifyChoiceTest1(request: Record{derived: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, entry: Int, newentry: Int, original: Record{bytes: Bytes, items: List<Int>, n: Int, table: Map<String, Int>}, selector: Int, text: String}) -> Bool {
      return Math.eq(request.selector, 18446744073709551616)
  }
