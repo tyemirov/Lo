@@ -2299,8 +2299,7 @@
       "axis": "runtime-negative",
       "boundary": "native-abi",
       "targets": [
-        "darwin/arm64",
-        "linux/arm64"
+        "darwin/arm64"
       ],
       "profile": "software",
       "tests": [
@@ -2309,6 +2308,22 @@
         "TestLLVMConsoleEmbeddingBoundary",
         "TestLLVMConsoleReadinessCancellation",
         "TestLLVMConsoleSpawnQueuedDeadline"
+      ]
+    },
+    {
+      "id": "operation:Console.Line.new:runtime-negative:2:linux",
+      "operation": "Console.Line.new",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMConsoleCompletionCleanupPrecedence",
+        "TestLLVMConsoleCompletionFlushCancellation",
+        "TestLLVMConsoleEmbeddingBoundary",
+        "TestLLVMConsoleReadinessCancellation"
       ]
     },
     {
@@ -6037,13 +6052,38 @@
       "axis": "runtime-negative",
       "boundary": "program-command",
       "targets": [
-        "darwin/arm64",
-        "linux/arm64"
+        "darwin/arm64"
       ],
       "profile": "software",
       "tests": [
         "TestF035InvalidCommandOptions",
         "TestF035TimeoutRecoveryPreservesOriginal"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_timeout:runtime-negative:linux-command",
+      "operation": "Process.Command.with_timeout",
+      "axis": "runtime-negative",
+      "boundary": "program-command",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF035InvalidCommandOptions"
+      ]
+    },
+    {
+      "id": "operation:Process.Command.with_timeout:runtime-negative:linux-abi",
+      "operation": "Process.Command.with_timeout",
+      "axis": "runtime-negative",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestF035LinuxDriverLifecycle/timeout-after-cleanup-permits-next"
       ]
     },
     {
@@ -6729,8 +6769,7 @@
       "axis": "positive",
       "boundary": "native-abi",
       "targets": [
-        "darwin/arm64",
-        "linux/arm64"
+        "darwin/arm64"
       ],
       "profile": "software",
       "tests": [
@@ -6739,6 +6778,22 @@
         "TestLLVMConsoleEmbeddingBoundary",
         "TestLLVMConsoleReadinessCancellation",
         "TestLLVMConsoleSpawnQueuedDeadline"
+      ]
+    },
+    {
+      "id": "operation:Program.Exit.new:positive:2:linux",
+      "operation": "Program.Exit.new",
+      "axis": "positive",
+      "boundary": "native-abi",
+      "targets": [
+        "linux/arm64"
+      ],
+      "profile": "software",
+      "tests": [
+        "TestLLVMConsoleCompletionCleanupPrecedence",
+        "TestLLVMConsoleCompletionFlushCancellation",
+        "TestLLVMConsoleEmbeddingBoundary",
+        "TestLLVMConsoleReadinessCancellation"
       ]
     },
     {

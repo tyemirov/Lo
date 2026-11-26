@@ -9,7 +9,7 @@ import (
 func TestProcessCleanupPolicyDiagnostics(t *testing.T) {
 	root, executable, launcher := processPolicyPaths(t)
 	source := sourceFile(t, "return 1")
-	artifact, built := buildForTest(t, source)
+	artifact, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build policy fixture: %+v", built)
 	}

@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __INT64_TYPE__ Offset;
@@ -13,7 +14,7 @@ extern unsigned alarm(unsigned);
 extern void (*signal(int, void (*)(int)))(int);
 extern int pthread_create(Thread *, const void *, void *(*)(void *), void *);
 extern int pthread_join(Thread, void **);
-extern int lo_cli_main(int, const char **, const char **);
+
 extern void *dlsym(void *, const char *);
 extern int poll(void *, unsigned, int);
 extern int getpid(void);

@@ -1,10 +1,12 @@
+#include "cli-entry.h"
+#include "self-image.h"
 #include "lo_runtime.h"
 #include "lo_process.h"
 #include "capture.h"
 typedef __UINTPTR_TYPE__ Thread;
 extern void lo_signal_entry(Context *,const Value *const *,uint64_t,uint64_t,ResultSlot *);
 extern void lo_commit(Context *,const Value *const *,uint64_t,uint64_t,ResultSlot *);
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern uint64_t lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int getpid(void),kill(int,int),setpgid(int,int),waitpid(int,int *,int),flock(int,int),ftruncate(int,long);
 extern unsigned alarm(unsigned);
@@ -148,11 +150,9 @@ static void *control(void *unused){
 }
 int main(int argc,const char **argv){
  (void)argc;alarm(15);if(setpgid(0,0))return 1;
-#ifdef __APPLE__
- image=argv[0];
-#else
- image="/probe";
-#endif
+ char image_path[LO_TEST_SELF_IMAGE_CAPACITY];
+ image=lo_test_self_image(argv[0],image_path);
+ if(!image)return 1;
  int file=open(lo_capture_path,2);if(file<0||ftruncate(file,sizeof(struct State)))return 2;
  state=mmap(0,sizeof(struct State),3,1,file,0);close(file);if(state==(void *)-1)return 3;
  for(unsigned n=0;n<sizeof(*state);++n)((unsigned char *)state)[n]=0;

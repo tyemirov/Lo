@@ -5,6 +5,7 @@ import copy
 import io
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -206,6 +207,10 @@ def validate_runtime(runtime: Path, variant: str) -> dict:
 def construct(prepared_path: Path, runtime: Path, host: str, variant: str, go: Path, output: Path) -> dict:
     if variant == 'metal' and host != 'darwin/arm64':
         raise ValueError('Metal requires darwin/arm64')
+    build_cache = local(Path(os.environ.get('LO_DISTRIBUTION_BUILD_CACHE',
+                                          str(ROOT / '_scratch/build-state/distribution-go-build'))))
+    if build_cache == ROOT / '_scratch' or not build_cache.is_relative_to(ROOT / '_scratch'):
+        raise ValueError('build cache must be strictly inside Lo/_scratch')
     archive = local(output.with_suffix('.tar'))
     receipt_path = local(output.with_suffix('.receipt.json'))
     if output.exists() or archive.exists() or receipt_path.exists():
@@ -259,11 +264,12 @@ def construct(prepared_path: Path, runtime: Path, host: str, variant: str, go: P
         raise ValueError(f'unfinished package output exists: {temporary}')
     temporary.mkdir()
     state = local(prepared_path.parent / 'producer-state')
-    for name in ('home', 'tmp', 'go-cache', 'go-path', 'xdg-cache'):
+    for name in ('home', 'tmp', 'go-path', 'xdg-cache'):
         local(state / name).mkdir(parents=True, exist_ok=True)
+    build_cache.mkdir(parents=True, exist_ok=True)
     env = dict(PATH='', LC_ALL='C', TZ='UTC', CI='1', CGO_ENABLED='0', GOOS=host.split('/')[0], GOARCH='arm64',
                GOTOOLCHAIN='local', GOENV='off', GOWORK='off', GOTELEMETRY='off', GOPROXY='off',
-               GOSUMDB='off', GOCACHE=str(state / 'go-cache'), GOPATH=str(state / 'go-path'),
+               GOSUMDB='off', GOCACHE=str(build_cache), GOPATH=str(state / 'go-path'),
                GOMODCACHE=str(ROOT / '_scratch/build-state/modules'), HOME=str(state / 'home'),
                TMPDIR=str(state / 'tmp'), TMP=str(state / 'tmp'), TEMP=str(state / 'tmp'),
                XDG_CACHE_HOME=str(state / 'xdg-cache'))

@@ -25,7 +25,7 @@ func TestLLVMProgramExitRetainedBytes(t *testing.T) {
 			}
 			source := fmt.Sprintf(`flow Make()->%s!{%s};flow Use(%s:%s)->Int!{%s};flow Main()->Int!{%s};return Main()`, fixture.output, fixture.makeBody, parameter, fixture.output, fixture.useBody, fixture.mainBody)
 			path := sourceFile(t, source)
-			artifact, built := buildForTest(t, path)
+			artifact, built := runtimeFixture(t, path)
 			if built.status != 0 {
 				t.Fatalf("build retained terminal fixture: %+v", built)
 			}

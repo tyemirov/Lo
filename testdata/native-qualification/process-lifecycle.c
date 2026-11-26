@@ -1,3 +1,4 @@
+#include "../native-runtime/cli-entry.h"
 #include "lo_process.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128,256})
 #include "capture.h"
@@ -6,7 +7,7 @@ typedef __UINT32_TYPE__ U32;
 typedef __SIZE_TYPE__ Size;
 extern void lo_context_cancel_after_polls(Context*,U64);
 extern void lo_process_lifecycle_entry(Context*,const Value**,U64,U64,ResultSlot*);
-extern int lo_cli_main(int,const char**,const char**);
+
 extern U64 lo_runtime_live_values(void),lo_runtime_live_contexts(void);
 extern int dup2(int,int),fcntl(int,int,...),close(int);
 extern long read(int,void*,Size),write(int,const void*,Size);

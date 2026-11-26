@@ -1,9 +1,10 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 extern void lo_op_File_2Edirectory(Context *, const Value **, U64, U64, ResultSlot *);
-extern int lo_cli_main(int, const char **, const char **);
+
 extern U64 lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 extern int mkdir(const char *, unsigned), open(const char *, int, ...);
 extern int rename(const char *, const char *), fcntl(int, int, ...), dup2(int, int);

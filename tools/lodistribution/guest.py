@@ -1,21 +1,26 @@
-"""Compile with an installed Linux package in a network-free QEMU TCG guest."""
+"""Compile with an installed Linux package in a network-free QEMU guest."""
 from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
-import gzip
 import hashlib
 import json
 import os
 from pathlib import Path
+import platform
 import shutil
 import subprocess
 import sys
+import time
 
 from prepare import ROOT, local, verified
 
 GUEST_PACKAGE = '/relocated compiler package'
 TARGETS = ('linux/arm64', 'darwin/arm64')
+ACCELERATORS = ('tcg', 'hvf')
+DEFAULT_ACCELERATOR = os.environ.get('LO_TEST_GUEST_ACCELERATOR') or (
+    'hvf' if sys.platform == 'darwin' and platform.machine() == 'arm64' else 'tcg'
+)
 
 
 @dataclass(frozen=True)
@@ -107,8 +112,11 @@ def initializer(preparation: Path, work: Path, environment: dict[str, str]) -> P
 
 def compile(preparation: Path, package: Path, source: Path, target: str, output: Path,
             work: Path, extra_args: list[str] | None = None, *,
-            initial_output: bytes | None = None) -> dict:
+            initial_output: bytes | None = None, accelerator: str = DEFAULT_ACCELERATOR) -> dict:
+    started = time.perf_counter()
     preparation, package, source, output, work = map(local, (preparation, package, source, output, work))
+    if accelerator not in ACCELERATORS:
+        raise ValueError('distribution guest accelerator must be tcg or hvf')
     if not (package / 'bin/lo').is_file():
         raise ValueError(f'missing installed frontend: {package / "bin/lo"}')
     if not source.is_file():
@@ -125,65 +133,74 @@ def compile(preparation: Path, package: Path, source: Path, target: str, output:
     if len(encoded) >= 1048576 or len(command) >= 4094:
         raise ValueError('guest arguments exceed the declared limit')
     work.mkdir(parents=True)
-    guest = work / 'root'
-    for name in ('dev', 'proc', 'tmp', 'home', 'cache', 'unrelated', 'input', 'result'):
-        (guest / name).mkdir(parents=True, exist_ok=True)
-    environment = {'CI': '1', 'PATH': '', 'HOME': str(work / 'host-home'), 'TMPDIR': str(work),
-                   'DYLD_LIBRARY_PATH': str(preparation / 'emulation/lib')}
-    (work / 'host-home').mkdir()
-    os.link(initializer(preparation, work, environment), guest / 'init')
-    libraries = local(preparation / 'linux-sysroot/lib')
-    for path in libraries.rglob('*'):
-        local(path)
-    shutil.copytree(libraries, guest / 'lib', copy_function=os.link)
-    for path in package.rglob('*'):
-        local(path)
-    shutil.copytree(package, guest / GUEST_PACKAGE.lstrip('/'), copy_function=os.link)
-    shutil.copyfile(source, guest / 'input/source.lo')
-    (guest / 'arguments').write_bytes(encoded)
-    if initial_output is not None:
-        (guest / 'result/program').write_bytes(initial_output)
-    archive = work / 'root.cpio'
-    result = subprocess.run(['/usr/bin/tar', '--format=newc', '-cf', str(archive), '-C', str(guest), '.'],
-                            cwd=ROOT, env=environment, stdin=subprocess.DEVNULL, capture_output=True, check=False)
-    if result.returncode:
-        raise ValueError(f'distribution guest archive failed: {result.stderr.decode(errors="replace")}')
-    compressed = work / 'root.cpio.gz'
-    with archive.open('rb') as original, gzip.open(compressed, 'wb', compresslevel=1) as destination:
-        shutil.copyfileobj(original, destination)
-    archive.unlink()
-    export = work / 'export.log'
-    command = [str(local(preparation / 'emulation/qemu-system-aarch64')), '-machine', 'virt',
-               '-accel', 'tcg', '-cpu', 'cortex-a72', '-m', '4096', '-smp', '2', '-display', 'none',
-               '-monitor', 'none', '-serial', 'stdio', '-no-reboot', '-nodefaults', '-nic', 'none',
-               '-device', 'virtio-serial-pci,id=lo-transport',
-               '-chardev', 'file,id=lo-export,path=' + str(export),
-               '-device', 'virtserialport,bus=lo-transport.0,nr=1,chardev=lo-export,name=lo.export',
-               '-kernel', str(local(preparation / 'vmlinuz-virt')), '-initrd', str(compressed),
-               '-append', 'console=ttyAMA0 rdinit=/init panic=-1 loglevel=3']
-    serial, errors = work / 'serial.log', work / 'qemu.stderr'
-    with serial.open('wb') as stdout, errors.open('wb') as stderr:
-        result = subprocess.run(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL,
-                                stdout=stdout, stderr=stderr, timeout=240, check=False)
-    if result.returncode:
-        raise ValueError(f'distribution software guest failed: {errors.read_text(errors="replace")}')
-    if not export.is_file() or export.stat().st_size == 0:
-        raise ValueError(f'distribution guest export transport missing or empty; inspect {serial}')
-    exported = receive(export)
-    stdout_text = exported.stdout.decode(errors='replace')
-    receipt = json.loads(stdout_text) if exported.status == 0 else None
-    if exported.artifact:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_bytes(exported.artifact)
-    report = {'status': exported.status, 'stdout': stdout_text, 'stderr': exported.stderr.decode(errors='replace'),
-              'receipt': receipt, 'artifact': str(output) if exported.artifact else None,
-              'artifact_bytes': len(exported.artifact),
-              'artifact_sha256': hashlib.sha256(exported.artifact).hexdigest() if exported.artifact else None,
-              'entries': exported.entries,
-              'environment': 'Linux arm64 QEMU TCG; no network interface; empty PATH and caches',
-              'serial': str(serial), 'export': str(export)}
-    (work / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    return report
+    try:
+        guest = work / 'root'
+        for name in ('dev', 'proc', 'tmp', 'home', 'cache', 'unrelated', 'input', 'result'):
+            (guest / name).mkdir(parents=True, exist_ok=True)
+        environment = {'CI': '1', 'PATH': '', 'HOME': str(work / 'host-home'), 'TMPDIR': str(work),
+                       'DYLD_LIBRARY_PATH': str(preparation / 'emulation/lib')}
+        (work / 'host-home').mkdir()
+        os.link(initializer(preparation, work, environment), guest / 'init')
+        libraries = local(preparation / 'linux-sysroot/lib')
+        for path in libraries.rglob('*'):
+            local(path)
+        shutil.copytree(libraries, guest / 'lib', copy_function=os.link)
+        for path in package.rglob('*'):
+            local(path)
+        shutil.copytree(package, guest / GUEST_PACKAGE.lstrip('/'), copy_function=os.link)
+        shutil.copyfile(source, guest / 'input/source.lo')
+        (guest / 'arguments').write_bytes(encoded)
+        if initial_output is not None:
+            (guest / 'result/program').write_bytes(initial_output)
+        staged = time.perf_counter()
+        archive = work / 'root.cpio'
+        result = subprocess.run(['/usr/bin/tar', '--format=newc', '-cf', str(archive), '-C', str(guest), '.'],
+                                cwd=ROOT, env=environment, stdin=subprocess.DEVNULL, capture_output=True, check=False)
+        if result.returncode:
+            raise ValueError(f'distribution guest archive failed: {result.stderr.decode(errors="replace")}')
+        archived = time.perf_counter()
+        export = work / 'export.log'
+        command = [str(local(preparation / 'emulation/qemu-system-aarch64')), '-machine', 'virt',
+                   '-accel', accelerator, '-cpu', 'host' if accelerator == 'hvf' else 'cortex-a72', '-m', '4096', '-smp', '2', '-display', 'none',
+                   '-monitor', 'none', '-serial', 'stdio', '-no-reboot', '-nodefaults', '-nic', 'none',
+                   '-device', 'virtio-serial-pci,id=lo-transport',
+                   '-chardev', 'file,id=lo-export,path=' + str(export),
+                   '-device', 'virtserialport,bus=lo-transport.0,nr=1,chardev=lo-export,name=lo.export',
+                   '-kernel', str(local(preparation / 'vmlinuz-virt')), '-initrd', str(archive),
+                   '-append', 'console=ttyAMA0 rdinit=/init panic=-1 loglevel=3']
+        serial, errors = work / 'serial.log', work / 'qemu.stderr'
+        guest_started = time.perf_counter()
+        with serial.open('wb') as stdout, errors.open('wb') as stderr:
+            result = subprocess.run(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL,
+                                    stdout=stdout, stderr=stderr, timeout=240, check=False)
+        guest_seconds = time.perf_counter() - guest_started
+        if result.returncode:
+            raise ValueError(f'distribution software guest failed: {errors.read_text(errors="replace")}')
+        if not export.is_file() or export.stat().st_size == 0:
+            raise ValueError(f'distribution guest export transport missing or empty; inspect {serial}')
+        exported = receive(export)
+        stdout_text = exported.stdout.decode(errors='replace')
+        receipt = json.loads(stdout_text) if exported.status == 0 else None
+        if exported.artifact:
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(exported.artifact)
+        report = {'status': exported.status, 'stdout': stdout_text, 'stderr': exported.stderr.decode(errors='replace'),
+                  'receipt': receipt, 'artifact': str(output) if exported.artifact else None,
+                  'artifact_bytes': len(exported.artifact),
+                  'artifact_sha256': hashlib.sha256(exported.artifact).hexdigest() if exported.artifact else None,
+                  'entries': exported.entries,
+                  'accelerator': accelerator,
+                  'timing': {'staging_seconds': staged - started, 'archive_seconds': archived - staged,
+                             'guest_wall_seconds': guest_seconds},
+                  'environment': f'Linux arm64 QEMU {accelerator.upper()}; no network interface; empty PATH and caches',
+                  'serial': str(serial), 'export': str(export)}
+        (work / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
+        return report
+    finally:
+        if (work / 'root').exists():
+            shutil.rmtree(work / 'root')
+        (work / 'root.cpio').unlink(missing_ok=True)
+
 
 
 def main() -> int:
@@ -192,10 +209,11 @@ def main() -> int:
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--target', choices=TARGETS, required=True)
     parser.add_argument('--extra-arg', action='append', default=[])
+    parser.add_argument('--accelerator', choices=ACCELERATORS, default=DEFAULT_ACCELERATOR)
     args = parser.parse_args()
     try:
         report = compile(args.preparation, args.package, args.source, args.target, args.output,
-                         args.work, args.extra_arg)
+                         args.work, args.extra_arg, accelerator=args.accelerator)
         print(json.dumps(report))
         return report['status']
     except (ValueError, OSError, subprocess.SubprocessError, KeyError) as error:

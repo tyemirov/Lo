@@ -7,16 +7,121 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
+import time
 
-from batch import ROOT, local, run, verified
+from batch import GUEST_STATE, ROOT, local, run, verified
 
 sys.path.insert(0, str(ROOT / "tools/semanticcoverage"))
 from run import select_tests as test_pattern  # noqa: E402
 from report import source_identity  # noqa: E402
 
 PACKAGE = "github.com/MarcoPoloResearchLab/Lo/tests/integration"
+SHARED_INPUTS = {
+    "LO_TEST_LINUX_INTEGRATION_BINARY": "integration.test",
+    "LO_TEST_LINUX_FILEPROBE": "fileprobe",
+    "LO_TEST_LINUX_COMPILER": "lo-development",
+}
+FIXTURE_FOLDERS = ("testdata", "examples", "docs/examples", "runtime/metal")
+DIAGNOSTIC_BYTES = 8192
+
+
+def bounded(text: str) -> str:
+    return text.encode(errors="replace")[-DIAGNOSTIC_BYTES:].decode(errors="replace")
+
+
+def case_failure(work: Path, index: int, case: dict, events: Path | None = None) -> str:
+    details = [f'Linux semantic guest case {case["id"]} failed: status={case["status"]}']
+    if events is not None:
+        outputs: dict[str, str] = {}
+        with events.open() as records:
+            for line in records:
+                event = json.loads(line)
+                name = event.get("Test")
+                if name and event["Action"] == "output":
+                    outputs[name] = bounded(outputs.get(name, "") + event["Output"])
+                elif name and event["Action"] == "fail":
+                    details.append(f'first failing test: {name}\n{outputs.get(name, "")}')
+                    break
+    for name in ("stdout", "stderr"):
+        with (work / "guest" / f"{index}.{name}").open("rb") as source:
+            source.seek(0, os.SEEK_END)
+            source.seek(max(0, source.tell() - DIAGNOSTIC_BYTES))
+            text = source.read(DIAGNOSTIC_BYTES).decode(errors="replace")
+        details.append(f'{name} tail:\n{text}')
+    return "\n".join(details)
+
+
+def source_payloads(matrix: Path) -> list[dict[str, str]]:
+    names = set(source_identity()[0])
+    names.add(matrix.relative_to(ROOT).as_posix())
+    for folder in FIXTURE_FOLDERS:
+        for path in (ROOT / folder).rglob("*"):
+            path = local(path)
+            if path.is_file():
+                names.add(path.relative_to(ROOT).as_posix())
+    return [{"source": str(local(ROOT / name)), "path": "/workspace/" + name}
+            for name in sorted(names)]
+
+
+def shared_inputs() -> dict[str, Path]:
+    selected = {name: os.environ.get(name, "") for name in SHARED_INPUTS}
+    if not any(selected.values()):
+        return {}
+    if not all(selected.values()):
+        raise ValueError("select all three precompiled Linux inputs")
+    result = {}
+    for name, raw in selected.items():
+        path = local(Path(raw))
+        with path.open("rb") as source:
+            header = source.read(20)
+        if len(header) != 20 or header[:6] != b"\x7fELF\x02\x01" or header[18:20] != b"\xb7\x00":
+            raise ValueError(f"precompiled Linux input must be ARM64 ELF: {path}")
+        result[SHARED_INPUTS[name]] = path
+    return result
+
+
+def validate_events(path: Path, expected: tuple[str, ...], required: tuple[str, ...]) -> dict[str, list[str]]:
+    runs: set[str] = set()
+    completed: dict[str, str] = {}
+    package_started = package_completed = False
+    for line in path.read_text().splitlines():
+        event = json.loads(line)
+        if event.get("Package") != PACKAGE:
+            raise ValueError("Linux semantic events name an unexpected package")
+        action, name = event.get("Action"), event.get("Test")
+        if name and action in {"run", "pass", "fail", "skip"} and (not package_started or package_completed):
+            raise ValueError("Linux semantic case event is outside package execution")
+        if not name:
+            if action == "start":
+                if package_started:
+                    raise ValueError("duplicate Linux semantic package start")
+                package_started = True
+            elif action in {"pass", "fail", "skip"}:
+                if package_completed or action != "pass":
+                    raise ValueError("Linux semantic package did not complete successfully exactly once")
+                package_completed = True
+        elif action == "run":
+            if name in runs:
+                raise ValueError(f"duplicate Linux semantic test start: {name}")
+            runs.add(name)
+        elif action in {"pass", "fail", "skip"}:
+            if name in completed or name not in runs:
+                raise ValueError(f"duplicate or unmatched Linux semantic completion: {name}")
+            if action != "pass":
+                raise ValueError(f"Linux semantic case did not pass: {name}: {action}")
+            completed[name] = action
+    actual = {name for name in runs if "/" not in name}
+    if not package_started or not package_completed or runs != set(completed):
+        raise ValueError("Linux semantic execution has missing package or case completion")
+    if actual != set(expected) or len(expected) != len(set(expected)):
+        raise ValueError(f"Linux semantic selected inventory differs: missing={sorted(set(expected)-actual)}, unexpected={sorted(actual-set(expected))}")
+    missing = set(required) - set(completed)
+    if missing:
+        raise ValueError(f"Linux semantic referenced cases are missing: {sorted(missing)}")
+    return {"selected": sorted(expected), "required": sorted(set(required)), "executed": sorted(completed)}
 
 
 def environment() -> dict[str, str]:
@@ -116,33 +221,28 @@ def qualify(
     timeout: int = 7200,
     accelerator: str = "tcg",
 ) -> dict:
+    started = time.perf_counter()
     preparation, package, matrix, work = map(
         local, (preparation, package, matrix, work)
     )
     if work.exists():
         raise ValueError(f"qualification suite work must be fresh: {work}")
     env = environment()
+    shared = shared_inputs()
     work.mkdir(parents=True)
     inputs = work / "inputs"
     inputs.mkdir()
-    test_binary = inputs / "integration.test"
-    execute(
-        [go, "test", "-c", "-o", str(test_binary), "./tests/integration"],
-        env,
-        work / "test-build.log",
-    )
-    probe = inputs / "fileprobe"
-    execute(
-        [go, "build", "-o", str(probe), "./testdata/fileprobe"],
-        env,
-        work / "probe-build.log",
-    )
-    development = inputs / "lo-development"
-    execute(
-        [go, "build", "-o", str(development), "./cmd/lo"],
-        env,
-        work / "development-build.log",
-    )
+    for name, arguments, log_name in (
+        ("integration.test", ["test", "-c", "./tests/integration"], "test-build.log"),
+        ("fileprobe", ["build", "./testdata/fileprobe"], "probe-build.log"),
+        ("lo-development", ["build", "./cmd/lo"], "development-build.log"),
+    ):
+        destination = inputs / name
+        if shared:
+            os.link(shared[name], destination)
+        else:
+            execute([go, *arguments[:-1], "-o", str(destination), arguments[-1]], env, work / log_name)
+    test_binary, probe, development = (inputs / name for name in ("integration.test", "fileprobe", "lo-development"))
     controlled = inputs / "native-toolchain"
     control_fixture(preparation, package, controlled, env, work / "control-build.log")
     identities = {
@@ -157,39 +257,21 @@ def qualify(
         )
     }
     (inputs / "fixtures.json").write_text(json.dumps(identities, indent=2) + "\n")
-    listing = subprocess.run(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-        cwd=ROOT,
-        env=env,
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        check=True,
-    )
-    source_names = set(source_identity()[0])
-    source_names.update(os.fsdecode(raw) for raw in listing.stdout.split(b"\0") if raw)
-    payloads = []
-    for name in sorted(source_names):
-        path = local(ROOT / name)
-        if not path.is_file():
-            continue
-        payloads.append(
-            {
-                "source": str(path),
-                "path": "/workspace/" + path.relative_to(ROOT).as_posix(),
-            }
-        )
+    payloads = source_payloads(matrix)
     guest_inputs = "/workspace/" + inputs.relative_to(ROOT).as_posix()
     payloads.append({"source": str(inputs), "path": guest_inputs})
     guest_package = "/workspace/" + package.relative_to(ROOT).as_posix()
     guest_manifest = guest_package + "/toolchain.json"
+    selected_pattern = pattern or test_pattern(matrix, "linux/arm64")
     case = {
         "id": "semantic-linux-arm64",
         "argv": [
             guest_inputs + "/integration.test",
             "-test.v=test2json",
             "-test.count=1",
+            "-test.failfast",
             "-test.timeout=" + str(timeout) + "s",
-            "-test.run=" + (pattern or test_pattern(matrix, "linux/arm64")),
+            "-test.run=" + selected_pattern,
         ],
         "cwd": "/workspace/tests/integration",
         "environment": {
@@ -197,19 +279,32 @@ def qualify(
             "LO_LLVM_TOOLCHAIN": guest_manifest,
             "LO_SEMANTIC_MATRIX": "/workspace/" + matrix.relative_to(ROOT).as_posix(),
             "LO_TEST_PREBUILT_FIXTURES": guest_inputs,
+            "LO_TEST_SESSION_LOCAL": "1",
+            "LO_TEST_SESSION_DIRECTORY": GUEST_STATE,
         },
         "stdin": "",
         "timeout_seconds": timeout,
         "outputs": [],
     }
+    listing_case = {**case, "id": "semantic-linux-inventory",
+                    "argv": [guest_inputs + "/integration.test", "-test.list=" + selected_pattern.split("/", 1)[0]],
+                    "environment": {name: value for name, value in case["environment"].items()
+                                    if name not in {"LO_TEST_SESSION_LOCAL", "LO_TEST_SESSION_DIRECTORY"}}}
     manifest = work / "batch.json"
     manifest.write_text(
-        json.dumps({"files": payloads, "cases": [case]}, indent=2) + "\n"
+        json.dumps({"files": payloads, "cases": [listing_case, case]}, indent=2) + "\n"
     )
+    host_preparation_seconds = time.perf_counter() - started
     report = run(
         preparation, package, manifest, work / "guest", guest_package, accelerator
     )
-    stdout = work / "guest/0.stdout"
+    if report["cases"][0]["status"] != 0:
+        raise ValueError(case_failure(work, 0, report["cases"][0]))
+    expected = tuple(line for line in (work / "guest/0.stdout").read_text().splitlines()
+                     if re.fullmatch(r"(?:Test|Fuzz)[A-Za-z0-9_]+", line))
+    if not expected:
+        raise ValueError("Linux semantic inventory selected no tests")
+    stdout = work / "guest/1.stdout"
     events = work / "semantic-linux-arm64.jsonl"
     with stdout.open("rb") as source, events.open("wb") as output:
         result = subprocess.run(
@@ -222,13 +317,27 @@ def qualify(
             check=False,
         )
     if result.returncode:
+        failed = case_failure(work, 1, report["cases"][1]) if report["cases"][1]["status"] else ""
         raise ValueError(
-            f'Linux semantic event conversion failed: {result.stderr.decode(errors="replace")}'
+            f'Linux semantic event conversion failed: {bounded(result.stderr.decode(errors="replace"))}\n{failed}'
         )
     report["events"] = str(events.relative_to(ROOT))
+    if report["cases"][1]["status"] != 0:
+        raise ValueError(case_failure(work, 1, report["cases"][1], events))
+    matrix_data = json.loads(matrix.read_text())
+    references = {reference for row in matrix_data["contracts"] if "linux/arm64" in row["targets"]
+                  for reference in row["tests"] if reference.split("/", 1)[0] in expected}
+    if pattern is not None:
+        components = pattern.split("/")
+        references = {reference for reference in references
+                      if all(index < len(reference.split("/")) and re.search(part, reference.split("/")[index])
+                             for index, part in enumerate(components))}
+    report["inventory"] = validate_events(events, expected, tuple(sorted(references)))
     report["test_binary_sha256"] = hashlib.sha256(test_binary.read_bytes()).hexdigest()
     report["fixture_identities"] = identities
-    report["pattern"] = pattern or test_pattern(matrix, "linux/arm64")
+    report["pattern"] = selected_pattern
+    report["suite_host_preparation_seconds"] = host_preparation_seconds
+    report["suite_wall_seconds"] = time.perf_counter() - started
     (work / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     return report
 
@@ -256,7 +365,7 @@ def main() -> int:
             args.accelerator,
         )
         print(json.dumps(report))
-        return 0 if report["cases"][0]["status"] == 0 else 1
+        return 0 if all(case["status"] == 0 for case in report["cases"]) else 1
     except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:
         print(f"Linux qualification suite: {error}", file=sys.stderr)
         return 1

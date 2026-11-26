@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 #include "lo_process_ownership.h"
 #include "process-ownership-fixture.h"
 #include <pthread.h>
@@ -310,7 +311,7 @@ int lo_test_host_init(int argc,char **argv,char **environment) {
     }
     return 0;
 }
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 int main(int argc,char **argv,char **environment) {
     return lo_cli_main(argc,(const char *const *)argv,(const char *const *)environment);
 }

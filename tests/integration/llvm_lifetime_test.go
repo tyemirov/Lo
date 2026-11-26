@@ -15,6 +15,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/testsession"
 )
 
 const llvmCaptureName = ".lo-native-capture"
@@ -61,6 +63,15 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 	if manifest == "" {
 		t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")
 	}
+	sharedInputs := false
+	if address := os.Getenv("LO_TEST_SESSION"); address != "" {
+		inputs, err := testsession.Inputs(context.Background(), address)
+		if err != nil {
+			t.Fatal(err)
+		}
+		manifest = inputs.Manifest
+		sharedInputs = true
+	}
 	manifest, err := filepath.Abs(manifest)
 	if err != nil {
 		t.Fatal(err)
@@ -94,6 +105,9 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 	if err := json.Unmarshal(data, &distribution); err != nil {
 		t.Fatal(err)
 	}
+	manifestSum := sha256.Sum256(data)
+	manifestIdentity := hex.EncodeToString(manifestSum[:])
+	frontendIdentity := runtimeToolIdentity(t, binary)
 	host := runtime.GOOS + "/" + runtime.GOARCH
 	if distribution.ABI != "lo-native-3" || distribution.LLVM != "21.1.8" || distribution.Host != host {
 		t.Fatal("toolchain identity mismatch")
@@ -106,6 +120,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 	if triple == "" || defaultTarget.Triple != triple {
 		t.Fatal("toolchain target mismatch")
 	}
+	toolIdentities := map[string]string{}
 	resolve := func(identity fileIdentity) string {
 		t.Helper()
 		if !filepath.IsLocal(identity.Path) {
@@ -118,6 +133,10 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 		relative, err := filepath.Rel(repository, path)
 		if err != nil || !filepath.IsLocal(relative) {
 			t.Fatal("toolchain input leaves repository")
+		}
+		toolIdentities[path] = identity.SHA256
+		if sharedInputs {
+			return path
 		}
 		content, err := os.ReadFile(path)
 		if err != nil {
@@ -178,14 +197,12 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 				})
 			}
 			module, object, harness, executable := filepath.Join(work, "program.ll"), filepath.Join(work, "program.o"), filepath.Join(work, "lifetime.o"), filepath.Join(work, "lifetime")
-			emitArguments := []string{"build", sourceFile(t, scenario.source), "--emit", "llvm", "--target", selectedTarget, "--output", module, "--format", "json"}
+			source := runtimeImmutableSource(t, scenario.source)
+			emitArguments := []string{"build", source, "--emit", "llvm", "--target", selectedTarget, "--output", module, "--format", "json"}
 			if scenario.metal {
 				emitArguments = append(emitArguments, "--device-backend", "metal")
 			}
-			emitted := runExecutable(t, binary, emitArguments...)
-			if emitted.status != 0 {
-				t.Fatalf("emit LLVM: %+v", emitted)
-			}
+			runtimeCachedLLVMEmission(t, frontendIdentity, manifestIdentity, source, module, emitArguments)
 			if scenario.transform != nil {
 				contents, err := os.ReadFile(module)
 				if err != nil {
@@ -205,24 +222,53 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 					t.Fatal(closeErr)
 				}
 			}
-			runTool := func(tool string, arguments ...string) {
+			backendTools := map[string]bool{compiler: true, linker: true}
+			runToolAt := func(tool, directory string, arguments ...string) {
 				t.Helper()
-				command := exec.Command(tool, arguments...)
+				ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
+				defer cancel()
+				if address := os.Getenv("LO_TEST_SESSION"); address != "" && backendTools[tool] {
+					lease, err := testsession.Acquire(ctx, address)
+					if err != nil {
+						t.Fatal(err)
+					}
+					defer func() {
+						if err := lease.Close(); err != nil {
+							t.Error(err)
+						}
+					}()
+				}
+				command := exec.CommandContext(ctx, tool, arguments...)
 				if host == "linux/arm64" && (tool == compiler || tool == linker) {
 					loaderArguments := []string{"--inhibit-cache", "--library-path", hostLibraryDirectory, "--argv0", tool, tool}
-					command = exec.Command("/lib/ld-linux-aarch64.so.1", append(loaderArguments, arguments...)...)
+					command = exec.CommandContext(ctx, "/lib/ld-linux-aarch64.so.1", append(loaderArguments, arguments...)...)
 				}
-				command.Dir = work
-				command.Env = []string{"CI=1", "PATH=", "HOME=" + work, "TMPDIR=" + work, "TMP=" + work, "TEMP=" + work, "LC_ALL=C", "LANG=C", "ZERO_AR_DATE=1", "CLANG_MODULE_CACHE_PATH=" + work}
+				command.Dir = directory
+				command.Env = []string{"CI=1", "PATH=", "HOME=" + directory, "TMPDIR=" + directory, "TMP=" + directory, "TEMP=" + directory, "LC_ALL=C", "LANG=C", "ZERO_AR_DATE=1", "CLANG_MODULE_CACHE_PATH=" + directory}
 				if output, err := command.CombinedOutput(); err != nil {
 					t.Fatalf("%s: %v\n%s", filepath.Base(tool), err, output)
 				}
+			}
+			runTool := func(tool string, arguments ...string) {
+				t.Helper()
+				runToolAt(tool, work, arguments...)
+			}
+			compileObject := func(tool, source, output string, arguments ...string) {
+				t.Helper()
+				identity, exists := toolIdentities[tool]
+				if !exists {
+					identity = runtimeToolIdentity(t, tool)
+					toolIdentities[tool] = identity
+				}
+				runtimeCachedObject(t, tool, identity, source, output, arguments, func(directory string, arguments []string) {
+					runToolAt(tool, directory, arguments...)
+				})
 			}
 			flags := []string{"-target", target.Triple, "-O0", "-g", "-fPIC", "-ffp-contract=off", "-I", filepath.Join(repository, "runtime/native/include"), "-I", filepath.Join(repository, "testdata/native-runtime")}
 			if selectedTarget == "darwin/arm64" {
 				flags = append(flags, "-mmacosx-version-min=27.0")
 			}
-			runTool(compiler, append(append([]string{}, flags...), "-c", module, "-o", object)...)
+			compileObject(compiler, module, object, append(append([]string{}, flags...), "-c", module, "-o", object)...)
 			harnessCompiler := compiler
 			harnessSDK := ""
 			harnessFlags := append(append([]string{}, flags...), "-nostdinc")
@@ -240,6 +286,8 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 					t.Fatal("SDK harness omitted its system root")
 				}
 			}
+			backendTools[harnessCompiler] = true
+			harnessFlags = append(harnessFlags, "-include", filepath.Join(repository, "testdata/native-runtime/cli-entry.h"))
 			harnessSource := scenario.harness
 			if harnessSource == "" {
 				harnessSource = "testdata/native-runtime/lifetime.c"
@@ -307,7 +355,7 @@ func runLLVMRuntimeTargetScenarios(t *testing.T, selectedTarget string, scenario
 				bootstrapDeclaration = fmt.Sprintf("extern int %s(int, char **, char **);\n", scenario.hostBootstrap)
 				bootstrapCall = fmt.Sprintf("    if (%s(argc, argv, environment)) return 73;\n", scenario.hostBootstrap)
 			}
-			entry := fmt.Sprintf(`extern int lo_cli_main(int, const char *const *, const char *const *);
+			entry := fmt.Sprintf(`#include "cli-entry.h"
 extern int lo_test_main(%s);
 %s
 static int equal(const char *a, const char *b) { while (*a && *a == *b) { ++a; ++b; } return *a == *b; }
@@ -327,8 +375,8 @@ int main(int argc, char **argv, char **environment) {
 			if writeErr != nil || closeErr != nil {
 				t.Fatalf("write runtime entry: %v, %v", writeErr, closeErr)
 			}
-			runTool(compiler, append(append([]string{}, flags...), "-fno-stack-protector", "-nostdinc", "-c", entrySource, "-o", entryObject)...)
-			runTool(harnessCompiler, append(append([]string{}, harnessFlags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-iquote", originalHarnessDirectory, "-fno-stack-protector", "-c", ownedHarness, "-o", harness)...)
+			compileObject(compiler, entrySource, entryObject, append(append([]string{}, flags...), "-fno-stack-protector", "-nostdinc", "-c", entrySource, "-o", entryObject)...)
+			compileObject(harnessCompiler, ownedHarness, harness, append(append([]string{}, harnessFlags...), fmt.Sprintf("-DLO_CASE=%d", scenario.number), "-iquote", originalHarnessDirectory, "-fno-stack-protector", "-c", ownedHarness, "-o", harness)...)
 			var arguments []string
 			for _, argument := range target.LinkArgs {
 				switch argument {

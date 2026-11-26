@@ -1,6 +1,8 @@
+#include "cli-entry.h"
+#include "self-image.h"
 #include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern void lo_op_File_2Eopen_5Fpaths(Context *,const Value **,uint64_t,uint64_t,ResultSlot *);
 extern uint64_t lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int open(const char *,int,...),close(int),rename(const char *,const char *),linkat(int,const char *,int,const char *,int),setenv(const char *,const char *,int),waitpid(int,int *,int);
@@ -49,11 +51,9 @@ int main(int argc,const char **argv){
  char cwd[4096],directory[]="grant-XXXXXX";
  if(!getcwd(cwd,sizeof(cwd))||!temporary_directory(directory)||rename(directory,"grant")||put("grant/retained.log","retained",8))return 10;
  if(path(root_path,sizeof(root_path),cwd,"/grant")||path(held_path,sizeof(held_path),cwd,"/held")||path(replacement_template,sizeof(replacement_template),cwd,"/replacement-XXXXXX"))return 11;
-#ifdef __APPLE__
- const char *executable=argv[0];
-#else
- (void)argv;const char *executable="/probe";
-#endif
+ char image_path[LO_TEST_SELF_IMAGE_CAPACITY];
+ const char *executable=lo_test_self_image(argv[0],image_path);
+ if(!executable)return 12;
  if(linkat(CURRENT_DIRECTORY,executable,CURRENT_DIRECTORY,"lsof",0)||setenv("PATH",LO_CASE==1?"missing":".",1))return 12;
  const char *arguments[]={"probe-binding","run","--open-files-root","grant","--format","json"};
  int status=lo_cli_main(6,arguments,0);

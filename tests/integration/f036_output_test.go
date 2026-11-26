@@ -21,6 +21,9 @@ func TestF036DescendantOutputFailure(t *testing.T) {
 		t.Run(scenario, func(t *testing.T) {
 			fixture := newF036Fixture(t)
 			compiler, flags := llvmDarwinSDKHarness(t, fixture.work)
+			if err := os.Remove(fixture.command); err != nil {
+				t.Fatalf("release private command before replacement: %v", err)
+			}
 			build := exec.Command(compiler, append(flags, filepath.Join(repository, "testdata/native-runtime/f036-output-command.c"), "-o", fixture.command)...)
 			build.Dir, build.Env = fixture.work, fixture.environment()
 			if output, err := build.CombinedOutput(); err != nil {
@@ -111,12 +114,7 @@ func TestF036DescendantOutputFailure(t *testing.T) {
 					valueJSON(t, fields["stdout_bytes"], stdoutCount)
 					fixture.wait(t, "output-failure owner release", func() bool { return fixture.logged("C\n") && !fixture.lockBusy(t) })
 					fixture.wait(t, "output-failure descendant termination", func() bool {
-						for _, record := range fixture.tokenRecords(t) {
-							if fixture.alive(record[1]) {
-								return false
-							}
-						}
-						return true
+						return !fixture.anyAlive(t)
 					})
 				}}})
 		})

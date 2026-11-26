@@ -237,6 +237,141 @@ These limits apply to v0.4.
 The [planned features](specification.md#planned-features) identify later extensions.
 The core stays small for AI generation, verification, and inspection.
 
+## Choosing Between Scenarios
+
+Use `Match.new` when you would reach for `if` / `else` in another language. The first argument is the value to match, called the selector. Each case has a test on the left of `:` and a result on the right. Lo checks cases from top to bottom and evaluates only the result of the first match. Put the required `_` case last to cover everything else. The branch results must have a common type.
+
+### Choose Between Two Outcomes
+
+Use a Boolean selector for a yes-or-no decision. This example returns `"eligible"` because `20` is at least `18`. Set `age` to `17` to get `"too young"`.
+
+```lo
+age = 20
+return Match.new(Math.gte(age, 18),
+    true: "eligible",
+    _: "too young"
+)
+```
+
+### Choose By Exact Value
+
+List each recognized value as a case. This example returns `"export report"`. Set `mode` to `"preview"` to get `"show preview"`, or to `"print"` to get `"unknown mode"`.
+
+```lo
+mode = "export"
+return Match.new(mode,
+    "preview": "show preview",
+    "export": "export report",
+    _: "unknown mode"
+)
+```
+
+### Choose By Range Or Condition
+
+A case can match a range or use `when` with a named flow. Lo passes the selector to that flow and selects the case if it returns `true`. The flow must be pure, take one argument of the selector's type, and return a plain `Bool`.
+
+```lo
+flow IsPassing(score: Int) -> Bool {
+    return Math.gte(score, 60)
+}
+
+score = 95
+return Match.new(score,
+    Range.new(90, 100, true, true): "distinction",
+    when IsPassing: "pass",
+    _: "try again"
+)
+```
+
+The range includes both endpoints. A score of `95` meets both tests and returns `"distinction"` because the range comes first. A score of `75` returns `"pass"`, and `50` returns `"try again"`.
+
+### Call A Different Flow In Each Branch
+
+Put a flow call on the right side of each case. Lo calls only the flow in the matching branch. All three flows return `Console.Line!`, which means they can produce a line to write or report an error. The `commit` after `Match.new` writes the selected line.
+
+```lo
+flow ShowHelp() -> Console.Line! {
+    return Console.Line.new("stdout", "Available modes: help, version", true)
+}
+
+flow ShowVersion() -> Console.Line! {
+    return Console.Line.new("stdout", "Example version 1.0", true)
+}
+
+flow ReportUnknownMode(mode: String) -> Console.Line! {
+    return Console.Line.new("stderr", String.concat("Unknown mode: ", mode), true)
+}
+
+flow Run(mode: String) -> Program.Exit! {
+    action = Match.new(mode,
+        "help": ShowHelp(),
+        "version": ShowVersion(),
+        _: ReportUnknownMode(mode)
+    )
+    commit action
+    return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
+}
+
+return Run("help")
+```
+
+`Run("help")` prints the available modes to standard output. Try `Run("version")` to print the version, or `Run("print")` to write `Unknown mode: print` to standard error.
+
+### Choose Between A File Write And Console Output
+
+`File.Write` and `Console.Line` are different target types. `Match.new` requires a common result type, and its branches cannot commit. Here, the match returns the same kind of record in both branches, with one message in the selected list and an empty list for the other action. After the match, `Flow.fold` calls the appropriate flow once for each message. An empty list skips its flow. Each flow commits its own target.
+
+```lo
+flow NoMessages() -> List<String> {
+    return List.new()
+}
+
+flow WriteMessage(count: Int, message: String) -> Int! {
+    path = File.Path.new("_scratch/match-output/message.txt")
+    action = File.Write.new(path, UTF8.Bytes.new(message))
+    commit action
+    return Math.add(count, 1)
+}
+
+flow PrintMessage(count: Int, message: String) -> Int! {
+    action = Console.Line.new("stdout", message, true)
+    commit action
+    return Math.add(count, 1)
+}
+
+flow Deliver(save_to_file: Bool, message: String) -> Program.Exit! {
+    selected = Match.new(save_to_file,
+        true: Record.new(file_messages: List.new(message), console_messages: NoMessages()),
+        _: Record.new(file_messages: NoMessages(), console_messages: List.new(message))
+    )
+    written = Flow.fold(selected.file_messages, 0, WriteMessage)
+    delivered = Flow.fold(selected.console_messages, written, PrintMessage)
+    return Program.Exit.new(0, Bytes.new(""), Bytes.new(""))
+}
+
+return Deliver(false, "Hello from Lo")
+```
+
+[Build and run the example](#build-and-run-the-examples) with `false` to print `Hello from Lo`. To create or replace `_scratch/match-output/message.txt` with that text, change `false` to `true`, rebuild, and run with a write grant scoped to the example directory.
+
+```bash
+mkdir -p _scratch/match-output
+./selection run --write-root _scratch/match-output
+```
+
+### Build And Run The Examples
+
+To try an example with an installed Lo compiler, save one block as `selection.lo`, then build and run it. Use the [developer build instructions](#build-and-validate) if you built the compiler from source.
+
+```bash
+lo check selection.lo
+mkdir -p _scratch/build-state
+LO_BUILD_ROOT="$PWD/_scratch/build-state" lo build selection.lo --output ./selection
+./selection run
+```
+
+See the [Match rules](specification.md#11-match) for the full contract and the [side effects example](#example-explicit-side-effects) for how to choose an action and then activate it with `commit`.
+
 ## Example: HTTP Handler With Typed Failure
 
 ```lo

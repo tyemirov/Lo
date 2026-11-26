@@ -145,6 +145,11 @@ impl Drop for Entry {
 
 #[cfg(target_os = "macos")]
 fn darwin_image() -> Result<(PathBuf, Identity), String> {
+    const MH_EXECUTE: u32 = 2;
+    extern "C" {
+        static _mh_execute_header: libc::mach_header;
+        fn _NSGetExecutablePath(buffer: *mut libc::c_char, size: *mut u32) -> libc::c_int;
+    }
     #[repr(C)]
     struct Region {
         prefix: [u8; 80],
@@ -157,10 +162,11 @@ fn darwin_image() -> Result<(PathBuf, Identity), String> {
         vnode: libc::vnode_info_path,
     }
     unsafe {
-        let address = libc::_dyld_get_image_header(0) as u64;
-        if address == 0 {
-            return Err("main executable header is unavailable".into());
+        // The linker identifies the main image independently of dyld's mutable list.
+        if _mh_execute_header.filetype != MH_EXECUTE {
+            return Err("main executable header is invalid".into());
         }
+        let address = std::ptr::addr_of!(_mh_execute_header) as u64;
         let mut info: RegionPath = std::mem::zeroed();
         let length = std::mem::size_of::<RegionPath>();
         let received = libc::proc_pidinfo(
@@ -188,13 +194,41 @@ fn darwin_image() -> Result<(PathBuf, Identity), String> {
         if path.is_empty() || info.vnode.vip_vi.vi_stat.vst_ino == 0 {
             return Err("running executable vnode is empty".into());
         }
-        Ok((
-            PathBuf::from(path),
-            Identity(
-                (info.vnode.vip_vi.vi_stat.vst_dev as libc::dev_t) as u64,
-                info.vnode.vip_vi.vi_stat.vst_ino,
-            ),
-        ))
+        let witness = Identity(
+            (info.vnode.vip_vi.vi_stat.vst_dev as libc::dev_t) as u64,
+            info.vnode.vip_vi.vi_stat.vst_ino,
+        );
+        let mut invoked = [0u8; 4097];
+        let mut size = invoked.len() as u32;
+        if _NSGetExecutablePath(invoked.as_mut_ptr().cast(), &mut size) != 0 {
+            return Err("invoked executable path exceeds the entry path limit".into());
+        }
+        let end = invoked
+            .iter()
+            .position(|byte| *byte == 0)
+            .ok_or("invoked executable path is unterminated")?;
+        let invoked = Path::new(
+            std::str::from_utf8(&invoked[..end])
+                .map_err(|_| "invoked executable path requires UTF-8")?,
+        );
+        if !invoked.is_absolute() {
+            return Err("invoked executable path requires an absolute name".into());
+        }
+        use std::os::unix::fs::MetadataExt;
+        let location = match std::fs::metadata(invoked) {
+            // Hardlink lookups can change the vnode's cached name without moving
+            // the executable. Keep the invocation name while its identity agrees.
+            Ok(metadata) if Identity(metadata.dev(), metadata.ino()) == witness => {
+                std::fs::canonicalize(invoked)
+                    .map_err(|error| format!("resolve invoked executable path: {error}"))?
+            }
+            // A replaced or removed invocation name means the mapped image moved.
+            // Entry::bind must validate its current kernel name against the witness.
+            Ok(_) => PathBuf::from(path),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => PathBuf::from(path),
+            Err(error) => return Err(format!("inspect invoked executable path: {error}")),
+        };
+        Ok((location, witness))
     }
 }
 pub fn admit(site: &Site) -> Result<(), String> {

@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
-import gzip
 import hashlib
 import json
 import os
@@ -12,6 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools/lodistribution'))
@@ -271,6 +271,7 @@ def initializer(preparation: Path, work: Path, environment: dict[str, str]) -> P
 
 def run(preparation: Path, package: Path, manifest: Path, work: Path,
         package_path: str = '/compiler', accelerator: str = 'tcg') -> dict:
+    started = time.perf_counter()
     if accelerator not in ('tcg', 'hvf'):
         raise ValueError('qualification accelerator must be tcg or hvf')
     cpu = 'host' if accelerator == 'hvf' else 'cortex-a72'
@@ -286,91 +287,101 @@ def run(preparation: Path, package: Path, manifest: Path, work: Path,
            or PurePosixPath(item.path).is_relative_to(package_guest) for item in payloads):
         raise ValueError('guest package and payload paths overlap')
     work.mkdir(parents=True)
-    guest = work / 'root'
-    for name in ('dev', 'proc', 'tmp', 'home', 'cache', 'work', 'input', 'result', 'workspace', 'cases'):
-        (guest / name).mkdir(parents=True, exist_ok=True)
-    for name in ('home', 'tmp', 'cache'):
-        (guest / GUEST_STATE.lstrip('/') / name).mkdir(parents=True, exist_ok=True)
-    environment = {'CI': '1', 'PATH': '', 'HOME': str(work / 'host-home'), 'TMPDIR': str(work),
-                   'DYLD_LIBRARY_PATH': str(preparation / 'emulation/lib')}
-    (work / 'host-home').mkdir()
-    os.link(initializer(preparation, work, environment), guest / 'init')
-    libraries = local(preparation / 'linux-sysroot/lib')
-    for member in libraries.rglob('*'):
-        local(member)
-    shutil.copytree(libraries, guest / 'lib', copy_function=os.link)
-    for member in package.rglob('*'):
-        local(member)
-    destination = guest / package_path.lstrip('/')
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(package, destination, copy_function=os.link)
-    for item in payloads:
-        destination = guest / item.path.lstrip('/')
+    try:
+        guest = work / 'root'
+        for name in ('dev', 'proc', 'tmp', 'home', 'cache', 'work', 'input', 'result', 'workspace', 'cases'):
+            (guest / name).mkdir(parents=True, exist_ok=True)
+        for name in ('home', 'tmp', 'cache'):
+            (guest / GUEST_STATE.lstrip('/') / name).mkdir(parents=True, exist_ok=True)
+        environment = {'CI': '1', 'PATH': '', 'HOME': str(work / 'host-home'), 'TMPDIR': str(work),
+                       'DYLD_LIBRARY_PATH': str(preparation / 'emulation/lib')}
+        (work / 'host-home').mkdir()
+        os.link(initializer(preparation, work, environment), guest / 'init')
+        libraries = local(preparation / 'linux-sysroot/lib')
+        for member in libraries.rglob('*'):
+            local(member)
+        shutil.copytree(libraries, guest / 'lib', copy_function=os.link)
+        for member in package.rglob('*'):
+            local(member)
+        destination = guest / package_path.lstrip('/')
         destination.parent.mkdir(parents=True, exist_ok=True)
-        if item.source.is_dir():
-            shutil.copytree(item.source, destination, dirs_exist_ok=True, copy_function=shutil.copy2)
-        else:
-            shutil.copy2(item.source, destination)
-    (guest / 'case-count').write_text(str(len(cases)))
-    for index, case in enumerate(cases):
-        destination = guest / 'cases' / str(index)
-        destination.mkdir()
-        for name, data in {'arguments': encode(case.argv), 'environment': encode(case.environment),
-                           'cwd': case.cwd.encode() + b'\0', 'stdin': case.stdin,
-                           'timeout': str(case.timeout_seconds).encode(), 'outputs': encode(case.outputs)}.items():
-            (destination / name).write_bytes(data)
-    archive = work / 'root.cpio'
-    result = subprocess.run(['/usr/bin/tar', '--format=newc', '-cf', str(archive), '-C', str(guest), '.'],
-                            cwd=ROOT, env=environment, stdin=subprocess.DEVNULL, capture_output=True, check=False)
-    if result.returncode:
-        raise ValueError(f'qualification guest archive failed: {result.stderr.decode(errors="replace")}')
-    compressed = work / 'root.cpio.gz'
-    with archive.open('rb') as original, gzip.open(compressed, 'wb', compresslevel=1) as destination:
-        shutil.copyfileobj(original, destination)
-    archive.unlink()
-    export = work / 'export.log'
-    command = [str(local(preparation / 'emulation/qemu-system-aarch64')), '-machine', 'virt',
-               '-accel', accelerator, '-cpu', cpu, '-m', '8192', '-smp', '2', '-display', 'none',
-               '-monitor', 'none', '-serial', 'stdio', '-no-reboot', '-nodefaults', '-nic', 'none',
-               '-device', 'virtio-serial-pci,id=lo-transport', '-chardev', f'file,id=lo-export,path={export}',
-               '-device', 'virtserialport,bus=lo-transport.0,nr=1,chardev=lo-export,name=lo.export',
-               '-kernel', str(local(preparation / 'vmlinuz-virt')), '-initrd', str(compressed),
-               '-append', 'console=ttyAMA0 rdinit=/init panic=-1 loglevel=3']
-    serial, errors = work / 'serial.log', work / 'qemu.stderr'
-    with serial.open('wb') as stdout, errors.open('wb') as stderr:
-        result = subprocess.run(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL,
-                                stdout=stdout, stderr=stderr, timeout=120 + sum(case.timeout_seconds for case in cases),
-                                check=False)
-    if result.returncode:
-        raise ValueError(f'qualification software guest failed: {errors.read_text(errors="replace")}')
-    if not export.is_file():
-        raise ValueError(f'qualification export channel missing: {export}')
-    exported = receive(export, tuple(case.identifier for case in cases), tuple(len(case.outputs) for case in cases))
-    records = []
-    for index, (case, result) in enumerate(zip(cases, exported)):
-        files = []
-        for name, data in [('stdout', result.stdout), ('stderr', result.stderr),
-                           *((f'file{number}', data) for number, data in enumerate(result.outputs))]:
-            output = work / f'{index}.{name}'
-            if data is not None:
-                output.write_bytes(data)
-                files.append({'name': name, 'path': str(output.relative_to(ROOT)), 'bytes': len(data),
-                              'sha256': hashlib.sha256(data).hexdigest()})
-        records.append({'id': result.identifier, 'status': result.status, 'elapsed_ns': result.elapsed_ns,
-                        'argv': case.argv, 'cwd': case.cwd, 'streams': files,
-                        'output_paths': case.outputs})
-    digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
-    report = {'target': 'linux/arm64', 'guest_memory_mib': 8192, 'accelerator': accelerator, 'cpu': cpu,
-              'environment': f'QEMU {accelerator.upper()}; no external network interface; loopback enabled; empty PATH; declared payloads',
-              'package': str(package.relative_to(ROOT)), 'package_path': package_path,
-              'compiler_sha256': digest(package / 'bin/lo'),
-              'manifest_sha256': digest(package / 'toolchain.json'), 'batch_sha256': digest(manifest),
-              'cases': records, 'serial': str(serial.relative_to(ROOT)), 'export': str(export.relative_to(ROOT))}
-    preliminary = package / 'preliminary.json'
-    if preliminary.is_file():
-        report['preliminary'] = json.loads(preliminary.read_text())
-    (work / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    return report
+        shutil.copytree(package, destination, copy_function=os.link)
+        for item in payloads:
+            destination = guest / item.path.lstrip('/')
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            if item.source.is_dir():
+                shutil.copytree(item.source, destination, dirs_exist_ok=True, copy_function=shutil.copy2)
+            else:
+                shutil.copy2(item.source, destination)
+        (guest / 'case-count').write_text(str(len(cases)))
+        for index, case in enumerate(cases):
+            destination = guest / 'cases' / str(index)
+            destination.mkdir()
+            for name, data in {'arguments': encode(case.argv), 'environment': encode(case.environment),
+                               'cwd': case.cwd.encode() + b'\0', 'stdin': case.stdin,
+                               'timeout': str(case.timeout_seconds).encode(), 'outputs': encode(case.outputs)}.items():
+                (destination / name).write_bytes(data)
+        staged = time.perf_counter()
+        archive = work / 'root.cpio'
+        result = subprocess.run(['/usr/bin/tar', '--format=newc', '-cf', str(archive), '-C', str(guest), '.'],
+                                cwd=ROOT, env=environment, stdin=subprocess.DEVNULL, capture_output=True, check=False)
+        if result.returncode:
+            raise ValueError(f'qualification guest archive failed: {result.stderr.decode(errors="replace")}')
+        archived = time.perf_counter()
+        export = work / 'export.log'
+        command = [str(local(preparation / 'emulation/qemu-system-aarch64')), '-machine', 'virt',
+                   '-accel', accelerator, '-cpu', cpu, '-m', '8192', '-smp', '2', '-display', 'none',
+                   '-monitor', 'none', '-serial', 'stdio', '-no-reboot', '-nodefaults', '-nic', 'none',
+                   '-device', 'virtio-serial-pci,id=lo-transport', '-chardev', f'file,id=lo-export,path={export}',
+                   '-device', 'virtserialport,bus=lo-transport.0,nr=1,chardev=lo-export,name=lo.export',
+                   '-kernel', str(local(preparation / 'vmlinuz-virt')), '-initrd', str(archive),
+                   '-append', 'console=ttyAMA0 rdinit=/init panic=-1 loglevel=3']
+        serial, errors = work / 'serial.log', work / 'qemu.stderr'
+        guest_started = time.perf_counter()
+        with serial.open('wb') as stdout, errors.open('wb') as stderr:
+            result = subprocess.run(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL,
+                                    stdout=stdout, stderr=stderr, timeout=120 + sum(case.timeout_seconds for case in cases),
+                                    check=False)
+        guest_seconds = time.perf_counter() - guest_started
+        if result.returncode:
+            raise ValueError(f'qualification software guest failed: {errors.read_text(errors="replace")}')
+        if not export.is_file():
+            raise ValueError(f'qualification export channel missing: {export}')
+        exported = receive(export, tuple(case.identifier for case in cases), tuple(len(case.outputs) for case in cases))
+        records = []
+        for index, (case, result) in enumerate(zip(cases, exported)):
+            files = []
+            for name, data in [('stdout', result.stdout), ('stderr', result.stderr),
+                               *((f'file{number}', data) for number, data in enumerate(result.outputs))]:
+                output = work / f'{index}.{name}'
+                if data is not None:
+                    output.write_bytes(data)
+                    files.append({'name': name, 'path': str(output.relative_to(ROOT)), 'bytes': len(data),
+                                  'sha256': hashlib.sha256(data).hexdigest()})
+            records.append({'id': result.identifier, 'status': result.status, 'elapsed_ns': result.elapsed_ns,
+                            'argv': case.argv, 'cwd': case.cwd, 'streams': files,
+                            'output_paths': case.outputs})
+        digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+        execution_seconds = sum(item.elapsed_ns for item in exported) / 1_000_000_000
+        report = {'target': 'linux/arm64', 'guest_memory_mib': 8192, 'accelerator': accelerator, 'cpu': cpu,
+                  'timing': {'staging_seconds': staged - started, 'archive_seconds': archived - staged,
+                             'guest_wall_seconds': guest_seconds, 'case_execution_seconds': execution_seconds,
+                             'guest_boot_cleanup_export_seconds': max(0.0, guest_seconds - execution_seconds)},
+                  'environment': f'QEMU {accelerator.upper()}; no external network interface; loopback enabled; empty PATH; declared payloads',
+                  'package': str(package.relative_to(ROOT)), 'package_path': package_path,
+                  'compiler_sha256': digest(package / 'bin/lo'),
+                  'manifest_sha256': digest(package / 'toolchain.json'), 'batch_sha256': digest(manifest),
+                  'cases': records, 'serial': str(serial.relative_to(ROOT)), 'export': str(export.relative_to(ROOT))}
+        preliminary = package / 'preliminary.json'
+        if preliminary.is_file():
+            report['preliminary'] = json.loads(preliminary.read_text())
+        (work / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
+        return report
+    finally:
+        if (work / 'root').exists():
+            shutil.rmtree(work / 'root')
+        (work / 'root.cpio').unlink(missing_ok=True)
+
 
 
 def main() -> int:

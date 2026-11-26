@@ -1,3 +1,4 @@
+#include "../native-runtime/cli-entry.h"
 #include "lo_runtime.h"
 #define LO_OPTIONS(budget) (&(const ContextOptions){(budget),16ULL<<20,64ULL<<20,0,0,0,128,256})
 typedef __UINT64_TYPE__ U64;
@@ -5,7 +6,7 @@ typedef __UINT32_TYPE__ U32;
 
 extern U64 lo_context_remaining_steps(const Context *),lo_context_scope_count(const Context *),lo_context_depth(const Context *);
 extern U64 lo_runtime_live_values(void),lo_runtime_live_programs(void),lo_runtime_live_contexts(void);
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 static int empty(void){return !lo_runtime_live_values() && !lo_runtime_live_programs() && !lo_runtime_live_contexts();}
 int main(void){
  const Program *program=lo_program_new();

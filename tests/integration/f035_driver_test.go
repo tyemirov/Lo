@@ -86,7 +86,9 @@ func f035DriverScenarios() []llvmRuntimeScenario {
 		}
 		prelude := f035Require + `flow Recover(error:Error)->Bool{return String.eq(error.kind,"Process.Timeout")};flow Attempt(command:Process.Command)->Bool onError Recover{result=commit command;return false};`
 		body := f035DriverCommand + fmt.Sprintf(`timed=Process.Command.with_timeout(command,%d);configured=Process.Command.with_output(timed,%q);`, timeout, output)
-		if test.number == 5 || test.number == 11 {
+		if test.number == 5 {
+			body += `timed_out=Attempt(configured);result=commit command;exit_ok=Math.eq(Process.Termination.exit_code(result.termination),0);return Require(Match.new(timed_out,true:exit_ok,_:false))`
+		} else if test.number == 11 {
 			body += `timed_out=Attempt(configured);result=commit command;return Require(timed_out)`
 		} else if test.number == 8 || test.number == 10 || test.number == 25 {
 			body += `result=commit configured;return Require(Math.eq(Math.add(result.stdout_bytes,result.stderr_bytes),6))`

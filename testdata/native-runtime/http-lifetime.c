@@ -1,7 +1,8 @@
+#include "cli-entry.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __SIZE_TYPE__ Size;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern U64 lo_runtime_live_contexts(void);
 extern U64 lo_runtime_live_values(void);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *);

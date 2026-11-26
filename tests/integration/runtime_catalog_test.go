@@ -136,6 +136,9 @@ func TestRunBuiltinCatalog(t *testing.T) {
 			covered[tc.name] = true
 		}
 		t.Run(tc.name, func(t *testing.T) {
+			if tc.name != catalog.FileOpenPaths {
+				t.Parallel()
+			}
 			expected, ok := want[tc.name]
 			if !ok {
 				t.Fatalf("missing runtime assertion for %s", tc.name)

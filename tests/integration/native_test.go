@@ -6,6 +6,7 @@ import (
 	"debug/elf"
 	"debug/macho"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,6 +17,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/MarcoPoloResearchLab/Lo/internal/testsession"
 	"github.com/MarcoPoloResearchLab/Lo/tests/corpus"
 )
 
@@ -93,12 +95,29 @@ func assertNativeObjectTarget(t *testing.T, artifact, target string) {
 
 var nativeArtifacts = struct {
 	sync.Mutex
-	paths map[string]string
-}{paths: map[string]string{}}
+	paths map[string]*nativeArtifact
+}{paths: map[string]*nativeArtifact{}}
+
+type nativeArtifact struct {
+	done  chan struct{}
+	path  string
+	built result
+}
 
 func buildForTest(t *testing.T, path string) (string, result) {
 	t.Helper()
 	build := func(artifact string) result {
+		if address := os.Getenv("LO_TEST_SESSION"); address != "" {
+			lease, err := testsession.Acquire(t.Context(), address)
+			if err != nil {
+				t.Fatalf("acquire native fixture build slot: %v", err)
+			}
+			defer func() {
+				if err := lease.Close(); err != nil {
+					t.Errorf("release native fixture build slot: %v", err)
+				}
+			}()
+		}
 		args := []string{"build", path, "--output", artifact, "--format", "json"}
 		built := run(t, args...)
 		if built.status == 0 {
@@ -124,25 +143,68 @@ func buildForTest(t *testing.T, path string) (string, result) {
 	}
 	key := fmt.Sprintf("%x", sha256.Sum256(append([]byte(path+"\x00"), data...)))
 	nativeArtifacts.Lock()
-	defer nativeArtifacts.Unlock()
 	if artifact, ok := nativeArtifacts.paths[key]; ok {
-		return artifact, result{status: 0}
+		nativeArtifacts.Unlock()
+		<-artifact.done
+		return artifact.path, artifact.built
 	}
 	artifact := filepath.Join(t.TempDir(), "fixture-"+key)
-	r := build(artifact)
-	if r.status == 0 {
-		nativeArtifacts.paths[key] = artifact
-		t.Cleanup(func() {
+	record := &nativeArtifact{done: make(chan struct{}), path: artifact, built: result{status: 2, stderr: "native fixture build did not complete"}}
+	nativeArtifacts.paths[key] = record
+	nativeArtifacts.Unlock()
+	defer func() {
+		if record.built.status != 0 {
 			nativeArtifacts.Lock()
-			defer nativeArtifacts.Unlock()
+			if nativeArtifacts.paths[key] == record {
+				delete(nativeArtifacts.paths, key)
+			}
+			nativeArtifacts.Unlock()
+		}
+		close(record.done)
+	}()
+	t.Cleanup(func() {
+		nativeArtifacts.Lock()
+		defer nativeArtifacts.Unlock()
+		if nativeArtifacts.paths[key] == record {
 			delete(nativeArtifacts.paths, key)
-		})
-	}
-	return artifact, r
+		}
+	})
+	record.built = build(artifact)
+	return artifact, record.built
 }
+
+func runtimeFixture(t *testing.T, path string) (string, result) {
+	t.Helper()
+	address := os.Getenv("LO_TEST_SESSION")
+	if address == "" {
+		return buildForTest(t, path)
+	}
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(repository, path)
+	}
+	compiled, lease, err := testsession.CompileRetained(t.Context(), address, testsession.CompileRequest{Source: path})
+	if err != nil {
+		var command *testsession.CommandError
+		if errors.As(err, &command) {
+			if command.Status < 0 || command.Operation != "emit native fixture" {
+				t.Fatalf("prepare native runtime fixture %q: %v", path, err)
+			}
+			return "", result{status: command.Status, stdout: command.Stdout, stderr: command.Stderr}
+		}
+		t.Fatalf("prepare native runtime fixture %q: %v", path, err)
+	}
+	t.Cleanup(func() {
+		if err := lease.Close(); err != nil {
+			t.Errorf("release native runtime fixture %q: %v", path, err)
+		}
+	})
+	t.Logf("LO_NATIVE_RUNTIME=%s", compiled.Runtime)
+	return compiled.Artifact, result{status: 0}
+}
+
 func runProgram(t *testing.T, path, command string, args ...string) result {
 	t.Helper()
-	artifact, built := buildForTest(t, path)
+	artifact, built := runtimeFixture(t, path)
 	if built.status != 0 {
 		return built
 	}
@@ -151,7 +213,7 @@ func runProgram(t *testing.T, path, command string, args ...string) result {
 
 func programCommand(t *testing.T, path, command string, args ...string) *exec.Cmd {
 	t.Helper()
-	artifact, built := buildForTest(t, path)
+	artifact, built := runtimeFixture(t, path)
 	if built.status != 0 {
 		t.Fatalf("build program fixture: %+v", built)
 	}
@@ -199,7 +261,7 @@ func TestNativeBuildBoundary(t *testing.T) {
 	if err != nil || string(data) != "previous artifact" {
 		t.Fatalf("previous artifact changed: %q %v", data, err)
 	}
-	if os.Getenv("LO_TEST_COMPILER") != "" {
+	if !developmentCompilerSelected() {
 		command := exec.Command(binary, "build", source, "--output", artifact, "--format", "json")
 		command.Env = []string{"PATH=", "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 		if data, err := command.CombinedOutput(); err != nil {
@@ -213,7 +275,7 @@ func TestNativeReproducibleAndIsolated(t *testing.T) {
 	source := sourceFile(t, "return String.new(\"quotes \\\" $() `literal` é\")\n")
 	buildArgs := func(output string) []string {
 		args := []string{"build", source, "--output", output, "--format", "json"}
-		if os.Getenv("LO_TEST_COMPILER") == "" {
+		if developmentCompilerSelected() {
 			manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 			if manifest == "" {
 				t.Fatal("native reproducibility requires LO_LLVM_TOOLCHAIN")
@@ -267,7 +329,7 @@ func TestNativeLargeArguments(t *testing.T) {
 			continue
 		}
 		source := sourceFile(t, fixture.Source)
-		artifact, built := buildForTest(t, source)
+		artifact, built := runtimeFixture(t, source)
 		if built.status != 0 {
 			t.Fatalf("build large arguments: %+v", built)
 		}
@@ -296,7 +358,7 @@ func TestNativeLargeCallbackContexts(t *testing.T) {
 				t.Fatalf("check callback contexts: %+v", checked)
 			}
 			want := strconv.Itoa(count*(count+1)*(2*count+1)/3+3) + "\n"
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build callback contexts: %+v", built)
 			}
@@ -350,7 +412,7 @@ func TestNativeRuntimeBudgetContracts(t *testing.T) {
 	}
 	for _, text := range cases {
 		source := sourceFile(t, text)
-		artifact, r := buildForTest(t, source)
+		artifact, r := runtimeFixture(t, source)
 		if r.status != 0 {
 			t.Fatalf("build differential fixture: %+v", r)
 		}
@@ -391,7 +453,7 @@ func TestNativeTensorBudgetContracts(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			minimum := minimumLLVMWorkSteps(t, text)
 			source := sourceFile(t, text)
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build: %+v", built)
 			}
@@ -423,7 +485,7 @@ flow Pair(first: Int, second: Int) -> Int { return Math.add(Math.mul(first,10),s
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			source := sourceFile(t, prelude+fixture.body)
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build: %+v", built)
 			}

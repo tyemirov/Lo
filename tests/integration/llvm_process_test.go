@@ -25,7 +25,7 @@ func TestLLVMProcessConstructors(t *testing.T) {
 	} {
 		t.Run(fmt.Sprint(index), func(t *testing.T) {
 			input := sourceFile(t, source)
-			artifact, built := buildForTest(t, input)
+			artifact, built := runtimeFixture(t, input)
 			if built.status != 0 {
 				t.Fatalf("build process fixture: %+v", built)
 			}
@@ -141,7 +141,7 @@ func TestLLVMProcessExecution(t *testing.T) {
 	t.Run("post-commit-budget-safe-progress", func(t *testing.T) {
 		later := filepath.Join(directory, "later")
 		source := sourceFile(t, fmt.Sprintf(`flow Add(state:Int,item:Int)->Int{return Math.add(state,item)}; flow Main()->Int!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new("argument"), context: Process.Context.new(Map.new(Record.new(key:"DECLARED",value:"value")), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;items=List.new(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);total=Flow.fold(items,0,Add);write=File.Write.new(File.Path.new(%q),Bytes.new("wrong"));commit write;return total};return Main()`, executable, directory, later))
-		builtArtifact, built := buildForTest(t, source)
+		builtArtifact, built := runtimeFixture(t, source)
 		if built.status != 0 {
 			t.Fatalf("build postcommit fixture: %+v", built)
 		}
@@ -216,7 +216,7 @@ func TestLLVMProcessConfigurationDiagnostics(t *testing.T) {
 	grant := fmt.Sprintf("%x,%s", digest, command)
 	helper := filepath.Join(repository, "bin", "lo-process-launcher")
 	input := sourceFile(t, `return 1`)
-	artifact, built := buildForTest(t, input)
+	artifact, built := runtimeFixture(t, input)
 	if built.status != 0 {
 		t.Fatalf("build configuration fixture: %+v", built)
 	}
@@ -267,7 +267,7 @@ func TestLLVMProcessProtectedFileComposition(t *testing.T) {
 		t.Run(filepath.Base(test.path), func(t *testing.T) {
 			path := test.path
 			source := sourceFile(t, fmt.Sprintf(`target=File.Write.new(File.Path.new(%q),Bytes.new("changed"));commit target`, path))
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build protected file fixture: %+v", built)
 			}

@@ -19,7 +19,7 @@ func TestLLVMCheckpointDecodeBudget(t *testing.T) {
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			input := sourceFile(t, fmt.Sprintf(`flow Run()->%s!{%s return Checkpoint.decode(Bytes.new(%q),original)};return Run()`, typ, setup, fixture.data))
-			artifact, built := buildForTest(t, input)
+			artifact, built := runtimeFixture(t, input)
 			if built.status != 0 {
 				t.Fatalf("build checkpoint budget fixture: %+v", built)
 			}

@@ -40,7 +40,11 @@ func TestLLVMFileAdapters(t *testing.T) {
 }
 
 func llvmFileNoReaderScenarios() []llvmRuntimeScenario {
-	return []llvmRuntimeScenario{{name: "cancel-after-no-reader-open", number: 0, harness: "testdata/native-runtime/files-no-reader.c", source: `flow Handle(e:Error)->Int{return 99};flow Main()->Int onError Handle {target=File.Write.new(File.Path.new("pipe"),Bytes.new("x"));commit target;later=File.Write.new(File.Path.new("later"),Bytes.new("wrong"));commit later;return 0};return Main()`}}
+	const source = `flow Handle(e:Error)->Int{return 99};flow Main()->Int onError Handle {target=File.Write.new(File.Path.new("pipe"),Bytes.new("x"));commit target;later=File.Write.new(File.Path.new("later"),Bytes.new("wrong"));commit later;return 0};return Main()`
+	return []llvmRuntimeScenario{
+		{name: "cancel-after-no-reader-open", number: 0, harness: "testdata/native-runtime/files-no-reader.c", source: source},
+		{name: "cancel-after-no-reader-retry", number: 1, harness: "testdata/native-runtime/files-no-reader.c", source: source},
+	}
 }
 func TestLLVMFileNoReaderCancellation(t *testing.T) {
 	runLLVMRuntimeScenarios(t, llvmFileNoReaderScenarios())
@@ -98,7 +102,7 @@ func TestLLVMFileUnicodeDiagnosticParity(t *testing.T) {
 	path := filepath.Join(root, "line\u2028separator")
 	source := sourceFile(t, fmt.Sprintf(`flow Handle(e:Error)->String{return e.message};flow Main()->String onError Handle {path=File.Path.new(%q);first=File.Write.new(path,Bytes.new("original"));commit first;entries=File.list(File.Path.new(%q));changed=File.Write.new(path,Bytes.new("x"));commit changed;target=File.Remove.new(entries);commit target;return "unexpected"};return Main()`, path, root))
 	arguments := []string{"--write-root", root, "--list-root", root, "--remove-root", root, "--format", "json"}
-	artifact, built := buildForTest(t, source)
+	artifact, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build: %+v", built)
 	}

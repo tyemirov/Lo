@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINTPTR_TYPE__ Thread;
 extern int open(const char *, int, ...);
@@ -11,7 +12,7 @@ extern unsigned alarm(unsigned);
 extern int pthread_create(Thread *, const void *, void *(*)(void *), void *);
 extern int pthread_join(Thread, void **);
 extern int pthread_kill(Thread, int);
-extern int lo_cli_main(int, const char **, const char **);
+
 static char payload[1048576];
 static void *execute(void *unused) {
     (void)unused;

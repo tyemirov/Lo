@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -372,6 +374,15 @@ func TestF034ProtectedResourcePreflight(t *testing.T) {
 			alias := filepath.Join(tree, "z-protected")
 			if err := os.Link(protectedPath, alias); err != nil {
 				t.Fatal(err)
+			}
+			if protected == "program-entry" && runtime.GOOS == "darwin" {
+				library := filepath.Join(t.TempDir(), "entry-alias.dylib")
+				command := exec.Command("xcrun", "--sdk", "macosx", "clang", "-dynamiclib", filepath.Join(repository, "testdata/native-runtime/program-entry-hardlink.c"), "-o", library)
+				if output, err := command.CombinedOutput(); err != nil {
+					t.Fatalf("compile executable-alias observation boundary: %v %s", err, output)
+				}
+				t.Setenv("LO_TEST_ENTRY_ALIAS", alias)
+				t.Setenv("DYLD_INSERT_LIBRARIES", library)
 			}
 			got := runExecutable(t, artifact, flags...)
 			f034Failure(t, got, 2, "runtime.capability-denied")

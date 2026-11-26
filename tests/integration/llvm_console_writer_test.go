@@ -12,7 +12,7 @@ import (
 )
 
 func TestNativeConsoleWriterFrames(t *testing.T) {
-	artifact, built := buildForTest(t, sourceFile(t, "return 0"))
+	artifact, built := runtimeFixture(t, sourceFile(t, "return 0"))
 	if built.status != 0 {
 		t.Fatalf("build writer fixture: %+v", built)
 	}
@@ -101,7 +101,7 @@ func TestNativeConsoleWriterFrames(t *testing.T) {
 }
 
 func TestNativeConsoleWriterClosedPipe(t *testing.T) {
-	artifact, built := buildForTest(t, sourceFile(t, "return 0"))
+	artifact, built := runtimeFixture(t, sourceFile(t, "return 0"))
 	if built.status != 0 {
 		t.Fatalf("build writer fixture: %+v", built)
 	}

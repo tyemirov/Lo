@@ -38,7 +38,7 @@ func TestLLVMCheckpointFileCancellation(t *testing.T) {
 			source := sourceFile(t, fmt.Sprintf(`flow Handle(e:Error)->Int{return 99}
 flow Run()->Int onError Handle{%s target=File.Write.new(File.Path.new(%q),Bytes.new("wrong")); commit target; return 0}
 return Run()`, expression, later))
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build file cancellation fixture: %+v", built)
 			}
@@ -124,7 +124,7 @@ func TestLLVMCheckpointFileDiagnostics(t *testing.T) {
 	} {
 		t.Run(fmt.Sprint(index), func(t *testing.T) {
 			input := sourceFile(t, source)
-			artifact, built := buildForTest(t, input)
+			artifact, built := runtimeFixture(t, input)
 			if built.status != 0 {
 				t.Fatalf("build file diagnostic fixture: %+v", built)
 			}

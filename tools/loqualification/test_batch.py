@@ -10,6 +10,8 @@ import sys
 
 import pytest
 
+import batch
+
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "tools/loqualification/batch.py"
 
@@ -46,6 +48,50 @@ def invoke(work: Path, manifest: dict) -> subprocess.CompletedProcess[str]:
         text=True,
         check=False,
     )
+
+
+@pytest.mark.parametrize("corrupt", [False, True])
+def test_batch_passes_uncompressed_declared_image_to_guest(
+    work: Path, monkeypatch: pytest.MonkeyPatch, corrupt: bool
+) -> None:
+    package, preparation = work / "package", work / "preparation"
+    (package / "bin").mkdir(parents=True)
+    (package / "bin/lo").write_bytes(b"frontend")
+    (package / "toolchain.json").write_text("{}")
+    (preparation / "linux-sysroot/lib").mkdir(parents=True)
+    initializer = work / "initializer"
+    initializer.write_bytes(b"initializer")
+    monkeypatch.setattr(batch, "initializer", lambda *_args: initializer)
+    manifest = work / "cases.json"
+    manifest.write_text(json.dumps({"files": [], "cases": [{
+        "id": "version", "argv": ["/compiler/bin/lo", "version"], "cwd": "/work",
+        "environment": {}, "stdin": "", "timeout_seconds": 10, "outputs": []}]}))
+    def command(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess:
+        if argv[0] == "/usr/bin/tar":
+            Path(argv[argv.index("-cf") + 1]).write_bytes(b"070701declared-image")
+        else:
+            image = Path(argv[argv.index("-initrd") + 1])
+            assert image.name == "root.cpio"
+            assert image.read_bytes() == b"070701declared-image"
+            export = work / "guest/export.log"
+            export.write_text("LO_QUALIFICATION_STREAM:0:stdout:0\n" if corrupt else
+                              "LO_QUALIFICATION_STREAM:0:stdout:0\n"
+                              "LO_QUALIFICATION_STREAM:0:stderr:0\n"
+                              "LO_QUALIFICATION_RESULT:0:0:1000\n"
+                              "LO_QUALIFICATION_COMPLETE:1\n")
+        return subprocess.CompletedProcess(argv, 0, b"", b"")
+    monkeypatch.setattr(batch.subprocess, "run", command)
+    if corrupt:
+        with pytest.raises(ValueError):
+            batch.run(preparation, package, manifest, work / "guest", accelerator="hvf")
+    else:
+        report = batch.run(preparation, package, manifest, work / "guest", accelerator="hvf")
+        assert report["cases"][0]["status"] == 0
+        assert report["timing"]["case_execution_seconds"] == 0.000001
+    assert not (work / "guest/root").exists()
+    assert not (work / "guest/root.cpio").exists()
+    assert (work / "guest/export.log").exists()
+    assert not (work / "guest/root.cpio.gz").exists()
 
 
 def test_batch_rejects_duplicate_case_ids_before_start(work: Path) -> None:

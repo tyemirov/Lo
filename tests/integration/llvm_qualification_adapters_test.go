@@ -160,7 +160,7 @@ func TestLLVMProcessTransportCompleted(t *testing.T) {
 			}
 			digest := sha256.Sum256(data)
 			source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new("one two","$VALUE"), context: Process.Context.new(Map.new(Record.new(key:"ONLY",value:"explicit")), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, child, directory))
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build process program: %+v", built)
 			}
@@ -205,7 +205,7 @@ func TestLLVMProcessTransportCancellation(t *testing.T) {
 	}
 	digest := sha256.Sum256(data)
 	source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new(), context: Process.Context.new(Map.new(), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, child, directory))
-	artifact, built := buildForTest(t, source)
+	artifact, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build cancellation program: %+v", built)
 	}
@@ -296,7 +296,7 @@ func TestLLVMProcessTransportOutputLimits(t *testing.T) {
 	for _, name := range []string{"exact", "stdout", "stderr"} {
 		t.Run(name, func(t *testing.T) {
 			source := sourceFile(t, fmt.Sprintf(`flow Main()->Process.Result!{executable=Process.Executable.new(File.Path.new(%q));target=Process.Command.new(executable: executable, arguments: List.new(%q), context: Process.Context.new(Map.new(), File.Path.new(%q)), stdin: Bytes.new("input"));result=commit target;return result};return Main()`, child, name, directory))
-			artifact, built := buildForTest(t, source)
+			artifact, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build output contract: %+v", built)
 			}

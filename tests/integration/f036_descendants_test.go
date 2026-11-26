@@ -1,7 +1,9 @@
 package integration_test
 
 import (
+	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -10,14 +12,24 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/testsession"
 )
 
 type f036Fixture struct {
 	root, work, command, grant, socket, tokens, log, release, ready, lock string
 	kernelLimit                                                           uint32
+}
+
+var f036CommandBuild struct {
+	sync.Once
+	path   string
+	err    error
+	output []byte
 }
 
 func newF036Fixture(t *testing.T) f036Fixture {
@@ -93,11 +105,35 @@ func newF036Fixture(t *testing.T) f036Fixture {
 		}
 	})
 	compiler, flags := llvmDarwinSDKHarness(t, work)
-	arguments := append(flags, filepath.Join(repository, "testdata/native-runtime/process-ownership-command.c"), "-o", fixture.command)
-	command := exec.Command(compiler, arguments...)
-	command.Dir, command.Env = work, fixture.environment()
-	if output, err := command.CombinedOutput(); err != nil {
-		t.Fatalf("build controlled descendant command: %v\n%s", err, output)
+	f036CommandBuild.Do(func() {
+		directory, err := os.MkdirTemp(fixtureDirectory, "f036-command-")
+		if err != nil {
+			f036CommandBuild.err = err
+			return
+		}
+		f036CommandBuild.path = filepath.Join(directory, "command")
+		arguments := append(flags, filepath.Join(repository, "testdata/native-runtime/process-ownership-command.c"), "-o", f036CommandBuild.path)
+		command := exec.Command(compiler, arguments...)
+		command.Dir = directory
+		command.Env = []string{"CI=1", "PATH=", "TMPDIR=" + directory, "TMP=" + directory, "TEMP=" + directory,
+			"CLANG_MODULE_CACHE_PATH=" + directory, "LC_ALL=C", "LANG=C"}
+		if address := os.Getenv("LO_TEST_SESSION"); address != "" {
+			lease, err := testsession.Acquire(context.Background(), address)
+			if err != nil {
+				f036CommandBuild.err = err
+				return
+			}
+			defer func() {
+				f036CommandBuild.err = errors.Join(f036CommandBuild.err, lease.Close())
+			}()
+		}
+		f036CommandBuild.output, f036CommandBuild.err = command.CombinedOutput()
+	})
+	if f036CommandBuild.err != nil {
+		t.Fatalf("build shared controlled descendant command: %v\n%s", f036CommandBuild.err, f036CommandBuild.output)
+	}
+	if err := os.Link(f036CommandBuild.path, fixture.command); err != nil {
+		t.Fatalf("retain private controlled descendant command: %v", err)
 	}
 	contents, err := os.ReadFile(fixture.command)
 	if err != nil {
@@ -172,12 +208,16 @@ func (fixture f036Fixture) tokenRecords(t *testing.T) [][2]string {
 	return records
 }
 
-func (fixture f036Fixture) signalToken(t *testing.T, token string, signal syscall.Signal) {
+func (fixture f036Fixture) signalTokens(t *testing.T, tokens []string, signal syscall.Signal) {
 	t.Helper()
-	command := exec.Command(fixture.command, "--host-signal", token, strconv.Itoa(int(signal)))
+	if len(tokens) == 0 {
+		return
+	}
+	arguments := append([]string{"--host-signal", strconv.Itoa(int(signal))}, tokens...)
+	command := exec.Command(fixture.command, arguments...)
 	command.Dir, command.Env = fixture.work, fixture.environment()
 	if output, err := command.CombinedOutput(); err != nil {
-		t.Errorf("signal controlled audit token: %v: %s", err, output)
+		t.Errorf("signal controlled audit-token batch: %v: %s", err, output)
 	}
 }
 
@@ -185,38 +225,64 @@ func (fixture f036Fixture) signalRole(t *testing.T, role string, signal syscall.
 	t.Helper()
 	for _, record := range fixture.tokenRecords(t) {
 		if record[0] == role {
-			fixture.signalToken(t, record[1], signal)
+			fixture.signalTokens(t, []string{record[1]}, signal)
 			return
 		}
 	}
 	t.Fatalf("fixture did not record %s identity", role)
 }
 
-func (fixture f036Fixture) alive(token string) bool {
-	command := exec.Command(fixture.command, "--host-alive", token)
+func (fixture f036Fixture) liveTokens(t *testing.T, records [][2]string) []string {
+	t.Helper()
+	tokens := make([]string, len(records))
+	for index, record := range records {
+		tokens[index] = record[1]
+	}
+	if len(tokens) == 0 {
+		return nil
+	}
+	command := exec.Command(fixture.command, append([]string{"--host-alive"}, tokens...)...)
 	command.Dir, command.Env = fixture.work, fixture.environment()
-	return command.Run() == nil
+	output, err := command.CombinedOutput()
+	if err != nil || len(output) != 2*len(tokens) {
+		t.Errorf("observe controlled audit-token batch: %v: %q", err, output)
+		return tokens
+	}
+	var alive []string
+	for index, token := range tokens {
+		value := output[2*index]
+		if output[2*index+1] != '\n' || value != '0' && value != '1' {
+			t.Errorf("invalid controlled audit-token batch response: %q", output)
+			return tokens
+		}
+		if value == '1' {
+			alive = append(alive, token)
+		}
+	}
+	return alive
+}
+
+func (fixture f036Fixture) anyAlive(t *testing.T) bool {
+	t.Helper()
+	return len(fixture.liveTokens(t, fixture.tokenRecords(t))) != 0
 }
 
 func (fixture f036Fixture) teardown(t *testing.T) {
 	t.Helper()
-	// This independent host path also destroys quarantined owners after assertions.
-	// Forced test teardown is not a successful controller cleanup receipt.
-	for _, record := range fixture.tokenRecords(t) {
-		fixture.signalToken(t, record[1], syscall.SIGKILL)
+	// Forced teardown remains separate from a successful controller cleanup receipt.
+	records := fixture.tokenRecords(t)
+	tokens := make([]string, len(records))
+	for index, record := range records {
+		tokens[index] = record[1]
 	}
+	fixture.signalTokens(t, tokens, syscall.SIGKILL)
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
-		remaining := false
-		for _, record := range fixture.tokenRecords(t) {
-			if fixture.alive(record[1]) {
-				remaining = true
-				fixture.signalToken(t, record[1], syscall.SIGKILL)
-			}
-		}
-		if !remaining {
+		alive := fixture.liveTokens(t, fixture.tokenRecords(t))
+		if len(alive) == 0 {
 			return
 		}
+		fixture.signalTokens(t, alive, syscall.SIGKILL)
 		time.Sleep(5 * time.Millisecond)
 	}
 	t.Error("controlled process remains after token-bound fixture teardown")
@@ -280,6 +346,29 @@ func (fixture f036Fixture) source(operation string) string {
 	return fmt.Sprintf(`flow Recover(error:Error)->Int{return Match.new(String.eq(error.kind,"Process.Timeout"),true:0,_:99)};flow Main()->Int onError Recover{lock=Lock.File.new(File.Path.new(%q));lease=commit lock;context=Process.Context.new(Map.new(),File.Path.new(%q));executable=Process.Executable.new(File.Path.new(%q));command=Process.Command.new(context,executable,List.new(%q,%q,%q,%q,"initial"),Bytes.new(""));result=commit command;return Process.Termination.exit_code(result.termination)};return Main()`, fixture.lock, fixture.work, fixture.command, fixture.socket, operation, fixture.ready, fixture.release)
 }
 
+type f036InjectedProgram struct {
+	source    string
+	arguments []string
+}
+
+const f036InjectedSource = `flow Recover(error:Error)->Int{return Match.new(String.eq(error.kind,"Process.Timeout"),true:0,_:99)};flow Main()->Int onError Recover{invocation=Host.Invocation.current();arguments=invocation.arguments;lock=Lock.File.new(File.Path.new(List.at(arguments,0)));lease=commit lock;context=Process.Context.new(Map.new(),File.Path.new(List.at(arguments,1)));executable=Process.Executable.new(File.Path.new(List.at(arguments,2)));command=Process.Command.new(context,executable,List.new(List.at(arguments,3),List.at(arguments,4),List.at(arguments,5),List.at(arguments,6),"initial"),Bytes.new(""));result=commit command;return Process.Termination.exit_code(result.termination)};return Main()`
+
+func (fixture f036Fixture) privateInvocationArguments(operation string) []string {
+	return []string{fixture.lock, fixture.work, fixture.command, fixture.socket, operation, fixture.ready, fixture.release}
+}
+
+func (fixture f036Fixture) injectedProgram(operation string) f036InjectedProgram {
+	return f036InjectedProgram{source: f036InjectedSource, arguments: fixture.privateInvocationArguments(operation)}
+}
+
+func (fixture f036Fixture) injectedCommand(artifact string, program f036InjectedProgram, arguments []string) *exec.Cmd {
+	arguments = append(append([]string{}, arguments...), "--")
+	arguments = append(arguments, program.arguments...)
+	command := exec.Command(artifact, arguments...)
+	command.Dir, command.Env = fixture.work, append(fixture.environment(), "HOME="+fixture.work)
+	return command
+}
+
 func TestF036InjectedDescendantOwnership(t *testing.T) {
 	if runtime.GOOS != "darwin" || runtime.GOARCH != "arm64" {
 		t.Skip("requires Darwin process and audit-token fixtures")
@@ -309,7 +398,8 @@ func TestF036InjectedDescendantOwnership(t *testing.T) {
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			fixture := newF036Fixture(t)
-			runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "public-cli", source: fixture.source(scenario.operation),
+			program := fixture.injectedProgram(scenario.operation)
+			runLLVMRuntimeScenarios(t, []llvmRuntimeScenario{{name: "public-cli", source: program.source,
 				number: scenario.number, harness: "testdata/native-runtime/process-ownership-provider.c",
 				hostBootstrap: "lo_test_host_init", sdkHarness: true, harnessTransform: fixture.transform,
 				run: func(t *testing.T, artifact, work string) {
@@ -334,8 +424,7 @@ func TestF036InjectedDescendantOwnership(t *testing.T) {
 					if scenario.number == 22 {
 						arguments = append(arguments, "--max-process-descendants", "1")
 					}
-					command := exec.Command(artifact, arguments...)
-					command.Dir, command.Env = fixture.work, fixture.environment()
+					command := fixture.injectedCommand(artifact, program, arguments)
 					command.Stdout, command.Stderr = stdout, stderr
 					if err := command.Start(); err != nil {
 						t.Fatal(err)
@@ -434,12 +523,7 @@ func TestF036InjectedDescendantOwnership(t *testing.T) {
 					} else {
 						fixture.wait(t, "complete owner release", func() bool { return fixture.logged("C\n") && !fixture.lockBusy(t) })
 						fixture.wait(t, "all owned process exits", func() bool {
-							for _, token := range fixture.tokenRecords(t) {
-								if fixture.alive(token[1]) {
-									return false
-								}
-							}
-							return true
+							return !fixture.anyAlive(t)
 						})
 					}
 				}}})

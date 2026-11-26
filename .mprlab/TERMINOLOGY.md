@@ -2,9 +2,9 @@
 
 This file contains the approved technical nouns and technical verbs for repository documentation.
 
-Use this file with `.mprlab/AGENTS.DOCS.md` and ASD-STE100 Simplified Technical English, Issue 9.
+Use this file with `.mprlab/AGENTS.DOCS.md`. Apply the ASD-STE100 dictionary only within explicitly selected formal STE scope.
 
-Do not add a general dictionary word to this file. Use the ASD-STE100 dictionary for general words.
+Keep this glossary focused on technical terms. For formal STE scope, use the ASD-STE100 dictionary for general words.
 
 Give each term one meaning. Use the same term for the same concept in all documents.
 
@@ -98,6 +98,18 @@ Give each term one meaning. Use the same term for the same concept in all docume
 
 ## Repository Technical Nouns
 
+- `test harness`: Software that prepares fixtures, executes tests, and collects their results.
+- `test session`: One complete execution of a selected test manifest, including preparation and cleanup.
+- `test manifest`: The complete set of test identifiers, parameter cases, targets, and required execution environments.
+- `test shard`: A set of tests that executes in one isolated worker process.
+- `fixture`: Controlled input or state that a test requires.
+- `worker`: A process that executes assigned test or build work.
+- `artifact registry`: A session-owned record of immutable build inputs, outputs, identities, and active users.
+- `artifact lease`: A retained reference that prevents artifact removal while a test uses the artifact.
+- `guest batch`: A set of isolated test processes that executes within one emulator boot.
+- `resource scheduler`: Software that assigns work within CPU, memory, disk, and process limits.
+- `resource budget`: The maximum resources available to one test session or operation.
+- `critical path`: The longest dependency sequence that determines total execution time.
 - `application`: A program or service that uses language operations for a specific task.
 - `general-purpose language`: A programming language with contracts that apply across application domains.
 - `glob`: A wildcard pattern that matches a complete string.
@@ -208,6 +220,7 @@ Give each term one meaning. Use the same term for the same concept in all docume
 - `DWARF`: Debug information that connects machine instructions with source locations and values.
 - `TAPI`: A text format that declares dynamic-library symbols for a linker.
 - `Mach-O`: The object and executable format used by macOS.
+- `dyld`: The macOS dynamic linker that loads executable images and libraries.
 - `ELF`: The object and executable format used by the selected Linux target.
 - `TCG`: The QEMU software engine that translates guest instructions into host instructions.
 - `position-independent code`: Machine code that permits its loader to select its memory address.

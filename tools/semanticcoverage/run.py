@@ -21,6 +21,19 @@ def select_tests(matrix: Path, target: str | None = None) -> str:
     return "^(" + "|".join(sorted(tests)) + ")$"
 
 
+def test_executor(pattern: str) -> tuple[list[str], Path, Path | None]:
+    selected = os.environ.get("LO_TEST_INTEGRATION_BINARY")
+    if selected:
+        binary = report.contained(selected)
+        if not binary.is_file():
+            raise ValueError(f"LO_TEST_INTEGRATION_BINARY must name a file: {binary}")
+        return (["go", "tool", "test2json", "-t", "-p", report.PACKAGE, str(binary),
+                 "-test.v=test2json", "-test.count=1", "-test.timeout=240s", "-test.run=" + pattern],
+                report.ROOT / "tests/integration", binary)
+    return (["go", "test", "-json", "-count=1", "-timeout=240s", "-run", pattern, "./tests/integration"],
+            report.ROOT, None)
+
+
 def run(matrix: Path, output_root: Path, compiler: Path,
         toolchain: Path, additional: dict[str, Path], allow_partial: bool) -> int:
     for name in ("HOME", "TMPDIR", "GOCACHE", "GOMODCACHE", "GOPATH"):
@@ -38,11 +51,14 @@ def run(matrix: Path, output_root: Path, compiler: Path,
         raise ValueError("run requires --compiler and --toolchain installed distribution inputs")
     if target in additional:
         raise ValueError(f"additional native log duplicates current host target: {target}")
-    report.validate_output_paths((log, output), report.consumed_inputs(matrix, additional, compiler, toolchain))
+    pattern = select_tests(matrix, target)
+    command, directory, executor = test_executor(pattern)
+    consumed = report.consumed_inputs(matrix, additional, compiler, toolchain)
+    if executor is not None:
+        consumed.add(executor)
+    report.validate_output_paths((log, output), consumed)
     output_root.mkdir(parents=True, exist_ok=True)
     output.unlink(missing_ok=True)
-    pattern = select_tests(matrix, target)
-    command = ["go", "test", "-json", "-count=1", "-timeout=120m", "-run", pattern, "./tests/integration"]
     environment = dict(os.environ)
     environment["LO_SEMANTIC_MATRIX"] = str(matrix)
     environment["LO_TEST_COMPILER"] = str(compiler)
@@ -50,7 +66,7 @@ def run(matrix: Path, output_root: Path, compiler: Path,
     environment["LO_TEST_TARGET"] = target
     print(f"semantic execution: native:{target}", flush=True)
     with log.open("wb") as stream:
-        result = subprocess.run(command, cwd=report.ROOT, env=environment,
+        result = subprocess.run(command, cwd=directory, env=environment,
                                 stdin=subprocess.DEVNULL, stdout=stream)
     if result.returncode:
         print(f"semantic execution: native:{target} failed; see {log.relative_to(report.ROOT)}", file=sys.stderr)

@@ -7,15 +7,16 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
-	"github.com/MarcoPoloResearchLab/Lo/internal/nativebuild"
-	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/metalconfig"
+	"github.com/MarcoPoloResearchLab/Lo/internal/nativebuild"
+	"github.com/MarcoPoloResearchLab/Lo/internal/targetconfig"
 )
 
 type nativeMetalArtifactIdentity struct {
@@ -98,6 +99,68 @@ func nativeMetalMetadata(t *testing.T, artifact, source string, backend targetco
 	return identity
 }
 
+func liveMetalAdmissionFailure(actual result) string {
+	if actual.status != 1 || actual.stdout != "" {
+		return ""
+	}
+	var output struct {
+		Diagnostics []struct {
+			Code  string `json:"code"`
+			Stage string `json:"stage"`
+			Error struct {
+				Kind    string `json:"kind"`
+				Message string `json:"message"`
+			} `json:"error"`
+		} `json:"diagnostics"`
+	}
+	if err := json.Unmarshal([]byte(actual.stderr), &output); err != nil || len(output.Diagnostics) != 1 {
+		return ""
+	}
+	report := output.Diagnostics[0]
+	if report.Code != "runtime.unhandled-error" || report.Stage != "runtime" {
+		return ""
+	}
+	failure := report.Error
+	if failure.Kind == "Device.Unavailable" && failure.Message == "Tensor.to: Device.Unavailable: metal:0: no system Metal device" ||
+		failure.Kind == "Device.UnsupportedProfile" && failure.Message == "Tensor.to: Device.UnsupportedProfile: metal:0: require Apple GPU family 7 and unified memory" {
+		return failure.Message
+	}
+	return ""
+}
+
+func reportUnavailableLiveMetal(t *testing.T, actual result) {
+	t.Helper()
+	if message := liveMetalAdmissionFailure(actual); message != "" {
+		t.Log(message)
+		t.Skip("system Metal device is unavailable or has an unsupported profile")
+	}
+}
+
+func TestNativeMetalAdmissionClassification(t *testing.T) {
+	const diagnostic = `{"code":"runtime.unhandled-error","stage":"runtime","error":{"kind":"Device.UnsupportedProfile","message":"Tensor.to: Device.UnsupportedProfile: metal:0: require Apple GPU family 7 and unified memory"}}`
+	stderr := `{"diagnostics":[` + diagnostic + `]}`
+	for _, tc := range []struct {
+		name   string
+		actual result
+		want   bool
+	}{
+		{"unsupported profile", result{status: 1, stderr: stderr}, true},
+		{"command queue failed", result{status: 1, stderr: strings.ReplaceAll(strings.ReplaceAll(stderr, "Device.UnsupportedProfile", "Device.Unavailable"), "require Apple GPU family 7 and unified memory", "create command queue")}, false},
+		{"wrong diagnostic code", result{status: 1, stderr: strings.Replace(stderr, "runtime.unhandled-error", "runtime.host-failure", 1)}, false},
+		{"wrong operation", result{status: 1, stderr: strings.Replace(stderr, "Tensor.to", "Tensor.add", 1)}, false},
+		{"multiple diagnostics", result{status: 1, stderr: `{"diagnostics":[` + diagnostic + "," + diagnostic + `]}`}, false},
+		{"malformed diagnostic", result{status: 1, stderr: stderr + "other output"}, false},
+		{"wrong exit", result{status: 2, stderr: stderr}, false},
+		{"result published", result{status: 1, stdout: "unexpected", stderr: stderr}, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := liveMetalAdmissionFailure(tc.actual); (got != "") != tc.want {
+				t.Fatalf("admission classification = %q, expected environmental admission failure: %t", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestNativeMetalLiveStandalone(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(repository, "examples", "metal_arithmetic.lo"))
 	if err != nil {
@@ -139,7 +202,11 @@ func TestNativeMetalLiveStandalone(t *testing.T) {
 	command.Env = []string{"PATH=" + t.TempDir(), "LO_BUILD_ROOT=" + os.Getenv("LO_BUILD_ROOT")}
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
-	if err := command.Run(); err != nil || stderr.Len() != 0 {
+	err = command.Run()
+	if command.ProcessState != nil {
+		reportUnavailableLiveMetal(t, result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()})
+	}
+	if err != nil || stderr.Len() != 0 {
 		t.Fatalf("standalone: %v stdout=%s stderr=%s", err, &stdout, &stderr)
 	}
 	value := nativeValue(t, result{stdout: stdout.String()})
@@ -173,6 +240,7 @@ func TestNativeMetalLiveNumericalContracts(t *testing.T) {
 			for _, budget := range []string{"10000000", "1", "30"} {
 				for repeat := 0; repeat < 3; repeat++ {
 					actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
+					reportUnavailableLiveMetal(t, actual)
 					if budget != "10000000" && actual.status == 2 {
 						nativeBudgetOrSuccess(t, actual)
 						continue
@@ -200,15 +268,17 @@ func TestNativeMetalLiveFailurePreventsCommit(t *testing.T) {
 				t.Fatalf("build: %+v", built)
 			}
 			actual := runExecutable(t, artifact, "run", "--allow-device", selector, "--write-root", dir, "--format", "json")
+			if _, err := os.ReadFile(path); !os.IsNotExist(err) {
+				t.Fatalf("later commit: %v", err)
+			}
 			kind := "Numeric.DivideByZero"
 			if selector == "cuda:0" {
 				kind = "Device.Unavailable"
+			} else {
+				reportUnavailableLiveMetal(t, actual)
 			}
 			if actual.status != 1 || actual.stdout != "" || !strings.Contains(actual.stderr, kind) {
 				t.Fatalf("failure: %+v", actual)
-			}
-			if _, err := os.ReadFile(path); !os.IsNotExist(err) {
-				t.Fatalf("later commit: %v", err)
 			}
 		})
 	}
@@ -235,7 +305,8 @@ func TestNativeMetalLiveUnavailable(t *testing.T) {
 	command.Env = append(os.Environ(), "DYLD_INSERT_LIBRARIES="+library)
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
-	if err := command.Run(); err == nil || command.ProcessState.ExitCode() != 1 || stdout.Len() != 0 || !strings.Contains(stderr.String(), "Device.Unavailable") {
+	err := command.Run()
+	if command.ProcessState == nil || liveMetalAdmissionFailure(result{stdout.String(), stderr.String(), command.ProcessState.ExitCode()}) != "Tensor.to: Device.Unavailable: metal:0: no system Metal device" {
 		t.Fatalf("unavailable framework device: %v %s %s", err, &stdout, &stderr)
 	}
 }
@@ -338,12 +409,14 @@ func TestNativeMetalLiveTraining(t *testing.T) {
 			t.Logf("training artifact: %+v", identity)
 			for _, budget := range []string{"1", "30"} {
 				actual := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--max-steps", budget, "--format", "json")
+				reportUnavailableLiveMetal(t, actual)
 				if actual.status != 2 || actual.stdout != "" || !strings.Contains(actual.stderr, "runtime.limit") {
 					t.Fatalf("training budget=%s: %+v", budget, actual)
 				}
 			}
 			for repeat := 0; repeat < tc.repeats; repeat++ {
 				got := runExecutable(t, artifact, "run", "--allow-device", "metal:0", "--format", "json")
+				reportUnavailableLiveMetal(t, got)
 				if tc.name == "200-steps" {
 					loss := assertMetalTrainingResult(t, trainingResult(t, got))
 					t.Logf("native run=%d loss=%.17g", repeat+1, loss)

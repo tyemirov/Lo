@@ -1,7 +1,8 @@
+#include "cli-entry.h"
 #include "capture.h"
 
 extern int rename(const char *, const char *), linkat(int, const char *, int, const char *, int);
-extern int lo_cli_main(int, const char *const *, const char *const *);
+
 extern unsigned long long lo_runtime_live_contexts(void), lo_runtime_live_values(void);
 
 int main(int argc, char **argv) {

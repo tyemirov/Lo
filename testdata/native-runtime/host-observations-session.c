@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 #include "lo_host_observer.h"
 extern void lo_observation_handler(Context *, const Value **, uint64_t, uint64_t, ResultSlot *);
 static int rejected_providers;
@@ -11,7 +12,7 @@ void lo_flow_0(Context *context, const Value **arguments, uint64_t count, uint64
 typedef __UINT64_TYPE__ U64;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __SIZE_TYPE__ Size;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern U64 lo_runtime_live_contexts(void);
 extern U64 lo_runtime_live_values(void);
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *);

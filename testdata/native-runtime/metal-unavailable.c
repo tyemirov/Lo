@@ -1,7 +1,8 @@
+#include "cli-entry.h"
 #include "capture.h"
 #include <stddef.h>
 #include <stdint.h>
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern uint64_t lo_runtime_live_contexts(void);
 extern uint64_t lo_runtime_live_values(void);
 extern uint64_t lo_runtime_live_storages(void);

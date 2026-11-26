@@ -55,6 +55,7 @@ func f030Cases() []f030Case {
 func TestF030Values(t *testing.T) {
 	for _, tc := range f030Cases() {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			value := f030Value(t, tc.source)
 			if value.Type != tc.typ {
 				t.Fatalf("type = %s, want %s", value.Type, tc.typ)

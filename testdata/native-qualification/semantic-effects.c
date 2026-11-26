@@ -1,3 +1,4 @@
+#include "../native-runtime/cli-entry.h"
 #include "lo_runtime.h"
 #include "capture.h"
 typedef __UINT64_TYPE__ U64;
@@ -7,7 +8,7 @@ extern void lo_semantic_entry(Context*,const Value**,U64,U64,ResultSlot*);
 extern void lo_op_File_2Eread(Context*,const Value**,U64,U64,ResultSlot*);
 extern void lo_commit(Context*,const Value**,U64,U64,ResultSlot*);
 
-extern int lo_cli_main(int,const char**,const char**);
+
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void);
 extern int open(const char*,int,...),close(int),dup2(int,int),fcntl(int,int,...),unlink(const char*);
 extern long lseek(int,long,int);

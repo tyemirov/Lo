@@ -21,7 +21,7 @@ Docker and container guidance for this repository. Use this guide only when Dock
 - MPR Lab has no current plan to put these contracts together.
 - Use the permanent versionless selected-manifest contract for production.
 - Reject a selected manifest that contains `schema_version`.
-- Apply the current iOS baseline in `.mprlab/POLICY.md` before the manifest preservation rules.
+- Apply the current iOS baseline in `.mprlab/AGENTS.DEPLOYMENT.md` before the manifest preservation rules.
 - For other manifest contracts, accept each manifest that an earlier versionless gateway accepted.
 - A field added to an existing shape must be optional and have one canonical default.
 - The gateway must normalize that default before manifest identity calculation.
@@ -39,7 +39,7 @@ Docker and container guidance for this repository. Use this guide only when Dock
 
 ## Validation
 
-- For a behavior change, start with an integration test through the real container entry point.
+- Apply the proportional test sequence in `.mprlab/POLICY.md`. Use integration tests for the changed public contract.
 - Use dependency injection for integration scenarios that are difficult to reproduce.
 - Keep the product logic under test real.
 - Use `.mprlab/POLICY.md` for validation.

@@ -1,16 +1,19 @@
 package integration_test
 
 import (
-	"bytes"
-	"context"
+	"bufio"
+	"encoding/base64"
 	"encoding/json"
+	"io"
+	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/testsession"
 )
 
 func runLinuxLLVMExecutable(t *testing.T, executable string, arguments ...string) result {
@@ -51,56 +54,85 @@ func runLinuxLLVMExecutableWithInputs(t *testing.T, executable, capture, compani
 	if companion == "" && runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
 		return runExecutableAt(t, filepath.Dir(executable), executable, arguments...)
 	}
-	preparation := os.Getenv("LO_NATIVE_PREPARATION")
-	if preparation == "" {
-		t.Fatal("Linux LLVM qualification requires LO_NATIVE_PREPARATION")
+	if address := os.Getenv("LO_TEST_GUEST_SOCKET"); address != "" {
+		return runLinuxGuestSession(t, address, executable, capture, companion, arguments)
 	}
-	preparation, err := filepath.Abs(preparation)
+	t.Fatal("Linux execution requires the shared guest session; run make test-session-group for the selected tests")
+	return result{}
+}
+
+func runLinuxGuestSession(t *testing.T, address, executable, capture, companion string, arguments []string) result {
+	t.Helper()
+	started := time.Now()
+	resolved, err := filepath.EvalSymlinks(address)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("resolve Linux guest session: %v", err)
 	}
-	preparation, err = filepath.EvalSymlinks(preparation)
+	if relative, err := filepath.Rel(repository, resolved); err != nil || !filepath.IsLocal(relative) {
+		t.Fatal("Linux guest session socket leaves repository")
+	}
+	connection, err := net.DialTimeout("unix", resolved, 5*time.Second)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("connect Linux guest session: %v", err)
 	}
-	relative, err := filepath.Rel(filepath.Join(repository, "_scratch"), preparation)
-	if err != nil || !filepath.IsLocal(relative) {
-		t.Fatal("guest preparation leaves repository scratch directory")
+	defer connection.Close()
+	if err := connection.SetDeadline(time.Now().Add(150 * time.Second)); err != nil {
+		t.Fatalf("set Linux guest session deadline: %v", err)
 	}
-	python, err := exec.LookPath("python3")
-	if err != nil {
-		t.Fatal(err)
+	request := struct {
+		Executable string   `json:"executable"`
+		Arguments  []string `json:"arguments"`
+		Capture    string   `json:"capture_file"`
+		Companion  string   `json:"companion"`
+		Stdin      string   `json:"stdin"`
+		TimeoutMS  int      `json:"timeout_ms"`
+	}{executable, append([]string{}, arguments...), capture, companion, "", 120000}
+	if err := json.NewEncoder(connection).Encode(request); err != nil {
+		t.Fatalf("submit Linux guest case: %v", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Second)
-	defer cancel()
-	args := []string{"-B", filepath.Join(repository, "tools/nativeruntime/run.py"), "--preparation", preparation}
-	if capture != "" {
-		args = append(args, "--capture-file", capture)
+	var response struct {
+		Status    *int   `json:"status"`
+		Stdout    string `json:"stdout"`
+		Stderr    string `json:"stderr"`
+		ElapsedNS *int64 `json:"elapsed_ns"`
+		Error     string `json:"error"`
 	}
-	if companion != "" {
-		args = append(args, "--companion", companion)
-		arguments = append([]string{"/companion"}, arguments...)
+	decoder := json.NewDecoder(bufio.NewReader(io.LimitReader(connection, 180<<20)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&response); err != nil {
+		t.Fatalf("decode Linux guest result: %v", err)
 	}
-	args = append(args, executable)
-	args = append(args, arguments...)
-	command := exec.CommandContext(ctx, python, args...)
-	command.Dir = repository
-	command.Env = append(os.Environ(), "CI=1", "PYTHONDONTWRITEBYTECODE=1")
-	var stdout, stderr bytes.Buffer
-	command.Stdout, command.Stderr = &stdout, &stderr
-	if err := command.Run(); err != nil {
-		if ctx.Err() != nil {
-			t.Fatalf("Linux software guest: %v", ctx.Err())
-		}
-		if _, exited := err.(*exec.ExitError); !exited {
-			t.Fatal(err)
-		}
+	if response.Error != "" {
+		t.Fatalf("execute Linux guest case %s: %s", t.Name(), response.Error)
 	}
-	return result{stdout: stdout.String(), stderr: stderr.String(), status: command.ProcessState.ExitCode()}
+	stdout, stdoutErr := base64.StdEncoding.Strict().DecodeString(response.Stdout)
+	stderr, stderrErr := base64.StdEncoding.Strict().DecodeString(response.Stderr)
+	if stdoutErr != nil || stderrErr != nil || response.Status == nil || *response.Status < 0 || *response.Status > 255 || response.ElapsedNS == nil || *response.ElapsedNS <= 0 {
+		t.Fatalf("invalid Linux guest result: status=%v stdout=%v stderr=%v", response.Status, stdoutErr, stderrErr)
+	}
+	t.Logf("LO_GUEST_CASE_NS=%d LO_GUEST_TOTAL_NS=%d", *response.ElapsedNS, time.Since(started).Nanoseconds())
+	return result{stdout: string(stdout), stderr: string(stderr), status: *response.Status}
 }
 
 func linuxLLVMArtifact(t *testing.T, source string) string {
 	t.Helper()
+	if address := os.Getenv("LO_TEST_SESSION"); address != "" {
+		input, err := testsession.Source(t.Context(), address, source)
+		if err != nil {
+			t.Fatalf("prepare immutable Linux source: %v", err)
+		}
+		compiled, lease, err := testsession.CompileRetained(t.Context(), address, testsession.CompileRequest{Source: input, Target: "linux/arm64"})
+		if err != nil {
+			t.Fatalf("prepare Linux runtime fixture: %v", err)
+		}
+		t.Cleanup(func() {
+			if err := lease.Close(); err != nil {
+				t.Errorf("release Linux runtime fixture: %v", err)
+			}
+		})
+		t.Logf("LO_NATIVE_RUNTIME=%s", compiled.Runtime)
+		return compiled.Artifact
+	}
 	manifest := os.Getenv("LO_LLVM_TOOLCHAIN")
 	if manifest == "" {
 		t.Fatal("LLVM lane requires LO_LLVM_TOOLCHAIN")

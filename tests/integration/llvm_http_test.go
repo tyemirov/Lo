@@ -113,7 +113,7 @@ func TestLLVMHTTPVerifiedTLS(t *testing.T) {
 	}{{"trusted-address", server.URL, runtime.GOOS != "darwin"}, {"wrong-name", strings.Replace(server.URL, "127.0.0.1", "localhost", 1), false}} {
 		t.Run(test.name, func(t *testing.T) {
 			input := sourceFile(t, httpClientSource(test.url, "GET", `List.new()`, "", `response=commit target; return response`))
-			artifact, built := buildForTest(t, input)
+			artifact, built := runtimeFixture(t, input)
 			if built.status != 0 {
 				t.Fatalf("build TLS fixture: %+v", built)
 			}
@@ -286,7 +286,7 @@ func TestLLVMHTTPClientCancellation(t *testing.T) {
 	defer server.Close()
 	defer close(release)
 	source := sourceFile(t, httpClientSource(server.URL, "GET", `List.new()`, "", `response=commit target;return response`))
-	artifact, built := buildForTest(t, source)
+	artifact, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build HTTP cancellation: %+v", built)
 	}
@@ -409,7 +409,7 @@ func TestLLVMHTTPChunkLengthGrammar(t *testing.T) {
 			}()
 			origin := "http://" + listener.Addr().String()
 			input := sourceFile(t, httpClientSource(origin, "GET", `List.new()`, "", `response=commit target;return response`))
-			artifact, built := buildForTest(t, input)
+			artifact, built := runtimeFixture(t, input)
 			if built.status != 0 {
 				t.Fatalf("build chunk fixture: %+v", built)
 			}
@@ -572,7 +572,7 @@ func TestLLVMHTTPResponseFraming(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			source := sourceFile(t, fmt.Sprintf(`flow Handle(r:HTTP.Request)->HTTP.Response!{headers=HTTP.Headers.new(%s);return HTTP.Response.new(%d,headers,UTF8.Bytes.new(%q))};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix, llvmHTTPHeaderSource(test.headers), test.status, test.body))
-			native, built := buildForTest(t, source)
+			native, built := runtimeFixture(t, source)
 			if built.status != 0 {
 				t.Fatalf("build response framing: %+v", built)
 			}
@@ -587,7 +587,7 @@ func TestLLVMHTTPResponseFraming(t *testing.T) {
 
 func TestLLVMHTTPRequestConnectionTokens(t *testing.T) {
 	source := sourceFile(t, `flow Handle(r:HTTP.Request)->HTTP.Response{return HTTP.Response.Text.new(200,"ok")};flow OnError(e:Error)->HTTP.Response{return HTTP.Response.Text.new(500,e.kind)}`+serveSuffix)
-	native, built := buildForTest(t, source)
+	native, built := runtimeFixture(t, source)
 	if built.status != 0 {
 		t.Fatalf("build connection tokens: %+v", built)
 	}

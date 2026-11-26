@@ -9,7 +9,7 @@ import (
 
 func f030MinimumLive(t *testing.T, source string) uint64 {
 	t.Helper()
-	artifact, built := buildForTest(t, sourceFile(t, source))
+	artifact, built := runtimeFixture(t, sourceFile(t, source))
 	if built.status != 0 {
 		t.Fatalf("build resource fixture: %+v", built)
 	}
@@ -77,7 +77,7 @@ func TestF030SplitItemQuota(t *testing.T) {
 		{"bytes", `return Bytes.split(Bytes.new("a\u0000b\u0000c"), Bytes.new("\u0000"))`},
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
-			artifact, built := buildForTest(t, sourceFile(t, fixture.source))
+			artifact, built := runtimeFixture(t, sourceFile(t, fixture.source))
 			if built.status != 0 {
 				t.Fatalf("build split quota: %+v", built)
 			}

@@ -90,11 +90,15 @@ func TestMacCleanupOwnedWorkflow(t *testing.T) {
 			t.Fatalf("missing confirmed child identity: %q, %v", child, err)
 		}
 		childObserved := false
+		alive := make(map[string]bool)
+		for _, token := range owner.liveTokens(t, records) {
+			alive[token] = true
+		}
 		for _, record := range records {
 			if record[0] == "command" && record[1] == string(child) {
 				childObserved = true
 			}
-			if owner.alive(record[1]) {
+			if alive[record[1]] {
 				t.Fatalf("owned process still alive after application completion: %s", record[0])
 			}
 		}

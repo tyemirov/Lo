@@ -67,22 +67,26 @@ def campaign_inputs(tmp_path: Path) -> tuple[Path, list[str], dict[str, str]]:
         path.write_text(name)
     frontend = tmp_path / "frontend"
     frontend.write_text("frontend")
+    producers = {
+        "darwin": ("scripts/qualify_native.py", "tools/nativecorpus/main.go"),
+        "linux": (
+            "tools/loqualification/performance.py",
+            "tools/loqualification/performance-runner/main.go",
+            "tools/loqualification/batch.py",
+            "tools/loqualification/batch_init.c",
+            "tools/loqualification/suite.py",
+            "tools/lodistribution/prepare.py",
+            "tools/nativecorpus/main.go",
+        ),
+    }
     for target in ("darwin", "linux"):
+        provenance = source_provenance(ROOT, producers[target])
+        package = tmp_path / target
+        package_identity, _ = package_provenance(
+            ROOT, package / "bin/lo", package / "toolchain.json", target + "/arm64"
+        )
         for lane in LANES:
             record = lane_report(lane)
-            producers = {
-                "darwin": ("scripts/qualify_native.py", "tools/nativecorpus/main.go"),
-                "linux": (
-                    "tools/loqualification/performance.py",
-                    "tools/loqualification/performance-runner/main.go",
-                    "tools/loqualification/batch.py",
-                    "tools/loqualification/batch_init.c",
-                    "tools/loqualification/suite.py",
-                    "tools/lodistribution/prepare.py",
-                    "tools/nativecorpus/main.go",
-                ),
-            }
-            provenance = source_provenance(ROOT, producers[target])
             identity = record["merge_identity"]
             for name in ("source", "harness", "evaluator"):
                 identity[name] = provenance[name]
@@ -90,10 +94,7 @@ def campaign_inputs(tmp_path: Path) -> tuple[Path, list[str], dict[str, str]]:
                 "source_identity"
             ]
             identity["oracle"] = provenance["oracle"]
-            package = tmp_path / target
-            identity["package"], _ = package_provenance(
-                ROOT, package / "bin/lo", package / "toolchain.json", target + "/arm64"
-            )
+            identity["package"] = package_identity
             if target == "linux":
                 identity = record["merge_identity"]
                 identity["target"] = record["target"] = "linux/arm64"

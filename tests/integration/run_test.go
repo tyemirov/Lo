@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/MarcoPoloResearchLab/Lo/internal/testsession"
 )
 
 type runtimeValue struct {
@@ -24,7 +26,26 @@ type runtimeValue struct {
 func runValue(t *testing.T, source string, options ...string) runtimeValue {
 	t.Helper()
 	args := append([]string{"--format", "json"}, options...)
-	got := runProgram(t, sourceFile(t, source), "run", args...)
+	var got result
+	if address := os.Getenv("LO_TEST_SESSION"); address != "" {
+		path, err := testsession.Source(t.Context(), address, source)
+		if err != nil {
+			t.Fatalf("prepare immutable value source: %v", err)
+		}
+		compiled, lease, err := testsession.CompileRetained(t.Context(), address, testsession.CompileRequest{Source: path, Purpose: testsession.RuntimeValues})
+		if err != nil {
+			t.Fatalf("prepare runtime value fixture: %v", err)
+		}
+		t.Cleanup(func() {
+			if err := lease.Close(); err != nil {
+				t.Error(err)
+			}
+		})
+		t.Logf("LO_NATIVE_RUNTIME=%s", compiled.Runtime)
+		got = runExecutable(t, compiled.Artifact, append([]string{"run"}, args...)...)
+	} else {
+		got = runProgram(t, sourceFile(t, source), "run", args...)
+	}
 	if got.status != 0 || got.stderr != "" {
 		t.Fatalf("run: %+v", got)
 	}
@@ -78,6 +99,7 @@ func TestRunValues(t *testing.T) {
 		{"match-predicate", `flow Positive(x: Int) -> Bool { return Math.gt(x, 0) }; return Match.new(2, when Positive: "yes", _: "no")`, "String", `"yes"`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			v := runValue(t, tc.source)
 			if v.Type != tc.typ {
 				t.Fatalf("type %s, want %s", v.Type, tc.typ)
@@ -105,6 +127,7 @@ func TestRunListProcessors(t *testing.T) {
 		{"unfold-negative", `flow Step(state: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: state, next_state: state) }; return List.unfold(0, -1, Step)`, "List<Int>", `[]`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			v := runValue(t, tc.source)
 			if v.Type != tc.typ {
 				t.Fatal(v.Type)
@@ -348,6 +371,7 @@ func TestRunResourceLimits(t *testing.T) {
 		{"unfold-count", `flow Step(n: Int) -> Record{value: Int, next_state: Int} { return Record.new(value: n, next_state: n) }; return List.unfold(0, 1000001, Step)`, []string{"--max-list-items", "1000000"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			got := runProgram(t, sourceFile(t, tc.source), "run", append([]string{"--format", "json"}, tc.options...)...)
 			if got.status != 2 || got.stdout != "" || diagnostics(t, got.stderr).Diagnostics[0].Code != "runtime.limit" {
 				t.Fatalf("resource limit: %+v", got)
@@ -355,6 +379,7 @@ func TestRunResourceLimits(t *testing.T) {
 		})
 	}
 	t.Run("file-bytes", func(t *testing.T) {
+		t.Parallel()
 		dir := t.TempDir()
 		file, err := os.Create(filepath.Join(dir, "large"))
 		if err != nil {
@@ -429,6 +454,7 @@ func TestRunFallibleListVariants(t *testing.T) {
 		{"unfold", `flow F(state: Int) -> Record{value: Int, next_state: Int}! { n = Math.div(8, state); return Record.new(value: n, next_state: Math.sub(state, 1)) }`, `List.unfold(1, 3, F)`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			source := tc.flow + `; flow H(e: Error) -> Error { return e }; flow Main() -> Error onError H { unused = ` + tc.call + `; return Error.new("missed", "", Record.new()) }; return Main()`
 			v := runValue(t, source)
 			if v.Kind != "Math.DivideByZero" || len(v.Trace) != 3 {

@@ -1,9 +1,10 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINT64_TYPE__ U64;
 typedef __UINT32_TYPE__ U32;
 typedef __INT64_TYPE__ Offset;
-extern int lo_cli_main(int,const char **,const char **);
+
 extern void lo_op_File_2Elist(Context*,const Value**,U64,U64,ResultSlot*);
 extern void lo_op_File_2ERemove_2Enew(Context*,const Value**,U64,U64,ResultSlot*);
 

@@ -82,7 +82,7 @@ func TestHostInvocationObservationPurity(t *testing.T) {
 }
 
 func TestNativeHostInvocationArgumentAdmission(t *testing.T) {
-	artifact, built := buildForTest(t, sourceFile(t, `return "ordinary"`))
+	artifact, built := runtimeFixture(t, sourceFile(t, `return "ordinary"`))
 	if built.status != 0 {
 		t.Fatalf("build artifact: %+v", built)
 	}

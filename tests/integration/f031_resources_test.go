@@ -49,7 +49,7 @@ func TestF031JSONContainerLimits(t *testing.T) {
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			source := `flow Main()->String!{return JSON.kind(` + f031Decode(fixture.document) + `)};return Main()`
-			artifact, built := buildForTest(t, sourceFile(t, source))
+			artifact, built := runtimeFixture(t, sourceFile(t, source))
 			if built.status != 0 || built.stderr != "" {
 				t.Fatalf("build container limit: %+v", built)
 			}

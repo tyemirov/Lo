@@ -1,3 +1,4 @@
+#include "cli-entry.h"
 #include "lo_runtime.h"
 #include "lo_console.h"
 typedef __UINT64_TYPE__ U64;
@@ -6,7 +7,7 @@ typedef __SIZE_TYPE__ Size;
 _Static_assert(sizeof(ResultSlot)==16 && offsetof(ResultSlot,value)==8,"native result ABI");
 _Static_assert(sizeof(ContextOptions)==64,"native context options ABI");
 extern U64 lo_runtime_live_programs(void),lo_runtime_live_contexts(void),lo_runtime_live_values(void);
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern int pthread_create(Thread *,const void *,void *(*)(void *),void *),pthread_join(Thread,void **);
 extern int poll(void *,unsigned long,int),getpid(void),kill(int,int);
 extern unsigned alarm(unsigned);

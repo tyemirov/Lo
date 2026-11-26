@@ -1,5 +1,6 @@
+#include "cli-entry.h"
 typedef __SIZE_TYPE__ Size;typedef __INT64_TYPE__ Offset;
-extern int lo_cli_main(int,const char**,const char**);extern int open(const char*,int,...);extern int close(int);extern int dup2(int,int);extern long lseek(int,long,int);extern long read(int,void*,Size);extern long write(int,const void*,Size);extern int fcntl(int,int,...);extern char *getcwd(char*,Size);extern int getpid(void);extern int kill(int,int);extern int *__error(void);extern void *dlsym(void*,const char*);
+extern int open(const char*,int,...);extern int close(int);extern int dup2(int,int);extern long lseek(int,long,int);extern long read(int,void*,Size);extern long write(int,const void*,Size);extern int fcntl(int,int,...);extern char *getcwd(char*,Size);extern int getpid(void);extern int kill(int,int);extern int *__error(void);extern void *dlsym(void*,const char*);
 static unsigned admissions,spawns;
 static Size length(const char *text){Size n=0;while(text[n])++n;return n;}
 static void append(char *text,const char *tail){Size at=length(text),i=0;while((text[at+i]=tail[i]))++i;}

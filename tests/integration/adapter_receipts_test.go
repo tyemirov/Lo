@@ -120,7 +120,7 @@ func receiptHostDiagnostic(t *testing.T, got result) receiptRuntimeDiagnostic {
 	t.Helper()
 	var document struct{ Diagnostics []receiptRuntimeDiagnostic }
 	if err := json.Unmarshal([]byte(got.stderr), &document); err != nil {
-		t.Fatal(err)
+		t.Fatalf("decode runtime diagnostic: %v; status=%d stdout=%q stderr=%q", err, got.status, got.stdout, got.stderr)
 	}
 	if len(document.Diagnostics) != 1 {
 		t.Fatalf("missing diagnostic: %+v", got)

@@ -1,7 +1,8 @@
+#include "../native-runtime/cli-entry.h"
 typedef __SIZE_TYPE__ Size;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __UINT64_TYPE__ U64;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void),lo_runtime_live_storages(void),lo_runtime_live_storage_bytes(void);
 extern int open(const char*,int,...),fcntl(int,int,...),dup2(int,int),socket(int,int,int),connect(int,const void*,unsigned int),poll(void*,unsigned long,int);
 extern int kill(int,int),getpid(void);

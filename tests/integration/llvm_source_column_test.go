@@ -14,7 +14,7 @@ func TestLLVMSourceColumnOverflow(t *testing.T) {
 	prefix := `padding="` + strings.Repeat("界", 1<<16) + `"; return `
 	column := utf8.RuneCountInString(prefix) + 1
 	path := sourceFile(t, prefix+"7")
-	artifact, built := buildForTest(t, path)
+	artifact, built := runtimeFixture(t, path)
 	if built.status != 0 || built.stderr != "" {
 		t.Fatalf("build long single-line source: %+v", built)
 	}

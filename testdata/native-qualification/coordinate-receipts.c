@@ -1,9 +1,10 @@
+#include "../native-runtime/cli-entry.h"
 typedef __UINT64_TYPE__ U64;
 typedef __UINTPTR_TYPE__ Thread;
 typedef __SIZE_TYPE__ Size;
 extern const char *lo_coordinate_arguments[];
 extern const int lo_coordinate_argument_count;
-extern int lo_cli_main(int,const char *const *,const char *const *);
+
 extern U64 lo_runtime_live_contexts(void),lo_runtime_live_values(void),lo_runtime_live_storages(void),lo_runtime_live_storage_bytes(void);
 extern int socket(int,int,int),bind(int,const void*,unsigned int),listen(int,int),accept(int,void*,void*),setsockopt(int,int,int,const void*,unsigned int),close(int),poll(void*,unsigned long,int);
 extern long read(int,void*,Size),write(int,const void*,Size);

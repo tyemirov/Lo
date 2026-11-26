@@ -7,7 +7,7 @@ import (
 
 func TestLLVMDeviceArtifactGrantArguments(t *testing.T) {
 	input := sourceFile(t, "return 1")
-	artifact, built := buildForTest(t, input)
+	artifact, built := runtimeFixture(t, input)
 	if built.status != 0 {
 		t.Fatalf("build grant fixture: %+v", built)
 	}

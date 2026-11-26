@@ -4,13 +4,13 @@ import os
 import subprocess
 import sys
 import shutil
-import uuid
 import pytest
 
 
-def test_guest_rejects_missing_installed_frontend() -> None:
+def test_guest_rejects_missing_installed_frontend(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
-    state = root / '_scratch/compiler-distribution/tests/missing'
+    assert tmp_path.resolve().is_relative_to(root / '_scratch')
+    state = tmp_path / 'missing'
     result = subprocess.run([sys.executable, '-B', str(root / 'tools/lodistribution/guest.py'),
                              '--preparation', str(root / '_scratch/native-runtime'),
                              '--package', str(state / 'package'), '--source', str(root / 'go.mod'),
@@ -28,10 +28,11 @@ def test_guest_rejects_missing_installed_frontend() -> None:
     b'LO_DISTRIBUTION_ARTIFACT:0\nLO_DISTRIBUTION_RESULT:0\n',
     b'LO_DISTRIBUTION_DATA:artifact:7f45\nLO_DISTRIBUTION_ARTIFACT:4\nLO_DISTRIBUTION_RESULT:0\n',
 ])
-def test_receiver_rejects_missing_or_truncated_success_artifact(wire: bytes) -> None:
+def test_receiver_rejects_missing_or_truncated_success_artifact(wire: bytes, tmp_path: Path) -> None:
     from guest import receive
     root = Path(__file__).resolve().parents[2]
-    state = root / '_scratch/compiler-distribution/tests/receiver' / uuid.uuid4().hex
+    assert tmp_path.resolve().is_relative_to(root / '_scratch')
+    state = tmp_path / 'receiver'
     state.mkdir(parents=True)
     try:
         serial = state / 'serial.log'
@@ -42,10 +43,11 @@ def test_receiver_rejects_missing_or_truncated_success_artifact(wire: bytes) -> 
         shutil.rmtree(state)
 
 
-def test_receiver_returns_verified_artifact_bytes() -> None:
+def test_receiver_returns_verified_artifact_bytes(tmp_path: Path) -> None:
     from guest import receive
     root = Path(__file__).resolve().parents[2]
-    state = root / '_scratch/compiler-distribution/tests/receiver' / uuid.uuid4().hex
+    assert tmp_path.resolve().is_relative_to(root / '_scratch')
+    state = tmp_path / 'receiver'
     state.mkdir(parents=True)
     try:
         serial = state / 'serial.log'
@@ -105,12 +107,17 @@ def test_public_compile_uses_dedicated_export_despite_console_noise(injected_gue
     console = (b'watchdog: BUG: soft lockup\nLO_DISTRIBUTION_DATA:artifact:7f45'
                b'[ 12.3] kernel watchdog interleaving\nLO_DISTRIBUTION_RESULT:99\n')
     guest, args, commands = injected_guest(console, distribution_wire(artifact))
-    result = guest.compile(*args)
+    result = guest.compile(*args, accelerator='hvf')
     assert args[4].read_bytes() == artifact
     assert result['artifact_bytes'] == len(artifact)
     assert result['export'] == str(args[5] / 'export.log')
     assert (args[5] / 'serial.log').read_bytes() == console
     command = commands[0]
+    assert command[command.index('-initrd') + 1] == str(args[5] / 'root.cpio')
+    assert command[command.index('-accel') + 1] == 'hvf'
+    assert command[command.index('-cpu') + 1] == 'host'
+    assert not (args[5] / 'root').exists()
+    assert not (args[5] / 'root.cpio').exists()
     assert 'virtio-serial-pci,id=lo-transport' in command
     assert 'virtserialport,bus=lo-transport.0,nr=1,chardev=lo-export,name=lo.export' in command
     assert 'file,id=lo-export,path=' + str(args[5] / 'export.log') in command
@@ -125,6 +132,8 @@ def test_public_compile_rejects_bad_dedicated_export_even_with_valid_console(inj
         guest.compile(*args)
     assert args[4].read_bytes() == b'previous artifact'
     assert not (args[5] / 'report.json').exists()
+    assert not (args[5] / 'root').exists()
+    assert not (args[5] / 'root.cpio').exists()
 
 
 @pytest.mark.parametrize('problem', ['unknown', 'unterminated', 'after-result', 'artifact-fields',

@@ -41,6 +41,7 @@ static void execute(uintptr_t user,const LoProcessRequest *request,LoProcessResu
     ++driver_calls;
     const uint64_t durations[]={30000,60000,180000,1800000};
     if(LO_CASE<4 && request->timeout_ms!=durations[LO_CASE])invalid=4;
+    if(LO_CASE==5 && request->timeout_ms!=(driver_calls==1?1000U:1800000U))invalid=4;
     if(LO_CASE==19 && request->timeout_ms!=30000)invalid=5;
     result->started=1;result->termination_kind=1;result->termination_value=0;result->cleanup_complete=1;
     if((LO_CASE==5 || LO_CASE==6) && driver_calls==1){result->stage=7;result->class_id=LO_PROCESS_TIMEOUT;if(LO_CASE==6){result->cleanup_complete=0;result->ownership=35;}return;}
