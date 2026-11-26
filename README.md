@@ -252,11 +252,11 @@ flow WantsFile(request: Record{destination: String, message: String}) -> Bool {
 }
 
 flow PlanFile(request: Record{destination: String, message: String}) -> Record{action: String, body: Bytes} {
-    return Record.new(action: "write-file", body: UTF8.Bytes.new(request.message))
+    return Record.new(action: "write-file", body: Bytes.new(request.message))
 }
 
 flow PlanConsole(request: Record{destination: String, message: String}) -> Record{action: String, body: Bytes} {
-    return Record.new(action: "print", body: UTF8.Bytes.new(String.concat(request.message, "\n")))
+    return Record.new(action: "print", body: Bytes.new(String.concat(request.message, "\n")))
 }
 
 delivery = Match.new(
@@ -367,12 +367,12 @@ flow WantsFile(request: Record{save: Bool, message: String}) -> Bool { return re
 
 flow PlanFile(request: Record{save: Bool, message: String}) -> Record{writes: List<File.Write>, stdout: Bytes} {
     path = File.Path.new("_scratch/match-output/message.txt")
-    target = File.Write.new(path, UTF8.Bytes.new(request.message))
+    target = File.Write.new(path, Bytes.new(request.message))
     return Record.new(writes: List.new(target), stdout: Bytes.new(""))
 }
 
 flow PlanConsole(request: Record{save: Bool, message: String}) -> Record{writes: List<File.Write>, stdout: Bytes} {
-    return Record.new(writes: List.new(), stdout: UTF8.Bytes.new(String.concat(request.message, "\n")))
+    return Record.new(writes: List.new(), stdout: Bytes.new(String.concat(request.message, "\n")))
 }
 
 flow WriteMessage(count: Int, target: File.Write) -> Int! {
@@ -479,7 +479,7 @@ flow CountFallback(error: Error) -> Int {
 flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
     file_text = file_path
         |> File.read()
-        |> UTF8.String.new()
+        |> String.FromBytes.new()
 
     match_count = file_text
         |> List.filter(IsMatchingScalar)
@@ -492,7 +492,7 @@ flow CountLetterA(file_path: File.Path) -> Int onError CountFallback {
 This example demonstrates:
 
 - file reads are fallible
-- UTF-8 decoding is fallible
+- `String.FromBytes.new` decodes UTF-8 and returns `UTF8.InvalidBytes` on malformed input
 - fallible values bubble automatically inside a self-handling flow
 - the handler converts failure into a total `Int`
 - list processing uses a named pure flow
@@ -519,7 +519,7 @@ flow HandleStatus(status_code: Int, request_data: String) -> HTTP.Response onErr
         default: ErrorLog
     )
     path = status_code |> Match.apply(destinations)
-    target_action = File.Append.new(path, UTF8.Bytes.new(request_data))
+    target_action = File.Append.new(path, Bytes.new(request_data))
     commit target_action
 
     return HTTP.Response.Text.new(status: status_code, body: "Status processed")
@@ -717,7 +717,7 @@ Initial support:
 - `List.filter`
 - `List.map`
 - `File.read`
-- `UTF8.String.new`
+- `String.FromBytes.new`
 - `Error`
 - `T!` bubbling
 - self-handling flows
@@ -740,7 +740,7 @@ Initial support:
 - `File.Remove` and `File.Remove.new`
 - `File.WriteReceipt`, `File.AppendReceipt`, and `File.RemoveReceipt`
 - `HTTP.ServerReceipt`
-- `UTF8.Bytes.new`
+- `Bytes.new`
 - `commit`
 - `HTTP.Server.new`
 - `HTTP.Request`
